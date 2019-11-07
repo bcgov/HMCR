@@ -1,0 +1,80 @@
+.form-input.dropdown,
+.form-input.dropdown.show {
+  .dropdown-toggle::after {
+    position: absolute;
+    top: 50%;
+    right: 10px;
+  }
+
+  button {
+    width: 100%;
+    height: $input-height;
+    color: #495057;
+    background-color: unset;
+    border: 1px solid #ced4da;
+    text-align: left;
+  }
+
+  .btn-secondary.dropdown-toggle,
+  .btn-secondary.dropdown-toggle:hover,
+  .btn-secondary.dropdown-toggle:focus,
+  .btn-secondary.dropdown-toggle:active {
+    color: #495057;
+    background-color: unset;
+    border: 1px solid #ced4da;
+  }
+
+  .btn-secondary.dropdown-toggle:focus {
+    box-shadow: 0 0 0 0.2rem rgba(205, 213, 226, 1);
+  }
+
+  .dropdown-menu {
+    //width: 100%;
+
+    .dropdown-item {
+      border: unset;
+      height: unset;
+      padding: 0 1.5rem;
+    }
+
+    .dropdown-item:hover {
+      background-color: #cdd5e2;
+    }
+
+    .dropdown-header {
+      padding: 0.5rem 0.5rem;
+    }
+  }
+
+  .dropdown-menu.multi {
+    padding: 0;
+  }
+
+  .multi-item-label {
+    padding: 0 36px;
+    width: 100%;
+    white-space: nowrap;
+  }
+
+  .multi-item-label:hover {
+    cursor: pointer;
+  }
+
+  .multi-item:hover {
+    cursor: pointer;
+  }
+
+  .multi-item {
+    position: relative;
+  }
+
+  .multi-item.select-all {
+    background-color: #e2e1e0;
+    padding: 4px 0;
+  }
+
+  .multi-menu {
+    max-height: 222px;
+    overflow-y: auto;
+  }
+}

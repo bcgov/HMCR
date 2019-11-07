@@ -1,0 +1,22 @@
+********************************************
+Step 1: Drop batch tables
+********************************************
+Remove Hangfire tables and sequences before scaffolding the db
+
+********************************************
+Step 2: Generate / Update Model:
+********************************************
+Scaffold-DbContext -Connection "Data Source=(localdb)\MSSQLLocalDB;Initial Catalog=aspnet-hmcr" -Provider Microsoft.EntityFrameworkCore.SqlServer -Context AppDbContext -OutputDir Database\Entities -Project "Hmcr.Data" -Force
+
+********************************************
+Step 3: Update Context
+********************************************
+Remove the OnConfiguring override method.
+
+protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+{
+    if (!optionsBuilder.IsConfigured)
+    {
+        optionsBuilder.UseSqlServer("Data Source=(localdb)\\MSSQLLocalDB;Initial Catalog=aspnet-hmcr");
+    }
+}

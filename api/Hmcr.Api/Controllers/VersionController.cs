@@ -1,0 +1,71 @@
+﻿using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration;
+using System.Reflection;
+using System.Runtime.Versioning;
+using Hmcr.Model;
+using Microsoft.Extensions.Hosting;
+
+namespace Hmcr.Api.Controllers
+{
+    [ApiVersion("1.0")]
+    [Route("api/version")]
+    public class VersionController : Controller
+    {
+        private IConfiguration _config;
+        private IWebHostEnvironment _env;
+
+        public VersionController(IConfiguration config, IWebHostEnvironment env)
+        {
+            _config = config;
+            _env = env;
+        }
+
+        [Route("")]
+        [HttpGet]
+        public IActionResult GetVersionInfo()
+        {
+            var assembly = Assembly.GetExecutingAssembly();
+
+            var creationTime = System.IO.File.GetLastWriteTimeUtc(assembly.Location);
+            var environment = "";
+
+            if (_env.IsProduction())
+            {
+                environment = "Production";
+            }
+            else if (_env.IsStaging())
+            {
+                environment = "Test";
+            }
+            else if (_env.IsDevelopment())
+            {
+                environment = "Development";
+            }
+            else if (_env.IsEnvironment("Training"))
+            {
+                environment = "Training";
+            }
+            else if (_env.IsEnvironment("UAT"))
+            {
+                environment = "UAT";
+            }
+
+            var versionInfo = new VersionInfo()
+            {
+                Name = assembly.GetName().Name,
+                Version = _config.GetSection("Constants:Version").Value,
+                Description = assembly.GetCustomAttribute<AssemblyDescriptionAttribute>().Description,
+                Copyright = assembly.GetCustomAttribute<AssemblyCopyrightAttribute>().Copyright,
+                FileVersion = assembly.GetCustomAttribute<AssemblyFileVersionAttribute>().Version,
+                FileCreationTime = creationTime.ToString("O"),
+                InformationalVersion = assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>().InformationalVersion,
+                TargetFramework = assembly.GetCustomAttribute<TargetFrameworkAttribute>().FrameworkName,
+                ImageRuntimeVersion = assembly.ImageRuntimeVersion,
+                Environment = environment
+            };
+
+            return Ok(versionInfo);
+        }
+    }
+}

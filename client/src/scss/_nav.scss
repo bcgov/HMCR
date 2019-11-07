@@ -1,0 +1,31 @@
+@import './vendor/bootstrap-theme.scss';
+
+$nav-link-active-bg: lighten(theme-color(secondary-nav), 10%);
+
+.main-nav {
+  padding: 0 1rem;
+  border-bottom: 0;
+  background-color: theme-color(secondary-nav);
+  font-size: 0.85rem;
+
+  .nav-link {
+    @media (min-width: 992px) {
+      padding: 0.75rem 0.8em;
+    }
+  }
+
+  .nav-link.active {
+    padding: 0.75rem 0.8em;
+    background-color: $nav-link-active-bg;
+  }
+
+  .btn-link {
+    color: #fff;
+    text-decoration: none;
+    font-size: 0.85rem;
+  }
+}
+
+.navbar-brand {
+  font-size: 2rem;
+}

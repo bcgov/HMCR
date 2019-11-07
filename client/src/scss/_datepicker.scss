@@ -1,0 +1,69 @@
+.DatePickerWrapper {
+  .SingleDatePicker {
+    height: $input-height;
+
+    .SingleDatePickerInput {
+      position: relative;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: stretch;
+      width: 100%;
+
+      .DateInput {
+        position: relative;
+        flex: 1 1 auto;
+        width: 1%;
+
+        .DateInput_input {
+          background-color: $input-bg;
+          background-clip: padding-box;
+          border: $input-border-width solid $input-border-color;
+
+          @include border-radius($input-border-radius, 0);
+
+          border-radius: 0;
+          border-top-left-radius: $input-border-radius;
+          border-bottom-left-radius: $input-border-radius;
+
+          @include box-shadow($input-box-shadow);
+          @include transition($input-transition);
+        }
+
+        .DateInput_input__focused {
+          @include form-control-focus();
+        }
+
+        .DateInput__small {
+          width: 100%;
+        }
+
+        .DateInput_input__small {
+          font-size: 1rem;
+          line-height: 1.5;
+          font-weight: 400;
+        }
+      }
+
+      .SingleDatePickerInput_calendarIcon {
+        padding: 0 10px;
+        margin: 0;
+        background-color: theme-color(primary);
+
+        border-radius: 0;
+        border-top-right-radius: $input-border-radius;
+        border-bottom-right-radius: $input-border-radius;
+
+        .SingleDatePickerInput_calendarIcon_svg {
+          fill: white;
+        }
+      }
+
+      .CalendarDay__selected,
+      .CalendarDay__selected:active,
+      .CalendarDay__selected:hover {
+        background: theme-color(primary);
+        border: 1px double theme-color(primary);
+      }
+    }
+  }
+}

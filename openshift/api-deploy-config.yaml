@@ -1,0 +1,149 @@
+apiVersion: v1
+kind: Template
+metadata:
+  creationTimestamp: null
+  name: transaction
+labels:
+  template: api-deploy
+objects:
+  - apiVersion: v1
+    kind: ImageStream
+    metadata:
+      creationTimestamp: null
+      labels:
+        shared: true
+      name: ${NAME}
+    spec:
+      lookupPolicy:
+        local: false
+  - apiVersion: v1
+    kind: DeploymentConfig
+    metadata:
+      creationTimestamp: null
+      name: ${NAME}${SUFFIX}
+    spec:
+      replicas: 1
+      selector:
+        deploymentconfig: ${NAME}${SUFFIX}
+      strategy:
+        resources:
+          requests:
+            cpu: 500m
+            memory: 256Mi
+          limits:
+            cpu: 500m
+            memory: 512Mi
+      template:
+        metadata:
+          creationTimestamp: null
+          labels:
+            deploymentconfig: ${NAME}${SUFFIX}
+        spec:
+          containers:
+            - image: ${NAME}:${VERSION}
+              name: api
+              ports:
+                - containerPort: 8080
+                  protocol: TCP
+              resources:
+                requests:
+                  cpu: 500m
+                  memory: 256Mi
+                limits:
+                  cpu: 500m
+                  memory: 512Mi
+              env:
+                - name: CONNECTION_STRING
+                  valueFrom:
+                    secretKeyRef:
+                      name: api-connections
+                      key: transaction.db
+                - name: JWT_AUTHORITY
+                  valueFrom:
+                    secretKeyRef:
+                      name: sso-configs
+                      key: JWT_SSO_AUTHORITY
+                - name: JWT_AUDIENCE
+                  valueFrom:
+                    secretKeyRef:
+                      name: sso-configs
+                      key: JWT_SSO_AUDIENCE
+                - name: ASPNETCORE_ENVIRONMENT
+                  value: ${ASPNETCORE_ENVIRONMENT}
+      test: false
+      triggers:
+        - imageChangeParams:
+            automatic: true
+            containerNames:
+              - api
+            from:
+              kind: ImageStreamTag
+              name: ${NAME}:${VERSION}
+          type: ImageChange
+        - type: ConfigChange
+  - apiVersion: v1
+    kind: Service
+    metadata:
+      creationTimestamp: null
+      name: ${NAME}${SUFFIX}
+    spec:
+      ports:
+        - name: web
+          port: 8080
+          protocol: TCP
+          targetPort: 8080
+      selector:
+        deploymentconfig: ${NAME}${SUFFIX}
+  - apiVersion: route.openshift.io/v1
+    kind: Route
+    metadata:
+      creationTimestamp: null
+      name: ${NAME}${SUFFIX}
+    spec:
+      host: ${HOST}
+      path: "/api"
+      port:
+        targetPort: web
+      tls:
+        termination: edge
+      to:
+        kind: Service
+        name: ${NAME}${SUFFIX}
+        weight: 100
+      wildcardPolicy: None
+parameters:
+  - description: A name used for all objects
+    displayName: Name
+    name: NAME
+    required: true
+    value: "api"
+  - description: A name suffix used for all objects
+    displayName: Suffix
+    name: SUFFIX
+    required: false
+    value: "-dev"
+  - description: A version used for the image tags
+    displayName: version
+    name: VERSION
+    required: true
+    value: "v1.0.0"
+  - description: The ASP Net Core deployment environment setting
+    displayName: AspNetCore Environment
+    name: ASPNETCORE_ENVIRONMENT
+    required: true
+    value: "Development"
+  - description: HOST
+    displayName: HOST
+    name: HOST
+    required: true
+    value: ""
+  - description: SOURCE_REPOSITORY_URL
+    displayName: SOURCE_REPOSITORY_URL
+    name: SOURCE_REPOSITORY_URL
+    required: false
+    value: ""
+  - description: SOURCE_REPOSITORY_REF
+    displayName: SOURCE_REPOSITORY_REF
+    name: SOURCE_REPOSITORY_REF
+    required: false
+    value: ""

@@ -1,0 +1,54 @@
+{
+  "generator-bcdk": {
+    "promptValues": {
+      "modules": {
+        "jenkins": {
+          "path": ".jenkins",
+          "name": "jenkins",
+          "namespace": "txkggj-tools",
+          "version": "1.0.0",
+          "environments": {
+            "build": {
+              "namespace": "txkggj-tools"
+            },
+            "dev": {
+              "namespace": "txkggj-tools"
+            },
+            "prod": {
+              "namespace": "txkggj-tools"
+            }
+          },
+          "jenkinsJobName": "_jenkins",
+          "github_owner": "bcgovneal",
+          "github_repo": "hmr",
+          "jenkinsFilePath": ".jenkins/Jenkinsfile",
+          "uuid": "6c39d7be-4946-4503-a7c1-ede34077d714"
+        },
+        ".": {
+          "name": "hmr",
+          "version": "1.0.0",
+          "path": ".",
+          "environments": {
+            "build": {
+              "namespace": "txkggj-tools"
+            },
+            "dev": {
+              "namespace": "txkggj-dev"
+            },
+            "test": {
+              "namespace": "txkggj-test"
+            },
+            "prod": {
+              "namespace": "txkggj-prod"
+            }
+          },
+          "jenkinsJobName": "hmr",
+          "github_owner": "bcgovneal",
+          "github_repo": "hmr",
+          "jenkinsFilePath": "Jenkinsfile",
+          "uuid": "ec41bd05-a3ea-4766-952c-21b768acf8ca"
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,14 @@
+@import './vendor/bootstrap-theme.scss';
+@import './nav';
+@import './materialcard';
+@import './multidropdown';
+@import './datepicker';
+
+body {
+  background-color: #e2e1e0;
+}
+
+.util-bar {
+  width: 100%;
+  background-color: white;
+}

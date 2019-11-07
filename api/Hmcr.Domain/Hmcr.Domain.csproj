@@ -1,0 +1,12 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp3.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Hmcr.Data\Hmcr.Data.csproj" />
+    <ProjectReference Include="..\Hmcr.Model\Hmcr.Model.csproj" />
+  </ItemGroup>
+
+</Project>

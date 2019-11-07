@@ -1,0 +1,29 @@
+﻿<wfs:GetFeature service="WFS"
+    version="1.1.0"
+    outputFormat="json"
+    xmlns:topp="http://www.openplans.org/topp"
+    xmlns:wfs="http://www.opengis.net/wfs"
+    xmlns="http://www.opengis.net/ogc"
+    xmlns:gml="http://www.opengis.net/gml"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.opengis.net/wfs
+                        http://schemas.opengis.net/wfs/1.1.0/WFS-basic.xsd">
+
+  <wfs:Query typeName="hwy:DSA_CONTRACT_AREA">
+    <PropertyName>CONTRACT_AREA_NUMBER</PropertyName>
+    <Filter>
+      <And>
+        <Contains>
+          <PropertyName>SHAPE</PropertyName>
+          <gml:Point srsName="http://www.opengis.net/gml/srs/epsg.xml#4326">
+            <gml:coordinates>{0},{1}</gml:coordinates>
+          </gml:Point>
+        </Contains>
+        <PropertyIsEqualTo>
+          <PropertyName>CONTRACT_AREA_NUMBER</PropertyName>
+          <Literal>{2}</Literal>
+        </PropertyIsEqualTo>
+      </And>
+    </Filter>
+  </wfs:Query>
+</wfs:GetFeature>
