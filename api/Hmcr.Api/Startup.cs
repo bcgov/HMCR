@@ -31,12 +31,11 @@ namespace Hmcr.Api
             services.AddHmcrDbContext(Configuration.GetConnectionString("Hmcr"));
             services.AddCors();
             services.AddHmcrMvc();
-            //services.AddHmcrSpaStaticFiles();
             services.AddHmcrAutoMapper();
             services.AddHmcrApiVersioning();
             services.AddHmcrTypes();
             services.AddHmcrSwagger(_env);
-            services.AddChrisHttpClient(Configuration);
+            //services.AddChrisHttpClient(Configuration);
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -51,10 +50,8 @@ namespace Hmcr.Api
             app.UseAuthentication();
             app.UseHmcrCors();
             app.UseHmcrSwagger(env, Configuration.GetSection("Constants:SwaggerApiUrl").Value);
-            //app.UseSpaStaticFiles();
             app.UseRouting();
             app.UseHmcrEndpoints();
-            //app.UseHmcrSpa(env);
         }
     }
 }

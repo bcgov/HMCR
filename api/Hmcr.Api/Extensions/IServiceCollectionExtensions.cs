@@ -75,14 +75,6 @@ namespace Hmcr.Api.Extensions
             services.AddSingleton(mapper);
         }
 
-        public static void AddHmcrSpaStaticFiles(this IServiceCollection services)
-        {
-            services.AddSpaStaticFiles(configuration =>
-            {
-                configuration.RootPath = "ClientApp/build";
-            });
-        }
-
         public static void AddHmcrAuthentication(this IServiceCollection services)
         {
             services.AddAuthentication(options =>
