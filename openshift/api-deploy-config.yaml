@@ -2,7 +2,7 @@ apiVersion: v1
 kind: Template
 metadata:
   creationTimestamp: null
-  name: transaction
+  name: ${PROJECT_NAME}
 labels:
   template: api-deploy
 objects:
@@ -53,21 +53,21 @@ objects:
                   cpu: 500m
                   memory: 512Mi
               env:
-                - name: CONNECTION_STRING
-                  valueFrom:
-                    secretKeyRef:
-                      name: api-connections
-                      key: transaction.db
-                - name: JWT_AUTHORITY
-                  valueFrom:
-                    secretKeyRef:
-                      name: sso-configs
-                      key: JWT_SSO_AUTHORITY
-                - name: JWT_AUDIENCE
-                  valueFrom:
-                    secretKeyRef:
-                      name: sso-configs
-                      key: JWT_SSO_AUDIENCE
+                # - name: CONNECTION_STRING
+                #   valueFrom:
+                #     secretKeyRef:
+                #       name: api-connections
+                #       key: transaction.db
+                # - name: JWT_AUTHORITY
+                #   valueFrom:
+                #     secretKeyRef:
+                #       name: sso-configs
+                #       key: JWT_SSO_AUTHORITY
+                # - name: JWT_AUDIENCE
+                #   valueFrom:
+                #     secretKeyRef:
+                #       name: sso-configs
+                #       key: JWT_SSO_AUDIENCE
                 - name: ASPNETCORE_ENVIRONMENT
                   value: ${ASPNETCORE_ENVIRONMENT}
       test: false
@@ -112,6 +112,11 @@ objects:
         weight: 100
       wildcardPolicy: None
 parameters:
+  - description: Name of the project (HMCR)
+    displayName: PROJECT_NAME
+    name: PROJECT_NAME
+    required: true
+    value: "hmcr"
   - description: A name used for all objects
     displayName: Name
     name: NAME

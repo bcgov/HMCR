@@ -2,7 +2,7 @@ apiVersion: v1
 kind: Template
 metadata:
   creationTimestamp: null
-  name: transaction
+  name: ${PROJECT_NAME}
 labels:
   template: nginx-build
 objects:
@@ -47,6 +47,11 @@ objects:
           noCache: true
         type: Docker
 parameters:
+  - description: Name of the project (HMCR)
+    displayName: PROJECT_NAME
+    name: PROJECT_NAME
+    required: true
+    value: "hmcr"
   - description: A name used for all objects
     displayName: Name
     name: NAME
