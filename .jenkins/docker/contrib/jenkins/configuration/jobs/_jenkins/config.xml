@@ -31,8 +31,8 @@
         <source class="org.jenkinsci.plugins.github_branch_source.GitHubSCMSource" plugin="github-branch-source@2.3.6">
           <id>6c39d7be-4946-4503-a7c1-ede34077d714</id>
           <credentialsId>github-account</credentialsId>
-          <repoOwner>bcgovneal</repoOwner>
-          <repository>hmr</repository>
+          <repoOwner>bcgov</repoOwner>
+          <repository>HMCR</repository>
           <traits>
             <org.jenkinsci.plugins.github__branch__source.ForkPullRequestDiscoveryTrait>
               <strategyId>2</strategyId>

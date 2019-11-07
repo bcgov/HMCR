@@ -19,8 +19,8 @@
             }
           },
           "jenkinsJobName": "_jenkins",
-          "github_owner": "bcgovneal",
-          "github_repo": "hmr",
+          "github_owner": "bcgov",
+          "github_repo": "HMCR",
           "jenkinsFilePath": ".jenkins/Jenkinsfile",
           "uuid": "6c39d7be-4946-4503-a7c1-ede34077d714"
         },
@@ -43,8 +43,8 @@
             }
           },
           "jenkinsJobName": "hmr",
-          "github_owner": "bcgovneal",
-          "github_repo": "hmr",
+          "github_owner": "bcgov",
+          "github_repo": "HMCR",
           "jenkinsFilePath": "Jenkinsfile",
           "uuid": "ec41bd05-a3ea-4766-952c-21b768acf8ca"
         }
