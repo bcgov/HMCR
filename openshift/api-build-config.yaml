@@ -2,7 +2,7 @@ apiVersion: v1
 kind: Template
 metadata:
   creationTimestamp: null
-  name: transaction
+  name: ${PROJECT_NAME}
 labels:
   template: api-build
 objects:
@@ -49,9 +49,14 @@ objects:
               value: Hmcr.Api/Hmcr.Api.csproj
           from:
             kind: ImageStreamTag
-            name: "dotnet-30-rhel7:3.0-2"
+            name: "dotnet-30-rhel7:3.0"
         type: Source
 parameters:
+  - description: Name of the project (HMCR)
+    displayName: PROJECT_NAME
+    name: PROJECT_NAME
+    required: true
+    value: "hmcr"
   - description: A name used for all objects
     displayName: Name
     name: NAME
@@ -71,7 +76,7 @@ parameters:
     displayName: SOURCE_REPOSITORY_URL
     name: SOURCE_REPOSITORY_URL
     required: false
-    value: "https://github.com/BCGovNeal/hmr.git"
+    value: ""
   - description: SOURCE_REPOSITORY_REF
     displayName: SOURCE_REPOSITORY_REF
     name: SOURCE_REPOSITORY_REF

@@ -12,6 +12,34 @@ module.exports = (settings)=>{
   var objects = []
 
   // The deployment of your cool app goes here ▼▼▼
+  objects.push(
+    ...oc.processDeploymentTemplate(
+      `${templatesLocalBaseUrl}/client-deploy-config.yaml`,
+      {
+        param: {
+          NAME: `${phases[phase].name}-client`,
+          SUFFIX: phases[phase].suffix,
+          VERSION: phases[phase].tag,
+          HOST: phases[phase].host
+        }
+      }
+    )
+  );
+
+  objects.push(
+    ...oc.processDeploymentTemplate(
+      `${templatesLocalBaseUrl}/api-deploy-config.yaml`,
+      {
+        param: {
+          NAME: `${phases[phase].name}-api`,
+          SUFFIX: phases[phase].suffix,
+          VERSION: phases[phase].tag,
+          HOST: phases[phase].host,
+          ASPNETCORE_ENVIRONMENT: phases[phase].dotnet_env
+        }
+      }
+    )
+  );
 
   oc.applyRecommendedLabels(objects, phases[phase].name, phase, `${changeId}`, phases[phase].instance)
   oc.importImageStreams(objects, phases[phase].tag, phases.build.namespace, phases.build.tag)
