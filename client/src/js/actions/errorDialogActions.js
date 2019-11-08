@@ -7,8 +7,10 @@ export const showErrorDialog = response => {
   return {
     type: SHOW_ERROR_DIALOG_MODAL,
     payload: {
-      message: response.data.message,
+      message: response.data.title,
       statusCode: response.status,
+      detail: response.data.detail,
+      errors: response.data.errors,
       path,
       method,
     },
