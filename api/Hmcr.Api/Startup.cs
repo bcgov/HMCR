@@ -22,7 +22,6 @@ namespace Hmcr.Api
             _env = env;
         }
 
-        // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddControllers();
@@ -35,10 +34,9 @@ namespace Hmcr.Api
             services.AddHmcrApiVersioning();
             services.AddHmcrTypes();
             services.AddHmcrSwagger(_env);
-            //services.AddChrisHttpClient(Configuration);
+            services.AddChrisHttpClient(Configuration);
         }
 
-        // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
 

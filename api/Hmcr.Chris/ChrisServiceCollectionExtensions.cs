@@ -10,14 +10,14 @@ namespace Hmcr.Chris
     {
         public static void AddChrisHttpClient(this IServiceCollection services, IConfiguration config)
         {
-            services.AddHttpClient<MapsService>(client =>
+            services.AddHttpClient<IMapsApi, MapsApi>(client =>
             {
                 client.BaseAddress = new Uri(config.GetSection("ChrisUris:MapsUri").Value);
                 client.Timeout = new TimeSpan(0, 0, 15);
                 client.DefaultRequestHeaders.Clear();
             });
 
-            services.AddHttpClient<OasService>(client =>
+            services.AddHttpClient<IOasApi, OasApi>(client =>
             {
                 client.BaseAddress = new Uri(config.GetSection("ChrisUris:OasUri").Value);
                 client.Timeout = new TimeSpan(0, 0, 15);
