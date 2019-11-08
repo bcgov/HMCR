@@ -21,5 +21,9 @@ namespace Hmcr.Chris
 
         public readonly string PointFromOffsetMeasureOnRfiSeg
             = "service=WFS&version=1.1.0&request=GetFeature&typeName=cwr%3ARFI_POINT_FROM_MEASURE&srsName=EPSG:4326&outputFormat=application%2Fjson&viewParams=ne_unique:{0};measure:{1}";
+
+        public readonly string RfiSegmentDetail
+            = "service=WFS&version=1.1.0&request=GetFeature&typeName=cwr:V_NM_NLT_RFI_GRFI_SDO_DT&srsName=EPSG:4326&outputFormat=application/json&cql_filter=NE_UNIQUE='{0}'";
+
     }
 }

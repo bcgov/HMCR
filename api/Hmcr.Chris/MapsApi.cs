@@ -9,19 +9,19 @@ using System.Threading.Tasks;
 
 namespace Hmcr.Chris
 {
-    public interface IMpasService 
+    public interface IMapsApi
     {
         Task<bool> IsPointWithinServiceAreaQuery(decimal longitude, decimal latitude, string serviceAreaNumber);
     }
 
-    public class MapsService : IMpasService
+    public class MapsApi : IMapsApi
     {
         private HttpClient _client;
         private MapsQueries _queries;
         private IApi _api;
         private const string _path = "geoV05/wfs?";
 
-        public MapsService(HttpClient client, IApi api)
+        public MapsApi(HttpClient client, IApi api)
         {
             _client = client;
             _queries = new MapsQueries();

@@ -9,21 +9,22 @@ using System.Threading.Tasks;
 
 namespace Hmcr.Chris
 {
-    public interface IOasService
+    public interface IOasApi
     {
         Task<bool> IsPointOnRfiSegment(int tolerance, decimal longitude, decimal latitude, string rfiSegment);
         Task<Line> GetLineFromOffsetMeasuerOnRfiSegment(string rfiSegment, decimal start, decimal end);
         Task<decimal> GetOffsetMeasureFromPointAndRfiSegment(decimal longitude, decimal latitude, string rfiSegment);
         Task<Point> GetPointFromOffsetMeasureOnRfiSegment(string rfiSegment, decimal offset);
+        Task<RecordDimension> GetRfiSegmentDetail(string rfiSegment);
     }
-    public class OasService : IOasService
+    public class OasApi : IOasApi
     {
         private HttpClient _client;
         private OasQueries _queries;
         private IApi _api;
         private const string _path = "ogs-geoV06/wfs?";
 
-        public OasService(HttpClient client, IApi api)
+        public OasApi(HttpClient client, IApi api)
         {
             _client = client;
             _api = api;
@@ -78,6 +79,18 @@ namespace Hmcr.Chris
             if (features.totalFeatures == 0) return null;
 
             return new Point(features.features[0].geometry.coordinates);
+        }
+        public async Task<RecordDimension> GetRfiSegmentDetail(string rfiSegment)
+        {
+            var query = _path + string.Format(_queries.RfiSegmentDetail, rfiSegment);
+
+            var content = await _api.Get(_client, query);
+
+            var features = JsonSerializer.Deserialize<FeatureCollection<object>>(content);
+
+            if (features.totalFeatures == 0) return RecordDimension.Na;
+
+            return features.features[0].geometry.type.ToLower() == "linestring" ? RecordDimension.Line : RecordDimension.Point;
         }
     }
 }
