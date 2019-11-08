@@ -4,13 +4,15 @@ using Hmcr.Model;
 using Hmcr.Model.Dtos;
 using Microsoft.AspNetCore.Mvc;
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace Hmcr.Api.Controllers
 {
     [ApiVersion("1.0")]
     [Route("api/provinces")]
-    public class ProvinceController : Controller
+    [ApiController]
+    public class ProvinceController : ControllerBase
     {
         private IProvinceService _provinceService;
 
@@ -21,7 +23,7 @@ namespace Hmcr.Api.Controllers
 
         [Route("")]
         [HttpGet]
-        public async Task<IActionResult> GetProvincesAsync()
+        public async Task<ActionResult<IEnumerable<ProvinceDto>>> GetProvincesAsync()
         {
             return Ok(await _provinceService.GetProvincesAsync());
         }
@@ -44,7 +46,7 @@ namespace Hmcr.Api.Controllers
 
         [Route("paged")]
         [HttpGet]
-        public IActionResult GetPaged()
+        public ActionResult<PagedDto<ProvinceDto>> GetPaged()
         {
             return Ok(_provinceService.GetProvincesByPage(3, 2));
         }
@@ -52,7 +54,7 @@ namespace Hmcr.Api.Controllers
         [Route("authorized")]
         [HttpGet]
         [RequiresPermission(Permissions.Read)]
-        public async Task<IActionResult> OnlyForAuthorizedUsers()
+        public async Task<ActionResult<IEnumerable<ProvinceDto>>> OnlyForAuthorizedUsers()
         {
             return Ok(await _provinceService.GetProvincesAsync());
         }

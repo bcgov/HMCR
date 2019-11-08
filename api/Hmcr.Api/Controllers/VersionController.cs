@@ -10,11 +10,14 @@ namespace Hmcr.Api.Controllers
 {
     [ApiVersion("1.0")]
     [Route("api/version")]
-    public class VersionController : Controller
+    [ApiController]
+    public class VersionController : ControllerBase
     {
+        private const string CommitKey = "OPENSHIFT_BUILD_COMMIT";
+
         private IConfiguration _config;
         private IWebHostEnvironment _env;
-
+        
         public VersionController(IConfiguration config, IWebHostEnvironment env)
         {
             _config = config;
@@ -23,7 +26,7 @@ namespace Hmcr.Api.Controllers
 
         [Route("")]
         [HttpGet]
-        public IActionResult GetVersionInfo()
+        public ActionResult<VersionInfo> GetVersionInfo()
         {
             var assembly = Assembly.GetExecutingAssembly();
 
@@ -62,6 +65,7 @@ namespace Hmcr.Api.Controllers
                 InformationalVersion = assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>().InformationalVersion,
                 TargetFramework = assembly.GetCustomAttribute<TargetFrameworkAttribute>().FrameworkName,
                 ImageRuntimeVersion = assembly.ImageRuntimeVersion,
+                Commit = _config[CommitKey],
                 Environment = environment
             };
 

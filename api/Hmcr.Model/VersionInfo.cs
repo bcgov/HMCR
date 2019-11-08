@@ -12,7 +12,7 @@
         public string TargetFramework { get; set; }
         public string ImageRuntimeVersion { get; set; }
 
-        public string BuildVersion { get; set; }
+        public string Commit { get; set; }
         public string Environment { get; set; }
     }
 }

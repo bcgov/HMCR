@@ -29,11 +29,18 @@ namespace Hmcr.Api.Authorization
 
             if (!result.Succeeded)
             {
-                context.Result = new UnauthorizedObjectResult(new Error
+                var problem = new ValidationProblemDetails()
                 {
-                    ErrorCode = StatusCodes.Status403Forbidden,
-                    Message = "Access Denied"
-                });
+                    Type = "https://hmcr.bc.gov.ca/exception",
+                    Title = "Access denied",
+                    Status = StatusCodes.Status401Unauthorized,
+                    Detail = "Insufficient permission.",
+                    Instance = context.HttpContext.Request.Path
+                };
+
+                problem.Extensions.Add("traceId", context.HttpContext.TraceIdentifier);
+
+                context.Result = new UnauthorizedObjectResult(problem);
             }
         }
     }
