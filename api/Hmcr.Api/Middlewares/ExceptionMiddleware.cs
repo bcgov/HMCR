@@ -1,6 +1,8 @@
-﻿using Hmcr.Model;
+﻿using Hmcr.Api.Extensions;
+using Hmcr.Model;
 using Hmcr.Model.Dtos;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
@@ -29,21 +31,28 @@ namespace Hmcr.Api.Middlewares
             }
             catch (Exception ex)
             {
-                _logger.LogError($"HMCR Exception: {ex}");
-                await HandleExceptionAsync(httpContext, ex);
+                var guid = Guid.NewGuid();
+                _logger.LogError($"HMCR Exception{guid}: {ex}");
+                await HandleExceptionAsync(httpContext, guid);
             }
         }
 
-        private Task HandleExceptionAsync(HttpContext context, Exception exception)
+        private Task HandleExceptionAsync(HttpContext context, Guid guid)
         {
-            context.Response.ContentType = "application/json";
             context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
 
-            return context.Response.WriteAsync(new Error()
+            var problem = new ValidationProblemDetails()
             {
-                ErrorCode = context.Response.StatusCode,
-                Message = "Internal Server Error."
-            }.ToString());
+                Type = "https://hmcr.bc.gov.ca/exception",
+                Title = "An unexpected error occurred!",
+                Status = StatusCodes.Status500InternalServerError,
+                Detail = "The instance value should be used to identify the problem when calling customer support",
+                Instance = $"urn:hmcr:error:{Guid.NewGuid()}"
+            };
+
+            problem.Extensions.Add("traceId", context.TraceIdentifier);
+
+            return context.Response.WriteJsonAsync(problem, "application/problem+json");
         }
     }
 }

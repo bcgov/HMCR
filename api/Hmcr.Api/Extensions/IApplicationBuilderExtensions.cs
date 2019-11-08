@@ -26,9 +26,7 @@ namespace Hmcr.Api.Extensions
         {
             app.UseEndpoints(endpoints =>
             {
-                endpoints.MapControllerRoute(
-                    name: "default",
-                    pattern: "{controller}/{action=Index}/{id?}");
+                endpoints.MapControllers();
             });
         }
 

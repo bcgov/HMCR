@@ -20,6 +20,7 @@ using System.Text.Json;
 using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
 using Hmcr.Model.JsonConverters;
+using Microsoft.AspNetCore.Http;
 
 namespace Hmcr.Api.Extensions
 {
@@ -37,7 +38,7 @@ namespace Hmcr.Api.Extensions
             });
         }
 
-        public static void AddHmcrMvc(this IServiceCollection services)
+        public static void AddHmcrControllers(this IServiceCollection services)
         {
             services
                 .AddControllers(options =>
@@ -46,6 +47,27 @@ namespace Hmcr.Api.Extensions
                         .RequireAuthenticatedUser()
                         .Build();
                     options.Filters.Add(new AuthorizeFilter(policy));
+                })
+                .ConfigureApiBehaviorOptions(setupAction =>
+                {
+                    setupAction.InvalidModelStateResponseFactory = context =>
+                    {
+                        var problem = new ValidationProblemDetails(context.ModelState)
+                        {
+                            Type = "https://hmcr.bc.gov.ca/model-validation-error",
+                            Title = "One or more validation errors occurred.",
+                            Status = StatusCodes.Status422UnprocessableEntity,
+                            Detail = "Please refer to the errors property for additional details",
+                            Instance = context.HttpContext.Request.Path
+                        };
+
+                        problem.Extensions.Add("traceId", context.HttpContext.TraceIdentifier);
+
+                        return new UnprocessableEntityObjectResult(problem)
+                        {
+                            ContentTypes = { "application/problem+json" }
+                        };
+                    };
                 })
                 .AddJsonOptions(options =>
                 {

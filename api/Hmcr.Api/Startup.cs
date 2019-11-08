@@ -24,12 +24,11 @@ namespace Hmcr.Api
 
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddControllers();
             services.AddHttpContextAccessor();
             services.AddHmcrAuthentication();
             services.AddHmcrDbContext(Configuration.GetConnectionString("Hmcr"));
             services.AddCors();
-            services.AddHmcrMvc();
+            services.AddHmcrControllers();
             services.AddHmcrAutoMapper();
             services.AddHmcrApiVersioning();
             services.AddHmcrTypes();
@@ -49,6 +48,7 @@ namespace Hmcr.Api
             app.UseHmcrCors();
             app.UseHmcrSwagger(env, Configuration.GetSection("Constants:SwaggerApiUrl").Value);
             app.UseRouting();
+            app.UseAuthorization();
             app.UseHmcrEndpoints();
         }
     }

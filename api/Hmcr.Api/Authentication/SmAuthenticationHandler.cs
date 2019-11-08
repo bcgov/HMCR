@@ -1,9 +1,12 @@
-﻿using Hmcr.Model;
+﻿using Hmcr.Api.Extensions;
+using Hmcr.Model;
 using Hmcr.Model.Utils;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
@@ -57,11 +60,18 @@ namespace Hmcr.Api.Authentication
             Context.Response.ContentType = "application/json";
             Context.Response.StatusCode = StatusCodes.Status401Unauthorized;
 
-            return Context.Response.WriteAsync(new Error()
+            var problem = new ValidationProblemDetails()
             {
-                ErrorCode = Context.Response.StatusCode,
-                Message = "Authentication failed."
-            }.ToString());
+                Type = "https://hmcr.bc.gov.ca/exception",
+                Title = "Access denied",
+                Status = StatusCodes.Status401Unauthorized,
+                Detail = "Authentication failed.",
+                Instance = Context.Request.Path
+            };
+
+            problem.Extensions.Add("traceId", Context.TraceIdentifier);
+
+            return Context.Response.WriteJsonAsync(problem, "application/problem+json");
         }
 
         private void ReadSmHeaders()
