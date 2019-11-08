@@ -5,7 +5,7 @@ import { Button, Modal, ModalHeader, ModalBody, ModalFooter } from 'reactstrap';
 
 import { hideErrorDialog } from '../../actions';
 
-const ErrorDialogModal = ({ isOpen, message, statusCode, path, method, hideErrorDialog }) => {
+const ErrorDialogModal = ({ isOpen, message, statusCode, detail, errors, path, method, hideErrorDialog }) => {
   const [clicked, setClicked] = useState(false);
 
   useEffect(() => {
@@ -37,6 +37,7 @@ const ErrorDialogModal = ({ isOpen, message, statusCode, path, method, hideError
               </small>
             </p>
           )}
+          {errors && <p>{Object.keys(errors).map(key => errors[key].map(error => <small>{error}</small>))}</p>}
         </ModalBody>
         <ModalFooter>
           <Button
@@ -64,6 +65,8 @@ ErrorDialogModal.propTypes = {
   method: PropTypes.string.isRequired,
   hideErrorDialog: PropTypes.func.isRequired,
   message: PropTypes.string,
+  detail: PropTypes.string,
+  errors: PropTypes.object,
 };
 
 export default connect(

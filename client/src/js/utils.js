@@ -12,8 +12,10 @@ export const buildApiErrorObject = response => {
     const path = response.config.url.replace(response.config.baseURL, '');
 
     return {
-      message: response.data.Message,
+      message: response.data.title,
       statusCode: response.status,
+      detail: response.data.detail,
+      errors: response.data.errors,
       path,
       method,
     };

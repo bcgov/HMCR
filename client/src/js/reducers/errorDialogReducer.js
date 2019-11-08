@@ -4,6 +4,8 @@ const defaultState = {
   show: false,
   message: undefined,
   statusCode: undefined,
+  detail: undefined,
+  errors: undefined,
   path: undefined,
   method: undefined,
 };
