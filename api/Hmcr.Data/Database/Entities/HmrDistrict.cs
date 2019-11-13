@@ -14,6 +14,7 @@ namespace Hmcr.Data.Database.Entities
         public decimal DistrictNumber { get; set; }
         public string DistrictName { get; set; }
         public decimal RegionNumber { get; set; }
+        public long ConcurrencyControlNumber { get; set; }
         public string DbAuditCreateUserid { get; set; }
         public DateTime DbAuditCreateTimestamp { get; set; }
         public string DbAuditLastUpdateUserid { get; set; }

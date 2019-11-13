@@ -35,12 +35,11 @@ namespace Hmcr.Data.Database.Entities
         public virtual DbSet<HmrServiceAreaUser> HmrServiceAreaUsers { get; set; }
         public virtual DbSet<HmrServiceAreaUserHist> HmrServiceAreaUserHists { get; set; }
         public virtual DbSet<HmrSubmissionObject> HmrSubmissionObjects { get; set; }
-        public virtual DbSet<HmrSubmissionObjectHist> HmrSubmissionObjectHists { get; set; }
+        public virtual DbSet<HmrSubmissionStatu> HmrSubmissionStatus { get; set; }
         public virtual DbSet<HmrSystemUser> HmrSystemUsers { get; set; }
         public virtual DbSet<HmrSystemUserHist> HmrSystemUserHists { get; set; }
         public virtual DbSet<HmrUserRole> HmrUserRoles { get; set; }
         public virtual DbSet<HmrUserRoleHist> HmrUserRoleHists { get; set; }
-        public virtual DbSet<HrmSubmissionStatu> HrmSubmissionStatus { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -59,7 +58,7 @@ namespace Hmcr.Data.Database.Entities
 
                 entity.Property(e => e.ContractServiceAreaId)
                     .HasColumnName("CONTRACT_SERVICE_AREA_ID")
-                    .HasColumnType("numeric(28, 9)")
+                    .HasColumnType("numeric(9, 0)")
                     .HasDefaultValueSql("(NEXT VALUE FOR [HMR_CNT_SRV_ARA_ID_SEQ])")
                     .HasComment("Unique identifier for the record");
 
@@ -76,10 +75,7 @@ namespace Hmcr.Data.Database.Entities
                     .HasComment("Active Directory which retains source of truth for user idenifiers.");
 
                 entity.Property(e => e.AppCreateUserGuid)
-                    .IsRequired()
                     .HasColumnName("APP_CREATE_USER_GUID")
-                    .HasMaxLength(32)
-                    .IsUnicode(false)
                     .HasComment("Unique idenifier of user who created record");
 
                 entity.Property(e => e.AppCreateUserid)
@@ -103,8 +99,6 @@ namespace Hmcr.Data.Database.Entities
 
                 entity.Property(e => e.AppLastUpdateUserGuid)
                     .HasColumnName("APP_LAST_UPDATE_USER_GUID")
-                    .HasMaxLength(32)
-                    .IsUnicode(false)
                     .HasComment("Unique idenifier of user who last updated record");
 
                 entity.Property(e => e.AppLastUpdateUserid)
@@ -116,13 +110,12 @@ namespace Hmcr.Data.Database.Entities
 
                 entity.Property(e => e.ConcurrencyControlNumber)
                     .HasColumnName("CONCURRENCY_CONTROL_NUMBER")
-                    .HasColumnType("numeric(9, 0)")
+                    .HasDefaultValueSql("((1))")
                     .HasComment("Record under edit indicator used for optomisitc record contention management.  If number differs from start of edit, then user will be prompted to that record has been updated by someone else.");
 
                 entity.Property(e => e.ContractTermId)
                     .HasColumnName("CONTRACT_TERM_ID")
                     .HasColumnType("numeric(9, 0)")
-                    .HasDefaultValueSql("(NEXT VALUE FOR [HMR_CNRT_SRV_ARA_CONTRACT_TERM])")
                     .HasComment("Unique idenifier for related contract term");
 
                 entity.Property(e => e.DbAuditCreateTimestamp)
@@ -179,12 +172,12 @@ namespace Hmcr.Data.Database.Entities
             modelBuilder.Entity<HmrContractServiceAreaHist>(entity =>
             {
                 entity.HasKey(e => e.ContractServiceAreaHistId)
-                    .HasName("HMR_CSA1H_PK");
+                    .HasName("HMR_CSA1_H_PK");
 
                 entity.ToTable("HMR_CONTRACT_SERVICE_AREA_HIST");
 
                 entity.HasIndex(e => new { e.ContractServiceAreaHistId, e.EndDateHist })
-                    .HasName("HMR_CSA1H_UK")
+                    .HasName("HMR_CSA1_H_UK")
                     .IsUnique();
 
                 entity.Property(e => e.ContractServiceAreaHistId)
@@ -201,11 +194,7 @@ namespace Hmcr.Data.Database.Entities
                     .HasMaxLength(12)
                     .IsUnicode(false);
 
-                entity.Property(e => e.AppCreateUserGuid)
-                    .IsRequired()
-                    .HasColumnName("APP_CREATE_USER_GUID")
-                    .HasMaxLength(32)
-                    .IsUnicode(false);
+                entity.Property(e => e.AppCreateUserGuid).HasColumnName("APP_CREATE_USER_GUID");
 
                 entity.Property(e => e.AppCreateUserid)
                     .IsRequired()
@@ -223,10 +212,7 @@ namespace Hmcr.Data.Database.Entities
                     .HasMaxLength(12)
                     .IsUnicode(false);
 
-                entity.Property(e => e.AppLastUpdateUserGuid)
-                    .HasColumnName("APP_LAST_UPDATE_USER_GUID")
-                    .HasMaxLength(32)
-                    .IsUnicode(false);
+                entity.Property(e => e.AppLastUpdateUserGuid).HasColumnName("APP_LAST_UPDATE_USER_GUID");
 
                 entity.Property(e => e.AppLastUpdateUserid)
                     .IsRequired()
@@ -234,9 +220,7 @@ namespace Hmcr.Data.Database.Entities
                     .HasMaxLength(30)
                     .IsUnicode(false);
 
-                entity.Property(e => e.ConcurrencyControlNumber)
-                    .HasColumnName("CONCURRENCY_CONTROL_NUMBER")
-                    .HasColumnType("numeric(18, 0)");
+                entity.Property(e => e.ConcurrencyControlNumber).HasColumnName("CONCURRENCY_CONTROL_NUMBER");
 
                 entity.Property(e => e.ContractServiceAreaId)
                     .HasColumnName("CONTRACT_SERVICE_AREA_ID")
@@ -347,7 +331,7 @@ namespace Hmcr.Data.Database.Entities
 
                 entity.Property(e => e.ConcurrencyControlNumber)
                     .HasColumnName("CONCURRENCY_CONTROL_NUMBER")
-                    .HasColumnType("numeric(9, 0)")
+                    .HasDefaultValueSql("((1))")
                     .HasComment("Record under edit indicator used for optomisitc record contention management.  If number differs from start of edit, then user will be prompted to that record has been updated by someone else.");
 
                 entity.Property(e => e.ContractName)
@@ -410,12 +394,12 @@ namespace Hmcr.Data.Database.Entities
             modelBuilder.Entity<HmrContractTermHist>(entity =>
             {
                 entity.HasKey(e => e.ContractTermHistId)
-                    .HasName("HMR_CNRT_H_PK");
+                    .HasName("HMR_CNRT__H_PK");
 
                 entity.ToTable("HMR_CONTRACT_TERM_HIST");
 
                 entity.HasIndex(e => new { e.ContractTermHistId, e.EndDateHist })
-                    .HasName("HMR_CNRT_H_UK")
+                    .HasName("HMR_CNRT__H_UK")
                     .IsUnique();
 
                 entity.Property(e => e.ContractTermHistId)
@@ -458,9 +442,7 @@ namespace Hmcr.Data.Database.Entities
                     .HasMaxLength(30)
                     .IsUnicode(false);
 
-                entity.Property(e => e.ConcurrencyControlNumber)
-                    .HasColumnName("CONCURRENCY_CONTROL_NUMBER")
-                    .HasColumnType("numeric(18, 0)");
+                entity.Property(e => e.ConcurrencyControlNumber).HasColumnName("CONCURRENCY_CONTROL_NUMBER");
 
                 entity.Property(e => e.ContractName)
                     .IsRequired()
@@ -532,6 +514,11 @@ namespace Hmcr.Data.Database.Entities
                     .HasColumnType("numeric(2, 0)")
                     .HasComment("Number assigned to represent the District");
 
+                entity.Property(e => e.ConcurrencyControlNumber)
+                    .HasColumnName("CONCURRENCY_CONTROL_NUMBER")
+                    .HasDefaultValueSql("((1))")
+                    .HasComment("Record under edit indicator used for optomisitc record contention management.  If number differs from start of edit, then user will be prompted to that record has been updated by someone else.");
+
                 entity.Property(e => e.DbAuditCreateTimestamp)
                     .HasColumnName("DB_AUDIT_CREATE_TIMESTAMP")
                     .HasColumnType("datetime")
@@ -601,7 +588,7 @@ namespace Hmcr.Data.Database.Entities
 
                 entity.Property(e => e.ConcurrencyControlNumber)
                     .HasColumnName("CONCURRENCY_CONTROL_NUMBER")
-                    .HasColumnType("numeric(9, 0)")
+                    .HasDefaultValueSql("((1))")
                     .HasComment("Record under edit indicator used for optomisitc record contention management.  If number differs from start of edit, then user will be prompted to that record has been updated by someone else.");
 
                 entity.Property(e => e.DbAuditCreateTimestamp)
@@ -676,10 +663,7 @@ namespace Hmcr.Data.Database.Entities
                     .HasComment("Active Directory which retains source of truth for user idenifiers.");
 
                 entity.Property(e => e.AppCreateUserGuid)
-                    .IsRequired()
                     .HasColumnName("APP_CREATE_USER_GUID")
-                    .HasMaxLength(32)
-                    .IsUnicode(false)
                     .HasComment("Unique idenifier of user who created record");
 
                 entity.Property(e => e.AppCreateUserid)
@@ -703,8 +687,6 @@ namespace Hmcr.Data.Database.Entities
 
                 entity.Property(e => e.AppLastUpdateUserGuid)
                     .HasColumnName("APP_LAST_UPDATE_USER_GUID")
-                    .HasMaxLength(32)
-                    .IsUnicode(false)
                     .HasComment("Unique idenifier of user who last updated record");
 
                 entity.Property(e => e.AppLastUpdateUserid)
@@ -716,8 +698,6 @@ namespace Hmcr.Data.Database.Entities
 
                 entity.Property(e => e.BusinessGuid)
                     .HasColumnName("BUSINESS_GUID")
-                    .HasMaxLength(32)
-                    .IsUnicode(false)
                     .HasComment("A system generated unique identifier.  Reflects the active directory unique idenifier for the business associated with the user.");
 
                 entity.Property(e => e.BusinessLegalName)
@@ -734,7 +714,7 @@ namespace Hmcr.Data.Database.Entities
 
                 entity.Property(e => e.ConcurrencyControlNumber)
                     .HasColumnName("CONCURRENCY_CONTROL_NUMBER")
-                    .HasColumnType("numeric(9, 0)")
+                    .HasDefaultValueSql("((1))")
                     .HasComment("Record under edit indicator used for optomisitc record contention management.  If number differs from start of edit, then user will be prompted to that record has been updated by someone else.");
 
                 entity.Property(e => e.DbAuditCreateTimestamp)
@@ -799,12 +779,12 @@ namespace Hmcr.Data.Database.Entities
             modelBuilder.Entity<HmrPartyHist>(entity =>
             {
                 entity.HasKey(e => e.PartyHistId)
-                    .HasName("HMR_PRTYH_PK");
+                    .HasName("HMR_PRTY_H_PK");
 
                 entity.ToTable("HMR_PARTY_HIST");
 
                 entity.HasIndex(e => new { e.PartyHistId, e.EndDateHist })
-                    .HasName("HMR_PRTYH_UK")
+                    .HasName("HMR_PRTY_H_UK")
                     .IsUnique();
 
                 entity.Property(e => e.PartyHistId)
@@ -821,11 +801,7 @@ namespace Hmcr.Data.Database.Entities
                     .HasMaxLength(12)
                     .IsUnicode(false);
 
-                entity.Property(e => e.AppCreateUserGuid)
-                    .IsRequired()
-                    .HasColumnName("APP_CREATE_USER_GUID")
-                    .HasMaxLength(32)
-                    .IsUnicode(false);
+                entity.Property(e => e.AppCreateUserGuid).HasColumnName("APP_CREATE_USER_GUID");
 
                 entity.Property(e => e.AppCreateUserid)
                     .IsRequired()
@@ -843,10 +819,7 @@ namespace Hmcr.Data.Database.Entities
                     .HasMaxLength(12)
                     .IsUnicode(false);
 
-                entity.Property(e => e.AppLastUpdateUserGuid)
-                    .HasColumnName("APP_LAST_UPDATE_USER_GUID")
-                    .HasMaxLength(32)
-                    .IsUnicode(false);
+                entity.Property(e => e.AppLastUpdateUserGuid).HasColumnName("APP_LAST_UPDATE_USER_GUID");
 
                 entity.Property(e => e.AppLastUpdateUserid)
                     .IsRequired()
@@ -854,10 +827,7 @@ namespace Hmcr.Data.Database.Entities
                     .HasMaxLength(30)
                     .IsUnicode(false);
 
-                entity.Property(e => e.BusinessGuid)
-                    .HasColumnName("BUSINESS_GUID")
-                    .HasMaxLength(32)
-                    .IsUnicode(false);
+                entity.Property(e => e.BusinessGuid).HasColumnName("BUSINESS_GUID");
 
                 entity.Property(e => e.BusinessLegalName)
                     .HasColumnName("BUSINESS_LEGAL_NAME")
@@ -868,9 +838,7 @@ namespace Hmcr.Data.Database.Entities
                     .HasColumnName("BUSINESS_NUMBER")
                     .HasColumnType("numeric(18, 0)");
 
-                entity.Property(e => e.ConcurrencyControlNumber)
-                    .HasColumnName("CONCURRENCY_CONTROL_NUMBER")
-                    .HasColumnType("numeric(18, 0)");
+                entity.Property(e => e.ConcurrencyControlNumber).HasColumnName("CONCURRENCY_CONTROL_NUMBER");
 
                 entity.Property(e => e.DbAuditCreateTimestamp)
                     .HasColumnName("DB_AUDIT_CREATE_TIMESTAMP")
@@ -959,10 +927,7 @@ namespace Hmcr.Data.Database.Entities
                     .HasComment("Active Directory which retains source of truth for user idenifiers.");
 
                 entity.Property(e => e.AppCreateUserGuid)
-                    .IsRequired()
                     .HasColumnName("APP_CREATE_USER_GUID")
-                    .HasMaxLength(32)
-                    .IsUnicode(false)
                     .HasComment("Unique idenifier of user who created record");
 
                 entity.Property(e => e.AppCreateUserid)
@@ -986,8 +951,6 @@ namespace Hmcr.Data.Database.Entities
 
                 entity.Property(e => e.AppLastUpdateUserGuid)
                     .HasColumnName("APP_LAST_UPDATE_USER_GUID")
-                    .HasMaxLength(32)
-                    .IsUnicode(false)
                     .HasComment("Unique idenifier of user who last updated record");
 
                 entity.Property(e => e.AppLastUpdateUserid)
@@ -999,7 +962,7 @@ namespace Hmcr.Data.Database.Entities
 
                 entity.Property(e => e.ConcurrencyControlNumber)
                     .HasColumnName("CONCURRENCY_CONTROL_NUMBER")
-                    .HasColumnType("numeric(9, 0)")
+                    .HasDefaultValueSql("((1))")
                     .HasComment("Record under edit indicator used for optomisitc record contention management.  If number differs from start of edit, then user will be prompted to that record has been updated by someone else.");
 
                 entity.Property(e => e.DbAuditCreateTimestamp)
@@ -1052,12 +1015,12 @@ namespace Hmcr.Data.Database.Entities
             modelBuilder.Entity<HmrPermissionHist>(entity =>
             {
                 entity.HasKey(e => e.PermissionHistId)
-                    .HasName("HMR_PERMH_PK");
+                    .HasName("HMR_PERM_H_PK");
 
                 entity.ToTable("HMR_PERMISSION_HIST");
 
                 entity.HasIndex(e => new { e.PermissionHistId, e.EndDateHist })
-                    .HasName("HMR_PERMH_UK")
+                    .HasName("HMR_PERM_H_UK")
                     .IsUnique();
 
                 entity.Property(e => e.PermissionHistId)
@@ -1074,11 +1037,7 @@ namespace Hmcr.Data.Database.Entities
                     .HasMaxLength(12)
                     .IsUnicode(false);
 
-                entity.Property(e => e.AppCreateUserGuid)
-                    .IsRequired()
-                    .HasColumnName("APP_CREATE_USER_GUID")
-                    .HasMaxLength(32)
-                    .IsUnicode(false);
+                entity.Property(e => e.AppCreateUserGuid).HasColumnName("APP_CREATE_USER_GUID");
 
                 entity.Property(e => e.AppCreateUserid)
                     .IsRequired()
@@ -1096,10 +1055,7 @@ namespace Hmcr.Data.Database.Entities
                     .HasMaxLength(12)
                     .IsUnicode(false);
 
-                entity.Property(e => e.AppLastUpdateUserGuid)
-                    .HasColumnName("APP_LAST_UPDATE_USER_GUID")
-                    .HasMaxLength(32)
-                    .IsUnicode(false);
+                entity.Property(e => e.AppLastUpdateUserGuid).HasColumnName("APP_LAST_UPDATE_USER_GUID");
 
                 entity.Property(e => e.AppLastUpdateUserid)
                     .IsRequired()
@@ -1107,9 +1063,7 @@ namespace Hmcr.Data.Database.Entities
                     .HasMaxLength(30)
                     .IsUnicode(false);
 
-                entity.Property(e => e.ConcurrencyControlNumber)
-                    .HasColumnName("CONCURRENCY_CONTROL_NUMBER")
-                    .HasColumnType("numeric(18, 0)");
+                entity.Property(e => e.ConcurrencyControlNumber).HasColumnName("CONCURRENCY_CONTROL_NUMBER");
 
                 entity.Property(e => e.DbAuditCreateTimestamp)
                     .HasColumnName("DB_AUDIT_CREATE_TIMESTAMP")
@@ -1180,7 +1134,7 @@ namespace Hmcr.Data.Database.Entities
 
                 entity.Property(e => e.ConcurrencyControlNumber)
                     .HasColumnName("CONCURRENCY_CONTROL_NUMBER")
-                    .HasColumnType("numeric(9, 0)")
+                    .HasDefaultValueSql("((1))")
                     .HasComment("Record under edit indicator used for optomisitc record contention management.  If number differs from start of edit, then user will be prompted to that record has been updated by someone else.");
 
                 entity.Property(e => e.DbAuditCreateTimestamp)
@@ -1252,10 +1206,7 @@ namespace Hmcr.Data.Database.Entities
                     .HasComment("Active Directory which retains source of truth for user idenifiers.");
 
                 entity.Property(e => e.AppCreateUserGuid)
-                    .IsRequired()
                     .HasColumnName("APP_CREATE_USER_GUID")
-                    .HasMaxLength(32)
-                    .IsUnicode(false)
                     .HasComment("Unique idenifier of user who created record");
 
                 entity.Property(e => e.AppCreateUserid)
@@ -1279,8 +1230,6 @@ namespace Hmcr.Data.Database.Entities
 
                 entity.Property(e => e.AppLastUpdateUserGuid)
                     .HasColumnName("APP_LAST_UPDATE_USER_GUID")
-                    .HasMaxLength(32)
-                    .IsUnicode(false)
                     .HasComment("Unique idenifier of user who last updated record");
 
                 entity.Property(e => e.AppLastUpdateUserid)
@@ -1292,7 +1241,7 @@ namespace Hmcr.Data.Database.Entities
 
                 entity.Property(e => e.ConcurrencyControlNumber)
                     .HasColumnName("CONCURRENCY_CONTROL_NUMBER")
-                    .HasColumnType("numeric(9, 0)")
+                    .HasDefaultValueSql("((1))")
                     .HasComment("Record under edit indicator used for optomisitc record contention management.  If number differs from start of edit, then user will be prompted to that record has been updated by someone else.");
 
                 entity.Property(e => e.DbAuditCreateTimestamp)
@@ -1345,12 +1294,12 @@ namespace Hmcr.Data.Database.Entities
             modelBuilder.Entity<HmrRoleHist>(entity =>
             {
                 entity.HasKey(e => e.RoleHistId)
-                    .HasName("HMR_RLH_PK");
+                    .HasName("HMR_RL_H_PK");
 
                 entity.ToTable("HMR_ROLE_HIST");
 
                 entity.HasIndex(e => new { e.RoleHistId, e.EndDateHist })
-                    .HasName("HMR_RLH_UK")
+                    .HasName("HMR_RL_H_UK")
                     .IsUnique();
 
                 entity.Property(e => e.RoleHistId)
@@ -1367,11 +1316,7 @@ namespace Hmcr.Data.Database.Entities
                     .HasMaxLength(12)
                     .IsUnicode(false);
 
-                entity.Property(e => e.AppCreateUserGuid)
-                    .IsRequired()
-                    .HasColumnName("APP_CREATE_USER_GUID")
-                    .HasMaxLength(32)
-                    .IsUnicode(false);
+                entity.Property(e => e.AppCreateUserGuid).HasColumnName("APP_CREATE_USER_GUID");
 
                 entity.Property(e => e.AppCreateUserid)
                     .IsRequired()
@@ -1389,10 +1334,7 @@ namespace Hmcr.Data.Database.Entities
                     .HasMaxLength(12)
                     .IsUnicode(false);
 
-                entity.Property(e => e.AppLastUpdateUserGuid)
-                    .HasColumnName("APP_LAST_UPDATE_USER_GUID")
-                    .HasMaxLength(32)
-                    .IsUnicode(false);
+                entity.Property(e => e.AppLastUpdateUserGuid).HasColumnName("APP_LAST_UPDATE_USER_GUID");
 
                 entity.Property(e => e.AppLastUpdateUserid)
                     .IsRequired()
@@ -1400,9 +1342,7 @@ namespace Hmcr.Data.Database.Entities
                     .HasMaxLength(30)
                     .IsUnicode(false);
 
-                entity.Property(e => e.ConcurrencyControlNumber)
-                    .HasColumnName("CONCURRENCY_CONTROL_NUMBER")
-                    .HasColumnType("numeric(18, 0)");
+                entity.Property(e => e.ConcurrencyControlNumber).HasColumnName("CONCURRENCY_CONTROL_NUMBER");
 
                 entity.Property(e => e.DbAuditCreateTimestamp)
                     .HasColumnName("DB_AUDIT_CREATE_TIMESTAMP")
@@ -1491,10 +1431,7 @@ namespace Hmcr.Data.Database.Entities
                     .HasComment("Active Directory which retains source of truth for user idenifiers.");
 
                 entity.Property(e => e.AppCreateUserGuid)
-                    .IsRequired()
                     .HasColumnName("APP_CREATE_USER_GUID")
-                    .HasMaxLength(32)
-                    .IsUnicode(false)
                     .HasComment("Unique idenifier of user who created record");
 
                 entity.Property(e => e.AppCreateUserid)
@@ -1518,8 +1455,6 @@ namespace Hmcr.Data.Database.Entities
 
                 entity.Property(e => e.AppLastUpdateUserGuid)
                     .HasColumnName("APP_LAST_UPDATE_USER_GUID")
-                    .HasMaxLength(32)
-                    .IsUnicode(false)
                     .HasComment("Unique idenifier of user who last updated record");
 
                 entity.Property(e => e.AppLastUpdateUserid)
@@ -1531,7 +1466,7 @@ namespace Hmcr.Data.Database.Entities
 
                 entity.Property(e => e.ConcurrencyControlNumber)
                     .HasColumnName("CONCURRENCY_CONTROL_NUMBER")
-                    .HasColumnType("numeric(9, 0)")
+                    .HasDefaultValueSql("((1))")
                     .HasComment("Record under edit indicator used for optomisitc record contention management.  If number differs from start of edit, then user will be prompted to that record has been updated by someone else.");
 
                 entity.Property(e => e.DbAuditCreateTimestamp)
@@ -1593,12 +1528,12 @@ namespace Hmcr.Data.Database.Entities
             modelBuilder.Entity<HmrRolePermissionHist>(entity =>
             {
                 entity.HasKey(e => e.RolePermissionHistId)
-                    .HasName("HMR_RL_PEH_PK");
+                    .HasName("HMR_RL_PE_H_PK");
 
                 entity.ToTable("HMR_ROLE_PERMISSION_HIST");
 
                 entity.HasIndex(e => new { e.RolePermissionHistId, e.EndDateHist })
-                    .HasName("HMR_RL_PEH_UK")
+                    .HasName("HMR_RL_PE_H_UK")
                     .IsUnique();
 
                 entity.Property(e => e.RolePermissionHistId)
@@ -1615,11 +1550,7 @@ namespace Hmcr.Data.Database.Entities
                     .HasMaxLength(12)
                     .IsUnicode(false);
 
-                entity.Property(e => e.AppCreateUserGuid)
-                    .IsRequired()
-                    .HasColumnName("APP_CREATE_USER_GUID")
-                    .HasMaxLength(32)
-                    .IsUnicode(false);
+                entity.Property(e => e.AppCreateUserGuid).HasColumnName("APP_CREATE_USER_GUID");
 
                 entity.Property(e => e.AppCreateUserid)
                     .IsRequired()
@@ -1637,10 +1568,7 @@ namespace Hmcr.Data.Database.Entities
                     .HasMaxLength(12)
                     .IsUnicode(false);
 
-                entity.Property(e => e.AppLastUpdateUserGuid)
-                    .HasColumnName("APP_LAST_UPDATE_USER_GUID")
-                    .HasMaxLength(32)
-                    .IsUnicode(false);
+                entity.Property(e => e.AppLastUpdateUserGuid).HasColumnName("APP_LAST_UPDATE_USER_GUID");
 
                 entity.Property(e => e.AppLastUpdateUserid)
                     .IsRequired()
@@ -1648,9 +1576,7 @@ namespace Hmcr.Data.Database.Entities
                     .HasMaxLength(30)
                     .IsUnicode(false);
 
-                entity.Property(e => e.ConcurrencyControlNumber)
-                    .HasColumnName("CONCURRENCY_CONTROL_NUMBER")
-                    .HasColumnType("numeric(18, 0)");
+                entity.Property(e => e.ConcurrencyControlNumber).HasColumnName("CONCURRENCY_CONTROL_NUMBER");
 
                 entity.Property(e => e.DbAuditCreateTimestamp)
                     .HasColumnName("DB_AUDIT_CREATE_TIMESTAMP")
@@ -1718,7 +1644,7 @@ namespace Hmcr.Data.Database.Entities
 
                 entity.Property(e => e.ConcurrencyControlNumber)
                     .HasColumnName("CONCURRENCY_CONTROL_NUMBER")
-                    .HasColumnType("numeric(9, 0)")
+                    .HasDefaultValueSql("((1))")
                     .HasComment("Record under edit indicator used for optomisitc record contention management.  If number differs from start of edit, then user will be prompted to that record has been updated by someone else.");
 
                 entity.Property(e => e.DbAuditCreateTimestamp)
@@ -1776,21 +1702,19 @@ namespace Hmcr.Data.Database.Entities
             modelBuilder.Entity<HmrServiceAreaHist>(entity =>
             {
                 entity.HasKey(e => e.ServiceAreaHistId)
-                    .HasName("HMR_SRV_AH_PK");
+                    .HasName("HMR_SRV_A_H_PK");
 
                 entity.ToTable("HMR_SERVICE_AREA_HIST");
 
                 entity.HasIndex(e => new { e.ServiceAreaHistId, e.EndDateHist })
-                    .HasName("HMR_SRV_AH_UK")
+                    .HasName("HMR_SRV_A_H_UK")
                     .IsUnique();
 
                 entity.Property(e => e.ServiceAreaHistId)
                     .HasColumnName("SERVICE_AREA_HIST_ID")
                     .HasDefaultValueSql("(NEXT VALUE FOR [HMR_SERVICE_AREA_H_ID_SEQ])");
 
-                entity.Property(e => e.ConcurrencyControlNumber)
-                    .HasColumnName("CONCURRENCY_CONTROL_NUMBER")
-                    .HasColumnType("numeric(18, 0)");
+                entity.Property(e => e.ConcurrencyControlNumber).HasColumnName("CONCURRENCY_CONTROL_NUMBER");
 
                 entity.Property(e => e.DbAuditCreateTimestamp)
                     .HasColumnName("DB_AUDIT_CREATE_TIMESTAMP")
@@ -1870,10 +1794,7 @@ namespace Hmcr.Data.Database.Entities
                     .HasComment("Active Directory which retains source of truth for user idenifiers.");
 
                 entity.Property(e => e.AppCreateUserGuid)
-                    .IsRequired()
                     .HasColumnName("APP_CREATE_USER_GUID")
-                    .HasMaxLength(32)
-                    .IsUnicode(false)
                     .HasComment("Unique idenifier of user who created record");
 
                 entity.Property(e => e.AppCreateUserid)
@@ -1897,8 +1818,6 @@ namespace Hmcr.Data.Database.Entities
 
                 entity.Property(e => e.AppLastUpdateUserGuid)
                     .HasColumnName("APP_LAST_UPDATE_USER_GUID")
-                    .HasMaxLength(32)
-                    .IsUnicode(false)
                     .HasComment("Unique idenifier of user who last updated record");
 
                 entity.Property(e => e.AppLastUpdateUserid)
@@ -1910,7 +1829,7 @@ namespace Hmcr.Data.Database.Entities
 
                 entity.Property(e => e.ConcurrencyControlNumber)
                     .HasColumnName("CONCURRENCY_CONTROL_NUMBER")
-                    .HasColumnType("numeric(9, 0)")
+                    .HasDefaultValueSql("((1))")
                     .HasComment("Record under edit indicator used for optomisitc record contention management.  If number differs from start of edit, then user will be prompted to that record has been updated by someone else.");
 
                 entity.Property(e => e.DbAuditCreateTimestamp)
@@ -1972,12 +1891,12 @@ namespace Hmcr.Data.Database.Entities
             modelBuilder.Entity<HmrServiceAreaUserHist>(entity =>
             {
                 entity.HasKey(e => e.ServiceAreaUserHistId)
-                    .HasName("HMR_SRV_AU_H_PK");
+                    .HasName("HMR_SRV_A_USR_H_PK");
 
                 entity.ToTable("HMR_SERVICE_AREA_USER_HIST");
 
                 entity.HasIndex(e => new { e.ServiceAreaUserHistId, e.EndDateHist })
-                    .HasName("HMR_SRV_AU_H_UK")
+                    .HasName("HMR_SRV_A_USR_H_UK")
                     .IsUnique();
 
                 entity.Property(e => e.ServiceAreaUserHistId)
@@ -1994,11 +1913,7 @@ namespace Hmcr.Data.Database.Entities
                     .HasMaxLength(12)
                     .IsUnicode(false);
 
-                entity.Property(e => e.AppCreateUserGuid)
-                    .IsRequired()
-                    .HasColumnName("APP_CREATE_USER_GUID")
-                    .HasMaxLength(32)
-                    .IsUnicode(false);
+                entity.Property(e => e.AppCreateUserGuid).HasColumnName("APP_CREATE_USER_GUID");
 
                 entity.Property(e => e.AppCreateUserid)
                     .IsRequired()
@@ -2016,10 +1931,7 @@ namespace Hmcr.Data.Database.Entities
                     .HasMaxLength(12)
                     .IsUnicode(false);
 
-                entity.Property(e => e.AppLastUpdateUserGuid)
-                    .HasColumnName("APP_LAST_UPDATE_USER_GUID")
-                    .HasMaxLength(32)
-                    .IsUnicode(false);
+                entity.Property(e => e.AppLastUpdateUserGuid).HasColumnName("APP_LAST_UPDATE_USER_GUID");
 
                 entity.Property(e => e.AppLastUpdateUserid)
                     .IsRequired()
@@ -2027,9 +1939,7 @@ namespace Hmcr.Data.Database.Entities
                     .HasMaxLength(30)
                     .IsUnicode(false);
 
-                entity.Property(e => e.ConcurrencyControlNumber)
-                    .HasColumnName("CONCURRENCY_CONTROL_NUMBER")
-                    .HasColumnType("numeric(18, 0)");
+                entity.Property(e => e.ConcurrencyControlNumber).HasColumnName("CONCURRENCY_CONTROL_NUMBER");
 
                 entity.Property(e => e.DbAuditCreateTimestamp)
                     .HasColumnName("DB_AUDIT_CREATE_TIMESTAMP")
@@ -2108,10 +2018,7 @@ namespace Hmcr.Data.Database.Entities
                     .HasComment("Active Directory which retains source of truth for user idenifiers.");
 
                 entity.Property(e => e.AppCreateUserGuid)
-                    .IsRequired()
                     .HasColumnName("APP_CREATE_USER_GUID")
-                    .HasMaxLength(32)
-                    .IsUnicode(false)
                     .HasComment("Unique idenifier of user who created record");
 
                 entity.Property(e => e.AppCreateUserid)
@@ -2135,8 +2042,6 @@ namespace Hmcr.Data.Database.Entities
 
                 entity.Property(e => e.AppLastUpdateUserGuid)
                     .HasColumnName("APP_LAST_UPDATE_USER_GUID")
-                    .HasMaxLength(32)
-                    .IsUnicode(false)
                     .HasComment("Unique idenifier of user who last updated record");
 
                 entity.Property(e => e.AppLastUpdateUserid)
@@ -2148,7 +2053,7 @@ namespace Hmcr.Data.Database.Entities
 
                 entity.Property(e => e.ConcurrencyControlNumber)
                     .HasColumnName("CONCURRENCY_CONTROL_NUMBER")
-                    .HasColumnType("numeric(9, 0)")
+                    .HasDefaultValueSql("((1))")
                     .HasComment("Record under edit indicator used for optomisitc record contention management.  If number differs from start of edit, then user will be prompted to that record has been updated by someone else.");
 
                 entity.Property(e => e.DbAuditCreateTimestamp)
@@ -2236,127 +2141,114 @@ namespace Hmcr.Data.Database.Entities
                     .HasConstraintName("HRM_SUBM_OBJ_SUBM_STAT_CODE_FK");
             });
 
-            modelBuilder.Entity<HmrSubmissionObjectHist>(entity =>
+            modelBuilder.Entity<HmrSubmissionStatu>(entity =>
             {
-                entity.HasKey(e => e.SubmissionObjectHistId)
-                    .HasName("HMR_SUBM_H_PK");
+                entity.HasKey(e => e.SubmissionStatusId)
+                    .HasName("HMR_SUBMISSION_STATUS_CODE_PK");
 
-                entity.ToTable("HMR_SUBMISSION_OBJECT_HIST");
+                entity.ToTable("HMR_SUBMISSION_STATUS");
 
-                entity.HasIndex(e => new { e.SubmissionObjectHistId, e.EndDateHist })
-                    .HasName("HMR_SUBM_H_UK")
-                    .IsUnique();
+                entity.HasComment("Indicates the statues a SUBMISSION_OBJECT can be assigned during ingestion (ie:  Received, Invalid, Valid)");
 
-                entity.Property(e => e.SubmissionObjectHistId)
-                    .HasColumnName("SUBMISSION_OBJECT_HIST_ID")
-                    .HasDefaultValueSql("(NEXT VALUE FOR [HMR_SUBMISSION_OBJECT_H_ID_SEQ])");
+                entity.Property(e => e.SubmissionStatusId)
+                    .HasColumnName("SUBMISSION_STATUS_ID")
+                    .HasColumnType("numeric(9, 0)")
+                    .HasDefaultValueSql("(NEXT VALUE FOR [HMR_SUBM_STAT_ID_SEQ])")
+                    .HasComment("Unique identifier for a record.");
 
                 entity.Property(e => e.AppCreateTimestamp)
                     .HasColumnName("APP_CREATE_TIMESTAMP")
-                    .HasColumnType("datetime");
+                    .HasColumnType("datetime")
+                    .HasComment("Date and time of record creation");
 
                 entity.Property(e => e.AppCreateUserDirectory)
                     .IsRequired()
                     .HasColumnName("APP_CREATE_USER_DIRECTORY")
                     .HasMaxLength(12)
-                    .IsUnicode(false);
+                    .IsUnicode(false)
+                    .HasComment("Active Directory which retains source of truth for user idenifiers.");
 
                 entity.Property(e => e.AppCreateUserGuid)
-                    .IsRequired()
                     .HasColumnName("APP_CREATE_USER_GUID")
-                    .HasMaxLength(32)
-                    .IsUnicode(false);
+                    .HasComment("Unique idenifier of user who created record");
 
                 entity.Property(e => e.AppCreateUserid)
                     .IsRequired()
                     .HasColumnName("APP_CREATE_USERID")
                     .HasMaxLength(30)
-                    .IsUnicode(false);
+                    .IsUnicode(false)
+                    .HasComment("Unique idenifier of user who created record");
 
                 entity.Property(e => e.AppLastUpdateTimestamp)
                     .HasColumnName("APP_LAST_UPDATE_TIMESTAMP")
-                    .HasColumnType("datetime");
+                    .HasColumnType("datetime")
+                    .HasComment("Date and time of last record update");
 
                 entity.Property(e => e.AppLastUpdateUserDirectory)
                     .IsRequired()
                     .HasColumnName("APP_LAST_UPDATE_USER_DIRECTORY")
                     .HasMaxLength(12)
-                    .IsUnicode(false);
+                    .IsUnicode(false)
+                    .HasComment("Active Directory which retains source of truth for user idenifiers.");
 
                 entity.Property(e => e.AppLastUpdateUserGuid)
                     .HasColumnName("APP_LAST_UPDATE_USER_GUID")
-                    .HasMaxLength(32)
-                    .IsUnicode(false);
+                    .HasComment("Unique idenifier of user who last updated record");
 
                 entity.Property(e => e.AppLastUpdateUserid)
                     .IsRequired()
                     .HasColumnName("APP_LAST_UPDATE_USERID")
                     .HasMaxLength(30)
-                    .IsUnicode(false);
+                    .IsUnicode(false)
+                    .HasComment("Unique idenifier of user who last updated record");
 
                 entity.Property(e => e.ConcurrencyControlNumber)
                     .HasColumnName("CONCURRENCY_CONTROL_NUMBER")
-                    .HasColumnType("numeric(18, 0)");
+                    .HasDefaultValueSql("((1))")
+                    .HasComment("Record under edit indicator used for optomisitc record contention management.  If number differs from start of edit, then user will be prompted to that record has been updated by someone else.");
 
                 entity.Property(e => e.DbAuditCreateTimestamp)
                     .HasColumnName("DB_AUDIT_CREATE_TIMESTAMP")
-                    .HasColumnType("datetime");
+                    .HasColumnType("datetime")
+                    .HasDefaultValueSql("(getutcdate())")
+                    .HasComment("Date and time record created in the database");
 
                 entity.Property(e => e.DbAuditCreateUserid)
                     .IsRequired()
                     .HasColumnName("DB_AUDIT_CREATE_USERID")
                     .HasMaxLength(30)
-                    .IsUnicode(false);
+                    .IsUnicode(false)
+                    .HasDefaultValueSql("(user_name())")
+                    .HasComment("Named database user who created record");
 
                 entity.Property(e => e.DbAuditLastUpdateTimestamp)
                     .HasColumnName("DB_AUDIT_LAST_UPDATE_TIMESTAMP")
-                    .HasColumnType("datetime");
+                    .HasColumnType("datetime")
+                    .HasDefaultValueSql("(getutcdate())")
+                    .HasComment("Date and time record was last updated in the database.");
 
                 entity.Property(e => e.DbAuditLastUpdateUserid)
                     .IsRequired()
                     .HasColumnName("DB_AUDIT_LAST_UPDATE_USERID")
                     .HasMaxLength(30)
-                    .IsUnicode(false);
+                    .IsUnicode(false)
+                    .HasDefaultValueSql("(user_name())")
+                    .HasComment("Named database user who last updated record");
 
-                entity.Property(e => e.DigitalRepresentation)
+                entity.Property(e => e.Description)
                     .IsRequired()
-                    .HasColumnName("DIGITAL_REPRESENTATION")
-                    .HasColumnType("image");
+                    .HasColumnName("DESCRIPTION")
+                    .HasMaxLength(150)
+                    .IsUnicode(false)
+                    .HasDefaultValueSql("('0')")
+                    .HasComment("Provides business description of the submission processing status");
 
-                entity.Property(e => e.EffectiveDateHist)
-                    .HasColumnName("EFFECTIVE_DATE_HIST")
-                    .HasColumnType("datetime")
-                    .HasDefaultValueSql("(getutcdate())");
-
-                entity.Property(e => e.EndDateHist)
-                    .HasColumnName("END_DATE_HIST")
-                    .HasColumnType("datetime");
-
-                entity.Property(e => e.FileName)
+                entity.Property(e => e.SubmissionStatusCode)
                     .IsRequired()
-                    .HasColumnName("FILE_NAME")
-                    .HasMaxLength(100)
-                    .IsUnicode(false);
-
-                entity.Property(e => e.MimeTypeId)
-                    .HasColumnName("MIME_TYPE_ID")
-                    .HasColumnType("numeric(18, 0)");
-
-                entity.Property(e => e.PartyId)
-                    .HasColumnName("PARTY_ID")
-                    .HasColumnType("numeric(18, 0)");
-
-                entity.Property(e => e.ServiceAreaNumber)
-                    .HasColumnName("SERVICE_AREA_NUMBER")
-                    .HasColumnType("numeric(18, 0)");
-
-                entity.Property(e => e.SubmissionObjectId)
-                    .HasColumnName("SUBMISSION_OBJECT_ID")
-                    .HasColumnType("numeric(18, 0)");
-
-                entity.Property(e => e.SubmissionStatusId)
-                    .HasColumnName("SUBMISSION_STATUS_ID")
-                    .HasColumnType("numeric(18, 0)");
+                    .HasColumnName("SUBMISSION_STATUS_CODE")
+                    .HasMaxLength(20)
+                    .IsUnicode(false)
+                    .HasComment("Describes the file processing status.");
             });
 
             modelBuilder.Entity<HmrSystemUser>(entity =>
@@ -2390,10 +2282,7 @@ namespace Hmcr.Data.Database.Entities
                     .HasComment("Active Directory which retains source of truth for user idenifiers.");
 
                 entity.Property(e => e.AppCreateUserGuid)
-                    .IsRequired()
                     .HasColumnName("APP_CREATE_USER_GUID")
-                    .HasMaxLength(32)
-                    .IsUnicode(false)
                     .HasComment("Unique idenifier of user who created record");
 
                 entity.Property(e => e.AppCreateUserid)
@@ -2417,8 +2306,6 @@ namespace Hmcr.Data.Database.Entities
 
                 entity.Property(e => e.AppLastUpdateUserGuid)
                     .HasColumnName("APP_LAST_UPDATE_USER_GUID")
-                    .HasMaxLength(32)
-                    .IsUnicode(false)
                     .HasComment("Unique idenifier of user who last updated record");
 
                 entity.Property(e => e.AppLastUpdateUserid)
@@ -2430,9 +2317,7 @@ namespace Hmcr.Data.Database.Entities
 
                 entity.Property(e => e.BusinessGuid)
                     .HasColumnName("BUSINESS_GUID")
-                    .HasMaxLength(32)
-                    .IsUnicode(false)
-                    .HasComment("A system generated unique identifier.  Reflects the active directory unique idenifier for the business associated with the user.r.");
+                    .HasComment("A system generated unique identifier.  Reflects the active directory unique idenifier for the business associated with the user.");
 
                 entity.Property(e => e.BusinessLegalName)
                     .HasColumnName("BUSINESS_LEGAL_NAME")
@@ -2443,7 +2328,7 @@ namespace Hmcr.Data.Database.Entities
 
                 entity.Property(e => e.ConcurrencyControlNumber)
                     .HasColumnName("CONCURRENCY_CONTROL_NUMBER")
-                    .HasColumnType("numeric(9, 0)")
+                    .HasDefaultValueSql("((1))")
                     .HasComment("Record under edit indicator used for optomisitc record contention management.  If number differs from start of edit, then user will be prompted to that record has been updated by someone else.");
 
                 entity.Property(e => e.DbAuditCreateTimestamp)
@@ -2540,12 +2425,12 @@ namespace Hmcr.Data.Database.Entities
             modelBuilder.Entity<HmrSystemUserHist>(entity =>
             {
                 entity.HasKey(e => e.SystemUserHistId)
-                    .HasName("HMR_SYS_UH_PK");
+                    .HasName("HMR_SYS_U_H_PK");
 
                 entity.ToTable("HMR_SYSTEM_USER_HIST");
 
                 entity.HasIndex(e => new { e.SystemUserHistId, e.EndDateHist })
-                    .HasName("HMR_SYS_UH_UK")
+                    .HasName("HMR_SYS_U_H_UK")
                     .IsUnique();
 
                 entity.Property(e => e.SystemUserHistId)
@@ -2562,11 +2447,7 @@ namespace Hmcr.Data.Database.Entities
                     .HasMaxLength(12)
                     .IsUnicode(false);
 
-                entity.Property(e => e.AppCreateUserGuid)
-                    .IsRequired()
-                    .HasColumnName("APP_CREATE_USER_GUID")
-                    .HasMaxLength(32)
-                    .IsUnicode(false);
+                entity.Property(e => e.AppCreateUserGuid).HasColumnName("APP_CREATE_USER_GUID");
 
                 entity.Property(e => e.AppCreateUserid)
                     .IsRequired()
@@ -2584,10 +2465,7 @@ namespace Hmcr.Data.Database.Entities
                     .HasMaxLength(12)
                     .IsUnicode(false);
 
-                entity.Property(e => e.AppLastUpdateUserGuid)
-                    .HasColumnName("APP_LAST_UPDATE_USER_GUID")
-                    .HasMaxLength(32)
-                    .IsUnicode(false);
+                entity.Property(e => e.AppLastUpdateUserGuid).HasColumnName("APP_LAST_UPDATE_USER_GUID");
 
                 entity.Property(e => e.AppLastUpdateUserid)
                     .IsRequired()
@@ -2595,19 +2473,14 @@ namespace Hmcr.Data.Database.Entities
                     .HasMaxLength(30)
                     .IsUnicode(false);
 
-                entity.Property(e => e.BusinessGuid)
-                    .HasColumnName("BUSINESS_GUID")
-                    .HasMaxLength(32)
-                    .IsUnicode(false);
+                entity.Property(e => e.BusinessGuid).HasColumnName("BUSINESS_GUID");
 
                 entity.Property(e => e.BusinessLegalName)
                     .HasColumnName("BUSINESS_LEGAL_NAME")
                     .HasMaxLength(200)
                     .IsUnicode(false);
 
-                entity.Property(e => e.ConcurrencyControlNumber)
-                    .HasColumnName("CONCURRENCY_CONTROL_NUMBER")
-                    .HasColumnType("numeric(18, 0)");
+                entity.Property(e => e.ConcurrencyControlNumber).HasColumnName("CONCURRENCY_CONTROL_NUMBER");
 
                 entity.Property(e => e.DbAuditCreateTimestamp)
                     .HasColumnName("DB_AUDIT_CREATE_TIMESTAMP")
@@ -2727,10 +2600,7 @@ namespace Hmcr.Data.Database.Entities
                     .HasComment("Active Directory which retains source of truth for user idenifiers.");
 
                 entity.Property(e => e.AppCreateUserGuid)
-                    .IsRequired()
                     .HasColumnName("APP_CREATE_USER_GUID")
-                    .HasMaxLength(32)
-                    .IsUnicode(false)
                     .HasComment("Unique idenifier of user who created record");
 
                 entity.Property(e => e.AppCreateUserid)
@@ -2754,8 +2624,6 @@ namespace Hmcr.Data.Database.Entities
 
                 entity.Property(e => e.AppLastUpdateUserGuid)
                     .HasColumnName("APP_LAST_UPDATE_USER_GUID")
-                    .HasMaxLength(32)
-                    .IsUnicode(false)
                     .HasComment("Unique idenifier of user who last updated record");
 
                 entity.Property(e => e.AppLastUpdateUserid)
@@ -2767,7 +2635,7 @@ namespace Hmcr.Data.Database.Entities
 
                 entity.Property(e => e.ConcurrencyControlNumber)
                     .HasColumnName("CONCURRENCY_CONTROL_NUMBER")
-                    .HasColumnType("numeric(9, 0)")
+                    .HasDefaultValueSql("((1))")
                     .HasComment("Record under edit indicator used for optomisitc record contention management.  If number differs from start of edit, then user will be prompted to that record has been updated by someone else.");
 
                 entity.Property(e => e.DbAuditCreateTimestamp)
@@ -2825,12 +2693,12 @@ namespace Hmcr.Data.Database.Entities
             modelBuilder.Entity<HmrUserRoleHist>(entity =>
             {
                 entity.HasKey(e => e.UserRoleHistId)
-                    .HasName("HMR_USR_RH_PK");
+                    .HasName("HMR_USR_R_H_PK");
 
                 entity.ToTable("HMR_USER_ROLE_HIST");
 
                 entity.HasIndex(e => new { e.UserRoleHistId, e.EndDateHist })
-                    .HasName("HMR_USR_RH_UK")
+                    .HasName("HMR_USR_R_H_UK")
                     .IsUnique();
 
                 entity.Property(e => e.UserRoleHistId)
@@ -2847,11 +2715,7 @@ namespace Hmcr.Data.Database.Entities
                     .HasMaxLength(12)
                     .IsUnicode(false);
 
-                entity.Property(e => e.AppCreateUserGuid)
-                    .IsRequired()
-                    .HasColumnName("APP_CREATE_USER_GUID")
-                    .HasMaxLength(32)
-                    .IsUnicode(false);
+                entity.Property(e => e.AppCreateUserGuid).HasColumnName("APP_CREATE_USER_GUID");
 
                 entity.Property(e => e.AppCreateUserid)
                     .IsRequired()
@@ -2869,10 +2733,7 @@ namespace Hmcr.Data.Database.Entities
                     .HasMaxLength(12)
                     .IsUnicode(false);
 
-                entity.Property(e => e.AppLastUpdateUserGuid)
-                    .HasColumnName("APP_LAST_UPDATE_USER_GUID")
-                    .HasMaxLength(32)
-                    .IsUnicode(false);
+                entity.Property(e => e.AppLastUpdateUserGuid).HasColumnName("APP_LAST_UPDATE_USER_GUID");
 
                 entity.Property(e => e.AppLastUpdateUserid)
                     .IsRequired()
@@ -2880,9 +2741,7 @@ namespace Hmcr.Data.Database.Entities
                     .HasMaxLength(30)
                     .IsUnicode(false);
 
-                entity.Property(e => e.ConcurrencyControlNumber)
-                    .HasColumnName("CONCURRENCY_CONTROL_NUMBER")
-                    .HasColumnType("numeric(18, 0)");
+                entity.Property(e => e.ConcurrencyControlNumber).HasColumnName("CONCURRENCY_CONTROL_NUMBER");
 
                 entity.Property(e => e.DbAuditCreateTimestamp)
                     .HasColumnName("DB_AUDIT_CREATE_TIMESTAMP")
@@ -2930,130 +2789,13 @@ namespace Hmcr.Data.Database.Entities
                     .HasColumnType("numeric(18, 0)");
             });
 
-            modelBuilder.Entity<HrmSubmissionStatu>(entity =>
-            {
-                entity.HasKey(e => e.SubmissionStatusId)
-                    .HasName("HMR_SUBMISSION_STATUS_CODE_PK");
+            modelBuilder.HasSequence("HMR_CNT_SRV_ARA_ID_SEQ")
+                .HasMin(1)
+                .HasMax(999999999);
 
-                entity.ToTable("HRM_SUBMISSION_STATUS");
-
-                entity.HasComment("Indicates the statues a SUBMISSION_OBJECT can be assigned during ingestion (ie:  Received, Invalid, Valid)");
-
-                entity.Property(e => e.SubmissionStatusId)
-                    .HasColumnName("SUBMISSION_STATUS_ID")
-                    .HasColumnType("numeric(9, 0)")
-                    .HasDefaultValueSql("(NEXT VALUE FOR [HMR_SUBM_STAT_ID_SEQ])")
-                    .HasComment("Unique identifier for a record.");
-
-                entity.Property(e => e.AppCreateTimestamp)
-                    .HasColumnName("APP_CREATE_TIMESTAMP")
-                    .HasColumnType("datetime")
-                    .HasComment("Date and time of record creation");
-
-                entity.Property(e => e.AppCreateUserDirectory)
-                    .IsRequired()
-                    .HasColumnName("APP_CREATE_USER_DIRECTORY")
-                    .HasMaxLength(12)
-                    .IsUnicode(false)
-                    .HasComment("Active Directory which retains source of truth for user idenifiers.");
-
-                entity.Property(e => e.AppCreateUserGuid)
-                    .IsRequired()
-                    .HasColumnName("APP_CREATE_USER_GUID")
-                    .HasMaxLength(32)
-                    .IsUnicode(false)
-                    .HasComment("Unique idenifier of user who created record");
-
-                entity.Property(e => e.AppCreateUserid)
-                    .IsRequired()
-                    .HasColumnName("APP_CREATE_USERID")
-                    .HasMaxLength(30)
-                    .IsUnicode(false)
-                    .HasComment("Unique idenifier of user who created record");
-
-                entity.Property(e => e.AppLastUpdateTimestamp)
-                    .HasColumnName("APP_LAST_UPDATE_TIMESTAMP")
-                    .HasColumnType("datetime")
-                    .HasComment("Date and time of last record update");
-
-                entity.Property(e => e.AppLastUpdateUserDirectory)
-                    .IsRequired()
-                    .HasColumnName("APP_LAST_UPDATE_USER_DIRECTORY")
-                    .HasMaxLength(12)
-                    .IsUnicode(false)
-                    .HasComment("Active Directory which retains source of truth for user idenifiers.");
-
-                entity.Property(e => e.AppLastUpdateUserGuid)
-                    .HasColumnName("APP_LAST_UPDATE_USER_GUID")
-                    .HasMaxLength(32)
-                    .IsUnicode(false)
-                    .HasComment("Unique idenifier of user who last updated record");
-
-                entity.Property(e => e.AppLastUpdateUserid)
-                    .IsRequired()
-                    .HasColumnName("APP_LAST_UPDATE_USERID")
-                    .HasMaxLength(30)
-                    .IsUnicode(false)
-                    .HasComment("Unique idenifier of user who last updated record");
-
-                entity.Property(e => e.ConcurrencyControlNumber)
-                    .HasColumnName("CONCURRENCY_CONTROL_NUMBER")
-                    .HasColumnType("numeric(9, 0)")
-                    .HasComment("Record under edit indicator used for optomisitc record contention management.  If number differs from start of edit, then user will be prompted to that record has been updated by someone else.");
-
-                entity.Property(e => e.DbAuditCreateTimestamp)
-                    .HasColumnName("DB_AUDIT_CREATE_TIMESTAMP")
-                    .HasColumnType("datetime")
-                    .HasDefaultValueSql("(getutcdate())")
-                    .HasComment("Date and time record created in the database");
-
-                entity.Property(e => e.DbAuditCreateUserid)
-                    .IsRequired()
-                    .HasColumnName("DB_AUDIT_CREATE_USERID")
-                    .HasMaxLength(30)
-                    .IsUnicode(false)
-                    .HasDefaultValueSql("(user_name())")
-                    .HasComment("Named database user who created record");
-
-                entity.Property(e => e.DbAuditLastUpdateTimestamp)
-                    .HasColumnName("DB_AUDIT_LAST_UPDATE_TIMESTAMP")
-                    .HasColumnType("datetime")
-                    .HasDefaultValueSql("(getutcdate())")
-                    .HasComment("Date and time record was last updated in the database.");
-
-                entity.Property(e => e.DbAuditLastUpdateUserid)
-                    .IsRequired()
-                    .HasColumnName("DB_AUDIT_LAST_UPDATE_USERID")
-                    .HasMaxLength(30)
-                    .IsUnicode(false)
-                    .HasDefaultValueSql("(user_name())")
-                    .HasComment("Named database user who last updated record");
-
-                entity.Property(e => e.Description)
-                    .IsRequired()
-                    .HasColumnName("DESCRIPTION")
-                    .HasMaxLength(150)
-                    .IsUnicode(false)
-                    .HasDefaultValueSql("('0')")
-                    .HasComment("Provides business description of the submission processing status");
-
-                entity.Property(e => e.SubmissionStatusCode)
-                    .IsRequired()
-                    .HasColumnName("SUBMISSION_STATUS_CODE")
-                    .HasMaxLength(20)
-                    .IsUnicode(false)
-                    .HasComment("Describes the file processing status.");
-            });
-
-            modelBuilder.HasSequence("CNRT_TRM_HIST_ID_SEQ");
-
-            modelBuilder.HasSequence("CONTRACT_TERM_ID_SEQ");
-
-            modelBuilder.HasSequence("HMR_CNRT_SRV_ARA_CONTRACT_TERM");
-
-            modelBuilder.HasSequence("HMR_CNT_SRV_ARA_ID_SEQ");
-
-            modelBuilder.HasSequence("HMR_CNT_TRM_ID_SEQ");
+            modelBuilder.HasSequence("HMR_CNT_TRM_ID_SEQ")
+                .HasMin(1)
+                .HasMax(999999999);
 
             modelBuilder.HasSequence("HMR_CONTRACT_SERVICE_AREA_H_ID_SEQ")
                 .HasMin(1)
@@ -3063,29 +2805,41 @@ namespace Hmcr.Data.Database.Entities
                 .HasMin(1)
                 .HasMax(2147483647);
 
-            modelBuilder.HasSequence("HMR_DIST_ID_SEQ");
+            modelBuilder.HasSequence("HMR_DIST_ID_SEQ")
+                .HasMin(1)
+                .HasMax(999999999);
 
-            modelBuilder.HasSequence("HMR_MIME_TYPE_ID_SEQ");
+            modelBuilder.HasSequence("HMR_MIME_TYPE_ID_SEQ")
+                .HasMin(1)
+                .HasMax(999999999);
 
             modelBuilder.HasSequence("HMR_PARTY_H_ID_SEQ")
                 .HasMin(1)
                 .HasMax(2147483647);
 
-            modelBuilder.HasSequence("HMR_PARTY_ID_SEQ").StartsAt(100);
-
-            modelBuilder.HasSequence("HMR_PERM_ID_SEQ");
+            modelBuilder.HasSequence("HMR_PERM_ID_SEQ")
+                .HasMin(1)
+                .HasMax(999999999);
 
             modelBuilder.HasSequence("HMR_PERMISSION_H_ID_SEQ")
                 .HasMin(1)
                 .HasMax(2147483647);
 
-            modelBuilder.HasSequence("HMR_PRTY_ID_SEQ");
+            modelBuilder.HasSequence("HMR_PRTY_ID_SEQ")
+                .HasMin(1)
+                .HasMax(999999999);
 
-            modelBuilder.HasSequence("HMR_REG_ID_SEQ");
+            modelBuilder.HasSequence("HMR_REG_ID_SEQ")
+                .HasMin(1)
+                .HasMax(999999999);
 
-            modelBuilder.HasSequence("HMR_RL_ID_SEQ");
+            modelBuilder.HasSequence("HMR_RL_ID_SEQ")
+                .HasMin(1)
+                .HasMax(999999999);
 
-            modelBuilder.HasSequence("HMR_RL_PERM_ID_SEQ");
+            modelBuilder.HasSequence("HMR_RL_PERM_ID_SEQ")
+                .HasMin(1)
+                .HasMax(999999999);
 
             modelBuilder.HasSequence("HMR_ROLE_H_ID_SEQ")
                 .HasMin(1)
@@ -3103,19 +2857,21 @@ namespace Hmcr.Data.Database.Entities
                 .HasMin(1)
                 .HasMax(2147483647);
 
-            modelBuilder.HasSequence("HMR_SRV_ARA_ID_SEQ");
-
-            modelBuilder.HasSequence("HMR_SRV_AREA_USR_ID_SEQ");
-
-            modelBuilder.HasSequence("HMR_SUBM_OBJ_ID_SEQ");
-
-            modelBuilder.HasSequence("HMR_SUBM_STAT_ID_SEQ");
-
-            modelBuilder.HasSequence("HMR_SUBMISSION_OBJECT_H_ID_SEQ")
+            modelBuilder.HasSequence("HMR_SRV_ARA_ID_SEQ")
                 .HasMin(1)
-                .HasMax(2147483647);
+                .HasMax(999999999);
 
-            modelBuilder.HasSequence("HMR_SYS_USR_HIST_ID_SEQ");
+            modelBuilder.HasSequence("HMR_SRV_AREA_USR_ID_SEQ")
+                .HasMin(1)
+                .HasMax(999999999);
+
+            modelBuilder.HasSequence("HMR_SUBM_OBJ_ID_SEQ")
+                .HasMin(1)
+                .HasMax(999999999);
+
+            modelBuilder.HasSequence("HMR_SUBM_STAT_ID_SEQ")
+                .HasMin(1)
+                .HasMax(999999999);
 
             modelBuilder.HasSequence("HMR_SYSTEM_USER_H_ID_SEQ")
                 .HasMin(1)
@@ -3125,9 +2881,13 @@ namespace Hmcr.Data.Database.Entities
                 .HasMin(1)
                 .HasMax(2147483647);
 
-            modelBuilder.HasSequence("HMR_USR_RL_ID_SEQ");
+            modelBuilder.HasSequence("HMR_USR_RL_ID_SEQ")
+                .HasMin(1)
+                .HasMax(999999999);
 
-            modelBuilder.HasSequence("SYS_USR_ID_SEQ");
+            modelBuilder.HasSequence("SYS_USR_ID_SEQ")
+                .HasMin(1)
+                .HasMax(999999999);
 
             OnModelCreatingPartial(modelBuilder);
         }

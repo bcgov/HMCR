@@ -17,17 +17,17 @@ namespace Hmcr.Data.Database.Entities
         public string FirstName { get; set; }
         public string LastName { get; set; }
         public string Email { get; set; }
-        public string BusinessGuid { get; set; }
+        public Guid? BusinessGuid { get; set; }
         public string BusinessLegalName { get; set; }
         public DateTime? EndDate { get; set; }
-        public decimal ConcurrencyControlNumber { get; set; }
+        public long ConcurrencyControlNumber { get; set; }
         public string AppCreateUserid { get; set; }
         public DateTime AppCreateTimestamp { get; set; }
-        public string AppCreateUserGuid { get; set; }
+        public Guid AppCreateUserGuid { get; set; }
         public string AppCreateUserDirectory { get; set; }
         public string AppLastUpdateUserid { get; set; }
         public DateTime AppLastUpdateTimestamp { get; set; }
-        public string AppLastUpdateUserGuid { get; set; }
+        public Guid? AppLastUpdateUserGuid { get; set; }
         public string AppLastUpdateUserDirectory { get; set; }
         public string DbAuditCreateUserid { get; set; }
         public DateTime DbAuditCreateTimestamp { get; set; }
