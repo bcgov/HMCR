@@ -15,7 +15,7 @@ namespace Hmcr.Data.Database.Entities
         public decimal PartyId { get; set; }
         public DateTime? StartDate { get; set; }
         public DateTime? EndDate { get; set; }
-        public decimal ConcurrencyControlNumber { get; set; }
+        public long ConcurrencyControlNumber { get; set; }
         public string AppCreateUserid { get; set; }
         public DateTime AppCreateTimestamp { get; set; }
         public Guid AppCreateUserGuid { get; set; }

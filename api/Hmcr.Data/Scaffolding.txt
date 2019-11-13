@@ -6,7 +6,7 @@ Remove Hangfire tables and sequences before scaffolding the db
 ********************************************
 Step 2: Generate / Update Model:
 ********************************************
-Scaffold-DbContext -Connection "Data Source=(localdb)\MSSQLLocalDB;Initial Catalog=aspnet-hmcr" -Provider Microsoft.EntityFrameworkCore.SqlServer -Context AppDbContext -OutputDir Database\Entities -Project "Hmcr.Data" -Force
+Scaffold-DbContext -Connection "Data Source=(localdb)\MSSQLLocalDB;Initial Catalog=HMR_DEV" -Provider Microsoft.EntityFrameworkCore.SqlServer -Context AppDbContext -OutputDir Database\Entities -Project "Hmcr.Data" -Force
 
 ********************************************
 Step 3: Update Context

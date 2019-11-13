@@ -13,7 +13,7 @@ namespace Hmcr.Data.Database.Entities
         public decimal RegionId { get; set; }
         public decimal RegionNumber { get; set; }
         public string RegionName { get; set; }
-        public decimal ConcurrencyControlNumber { get; set; }
+        public long ConcurrencyControlNumber { get; set; }
         public string DbAuditCreateUserid { get; set; }
         public DateTime DbAuditCreateTimestamp { get; set; }
         public string DbAuditLastUpdateUserid { get; set; }

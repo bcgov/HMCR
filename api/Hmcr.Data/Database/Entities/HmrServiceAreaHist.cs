@@ -12,7 +12,7 @@ namespace Hmcr.Data.Database.Entities
         public decimal ServiceAreaNumber { get; set; }
         public string ServiceAreaName { get; set; }
         public decimal DistrictNumber { get; set; }
-        public decimal ConcurrencyControlNumber { get; set; }
+        public long ConcurrencyControlNumber { get; set; }
         public string DbAuditCreateUserid { get; set; }
         public DateTime DbAuditCreateTimestamp { get; set; }
         public string DbAuditLastUpdateUserid { get; set; }
