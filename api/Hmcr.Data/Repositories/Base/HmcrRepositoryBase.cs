@@ -10,27 +10,25 @@ using System.Linq;
 
 namespace Hmcr.Data.Repositories.Base
 {
-    public interface IHmcrRepositoryBase<TDto, TEntity>
-        where TDto : class
+    public interface IHmcrRepositoryBase<TEntity>
         where TEntity : class
     {
-        void Add(TDto dto);
-        void Update(long id, TDto dto);
-        void Update(string id, TDto dto);
-        void Delete(TDto dto);
+        void Add<TDto>(TDto dto);
+        void Update<TDto>(long id, TDto dto);
+        void Update<TDto>(string id, TDto dto);
+        void Delete<TDto>(TDto dto);
         void Delete(Expression<Func<TEntity, bool>> where);
-        TDto GetById(long id);
-        TDto GetById(string id);
-        IEnumerable<TDto> GetAll();
-        IEnumerable<TDto> GetAll(Expression<Func<TEntity, bool>> where);
-        Task<IEnumerable<TDto>> GetAllAsync();
-        Task<IEnumerable<TDto>> GetAllAsync(Expression<Func<TEntity, bool>> where);
-        Task<TDto> GetFirstOrDefaultAsync(Expression<Func<TEntity, bool>> where);
+        TDto GetById<TDto>(long id);
+        TDto GetById<TDto>(string id);
+        IEnumerable<TDto> GetAll<TDto>();
+        IEnumerable<TDto> GetAll<TDto>(Expression<Func<TEntity, bool>> where);
+        Task<IEnumerable<TDto>> GetAllAsync<TDto>();
+        Task<IEnumerable<TDto>> GetAllAsync<TDto>(Expression<Func<TEntity, bool>> where);
+        Task<TDto> GetFirstOrDefaultAsync<TDto>(Expression<Func<TEntity, bool>> where);
         PagedDto<TOutput> Page<TInput, TOutput>(IQueryable<TInput> list, int pageSize, int pageNumber, string orderBy);
     }
 
-    public class HmcrRepositoryBase<TDto, TEntity> : IHmcrRepositoryBase<TDto, TEntity>
-        where TDto : class
+    public class HmcrRepositoryBase<TEntity> : IHmcrRepositoryBase<TEntity>
         where TEntity : class
     {
         #region Properties
@@ -51,13 +49,13 @@ namespace Hmcr.Data.Repositories.Base
         }
 
         #region Implementation
-        public virtual void Add(TDto dto)
+        public virtual void Add<TDto>(TDto dto)
         {
             var result = Mapper.Map<TEntity>(dto);
             DbSet.Add(result);
         }
 
-        public virtual void Update(long id, TDto dto)
+        public virtual void Update<TDto>(long id, TDto dto)
         {
             var oldEntity = DbSet.Find(id);
             var newObject = Mapper.Map<TEntity>(dto);
@@ -69,7 +67,7 @@ namespace Hmcr.Data.Repositories.Base
             }
         }
 
-        public virtual void Update(string id, TDto dto)
+        public virtual void Update<TDto>(string id, TDto dto)
         {
             var oldEntity = DbSet.Find(id);
             var newObject = Mapper.Map<TEntity>(dto);
@@ -81,7 +79,7 @@ namespace Hmcr.Data.Repositories.Base
             }
         }
 
-        public virtual void Delete(TDto dto)
+        public virtual void Delete<TDto>(TDto dto)
         {
             var result = Mapper.Map<TEntity>(dto);
             DbSet.Remove(result);
@@ -94,37 +92,37 @@ namespace Hmcr.Data.Repositories.Base
                 DbSet.Remove(obj);
         }
 
-        public virtual TDto GetById(long id)
+        public virtual TDto GetById<TDto>(long id)
         {
             return Mapper.Map<TDto>(DbSet.Find(id));
         }
 
-        public virtual TDto GetById(string id)
+        public virtual TDto GetById<TDto>(string id)
         {
             return Mapper.Map<TDto>(DbSet.Find(id));
         }
 
-        public virtual IEnumerable<TDto> GetAll()
+        public virtual IEnumerable<TDto> GetAll<TDto>()
         {
             return Mapper.Map<IEnumerable<TDto>>(DbSet.ToList());
         }
 
-        public virtual IEnumerable<TDto> GetAll(Expression<Func<TEntity, bool>> where)
+        public virtual IEnumerable<TDto> GetAll<TDto>(Expression<Func<TEntity, bool>> where)
         {
             return Mapper.Map<IEnumerable<TDto>>(DbSet.Where(where).ToList());
         }
 
-        public virtual async Task<IEnumerable<TDto>> GetAllAsync()
+        public virtual async Task<IEnumerable<TDto>> GetAllAsync<TDto>()
         {
             return Mapper.Map<IEnumerable<TDto>>(await DbSet.ToListAsync());
         }
 
-        public virtual async Task<IEnumerable<TDto>> GetAllAsync(Expression<Func<TEntity, bool>> where)
+        public virtual async Task<IEnumerable<TDto>> GetAllAsync<TDto>(Expression<Func<TEntity, bool>> where)
         {
             return Mapper.Map<IEnumerable<TDto>>(await DbSet.Where(where).ToListAsync());
         }
 
-        public async Task<TDto> GetFirstOrDefaultAsync(Expression<Func<TEntity, bool>> where)
+        public async Task<TDto> GetFirstOrDefaultAsync<TDto>(Expression<Func<TEntity, bool>> where)
         {
             return Mapper.Map<TDto>(await DbSet.Where(where).FirstOrDefaultAsync<TEntity>());
         }
