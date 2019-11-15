@@ -9,13 +9,6 @@ namespace Hmcr.Model.Dtos.Party
 {
     public class PartyDto
     {
-        public PartyDto()
-        {
-            ContractTerms = new HashSet<ContractTermDto>();
-            SubmissionObjects = new HashSet<SubmissionObjectDto>();
-            Users = new HashSet<UserDto>();
-        }
-
         public decimal PartyId { get; set; }
         public Guid? BusinessGuid { get; set; }
         public string BusinessLegalName { get; set; }
@@ -25,9 +18,5 @@ namespace Hmcr.Model.Dtos.Party
         public decimal? BusinessNumber { get; set; }
         public string PartyType { get; set; }
         public DateTime? EndDate { get; set; }
-
-        public virtual ICollection<ContractTermDto> ContractTerms { get; set; }
-        public virtual ICollection<SubmissionObjectDto> SubmissionObjects { get; set; }
-        public virtual ICollection<UserDto> Users { get; set; }
     }
 }

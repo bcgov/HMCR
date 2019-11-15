@@ -21,6 +21,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
 using Hmcr.Model.JsonConverters;
 using Microsoft.AspNetCore.Http;
+using Newtonsoft.Json.Serialization;
 
 namespace Hmcr.Api.Extensions
 {
@@ -74,9 +75,17 @@ namespace Hmcr.Api.Extensions
                     options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
                     options.JsonSerializerOptions.WriteIndented = true;
                     options.JsonSerializerOptions.PropertyNameCaseInsensitive = true;
-                    options.JsonSerializerOptions.Converters.Add(new LongToStringConverter()); 
+                    options.JsonSerializerOptions.Converters.Add(new LongToStringConverter());
                     options.JsonSerializerOptions.Converters.Add(new IntToStringConverter());
                 })
+                //.AddNewtonsoftJson(options =>
+                //{
+                //    options.SerializerSettings.ContractResolver = new CamelCasePropertyNamesContractResolver();
+                //    options.SerializerSettings.Formatting = Newtonsoft.Json.Formatting.Indented;
+                //    options.SerializerSettings.DateFormatHandling = Newtonsoft.Json.DateFormatHandling.IsoDateFormat;
+                //    options.SerializerSettings.DateTimeZoneHandling = Newtonsoft.Json.DateTimeZoneHandling.Utc;
+                //    options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
+                //})
                 .SetCompatibilityVersion(CompatibilityVersion.Version_3_0);
         }
 

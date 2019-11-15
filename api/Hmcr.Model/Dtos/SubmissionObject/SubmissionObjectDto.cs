@@ -17,10 +17,5 @@ namespace Hmcr.Model.Dtos.SubmissionObject
         public decimal SubmissionStatusId { get; set; }
         public decimal ServiceAreaNumber { get; set; }
         public decimal PartyId { get; set; }
-
-        public virtual MimeTypeDto MimeType { get; set; }
-        public virtual PartyDto Party { get; set; }
-        public virtual ServiceAreaDto ServiceArea { get; set; }
-        public virtual SubmissionStatusDto SubmissionStatus { get; set; }
     }
 }

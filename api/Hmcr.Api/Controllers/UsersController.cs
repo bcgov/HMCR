@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Hmcr.Domain.Services;
+using Hmcr.Model.Dtos.User;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -12,11 +14,17 @@ namespace Hmcr.Api.Controllers
     [ApiController]
     public class UsersController : ControllerBase
     {
-        // GET: api/Users
-        [HttpGet]
-        public IEnumerable<string> Get()
+        private IUserService _userService;
+
+        public UsersController(IUserService userService)
         {
-            return new string[] { "value1", "value2" };
+            _userService = userService;
+        }
+
+        [HttpGet("current")]
+        public async Task<ActionResult<UserCurrentDto>> GetCurrentUser()
+        {
+            return Ok(await _userService.GetCurrentUser());
         }
 
         // GET: api/Users/5

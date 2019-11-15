@@ -15,8 +15,6 @@ namespace Hmcr.Data.Database.Entities
         {
         }
 
-        public virtual DbSet<HmrContractServiceArea> HmrContractServiceAreas { get; set; }
-        public virtual DbSet<HmrContractServiceAreaHist> HmrContractServiceAreaHists { get; set; }
         public virtual DbSet<HmrContractTerm> HmrContractTerms { get; set; }
         public virtual DbSet<HmrContractTermHist> HmrContractTermHists { get; set; }
         public virtual DbSet<HmrDistrict> HmrDistricts { get; set; }
@@ -43,231 +41,6 @@ namespace Hmcr.Data.Database.Entities
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<HmrContractServiceArea>(entity =>
-            {
-                entity.HasKey(e => e.ContractServiceAreaId)
-                    .HasName("HMR_CNRT_SRV_ARA_PK");
-
-                entity.ToTable("HMR_CONTRACT_SERVICE_AREA");
-
-                entity.HasComment("SERVICE AREAs that are being administered under a contract term.  This table enables the confirmation of unique task IDs assigned by vendors for the term of their contract.");
-
-                entity.HasIndex(e => new { e.ContractTermId, e.ServiceAreaNumber, e.EndDate })
-                    .HasName("HMR_CNRT_SRV_ARA_UN_CH")
-                    .IsUnique();
-
-                entity.Property(e => e.ContractServiceAreaId)
-                    .HasColumnName("CONTRACT_SERVICE_AREA_ID")
-                    .HasColumnType("numeric(9, 0)")
-                    .HasDefaultValueSql("(NEXT VALUE FOR [HMR_CNT_SRV_ARA_ID_SEQ])")
-                    .HasComment("Unique identifier for the record");
-
-                entity.Property(e => e.AppCreateTimestamp)
-                    .HasColumnName("APP_CREATE_TIMESTAMP")
-                    .HasColumnType("datetime")
-                    .HasComment("Date and time of record creation");
-
-                entity.Property(e => e.AppCreateUserDirectory)
-                    .IsRequired()
-                    .HasColumnName("APP_CREATE_USER_DIRECTORY")
-                    .HasMaxLength(12)
-                    .IsUnicode(false)
-                    .HasComment("Active Directory which retains source of truth for user idenifiers.");
-
-                entity.Property(e => e.AppCreateUserGuid)
-                    .HasColumnName("APP_CREATE_USER_GUID")
-                    .HasComment("Unique idenifier of user who created record");
-
-                entity.Property(e => e.AppCreateUserid)
-                    .IsRequired()
-                    .HasColumnName("APP_CREATE_USERID")
-                    .HasMaxLength(30)
-                    .IsUnicode(false)
-                    .HasComment("Unique idenifier of user who created record");
-
-                entity.Property(e => e.AppLastUpdateTimestamp)
-                    .HasColumnName("APP_LAST_UPDATE_TIMESTAMP")
-                    .HasColumnType("datetime")
-                    .HasComment("Date and time of last record update");
-
-                entity.Property(e => e.AppLastUpdateUserDirectory)
-                    .IsRequired()
-                    .HasColumnName("APP_LAST_UPDATE_USER_DIRECTORY")
-                    .HasMaxLength(12)
-                    .IsUnicode(false)
-                    .HasComment("Active Directory which retains source of truth for user idenifiers.");
-
-                entity.Property(e => e.AppLastUpdateUserGuid)
-                    .HasColumnName("APP_LAST_UPDATE_USER_GUID")
-                    .HasComment("Unique idenifier of user who last updated record");
-
-                entity.Property(e => e.AppLastUpdateUserid)
-                    .IsRequired()
-                    .HasColumnName("APP_LAST_UPDATE_USERID")
-                    .HasMaxLength(30)
-                    .IsUnicode(false)
-                    .HasComment("Unique idenifier of user who last updated record");
-
-                entity.Property(e => e.ConcurrencyControlNumber)
-                    .HasColumnName("CONCURRENCY_CONTROL_NUMBER")
-                    .HasDefaultValueSql("((1))")
-                    .HasComment("Record under edit indicator used for optomisitc record contention management.  If number differs from start of edit, then user will be prompted to that record has been updated by someone else.");
-
-                entity.Property(e => e.ContractTermId)
-                    .HasColumnName("CONTRACT_TERM_ID")
-                    .HasColumnType("numeric(9, 0)")
-                    .HasComment("Unique idenifier for related contract term");
-
-                entity.Property(e => e.DbAuditCreateTimestamp)
-                    .HasColumnName("DB_AUDIT_CREATE_TIMESTAMP")
-                    .HasColumnType("datetime")
-                    .HasDefaultValueSql("(getutcdate())")
-                    .HasComment("Date and time record created in the database");
-
-                entity.Property(e => e.DbAuditCreateUserid)
-                    .IsRequired()
-                    .HasColumnName("DB_AUDIT_CREATE_USERID")
-                    .HasMaxLength(30)
-                    .IsUnicode(false)
-                    .HasDefaultValueSql("(user_name())")
-                    .HasComment("Named database user who created record");
-
-                entity.Property(e => e.DbAuditLastUpdateTimestamp)
-                    .HasColumnName("DB_AUDIT_LAST_UPDATE_TIMESTAMP")
-                    .HasColumnType("datetime")
-                    .HasDefaultValueSql("(getutcdate())")
-                    .HasComment("Date and time record was last updated in the database.");
-
-                entity.Property(e => e.DbAuditLastUpdateUserid)
-                    .IsRequired()
-                    .HasColumnName("DB_AUDIT_LAST_UPDATE_USERID")
-                    .HasMaxLength(30)
-                    .IsUnicode(false)
-                    .HasDefaultValueSql("(user_name())")
-                    .HasComment("Named database user who last updated record");
-
-                entity.Property(e => e.EndDate)
-                    .HasColumnName("END_DATE")
-                    .HasColumnType("datetime")
-                    .HasComment("Latest date a contract term was associated with a SERVICE AREA.");
-
-                entity.Property(e => e.ServiceAreaNumber)
-                    .HasColumnName("SERVICE_AREA_NUMBER")
-                    .HasColumnType("numeric(9, 0)")
-                    .HasComment("Assigned number of the Service Area");
-
-                entity.HasOne(d => d.ContractTerm)
-                    .WithMany(p => p.HmrContractServiceAreas)
-                    .HasForeignKey(d => d.ContractTermId)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("HMR_CNRT_SRV_ARA_CNRT_TRM_FK");
-
-                entity.HasOne(d => d.ServiceAreaNumberNavigation)
-                    .WithMany(p => p.HmrContractServiceAreas)
-                    .HasForeignKey(d => d.ServiceAreaNumber)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("HMR_CNRT_SRV_ARA_SRV_ARA_FK");
-            });
-
-            modelBuilder.Entity<HmrContractServiceAreaHist>(entity =>
-            {
-                entity.HasKey(e => e.ContractServiceAreaHistId)
-                    .HasName("HMR_CSA1_H_PK");
-
-                entity.ToTable("HMR_CONTRACT_SERVICE_AREA_HIST");
-
-                entity.HasIndex(e => new { e.ContractServiceAreaHistId, e.EndDateHist })
-                    .HasName("HMR_CSA1_H_UK")
-                    .IsUnique();
-
-                entity.Property(e => e.ContractServiceAreaHistId)
-                    .HasColumnName("CONTRACT_SERVICE_AREA_HIST_ID")
-                    .HasDefaultValueSql("(NEXT VALUE FOR [HMR_CONTRACT_SERVICE_AREA_H_ID_SEQ])");
-
-                entity.Property(e => e.AppCreateTimestamp)
-                    .HasColumnName("APP_CREATE_TIMESTAMP")
-                    .HasColumnType("datetime");
-
-                entity.Property(e => e.AppCreateUserDirectory)
-                    .IsRequired()
-                    .HasColumnName("APP_CREATE_USER_DIRECTORY")
-                    .HasMaxLength(12)
-                    .IsUnicode(false);
-
-                entity.Property(e => e.AppCreateUserGuid).HasColumnName("APP_CREATE_USER_GUID");
-
-                entity.Property(e => e.AppCreateUserid)
-                    .IsRequired()
-                    .HasColumnName("APP_CREATE_USERID")
-                    .HasMaxLength(30)
-                    .IsUnicode(false);
-
-                entity.Property(e => e.AppLastUpdateTimestamp)
-                    .HasColumnName("APP_LAST_UPDATE_TIMESTAMP")
-                    .HasColumnType("datetime");
-
-                entity.Property(e => e.AppLastUpdateUserDirectory)
-                    .IsRequired()
-                    .HasColumnName("APP_LAST_UPDATE_USER_DIRECTORY")
-                    .HasMaxLength(12)
-                    .IsUnicode(false);
-
-                entity.Property(e => e.AppLastUpdateUserGuid).HasColumnName("APP_LAST_UPDATE_USER_GUID");
-
-                entity.Property(e => e.AppLastUpdateUserid)
-                    .IsRequired()
-                    .HasColumnName("APP_LAST_UPDATE_USERID")
-                    .HasMaxLength(30)
-                    .IsUnicode(false);
-
-                entity.Property(e => e.ConcurrencyControlNumber).HasColumnName("CONCURRENCY_CONTROL_NUMBER");
-
-                entity.Property(e => e.ContractServiceAreaId)
-                    .HasColumnName("CONTRACT_SERVICE_AREA_ID")
-                    .HasColumnType("numeric(18, 0)");
-
-                entity.Property(e => e.ContractTermId)
-                    .HasColumnName("CONTRACT_TERM_ID")
-                    .HasColumnType("numeric(18, 0)");
-
-                entity.Property(e => e.DbAuditCreateTimestamp)
-                    .HasColumnName("DB_AUDIT_CREATE_TIMESTAMP")
-                    .HasColumnType("datetime");
-
-                entity.Property(e => e.DbAuditCreateUserid)
-                    .IsRequired()
-                    .HasColumnName("DB_AUDIT_CREATE_USERID")
-                    .HasMaxLength(30)
-                    .IsUnicode(false);
-
-                entity.Property(e => e.DbAuditLastUpdateTimestamp)
-                    .HasColumnName("DB_AUDIT_LAST_UPDATE_TIMESTAMP")
-                    .HasColumnType("datetime");
-
-                entity.Property(e => e.DbAuditLastUpdateUserid)
-                    .IsRequired()
-                    .HasColumnName("DB_AUDIT_LAST_UPDATE_USERID")
-                    .HasMaxLength(30)
-                    .IsUnicode(false);
-
-                entity.Property(e => e.EffectiveDateHist)
-                    .HasColumnName("EFFECTIVE_DATE_HIST")
-                    .HasColumnType("datetime")
-                    .HasDefaultValueSql("(getutcdate())");
-
-                entity.Property(e => e.EndDate)
-                    .HasColumnName("END_DATE")
-                    .HasColumnType("datetime");
-
-                entity.Property(e => e.EndDateHist)
-                    .HasColumnName("END_DATE_HIST")
-                    .HasColumnType("datetime");
-
-                entity.Property(e => e.ServiceAreaNumber)
-                    .HasColumnName("SERVICE_AREA_NUMBER")
-                    .HasColumnType("numeric(18, 0)");
-            });
-
             modelBuilder.Entity<HmrContractTerm>(entity =>
             {
                 entity.HasKey(e => e.ContractTermId)
@@ -276,6 +49,16 @@ namespace Hmcr.Data.Database.Entities
                 entity.ToTable("HMR_CONTRACT_TERM");
 
                 entity.HasComment("Identifies a unique contract term for each party and the service areas those organizations are obligated to provide services for. This table enables the confirmation of unique task IDs assigned by vendors for the term of their contract.");
+
+                entity.HasIndex(e => e.PartyId)
+                    .HasName("HMR_CNT_TRM_PRTY_FK_I");
+
+                entity.HasIndex(e => e.ServiceAreaNumber)
+                    .HasName("HMR_CNT_TRM_SRV_A_FK_I");
+
+                entity.HasIndex(e => new { e.PartyId, e.ServiceAreaNumber, e.StartDate })
+                    .HasName("HMR_CNT_TRM_UQ_CH")
+                    .IsUnique();
 
                 entity.Property(e => e.ContractTermId)
                     .HasColumnName("CONTRACT_TERM_ID")
@@ -379,6 +162,11 @@ namespace Hmcr.Data.Database.Entities
                     .HasColumnType("numeric(9, 0)")
                     .HasComment("Unique identifier of related PARTY record");
 
+                entity.Property(e => e.ServiceAreaNumber)
+                    .HasColumnName("SERVICE_AREA_NUMBER")
+                    .HasColumnType("numeric(9, 0)")
+                    .HasComment("Assigned number of the Service Area");
+
                 entity.Property(e => e.StartDate)
                     .HasColumnName("START_DATE")
                     .HasColumnType("datetime")
@@ -389,6 +177,12 @@ namespace Hmcr.Data.Database.Entities
                     .HasForeignKey(d => d.PartyId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("HMR_CNRT_TRM_PRTY_FK");
+
+                entity.HasOne(d => d.ServiceAreaNumberNavigation)
+                    .WithMany(p => p.HmrContractTerms)
+                    .HasForeignKey(d => d.ServiceAreaNumber)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("HMR_CNRT_TRM_SRV_ARA_FK");
             });
 
             modelBuilder.Entity<HmrContractTermHist>(entity =>
@@ -491,6 +285,10 @@ namespace Hmcr.Data.Database.Entities
                     .HasColumnName("PARTY_ID")
                     .HasColumnType("numeric(18, 0)");
 
+                entity.Property(e => e.ServiceAreaNumber)
+                    .HasColumnName("SERVICE_AREA_NUMBER")
+                    .HasColumnType("numeric(18, 0)");
+
                 entity.Property(e => e.StartDate)
                     .HasColumnName("START_DATE")
                     .HasColumnType("datetime");
@@ -554,6 +352,7 @@ namespace Hmcr.Data.Database.Entities
                     .HasComment("Unique identifier for district records");
 
                 entity.Property(e => e.DistrictName)
+                    .IsRequired()
                     .HasColumnName("DISTRICT_NAME")
                     .HasMaxLength(40)
                     .IsUnicode(false)
@@ -763,7 +562,6 @@ namespace Hmcr.Data.Database.Entities
                     .HasComment("Date reflecting when submissions are no longer expected from the organization.");
 
                 entity.Property(e => e.PartyType)
-                    .IsRequired()
                     .HasColumnName("PARTY_TYPE")
                     .HasMaxLength(32)
                     .IsUnicode(false)
@@ -888,7 +686,6 @@ namespace Hmcr.Data.Database.Entities
                     .HasColumnType("numeric(18, 0)");
 
                 entity.Property(e => e.PartyType)
-                    .IsRequired()
                     .HasColumnName("PARTY_TYPE")
                     .HasMaxLength(32)
                     .IsUnicode(false);
@@ -1172,6 +969,7 @@ namespace Hmcr.Data.Database.Entities
                     .HasComment("A ministry organizational unit responsible for an exclusive geographic area within the province.  ");
 
                 entity.Property(e => e.RegionName)
+                    .IsRequired()
                     .HasColumnName("REGION_NAME")
                     .HasMaxLength(40)
                     .IsUnicode(false)
@@ -1687,6 +1485,7 @@ namespace Hmcr.Data.Database.Entities
                     .HasComment("Unique idenifier for table records");
 
                 entity.Property(e => e.ServiceAreaName)
+                    .IsRequired()
                     .HasColumnName("SERVICE_AREA_NAME")
                     .HasMaxLength(60)
                     .IsUnicode(false)
@@ -1754,6 +1553,7 @@ namespace Hmcr.Data.Database.Entities
                     .HasColumnType("numeric(18, 0)");
 
                 entity.Property(e => e.ServiceAreaName)
+                    .IsRequired()
                     .HasColumnName("SERVICE_AREA_NAME")
                     .HasMaxLength(60)
                     .IsUnicode(false);
@@ -2260,7 +2060,7 @@ namespace Hmcr.Data.Database.Entities
 
                 entity.HasComment("Defines users and their attributes as found in IDIR or BCeID.");
 
-                entity.HasIndex(e => new { e.PartyId, e.UserType })
+                entity.HasIndex(e => e.PartyId)
                     .HasName("HMR_SYSTEM_USER_FK_I");
 
                 entity.Property(e => e.SystemUserId)
@@ -2396,12 +2196,9 @@ namespace Hmcr.Data.Database.Entities
 
                 entity.Property(e => e.UserGuid)
                     .HasColumnName("USER_GUID")
-                    .HasMaxLength(32)
-                    .IsUnicode(false)
                     .HasComment("A system generated unique identifier.  Reflects the active directory unique idenifier for the user.");
 
                 entity.Property(e => e.UserType)
-                    .IsRequired()
                     .HasColumnName("USER_TYPE")
                     .HasMaxLength(30)
                     .IsUnicode(false)
@@ -2418,7 +2215,6 @@ namespace Hmcr.Data.Database.Entities
                 entity.HasOne(d => d.Party)
                     .WithMany(p => p.HmrSystemUsers)
                     .HasForeignKey(d => d.PartyId)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("HMR_SYS_USR_PRTY_FK");
             });
 
@@ -2544,13 +2340,9 @@ namespace Hmcr.Data.Database.Entities
                     .HasMaxLength(30)
                     .IsUnicode(false);
 
-                entity.Property(e => e.UserGuid)
-                    .HasColumnName("USER_GUID")
-                    .HasMaxLength(32)
-                    .IsUnicode(false);
+                entity.Property(e => e.UserGuid).HasColumnName("USER_GUID");
 
                 entity.Property(e => e.UserType)
-                    .IsRequired()
                     .HasColumnName("USER_TYPE")
                     .HasMaxLength(30)
                     .IsUnicode(false);
@@ -2641,6 +2433,7 @@ namespace Hmcr.Data.Database.Entities
                 entity.Property(e => e.DbAuditCreateTimestamp)
                     .HasColumnName("DB_AUDIT_CREATE_TIMESTAMP")
                     .HasColumnType("datetime")
+                    .HasDefaultValueSql("(getutcdate())")
                     .HasComment("Date and time record created in the database");
 
                 entity.Property(e => e.DbAuditCreateUserid)
@@ -2648,11 +2441,13 @@ namespace Hmcr.Data.Database.Entities
                     .HasColumnName("DB_AUDIT_CREATE_USERID")
                     .HasMaxLength(30)
                     .IsUnicode(false)
+                    .HasDefaultValueSql("(user_name())")
                     .HasComment("Named database user who created record");
 
                 entity.Property(e => e.DbAuditLastUpdateTimestamp)
                     .HasColumnName("DB_AUDIT_LAST_UPDATE_TIMESTAMP")
                     .HasColumnType("datetime")
+                    .HasDefaultValueSql("(getutcdate())")
                     .HasComment("Date and time record was last updated in the database.");
 
                 entity.Property(e => e.DbAuditLastUpdateUserid)
@@ -2660,6 +2455,7 @@ namespace Hmcr.Data.Database.Entities
                     .HasColumnName("DB_AUDIT_LAST_UPDATE_USERID")
                     .HasMaxLength(30)
                     .IsUnicode(false)
+                    .HasDefaultValueSql("(user_name())")
                     .HasComment("Named database user who last updated record");
 
                 entity.Property(e => e.EndDate)
@@ -2789,17 +2585,9 @@ namespace Hmcr.Data.Database.Entities
                     .HasColumnType("numeric(18, 0)");
             });
 
-            modelBuilder.HasSequence("HMR_CNT_SRV_ARA_ID_SEQ")
-                .HasMin(1)
-                .HasMax(999999999);
-
             modelBuilder.HasSequence("HMR_CNT_TRM_ID_SEQ")
                 .HasMin(1)
                 .HasMax(999999999);
-
-            modelBuilder.HasSequence("HMR_CONTRACT_SERVICE_AREA_H_ID_SEQ")
-                .HasMin(1)
-                .HasMax(2147483647);
 
             modelBuilder.HasSequence("HMR_CONTRACT_TERM_H_ID_SEQ")
                 .HasMin(1)

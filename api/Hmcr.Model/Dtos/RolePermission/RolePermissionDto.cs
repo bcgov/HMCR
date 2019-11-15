@@ -12,8 +12,5 @@ namespace Hmcr.Model.Dtos.RolePermission
         public decimal RoleId { get; set; }
         public decimal PermissionId { get; set; }
         public DateTime? EndDate { get; set; }
-
-        public virtual PermissionDto Permission { get; set; }
-        public virtual RoleDto Role { get; set; }
     }
 }

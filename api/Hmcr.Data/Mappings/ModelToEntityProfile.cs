@@ -1,6 +1,5 @@
 ﻿using AutoMapper;
 using Hmcr.Data.Database.Entities;
-using Hmcr.Model.Dtos.ContractServiceArea;
 using Hmcr.Model.Dtos.ContractTerm;
 using Hmcr.Model.Dtos.District;
 using Hmcr.Model.Dtos.MimeType;
@@ -28,13 +27,9 @@ namespace Hmcr.Data.Mappings
             SourceMemberNamingConvention = new LowerUnderscoreNamingConvention();
             DestinationMemberNamingConvention = new PascalCaseNamingConvention();
 
-            CreateMap<ContractServiceAreaDto, HmrContractServiceArea>()
-                .ForMember(dest => dest.ServiceAreaNumberNavigation, opt => opt.MapFrom(src => src.ServiceArea));
-
             CreateMap<ContractTermDto, HmrContractTerm>();
 
-            CreateMap<DistrictDto, HmrDistrict>()
-                .ForMember(dest => dest.RegionNumberNavigation, opt => opt.MapFrom(src => src.Region));
+            CreateMap<DistrictDto, HmrDistrict>();
 
             CreateMap<MimeTypeDto, HmrMimeType>();
 
@@ -48,19 +43,19 @@ namespace Hmcr.Data.Mappings
 
             CreateMap<RolePermissionDto, HmrRolePermission>();
 
-            CreateMap<ServiceAreaDto, HmrServiceArea>()
-                .ForMember(dest => dest.DistrictNumberNavigation, opt => opt.MapFrom(src => src.District));
+            CreateMap<ServiceAreaDto, HmrServiceArea>();
 
-            CreateMap<ServiceAreaUserDto, HmrServiceAreaUser>()
-                .ForMember(dest => dest.ServiceAreaNumberNavigation, opt => opt.MapFrom(src => src.ServiceArea));
+            CreateMap<ServiceAreaUserDto, HmrServiceAreaUser>();
 
-            CreateMap<SubmissionObjectDto, HmrSubmissionObject>()
-                .ForMember(dest => dest.ServiceAreaNumberNavigation, opt => opt.MapFrom(src => src.ServiceArea));
+            CreateMap<SubmissionObjectDto, HmrSubmissionObject>();
 
             CreateMap<SubmissionStatusDto, HmrSubmissionStatu>();
 
             CreateMap<UserDto, HmrSystemUser>();
+
             CreateMap<UserCreateDto, HmrSystemUser>();
+
+            CreateMap<UserCurrentDto, HmrSystemUser>();
 
             CreateMap<UserRoleDto, HmrUserRole>();
         }

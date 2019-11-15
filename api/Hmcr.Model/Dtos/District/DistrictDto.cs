@@ -8,17 +8,9 @@ namespace Hmcr.Model.Dtos.District
 {
     public class DistrictDto
     {
-        public DistrictDto()
-        {
-            ServiceAreas = new HashSet<ServiceAreaDto>();
-        }
-
         public decimal DistrictId { get; set; }
         public decimal DistrictNumber { get; set; }
         public string DistrictName { get; set; }
         public decimal RegionNumber { get; set; }
-
-        public virtual RegionDto Region { get; set; }
-        public virtual ICollection<ServiceAreaDto> ServiceAreas { get; set; }
     }
 }

@@ -7,7 +7,7 @@ namespace Hmcr.Data.Database.Entities
     {
         public HmrServiceArea()
         {
-            HmrContractServiceAreas = new HashSet<HmrContractServiceArea>();
+            HmrContractTerms = new HashSet<HmrContractTerm>();
             HmrServiceAreaUsers = new HashSet<HmrServiceAreaUser>();
             HmrSubmissionObjects = new HashSet<HmrSubmissionObject>();
         }
@@ -23,7 +23,7 @@ namespace Hmcr.Data.Database.Entities
         public DateTime DbAuditLastUpdateTimestamp { get; set; }
 
         public virtual HmrDistrict DistrictNumberNavigation { get; set; }
-        public virtual ICollection<HmrContractServiceArea> HmrContractServiceAreas { get; set; }
+        public virtual ICollection<HmrContractTerm> HmrContractTerms { get; set; }
         public virtual ICollection<HmrServiceAreaUser> HmrServiceAreaUsers { get; set; }
         public virtual ICollection<HmrSubmissionObject> HmrSubmissionObjects { get; set; }
     }

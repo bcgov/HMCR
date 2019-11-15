@@ -12,8 +12,5 @@ namespace Hmcr.Model.Dtos.ServiceAreaUser
         public decimal ServiceAreaNumber { get; set; }
         public decimal SystemUserId { get; set; }
         public DateTime? EndDate { get; set; }
-
-        public virtual ServiceAreaDto ServiceArea { get; set; }
-        public virtual UserDto User { get; set; }
     }
 }
