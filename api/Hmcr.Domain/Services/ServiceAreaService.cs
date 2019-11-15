@@ -11,6 +11,7 @@ namespace Hmcr.Domain.Services
     public interface IServiceAreaService
     {
         Task<IEnumerable<ServiceAreaDto>> GetServiceAreaBySystemUserIdAsync(long systemUserId);
+        Task<IEnumerable<ServiceAreaDropdownDto>> GetAllServiceAreasAsync();
     }
 
     public class ServiceAreaService : IServiceAreaService
@@ -24,9 +25,16 @@ namespace Hmcr.Domain.Services
             _unitOfWork = unitOfWork;
         }
 
+        public async Task<IEnumerable<ServiceAreaDropdownDto>> GetAllServiceAreasAsync()
+        {
+            return await _svcAreaRepo.GetAllServiceAreasAsync();
+        }
+
         public async Task<IEnumerable<ServiceAreaDto>> GetServiceAreaBySystemUserIdAsync(long systemUserId)
         {
             return await _svcAreaRepo.GetServiceAreaBySystemUserIdAsync(systemUserId);
         }
+
+
     }
 }

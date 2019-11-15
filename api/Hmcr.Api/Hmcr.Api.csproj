@@ -37,9 +37,5 @@
     <ProjectReference Include="..\Hmcr.Domain\Hmcr.Domain.csproj" />
     <ProjectReference Include="..\Hmcr.Model\Hmcr.Model.csproj" />
   </ItemGroup>
-  
-  <ItemGroup>
-    <Folder Include="Controllers\" />
-  </ItemGroup>
 
 </Project>
