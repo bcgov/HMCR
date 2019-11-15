@@ -9,8 +9,8 @@ namespace Hmcr.Data.Database.Entities
         public DateTime EffectiveDateHist { get; set; }
         public DateTime? EndDateHist { get; set; }
         public decimal SystemUserId { get; set; }
-        public decimal PartyId { get; set; }
-        public string UserGuid { get; set; }
+        public decimal? PartyId { get; set; }
+        public Guid? UserGuid { get; set; }
         public string Username { get; set; }
         public string UserDirectory { get; set; }
         public string UserType { get; set; }
@@ -27,7 +27,7 @@ namespace Hmcr.Data.Database.Entities
         public string AppCreateUserDirectory { get; set; }
         public string AppLastUpdateUserid { get; set; }
         public DateTime AppLastUpdateTimestamp { get; set; }
-        public Guid? AppLastUpdateUserGuid { get; set; }
+        public Guid AppLastUpdateUserGuid { get; set; }
         public string AppLastUpdateUserDirectory { get; set; }
         public string DbAuditCreateUserid { get; set; }
         public DateTime DbAuditCreateTimestamp { get; set; }

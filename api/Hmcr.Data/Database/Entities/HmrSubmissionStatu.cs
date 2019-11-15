@@ -20,7 +20,7 @@ namespace Hmcr.Data.Database.Entities
         public string AppCreateUserDirectory { get; set; }
         public string AppLastUpdateUserid { get; set; }
         public DateTime AppLastUpdateTimestamp { get; set; }
-        public Guid? AppLastUpdateUserGuid { get; set; }
+        public Guid AppLastUpdateUserGuid { get; set; }
         public string AppLastUpdateUserDirectory { get; set; }
         public string DbAuditCreateUserid { get; set; }
         public DateTime DbAuditCreateTimestamp { get; set; }
