@@ -47,7 +47,7 @@ namespace Hmcr.Domain.Services
 
             if (userEntity.UserGuid == null)
             {
-                if (userEntity.UserDirectory == _currentUser.AuthDirName.ToUpperInvariant())
+                if (userEntity.UserType == _currentUser.UserType)
                 {
                     UpdateUserEntity(userEntity);
                     CreatePartyEntityIfNecessary();
@@ -55,8 +55,7 @@ namespace Hmcr.Domain.Services
                 }
                 else
                 {
-                    //To do: does admin user enter DIR name or user type?
-                    throw new HmcrException($"User[{_currentUser.UniversalId}] exists in the user table with a wrong directory name [{_currentUser.AuthDirName}].");
+                    throw new HmcrException($"User[{_currentUser.UniversalId}] exists in the user table with a wrong user type [{_currentUser.UserType}].");
                 }
             }
 
@@ -68,12 +67,12 @@ namespace Hmcr.Domain.Services
             userEntity.UserGuid = _currentUser.UserGuid;
             userEntity.BusinessGuid = _currentUser.BusinessGuid;
             userEntity.BusinessLegalName = _currentUser.BusinessLegalName;
-            userEntity.UserType = _currentUser.UserType.ToUpperInvariant();
+            userEntity.UserType = _currentUser.UserType;
         }
 
         private async void CreatePartyEntityIfNecessary()
         {
-            if (_currentUser.AuthDirName.ToUpperInvariant() == Constants.IDIR)
+            if (_currentUser.UserType == Constants.INTERNAL)
                 return;
 
             var partyEntity = await _partyRepo.GetPartyEntityByGuidAsync(_currentUser.BusinessGuid);

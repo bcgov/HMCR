@@ -6,6 +6,6 @@ namespace Hmcr.Model
 {
     public static class Constants
     {
-        public const string IDIR = "IDIR";
+        public const string INTERNAL = "INTERNAL";
     }
 }
