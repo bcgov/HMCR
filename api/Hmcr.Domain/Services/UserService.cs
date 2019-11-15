@@ -72,7 +72,7 @@ namespace Hmcr.Domain.Services
 
         private async void CreatePartyEntityIfNecessary()
         {
-            if (_currentUser.UserType == Constants.INTERNAL)
+            if (_currentUser.UserType == UserTypeDto.INTERNAL)
                 return;
 
             var partyEntity = await _partyRepo.GetPartyEntityByGuidAsync(_currentUser.BusinessGuid);
