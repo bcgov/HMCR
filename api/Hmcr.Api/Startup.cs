@@ -26,7 +26,7 @@ namespace Hmcr.Api
         {
             services.AddHttpContextAccessor();
             services.AddHmcrAuthentication();
-            services.AddHmcrDbContext(Configuration.GetConnectionString("Hmcr"));
+            services.AddHmcrDbContext(Configuration.GetValue<string>("CONNECTION_STRING"));
             services.AddCors();
             services.AddHmcrControllers();
             services.AddHmcrAutoMapper();

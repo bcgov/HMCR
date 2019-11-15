@@ -2,6 +2,7 @@
 using Hmcr.Model;
 using Hmcr.Model.Dtos.User;
 using Microsoft.AspNetCore.Mvc;
+using System.Collections;
 
 namespace Hmcr.Api.Controllers
 {
@@ -23,6 +24,18 @@ namespace Hmcr.Api.Controllers
         public ActionResult<UserCurrentDto> GetCurrentUser()
         {
             return Ok(_currentUser.UserInfo);
+        }
+
+        [HttpGet("usertypes")]
+        public ActionResult<UserTypeDto> GetUserTypes()
+        {
+            return Ok(new UserTypeDto());
+        }
+
+        [HttpGet("userstatus")]
+        public ActionResult<UserTypeDto> GetUserStatus()
+        {
+            return Ok(new UserStatusDto());
         }
     }
 }

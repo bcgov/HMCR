@@ -89,13 +89,13 @@ namespace Hmcr.Api.Authentication
         private void ReadSmHeaders()
         {
             _curentUser.UserGuid = new Guid(_context.Request.Headers[HmcrClaimTypes.UserGuid].FirstOrDefault());
-            _curentUser.UserType = _context.Request.Headers[HmcrClaimTypes.UserType].FirstOrDefault();
+            _curentUser.UserType = _context.Request.Headers[HmcrClaimTypes.UserType].FirstOrDefault().ToUpperInvariant();
             _curentUser.UniversalId = _context.Request.Headers[HmcrClaimTypes.UniversalId].FirstOrDefault();
 
             var bizGuid = _context.Request.Headers[HmcrClaimTypes.BusinessGuid].FirstOrDefault();
             _curentUser.BusinessGuid = bizGuid.IsEmpty() ? (Guid?)null : new Guid(bizGuid);
 
-            _curentUser.AuthDirName = _context.Request.Headers[HmcrClaimTypes.AuthDirName].FirstOrDefault();
+            _curentUser.AuthDirName = _context.Request.Headers[HmcrClaimTypes.AuthDirName].FirstOrDefault().ToUpperInvariant();
             _curentUser.Email = _context.Request.Headers[HmcrClaimTypes.Email].FirstOrDefault();
             _curentUser.UserName = _context.Request.Headers[HmcrClaimTypes.UserName].FirstOrDefault();
             _curentUser.BusinessLegalName = _context.Request.Headers[HmcrClaimTypes.BusinessLegalName].FirstOrDefault();
