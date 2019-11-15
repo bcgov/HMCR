@@ -1,11 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Hmcr.Domain.Services;
+﻿using Hmcr.Domain.Services;
 using Hmcr.Model;
 using Hmcr.Model.Dtos.User;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Hmcr.Api.Controllers
