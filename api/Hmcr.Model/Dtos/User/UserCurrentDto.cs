@@ -30,9 +30,7 @@ namespace Hmcr.Model.Dtos.User
         public string BusinessLegalName { get; set; }
         public DateTime? EndDate { get; set; }
 
-        public virtual List<ServiceAreaDto> ServiceAreas { get; set; }
-        public virtual List<string> Permissions { get; set; }
-
-       
+        public virtual IList<ServiceAreaDto> ServiceAreas { get; set; }
+        public virtual IList<string> Permissions { get; set; }       
     }
 }

@@ -1,5 +1,7 @@
 ﻿using Hmcr.Api.Extensions;
+using Hmcr.Domain.Services;
 using Hmcr.Model;
+using Hmcr.Model.Dtos.User;
 using Hmcr.Model.Utils;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Http;
@@ -17,18 +19,21 @@ namespace Hmcr.Api.Authentication
 {
     public class SmAuthenticationHandler : AuthenticationHandler<SmAuthenticationOptions>
     {
-        private SmHeaders _smHeaders;
+        private IUserService _userService;
+        private HmcrCurrentUser _curentUser;
         private HttpContext _context;
 
         public SmAuthenticationHandler(
-            SmHeaders smHeaders, 
+            IUserService userService,
+            HmcrCurrentUser currentUser, 
             IOptionsMonitor<SmAuthenticationOptions> options,
             ILoggerFactory logger,
             UrlEncoder encoder,
             ISystemClock clock)
             : base(options, logger, encoder, clock)
         {
-            _smHeaders = smHeaders;
+            _userService = userService;
+            _curentUser = currentUser;            
         }
 
 
@@ -36,22 +41,29 @@ namespace Hmcr.Api.Authentication
         {
             _context = Request.HttpContext;
 
-            ReadSmHeaders();
+            var userGuid = _context.Request.Headers[HmcrClaimTypes.UserGuid].FirstOrDefault();
 
-            if (string.IsNullOrWhiteSpace(_smHeaders.UniversalId))
+            if (userGuid.IsEmpty())
             {
                 return AuthenticateResult.Fail("Access Denied");
             }
 
-            //Database look up and update if necessary
-            //  Find User with UserGuid first and if not found, find with UniversalId
-            //  Update Email and other fields if they are different
-            //  Make sure company exists if BusinessGuid is present
-            //  Update company if necessary
+            ReadSmHeaders();
 
-            await Task.CompletedTask; //Remove after DB access
+            var userExists = await _userService.ProcessFirstUserLoginAsync();
 
-            var principal = new ClaimsPrincipal(new ClaimsIdentity(GetClaims(), SmAuthenticationOptions.Scheme));            
+            if (!userExists)
+            {
+                return AuthenticateResult.Fail($"Access Denied - User[{_curentUser.UniversalId}] does not exist");
+            }
+
+            var claims = GetClaims();
+
+            _curentUser.UserInfo = await _userService.GetCurrentUserAsync();
+
+            AddClaimsFromUserInfo(claims, _curentUser.UserInfo);
+
+            var principal = new ClaimsPrincipal(new ClaimsIdentity(claims, SmAuthenticationOptions.Scheme));            
             return AuthenticateResult.Success(new AuthenticationTicket(principal, null, SmAuthenticationOptions.Scheme));
         }
 
@@ -76,37 +88,53 @@ namespace Hmcr.Api.Authentication
 
         private void ReadSmHeaders()
         {
-            _smHeaders.UserGuid = _context.Request.Headers[HmcrClaimTypes.UserGuid].FirstOrDefault();
-            _smHeaders.UserType = _context.Request.Headers[HmcrClaimTypes.UserType].FirstOrDefault();
-            _smHeaders.UniversalId = _context.Request.Headers[HmcrClaimTypes.UniversalId].FirstOrDefault();
-            _smHeaders.BusinessGuid = _context.Request.Headers[HmcrClaimTypes.BusinessGuid].FirstOrDefault();
-            _smHeaders.AuthDirName = _context.Request.Headers[HmcrClaimTypes.AuthDirName].FirstOrDefault();
-            _smHeaders.Email = _context.Request.Headers[HmcrClaimTypes.Email].FirstOrDefault();
-            _smHeaders.UserName = _context.Request.Headers[HmcrClaimTypes.UserName].FirstOrDefault();
-            _smHeaders.BusinessLegalName = _context.Request.Headers[HmcrClaimTypes.BusinessLegalName].FirstOrDefault();
-            _smHeaders.BusinessNumber = _context.Request.Headers[HmcrClaimTypes.BusinessNumber].FirstOrDefault();
+            _curentUser.UserGuid = new Guid(_context.Request.Headers[HmcrClaimTypes.UserGuid].FirstOrDefault());
+            _curentUser.UserType = _context.Request.Headers[HmcrClaimTypes.UserType].FirstOrDefault();
+            _curentUser.UniversalId = _context.Request.Headers[HmcrClaimTypes.UniversalId].FirstOrDefault();
+
+            var bizGuid = _context.Request.Headers[HmcrClaimTypes.BusinessGuid].FirstOrDefault();
+            _curentUser.BusinessGuid = bizGuid.IsEmpty() ? (Guid?)null : new Guid(bizGuid);
+
+            _curentUser.AuthDirName = _context.Request.Headers[HmcrClaimTypes.AuthDirName].FirstOrDefault();
+            _curentUser.Email = _context.Request.Headers[HmcrClaimTypes.Email].FirstOrDefault();
+            _curentUser.UserName = _context.Request.Headers[HmcrClaimTypes.UserName].FirstOrDefault();
+            _curentUser.BusinessLegalName = _context.Request.Headers[HmcrClaimTypes.BusinessLegalName].FirstOrDefault();
+            _curentUser.BusinessNumber = _context.Request.Headers[HmcrClaimTypes.BusinessNumber].FirstOrDefault();
         }
 
         private List<Claim> GetClaims()
         {
             var claims = new List<Claim>();
 
-            if (_smHeaders.UniversalId.IsNotEmpty())
+            if (_curentUser.UniversalId.IsNotEmpty())
             {
-                claims.Add(new Claim(HmcrClaimTypes.UniversalId, _smHeaders.UniversalId));
-                claims.Add(new Claim(ClaimTypes.Name, _smHeaders.UniversalId));
+                claims.Add(new Claim(HmcrClaimTypes.UniversalId, _curentUser.UniversalId));
+                claims.Add(new Claim(ClaimTypes.Name, _curentUser.UniversalId)); //important: it's the username in HMR_SYSTEM_USER
             }
 
-            if (_smHeaders.UserGuid.IsNotEmpty()) claims.Add(new Claim(HmcrClaimTypes.UserGuid, _smHeaders.UserGuid));
-            if (_smHeaders.UserType.IsNotEmpty()) claims.Add(new Claim(HmcrClaimTypes.UserType, _smHeaders.UserType));
-            if (_smHeaders.BusinessGuid.IsNotEmpty()) claims.Add(new Claim(HmcrClaimTypes.BusinessGuid, _smHeaders.BusinessGuid));
-            if (_smHeaders.AuthDirName.IsNotEmpty()) claims.Add(new Claim(HmcrClaimTypes.AuthDirName, _smHeaders.AuthDirName));
-            if (_smHeaders.Email.IsNotEmpty()) claims.Add(new Claim(HmcrClaimTypes.Email, _smHeaders.Email));
-            if (_smHeaders.UserName.IsNotEmpty()) claims.Add(new Claim(HmcrClaimTypes.UserName, _smHeaders.UserName));
-            if (_smHeaders.BusinessLegalName.IsNotEmpty()) claims.Add(new Claim(HmcrClaimTypes.BusinessLegalName, _smHeaders.BusinessLegalName));
-            if (_smHeaders.BusinessNumber.IsNotEmpty()) claims.Add(new Claim(HmcrClaimTypes.BusinessNumber, _smHeaders.BusinessNumber));
+            if (_curentUser.UserGuid != null) claims.Add(new Claim(HmcrClaimTypes.UserGuid, _curentUser.UserGuid.ToString()));
+            if (_curentUser.UserType.IsNotEmpty()) claims.Add(new Claim(HmcrClaimTypes.UserType, _curentUser.UserType));
+            if (_curentUser.BusinessGuid != null) claims.Add(new Claim(HmcrClaimTypes.BusinessGuid, _curentUser.BusinessGuid.ToString()));
+            if (_curentUser.AuthDirName.IsNotEmpty()) claims.Add(new Claim(HmcrClaimTypes.AuthDirName, _curentUser.AuthDirName));
+            if (_curentUser.Email.IsNotEmpty()) claims.Add(new Claim(HmcrClaimTypes.Email, _curentUser.Email));
+            if (_curentUser.UserName.IsNotEmpty()) claims.Add(new Claim(HmcrClaimTypes.UserName, _curentUser.UserName));
+            if (_curentUser.BusinessLegalName.IsNotEmpty()) claims.Add(new Claim(HmcrClaimTypes.BusinessLegalName, _curentUser.BusinessLegalName));
+            if (_curentUser.BusinessNumber.IsNotEmpty()) claims.Add(new Claim(HmcrClaimTypes.BusinessNumber, _curentUser.BusinessNumber));
 
             return claims;
+        }
+
+        private void AddClaimsFromUserInfo(List<Claim> claims, UserCurrentDto user)
+        {
+            foreach(var permission in user.Permissions)
+            {
+                claims.Add(new Claim(HmcrClaimTypes.Permission, permission));
+            }
+
+            foreach(var serviceArea in user.ServiceAreas)
+            {
+                claims.Add(new Claim(HmcrClaimTypes.ServiceAreaNumber, serviceArea.ServiceAreaNumber.ToString()));
+            }
         }
     }
 }

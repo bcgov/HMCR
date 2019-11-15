@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Hmcr.Domain.Services;
+using Hmcr.Model;
 using Hmcr.Model.Dtos.User;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -15,41 +16,18 @@ namespace Hmcr.Api.Controllers
     public class UsersController : ControllerBase
     {
         private IUserService _userService;
+        private HmcrCurrentUser _currentUser;
 
-        public UsersController(IUserService userService)
+        public UsersController(IUserService userService, HmcrCurrentUser currentUser)
         {
             _userService = userService;
+            _currentUser = currentUser;
         }
 
         [HttpGet("current")]
-        public async Task<ActionResult<UserCurrentDto>> GetCurrentUser()
+        public ActionResult<UserCurrentDto> GetCurrentUser()
         {
-            return Ok(await _userService.GetCurrentUser());
-        }
-
-        // GET: api/Users/5
-        [HttpGet("{id}", Name = "Get")]
-        public string Get(int id)
-        {
-            return "value";
-        }
-
-        // POST: api/Users
-        [HttpPost]
-        public void Post([FromBody] string value)
-        {
-        }
-
-        // PUT: api/Users/5
-        [HttpPut("{id}")]
-        public void Put(int id, [FromBody] string value)
-        {
-        }
-
-        // DELETE: api/ApiWithActions/5
-        [HttpDelete("{id}")]
-        public void Delete(int id)
-        {
+            return Ok(_currentUser.UserInfo);
         }
     }
 }

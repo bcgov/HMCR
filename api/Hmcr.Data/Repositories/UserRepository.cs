@@ -9,6 +9,7 @@ using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -16,20 +17,21 @@ namespace Hmcr.Data.Repositories
 {
     public interface IUserRepository : IHmcrRepositoryBase<HmrSystemUser>
     {
-        Task<UserCurrentDto> GetCurrentUser();
+        Task<UserCurrentDto> GetCurrentUserAsync();
+        Task<HmrSystemUser> GetCurrentActiveUserEntityAsync();
     }
 
     public class UserRepository : HmcrRepositoryBase<HmrSystemUser>, IUserRepository
     {
-        private SmHeaders _smHeaders;
+        private HmcrCurrentUser _currentUser;
 
-        public UserRepository(AppDbContext dbContext, IMapper mapper, SmHeaders smHeaders)
+        public UserRepository(AppDbContext dbContext, IMapper mapper, HmcrCurrentUser currentUser)
             : base(dbContext, mapper)
         {
-            _smHeaders = smHeaders;
+            _currentUser = currentUser;
         }
 
-        public async Task<UserCurrentDto> GetCurrentUser()
+        public async Task<UserCurrentDto> GetCurrentUserAsync()
         {
             var userEntity = await DbSet.AsNoTracking()
                                 .Include(x => x.HmrUserRoles)
@@ -38,7 +40,7 @@ namespace Hmcr.Data.Repositories
                                             .ThenInclude(x => x.Permission)
                                 .Include(x => x.HmrServiceAreaUsers)
                                     .ThenInclude(x => x.ServiceAreaNumberNavigation)
-                                .FirstAsync(u => u.Username == _smHeaders.UniversalId);
+                                .FirstAsync(u => u.Username == _currentUser.UniversalId);
 
             var currentUser = Mapper.Map<UserCurrentDto>(userEntity);
 
@@ -46,8 +48,9 @@ namespace Hmcr.Data.Repositories
                 userEntity
                 .HmrUserRoles
                 .Select(r => r.Role)
+                .Where(r => r.EndDate == null || r.EndDate >= DateTime.Today) //active roles
                 .SelectMany(r => r.HmrRolePermissions.Select(rp => rp.Permission))
-                .Where(p => p.EndDate == null || p.EndDate >= DateTime.Today)
+                .Where(p => p.EndDate == null || p.EndDate >= DateTime.Today) //active permissions
                 .ToLookup(p => p.Name)
                 .Select(p => p.First())
                 .Select(p => p.Name)
@@ -63,6 +66,11 @@ namespace Hmcr.Data.Repositories
             currentUser.ServiceAreas = new List<ServiceAreaDto>(Mapper.Map<IEnumerable<ServiceAreaDto>>(serviceAreas));
 
             return currentUser;
+        }
+
+        public async Task<HmrSystemUser> GetCurrentActiveUserEntityAsync()
+        {
+            return await DbSet.FirstOrDefaultAsync(u => u.Username == _currentUser.UniversalId && (u.EndDate == null || u.EndDate >= DateTime.Today));
         }
     }
 }

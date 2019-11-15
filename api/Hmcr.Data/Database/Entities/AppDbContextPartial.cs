@@ -24,12 +24,12 @@ namespace Hmcr.Data.Database.Entities
         private const string AppLastUpdateUserGuid = "APP_LAST_UPDATE_USER_GUID";
         private const string AppLastUpdateTimestamp = "APP_LAST_UPDATE_TIMESTAMP";
 
-        public readonly SmHeaders _smHeaders;
+        public readonly HmcrCurrentUser _currentUser;
 
-        public AppDbContext(DbContextOptions<AppDbContext> options, SmHeaders smHeaders)
+        public AppDbContext(DbContextOptions<AppDbContext> options, HmcrCurrentUser currentUser)
             : base(options)
         {
-            _smHeaders = smHeaders;
+            _currentUser = currentUser;
         }
 
         public override int SaveChanges()
@@ -102,16 +102,16 @@ namespace Hmcr.Data.Database.Entities
             {
                 if (AuditableEntity(entry.Entity))
                 {
-                    SetAuditProperty(entry.Entity, AppLastUpdateUserid, _smHeaders.UniversalId);
-                    SetAuditProperty(entry.Entity, AppLastUpdateUserDirectory, _smHeaders.AuthDirName);
-                    SetAuditProperty(entry.Entity, AppLastUpdateUserGuid, _smHeaders.UserGuid);
+                    SetAuditProperty(entry.Entity, AppLastUpdateUserid, _currentUser.UniversalId);
+                    SetAuditProperty(entry.Entity, AppLastUpdateUserDirectory, _currentUser.AuthDirName);
+                    SetAuditProperty(entry.Entity, AppLastUpdateUserGuid, _currentUser.UserGuid);
                     SetAuditProperty(entry.Entity, AppLastUpdateTimestamp, currentTime);
 
                     if (entry.State == EntityState.Added)
                     {
-                        SetAuditProperty(entry.Entity, AppCreateUserid, _smHeaders.UniversalId);
-                        SetAuditProperty(entry.Entity, AppCreateUserDirectory, _smHeaders.AuthDirName);
-                        SetAuditProperty(entry.Entity, AppCreateUserGuid, _smHeaders.UserGuid);
+                        SetAuditProperty(entry.Entity, AppCreateUserid, _currentUser.UniversalId);
+                        SetAuditProperty(entry.Entity, AppCreateUserDirectory, _currentUser.AuthDirName);
+                        SetAuditProperty(entry.Entity, AppCreateUserGuid, _currentUser.UserGuid);
                         SetAuditProperty(entry.Entity, AppCreateTimestamp, currentTime);
                         SetAuditProperty(entry.Entity, ConcurrencyControlNumber, 1);
                     }
