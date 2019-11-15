@@ -153,7 +153,7 @@ namespace Hmcr.Api.Extensions
             services.AddScoped<IUnitOfWork, UnitOfWork>();
 
             //SmHeaders
-            services.AddScoped<SmHeaders, SmHeaders>();
+            services.AddScoped<HmcrCurrentUser, HmcrCurrentUser>();
 
             //Permission Handler
             services.AddSingleton<IAuthorizationHandler, PermissionHandler>();
