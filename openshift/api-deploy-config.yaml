@@ -53,11 +53,11 @@ objects:
                   cpu: 500m
                   memory: 512Mi
               env:
-                # - name: CONNECTION_STRING
-                #   valueFrom:
-                #     secretKeyRef:
-                #       name: api-connections
-                #       key: transaction.db
+                - name: CONNECTION_STRING
+                  valueFrom:
+                    secretKeyRef:
+                      name: api-connections
+                      key: hmr.db
                 # - name: JWT_AUTHORITY
                 #   valueFrom:
                 #     secretKeyRef:
