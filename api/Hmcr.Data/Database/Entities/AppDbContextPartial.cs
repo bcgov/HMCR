@@ -14,15 +14,15 @@ namespace Hmcr.Data.Database.Entities
 {
     public partial class AppDbContext
     {
-        private const string ConcurrencyControlNumber = "CONCURRENCY_CONTROL_NUMBER";
-        private const string AppCreateUserid = "APP_CREATE_USERID";
-        private const string AppCreateUserDirectory = "APP_CREATE_USER_DIRECTORY";
-        private const string AppCreateUserGuid = "APP_CREATE_USER_GUID";
-        private const string AppCreateTimestamp = "APP_CREATE_TIMESTAMP";
-        private const string AppLastUpdateUserid = "APP_LAST_UPDATE_USERID";
-        private const string AppLastUpdateUserDirectory = "APP_LAST_UPDATE_USER_DIRECTORY";
-        private const string AppLastUpdateUserGuid = "APP_LAST_UPDATE_USER_GUID";
-        private const string AppLastUpdateTimestamp = "APP_LAST_UPDATE_TIMESTAMP";
+        private const string ConcurrencyControlNumber = "ConcurrencyControlNumber";
+        private const string AppCreateUserid = "AppCreateUserid";
+        private const string AppCreateUserDirectory = "AppCreateUserDirectory";
+        private const string AppCreateUserGuid = "AppCreateUserGuid";
+        private const string AppCreateTimestamp = "AppCreateTimestamp";
+        private const string AppLastUpdateUserid = "AppLastUpdateUserid";
+        private const string AppLastUpdateUserDirectory = "AppLastUpdateUserDirectory";
+        private const string AppLastUpdateUserGuid = "AppLastUpdateUserGuid";
+        private const string AppLastUpdateTimestamp = "AppLastUpdateTimestamp";
 
         public readonly HmcrCurrentUser _currentUser;
 
@@ -45,13 +45,13 @@ namespace Hmcr.Data.Database.Entities
             {
                 Console.WriteLine(e);
 
-                if (!e.InnerException.Message.Contains(" Cannot insert duplicate key in object."))
+                if (e.InnerException.Message.Contains(" Cannot insert duplicate key in object."))
                 {
-                    throw new Exception("This record already exists.");
+                    throw new Exception("This record already exists.", e);
                 }
                 else if (e.InnerException.Message.StartsWith("20180"))
                 {
-                    throw new Exception("This record has been updated by another user.");
+                    throw new Exception("This record has been updated by another user.", e);
                 }
 
                 throw;

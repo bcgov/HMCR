@@ -6,6 +6,7 @@ using Hmcr.Model.Dtos.UserRole;
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Text.Json.Serialization;
 
 namespace Hmcr.Model.Dtos.User
 {
@@ -17,6 +18,7 @@ namespace Hmcr.Model.Dtos.User
             Permissions = new List<string>();
         }
 
+        [JsonPropertyName("id")]
         public decimal SystemUserId { get; set; }   
         public decimal PartyId { get; set; }
         public string UserGuid { get; set; }

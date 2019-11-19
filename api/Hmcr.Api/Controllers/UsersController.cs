@@ -38,18 +38,23 @@ namespace Hmcr.Api.Controllers
         [HttpGet("userstatus")]
         public ActionResult<UserTypeDto> GetUserStatus()
         {
-            return Ok(new UserStatusDto());
+            return Ok(new UserStatusDto().UserStatuses);
         }
 
-        [HttpGet("")]
+        [HttpGet]
         public async Task<ActionResult<PagedDto<UserSearchDto>>> GetUsersAsync(
             [FromQuery]string? serviceAreas, [FromQuery]string? userTypes, [FromQuery]string searchText, [FromQuery]bool? isActive, 
             [FromQuery]int pageSize, [FromQuery]int pageNumber, [FromQuery]string orderBy)
         {
-
             orderBy ??= "Username";
 
             return Ok(await _userService.GetUsersAsync(serviceAreas.ToDecimalArray(), userTypes.ToStringArray(), searchText, isActive, pageSize, pageNumber, orderBy));
+        }
+
+        [HttpPost]
+        public async Task<ActionResult<UserDto>> CreateUser(UserCreateDto user)
+        {
+            return Ok(await _userService.CreateUserAsync(user));
         }
 
     }
