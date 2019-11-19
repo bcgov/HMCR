@@ -16,7 +16,7 @@ namespace Hmcr.Domain.Services
     {
         Task<UserCurrentDto> GetCurrentUserAsync();
         Task<bool> ProcessFirstUserLoginAsync();
-        Task<PagedDto<UserSearchDto>> GetUsers(decimal[]? serviceAreas, string[]? userTypes, string searchText, bool? isActive, int pageSize, int pageNumber, string orderBy);
+        Task<PagedDto<UserSearchDto>> GetUsersAsync(decimal[]? serviceAreas, string[]? userTypes, string searchText, bool? isActive, int pageSize, int pageNumber, string orderBy);
     }
     public class UserService : IUserService
     {
@@ -93,9 +93,9 @@ namespace Hmcr.Domain.Services
             _partyRepo.Add(party);
         }
 
-        public async Task<PagedDto<UserSearchDto>> GetUsers(decimal[]? serviceAreas, string[]? userTypes, string searchText, bool? isActive, int pageSize, int pageNumber, string orderBy)
+        public async Task<PagedDto<UserSearchDto>> GetUsersAsync(decimal[]? serviceAreas, string[]? userTypes, string searchText, bool? isActive, int pageSize, int pageNumber, string orderBy)
         {
-            return await _userRepo.GetUsers(serviceAreas, userTypes, searchText, isActive, pageSize, pageNumber, orderBy);
+            return await _userRepo.GetUsersAsync(serviceAreas, userTypes, searchText, isActive, pageSize, pageNumber, orderBy);
         }
     }
 }

@@ -3,7 +3,6 @@ using Hmcr.Data.Database.Entities;
 using Hmcr.Data.Repositories.Base;
 using Hmcr.Model;
 using Hmcr.Model.Dtos;
-using Hmcr.Model.Dtos.Permission;
 using Hmcr.Model.Dtos.ServiceArea;
 using Hmcr.Model.Dtos.User;
 using Hmcr.Model.Utils;
@@ -11,8 +10,6 @@ using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Linq.Expressions;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace Hmcr.Data.Repositories
@@ -21,7 +18,7 @@ namespace Hmcr.Data.Repositories
     {
         Task<UserCurrentDto> GetCurrentUserAsync();
         Task<HmrSystemUser> GetCurrentActiveUserEntityAsync();
-        Task<PagedDto<UserSearchDto>> GetUsers(decimal[]? serviceAreas, string[]? userTypes, string searchText, bool? isActive, int pageSize, int pageNumber, string orderBy);
+        Task<PagedDto<UserSearchDto>> GetUsersAsync(decimal[]? serviceAreas, string[]? userTypes, string searchText, bool? isActive, int pageSize, int pageNumber, string orderBy);
     }
 
     public class UserRepository : HmcrRepositoryBase<HmrSystemUser>, IUserRepository
@@ -76,7 +73,7 @@ namespace Hmcr.Data.Repositories
             return await DbSet.FirstOrDefaultAsync(u => u.Username == _currentUser.UniversalId && (u.EndDate == null || u.EndDate >= DateTime.Today));
         }
 
-        public async Task<PagedDto<UserSearchDto>> GetUsers(decimal[]? serviceAreas, string[]? userTypes, string searchText, bool? isActive, int pageSize, int pageNumber, string orderBy)
+        public async Task<PagedDto<UserSearchDto>> GetUsersAsync(decimal[]? serviceAreas, string[]? userTypes, string searchText, bool? isActive, int pageSize, int pageNumber, string orderBy)
         {
             var query = DbSet.AsNoTracking();
 
