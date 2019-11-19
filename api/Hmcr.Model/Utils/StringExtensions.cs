@@ -11,5 +11,35 @@
         {
             return string.IsNullOrWhiteSpace(str);
         }
+
+        public static decimal[] ToDecimalArray(this string str)
+        {
+            if (str == null) return new decimal[] { };
+
+            decimal[] result;
+
+            try
+            {
+                string[] tokens = str.Split(',');
+
+                result = new decimal[tokens.Length];
+
+                for (int i = 0; i < tokens.Length; i++)
+                {
+                    result[i] = decimal.Parse(tokens[i]);
+                }
+            }
+            catch
+            {
+                result = null;
+            }
+
+            return result;
+        }
+
+        public static string[] ToStringArray(this string str)
+        {
+            return str == null ? (new string[] { }) : str.Split(',');
+        }
     }
 }

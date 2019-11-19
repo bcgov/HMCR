@@ -2,9 +2,11 @@
 using Hmcr.Data.Database.Entities;
 using Hmcr.Data.Repositories.Base;
 using Hmcr.Model;
+using Hmcr.Model.Dtos;
 using Hmcr.Model.Dtos.Permission;
 using Hmcr.Model.Dtos.ServiceArea;
 using Hmcr.Model.Dtos.User;
+using Hmcr.Model.Utils;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -19,6 +21,7 @@ namespace Hmcr.Data.Repositories
     {
         Task<UserCurrentDto> GetCurrentUserAsync();
         Task<HmrSystemUser> GetCurrentActiveUserEntityAsync();
+        Task<PagedDto<UserSearchDto>> GetUsers(decimal[]? serviceAreas, string[]? userTypes, string searchText, bool? isActive, int pageSize, int pageNumber, string orderBy);
     }
 
     public class UserRepository : HmcrRepositoryBase<HmrSystemUser>, IUserRepository
@@ -71,6 +74,57 @@ namespace Hmcr.Data.Repositories
         public async Task<HmrSystemUser> GetCurrentActiveUserEntityAsync()
         {
             return await DbSet.FirstOrDefaultAsync(u => u.Username == _currentUser.UniversalId && (u.EndDate == null || u.EndDate >= DateTime.Today));
+        }
+
+        public async Task<PagedDto<UserSearchDto>> GetUsers(decimal[]? serviceAreas, string[]? userTypes, string searchText, bool? isActive, int pageSize, int pageNumber, string orderBy)
+        {
+            var query = DbSet.AsNoTracking();
+
+            if (serviceAreas != null && serviceAreas.Length > 0)
+            {
+                query = query.Where(u => u.HmrServiceAreaUsers.Any(s => serviceAreas.Contains(s.ServiceAreaNumber)));
+            }
+
+            if (userTypes != null && userTypes.Length > 0)
+            {
+                query = query.Where(u => userTypes.Contains(u.UserType));
+            }
+
+            if (searchText.IsNotEmpty())
+            {
+                query = query
+                    .Where(u => u.Username.Contains(searchText) || u.FirstName.Contains(searchText) || u.LastName.Contains(searchText) || u.BusinessLegalName.Contains(searchText));
+            }
+            
+            if (isActive != null)
+            {
+                query = (bool)isActive
+                    ? query.Where(u => u.EndDate == null || u.EndDate >= DateTime.Today)
+                    : query.Where(u => u.EndDate != null || u.EndDate < DateTime.Today.AddDays(1));
+            }
+
+            query = query.Include(u => u.HmrServiceAreaUsers);
+
+            var pagedEntity = await Page<HmrSystemUser, HmrSystemUser>(query, pageSize, pageNumber, orderBy);
+
+            var users = Mapper.Map<IEnumerable<UserSearchDto>>(pagedEntity.SourceList);
+
+            var userServiceArea = pagedEntity.SourceList.SelectMany(u => u.HmrServiceAreaUsers).ToLookup(u => u.SystemUserId);
+
+            foreach (var user in users)
+            {
+                user.ServiceAreas = string.Join(",", userServiceArea[user.SystemUserId].Select(x => x.ServiceAreaNumber.ToString()));
+            }
+
+            var pagedDTO = new PagedDto<UserSearchDto>
+            {
+                PageNumber = pageNumber,
+                PageSize = pageSize,
+                TotalCount = pagedEntity.TotalCount,
+                SourceList = users
+            };
+
+            return pagedDTO;
         }
     }
 }

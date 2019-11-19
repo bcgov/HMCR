@@ -44,7 +44,7 @@ namespace Hmcr.Data.Mappings
             CreateMap<RolePermissionDto, HmrRolePermission>();
 
             CreateMap<ServiceAreaDto, HmrServiceArea>();
-            CreateMap<ServiceAreaDropdownDto, HmrServiceArea>();
+            CreateMap<ServiceAreaNumberDto, HmrServiceArea>();
 
             CreateMap<ServiceAreaUserDto, HmrServiceAreaUser>();
 
@@ -55,6 +55,7 @@ namespace Hmcr.Data.Mappings
             CreateMap<UserDto, HmrSystemUser>();
             CreateMap<UserCreateDto, HmrSystemUser>();
             CreateMap<UserCurrentDto, HmrSystemUser>();
+            CreateMap<UserSearchDto, HmrSystemUser>();
 
             CreateMap<UserRoleDto, HmrUserRole>();
         }

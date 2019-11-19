@@ -2,6 +2,7 @@
 using Hmcr.Data.Database.Entities;
 using Hmcr.Data.Repositories;
 using Hmcr.Model;
+using Hmcr.Model.Dtos;
 using Hmcr.Model.Dtos.Party;
 using Hmcr.Model.Dtos.User;
 using System;
@@ -15,6 +16,7 @@ namespace Hmcr.Domain.Services
     {
         Task<UserCurrentDto> GetCurrentUserAsync();
         Task<bool> ProcessFirstUserLoginAsync();
+        Task<PagedDto<UserSearchDto>> GetUsers(decimal[]? serviceAreas, string[]? userTypes, string searchText, bool? isActive, int pageSize, int pageNumber, string orderBy);
     }
     public class UserService : IUserService
     {
@@ -89,6 +91,11 @@ namespace Hmcr.Domain.Services
             };
 
             _partyRepo.Add(party);
+        }
+
+        public async Task<PagedDto<UserSearchDto>> GetUsers(decimal[]? serviceAreas, string[]? userTypes, string searchText, bool? isActive, int pageSize, int pageNumber, string orderBy)
+        {
+            return await _userRepo.GetUsers(serviceAreas, userTypes, searchText, isActive, pageSize, pageNumber, orderBy);
         }
     }
 }

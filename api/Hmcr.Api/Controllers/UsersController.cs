@@ -1,8 +1,11 @@
 ﻿using Hmcr.Domain.Services;
 using Hmcr.Model;
+using Hmcr.Model.Dtos;
 using Hmcr.Model.Dtos.User;
+using Hmcr.Model.Utils;
 using Microsoft.AspNetCore.Mvc;
 using System.Collections;
+using System.Threading.Tasks;
 
 namespace Hmcr.Api.Controllers
 {
@@ -37,5 +40,17 @@ namespace Hmcr.Api.Controllers
         {
             return Ok(new UserStatusDto());
         }
+
+        [HttpGet("")]
+        public async Task<ActionResult<PagedDto<UserSearchDto>>> GetUsers(
+            [FromQuery]string? serviceAreas, [FromQuery]string? userTypes, [FromQuery]string searchText, [FromQuery]bool? isActive, 
+            [FromQuery]int pageSize, [FromQuery]int pageNumber, [FromQuery]string orderBy)
+        {
+
+            orderBy ??= "Username";
+
+            return Ok(await _userService.GetUsers(serviceAreas.ToDecimalArray(), userTypes.ToStringArray(), searchText, isActive, pageSize, pageNumber, orderBy));
+        }
+
     }
 }

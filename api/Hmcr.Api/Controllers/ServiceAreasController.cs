@@ -24,7 +24,7 @@ namespace Hmcr.Api.Controllers
         }
 
         [HttpGet("")]
-        public async Task<ActionResult<Task<IEnumerable<ServiceAreaDropdownDto>>>> GetAllServiceArea()
+        public async Task<ActionResult<Task<IEnumerable<ServiceAreaNumberDto>>>> GetAllServiceArea()
         {
             return Ok(await _svcAreaSvc.GetAllServiceAreasAsync());
         }
