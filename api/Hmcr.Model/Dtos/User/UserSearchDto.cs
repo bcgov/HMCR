@@ -1,0 +1,17 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Text;
+
+namespace Hmcr.Model.Dtos.User
+{
+    public class UserSearchDto
+    {
+        public decimal SystemUserId { get; set; }
+        public string UserType { get; set; }
+        public string LastName { get; set; }
+        public string FirstName { get; set; }
+        public string Username { get; set; }
+        public string BusinessLegalName { get; set; }
+        public string ServiceAreas { get; set; }
+    }
+}

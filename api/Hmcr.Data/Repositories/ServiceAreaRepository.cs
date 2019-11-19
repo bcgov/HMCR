@@ -14,7 +14,7 @@ namespace Hmcr.Data.Repositories
     public interface IServiceAreaRepository
     {
         Task<IEnumerable<ServiceAreaDto>> GetServiceAreaBySystemUserIdAsync(long systemUserId);
-        Task<IEnumerable<ServiceAreaDropdownDto>> GetAllServiceAreasAsync();
+        Task<IEnumerable<ServiceAreaNumberDto>> GetAllServiceAreasAsync();
     }
 
     public class ServiceAreaRepository : HmcrRepositoryBase<HmrServiceArea>, IServiceAreaRepository
@@ -33,9 +33,9 @@ namespace Hmcr.Data.Repositories
             return Mapper.Map<IEnumerable<ServiceAreaDto>>(entity);
         }
 
-        public async Task<IEnumerable<ServiceAreaDropdownDto>> GetAllServiceAreasAsync()
+        public async Task<IEnumerable<ServiceAreaNumberDto>> GetAllServiceAreasAsync()
         {
-            return await GetAllAsync<ServiceAreaDropdownDto>();
+            return await GetAllAsync<ServiceAreaNumberDto>();
         }
     }
 }

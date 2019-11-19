@@ -25,7 +25,7 @@ namespace Hmcr.Data.Repositories.Base
         Task<IEnumerable<TDto>> GetAllAsync<TDto>();
         Task<IEnumerable<TDto>> GetAllAsync<TDto>(Expression<Func<TEntity, bool>> where);
         Task<TDto> GetFirstOrDefaultAsync<TDto>(Expression<Func<TEntity, bool>> where);
-        PagedDto<TOutput> Page<TInput, TOutput>(IQueryable<TInput> list, int pageSize, int pageNumber, string orderBy);
+        Task<PagedDto<TOutput>> Page<TInput, TOutput>(IQueryable<TInput> list, int pageSize, int pageNumber, string orderBy);
     }
 
     public class HmcrRepositoryBase<TEntity> : IHmcrRepositoryBase<TEntity>
@@ -127,7 +127,7 @@ namespace Hmcr.Data.Repositories.Base
             return Mapper.Map<TDto>(await DbSet.Where(where).FirstOrDefaultAsync<TEntity>());
         }
 
-        public PagedDto<TOutput> Page<TInput, TOutput>(IQueryable<TInput> list, int pageSize, int pageNumber, string orderBy)
+        public async Task<PagedDto<TOutput>> Page<TInput, TOutput>(IQueryable<TInput> list, int pageSize, int pageNumber, string orderBy)
         {
             var totalRecords = list.Count();
 
@@ -140,11 +140,14 @@ namespace Hmcr.Data.Repositories.Base
                     .Take(pageSize);
             }
 
+            var result = await pagedList.ToListAsync();
+
             IEnumerable<TOutput> outputList;
-            if (typeof(TOutput) == typeof(TInput))
-                outputList = (IEnumerable<TOutput>)pagedList.AsEnumerable();
+
+            if (typeof(TOutput) != typeof(TInput))
+                outputList = Mapper.Map<IEnumerable<TInput>, IEnumerable<TOutput>>(result);
             else
-                outputList = Mapper.Map<IEnumerable<TInput>, IEnumerable<TOutput>>(pagedList.AsEnumerable());
+                outputList = (IEnumerable<TOutput>) result;
 
             var pagedDTO = new PagedDto<TOutput>
             {
