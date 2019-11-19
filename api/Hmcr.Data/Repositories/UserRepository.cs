@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Hmcr.Data.Database;
 using Hmcr.Data.Database.Entities;
 using Hmcr.Data.Repositories.Base;
 using Hmcr.Model;
@@ -19,16 +20,19 @@ namespace Hmcr.Data.Repositories
         Task<UserCurrentDto> GetCurrentUserAsync();
         Task<HmrSystemUser> GetCurrentActiveUserEntityAsync();
         Task<PagedDto<UserSearchDto>> GetUsersAsync(decimal[]? serviceAreas, string[]? userTypes, string searchText, bool? isActive, int pageSize, int pageNumber, string orderBy);
+        Task<UserDto> CreateUserAsync(UserCreateDto user);
     }
 
     public class UserRepository : HmcrRepositoryBase<HmrSystemUser>, IUserRepository
     {
         private HmcrCurrentUser _currentUser;
+        private IUnitOfWork _unitOfWork;
 
-        public UserRepository(AppDbContext dbContext, IMapper mapper, HmcrCurrentUser currentUser)
+        public UserRepository(AppDbContext dbContext, IMapper mapper, HmcrCurrentUser currentUser, IUnitOfWork unitOfwork)
             : base(dbContext, mapper)
         {
             _currentUser = currentUser;
+            _unitOfWork = unitOfwork;
         }
 
         public async Task<UserCurrentDto> GetCurrentUserAsync()
@@ -122,6 +126,33 @@ namespace Hmcr.Data.Repositories
             };
 
             return pagedDTO;
+        }
+
+        public async Task<UserDto> CreateUserAsync(UserCreateDto user)
+        {
+            var userEntity = await AddAsync(user);
+
+            foreach (var areaNumber in user.ServiceAreaNumbers)
+            {
+                userEntity.HmrServiceAreaUsers
+                    .Add(new HmrServiceAreaUser
+                    {
+                        ServiceAreaNumber = areaNumber
+                    });
+            }
+
+            foreach (var roleId in user.UserRoleIds)
+            {
+                userEntity.HmrUserRoles
+                    .Add(new HmrUserRole
+                    {
+                        RoleId = roleId
+                    }); ;
+            }
+
+            _unitOfWork.Commit();
+
+            return Mapper.Map<UserDto>(await DbSet.FindAsync(userEntity.SystemUserId));
         }
     }
 }

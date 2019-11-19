@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Text.Json.Serialization;
 
 namespace Hmcr.Model.Dtos.User
 {
@@ -11,9 +12,26 @@ namespace Hmcr.Model.Dtos.User
 
         public UserTypeDto()
         {
-            UserTypes = new string[] { INTERNAL, BUSINESS };
+            UserTypes = new List<UserTypeDto>()
+            {
+                new UserTypeDto
+                {
+                    UserTypeId = 1,
+                    UserType = INTERNAL
+                },
+                new UserTypeDto
+                {
+                    UserTypeId = 2,
+                    UserType = BUSINESS
+                }
+            };
         }
 
-        public virtual IEnumerable<string> UserTypes { get; set; }
+        [JsonPropertyName("id")]
+        public decimal UserTypeId { get; set; }
+        [JsonPropertyName("name")]
+        public string UserType { get; set; }
+
+        public virtual IEnumerable<UserTypeDto> UserTypes { get; set; }
     }
 }

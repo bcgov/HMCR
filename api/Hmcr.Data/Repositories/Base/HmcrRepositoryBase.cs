@@ -13,7 +13,8 @@ namespace Hmcr.Data.Repositories.Base
     public interface IHmcrRepositoryBase<TEntity>
         where TEntity : class
     {
-        void Add<TDto>(TDto dto);
+        TEntity Add<TDto>(TDto dto);
+        Task<TEntity> AddAsync<TDto>(TDto dto);
         void Update<TDto>(long id, TDto dto);
         void Update<TDto>(string id, TDto dto);
         void Delete<TDto>(TDto dto);
@@ -49,10 +50,20 @@ namespace Hmcr.Data.Repositories.Base
         }
 
         #region Implementation
-        public virtual void Add<TDto>(TDto dto)
+        public virtual TEntity Add<TDto>(TDto dto)
         {
             var result = Mapper.Map<TEntity>(dto);
             DbSet.Add(result);
+
+            return result;
+        }
+
+        public async virtual Task<TEntity> AddAsync<TDto>(TDto dto)
+        {
+            var result = Mapper.Map<TEntity>(dto);
+            await DbSet.AddAsync(result);
+
+            return result;
         }
 
         public virtual void Update<TDto>(long id, TDto dto)

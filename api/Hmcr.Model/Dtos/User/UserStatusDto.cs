@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Text.Json.Serialization;
 
 namespace Hmcr.Model.Dtos.User
 {
@@ -11,9 +12,26 @@ namespace Hmcr.Model.Dtos.User
 
         public UserStatusDto()
         {
-            UserStatus = new string[] { ACTIVE, INACTIVE };
+            UserStatuses = new List<UserStatusDto>()
+            {
+                new UserStatusDto
+                {
+                    UserStatusId = 1,
+                    UserStatus = ACTIVE
+                },
+                new UserStatusDto
+                {
+                    UserStatusId = 2,
+                    UserStatus = INACTIVE
+                }
+            };
         }
 
-        public virtual IEnumerable<string> UserStatus { get; set; }
+        [JsonPropertyName("id")]
+        public decimal UserStatusId { get; set; }
+        [JsonPropertyName("name")]
+        public string UserStatus { get; set; }
+
+        public virtual IEnumerable<UserStatusDto> UserStatuses { get; set; }
     }
 }

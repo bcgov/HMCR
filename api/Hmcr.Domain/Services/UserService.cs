@@ -17,6 +17,7 @@ namespace Hmcr.Domain.Services
         Task<UserCurrentDto> GetCurrentUserAsync();
         Task<bool> ProcessFirstUserLoginAsync();
         Task<PagedDto<UserSearchDto>> GetUsersAsync(decimal[]? serviceAreas, string[]? userTypes, string searchText, bool? isActive, int pageSize, int pageNumber, string orderBy);
+        Task<UserDto> CreateUserAsync(UserCreateDto user);
     }
     public class UserService : IUserService
     {
@@ -96,6 +97,13 @@ namespace Hmcr.Domain.Services
         public async Task<PagedDto<UserSearchDto>> GetUsersAsync(decimal[]? serviceAreas, string[]? userTypes, string searchText, bool? isActive, int pageSize, int pageNumber, string orderBy)
         {
             return await _userRepo.GetUsersAsync(serviceAreas, userTypes, searchText, isActive, pageSize, pageNumber, orderBy);
+        }
+
+        public async Task<UserDto> CreateUserAsync(UserCreateDto user)
+        {
+            //user.EndDate ??= Constants.MaxDate;
+
+            return await _userRepo.CreateUserAsync(user);
         }
     }
 }

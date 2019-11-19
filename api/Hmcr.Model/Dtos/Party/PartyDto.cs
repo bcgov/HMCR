@@ -4,11 +4,13 @@ using Hmcr.Model.Dtos.User;
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Text.Json.Serialization;
 
 namespace Hmcr.Model.Dtos.Party
 {
     public class PartyDto
     {
+        [JsonPropertyName("id")]
         public decimal PartyId { get; set; }
         public Guid? BusinessGuid { get; set; }
         public string BusinessLegalName { get; set; }
