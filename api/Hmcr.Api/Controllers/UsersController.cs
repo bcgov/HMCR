@@ -32,7 +32,7 @@ namespace Hmcr.Api.Controllers
         [HttpGet("usertypes")]
         public ActionResult<UserTypeDto> GetUserTypes()
         {
-            return Ok(new UserTypeDto());
+            return Ok(new UserTypeDto().UserTypes);
         }
 
         [HttpGet("userstatus")]
