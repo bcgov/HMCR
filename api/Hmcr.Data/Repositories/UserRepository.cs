@@ -20,7 +20,8 @@ namespace Hmcr.Data.Repositories
         Task<UserCurrentDto> GetCurrentUserAsync();
         Task<HmrSystemUser> GetCurrentActiveUserEntityAsync();
         Task<PagedDto<UserSearchDto>> GetUsersAsync(decimal[]? serviceAreas, string[]? userTypes, string searchText, bool? isActive, int pageSize, int pageNumber, string orderBy);
-        Task<UserDto> CreateUserAsync(UserCreateDto user);
+        Task<UserDto> GetUserAsync(decimal systemUserId);
+        Task<HmrSystemUser> CreateUserAsync(UserCreateDto user);
     }
 
     public class UserRepository : HmcrRepositoryBase<HmrSystemUser>, IUserRepository
@@ -128,7 +129,12 @@ namespace Hmcr.Data.Repositories
             return pagedDTO;
         }
 
-        public async Task<UserDto> CreateUserAsync(UserCreateDto user)
+        public async Task<UserDto> GetUserAsync(decimal systemUserId)
+        {
+            return Mapper.Map<UserDto>(await DbSet.FindAsync(systemUserId));
+        }
+
+        public async Task<HmrSystemUser> CreateUserAsync(UserCreateDto user)
         {
             var userEntity = await AddAsync(user);
 
@@ -150,9 +156,7 @@ namespace Hmcr.Data.Repositories
                     }); ;
             }
 
-            _unitOfWork.Commit();
-
-            return Mapper.Map<UserDto>(await DbSet.FindAsync(userEntity.SystemUserId));
+            return userEntity;
         }
     }
 }
