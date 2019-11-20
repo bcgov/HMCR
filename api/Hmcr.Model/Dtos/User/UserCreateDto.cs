@@ -1,9 +1,5 @@
-﻿using Hmcr.Model.Dtos.Party;
-using Hmcr.Model.Dtos.ServiceAreaUser;
-using Hmcr.Model.Dtos.UserRole;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.Text;
 
 namespace Hmcr.Model.Dtos.User
 {
