@@ -54,7 +54,7 @@ namespace Hmcr.Domain.Services
                 if (userEntity.UserType == _currentUser.UserType)
                 {
                     UpdateUserEntity(userEntity);
-                    CreatePartyEntityIfNecessary();
+                    CreatePartyEntityIfNecessaryAsync();
                     await _unitOfWork.CommitAsync();
                 }
                 else
@@ -74,7 +74,7 @@ namespace Hmcr.Domain.Services
             userEntity.UserType = _currentUser.UserType;
         }
 
-        private async void CreatePartyEntityIfNecessary()
+        private async void CreatePartyEntityIfNecessaryAsync()
         {
             if (_currentUser.UserType == UserTypeDto.INTERNAL)
                 return;
@@ -92,7 +92,7 @@ namespace Hmcr.Domain.Services
                 DisplayName = _currentUser.BusinessLegalName.Trim()
             };
 
-            _partyRepo.Add(party);
+            await _partyRepo.AddAsync(party);
         }
 
         public async Task<PagedDto<UserSearchDto>> GetUsersAsync(decimal[]? serviceAreas, string[]? userTypes, string searchText, bool? isActive, int pageSize, int pageNumber, string orderBy)
@@ -107,6 +107,10 @@ namespace Hmcr.Domain.Services
 
         public async Task<decimal> CreateUserAsync(UserCreateDto user)
         {
+            //validation
+            //username must be unique
+            //field validation
+
             var userEntity = await _userRepo.CreateUserAsync(user);
             await _unitOfWork.CommitAsync();
 
