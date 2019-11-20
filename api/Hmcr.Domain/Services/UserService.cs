@@ -5,6 +5,7 @@ using Hmcr.Model;
 using Hmcr.Model.Dtos;
 using Hmcr.Model.Dtos.Party;
 using Hmcr.Model.Dtos.User;
+using Hmcr.Model.Utils;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -19,6 +20,7 @@ namespace Hmcr.Domain.Services
         Task<PagedDto<UserSearchDto>> GetUsersAsync(decimal[]? serviceAreas, string[]? userTypes, string searchText, bool? isActive, int pageSize, int pageNumber, string orderBy);
         Task<UserDto> GetUserAsync(decimal systemUserId);
         Task<decimal> CreateUserAsync(UserCreateDto user);
+        Task<Dictionary<string, List<string>>> ValidateUserDtoAsync(UserCreateDto user);
     }
     public class UserService : IUserService
     {
@@ -26,13 +28,15 @@ namespace Hmcr.Domain.Services
         private IPartyRepository _partyRepo;
         private IUnitOfWork _unitOfWork;
         private HmcrCurrentUser _currentUser;
+        private IFieldValidatorService _validator;
 
-        public UserService(IUserRepository userRepo, IPartyRepository partyRepo, IUnitOfWork unitOfWork, HmcrCurrentUser currentUser)
+        public UserService(IUserRepository userRepo, IPartyRepository partyRepo, IUnitOfWork unitOfWork, HmcrCurrentUser currentUser, IFieldValidatorService validator)
         {
             _userRepo = userRepo;
             _partyRepo = partyRepo;
             _unitOfWork = unitOfWork;
             _currentUser = currentUser;
+            _validator = validator;
         }
 
         public async Task<UserCurrentDto> GetCurrentUserAsync()
@@ -107,14 +111,38 @@ namespace Hmcr.Domain.Services
 
         public async Task<decimal> CreateUserAsync(UserCreateDto user)
         {
-            //validation
-            //username must be unique
-            //field validation
-
             var userEntity = await _userRepo.CreateUserAsync(user);
             await _unitOfWork.CommitAsync();
 
             return userEntity.SystemUserId;
+        }
+
+        public async Task<Dictionary<string, List<string>>> ValidateUserDtoAsync(UserCreateDto user)
+        {
+            var entityName = Entities.User;
+            var errors = new Dictionary<string, List<string>>();
+
+            _validator.Validate(entityName, Fields.Username, user.Username, errors);
+            _validator.Validate(entityName, Fields.FirstName, user.FirstName, errors);
+            _validator.Validate(entityName, Fields.LastName, user.LastName, errors);
+            _validator.Validate(entityName, Fields.Email, user.Email, errors);
+            _validator.Validate(entityName, Fields.EndDate, user.EndDate, errors);
+
+            if (user.Username.IsNotEmpty() && await _userRepo.DoesUsernameExistAsync(user.Username))
+            {
+                var message = $"Username [{user.Username}] already exists.";
+
+                if (errors.ContainsKey(Fields.Username))
+                {
+                    errors[Fields.Username].Add(message);
+                }
+                else
+                {
+                    errors.Add(Fields.Username, new List<string> { message });
+                }
+            }
+
+            return errors;
         }
     }
 }

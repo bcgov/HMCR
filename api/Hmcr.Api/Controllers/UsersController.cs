@@ -100,6 +100,13 @@ namespace Hmcr.Api.Controllers
         [HttpPost]
         public async Task<ActionResult<UserDto>> CreateUser(UserCreateDto user)
         {
+            var errors = await _userService.ValidateUserDtoAsync(user);
+
+            if (errors.Count > 0)
+            {
+                return ValidationUtils.GetValidationErrorResult(errors, ControllerContext);
+            }
+
             var systemUserId = await _userService.CreateUserAsync(user);
 
             return CreatedAtRoute("GetUser", new { id = systemUserId }, await _userService.GetUserAsync(systemUserId));
