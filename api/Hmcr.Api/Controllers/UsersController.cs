@@ -41,6 +41,17 @@ namespace Hmcr.Api.Controllers
             return Ok(new UserStatusDto().UserStatuses);
         }
 
+        /// <summary>
+        /// Search users
+        /// </summary>
+        /// <param name="serviceAreas">Comma separated service area numbers. Example: serviceareas=1,2</param>
+        /// <param name="userTypes">Comma separated user types. Example: usertypes=INTERNAL,BUSINESS</param>
+        /// <param name="searchText">Search text for first name, last name, orgnization name, username</param>
+        /// <param name="isActive">True or false</param>
+        /// <param name="pageSize">Page size</param>
+        /// <param name="pageNumber">Page number</param>
+        /// <param name="orderBy">Order by column(s). Example: orderby=username</param>
+        /// <returns></returns>
         [HttpGet]
         public async Task<ActionResult<PagedDto<UserSearchDto>>> GetUsersAsync(
             [FromQuery]string? serviceAreas, [FromQuery]string? userTypes, [FromQuery]string searchText, [FromQuery]bool? isActive, 
