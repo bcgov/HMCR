@@ -16,19 +16,19 @@ namespace Hmcr.Model.Dtos.User
             {
                 new UserTypeDto
                 {
-                    UserTypeId = 1,
+                    UserTypeId = INTERNAL,
                     UserType = INTERNAL
                 },
                 new UserTypeDto
                 {
-                    UserTypeId = 2,
+                    UserTypeId = BUSINESS,
                     UserType = BUSINESS
                 }
             };
         }
 
         [JsonPropertyName("id")]
-        public decimal UserTypeId { get; set; }
+        public string UserTypeId { get; set; }
         [JsonPropertyName("name")]
         public string UserType { get; set; }
 
