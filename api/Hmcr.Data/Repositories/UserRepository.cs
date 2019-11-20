@@ -27,13 +27,11 @@ namespace Hmcr.Data.Repositories
     public class UserRepository : HmcrRepositoryBase<HmrSystemUser>, IUserRepository
     {
         private HmcrCurrentUser _currentUser;
-        private IUnitOfWork _unitOfWork;
 
-        public UserRepository(AppDbContext dbContext, IMapper mapper, HmcrCurrentUser currentUser, IUnitOfWork unitOfwork)
+        public UserRepository(AppDbContext dbContext, IMapper mapper, HmcrCurrentUser currentUser)
             : base(dbContext, mapper)
         {
             _currentUser = currentUser;
-            _unitOfWork = unitOfwork;
         }
 
         public async Task<UserCurrentDto> GetCurrentUserAsync()
