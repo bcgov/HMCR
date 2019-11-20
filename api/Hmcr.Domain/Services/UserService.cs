@@ -17,7 +17,8 @@ namespace Hmcr.Domain.Services
         Task<UserCurrentDto> GetCurrentUserAsync();
         Task<bool> ProcessFirstUserLoginAsync();
         Task<PagedDto<UserSearchDto>> GetUsersAsync(decimal[]? serviceAreas, string[]? userTypes, string searchText, bool? isActive, int pageSize, int pageNumber, string orderBy);
-        Task<UserDto> CreateUserAsync(UserCreateDto user);
+        Task<UserDto> GetUserAsync(decimal systemUserId);
+        Task<decimal> CreateUserAsync(UserCreateDto user);
     }
     public class UserService : IUserService
     {
@@ -54,7 +55,7 @@ namespace Hmcr.Domain.Services
                 {
                     UpdateUserEntity(userEntity);
                     CreatePartyEntityIfNecessary();
-                    _unitOfWork.Commit();
+                    await _unitOfWork.CommitAsync();
                 }
                 else
                 {
@@ -99,11 +100,17 @@ namespace Hmcr.Domain.Services
             return await _userRepo.GetUsersAsync(serviceAreas, userTypes, searchText, isActive, pageSize, pageNumber, orderBy);
         }
 
-        public async Task<UserDto> CreateUserAsync(UserCreateDto user)
+        public async Task<UserDto> GetUserAsync(decimal systemUserId)
         {
-            //user.EndDate ??= Constants.MaxDate;
+            return await _userRepo.GetUserAsync(systemUserId);
+        }
 
-            return await _userRepo.CreateUserAsync(user);
+        public async Task<decimal> CreateUserAsync(UserCreateDto user)
+        {
+            var userEntity = await _userRepo.CreateUserAsync(user);
+            await _unitOfWork.CommitAsync();
+
+            return userEntity.SystemUserId;
         }
     }
 }

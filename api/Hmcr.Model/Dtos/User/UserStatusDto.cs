@@ -16,19 +16,19 @@ namespace Hmcr.Model.Dtos.User
             {
                 new UserStatusDto
                 {
-                    UserStatusId = 1,
+                    UserStatusId = ACTIVE,
                     UserStatus = ACTIVE
                 },
                 new UserStatusDto
                 {
-                    UserStatusId = 2,
+                    UserStatusId = INACTIVE,
                     UserStatus = INACTIVE
                 }
             };
         }
 
         [JsonPropertyName("id")]
-        public decimal UserStatusId { get; set; }
+        public string UserStatusId { get; set; }
         [JsonPropertyName("name")]
         public string UserStatus { get; set; }
 
