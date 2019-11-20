@@ -22,6 +22,7 @@ using Microsoft.OpenApi.Models;
 using Hmcr.Model.JsonConverters;
 using Microsoft.AspNetCore.Http;
 using Newtonsoft.Json.Serialization;
+using Hmcr.Domain.Services;
 
 namespace Hmcr.Api.Extensions
 {
@@ -140,6 +141,9 @@ namespace Hmcr.Api.Extensions
 
             //Permission Handler
             services.AddSingleton<IAuthorizationHandler, PermissionHandler>();
+
+            //FieldValidationService as Singleton
+            services.AddSingleton<IFieldValidatorService, FieldValidatorService>();
         }
     }
 }
