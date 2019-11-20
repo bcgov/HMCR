@@ -36,7 +36,7 @@ namespace Hmcr.Domain.Services
             _rules.Add(new FieldValidationRule(Entities.User, Fields.EndDate, FieldTypes.Date, false, null, null, null, null, new DateTime(1900, 1, 1), new DateTime(9999, 12, 31), null, null));
         }
 
-        public void Validate<T>(string entityName, string fieldName, T value, Dictionary<string, List<string>> errors)
+        public void Validate<T>(string entityName, string fieldName, T val, Dictionary<string, List<string>> errors)
         {
             var rule = _rules.FirstOrDefault(r => r.EntityName == entityName && r.FieldName == fieldName);
 
@@ -45,10 +45,10 @@ namespace Hmcr.Domain.Services
             switch (rule.FieldType)
             {
                 case FieldTypes.String:
-                    messages.AddRange(ValidateStringField(rule, value.ToString()));
+                    messages.AddRange(ValidateStringField(rule, val));
                     break;
                 case FieldTypes.Date:
-                    messages.AddRange(ValidateDateField(rule, Convert.ToDateTime(value)));
+                    messages.AddRange(ValidateDateField(rule, val));
                     break;
             }
 
@@ -65,6 +65,9 @@ namespace Hmcr.Domain.Services
                 messages.Add($"The {rule.FieldName} field is required.");
                 return messages;
             }
+
+            if (!rule.Required && val is null)
+                return messages;
 
             string value = Convert.ToString(val);
 
@@ -98,6 +101,9 @@ namespace Hmcr.Domain.Services
                 messages.Add($"{rule.FieldName} field is required.");
                 return messages;
             }
+
+            if (!rule.Required && val is null)
+                return messages;
 
             DateTime value = Convert.ToDateTime(val);
 
