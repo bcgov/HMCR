@@ -5,6 +5,7 @@ using Hmcr.Model.Dtos.User;
 using Hmcr.Model.Utils;
 using Microsoft.AspNetCore.Mvc;
 using System.Collections;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace Hmcr.Api.Controllers
@@ -30,15 +31,43 @@ namespace Hmcr.Api.Controllers
         }
 
         [HttpGet("usertypes")]
-        public ActionResult<UserTypeDto> GetUserTypes()
+        public ActionResult<IEnumerable<UserTypeDto>> GetUserTypes()
         {
-            return Ok(new UserTypeDto().UserTypes);
+            var userTypes = new List<UserTypeDto>()
+            {
+                new UserTypeDto
+                {
+                    UserTypeId = UserTypeDto.INTERNAL,
+                    UserType = UserTypeDto.INTERNAL
+                },
+                new UserTypeDto
+                {
+                    UserTypeId = UserTypeDto.BUSINESS,
+                    UserType = UserTypeDto.BUSINESS
+                }
+            };
+
+            return Ok(userTypes);
         }
 
         [HttpGet("userstatus")]
-        public ActionResult<UserTypeDto> GetUserStatus()
+        public ActionResult<IEnumerable<UserTypeDto>> GetUserStatus()
         {
-            return Ok(new UserStatusDto().UserStatuses);
+            var statuses = new List<UserStatusDto>()
+            {
+                new UserStatusDto
+                {
+                    UserStatusId = UserStatusDto.ACTIVE,
+                    UserStatus = UserStatusDto.ACTIVE
+                },
+                new UserStatusDto
+                {
+                    UserStatusId = UserStatusDto.INACTIVE,
+                    UserStatus = UserStatusDto.INACTIVE
+                }
+            };
+
+            return Ok(statuses);
         }
 
         /// <summary>
