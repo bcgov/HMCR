@@ -1,5 +1,5 @@
 import React from 'react';
-import { BrowserRouter, Route, Switch } from 'react-router-dom';
+import { BrowserRouter, Route, Switch, Redirect } from 'react-router-dom';
 import { Container } from 'reactstrap';
 
 import 'react-dates/initialize';
@@ -15,7 +15,6 @@ import RolePermissionAdmin from './components/RolePermissionAdmin';
 import WorkReporting from './components/WorkReporting';
 import WorkReportingSubmission from './components/WorkReportingSubmission';
 import Home from './components/Home';
-import HelloWorld from './components/HelloWorld';
 
 import addIconsToLibrary from './fontAwesome';
 import * as Constants from './Constants';
@@ -32,14 +31,16 @@ const App = () => {
           <Header />
           <Container>
             <Switch>
-              <Route path={Constants.PATHS.HOME} exact component={Home} />
+              {/* <Route path={Constants.PATHS.HOME} exact component={Home} /> */}
+              <Route path={Constants.PATHS.HOME} exact component={Home}>
+                <Redirect to={Constants.PATHS.ADMIN_USERS} />
+              </Route>
               <AuthorizedRoute path={Constants.PATHS.ADMIN} requires={Constants.PERMISSIONS.ADMIN}>
                 <AdminRoutes />
               </AuthorizedRoute>
               <AuthorizedRoute path={Constants.PATHS.WORK_REPORTING} requires={Constants.PERMISSIONS.CONTRACTOR}>
                 <WorkReportingRoutes />
               </AuthorizedRoute>
-              <Route path={Constants.PATHS.HELLOWORLD} exact component={HelloWorld} />
               <Route path={Constants.PATHS.UNAUTHORIZED} exact component={Unauthorized} />
               <Route path="*" component={NoMatch} />
             </Switch>

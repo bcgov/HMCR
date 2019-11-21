@@ -4,11 +4,16 @@ import { connect } from 'react-redux';
 import Spinner from './ui/Spinner';
 import ErrorDialogModal from './ui/ErrorDialogModal';
 
-const Main = ({ errorDialog, children }) => {
+import { fetchCurrentUser, fetchServiceAreas, fetchUserStatuses, fetchUserTypes } from '../actions';
+
+const Main = ({ errorDialog, children, fetchCurrentUser, fetchServiceAreas, fetchUserStatuses, fetchUserTypes }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    setLoading(false);
+    Promise.all([fetchServiceAreas(), fetchCurrentUser(), fetchUserStatuses(), fetchUserTypes()]).then(() =>
+      setLoading(false)
+    );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (
@@ -27,5 +32,5 @@ const mapStateToProps = state => {
 
 export default connect(
   mapStateToProps,
-  null
+  { fetchCurrentUser, fetchServiceAreas, fetchUserStatuses, fetchUserTypes }
 )(Main);

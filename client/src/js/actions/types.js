@@ -1,13 +1,10 @@
-//////////////////////////////////////////
-// HELLO WORLD
-
-export const FETCH_COUNTRIES = 'FETCH_COUNTRIES';
-export const FETCH_PROVINCES = 'FETCH_PROVINCES';
-
-// HELLO WORLD
-//////////////////////////////////////////
-
 export const FETCH_USER = 'FETCH_USER';
+export const FETCH_CURRENT_USER = 'FETCH_CURRENT_USER';
+export const FETCH_USERS = 'FETCH_USERS';
+export const FETCH_USER_TYPES = 'FETCH_USER_TYPES';
+export const FETCH_USER_STATUSES = 'FETCH_USER_STATUSES';
+
+export const FETCH_SERVICE_AREAS = 'FETCH_SERVICE_AREAS';
 
 // Global Error Dialog
 export const SHOW_ERROR_DIALOG_MODAL = 'SHOW_ERROR_DIALOG_MODAL';
