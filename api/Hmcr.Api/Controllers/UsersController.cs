@@ -4,6 +4,7 @@ using Hmcr.Model.Dtos;
 using Hmcr.Model.Dtos.User;
 using Hmcr.Model.Utils;
 using Microsoft.AspNetCore.Mvc;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -100,7 +101,7 @@ namespace Hmcr.Api.Controllers
         [HttpPost]
         public async Task<ActionResult<UserDto>> CreateUser(UserCreateDto user)
         {
-            var errors = await _userService.ValidateUserDtoAsync(user);
+            var errors = await _userService.ValidateUserDtoAsync(user, true);
 
             if (errors.Count > 0)
             {
@@ -110,6 +111,29 @@ namespace Hmcr.Api.Controllers
             var systemUserId = await _userService.CreateUserAsync(user);
 
             return CreatedAtRoute("GetUser", new { id = systemUserId }, await _userService.GetUserAsync(systemUserId));
+        }
+
+        [HttpPut("{id}")]
+        public async Task<ActionResult<UserDto>> UpdateUser(decimal id, UserUpdateDto user)
+        {
+            if (! await _userService.DoesUserExistsAsync(id))
+                return NotFound();
+
+            if (id != user.SystemUserId)
+            {
+                throw new Exception($"The system user ID from the query string does not match that of the body.");
+            }
+
+            var errors = await _userService.ValidateUserDtoAsync(user, false);
+
+            if (errors.Count > 0)
+            {
+                return ValidationUtils.GetValidationErrorResult(errors, ControllerContext);
+            }
+
+            await _userService.UpdateUserAsync(user);
+
+            return NoContent();
         }
     }
 }

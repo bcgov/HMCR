@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace Hmcr.Model.Dtos.User
 {
-    public class UserCreateDto
+    public class UserCreateDto : IUserDto
     {
         public UserCreateDto()
         {
@@ -20,7 +20,7 @@ namespace Hmcr.Model.Dtos.User
         public DateTime? EndDate { get; set; }
         public string UserDirectory { get; set; }
 
-        public virtual IList<decimal> ServiceAreaNumbers { get; set; }
-        public virtual IList<decimal> UserRoleIds { get; set; }
+        public IList<decimal> ServiceAreaNumbers { get; set; }
+        public IList<decimal> UserRoleIds { get; set; }
     }
 }

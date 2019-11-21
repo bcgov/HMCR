@@ -100,59 +100,29 @@ namespace Hmcr.Data.Database.Entities
 
             foreach (var entry in modifiedEntries)
             {
-                if (AuditableEntity(entry.Entity))
+                if (entry.Members.Any(m => m.Metadata.Name == AppCreateUserGuid)) //auditable entity
                 {
-                    SetAuditProperty(entry.Entity, AppLastUpdateUserid, _currentUser.UniversalId);
-                    SetAuditProperty(entry.Entity, AppLastUpdateUserDirectory, _currentUser.AuthDirName);
-                    SetAuditProperty(entry.Entity, AppLastUpdateUserGuid, _currentUser.UserGuid);
-                    SetAuditProperty(entry.Entity, AppLastUpdateTimestamp, currentTime);
+                    entry.Member(AppLastUpdateUserid).CurrentValue = _currentUser.UniversalId;
+                    entry.Member(AppLastUpdateUserDirectory).CurrentValue = _currentUser.AuthDirName;
+                    entry.Member(AppLastUpdateUserGuid).CurrentValue = _currentUser.UserGuid;
+                    entry.Member(AppLastUpdateTimestamp).CurrentValue = currentTime; 
 
                     if (entry.State == EntityState.Added)
                     {
-                        SetAuditProperty(entry.Entity, AppCreateUserid, _currentUser.UniversalId);
-                        SetAuditProperty(entry.Entity, AppCreateUserDirectory, _currentUser.AuthDirName);
-                        SetAuditProperty(entry.Entity, AppCreateUserGuid, _currentUser.UserGuid);
-                        SetAuditProperty(entry.Entity, AppCreateTimestamp, currentTime);
-                        SetAuditProperty(entry.Entity, ConcurrencyControlNumber, 1);
+                        entry.Member(AppCreateUserid).CurrentValue = _currentUser.UniversalId;
+                        entry.Member(AppCreateUserDirectory).CurrentValue = _currentUser.AuthDirName;
+                        entry.Member(AppCreateUserGuid).CurrentValue = _currentUser.UserGuid;
+                        entry.Member(AppCreateTimestamp).CurrentValue = currentTime;
+                        entry.Member(ConcurrencyControlNumber).CurrentValue = (long)1;
                     }
                     else
                     {
-                        int controlNumber = (int)GetAuditProperty(entry.Entity, ConcurrencyControlNumber);
-                        controlNumber = controlNumber + 1;
-                        SetAuditProperty(entry.Entity, ConcurrencyControlNumber, controlNumber);
+                        var controlNumber = (long)entry.Member(ConcurrencyControlNumber).CurrentValue + 1;
+                        entry.Member(ConcurrencyControlNumber).CurrentValue = controlNumber;
                     }
                 }
             }
         }
-
-        private static bool AuditableEntity(object objectToCheck)
-        {
-            Type type = objectToCheck.GetType();
-            return type.GetProperty("AppCreateUserDirectory") != null;
-        }
-
-        private static object GetAuditProperty(object obj, string property)
-        {
-            PropertyInfo prop = obj.GetType().GetProperty(property, BindingFlags.Public | BindingFlags.Instance);
-
-            if (prop != null && prop.CanRead)
-            {
-                return prop.GetValue(obj);
-            }
-
-            return null;
-        }
-
-        private static void SetAuditProperty(object obj, string property, object value)
-        {
-            PropertyInfo prop = obj.GetType().GetProperty(property, BindingFlags.Public | BindingFlags.Instance);
-
-            if (prop != null && prop.CanWrite)
-            {
-                prop.SetValue(obj, value, null);
-            }
-        }
         #endregion
-
     }
 }
