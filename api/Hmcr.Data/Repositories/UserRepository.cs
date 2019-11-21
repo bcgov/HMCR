@@ -23,6 +23,7 @@ namespace Hmcr.Data.Repositories
         Task<UserDto> GetUserAsync(decimal systemUserId);
         Task<HmrSystemUser> CreateUserAsync(UserCreateDto user);
         Task<bool> DoesUsernameExistAsync(string username);
+        Task UpdateUserAsync(UserUpdateDto userDto);
     }
 
     public class UserRepository : HmcrRepositoryBase<HmrSystemUser>, IUserRepository
@@ -186,6 +187,78 @@ namespace Hmcr.Data.Repositories
             }
 
             return userEntity;
+        }
+
+        public async Task UpdateUserAsync(UserUpdateDto userDto)
+        {
+            var userEntity = await DbSet
+                    .Include(x => x.HmrUserRoles)
+                    .Include(x => x.HmrServiceAreaUsers)
+                    .FirstAsync(u => u.SystemUserId == userDto.SystemUserId);
+
+            Mapper.Map(userDto, userEntity);
+
+            if (userEntity != null)
+            {
+                var tempUser = Mapper.Map<HmrSystemUser>(userDto);
+            }
+            else
+            {
+                throw new HmcrException($"User [{userDto.Username}] does not exist.");
+            }
+
+            SyncRoles(userDto, userEntity);
+            SyncServiceAreas(userDto, userEntity);
+        }
+
+        private void SyncRoles(UserUpdateDto userDto, HmrSystemUser userEntity)
+        {
+            var rolesToDelete =
+                userEntity.HmrUserRoles.Where(r => !userDto.UserRoleIds.Contains(r.RoleId)).ToList();
+
+            for (var i = rolesToDelete.Count() - 1; i >= 0; i--)
+            {
+                DbContext.Remove(rolesToDelete[i]);
+            }
+
+            var existingRoleIds = userEntity.HmrUserRoles.Select(r => r.RoleId);
+
+            var newRoleIds = userDto.UserRoleIds.Where(r => !existingRoleIds.Contains(r));
+
+            foreach (var roleId in newRoleIds)
+            {
+                userEntity.HmrUserRoles
+                    .Add(new HmrUserRole
+                    {
+                        RoleId = roleId,
+                        SystemUserId = userEntity.SystemUserId
+                    });
+            }
+        }
+
+        private void SyncServiceAreas(UserUpdateDto userDto, HmrSystemUser userEntity)
+        {
+            var areasToDelete =
+                userEntity.HmrServiceAreaUsers.Where(s => !userDto.ServiceAreaNumbers.Contains(s.ServiceAreaNumber)).ToList();
+
+            for (var i = areasToDelete.Count() - 1; i >= 0; i--)
+            {
+                DbContext.Remove(areasToDelete[i]);
+            }
+
+            var existingAreaNumbers = userEntity.HmrServiceAreaUsers.Select(s => s.ServiceAreaNumber);
+
+            var newAreaNumbers = userDto.ServiceAreaNumbers.Where(r => !existingAreaNumbers.Contains(r));
+
+            foreach (var areaNumber in newAreaNumbers)
+            {
+                userEntity.HmrServiceAreaUsers
+                    .Add(new HmrServiceAreaUser
+                    {
+                        ServiceAreaNumber = areaNumber,
+                        SystemUserId = userEntity.SystemUserId
+                    });
+            }
         }
     }
 }

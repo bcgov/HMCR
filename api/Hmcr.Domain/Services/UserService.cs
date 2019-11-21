@@ -20,7 +20,9 @@ namespace Hmcr.Domain.Services
         Task<PagedDto<UserSearchDto>> GetUsersAsync(decimal[]? serviceAreas, string[]? userTypes, string searchText, bool? isActive, int pageSize, int pageNumber, string orderBy);
         Task<UserDto> GetUserAsync(decimal systemUserId);
         Task<decimal> CreateUserAsync(UserCreateDto user);
-        Task<Dictionary<string, List<string>>> ValidateUserDtoAsync(UserCreateDto user);
+        Task<Dictionary<string, List<string>>> ValidateUserDtoAsync<T>(T user, bool isInsert) where T : IUserDto;
+        Task UpdateUserAsync(UserUpdateDto userDto);
+        Task<bool> DoesUserExistsAsync(decimal systemUserId);
     }
     public class UserService : IUserService
     {
@@ -117,19 +119,20 @@ namespace Hmcr.Domain.Services
         public async Task<decimal> CreateUserAsync(UserCreateDto user)
         {
             var userEntity = await _userRepo.CreateUserAsync(user);
+
             await _unitOfWork.CommitAsync();
 
             return userEntity.SystemUserId;
         }
 
-        public async Task<Dictionary<string, List<string>>> ValidateUserDtoAsync(UserCreateDto user)
+        public async Task<Dictionary<string, List<string>>> ValidateUserDtoAsync<T>(T user, bool isInsert) where T:IUserDto
         {
             var entityName = Entities.User;
             var errors = new Dictionary<string, List<string>>();
-
+            
             _validator.Validate(entityName, user, errors);
 
-            if (user.Username.IsNotEmpty() && await _userRepo.DoesUsernameExistAsync(user.Username))
+            if (isInsert && user.Username.IsNotEmpty() && await _userRepo.DoesUsernameExistAsync(user.Username))
             {
                 errors.AddItem(Fields.Username, $"Username [{user.Username}] already exists.");
             }
@@ -147,6 +150,18 @@ namespace Hmcr.Domain.Services
             }
 
             return errors;
+        }
+
+        public async Task UpdateUserAsync(UserUpdateDto userDto)
+        {
+            await _userRepo.UpdateUserAsync(userDto);
+
+            await _unitOfWork.CommitAsync();
+        }
+
+        public async Task<bool> DoesUserExistsAsync(decimal systemUserId)
+        {
+            return await _userRepo.ExistsAsync(systemUserId);
         }
     }
 }

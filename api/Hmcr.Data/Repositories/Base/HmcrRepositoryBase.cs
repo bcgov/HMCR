@@ -27,6 +27,7 @@ namespace Hmcr.Data.Repositories.Base
         Task<IEnumerable<TDto>> GetAllAsync<TDto>(Expression<Func<TEntity, bool>> where);
         Task<TDto> GetFirstOrDefaultAsync<TDto>(Expression<Func<TEntity, bool>> where);
         Task<PagedDto<TOutput>> Page<TInput, TOutput>(IQueryable<TInput> list, int pageSize, int pageNumber, string orderBy);
+        Task<bool> ExistsAsync(object id);
     }
 
     public class HmcrRepositoryBase<TEntity> : IHmcrRepositoryBase<TEntity>
@@ -68,26 +69,14 @@ namespace Hmcr.Data.Repositories.Base
 
         public virtual void Update<TDto>(long id, TDto dto)
         {
-            var oldEntity = DbSet.Find(id);
-            var newObject = Mapper.Map<TEntity>(dto);
-
-            if (oldEntity != null)
-            {
-                DbContext.Entry(oldEntity).CurrentValues.SetValues(newObject);
-                DbContext.Entry(oldEntity).State = EntityState.Modified;
-            }
+            var entity = DbSet.Find(id);
+            Mapper.Map(dto, entity);
         }
 
         public virtual void Update<TDto>(string id, TDto dto)
         {
-            var oldEntity = DbSet.Find(id);
-            var newObject = Mapper.Map<TEntity>(dto);
-
-            if (oldEntity != null)
-            {
-                DbContext.Entry(oldEntity).CurrentValues.SetValues(newObject);
-                DbContext.Entry(oldEntity).State = EntityState.Modified;
-            }
+            var entity = DbSet.Find(id);
+            Mapper.Map(dto, entity);
         }
 
         public virtual void Delete<TDto>(TDto dto)
@@ -136,6 +125,11 @@ namespace Hmcr.Data.Repositories.Base
         public async Task<TDto> GetFirstOrDefaultAsync<TDto>(Expression<Func<TEntity, bool>> where)
         {
             return Mapper.Map<TDto>(await DbSet.Where(where).FirstOrDefaultAsync<TEntity>());
+        }
+
+        public async Task<bool> ExistsAsync(object id)
+        {
+            return await DbSet.FindAsync(id) != null;
         }
 
         public async Task<PagedDto<TOutput>> Page<TInput, TOutput>(IQueryable<TInput> list, int pageSize, int pageNumber, string orderBy)
