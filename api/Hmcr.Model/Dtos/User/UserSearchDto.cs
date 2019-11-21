@@ -15,5 +15,6 @@ namespace Hmcr.Model.Dtos.User
         public string Username { get; set; }
         public string BusinessLegalName { get; set; }
         public string ServiceAreas { get; set; }
+        public bool HasLogInHistory { get; set; }
     }
 }
