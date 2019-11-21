@@ -1,11 +1,11 @@
 import { combineReducers } from 'redux';
 
 import errorDialogReducer from './errorDialogReducer';
+import serviceAreaReducer from './serviceAreaReducer';
 import userReducer from './userReducer';
-import helloReducer from './helloReducer';
 
 export default combineReducers({
   errorDialog: errorDialogReducer,
+  serviceAreas: serviceAreaReducer,
   user: userReducer,
-  hello: helloReducer,
 });

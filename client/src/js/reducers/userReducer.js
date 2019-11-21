@@ -1,13 +1,17 @@
-import { FETCH_USER } from '../actions/types';
+import _ from 'lodash';
 
-const defaultState = {
-  permissions: ['CONTRACTOR_PERMISSION', 'ADMIN_PERMISSION'],
-};
+import { FETCH_CURRENT_USER, FETCH_USER_TYPES, FETCH_USER_STATUSES } from '../actions/types';
+
+const defaultState = { types: {}, statuses: {}, current: {} };
 
 export default (state = defaultState, action) => {
   switch (action.type) {
-    case FETCH_USER:
-      return { ...state, [action.payload.id]: action.payload };
+    case FETCH_CURRENT_USER:
+      return { ...state, current: { ...state.current, ...action.payload } };
+    case FETCH_USER_TYPES:
+      return { ...state, types: { ...state.types, ..._.mapKeys(action.payload, 'id') } };
+    case FETCH_USER_STATUSES:
+      return { ...state, statuses: { ...state.statuses, ..._.mapKeys(action.payload, 'id') } };
     default:
       return state;
   }

@@ -281,5 +281,10 @@ __pycache__/
 # SonarQube
 *.sonarqube
 
+**/*.Local.json
+
 *.DotSettings
 *.DotSettings.user
+
+# Ignore Serilog files
+log*.txt

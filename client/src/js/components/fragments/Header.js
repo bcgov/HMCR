@@ -50,9 +50,7 @@ const Header = () => {
               <NavLinkWithMatch hideNavbar={hideNavbar} to={Constants.PATHS.ADMIN_ACTIVITIES} text="Activities" />
               <NavLinkWithMatch hideNavbar={hideNavbar} to={Constants.PATHS.ADMIN_USERS} text="Users" />
               <NavLinkWithMatch hideNavbar={hideNavbar} to={Constants.PATHS.ADMIN_ROLES} text="Roles and Permissions" />
-              {/* Work Reporting link to be removed later */}
-              <NavLinkWithMatch hideNavbar={hideNavbar} to={Constants.PATHS.WORK_REPORTING} text="Work Reporting" />
-              <NavLinkWithMatch hideNavbar={hideNavbar} to={Constants.PATHS.HELLOWORLD} text="Hello World" />
+              {/* <NavLinkWithMatch hideNavbar={hideNavbar} to={Constants.PATHS.WORK_REPORTING} text="Work Reporting" /> */}
             </Nav>
             <Nav className="navbar-nav ml-auto">
               <NavItem>

@@ -31,7 +31,7 @@ AuthorizedRoute.propTypes = {
 
 const mapStateToProps = state => {
   return {
-    currentUser: state.user,
+    currentUser: state.user.current,
   };
 };
 

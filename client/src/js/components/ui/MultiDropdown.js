@@ -4,7 +4,7 @@ import { FieldArray } from 'formik';
 
 const maxSelectedItemDisplay = 2;
 
-const MultiDropdown = ({ values, setFieldValue, items, name, title }) => {
+const MultiDropdown = ({ values, setFieldValue, items, name, title, showId }) => {
   const [selectAll, setSelectAll] = useState(false);
   const selectedValues = values[name];
 
@@ -22,7 +22,12 @@ const MultiDropdown = ({ values, setFieldValue, items, name, title }) => {
   const handleSelectedAllChecked = checked => {
     setSelectAll(checked);
 
-    if (checked) setFieldValue(name, items.map(o => o.id), true);
+    if (checked)
+      setFieldValue(
+        name,
+        items.map(o => o.id),
+        true
+      );
     else setFieldValue(name, [], true);
   };
 
@@ -53,22 +58,25 @@ const MultiDropdown = ({ values, setFieldValue, items, name, title }) => {
         <FieldArray name={name}>
           {({ push, remove }) => (
             <div className="multi-menu">
-              {items.map(item => (
-                <div key={item.id} className="multi-item">
-                  <Label check className="multi-item-label">
-                    <Input
-                      name={name}
-                      type="checkbox"
-                      value={item.id}
-                      checked={values[name].includes(item.id)}
-                      onChange={e => {
-                        handleItemSelected(e.target.checked, item.id, push, remove);
-                      }}
-                    />
-                    {item.name}
-                  </Label>
-                </div>
-              ))}
+              {items.map(item => {
+                const displayName = showId ? `${item.id} - ${item.name}` : item.name;
+                return (
+                  <div key={item.id} className="multi-item">
+                    <Label check className="multi-item-label">
+                      <Input
+                        name={name}
+                        type="checkbox"
+                        value={item.id}
+                        checked={values[name].includes(item.id)}
+                        onChange={e => {
+                          handleItemSelected(e.target.checked, item.id, push, remove);
+                        }}
+                      />
+                      {displayName}
+                    </Label>
+                  </div>
+                );
+              })}
             </div>
           )}
         </FieldArray>
