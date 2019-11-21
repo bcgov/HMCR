@@ -15,6 +15,7 @@ namespace Hmcr.Data.Repositories
     {
         Task<IEnumerable<ServiceAreaDto>> GetServiceAreaBySystemUserIdAsync(long systemUserId);
         Task<IEnumerable<ServiceAreaNumberDto>> GetAllServiceAreasAsync();
+        Task<int> CountServiceAreaNumbersAsync(IEnumerable<decimal> serviceAreaNumbers);
     }
 
     public class ServiceAreaRepository : HmcrRepositoryBase<HmrServiceArea>, IServiceAreaRepository
@@ -36,6 +37,11 @@ namespace Hmcr.Data.Repositories
         public async Task<IEnumerable<ServiceAreaNumberDto>> GetAllServiceAreasAsync()
         {
             return await GetAllAsync<ServiceAreaNumberDto>();
+        }
+
+        public async Task<int> CountServiceAreaNumbersAsync(IEnumerable<decimal> serviceAreaNumbers)
+        {
+            return await DbSet.CountAsync(s => serviceAreaNumbers.Contains(s.ServiceAreaNumber));
         }
     }
 }

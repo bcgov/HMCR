@@ -115,6 +115,7 @@ namespace Hmcr.Data.Repositories
             foreach (var user in users)
             {
                 user.ServiceAreas = string.Join(",", userServiceArea[user.SystemUserId].Select(x => x.ServiceAreaNumber.ToString()));
+                user.HasLogInHistory = pagedEntity.SourceList.Any(u => u.SystemUserId == user.SystemUserId && u.UserGuid != null);
             }
 
             var pagedDTO = new PagedDto<UserSearchDto>
@@ -130,7 +131,31 @@ namespace Hmcr.Data.Repositories
 
         public async Task<UserDto> GetUserAsync(decimal systemUserId)
         {
-            return Mapper.Map<UserDto>(await DbSet.FindAsync(systemUserId));
+            var userEntity = await DbSet.AsNoTracking()
+                    .Include(x => x.HmrUserRoles)
+                    .Include(x => x.HmrServiceAreaUsers)
+                    .FirstAsync(u => u.SystemUserId == systemUserId);
+
+            var user = Mapper.Map<UserDto>(userEntity);
+
+            var roleIds =
+                userEntity
+                .HmrUserRoles
+                .Where(r => r.EndDate == null || r.EndDate >= DateTime.Today) //active roles
+                .Select(r => r.RoleId)
+                .ToList();
+
+            user.UserRoleIds = roleIds;
+
+            var serviceAreasNumbers =
+                userEntity
+                .HmrServiceAreaUsers
+                .Select(s => s.ServiceAreaNumber)
+                .ToList();
+
+            user.ServiceAreaNumbers = serviceAreasNumbers;
+
+            return user;
         }
 
         public async Task<bool> DoesUsernameExistAsync(string username)

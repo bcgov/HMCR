@@ -26,14 +26,19 @@ namespace Hmcr.Domain.Services
     {
         private IUserRepository _userRepo;
         private IPartyRepository _partyRepo;
+        private IServiceAreaRepository _serviceAreaRepo;
+        private IRoleRepository _roleRepo;
         private IUnitOfWork _unitOfWork;
         private HmcrCurrentUser _currentUser;
         private IFieldValidatorService _validator;
 
-        public UserService(IUserRepository userRepo, IPartyRepository partyRepo, IUnitOfWork unitOfWork, HmcrCurrentUser currentUser, IFieldValidatorService validator)
+        public UserService(IUserRepository userRepo, IPartyRepository partyRepo, IServiceAreaRepository serviceAreaRepo, IRoleRepository roleRepo,
+            IUnitOfWork unitOfWork, HmcrCurrentUser currentUser, IFieldValidatorService validator)
         {
             _userRepo = userRepo;
             _partyRepo = partyRepo;
+            _serviceAreaRepo = serviceAreaRepo;
+            _roleRepo = roleRepo;
             _unitOfWork = unitOfWork;
             _currentUser = currentUser;
             _validator = validator;
@@ -122,24 +127,23 @@ namespace Hmcr.Domain.Services
             var entityName = Entities.User;
             var errors = new Dictionary<string, List<string>>();
 
-            _validator.Validate(entityName, Fields.Username, user.Username, errors);
-            _validator.Validate(entityName, Fields.FirstName, user.FirstName, errors);
-            _validator.Validate(entityName, Fields.LastName, user.LastName, errors);
-            _validator.Validate(entityName, Fields.Email, user.Email, errors);
-            _validator.Validate(entityName, Fields.EndDate, user.EndDate, errors);
+            _validator.Validate(entityName, user, errors);
 
             if (user.Username.IsNotEmpty() && await _userRepo.DoesUsernameExistAsync(user.Username))
             {
-                var message = $"Username [{user.Username}] already exists.";
+                errors.AddItem(Fields.Username, $"Username [{user.Username}] already exists.");
+            }
 
-                if (errors.ContainsKey(Fields.Username))
-                {
-                    errors[Fields.Username].Add(message);
-                }
-                else
-                {
-                    errors.Add(Fields.Username, new List<string> { message });
-                }
+            var serviceAreaCount = await _serviceAreaRepo.CountServiceAreaNumbersAsync(user.ServiceAreaNumbers);
+            if (serviceAreaCount != user.ServiceAreaNumbers.Count)
+            {
+                errors.AddItem(Fields.ServiceAreaNumber, $"Some of the user's service areas are invalid.");
+            }
+
+            var roleCount = await _roleRepo.CountActiveRoleIdsAsync(user.UserRoleIds);
+            if (roleCount != user.UserRoleIds.Count)
+            {
+                errors.AddItem(Fields.RoleId, $"Some of the user's role IDs are invalid or inactive.");
             }
 
             return errors;

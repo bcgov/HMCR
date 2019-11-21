@@ -14,12 +14,18 @@ namespace Hmcr.Data.Repositories
     public interface IRoleRepository : IHmcrRepositoryBase<HmrRole>
     {
         Task<IEnumerable<RoleDto>> GetActiveRolesAsync();
+        Task<int> CountActiveRoleIdsAsync(IEnumerable<decimal> roles);
     }
     public class RoleRepository : HmcrRepositoryBase<HmrRole>, IRoleRepository
     {
         public RoleRepository(AppDbContext dbContext, IMapper mapper)
             : base(dbContext, mapper)
         {
+        }
+
+        public async Task<int> CountActiveRoleIdsAsync(IEnumerable<decimal> roles)
+        {
+            return await DbSet.CountAsync(r => roles.Contains(r.RoleId) && (r.EndDate == null || r.EndDate >= DateTime.Today));
         }
 
         public async Task<IEnumerable<RoleDto>> GetActiveRolesAsync()
