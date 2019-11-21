@@ -46,6 +46,21 @@ pipeline {
                 sh "cd .pipeline && ./npmw ci && ./npmw run deploy -- --pr=${CHANGE_ID} --env=test"
             }
         }
+        stage('Deploy (UAT)') {
+            agent { label 'deploy' }
+            when {
+                expression { return env.CHANGE_TARGET == 'master';}
+                beforeInput true
+            }
+            input {
+                message "Should we continue with deployment to UAT?"
+                ok "Yes!"
+            }
+            steps {
+                echo "Deploying ..."
+                sh "cd .pipeline && ./npmw ci && ./npmw run deploy -- --pr=${CHANGE_ID} --env=uat"
+            }
+        }
         stage('Deploy (PROD)') {
             agent { label 'deploy' }
             when {
@@ -53,7 +68,7 @@ pipeline {
                 beforeInput true
             }
             input {
-                message "Should we continue with deployment to TEST?"
+                message "Should we continue with deployment to PROD?"
                 ok "Yes!"
             }
             steps {
