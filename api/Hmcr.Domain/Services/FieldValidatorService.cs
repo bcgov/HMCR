@@ -11,6 +11,7 @@ namespace Hmcr.Domain.Services
     public interface IFieldValidatorService
     {
         void Validate<T>(string entityName, string fieldName, T value, Dictionary<string, List<string>> errors);
+        void Validate<T>(string entityName, T entity, Dictionary<string, List<string>> errors, params string[] fieldsToSkip);
     }
     public class FieldValidatorService : IFieldValidatorService
     {
@@ -36,9 +37,25 @@ namespace Hmcr.Domain.Services
             _rules.Add(new FieldValidationRule(Entities.User, Fields.EndDate, FieldTypes.Date, false, null, null, null, null, new DateTime(1900, 1, 1), new DateTime(9999, 12, 31), null, null));
         }
 
+        public void Validate<T>(string entityName, T entity, Dictionary<string, List<string>> errors, params string[] fieldsToSkip)
+        {
+            var fields = typeof(T).GetProperties();
+
+            foreach (var field in fields)
+            {
+                if (fieldsToSkip.Any(x => x == field.Name))
+                    continue;
+
+                Validate(entityName, field.Name, field.GetValue(entity), errors);
+            }
+        }
+
         public void Validate<T>(string entityName, string fieldName, T val, Dictionary<string, List<string>> errors)
         {
             var rule = _rules.FirstOrDefault(r => r.EntityName == entityName && r.FieldName == fieldName);
+
+            if (rule == null)
+                return;
 
             var messages = new List<string>();
 
@@ -50,6 +67,8 @@ namespace Hmcr.Domain.Services
                 case FieldTypes.Date:
                     messages.AddRange(ValidateDateField(rule, val));
                     break;
+                default:
+                    throw new NotImplementedException($"Validation for {rule.FieldType} is not implemented.");
             }
 
             if (messages.Count > 0)
@@ -83,7 +102,7 @@ namespace Hmcr.Domain.Services
             {
                 if (!Regex.IsMatch(value, rule.Regex))
                 {
-                    messages.Add($"{rule.FieldName} field must match the Regex expression [{rule.Regex}].");
+                    messages.Add($"{rule.FieldName} field must match the regular expression [{rule.Regex}].");
                 }
             }
 
@@ -116,6 +135,6 @@ namespace Hmcr.Domain.Services
             }
 
             return messages;
-        }        
+        }
     }
 }

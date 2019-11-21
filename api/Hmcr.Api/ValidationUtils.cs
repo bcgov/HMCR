@@ -9,9 +9,9 @@ namespace Hmcr.Api
     {
         public static UnprocessableEntityObjectResult GetValidationErrorResult(Dictionary<string, List<string>> messages, ActionContext context)
         {
-            var errors = new Dictionary<string, string[]>(); 
+            var errors = new Dictionary<string, string[]>();
 
-            foreach(var message in messages)
+            foreach (var message in messages)
             {
                 errors.Add(message.Key, message.Value.ToArray());
             }

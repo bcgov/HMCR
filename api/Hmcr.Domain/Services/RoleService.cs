@@ -10,6 +10,7 @@ namespace Hmcr.Domain.Services
     public interface IRoleService
     {
         Task<IEnumerable<RoleDto>> GetActiveRolesAsync();
+        Task<int> CountActiveRoleIdsAsync(IEnumerable<decimal> roles);
     }
     public class RoleService : IRoleService
     {
@@ -18,6 +19,11 @@ namespace Hmcr.Domain.Services
         public RoleService(IRoleRepository roleRepo)
         {
             _roleRepo = roleRepo;
+        }
+
+        public async Task<int> CountActiveRoleIdsAsync(IEnumerable<decimal> roles)
+        {
+            return await _roleRepo.CountActiveRoleIdsAsync(roles);
         }
         public async Task<IEnumerable<RoleDto>> GetActiveRolesAsync()
         {

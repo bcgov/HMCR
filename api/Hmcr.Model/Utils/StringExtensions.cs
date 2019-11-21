@@ -1,4 +1,6 @@
-﻿namespace Hmcr.Model.Utils
+﻿using System.Collections.Generic;
+
+namespace Hmcr.Model.Utils
 {
     public static class StringExtensions
     {
@@ -40,6 +42,19 @@
         public static string[] ToStringArray(this string str)
         {
             return str == null ? (new string[] { }) : str.Split(',');
+        }
+
+
+        public static void AddItem(this Dictionary<string, List<string>> dictionary, string keyName, string item)
+        {
+            if (dictionary.ContainsKey(keyName))
+            {
+                dictionary[keyName].Add(item);
+            }
+            else
+            {
+                dictionary.Add(keyName, new List<string> { item });
+            }
         }
     }
 }
