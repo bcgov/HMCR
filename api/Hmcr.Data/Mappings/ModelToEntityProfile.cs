@@ -57,6 +57,7 @@ namespace Hmcr.Data.Mappings
             CreateMap<UserCurrentDto, HmrSystemUser>();
             CreateMap<UserSearchDto, HmrSystemUser>();
             CreateMap<UserUpdateDto, HmrSystemUser>();
+            CreateMap<UserDeleteDto, HmrSystemUser>();
 
             CreateMap<UserRoleDto, HmrUserRole>();
         }
