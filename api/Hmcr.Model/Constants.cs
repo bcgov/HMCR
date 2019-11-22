@@ -25,6 +25,7 @@ namespace Hmcr.Model
     {
         public const string Username = "Username";
         public const string UserType = "UserType";
+        public const string UserDirectory = "UserDirectory";
         public const string FirstName = "FirstName";
         public const string LastName = "LastName";
         public const string Email = "Email";

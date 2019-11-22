@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace Hmcr.Model.Dtos.User
 {
-    public class UserCreateDto : IUserDto
+    public class UserCreateDto : IUserSaveDto
     {
         public UserCreateDto()
         {

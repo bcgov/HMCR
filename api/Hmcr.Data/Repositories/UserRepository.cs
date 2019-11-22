@@ -135,9 +135,14 @@ namespace Hmcr.Data.Repositories
             var userEntity = await DbSet.AsNoTracking()
                     .Include(x => x.HmrUserRoles)
                     .Include(x => x.HmrServiceAreaUsers)
-                    .FirstAsync(u => u.SystemUserId == systemUserId);
+                    .FirstOrDefaultAsync(u => u.SystemUserId == systemUserId);
+
+            if (userEntity == null)
+                return null;
 
             var user = Mapper.Map<UserDto>(userEntity);
+
+            user.HasLogInHistory = userEntity.UserGuid != null;
 
             var roleIds =
                 userEntity

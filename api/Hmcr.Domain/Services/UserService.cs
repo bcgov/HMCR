@@ -19,9 +19,8 @@ namespace Hmcr.Domain.Services
         Task<bool> ProcessFirstUserLoginAsync();
         Task<PagedDto<UserSearchDto>> GetUsersAsync(decimal[]? serviceAreas, string[]? userTypes, string searchText, bool? isActive, int pageSize, int pageNumber, string orderBy);
         Task<UserDto> GetUserAsync(decimal systemUserId);
-        Task<decimal> CreateUserAsync(UserCreateDto user);
-        Task<Dictionary<string, List<string>>> ValidateUserDtoAsync<T>(T user, bool isInsert) where T : IUserDto;
-        Task UpdateUserAsync(UserUpdateDto userDto);
+        Task<(decimal SystemUserId, Dictionary<string, List<string>> Errors)> CreateUserAsync(UserCreateDto user);
+        Task<(bool NotFound, Dictionary<string, List<string>> Errors)> UpdateUserAsync(UserUpdateDto user);
         Task<bool> DoesUserExistsAsync(decimal systemUserId);
     }
     public class UserService : IUserService
@@ -116,26 +115,31 @@ namespace Hmcr.Domain.Services
             return await _userRepo.GetUserAsync(systemUserId);
         }
 
-        public async Task<decimal> CreateUserAsync(UserCreateDto user)
+        public async Task<(decimal SystemUserId, Dictionary<string, List<string>> Errors)> CreateUserAsync(UserCreateDto user)
         {
+            var errors = await ValidateUserDtoAsync(user);
+
+            if (user.Username.IsNotEmpty())
+            {
+                if (await _userRepo.DoesUsernameExistAsync(user.Username))
+                {
+                    errors.AddItem(Fields.Username, $"Username [{user.Username}] already exists.");
+                }
+            }
+
             var userEntity = await _userRepo.CreateUserAsync(user);
 
             await _unitOfWork.CommitAsync();
 
-            return userEntity.SystemUserId;
+            return (userEntity.SystemUserId, errors);
         }
 
-        public async Task<Dictionary<string, List<string>>> ValidateUserDtoAsync<T>(T user, bool isInsert) where T:IUserDto
+        private async Task<Dictionary<string, List<string>>> ValidateUserDtoAsync<T>(T user) where T:IUserSaveDto
         {
             var entityName = Entities.User;
             var errors = new Dictionary<string, List<string>>();
             
             _validator.Validate(entityName, user, errors);
-
-            if (isInsert && user.Username.IsNotEmpty() && await _userRepo.DoesUsernameExistAsync(user.Username))
-            {
-                errors.AddItem(Fields.Username, $"Username [{user.Username}] already exists.");
-            }
 
             var serviceAreaCount = await _serviceAreaRepo.CountServiceAreaNumbersAsync(user.ServiceAreaNumbers);
             if (serviceAreaCount != user.ServiceAreaNumbers.Count)
@@ -152,11 +156,68 @@ namespace Hmcr.Domain.Services
             return errors;
         }
 
-        public async Task UpdateUserAsync(UserUpdateDto userDto)
+        public async Task<(bool NotFound, Dictionary<string, List<string>> Errors)> UpdateUserAsync(UserUpdateDto user)
         {
-            await _userRepo.UpdateUserAsync(userDto);
+            var userFromDb = await GetUserAsync(user.SystemUserId);
+
+            if (userFromDb == null)
+            {
+                return (true, null);
+            }
+
+            var errors = await ValidateUserDtoAsync(user);
+
+            if (userFromDb.HasLogInHistory)
+            {
+                ValidateUserWithLoginHistory(user, userFromDb, errors);
+            }
+
+            if (user.Username != userFromDb.Username)
+            {
+                if (await _userRepo.DoesUsernameExistAsync(user.Username))
+                {
+                    errors.AddItem(Fields.Username, $"Username [{user.Username}] already exists.");
+                }
+            }
+
+            if (errors.Count > 0)
+            {
+                return (false, errors);
+            }
+
+            await _userRepo.UpdateUserAsync(user);
 
             await _unitOfWork.CommitAsync();
+
+            return (false, errors);
+        }
+
+        private void ValidateUserWithLoginHistory(UserUpdateDto user, UserDto userFromDb, Dictionary<string, List<string>> errors)
+        {
+            if (user.UserType != userFromDb.UserType)
+            {
+                errors.AddItem(Fields.UserType, $"The {Fields.UserType} field cannot be changed because the user has log-in history.");
+            }
+
+            if (user.UserDirectory != userFromDb.UserDirectory)
+            {
+                errors.AddItem(Fields.UserDirectory, $"The {Fields.UserDirectory} field cannot be changed because the user has log-in history.");
+            }
+
+            if (user.Username != userFromDb.Username)
+            {
+                errors.AddItem(Fields.Username, $"The {Fields.Username} field cannot be changed because the user has log-in history.");
+            }
+
+            if (user.FirstName != userFromDb.FirstName)
+            {
+                errors.AddItem(Fields.FirstName, $"The {Fields.FirstName} field cannot be changed because the user has log-in history.");
+            }
+
+            if (user.LastName != userFromDb.LastName)
+            {
+                errors.AddItem(Fields.LastName, $"The {Fields.LastName} field cannot be changed because the user has log-in history.");
+            }
         }
 
         public async Task<bool> DoesUserExistsAsync(decimal systemUserId)

@@ -23,6 +23,7 @@ namespace Hmcr.Model.Dtos.User
         public string Email { get; set; }
         public string BusinessLegalName { get; set; }
         public DateTime? EndDate { get; set; }
+        public bool HasLogInHistory { get; set; }
         public virtual IList<decimal> ServiceAreaNumbers { get; set; }
         public virtual IList<decimal> UserRoleIds { get; set; }
     }
