@@ -112,7 +112,7 @@ namespace Hmcr.Api.Controllers
         }
 
         [HttpPut("{id}")]
-        public async Task<ActionResult<UserDto>> UpdateUser(decimal id, UserUpdateDto user)
+        public async Task<ActionResult> UpdateUser(decimal id, UserUpdateDto user)
         {
             if (id != user.SystemUserId)
             {
@@ -120,6 +120,34 @@ namespace Hmcr.Api.Controllers
             }
 
             var response = await _userService.UpdateUserAsync(user);
+
+            if (response.NotFound)
+            {
+                return NotFound();
+            }
+
+            if (response.Errors.Count > 0)
+            {
+                return ValidationUtils.GetValidationErrorResult(response.Errors, ControllerContext);
+            }
+
+            return NoContent();
+        }
+
+        [HttpDelete("{id}")]
+        public async Task<ActionResult> DeleteUser(decimal id, UserDeleteDto user)
+        {
+            if (id != user.SystemUserId)
+            {
+                throw new Exception($"The system user ID from the query string does not match that of the body.");
+            }
+
+            var response = await _userService.DeleteUserAsync(user);
+
+            if (response.NotFound)
+            {
+                return NotFound();
+            }
 
             if (response.Errors.Count > 0)
             {
