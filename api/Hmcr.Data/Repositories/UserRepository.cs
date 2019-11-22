@@ -24,6 +24,7 @@ namespace Hmcr.Data.Repositories
         Task<HmrSystemUser> CreateUserAsync(UserCreateDto user);
         Task<bool> DoesUsernameExistAsync(string username);
         Task UpdateUserAsync(UserUpdateDto userDto);
+        Task DeleteUserAsync(UserDeleteDto user);
     }
 
     public class UserRepository : HmcrRepositoryBase<HmrSystemUser>, IUserRepository
@@ -203,16 +204,8 @@ namespace Hmcr.Data.Repositories
 
             Mapper.Map(userDto, userEntity);
 
-            if (userEntity != null)
-            {
-                var tempUser = Mapper.Map<HmrSystemUser>(userDto);
-            }
-            else
-            {
-                throw new HmcrException($"User [{userDto.Username}] does not exist.");
-            }
-
             SyncRoles(userDto, userEntity);
+
             SyncServiceAreas(userDto, userEntity);
         }
 
@@ -264,6 +257,14 @@ namespace Hmcr.Data.Repositories
                         SystemUserId = userEntity.SystemUserId
                     });
             }
+        }
+
+        public async Task DeleteUserAsync(UserDeleteDto user)
+        {
+            var userEntity = await DbSet
+                .FirstAsync(u => u.SystemUserId == user.SystemUserId);
+
+            Mapper.Map(user, userEntity);
         }
     }
 }

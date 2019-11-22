@@ -21,7 +21,7 @@ namespace Hmcr.Domain.Services
         Task<UserDto> GetUserAsync(decimal systemUserId);
         Task<(decimal SystemUserId, Dictionary<string, List<string>> Errors)> CreateUserAsync(UserCreateDto user);
         Task<(bool NotFound, Dictionary<string, List<string>> Errors)> UpdateUserAsync(UserUpdateDto user);
-        Task<bool> DoesUserExistsAsync(decimal systemUserId);
+        Task<(bool NotFound, Dictionary<string, List<string>> Errors)> DeleteUserAsync(UserDeleteDto user);
     }
     public class UserService : IUserService
     {
@@ -134,28 +134,6 @@ namespace Hmcr.Domain.Services
             return (userEntity.SystemUserId, errors);
         }
 
-        private async Task<Dictionary<string, List<string>>> ValidateUserDtoAsync<T>(T user) where T:IUserSaveDto
-        {
-            var entityName = Entities.User;
-            var errors = new Dictionary<string, List<string>>();
-            
-            _validator.Validate(entityName, user, errors);
-
-            var serviceAreaCount = await _serviceAreaRepo.CountServiceAreaNumbersAsync(user.ServiceAreaNumbers);
-            if (serviceAreaCount != user.ServiceAreaNumbers.Count)
-            {
-                errors.AddItem(Fields.ServiceAreaNumber, $"Some of the user's service areas are invalid.");
-            }
-
-            var roleCount = await _roleRepo.CountActiveRoleIdsAsync(user.UserRoleIds);
-            if (roleCount != user.UserRoleIds.Count)
-            {
-                errors.AddItem(Fields.RoleId, $"Some of the user's role IDs are invalid or inactive.");
-            }
-
-            return errors;
-        }
-
         public async Task<(bool NotFound, Dictionary<string, List<string>> Errors)> UpdateUserAsync(UserUpdateDto user)
         {
             var userFromDb = await GetUserAsync(user.SystemUserId);
@@ -192,6 +170,28 @@ namespace Hmcr.Domain.Services
             return (false, errors);
         }
 
+        private async Task<Dictionary<string, List<string>>> ValidateUserDtoAsync<T>(T user) where T : IUserSaveDto
+        {
+            var entityName = Entities.User;
+            var errors = new Dictionary<string, List<string>>();
+
+            _validator.Validate(entityName, user, errors);
+
+            var serviceAreaCount = await _serviceAreaRepo.CountServiceAreaNumbersAsync(user.ServiceAreaNumbers);
+            if (serviceAreaCount != user.ServiceAreaNumbers.Count)
+            {
+                errors.AddItem(Fields.ServiceAreaNumber, $"Some of the user's service areas are invalid.");
+            }
+
+            var roleCount = await _roleRepo.CountActiveRoleIdsAsync(user.UserRoleIds);
+            if (roleCount != user.UserRoleIds.Count)
+            {
+                errors.AddItem(Fields.RoleId, $"Some of the user's role IDs are invalid or inactive.");
+            }
+
+            return errors;
+        }
+
         private void ValidateUserWithLoginHistory(UserUpdateDto user, UserDto userFromDb, Dictionary<string, List<string>> errors)
         {
             if (user.UserType != userFromDb.UserType)
@@ -220,9 +220,30 @@ namespace Hmcr.Domain.Services
             }
         }
 
-        public async Task<bool> DoesUserExistsAsync(decimal systemUserId)
+        public async Task<(bool NotFound, Dictionary<string, List<string>> Errors)> DeleteUserAsync(UserDeleteDto user)
         {
-            return await _userRepo.ExistsAsync(systemUserId);
+            //todo: if user has no log-in history, we can delete user instead of deactivating it. 
+            var userFromDb = await GetUserAsync(user.SystemUserId);
+
+            if (userFromDb == null)
+            {
+                return (true, null);
+            }
+
+            var errors = new Dictionary<string, List<string>>();
+
+            _validator.Validate(Entities.User, Fields.EndDate, user.EndDate, errors);
+
+            if (errors.Count > 0)
+            {
+                return (false, errors);
+            }
+
+            await _userRepo.DeleteUserAsync(user);
+
+            await _unitOfWork.CommitAsync();
+
+            return (false, errors);
         }
     }
 }
