@@ -5,7 +5,7 @@ using System.Text.Json.Serialization;
 
 namespace Hmcr.Model.Dtos.User
 {
-    public class UserUpdateDto : IUserDto
+    public class UserUpdateDto : IUserSaveDto
     {
         public UserUpdateDto()
         {

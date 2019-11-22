@@ -101,37 +101,30 @@ namespace Hmcr.Api.Controllers
         [HttpPost]
         public async Task<ActionResult<UserDto>> CreateUser(UserCreateDto user)
         {
-            var errors = await _userService.ValidateUserDtoAsync(user, true);
+            var response = await _userService.CreateUserAsync(user);
 
-            if (errors.Count > 0)
+            if (response.Errors.Count > 0)
             {
-                return ValidationUtils.GetValidationErrorResult(errors, ControllerContext);
+                return ValidationUtils.GetValidationErrorResult(response.Errors, ControllerContext);
             }
 
-            var systemUserId = await _userService.CreateUserAsync(user);
-
-            return CreatedAtRoute("GetUser", new { id = systemUserId }, await _userService.GetUserAsync(systemUserId));
+            return CreatedAtRoute("GetUser", new { id = response.SystemUserId }, await _userService.GetUserAsync(response.SystemUserId));
         }
 
         [HttpPut("{id}")]
         public async Task<ActionResult<UserDto>> UpdateUser(decimal id, UserUpdateDto user)
         {
-            if (! await _userService.DoesUserExistsAsync(id))
-                return NotFound();
-
             if (id != user.SystemUserId)
             {
                 throw new Exception($"The system user ID from the query string does not match that of the body.");
             }
 
-            var errors = await _userService.ValidateUserDtoAsync(user, false);
+            var response = await _userService.UpdateUserAsync(user);
 
-            if (errors.Count > 0)
+            if (response.Errors.Count > 0)
             {
-                return ValidationUtils.GetValidationErrorResult(errors, ControllerContext);
+                return ValidationUtils.GetValidationErrorResult(response.Errors, ControllerContext);
             }
-
-            await _userService.UpdateUserAsync(user);
 
             return NoContent();
         }

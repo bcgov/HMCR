@@ -4,7 +4,7 @@ using System.Text;
 
 namespace Hmcr.Model.Dtos.User
 {
-    public interface IUserDto
+    public interface IUserSaveDto
     {
         string UserType { get; set; }
         string Username { get; set; }
