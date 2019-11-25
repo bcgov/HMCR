@@ -9,6 +9,18 @@ namespace Hmcr.Model
         public static DateTime MaxDate = new DateTime(9999, 12, 31);
     }
 
+    public static class Permissions
+    {
+        public const string CodeReadWrite = "CODE_RW";
+        public const string CodeRead = "CODE_R";
+        public const string UserReadWrite = "USER_RW";
+        public const string UserRead = "USER_R";
+        public const string RoleReadWrite = "ROLE_RW";
+        public const string RoleRead = "ROLE_R";
+        public const string FileUploadReadWrite = "FILE_RW";
+        public const string FileUploadRead = "FILE_R";
+    }
+
     public static class Entities
     {
         public const string User = "user";

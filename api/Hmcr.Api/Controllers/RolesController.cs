@@ -1,6 +1,8 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
+using Hmcr.Api.Authorization;
 using Hmcr.Domain.Services;
+using Hmcr.Model;
 using Hmcr.Model.Dtos.Role;
 using Microsoft.AspNetCore.Mvc;
 
@@ -19,6 +21,7 @@ namespace Hmcr.Api.Controllers
         }
 
         [HttpGet("")]
+        [RequiresPermission(Permissions.RoleRead)]
         public async Task<ActionResult<IEnumerable<RoleDto>>> GetActiveRolesAsync()
         {
             return Ok(await _roleSvc.GetActiveRolesAsync());

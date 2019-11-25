@@ -1,4 +1,5 @@
-﻿using Hmcr.Domain.Services;
+﻿using Hmcr.Api.Authorization;
+using Hmcr.Domain.Services;
 using Hmcr.Model;
 using Hmcr.Model.Dtos;
 using Hmcr.Model.Dtos.User;
@@ -83,6 +84,7 @@ namespace Hmcr.Api.Controllers
         /// <param name="orderBy">Order by column(s). Example: orderby=username</param>
         /// <returns></returns>
         [HttpGet]
+        [RequiresPermission(Permissions.UserRead)]
         public async Task<ActionResult<PagedDto<UserSearchDto>>> GetUsersAsync(
             [FromQuery]string? serviceAreas, [FromQuery]string? userTypes, [FromQuery]string searchText, [FromQuery]bool? isActive,
             [FromQuery]int pageSize, [FromQuery]int pageNumber, [FromQuery]string orderBy)
@@ -93,12 +95,14 @@ namespace Hmcr.Api.Controllers
         }
 
         [HttpGet("{id}", Name = "GetUser")]
+        [RequiresPermission(Permissions.UserRead)]
         public async Task<ActionResult<UserDto>> GetUsersAsync(decimal id)
         {
             return await _userService.GetUserAsync(id);
         }
 
         [HttpPost]
+        [RequiresPermission(Permissions.UserReadWrite)]
         public async Task<ActionResult<UserDto>> CreateUser(UserCreateDto user)
         {
             var response = await _userService.CreateUserAsync(user);
@@ -112,6 +116,7 @@ namespace Hmcr.Api.Controllers
         }
 
         [HttpPut("{id}")]
+        [RequiresPermission(Permissions.UserRead)]
         public async Task<ActionResult> UpdateUser(decimal id, UserUpdateDto user)
         {
             if (id != user.SystemUserId)
@@ -135,6 +140,7 @@ namespace Hmcr.Api.Controllers
         }
 
         [HttpDelete("{id}")]
+        [RequiresPermission(Permissions.UserRead)]
         public async Task<ActionResult> DeleteUser(decimal id, UserDeleteDto user)
         {
             if (id != user.SystemUserId)
