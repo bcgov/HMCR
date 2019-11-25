@@ -6,12 +6,12 @@ import { Formik, Form, Field } from 'formik';
 import MaterialCard from './ui/MaterialCard';
 import MultiDropdown from './ui/MultiDropdown';
 import FontAwesomeButton from './ui/FontAwesomeButton';
-import AddUserForm from './forms/AddUserForm';
+import EditUserForm from './forms/EditUserForm';
 
 import * as api from '../Api';
 import * as Constants from '../Constants';
 
-const renderUserTable = userList => {
+const renderUserTable = (userList, setEditUserForm) => {
   return (
     <MaterialCard>
       <Table size="sm" responsive>
@@ -21,22 +21,29 @@ const renderUserTable = userList => {
             <th>Last Name</th>
             <th>Fist Name</th>
             <th>User ID</th>
+            <th>Company</th>
             <th>Service Areas</th>
             <th></th>
           </tr>
         </thead>
         <tbody>
           {userList.map(user => {
-            console.log(user);
             return (
               <tr key={user.id}>
                 <td>{user.userType}</td>
                 <td>{user.lastName}</td>
                 <td>{user.firstName}</td>
                 <td>{user.username}</td>
+                <td>{user.businessLegalName}</td>
                 <td>{user.serviceAreas}</td>
                 <td style={{ width: '1%', whiteSpace: 'nowrap' }}>
-                  <FontAwesomeButton icon="edit" className="mr-1" />
+                  <FontAwesomeButton
+                    icon="edit"
+                    className="mr-1"
+                    onClick={() =>
+                      setEditUserForm({ isOpen: true, formType: Constants.FORM_TYPE.EDIT, userId: user.id })
+                    }
+                  />
                   <FontAwesomeButton color="danger" icon="trash-alt" />
                 </td>
               </tr>
@@ -114,7 +121,7 @@ const UserAdmin = ({ serviceAreas, userStatuses, userTypes }) => {
         setUserList(response.data.sourceList);
       });
     }
-    setEditUserForm({ ...editUserForm, isOpen: false });
+    setEditUserForm({ isOpen: false });
   };
 
   return (
@@ -167,15 +174,15 @@ const UserAdmin = ({ serviceAreas, userStatuses, userTypes }) => {
             size="sm"
             color="primary"
             className="float-right mb-3"
-            onClick={() => setEditUserForm({ ...editUserForm, isOpen: true, formType: Constants.FORM_TYPE.ADD })}
+            onClick={() => setEditUserForm({ isOpen: true, formType: Constants.FORM_TYPE.ADD })}
           >
             Add User
           </Button>
         </Col>
       </Row>
 
-      {userList.length > 0 && renderUserTable(userList)}
-      {editUserForm.isOpen && <AddUserForm {...editUserForm} toggle={handleEditUserFormClose} />}
+      {userList.length > 0 && renderUserTable(userList, setEditUserForm)}
+      {editUserForm.isOpen && <EditUserForm {...editUserForm} toggle={handleEditUserFormClose} />}
     </React.Fragment>
   );
 };

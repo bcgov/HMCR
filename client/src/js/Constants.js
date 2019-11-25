@@ -28,8 +28,12 @@ export const MESSAGE_DATE_FORMAT = 'YYYY-MM-DD hh:mmA';
 export const FORM_TYPE = { ADD: 'ADD_FORM', EDIT: 'EDIT_FORM' };
 
 export const PERMISSIONS = {
-  ADMIN: 'AdminAccess',
+  CODE_W: 'CODE_W',
+  CODE_R: 'CODE_R',
+  USER_W: 'USER_W',
   USER_R: 'USER_R',
-  CONTRACTOR: 'CONTRACTOR_PERMISSION',
-  UPLOAD: 'UPLOAD_PERMISSION',
+  ROLE_W: 'ROLE_W',
+  ROLE_R: 'ROLE_R',
+  FILE_W: 'FILE_W',
+  FILE_R: 'FILE_R',
 };
