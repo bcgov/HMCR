@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { SingleDatePicker } from 'react-dates';
 import { Field } from 'formik';
 
-const SingleDatePickerWithFormik = ({ field: { name }, values, setFieldValue }) => {
+const SingleDatePickerWithFormik = ({ field: { name }, values, setFieldValue, placeholder }) => {
   const [focusedInput, setFocusedInput] = useState(false);
   const [focusClassName, setFocusClassName] = useState('');
 
@@ -28,6 +28,7 @@ const SingleDatePickerWithFormik = ({ field: { name }, values, setFieldValue }) 
         noBorder
         showDefaultInputIcon={true}
         inputIconPosition="after"
+        placeholder={placeholder}
       />
     </div>
   );

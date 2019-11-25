@@ -6,6 +6,7 @@ import { Formik, Form, Field } from 'formik';
 import MaterialCard from './ui/MaterialCard';
 import MultiDropdown from './ui/MultiDropdown';
 import FontAwesomeButton from './ui/FontAwesomeButton';
+import AddUserForm from './forms/AddUserForm';
 
 import * as api from '../Api';
 import * as Constants from '../Constants';
@@ -26,6 +27,7 @@ const renderUserTable = userList => {
         </thead>
         <tbody>
           {userList.map(user => {
+            console.log(user);
             return (
               <tr key={user.id}>
                 <td>{user.userType}</td>
@@ -64,13 +66,15 @@ const UserAdmin = ({ serviceAreas, userStatuses, userTypes }) => {
 
   const [userList, setUserList] = useState([]);
 
+  const [editUserForm, setEditUserForm] = useState({ isOpen: false });
+
   useEffect(() => {
     api.instance.get(Constants.API_PATHS.USER).then(response => {
       setUserList(response.data.sourceList);
     });
   }, []);
 
-  const handleFormSubmit = (values, setSubmitting) => {
+  const handleSearchFormSubmit = (values, setSubmitting) => {
     const serviceAreas = values.serviceAreaIds.join(',') || null;
     setSearchServiceAreas(serviceAreas);
 
@@ -104,13 +108,22 @@ const UserAdmin = ({ serviceAreas, userStatuses, userTypes }) => {
       .finally(() => setSubmitting(false));
   };
 
+  const handleEditUserFormClose = refresh => {
+    if (refresh) {
+      api.instance.get(Constants.API_PATHS.USER).then(response => {
+        setUserList(response.data.sourceList);
+      });
+    }
+    setEditUserForm({ ...editUserForm, isOpen: false });
+  };
+
   return (
     <React.Fragment>
       <MaterialCard>
         <Formik
           initialValues={initialValues}
           onSubmit={(values, { setSubmitting }) => {
-            handleFormSubmit(values, setSubmitting);
+            handleSearchFormSubmit(values, setSubmitting);
           }}
         >
           {formikProps => (
@@ -150,13 +163,19 @@ const UserAdmin = ({ serviceAreas, userStatuses, userTypes }) => {
       </MaterialCard>
       <Row>
         <Col>
-          <Button size="sm" color="primary" className="float-right mb-3">
+          <Button
+            size="sm"
+            color="primary"
+            className="float-right mb-3"
+            onClick={() => setEditUserForm({ ...editUserForm, isOpen: true, formType: Constants.FORM_TYPE.ADD })}
+          >
             Add User
           </Button>
         </Col>
       </Row>
 
       {userList.length > 0 && renderUserTable(userList)}
+      {editUserForm.isOpen && <AddUserForm {...editUserForm} toggle={handleEditUserFormClose} />}
     </React.Fragment>
   );
 };

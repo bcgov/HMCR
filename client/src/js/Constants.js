@@ -3,6 +3,7 @@ export const API_URL = process.env.REACT_APP_API_HOST
   : `${window.location.protocol}//${window.location.host}/api`;
 
 export const API_PATHS = {
+  ROLE: '/roles',
   SERVICE_AREAS: '/serviceareas',
   USER: '/users',
   USER_CURRENT: '/users/current',
@@ -28,6 +29,7 @@ export const FORM_TYPE = { ADD: 'ADD_FORM', EDIT: 'EDIT_FORM' };
 
 export const PERMISSIONS = {
   ADMIN: 'AdminAccess',
+  USER_R: 'USER_R',
   CONTRACTOR: 'CONTRACTOR_PERMISSION',
   UPLOAD: 'UPLOAD_PERMISSION',
 };
