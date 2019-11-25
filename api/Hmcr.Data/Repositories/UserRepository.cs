@@ -54,9 +54,9 @@ namespace Hmcr.Data.Repositories
                 userEntity
                 .HmrUserRoles
                 .Select(r => r.Role)
-                .Where(r => r.EndDate == null || r.EndDate >= DateTime.Today) //active roles
+                .Where(r => r.EndDate == null || r.EndDate > DateTime.Today) //active roles
                 .SelectMany(r => r.HmrRolePermissions.Select(rp => rp.Permission))
-                .Where(p => p.EndDate == null || p.EndDate >= DateTime.Today) //active permissions
+                .Where(p => p.EndDate == null || p.EndDate > DateTime.Today) //active permissions
                 .ToLookup(p => p.Name)
                 .Select(p => p.First())
                 .Select(p => p.Name)
@@ -76,7 +76,7 @@ namespace Hmcr.Data.Repositories
 
         public async Task<HmrSystemUser> GetCurrentActiveUserEntityAsync()
         {
-            return await DbSet.FirstOrDefaultAsync(u => u.Username == _currentUser.UniversalId && (u.EndDate == null || u.EndDate >= DateTime.Today));
+            return await DbSet.FirstOrDefaultAsync(u => u.Username == _currentUser.UniversalId && (u.EndDate == null || u.EndDate > DateTime.Today));
         }
 
         public async Task<PagedDto<UserSearchDto>> GetUsersAsync(decimal[]? serviceAreas, string[]? userTypes, string searchText, bool? isActive, int pageSize, int pageNumber, string orderBy)
@@ -102,8 +102,8 @@ namespace Hmcr.Data.Repositories
             if (isActive != null)
             {
                 query = (bool)isActive
-                    ? query.Where(u => u.EndDate == null || u.EndDate >= DateTime.Today)
-                    : query.Where(u => u.EndDate != null || u.EndDate < DateTime.Today.AddDays(1));
+                    ? query.Where(u => u.EndDate == null || u.EndDate > DateTime.Today)
+                    : query.Where(u => u.EndDate != null || u.EndDate <= DateTime.Today.AddDays(1));
             }
 
             query = query.Include(u => u.HmrServiceAreaUsers);
@@ -118,6 +118,7 @@ namespace Hmcr.Data.Repositories
             {
                 user.ServiceAreas = string.Join(",", userServiceArea[user.SystemUserId].Select(x => x.ServiceAreaNumber.ToString()));
                 user.HasLogInHistory = pagedEntity.SourceList.Any(u => u.SystemUserId == user.SystemUserId && u.UserGuid != null);
+                user.IsActive = user.EndDate == null || user.EndDate > DateTime.Today;
             }
 
             var pagedDTO = new PagedDto<UserSearchDto>
@@ -148,7 +149,7 @@ namespace Hmcr.Data.Repositories
             var roleIds =
                 userEntity
                 .HmrUserRoles
-                .Where(r => r.EndDate == null || r.EndDate >= DateTime.Today) //active roles
+                .Where(r => r.EndDate == null || r.EndDate > DateTime.Today) //active roles
                 .Select(r => r.RoleId)
                 .ToList();
 
@@ -197,6 +198,9 @@ namespace Hmcr.Data.Repositories
 
         public async Task UpdateUserAsync(UserUpdateDto userDto)
         {
+            //remove time portion
+            userDto.EndDate = userDto.EndDate?.Date;
+
             var userEntity = await DbSet
                     .Include(x => x.HmrUserRoles)
                     .Include(x => x.HmrServiceAreaUsers)
@@ -261,6 +265,9 @@ namespace Hmcr.Data.Repositories
 
         public async Task DeleteUserAsync(UserDeleteDto user)
         {
+            //remove time portion
+            user.EndDate = user.EndDate?.Date;
+
             var userEntity = await DbSet
                 .FirstAsync(u => u.SystemUserId == user.SystemUserId);
 

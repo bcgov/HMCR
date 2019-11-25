@@ -11,13 +11,13 @@ namespace Hmcr.Model
 
     public static class Permissions
     {
-        public const string CodeReadWrite = "CODE_RW";
+        public const string CodeWrite = "CODE_W";
         public const string CodeRead = "CODE_R";
-        public const string UserReadWrite = "USER_RW";
+        public const string UserWrite = "USER_W";
         public const string UserRead = "USER_R";
-        public const string RoleReadWrite = "ROLE_RW";
+        public const string RoleWrite = "ROLE_W";
         public const string RoleRead = "ROLE_R";
-        public const string FileUploadReadWrite = "FILE_RW";
+        public const string FileUploadWrite = "FILE_W";
         public const string FileUploadRead = "FILE_R";
     }
 

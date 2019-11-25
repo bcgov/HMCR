@@ -25,13 +25,13 @@ namespace Hmcr.Data.Repositories
 
         public async Task<int> CountActiveRoleIdsAsync(IEnumerable<decimal> roles)
         {
-            return await DbSet.CountAsync(r => roles.Contains(r.RoleId) && (r.EndDate == null || r.EndDate >= DateTime.Today));
+            return await DbSet.CountAsync(r => roles.Contains(r.RoleId) && (r.EndDate == null || r.EndDate > DateTime.Today));
         }
 
         public async Task<IEnumerable<RoleDto>> GetActiveRolesAsync()
         {
             var roleEntity = await DbSet.AsNoTracking()
-                .Where(x => x.EndDate == null || x.EndDate >= DateTime.Today)
+                .Where(x => x.EndDate == null || x.EndDate > DateTime.Today)
                 .ToListAsync();
 
             return Mapper.Map<IEnumerable<RoleDto>>(roleEntity);
