@@ -127,6 +127,11 @@ namespace Hmcr.Domain.Services
                 }
             }
 
+            if (errors.Count > 0)
+            {
+                return (0, errors);
+            }
+
             var userEntity = await _userRepo.CreateUserAsync(user);
 
             await _unitOfWork.CommitAsync();
@@ -232,7 +237,7 @@ namespace Hmcr.Domain.Services
 
             var errors = new Dictionary<string, List<string>>();
 
-            _validator.Validate(Entities.User, Fields.EndDate, user.EndDate, errors);
+            _validator.Validate(Entities.User, user, errors);
 
             if (errors.Count > 0)
             {
