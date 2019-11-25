@@ -116,7 +116,7 @@ namespace Hmcr.Api.Controllers
         }
 
         [HttpPut("{id}")]
-        [RequiresPermission(Permissions.UserRead)]
+        [RequiresPermission(Permissions.UserReadWrite)]
         public async Task<ActionResult> UpdateUser(decimal id, UserUpdateDto user)
         {
             if (id != user.SystemUserId)
@@ -140,7 +140,7 @@ namespace Hmcr.Api.Controllers
         }
 
         [HttpDelete("{id}")]
-        [RequiresPermission(Permissions.UserRead)]
+        [RequiresPermission(Permissions.UserReadWrite)]
         public async Task<ActionResult> DeleteUser(decimal id, UserDeleteDto user)
         {
             if (id != user.SystemUserId)
