@@ -102,7 +102,7 @@ namespace Hmcr.Api.Controllers
         }
 
         [HttpPost]
-        [RequiresPermission(Permissions.UserReadWrite)]
+        [RequiresPermission(Permissions.UserWrite)]
         public async Task<ActionResult<UserDto>> CreateUser(UserCreateDto user)
         {
             var response = await _userService.CreateUserAsync(user);
@@ -116,7 +116,7 @@ namespace Hmcr.Api.Controllers
         }
 
         [HttpPut("{id}")]
-        [RequiresPermission(Permissions.UserReadWrite)]
+        [RequiresPermission(Permissions.UserWrite)]
         public async Task<ActionResult> UpdateUser(decimal id, UserUpdateDto user)
         {
             if (id != user.SystemUserId)
@@ -140,7 +140,7 @@ namespace Hmcr.Api.Controllers
         }
 
         [HttpDelete("{id}")]
-        [RequiresPermission(Permissions.UserReadWrite)]
+        [RequiresPermission(Permissions.UserWrite)]
         public async Task<ActionResult> DeleteUser(decimal id, UserDeleteDto user)
         {
             if (id != user.SystemUserId)
