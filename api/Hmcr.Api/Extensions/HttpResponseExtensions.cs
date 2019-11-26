@@ -11,10 +11,10 @@ namespace Hmcr.Api.Extensions
     {
         private static JsonSerializerOptions _jsonOptions = new JsonSerializerOptions { WriteIndented = true, PropertyNamingPolicy = JsonNamingPolicy.CamelCase };
 
-        public static Task WriteJsonAsync<T>(this HttpResponse response, T obj, string contentType = null)
+        public static async Task WriteJsonAsync<T>(this HttpResponse response, T obj, string contentType = null)
         {
             response.ContentType = contentType ?? "application/json";
-            return response.WriteAsync(JsonSerializer.Serialize<T>(obj, _jsonOptions));
+            await response.WriteAsync(JsonSerializer.Serialize<T>(obj, _jsonOptions));
         }
     }
 }

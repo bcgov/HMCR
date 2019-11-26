@@ -37,7 +37,7 @@ namespace Hmcr.Api.Middlewares
             }
         }
 
-        private Task HandleExceptionAsync(HttpContext context, Guid guid)
+        private async Task HandleExceptionAsync(HttpContext context, Guid guid)
         {
             context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
 
@@ -52,7 +52,7 @@ namespace Hmcr.Api.Middlewares
 
             problem.Extensions.Add("traceId", context.TraceIdentifier);
 
-            return context.Response.WriteJsonAsync(problem, "application/problem+json");
+            await context.Response.WriteJsonAsync(problem, "application/problem+json");
         }
     }
 }
