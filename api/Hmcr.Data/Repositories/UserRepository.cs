@@ -4,12 +4,15 @@ using Hmcr.Data.Database.Entities;
 using Hmcr.Data.Repositories.Base;
 using Hmcr.Model;
 using Hmcr.Model.Dtos;
+using Hmcr.Model.Dtos.Party;
 using Hmcr.Model.Dtos.ServiceArea;
 using Hmcr.Model.Dtos.User;
 using Hmcr.Model.Utils;
+using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -19,6 +22,7 @@ namespace Hmcr.Data.Repositories
     {
         Task<UserCurrentDto> GetCurrentUserAsync();
         Task<HmrSystemUser> GetCurrentActiveUserEntityAsync();
+        void ProcessFirstUserLogin();
         Task<PagedDto<UserSearchDto>> GetUsersAsync(decimal[]? serviceAreas, string[]? userTypes, string searchText, bool? isActive, int pageSize, int pageNumber, string orderBy);
         Task<UserDto> GetUserAsync(decimal systemUserId);
         Task<HmrSystemUser> CreateUserAsync(UserCreateDto user);
@@ -30,11 +34,13 @@ namespace Hmcr.Data.Repositories
     public class UserRepository : HmcrRepositoryBase<HmrSystemUser>, IUserRepository
     {
         private HmcrCurrentUser _currentUser;
+        private IPartyRepository _partyRepo;
 
-        public UserRepository(AppDbContext dbContext, IMapper mapper, HmcrCurrentUser currentUser)
+        public UserRepository(AppDbContext dbContext, IMapper mapper, HmcrCurrentUser currentUser, IPartyRepository partyRepo)
             : base(dbContext, mapper)
         {
             _currentUser = currentUser;
+            _partyRepo = partyRepo;
         }
 
         public async Task<UserCurrentDto> GetCurrentUserAsync()
@@ -77,6 +83,51 @@ namespace Hmcr.Data.Repositories
         public async Task<HmrSystemUser> GetCurrentActiveUserEntityAsync()
         {
             return await DbSet.FirstOrDefaultAsync(u => u.Username == _currentUser.UniversalId && (u.EndDate == null || u.EndDate > DateTime.Today));
+        }
+
+        /// <summary>
+        /// This method is self-committing
+        /// </summary>
+        public void ProcessFirstUserLogin()
+        {
+            using var transaction = DbContext.Database.BeginTransaction(IsolationLevel.Serializable);
+
+            DbContext.Database.ExecuteSqlInterpolated($"SELECT 1 FROM HMR_SYSTEM_USER WITH(XLOCK, ROWLOCK) WHERE USERNAME = {_currentUser.UserName}");
+
+            var userEntity = DbSet.First(u => u.Username == _currentUser.UniversalId);
+
+            if (userEntity.UserGuid == null)
+            {
+                userEntity.UserGuid = _currentUser.UserGuid;
+                userEntity.BusinessGuid = _currentUser.BusinessGuid;
+                userEntity.BusinessLegalName = _currentUser.BusinessLegalName;
+                userEntity.UserType = _currentUser.UserType;
+
+                if (_currentUser.UserType == UserTypeDto.INTERNAL)
+                {
+                    DbContext.SaveChanges();
+                    transaction.Commit();
+                    return;
+                }
+
+                var partyEntity = _partyRepo.GetPartyEntityByGuid(_currentUser.BusinessGuid);
+
+                if (partyEntity != null)
+                    return;
+
+                var party = new PartyDto
+                {
+                    BusinessGuid = _currentUser.BusinessGuid,
+                    BusinessLegalName = _currentUser.BusinessLegalName.Trim(),
+                    BusinessNumber = Convert.ToDecimal(_currentUser.BusinessNumber),
+                    DisplayName = _currentUser.BusinessLegalName.Trim()
+                };
+
+                _partyRepo.Add(party);
+                DbContext.SaveChanges();
+            }
+
+            transaction.Commit();
         }
 
         public async Task<PagedDto<UserSearchDto>> GetUsersAsync(decimal[]? serviceAreas, string[]? userTypes, string searchText, bool? isActive, int pageSize, int pageNumber, string orderBy)
