@@ -9,6 +9,7 @@ const FontAwesomeButton = props => {
       color={props.color ? props.color : 'primary'}
       className={`fontawesome-button ${props.className}`}
       onClick={props.onClick}
+      id={props.id}
     >
       <FontAwesomeIcon icon={props.icon} />
     </Button>

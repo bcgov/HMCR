@@ -5,6 +5,7 @@ export const FETCH_USER_TYPES = 'FETCH_USER_TYPES';
 export const FETCH_USER_STATUSES = 'FETCH_USER_STATUSES';
 export const CREATE_USER = 'CREATE_USER';
 export const EDIT_USER = 'EDIT_USER';
+export const DELETE_USER = 'DELETE_USER';
 
 export const FETCH_SERVICE_AREAS = 'FETCH_SERVICE_AREAS';
 

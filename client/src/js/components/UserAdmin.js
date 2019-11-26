@@ -7,11 +7,12 @@ import MaterialCard from './ui/MaterialCard';
 import MultiDropdown from './ui/MultiDropdown';
 import FontAwesomeButton from './ui/FontAwesomeButton';
 import EditUserForm from './forms/EditUserForm';
+import DeleteButton from './ui/DeleteButton';
 
 import * as api from '../Api';
 import * as Constants from '../Constants';
 
-const renderUserTable = (userList, setEditUserForm) => {
+const renderUserTable = (userList, setEditUserForm, refreshData) => {
   return (
     <MaterialCard>
       <Table size="sm" responsive>
@@ -21,7 +22,7 @@ const renderUserTable = (userList, setEditUserForm) => {
             <th>Last Name</th>
             <th>Fist Name</th>
             <th>User ID</th>
-            <th>Company</th>
+            <th>Organization</th>
             <th>Service Areas</th>
             <th></th>
           </tr>
@@ -44,7 +45,12 @@ const renderUserTable = (userList, setEditUserForm) => {
                       setEditUserForm({ isOpen: true, formType: Constants.FORM_TYPE.EDIT, userId: user.id })
                     }
                   />
-                  <FontAwesomeButton color="danger" icon="trash-alt" />
+                  <DeleteButton
+                    id={`user_${user.id}_delete`}
+                    userId={user.id}
+                    endDate={user.endDate}
+                    refreshData={refreshData}
+                  ></DeleteButton>
                 </td>
               </tr>
             );
@@ -75,10 +81,15 @@ const UserAdmin = ({ serviceAreas, userStatuses, userTypes }) => {
 
   const [editUserForm, setEditUserForm] = useState({ isOpen: false });
 
-  useEffect(() => {
+  // Temporary...
+  const refreshData = () => {
     api.instance.get(Constants.API_PATHS.USER).then(response => {
       setUserList(response.data.sourceList);
     });
+  };
+
+  useEffect(() => {
+    refreshData();
   }, []);
 
   const handleSearchFormSubmit = (values, setSubmitting) => {
@@ -117,9 +128,7 @@ const UserAdmin = ({ serviceAreas, userStatuses, userTypes }) => {
 
   const handleEditUserFormClose = refresh => {
     if (refresh) {
-      api.instance.get(Constants.API_PATHS.USER).then(response => {
-        setUserList(response.data.sourceList);
-      });
+      refreshData();
     }
     setEditUserForm({ isOpen: false });
   };
@@ -181,7 +190,7 @@ const UserAdmin = ({ serviceAreas, userStatuses, userTypes }) => {
         </Col>
       </Row>
 
-      {userList.length > 0 && renderUserTable(userList, setEditUserForm)}
+      {userList.length > 0 && renderUserTable(userList, setEditUserForm, refreshData)}
       {editUserForm.isOpen && <EditUserForm {...editUserForm} toggle={handleEditUserFormClose} />}
     </React.Fragment>
   );

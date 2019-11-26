@@ -15,6 +15,7 @@ import {
 } from 'reactstrap';
 import { Formik, Form, useField } from 'formik';
 import * as Yup from 'yup';
+import moment from 'moment';
 
 import MultiSelect from '../ui/MultiSelect';
 import SingleDateField from '../ui/SingleDateField';
@@ -89,7 +90,10 @@ const EditUserForm = ({
         if (formType === Constants.FORM_TYPE.ADD) setLoading(false);
         else {
           return api.instance.get(`${Constants.API_PATHS.USER}/${userId}`).then(response => {
-            setInitialValues(response.data);
+            setInitialValues({
+              ...response.data,
+              endDate: response.data.endDate ? moment(response.data.endDate) : null,
+            });
             setDisableEdit(response.data.hasLogInHistory);
           });
         }
