@@ -63,9 +63,7 @@ namespace Hmcr.Domain.Services
             {
                 if (userEntity.UserType == _currentUser.UserType)
                 {
-                    UpdateUserEntity(userEntity);
-                    await CreatePartyEntityIfNecessaryAsync();
-                    await _unitOfWork.CommitAsync();
+                    _userRepo.ProcessFirstUserLogin();
                 }
                 else
                 {
@@ -74,35 +72,6 @@ namespace Hmcr.Domain.Services
             }
 
             return true;
-        }
-
-        private void UpdateUserEntity(HmrSystemUser userEntity)
-        {
-            userEntity.UserGuid = _currentUser.UserGuid;
-            userEntity.BusinessGuid = _currentUser.BusinessGuid;
-            userEntity.BusinessLegalName = _currentUser.BusinessLegalName;
-            userEntity.UserType = _currentUser.UserType;
-        }
-
-        private async Task CreatePartyEntityIfNecessaryAsync()
-        {
-            if (_currentUser.UserType == UserTypeDto.INTERNAL)
-                return;
-
-            var partyEntity = await _partyRepo.GetPartyEntityByGuidAsync(_currentUser.BusinessGuid);
-
-            if (partyEntity != null)
-                return;
-
-            var party = new PartyDto
-            {
-                BusinessGuid = _currentUser.BusinessGuid,
-                BusinessLegalName = _currentUser.BusinessLegalName.Trim(),
-                BusinessNumber = Convert.ToDecimal(_currentUser.BusinessNumber),
-                DisplayName = _currentUser.BusinessLegalName.Trim()
-            };
-
-            await _partyRepo.AddAsync(party);
         }
 
         public async Task<PagedDto<UserSearchDto>> GetUsersAsync(decimal[]? serviceAreas, string[]? userTypes, string searchText, bool? isActive, int pageSize, int pageNumber, string orderBy)
