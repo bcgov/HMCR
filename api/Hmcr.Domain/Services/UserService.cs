@@ -64,7 +64,7 @@ namespace Hmcr.Domain.Services
                 if (userEntity.UserType == _currentUser.UserType)
                 {
                     UpdateUserEntity(userEntity);
-                    CreatePartyEntityIfNecessaryAsync();
+                    await CreatePartyEntityIfNecessaryAsync();
                     await _unitOfWork.CommitAsync();
                 }
                 else
@@ -84,7 +84,7 @@ namespace Hmcr.Domain.Services
             userEntity.UserType = _currentUser.UserType;
         }
 
-        private async void CreatePartyEntityIfNecessaryAsync()
+        private async Task CreatePartyEntityIfNecessaryAsync()
         {
             if (_currentUser.UserType == UserTypeDto.INTERNAL)
                 return;

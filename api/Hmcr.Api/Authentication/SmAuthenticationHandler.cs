@@ -67,7 +67,7 @@ namespace Hmcr.Api.Authentication
             return AuthenticateResult.Success(new AuthenticationTicket(principal, null, SmAuthenticationOptions.Scheme));
         }
 
-        protected override Task HandleChallengeAsync(AuthenticationProperties properties)
+        protected override async Task HandleChallengeAsync(AuthenticationProperties properties)
         {
             Context.Response.ContentType = "application/json";
             Context.Response.StatusCode = StatusCodes.Status401Unauthorized;
@@ -83,7 +83,7 @@ namespace Hmcr.Api.Authentication
 
             problem.Extensions.Add("traceId", Context.TraceIdentifier);
 
-            return Context.Response.WriteJsonAsync(problem, "application/problem+json");
+            await Context.Response.WriteJsonAsync(problem, "application/problem+json");
         }
 
         private void ReadSmHeaders()
