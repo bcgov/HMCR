@@ -6,11 +6,13 @@ import { Formik, Form, Field } from 'formik';
 import MaterialCard from './ui/MaterialCard';
 import MultiDropdown from './ui/MultiDropdown';
 import FontAwesomeButton from './ui/FontAwesomeButton';
+import EditUserForm from './forms/EditUserForm';
+import DeleteButton from './ui/DeleteButton';
 
 import * as api from '../Api';
 import * as Constants from '../Constants';
 
-const renderUserTable = userList => {
+const renderUserTable = (userList, setEditUserForm, refreshData) => {
   return (
     <MaterialCard>
       <Table size="sm" responsive>
@@ -20,6 +22,7 @@ const renderUserTable = userList => {
             <th>Last Name</th>
             <th>Fist Name</th>
             <th>User ID</th>
+            <th>Organization</th>
             <th>Service Areas</th>
             <th></th>
           </tr>
@@ -32,10 +35,22 @@ const renderUserTable = userList => {
                 <td>{user.lastName}</td>
                 <td>{user.firstName}</td>
                 <td>{user.username}</td>
+                <td>{user.businessLegalName}</td>
                 <td>{user.serviceAreas}</td>
                 <td style={{ width: '1%', whiteSpace: 'nowrap' }}>
-                  <FontAwesomeButton icon="edit" className="mr-1" />
-                  <FontAwesomeButton color="danger" icon="trash-alt" />
+                  <FontAwesomeButton
+                    icon="edit"
+                    className="mr-1"
+                    onClick={() =>
+                      setEditUserForm({ isOpen: true, formType: Constants.FORM_TYPE.EDIT, userId: user.id })
+                    }
+                  />
+                  <DeleteButton
+                    id={`user_${user.id}_delete`}
+                    userId={user.id}
+                    endDate={user.endDate}
+                    refreshData={refreshData}
+                  ></DeleteButton>
                 </td>
               </tr>
             );
@@ -64,13 +79,20 @@ const UserAdmin = ({ serviceAreas, userStatuses, userTypes }) => {
 
   const [userList, setUserList] = useState([]);
 
-  useEffect(() => {
+  const [editUserForm, setEditUserForm] = useState({ isOpen: false });
+
+  // Temporary...
+  const refreshData = () => {
     api.instance.get(Constants.API_PATHS.USER).then(response => {
       setUserList(response.data.sourceList);
     });
+  };
+
+  useEffect(() => {
+    refreshData();
   }, []);
 
-  const handleFormSubmit = (values, setSubmitting) => {
+  const handleSearchFormSubmit = (values, setSubmitting) => {
     const serviceAreas = values.serviceAreaIds.join(',') || null;
     setSearchServiceAreas(serviceAreas);
 
@@ -104,13 +126,20 @@ const UserAdmin = ({ serviceAreas, userStatuses, userTypes }) => {
       .finally(() => setSubmitting(false));
   };
 
+  const handleEditUserFormClose = refresh => {
+    if (refresh) {
+      refreshData();
+    }
+    setEditUserForm({ isOpen: false });
+  };
+
   return (
     <React.Fragment>
       <MaterialCard>
         <Formik
           initialValues={initialValues}
           onSubmit={(values, { setSubmitting }) => {
-            handleFormSubmit(values, setSubmitting);
+            handleSearchFormSubmit(values, setSubmitting);
           }}
         >
           {formikProps => (
@@ -150,13 +179,19 @@ const UserAdmin = ({ serviceAreas, userStatuses, userTypes }) => {
       </MaterialCard>
       <Row>
         <Col>
-          <Button size="sm" color="primary" className="float-right mb-3">
+          <Button
+            size="sm"
+            color="primary"
+            className="float-right mb-3"
+            onClick={() => setEditUserForm({ isOpen: true, formType: Constants.FORM_TYPE.ADD })}
+          >
             Add User
           </Button>
         </Col>
       </Row>
 
-      {userList.length > 0 && renderUserTable(userList)}
+      {userList.length > 0 && renderUserTable(userList, setEditUserForm, refreshData)}
+      {editUserForm.isOpen && <EditUserForm {...editUserForm} toggle={handleEditUserFormClose} />}
     </React.Fragment>
   );
 };

@@ -3,6 +3,7 @@ export const API_URL = process.env.REACT_APP_API_HOST
   : `${window.location.protocol}//${window.location.host}/api`;
 
 export const API_PATHS = {
+  ROLE: '/roles',
   SERVICE_AREAS: '/serviceareas',
   USER: '/users',
   USER_CURRENT: '/users/current',
@@ -27,7 +28,12 @@ export const MESSAGE_DATE_FORMAT = 'YYYY-MM-DD hh:mmA';
 export const FORM_TYPE = { ADD: 'ADD_FORM', EDIT: 'EDIT_FORM' };
 
 export const PERMISSIONS = {
-  ADMIN: 'AdminAccess',
-  CONTRACTOR: 'CONTRACTOR_PERMISSION',
-  UPLOAD: 'UPLOAD_PERMISSION',
+  CODE_W: 'CODE_W',
+  CODE_R: 'CODE_R',
+  USER_W: 'USER_W',
+  USER_R: 'USER_R',
+  ROLE_W: 'ROLE_W',
+  ROLE_R: 'ROLE_R',
+  FILE_W: 'FILE_W',
+  FILE_R: 'FILE_R',
 };

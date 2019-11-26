@@ -35,7 +35,7 @@ const App = () => {
               <Route path={Constants.PATHS.HOME} exact component={Home}>
                 <Redirect to={Constants.PATHS.ADMIN_USERS} />
               </Route>
-              <AuthorizedRoute path={Constants.PATHS.ADMIN} requires={Constants.PERMISSIONS.ADMIN}>
+              <AuthorizedRoute path={Constants.PATHS.ADMIN} requires={Constants.PERMISSIONS.USER_R}>
                 <AdminRoutes />
               </AuthorizedRoute>
               <AuthorizedRoute path={Constants.PATHS.WORK_REPORTING} requires={Constants.PERMISSIONS.CONTRACTOR}>

@@ -3,8 +3,13 @@ export const FETCH_CURRENT_USER = 'FETCH_CURRENT_USER';
 export const FETCH_USERS = 'FETCH_USERS';
 export const FETCH_USER_TYPES = 'FETCH_USER_TYPES';
 export const FETCH_USER_STATUSES = 'FETCH_USER_STATUSES';
+export const CREATE_USER = 'CREATE_USER';
+export const EDIT_USER = 'EDIT_USER';
+export const DELETE_USER = 'DELETE_USER';
 
 export const FETCH_SERVICE_AREAS = 'FETCH_SERVICE_AREAS';
+
+export const FETCH_ROLES = 'FETCH_ROLES';
 
 // Global Error Dialog
 export const SHOW_ERROR_DIALOG_MODAL = 'SHOW_ERROR_DIALOG_MODAL';
