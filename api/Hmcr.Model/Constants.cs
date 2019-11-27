@@ -24,6 +24,7 @@ namespace Hmcr.Model
     public static class Entities
     {
         public const string User = "user";
+        public const string Role = "role";
     }
 
     public static class FieldTypes
@@ -46,5 +47,9 @@ namespace Hmcr.Model
         public const string ServiceAreaNumber = "ServiceAreaNumber";
 
         public const string RoleId = "RoleId";
+        public const string Name = "Name";
+        public const string Description = "Description";
+
+        public const string PermissionId = "PermissionId";
     }
 }

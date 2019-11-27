@@ -136,6 +136,8 @@ namespace Hmcr.Data.Repositories.Base
         {
             var totalRecords = list.Count();
 
+            if (pageNumber <= 0) pageNumber = 1;
+
             var pagedList = list.DynamicOrderBy(orderBy) as IQueryable<TInput>;
 
             if (pageSize > 0)
