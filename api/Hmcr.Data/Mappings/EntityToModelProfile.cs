@@ -37,6 +37,10 @@ namespace Hmcr.Data.Mappings
             CreateMap<HmrRegion, RegionDto>();
 
             CreateMap<HmrRole, RoleDto>();
+            CreateMap<HmrRole, RoleCreateDto>();
+            CreateMap<HmrRole, RoleUpdateDto>();
+            CreateMap<HmrRole, RoleSearchDto>();
+            CreateMap<HmrRole, RoleDeleteDto>();
 
             CreateMap<HmrRolePermission, RolePermissionDto>();
 

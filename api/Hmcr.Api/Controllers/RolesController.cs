@@ -22,9 +22,9 @@ namespace Hmcr.Api.Controllers
 
         [HttpGet("")]
         [RequiresPermission(Permissions.RoleRead)]
-        public async Task<ActionResult<IEnumerable<RoleDto>>> GetActiveRolesAsync()
+        public async Task<ActionResult<IEnumerable<RoleSearchDto>>> GetRolesAsync([FromQuery]string searchText = null, [FromQuery]bool? isActive = true)
         {
-            return Ok(await _roleSvc.GetActiveRolesAsync());
+            return Ok(await _roleSvc.GetRolesAync(searchText, isActive));
         }
     }
 }
