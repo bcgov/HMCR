@@ -115,3 +115,11 @@ body {
 .form-control.multi-select.is-invalid {
   border-color: #d93e45;
 }
+
+.pagination {
+  justify-content: flex-end;
+
+  .page-link {
+    min-width: 32.38px;
+  }
+}

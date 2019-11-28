@@ -14,7 +14,7 @@ import UserAdmin from './components/UserAdmin';
 import RolePermissionAdmin from './components/RolePermissionAdmin';
 import WorkReporting from './components/WorkReporting';
 import WorkReportingSubmission from './components/WorkReportingSubmission';
-import Home from './components/Home';
+// import Home from './components/Home';
 
 import addIconsToLibrary from './fontAwesome';
 import * as Constants from './Constants';
@@ -32,7 +32,7 @@ const App = () => {
           <Container>
             <Switch>
               {/* <Route path={Constants.PATHS.HOME} exact component={Home} /> */}
-              <Route path={Constants.PATHS.HOME} exact component={Home}>
+              <Route path={Constants.PATHS.HOME} exact>
                 <Redirect to={Constants.PATHS.ADMIN_USERS} />
               </Route>
               <AuthorizedRoute path={Constants.PATHS.ADMIN} requires={Constants.PERMISSIONS.USER_R}>
