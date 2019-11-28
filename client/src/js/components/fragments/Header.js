@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { connect } from 'react-redux';
 import { Link } from 'react-router-dom';
 import { Button, Container, Collapse, Navbar, NavbarToggler, NavbarBrand, Nav, NavItem } from 'reactstrap';
 
@@ -6,7 +7,7 @@ import NavLinkWithMatch from '../ui/NavLinkWithMatch';
 
 import * as Constants from '../../Constants';
 
-const Header = () => {
+const Header = ({ currentUser }) => {
   const [collapsed, setCollapsed] = useState(true);
 
   const toggleNavbar = () => {
@@ -54,7 +55,7 @@ const Header = () => {
             </Nav>
             <Nav className="navbar-nav ml-auto">
               <NavItem>
-                <Button color="link">Logout</Button>
+                <Button color="link">{`${currentUser.username},  Logout`} </Button>
               </NavItem>
             </Nav>
           </Collapse>
@@ -64,4 +65,10 @@ const Header = () => {
   );
 };
 
-export default Header;
+const mapStateToProps = state => {
+  return {
+    currentUser: state.user.current,
+  };
+};
+
+export default connect(mapStateToProps, null)(Header);

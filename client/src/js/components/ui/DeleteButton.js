@@ -8,7 +8,7 @@ import FontAwesomeButton from './FontAwesomeButton';
 import * as api from '../../Api';
 import * as Constants from '../../Constants';
 
-const DeleteButton = ({ id, children, userId, endDate, refreshData, ...props }) => {
+const DeleteButton = ({ id, children, userId, endDate, onComplete, ...props }) => {
   const [popoverOpen, setPopoverOpen] = useState(false);
   const [date, setDate] = useState(null);
   const [focusedInput, setFocusedInput] = useState(false);
@@ -30,7 +30,7 @@ const DeleteButton = ({ id, children, userId, endDate, refreshData, ...props }) 
     togglePopover();
     api.instance
       .delete(`${Constants.API_PATHS.USER}/${userId}`, { data: { id: userId, endDate: date } })
-      .then(() => refreshData());
+      .then(() => onComplete());
   };
 
   return (

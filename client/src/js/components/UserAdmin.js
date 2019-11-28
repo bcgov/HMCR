@@ -8,11 +8,20 @@ import MultiDropdown from './ui/MultiDropdown';
 import FontAwesomeButton from './ui/FontAwesomeButton';
 import EditUserForm from './forms/EditUserForm';
 import DeleteButton from './ui/DeleteButton';
+import PaginationControl from './ui/PaginationControl';
 
-import * as api from '../Api';
+import { setSingleUserSeachCriteria, searchUsers } from '../actions';
+
 import * as Constants from '../Constants';
 
-const renderUserTable = (userList, setEditUserForm, refreshData) => {
+const renderUserTable = (
+  userList,
+  setEditUserForm,
+  refreshData,
+  searchPagination,
+  handleChangePage,
+  handleChangePageSize
+) => {
   return (
     <MaterialCard>
       <Table size="sm" responsive>
@@ -49,7 +58,7 @@ const renderUserTable = (userList, setEditUserForm, refreshData) => {
                     id={`user_${user.id}_delete`}
                     userId={user.id}
                     endDate={user.endDate}
-                    refreshData={refreshData}
+                    onComplete={refreshData}
                   ></DeleteButton>
                 </td>
               </tr>
@@ -57,89 +66,87 @@ const renderUserTable = (userList, setEditUserForm, refreshData) => {
           })}
         </tbody>
       </Table>
+      <PaginationControl
+        currentPage={searchPagination.pageNumber}
+        pageCount={searchPagination.pageCount}
+        onPageChange={handleChangePage}
+        pageSize={searchPagination.pageSize}
+        onPageSizeChange={handleChangePageSize}
+      />
     </MaterialCard>
   );
 };
 
-const initialValues = { serviceAreaIds: [], userTypeIds: [], searchText: '', useStatusIds: [] };
+const defaultSearchFormValues = { serviceAreaIds: [], userTypeIds: [], searchText: '', useStatusIds: [] };
 
-const UserAdmin = ({ serviceAreas, userStatuses, userTypes }) => {
+const UserAdmin = ({
+  serviceAreas,
+  userStatuses,
+  userTypes,
+  setSingleUserSeachCriteria,
+  searchUsers,
+  searchResult,
+  searchPagination,
+}) => {
   // const [displayPage, setDisplayPage] = useState(1);
   // const [displayPageSize, setDisplayPageSize] = useState(25);
   // const [displayOrderBy, setDisplayOrderBy] = useState(null);
-
-  // eslint-disable-next-line
-  const [searchServiceAreas, setSearchServiceAreas] = useState(null);
-  // eslint-disable-next-line
-  const [searchUserTypes, setSearchUserTypes] = useState(null);
-  // eslint-disable-next-line
-  const [searchUserStatus, setSearchUserStatus] = useState(null);
-  // eslint-disable-next-line
-  const [searchUserText, setSearchUserText] = useState(null);
-
-  const [userList, setUserList] = useState([]);
 
   const [editUserForm, setEditUserForm] = useState({ isOpen: false });
 
   // Temporary...
   const refreshData = () => {
-    api.instance.get(Constants.API_PATHS.USER).then(response => {
-      setUserList(response.data.sourceList);
-    });
+    searchUsers();
   };
 
   useEffect(() => {
     refreshData();
+    // eslint-disable-next-line
   }, []);
 
-  const handleSearchFormSubmit = (values, setSubmitting) => {
+  const handleSearchFormSubmit = values => {
     const serviceAreas = values.serviceAreaIds.join(',') || null;
-    setSearchServiceAreas(serviceAreas);
+    setSingleUserSeachCriteria('serviceAreas', serviceAreas);
 
     const userTypeIds = values.userTypeIds.join(',') || null;
-    setSearchUserTypes(userTypeIds);
+    setSingleUserSeachCriteria('userTypes', userTypeIds);
 
     const searchText = values.searchText.trim() || null;
-    setSearchUserText(searchText);
+    setSingleUserSeachCriteria('searchText', searchText);
 
     let isActive = null;
     if (values.useStatusIds.length === 1) {
       isActive = values.useStatusIds[0] === 'ACTIVE';
     }
-    setSearchUserStatus(isActive);
+    setSingleUserSeachCriteria('isActive', isActive);
 
-    api.instance
-      .get(Constants.API_PATHS.USER, {
-        params: {
-          serviceAreas: serviceAreas,
-          userTypes: userTypeIds,
-          searchText,
-          isActive,
-          // pageSize: displayPageSize,
-          // pageNumber: displayPage,
-          // orderBy: displayOrderBy,
-        },
-      })
-      .then(response => {
-        setUserList(response.data.sourceList);
-      })
-      .finally(() => setSubmitting(false));
+    searchUsers();
   };
 
   const handleEditUserFormClose = refresh => {
     if (refresh) {
-      refreshData();
+      searchUsers();
     }
     setEditUserForm({ isOpen: false });
+  };
+
+  const handleChangePage = newPage => {
+    setSingleUserSeachCriteria('pageNumber', newPage);
+    searchUsers();
+  };
+
+  const handleChangePageSize = newSize => {
+    setSingleUserSeachCriteria('pageSize', newSize);
+    searchUsers();
   };
 
   return (
     <React.Fragment>
       <MaterialCard>
         <Formik
-          initialValues={initialValues}
-          onSubmit={(values, { setSubmitting }) => {
-            handleSearchFormSubmit(values, setSubmitting);
+          initialValues={defaultSearchFormValues}
+          onSubmit={values => {
+            handleSearchFormSubmit(values);
           }}
         >
           {formikProps => (
@@ -190,7 +197,15 @@ const UserAdmin = ({ serviceAreas, userStatuses, userTypes }) => {
         </Col>
       </Row>
 
-      {userList.length > 0 && renderUserTable(userList, setEditUserForm, refreshData)}
+      {searchResult.length > 0 &&
+        renderUserTable(
+          searchResult,
+          setEditUserForm,
+          refreshData,
+          searchPagination,
+          handleChangePage,
+          handleChangePageSize
+        )}
       {editUserForm.isOpen && <EditUserForm {...editUserForm} toggle={handleEditUserFormClose} />}
     </React.Fragment>
   );
@@ -201,7 +216,9 @@ const mapStateToProps = state => {
     serviceAreas: Object.values(state.serviceAreas),
     userStatuses: Object.values(state.user.statuses),
     userTypes: Object.values(state.user.types),
+    searchResult: Object.values(state.user.searchResult),
+    searchPagination: state.user.searchPagination,
   };
 };
 
-export default connect(mapStateToProps, null)(UserAdmin);
+export default connect(mapStateToProps, { setSingleUserSeachCriteria, searchUsers })(UserAdmin);
