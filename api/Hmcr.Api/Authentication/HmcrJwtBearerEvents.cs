@@ -73,22 +73,22 @@ namespace Hmcr.Api.Authentication
 
         private void PopulateCurrentUser(ClaimsPrincipal principal)
         {
-            _curentUser.UserName = principal.FindFirstValue(KeycloakClaimTypes.Username);
+            _curentUser.UserName = principal.FindFirstValue(HmcrClaimTypes.Username);
             var username = _curentUser.UserName.Split("@");
             var directory = username[1];
 
             if (directory.ToUpperInvariant() == "IDIR")
             {
-                _curentUser.UserGuid = new Guid(principal.FindFirstValue(KeycloakClaimTypes.IdirGuid));
+                _curentUser.UserGuid = new Guid(principal.FindFirstValue(HmcrClaimTypes.IdirGuid));
                 _curentUser.UserType = UserTypeDto.INTERNAL;
             }
             else
             {
                 //todo: set UserGuid and BusinessGuid
-                //_curentUser.UserGuid = new Guid(principal.FindFirstValue(KeycloakClaimTypes.BceidGuid));
-                //_curentUser.BusinessGuid = new Guid(principal.FindFirstValue(KeycloakClaimTypes.BusinessGuid));
-                //_curentUser.BusinessLegalName = principal.FindFirstValue(KeycloakClaimTypes.BusinessLegalName);
-                //_curentUser.BusinessNumber = principal.FindFirstValue(KeycloakClaimTypes.BusinessNumber);
+                //_curentUser.UserGuid = new Guid(principal.FindFirstValue(HmcrClaimTypes.BceidGuid));
+                //_curentUser.BusinessGuid = new Guid(principal.FindFirstValue(HmcrClaimTypes.BizGuid));
+                //_curentUser.BusinessLegalName = principal.FindFirstValue(HmcrClaimTypes.BizLegalName);
+                //_curentUser.BusinessNumber = principal.FindFirstValue(HmcrClaimTypes.BizNumber);
 
                 _curentUser.UserType = UserTypeDto.BUSINESS;
             }
@@ -96,7 +96,7 @@ namespace Hmcr.Api.Authentication
             _curentUser.UniversalId = username[0].ToUpperInvariant();
             _curentUser.AuthDirName = directory.ToUpperInvariant();
             _curentUser.Email = principal.FindFirstValue(ClaimTypes.Email);
-            _curentUser.UserName = principal.FindFirstValue(KeycloakClaimTypes.Username);
+            _curentUser.UserName = principal.FindFirstValue(HmcrClaimTypes.Username);
             _curentUser.FirstName = principal.FindFirstValue(ClaimTypes.GivenName);
             _curentUser.LastName = principal.FindFirstValue(ClaimTypes.Surname);
         }
