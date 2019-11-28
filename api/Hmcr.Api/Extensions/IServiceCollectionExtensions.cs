@@ -13,16 +13,15 @@ using Microsoft.AspNetCore.Mvc.Versioning;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using NetCore.AutoRegisterDi;
-using Swashbuckle.AspNetCore.Swagger;
 using System.Linq;
 using System.Reflection;
 using System.Text.Json;
 using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
 using Hmcr.Model.JsonConverters;
-using Microsoft.AspNetCore.Http;
-using Newtonsoft.Json.Serialization;
 using Hmcr.Domain.Services;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.Extensions.Configuration;
 
 namespace Hmcr.Api.Extensions
 {
@@ -90,7 +89,24 @@ namespace Hmcr.Api.Extensions
             services.AddSingleton(mapper);
         }
 
-        public static void AddHmcrAuthentication(this IServiceCollection services)
+        //public static void AddHmcrAuthentication(this IServiceCollection services, IConfiguration config)
+        //{
+        //    services.AddAuthentication(options =>
+        //    {
+        //        options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+        //        options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+        //    })
+        //    .AddJwtBearer(options =>
+        //    {
+        //        options.Authority = config.GetValue<string>("JWT_AUTHORITY");
+        //        options.Audience = config.GetValue<string>("JWT_AUDIENCE");
+        //        options.RequireHttpsMetadata = false;
+        //        options.IncludeErrorDetails = true;
+        //        options.EventsType = typeof(HmcrJwtBearerEvents);
+        //    });
+        //}
+
+        public static void AddHmcrAuthentication(this IServiceCollection services, IConfiguration config = null)
         {
             services.AddAuthentication(options =>
             {
@@ -144,6 +160,9 @@ namespace Hmcr.Api.Extensions
 
             //FieldValidationService as Singleton
             services.AddSingleton<IFieldValidatorService, FieldValidatorService>();
+
+            //Jwt Bearer Handler
+            services.AddScoped<HmcrJwtBearerEvents>();
         }
     }
 }

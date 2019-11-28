@@ -1,3 +1,4 @@
+using Hmcr.Api.Authentication;
 using Hmcr.Api.Extensions;
 using Hmcr.Chris;
 using Microsoft.AspNetCore.Builder;
@@ -25,7 +26,7 @@ namespace Hmcr.Api
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddHttpContextAccessor();
-            services.AddHmcrAuthentication();
+            services.AddHmcrAuthentication(Configuration);
             services.AddHmcrDbContext(Configuration.GetValue<string>("CONNECTION_STRING"));
             services.AddCors();
             services.AddHmcrControllers();

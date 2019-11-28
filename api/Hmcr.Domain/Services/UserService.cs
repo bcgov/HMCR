@@ -61,7 +61,7 @@ namespace Hmcr.Domain.Services
 
             if (userEntity.UserGuid == null)
             {
-                if (userEntity.UserType == _currentUser.UserType)
+                if (userEntity.UserType == _currentUser.UserType) //todo: check email address once the email address is available.
                 {
                     _userRepo.ProcessFirstUserLogin();
                 }
@@ -69,6 +69,10 @@ namespace Hmcr.Domain.Services
                 {
                     throw new HmcrException($"User[{_currentUser.UniversalId}] exists in the user table with a wrong user type [{_currentUser.UserType}].");
                 }
+            }
+            else if (userEntity.UserGuid != _currentUser.UserGuid)
+            {
+                throw new HmcrException($"User[{_currentUser.UniversalId}] exists in the user table with a wrong User Guid. Login UserGuid: [{_currentUser.UserGuid}] Registered UserGuid: [{userEntity.UserGuid}].");
             }
 
             return true;

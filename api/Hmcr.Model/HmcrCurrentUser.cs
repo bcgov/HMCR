@@ -18,6 +18,8 @@ namespace Hmcr.Model
         public string UserName { get; set; }
         public string BusinessLegalName { get; set; }
         public string BusinessNumber { get; set; }
+        public string FirstName { get; set; }
+        public string LastName { get; set; }
 
         public UserCurrentDto UserInfo { get; set; }
     }
