@@ -102,6 +102,10 @@ namespace Hmcr.Data.Repositories
                 userEntity.BusinessGuid = _currentUser.BusinessGuid;
                 userEntity.BusinessLegalName = _currentUser.BusinessLegalName;
                 userEntity.UserType = _currentUser.UserType;
+                //todo: uncomment after Keycloak implementation
+                //userEntity.FirstName = _currentUser.FirstName;
+                //userEntity.LastName = _currentUser.LastName;
+                //userEntity.Email = _currentUser.Email;
 
                 if (_currentUser.UserType == UserTypeDto.INTERNAL)
                 {
