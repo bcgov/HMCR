@@ -35,10 +35,12 @@ const App = () => {
               <Route path={Constants.PATHS.HOME} exact>
                 <Redirect to={Constants.PATHS.ADMIN_USERS} />
               </Route>
-              <AuthorizedRoute path={Constants.PATHS.ADMIN} requires={Constants.PERMISSIONS.USER_R}>
-                <AdminRoutes />
-              </AuthorizedRoute>
-              <AuthorizedRoute path={Constants.PATHS.WORK_REPORTING} requires={Constants.PERMISSIONS.CONTRACTOR}>
+              <AdminRoutes />
+              <AuthorizedRoute
+                path={Constants.PATHS.WORK_REPORTING}
+                requires={Constants.PERMISSIONS.FILE_R}
+                userType={Constants.USER_TYPE.BUSINESS}
+              >
                 <WorkReportingRoutes />
               </AuthorizedRoute>
               <Route path={Constants.PATHS.UNAUTHORIZED} exact component={Unauthorized} />
@@ -73,9 +75,29 @@ const AdminRoutes = () => {
   return (
     <Switch>
       <Route path={Constants.PATHS.ADMIN} exact component={ActivityAdmin} />
-      <Route path={Constants.PATHS.ADMIN_ACTIVITIES} exact component={ActivityAdmin} />
-      <Route path={Constants.PATHS.ADMIN_USERS} exact component={UserAdmin} />
-      <Route path={Constants.PATHS.ADMIN_ROLES} exact component={RolePermissionAdmin} />
+
+      <AuthorizedRoute
+        path={Constants.PATHS.ADMIN_ACTIVITIES}
+        requires={Constants.PERMISSIONS.FILE_R}
+        userType={Constants.USER_TYPE.INTERNAL}
+      >
+        <Route path={Constants.PATHS.ADMIN_ACTIVITIES} exact component={ActivityAdmin} />
+      </AuthorizedRoute>
+      <AuthorizedRoute
+        path={Constants.PATHS.ADMIN_USERS}
+        requires={Constants.PERMISSIONS.USER_R}
+        userType={Constants.USER_TYPE.INTERNAL}
+      >
+        <Route path={Constants.PATHS.ADMIN_USERS} exact component={UserAdmin} />
+      </AuthorizedRoute>
+      <AuthorizedRoute
+        path={Constants.PATHS.ADMIN_ROLES}
+        requires={Constants.PERMISSIONS.ROLE_R}
+        userType={Constants.USER_TYPE.INTERNAL}
+      >
+        <Route path={Constants.PATHS.ADMIN_ROLES} exact component={RolePermissionAdmin} />
+      </AuthorizedRoute>
+      <Route path={Constants.PATHS.UNAUTHORIZED} exact component={Unauthorized} />
       <Route path="*" component={NoMatch} />
     </Switch>
   );

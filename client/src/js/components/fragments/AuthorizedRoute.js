@@ -5,12 +5,12 @@ import { Route, Redirect } from 'react-router-dom';
 
 import * as Constant from '../../Constants';
 
-const AuthorizedRoute = ({ children, currentUser, requires, ...rest }) => {
+const AuthorizedRoute = ({ children, currentUser, requires, userType, ...rest }) => {
   return (
     <Route
       {...rest}
       render={({ location }) =>
-        currentUser.permissions.includes(requires) ? (
+        currentUser.permissions.includes(requires) && currentUser.userType === userType ? (
           children
         ) : (
           <Redirect
@@ -27,6 +27,7 @@ const AuthorizedRoute = ({ children, currentUser, requires, ...rest }) => {
 
 AuthorizedRoute.propTypes = {
   requires: PropTypes.string.isRequired,
+  userType: PropTypes.string.isRequired,
 };
 
 const mapStateToProps = state => {
@@ -35,7 +36,4 @@ const mapStateToProps = state => {
   };
 };
 
-export default connect(
-  mapStateToProps,
-  null
-)(AuthorizedRoute);
+export default connect(mapStateToProps, null)(AuthorizedRoute);

@@ -3,6 +3,7 @@ import { connect } from 'react-redux';
 import { Row, Col, Button, Table } from 'reactstrap';
 import { Formik, Form, Field } from 'formik';
 
+import Authorize from './fragments/Authorize';
 import MaterialCard from './ui/MaterialCard';
 import MultiDropdown from './ui/MultiDropdown';
 import FontAwesomeButton from './ui/FontAwesomeButton';
@@ -33,7 +34,9 @@ const renderUserTable = (
             <th>User ID</th>
             <th>Organization</th>
             <th>Service Areas</th>
-            <th></th>
+            <Authorize requires={Constants.PERMISSIONS.USER_W}>
+              <th></th>
+            </Authorize>
           </tr>
         </thead>
         <tbody>
@@ -46,21 +49,23 @@ const renderUserTable = (
                 <td>{user.username}</td>
                 <td>{user.businessLegalName}</td>
                 <td>{user.serviceAreas}</td>
-                <td style={{ width: '1%', whiteSpace: 'nowrap' }}>
-                  <FontAwesomeButton
-                    icon="edit"
-                    className="mr-1"
-                    onClick={() =>
-                      setEditUserForm({ isOpen: true, formType: Constants.FORM_TYPE.EDIT, userId: user.id })
-                    }
-                  />
-                  <DeleteButton
-                    id={`user_${user.id}_delete`}
-                    userId={user.id}
-                    endDate={user.endDate}
-                    onComplete={refreshData}
-                  ></DeleteButton>
-                </td>
+                <Authorize requires={Constants.PERMISSIONS.USER_W}>
+                  <td style={{ width: '1%', whiteSpace: 'nowrap' }}>
+                    <FontAwesomeButton
+                      icon="edit"
+                      className="mr-1"
+                      onClick={() =>
+                        setEditUserForm({ isOpen: true, formType: Constants.FORM_TYPE.EDIT, userId: user.id })
+                      }
+                    />
+                    <DeleteButton
+                      id={`user_${user.id}_delete`}
+                      userId={user.id}
+                      endDate={user.endDate}
+                      onComplete={refreshData}
+                    ></DeleteButton>
+                  </td>
+                </Authorize>
               </tr>
             );
           })}
@@ -184,18 +189,20 @@ const UserAdmin = ({
           )}
         </Formik>
       </MaterialCard>
-      <Row>
-        <Col>
-          <Button
-            size="sm"
-            color="primary"
-            className="float-right mb-3"
-            onClick={() => setEditUserForm({ isOpen: true, formType: Constants.FORM_TYPE.ADD })}
-          >
-            Add User
-          </Button>
-        </Col>
-      </Row>
+      <Authorize requires={Constants.PERMISSIONS.USER_W}>
+        <Row>
+          <Col>
+            <Button
+              size="sm"
+              color="primary"
+              className="float-right mb-3"
+              onClick={() => setEditUserForm({ isOpen: true, formType: Constants.FORM_TYPE.ADD })}
+            >
+              Add User
+            </Button>
+          </Col>
+        </Row>
+      </Authorize>
 
       {searchResult.length > 0 &&
         renderUserTable(
