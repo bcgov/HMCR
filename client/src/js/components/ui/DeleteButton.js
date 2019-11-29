@@ -5,18 +5,15 @@ import moment from 'moment';
 
 import FontAwesomeButton from './FontAwesomeButton';
 
-import * as api from '../../Api';
-import * as Constants from '../../Constants';
-
-const DeleteButton = ({ id, children, userId, endDate, onComplete, ...props }) => {
+const DeleteButton = ({ buttonId, children, itemId, defaultEndDate, onDeleteClicked, onComplete, ...props }) => {
   const [popoverOpen, setPopoverOpen] = useState(false);
   const [date, setDate] = useState(null);
   const [focusedInput, setFocusedInput] = useState(false);
   const [focusClassName, setFocusClassName] = useState('');
 
   useEffect(() => {
-    if (endDate) setDate(moment(endDate));
-  }, [endDate]);
+    if (defaultEndDate) setDate(moment(defaultEndDate));
+  }, [defaultEndDate]);
 
   const togglePopover = () => setPopoverOpen(!popoverOpen);
 
@@ -28,20 +25,18 @@ const DeleteButton = ({ id, children, userId, endDate, onComplete, ...props }) =
 
   const handleConfirmDelete = () => {
     togglePopover();
-    api.instance
-      .delete(`${Constants.API_PATHS.USER}/${userId}`, { data: { id: userId, endDate: date } })
-      .then(() => onComplete());
+    onDeleteClicked(itemId, date);
   };
 
   return (
     <React.Fragment>
-      <FontAwesomeButton color="danger" icon="trash-alt" id={id} {...props} />
-      <Popover placement="bottom" isOpen={popoverOpen} target={id} toggle={togglePopover}>
+      <FontAwesomeButton color="danger" icon="trash-alt" id={buttonId} {...props} />
+      <Popover placement="bottom" isOpen={popoverOpen} target={buttonId} toggle={togglePopover}>
         <PopoverHeader>Are you sure?</PopoverHeader>
         <PopoverBody>
           <div className={`DatePickerWrapper ${focusClassName}`}>
             <SingleDatePicker
-              id={`${id}_endDate`}
+              id={`${buttonId}_endDate`}
               date={date}
               onDateChange={date => setDate(date)}
               focused={focusedInput}

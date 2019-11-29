@@ -37,3 +37,5 @@ export const PERMISSIONS = {
   FILE_W: 'FILE_W',
   FILE_R: 'FILE_R',
 };
+
+export const USER_TYPE = { INTERNAL: 'INTERNAL', BUSINESS: 'BUSINESS' };

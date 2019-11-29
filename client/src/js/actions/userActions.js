@@ -47,8 +47,8 @@ export const editUser = (id, userData) => dispatch => {
   });
 };
 
-export const deleteUser = id => dispatch => {
-  return api.instance.delete(`${Constants.API_PATHS.USER}/${id}`).then(response => {
+export const deleteUser = (id, endDate) => dispatch => {
+  return api.instance.delete(`${Constants.API_PATHS.USER}/${id}`, { data: { id, endDate } }).then(response => {
     const data = response.data;
     dispatch({ type: DELETE_USER, payload: data });
   });

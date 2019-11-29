@@ -1,83 +1,28 @@
 import React, { useState, useEffect } from 'react';
 import { connect } from 'react-redux';
-import { Row, Col, Button, Table } from 'reactstrap';
+import { Row, Col, Button } from 'reactstrap';
 import { Formik, Form, Field } from 'formik';
 
+import Authorize from './fragments/Authorize';
 import MaterialCard from './ui/MaterialCard';
 import MultiDropdown from './ui/MultiDropdown';
-import FontAwesomeButton from './ui/FontAwesomeButton';
 import EditUserForm from './forms/EditUserForm';
-import DeleteButton from './ui/DeleteButton';
-import PaginationControl from './ui/PaginationControl';
+import DataTableControl from './ui/DataTableControl';
 
-import { setSingleUserSeachCriteria, searchUsers } from '../actions';
+import { setSingleUserSeachCriteria, searchUsers, deleteUser } from '../actions';
 
 import * as Constants from '../Constants';
 
-const renderUserTable = (
-  userList,
-  setEditUserForm,
-  refreshData,
-  searchPagination,
-  handleChangePage,
-  handleChangePageSize
-) => {
-  return (
-    <MaterialCard>
-      <Table size="sm" responsive>
-        <thead className="thead-dark">
-          <tr>
-            <th>ID Type</th>
-            <th>Last Name</th>
-            <th>Fist Name</th>
-            <th>User ID</th>
-            <th>Organization</th>
-            <th>Service Areas</th>
-            <th></th>
-          </tr>
-        </thead>
-        <tbody>
-          {userList.map(user => {
-            return (
-              <tr key={user.id}>
-                <td>{user.userType}</td>
-                <td>{user.lastName}</td>
-                <td>{user.firstName}</td>
-                <td>{user.username}</td>
-                <td>{user.businessLegalName}</td>
-                <td>{user.serviceAreas}</td>
-                <td style={{ width: '1%', whiteSpace: 'nowrap' }}>
-                  <FontAwesomeButton
-                    icon="edit"
-                    className="mr-1"
-                    onClick={() =>
-                      setEditUserForm({ isOpen: true, formType: Constants.FORM_TYPE.EDIT, userId: user.id })
-                    }
-                  />
-                  <DeleteButton
-                    id={`user_${user.id}_delete`}
-                    userId={user.id}
-                    endDate={user.endDate}
-                    onComplete={refreshData}
-                  ></DeleteButton>
-                </td>
-              </tr>
-            );
-          })}
-        </tbody>
-      </Table>
-      <PaginationControl
-        currentPage={searchPagination.pageNumber}
-        pageCount={searchPagination.pageCount}
-        onPageChange={handleChangePage}
-        pageSize={searchPagination.pageSize}
-        onPageSizeChange={handleChangePageSize}
-      />
-    </MaterialCard>
-  );
-};
-
 const defaultSearchFormValues = { serviceAreaIds: [], userTypeIds: [], searchText: '', useStatusIds: [] };
+const tableColumns = [
+  { heading: 'ID Type', key: 'userType' },
+  { heading: 'Last Name', key: 'lastName' },
+  { heading: 'First Name', key: 'firstName' },
+  { heading: 'User ID', key: 'username' },
+  { heading: 'Organization', key: 'businessLegalName' },
+  { heading: 'Service Areas', key: 'serviceAreas', nosort: true },
+  { heading: 'Active', key: 'isActive', nosort: true },
+];
 
 const UserAdmin = ({
   serviceAreas,
@@ -87,20 +32,12 @@ const UserAdmin = ({
   searchUsers,
   searchResult,
   searchPagination,
+  deleteUser,
 }) => {
-  // const [displayPage, setDisplayPage] = useState(1);
-  // const [displayPageSize, setDisplayPageSize] = useState(25);
-  // const [displayOrderBy, setDisplayOrderBy] = useState(null);
-
   const [editUserForm, setEditUserForm] = useState({ isOpen: false });
 
-  // Temporary...
-  const refreshData = () => {
-    searchUsers();
-  };
-
   useEffect(() => {
-    refreshData();
+    searchUsers();
     // eslint-disable-next-line
   }, []);
 
@@ -123,6 +60,14 @@ const UserAdmin = ({
     searchUsers();
   };
 
+  const onEditClicked = userId => {
+    setEditUserForm({ isOpen: true, formType: Constants.FORM_TYPE.EDIT, userId });
+  };
+
+  const onDeleteClicked = (userId, endDate) => {
+    deleteUser(userId, endDate).then(() => searchUsers());
+  };
+
   const handleEditUserFormClose = refresh => {
     if (refresh) {
       searchUsers();
@@ -137,6 +82,13 @@ const UserAdmin = ({
 
   const handleChangePageSize = newSize => {
     setSingleUserSeachCriteria('pageSize', newSize);
+    setSingleUserSeachCriteria('pageNumber', 1);
+    searchUsers();
+  };
+
+  const handleHeadingSortClicked = headingKey => {
+    setSingleUserSeachCriteria('pageNumber', 1);
+    setSingleUserSeachCriteria('orderBy', headingKey);
     searchUsers();
   };
 
@@ -184,28 +136,34 @@ const UserAdmin = ({
           )}
         </Formik>
       </MaterialCard>
-      <Row>
-        <Col>
-          <Button
-            size="sm"
-            color="primary"
-            className="float-right mb-3"
-            onClick={() => setEditUserForm({ isOpen: true, formType: Constants.FORM_TYPE.ADD })}
-          >
-            Add User
-          </Button>
-        </Col>
-      </Row>
-
-      {searchResult.length > 0 &&
-        renderUserTable(
-          searchResult,
-          setEditUserForm,
-          refreshData,
-          searchPagination,
-          handleChangePage,
-          handleChangePageSize
-        )}
+      <Authorize requires={Constants.PERMISSIONS.USER_W}>
+        <Row>
+          <Col>
+            <Button
+              size="sm"
+              color="primary"
+              className="float-right mb-3"
+              onClick={() => setEditUserForm({ isOpen: true, formType: Constants.FORM_TYPE.ADD })}
+            >
+              Add User
+            </Button>
+          </Col>
+        </Row>
+      </Authorize>
+      {searchResult.length > 0 && (
+        <DataTableControl
+          dataList={searchResult}
+          tableColumns={tableColumns}
+          searchPagination={searchPagination}
+          onPageNumberChange={handleChangePage}
+          onPageSizeChange={handleChangePageSize}
+          editable
+          editPermissionName={Constants.PERMISSIONS.USER_W}
+          onEditClicked={onEditClicked}
+          onDeleteClicked={onDeleteClicked}
+          onHeadingSortClicked={handleHeadingSortClicked}
+        />
+      )}
       {editUserForm.isOpen && <EditUserForm {...editUserForm} toggle={handleEditUserFormClose} />}
     </React.Fragment>
   );
@@ -221,4 +179,4 @@ const mapStateToProps = state => {
   };
 };
 
-export default connect(mapStateToProps, { setSingleUserSeachCriteria, searchUsers })(UserAdmin);
+export default connect(mapStateToProps, { setSingleUserSeachCriteria, searchUsers, deleteUser })(UserAdmin);
