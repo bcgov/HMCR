@@ -11,7 +11,7 @@ import Footer from './components/fragments/Footer';
 import Header from './components/fragments/Header';
 import ActivityAdmin from './components/ActivityAdmin';
 import UserAdmin from './components/UserAdmin';
-import RolePermissionAdmin from './components/RolePermissionAdmin';
+import RoleAdmin from './components/RoleAdmin';
 import WorkReporting from './components/WorkReporting';
 import WorkReportingSubmission from './components/WorkReportingSubmission';
 // import Home from './components/Home';
@@ -95,7 +95,7 @@ const AdminRoutes = () => {
         requires={Constants.PERMISSIONS.ROLE_R}
         userType={Constants.USER_TYPE.INTERNAL}
       >
-        <Route path={Constants.PATHS.ADMIN_ROLES} exact component={RolePermissionAdmin} />
+        <Route path={Constants.PATHS.ADMIN_ROLES} exact component={RoleAdmin} />
       </AuthorizedRoute>
       <Route path={Constants.PATHS.UNAUTHORIZED} exact component={Unauthorized} />
       <Route path="*" component={NoMatch} />
