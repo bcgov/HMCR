@@ -43,7 +43,7 @@ export default (state = defaultState, action) => {
       const pageCount = parseInt(action.payload.pageCount);
       return {
         ...state,
-        searchResult: { ..._.mapKeys(action.payload.sourceList, 'id') },
+        searchResult: { ...action.payload.sourceList },
         searchPagination: { hasPreviousPage, hasNextPage, pageNumber, pageSize, totalCount, pageCount },
       };
     default:

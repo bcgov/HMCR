@@ -123,3 +123,15 @@ body {
     min-width: 32.38px;
   }
 }
+
+.fa-color-primary {
+  color: theme-color(primary);
+}
+
+.fa-color-success {
+  color: theme-color(success);
+}
+
+.fa-color-danger {
+  color: theme-color(danger);
+}

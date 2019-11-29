@@ -58,7 +58,7 @@ PaginationControl.propTypes = {
   onPageChange: PropTypes.func.isRequired,
   pageSize: PropTypes.number.isRequired,
   onPageSizeChange: PropTypes.func.isRequired,
-  pageSizeOptions: PropTypes.array,
+  pageSizeOptions: PropTypes.arrayOf(PropTypes.number),
 };
 
 PaginationControl.defaultProps = {

@@ -14,6 +14,15 @@ import { setSingleUserSeachCriteria, searchUsers, deleteUser } from '../actions'
 import * as Constants from '../Constants';
 
 const defaultSearchFormValues = { serviceAreaIds: [], userTypeIds: [], searchText: '', useStatusIds: [] };
+const tableColumns = [
+  { heading: 'ID Type', key: 'userType' },
+  { heading: 'Last Name', key: 'lastName' },
+  { heading: 'First Name', key: 'firstName' },
+  { heading: 'User ID', key: 'username' },
+  { heading: 'Organization', key: 'businessLegalName' },
+  { heading: 'Service Areas', key: 'serviceAreas', nosort: true },
+  { heading: 'Active', key: 'isActive', nosort: true },
+];
 
 const UserAdmin = ({
   serviceAreas,
@@ -73,6 +82,13 @@ const UserAdmin = ({
 
   const handleChangePageSize = newSize => {
     setSingleUserSeachCriteria('pageSize', newSize);
+    setSingleUserSeachCriteria('pageNumber', 1);
+    searchUsers();
+  };
+
+  const handleHeadingSortClicked = headingKey => {
+    setSingleUserSeachCriteria('pageNumber', 1);
+    setSingleUserSeachCriteria('orderBy', headingKey);
     searchUsers();
   };
 
@@ -137,14 +153,15 @@ const UserAdmin = ({
       {searchResult.length > 0 && (
         <DataTableControl
           dataList={searchResult}
-          tableHeadings={['ID Type', 'Last Name', 'Fist Name', 'User ID', 'Organization', 'Service Areas']}
-          dataColumnKeys={['userType', 'lastName', 'firstName', 'username', 'businessLegalName', 'serviceAreas']}
+          tableColumns={tableColumns}
           searchPagination={searchPagination}
-          handleChangePage={handleChangePage}
-          handleChangePageSize={handleChangePageSize}
-          writePermissionName={Constants.PERMISSIONS.USER_W}
+          onPageNumberChange={handleChangePage}
+          onPageSizeChange={handleChangePageSize}
+          editable
+          editPermissionName={Constants.PERMISSIONS.USER_W}
           onEditClicked={onEditClicked}
           onDeleteClicked={onDeleteClicked}
+          onHeadingSortClicked={handleHeadingSortClicked}
         />
       )}
       {editUserForm.isOpen && <EditUserForm {...editUserForm} toggle={handleEditUserFormClose} />}
