@@ -4,7 +4,7 @@ import { SEARCH_ROLES, SET_SINGLE_ROLE_SEARCH_CRITERIA } from '../actions/types'
 
 const defaultState = {
   list: {},
-  statuses: { ACTIVE: { id: true, name: 'ACTIVE' }, INACTIVE: { id: false, name: 'INACTIVE' } },
+  statuses: { ACTIVE: { id: 'ACTIVE', name: 'ACTIVE' }, INACTIVE: { id: 'INACTIVE', name: 'INACTIVE' } },
   searchCriteria: {
     searchText: null,
     isActive: null,

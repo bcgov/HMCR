@@ -14,7 +14,7 @@ import { setSingleRoleSeachCriteria, searchRoles } from '../actions';
 import * as Constants from '../Constants';
 import * as api from '../Api';
 
-const defaultSearchFormValues = { searchText: '', roleStatusIds: [], isActive: true };
+const defaultSearchFormValues = { searchText: '', isActive: 'ACTIVE' };
 
 const tableColumns = [
   { heading: 'Role Name', key: 'name', nosort: true },
@@ -34,7 +34,7 @@ const RoleAdmin = ({ roleStatuses, setSingleRoleSeachCriteria, searchRoles, sear
     const searchText = values.searchText.trim() || null;
     setSingleRoleSeachCriteria('searchText', searchText);
 
-    setSingleRoleSeachCriteria('isActive', values.isActive);
+    setSingleRoleSeachCriteria('isActive', values.isActive === 'ACTIVE');
 
     searchRoles();
   };
