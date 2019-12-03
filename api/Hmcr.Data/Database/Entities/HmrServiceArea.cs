@@ -10,6 +10,7 @@ namespace Hmcr.Data.Database.Entities
             HmrContractTerms = new HashSet<HmrContractTerm>();
             HmrServiceAreaUsers = new HashSet<HmrServiceAreaUser>();
             HmrSubmissionObjects = new HashSet<HmrSubmissionObject>();
+            HmrWildlifeReports = new HashSet<HmrWildlifeReport>();
         }
 
         public decimal ServiceAreaId { get; set; }
@@ -26,5 +27,6 @@ namespace Hmcr.Data.Database.Entities
         public virtual ICollection<HmrContractTerm> HmrContractTerms { get; set; }
         public virtual ICollection<HmrServiceAreaUser> HmrServiceAreaUsers { get; set; }
         public virtual ICollection<HmrSubmissionObject> HmrSubmissionObjects { get; set; }
+        public virtual ICollection<HmrWildlifeReport> HmrWildlifeReports { get; set; }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Text.RegularExpressions;
 
 namespace Hmcr.Model.Utils
 {
@@ -44,6 +45,20 @@ namespace Hmcr.Model.Utils
             return str == null ? (new string[] { }) : str.Split(',');
         }
 
+        public static string WordToWords(this string str)
+        {
+            return Regex.Replace(str, "[a-z][A-Z]", x => $"{x.Value[0]} {char.ToUpper(x.Value[1])}");
+        }
+
+        public static string RemoveLineBreak(this string str)
+        {
+            return Regex.Replace(str, @"\r\n?|\n", "");
+        }
+
+        public static bool IsInteger(this string str)
+        {
+            return Regex.IsMatch(str, @"^\d+$");
+        }
 
         public static void AddItem(this Dictionary<string, List<string>> dictionary, string keyName, string item)
         {

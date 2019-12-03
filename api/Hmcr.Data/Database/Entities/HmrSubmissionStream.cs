@@ -3,21 +3,19 @@ using System.Collections.Generic;
 
 namespace Hmcr.Data.Database.Entities
 {
-    public partial class HmrSubmissionStatu
+    public partial class HmrSubmissionStream
     {
-        public HmrSubmissionStatu()
+        public HmrSubmissionStream()
         {
-            HmrRockfallReports = new HashSet<HmrRockfallReport>();
+            HmrStreamElements = new HashSet<HmrStreamElement>();
             HmrSubmissionObjects = new HashSet<HmrSubmissionObject>();
-            HmrSubmissionRows = new HashSet<HmrSubmissionRow>();
-            HmrWildlifeReports = new HashSet<HmrWildlifeReport>();
-            HmrWorkReports = new HashSet<HmrWorkReport>();
         }
 
-        public decimal StatusId { get; set; }
-        public string StatusCode { get; set; }
-        public string Description { get; set; }
-        public string StatusType { get; set; }
+        public decimal SubmissionStreamId { get; set; }
+        public string StreamName { get; set; }
+        public DateTime? EndDate { get; set; }
+        public decimal? FileSizeLimit { get; set; }
+        public string StagingTableName { get; set; }
         public long ConcurrencyControlNumber { get; set; }
         public string AppCreateUserid { get; set; }
         public DateTime AppCreateTimestamp { get; set; }
@@ -32,10 +30,7 @@ namespace Hmcr.Data.Database.Entities
         public string DbAuditLastUpdateUserid { get; set; }
         public DateTime DbAuditLastUpdateTimestamp { get; set; }
 
-        public virtual ICollection<HmrRockfallReport> HmrRockfallReports { get; set; }
+        public virtual ICollection<HmrStreamElement> HmrStreamElements { get; set; }
         public virtual ICollection<HmrSubmissionObject> HmrSubmissionObjects { get; set; }
-        public virtual ICollection<HmrSubmissionRow> HmrSubmissionRows { get; set; }
-        public virtual ICollection<HmrWildlifeReport> HmrWildlifeReports { get; set; }
-        public virtual ICollection<HmrWorkReport> HmrWorkReports { get; set; }
     }
 }
