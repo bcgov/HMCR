@@ -3,6 +3,7 @@ export const API_URL = process.env.REACT_APP_API_HOST
   : `${window.location.protocol}//${window.location.host}/api`;
 
 export const API_PATHS = {
+  PERMISSIONS: '/permissions',
   ROLE: '/roles',
   SERVICE_AREAS: '/serviceareas',
   USER: '/users',

@@ -7,17 +7,17 @@ import Authorize from './fragments/Authorize';
 import MaterialCard from './ui/MaterialCard';
 import MultiDropdown from './ui/MultiDropdown';
 import EditUserForm from './forms/EditUserForm';
-import DataTableControl from './ui/DataTableControl';
+import DataTableWithPaginaionControl from './ui/DataTableWithPaginaionControl';
 
 import { setSingleUserSeachCriteria, searchUsers, deleteUser } from '../actions';
 
 import * as Constants from '../Constants';
 
-const defaultSearchFormValues = { serviceAreaIds: [], userTypeIds: [], searchText: '', useStatusIds: [] };
+const defaultSearchFormValues = { serviceAreaIds: [], userTypeIds: [], searchText: '', userStatusIds: [] };
 const tableColumns = [
   { heading: 'ID Type', key: 'userType' },
-  { heading: 'Last Name', key: 'lastName' },
   { heading: 'First Name', key: 'firstName' },
+  { heading: 'Last Name', key: 'lastName' },
   { heading: 'User ID', key: 'username' },
   { heading: 'Organization', key: 'businessLegalName' },
   { heading: 'Service Areas', key: 'serviceAreas', nosort: true },
@@ -52,8 +52,8 @@ const UserAdmin = ({
     setSingleUserSeachCriteria('searchText', searchText);
 
     let isActive = null;
-    if (values.useStatusIds.length === 1) {
-      isActive = values.useStatusIds[0] === 'ACTIVE';
+    if (values.userStatusIds.length === 1) {
+      isActive = values.userStatusIds[0] === 'ACTIVE';
     }
     setSingleUserSeachCriteria('isActive', isActive);
 
@@ -121,7 +121,7 @@ const UserAdmin = ({
                   <Field type="text" name="searchText" placeholder="User Id/Name" className="form-control" />
                 </Col>
                 <Col>
-                  <MultiDropdown {...formikProps} items={userStatuses} name="useStatusIds" title="User Status" />
+                  <MultiDropdown {...formikProps} items={userStatuses} name="userStatusIds" title="User Status" />
                 </Col>
                 <Col>
                   <div className="float-right">
@@ -151,18 +151,20 @@ const UserAdmin = ({
         </Row>
       </Authorize>
       {searchResult.length > 0 && (
-        <DataTableControl
-          dataList={searchResult}
-          tableColumns={tableColumns}
-          searchPagination={searchPagination}
-          onPageNumberChange={handleChangePage}
-          onPageSizeChange={handleChangePageSize}
-          editable
-          editPermissionName={Constants.PERMISSIONS.USER_W}
-          onEditClicked={onEditClicked}
-          onDeleteClicked={onDeleteClicked}
-          onHeadingSortClicked={handleHeadingSortClicked}
-        />
+        <MaterialCard>
+          <DataTableWithPaginaionControl
+            dataList={searchResult}
+            tableColumns={tableColumns}
+            searchPagination={searchPagination}
+            onPageNumberChange={handleChangePage}
+            onPageSizeChange={handleChangePageSize}
+            editable
+            editPermissionName={Constants.PERMISSIONS.USER_W}
+            onEditClicked={onEditClicked}
+            onDeleteClicked={onDeleteClicked}
+            onHeadingSortClicked={handleHeadingSortClicked}
+          />
+        </MaterialCard>
       )}
       {editUserForm.isOpen && <EditUserForm {...editUserForm} toggle={handleEditUserFormClose} />}
     </React.Fragment>
@@ -174,7 +176,7 @@ const mapStateToProps = state => {
     serviceAreas: Object.values(state.serviceAreas),
     userStatuses: Object.values(state.user.statuses),
     userTypes: Object.values(state.user.types),
-    searchResult: Object.values(state.user.searchResult),
+    searchResult: Object.values(state.user.list),
     searchPagination: state.user.searchPagination,
   };
 };

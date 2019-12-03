@@ -4,10 +4,10 @@ import store from './store';
 
 import { SHOW_ERROR_DIALOG_MODAL } from './actions/types';
 import { buildApiErrorObject } from './utils';
-import { API_URL } from './Constants';
+import * as Constants from './Constants';
 
 export const instance = axios.create({
-  baseURL: `${API_URL}`,
+  baseURL: `${Constants.API_URL}`,
   headers: { 'Access-Control-Allow-Origin': '*' },
 });
 
@@ -20,3 +20,23 @@ instance.interceptors.response.use(
     return Promise.reject(error);
   }
 );
+
+export const getCurrentUser = () => instance.get(Constants.API_PATHS.USER_CURRENT);
+export const getUser = id => instance.get(`${Constants.API_PATHS.USER}/${id}`);
+export const getUserStatuses = () => instance.get(Constants.API_PATHS.USER_STATUSES);
+export const getUserTypes = () => instance.get(Constants.API_PATHS.USER_TYPES);
+export const postUser = userData => instance.post(Constants.API_PATHS.USER, userData);
+export const putUser = (id, userData) => instance.put(`${Constants.API_PATHS.USER}/${id}`, userData);
+export const deleteUser = (id, endDate) =>
+  instance.delete(`${Constants.API_PATHS.USER}/${id}`, { data: { id, endDate } });
+export const searchUsers = params => instance.get(Constants.API_PATHS.USER, { params: { ...params } });
+
+export const getRoles = () => instance.get(Constants.API_PATHS.ROLE);
+export const getRole = id => instance.get(`${Constants.API_PATHS.ROLE}/${id}`);
+export const searchRoles = params => instance.get(Constants.API_PATHS.ROLE, { params: { ...params } });
+export const postRole = roleData => instance.post(Constants.API_PATHS.ROLE, roleData);
+export const putRole = (id, roleData) => instance.put(`${Constants.API_PATHS.ROLE}/${id}`, roleData);
+export const deleteRole = (id, endDate) =>
+  instance.delete(`${Constants.API_PATHS.ROLE}/${id}`, { data: { id, endDate } });
+
+export const getPermissions = () => instance.get(Constants.API_PATHS.PERMISSIONS);
