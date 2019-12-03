@@ -1,0 +1,54 @@
+﻿using System;
+using System.Collections.Generic;
+
+namespace Hmcr.Data.Database.Entities
+{
+    public partial class HmrRockfallReportHist
+    {
+        public long RockfallReportHistId { get; set; }
+        public DateTime EffectiveDateHist { get; set; }
+        public DateTime? EndDateHist { get; set; }
+        public decimal RockfallReportId { get; set; }
+        public decimal SubmissionObjectId { get; set; }
+        public decimal? ValidationStatusId { get; set; }
+        public string MajorIncidentNumber { get; set; }
+        public DateTime? EstimatedRockfallDate { get; set; }
+        public TimeSpan? EstimatedRockfallTime { get; set; }
+        public decimal? StartLatitude { get; set; }
+        public decimal? StartLongitude { get; set; }
+        public decimal? EndLatitude { get; set; }
+        public decimal? EndLongitude { get; set; }
+        public string HighwayUniqueNumber { get; set; }
+        public string HighwayUniqueName { get; set; }
+        public string Landmark { get; set; }
+        public string LandMarkName { get; set; }
+        public decimal? StartOffset { get; set; }
+        public decimal? EndOffset { get; set; }
+        public string DirectionFromLandmark { get; set; }
+        public string LocationDescription { get; set; }
+        public string DitchVolume { get; set; }
+        public string TravelledLanesVolume { get; set; }
+        public decimal? OtherVolume { get; set; }
+        public string HeavyPrecip { get; set; }
+        public string FreezeThaw { get; set; }
+        public string DitchSnowIce { get; set; }
+        public string VehicleDamage { get; set; }
+        public string Comments { get; set; }
+        public string ReporterName { get; set; }
+        public string McPhoneNumber { get; set; }
+        public DateTime? ReportDate { get; set; }
+        public long ConcurrencyControlNumber { get; set; }
+        public string AppCreateUserid { get; set; }
+        public DateTime AppCreateTimestamp { get; set; }
+        public Guid AppCreateUserGuid { get; set; }
+        public string AppCreateUserDirectory { get; set; }
+        public string AppLastUpdateUserid { get; set; }
+        public DateTime AppLastUpdateTimestamp { get; set; }
+        public Guid AppLastUpdateUserGuid { get; set; }
+        public string AppLastUpdateUserDirectory { get; set; }
+        public string DbAuditCreateUserid { get; set; }
+        public DateTime DbAuditCreateTimestamp { get; set; }
+        public string DbAuditLastUpdateUserid { get; set; }
+        public DateTime DbAuditLastUpdateTimestamp { get; set; }
+    }
+}
