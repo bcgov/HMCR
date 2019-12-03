@@ -17,6 +17,6 @@ namespace Hmcr.Model.Dtos.User
         public string ServiceAreas { get; set; }
         public bool HasLogInHistory { get; set; }
         public DateTime? EndDate { get; set; }
-        public bool IsActive { get; set; }
+        public bool IsActive => EndDate == null || EndDate > DateTime.Today;
     }
 }

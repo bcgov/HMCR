@@ -173,7 +173,6 @@ namespace Hmcr.Data.Repositories
             {
                 user.ServiceAreas = string.Join(",", userServiceArea[user.SystemUserId].Select(x => x.ServiceAreaNumber.ToString()));
                 user.HasLogInHistory = pagedEntity.SourceList.Any(u => u.SystemUserId == user.SystemUserId && u.UserGuid != null);
-                user.IsActive = user.EndDate == null || user.EndDate > DateTime.Today;
             }
 
             var pagedDTO = new PagedDto<UserSearchDto>
