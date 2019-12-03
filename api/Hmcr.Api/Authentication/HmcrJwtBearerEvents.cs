@@ -73,13 +73,13 @@ namespace Hmcr.Api.Authentication
 
         private void PopulateCurrentUser(ClaimsPrincipal principal)
         {
-            _curentUser.UserName = principal.FindFirstValue(HmcrClaimTypes.KcUsername);
+            _curentUser.UserName = principal.FindFirstValue(HmcrClaimTypes.UserName);
             var username = _curentUser.UserName.Split("@");
             var directory = username[1];
 
             if (directory.ToUpperInvariant() == "IDIR")
             {
-                _curentUser.UserGuid = new Guid(principal.FindFirstValue(HmcrClaimTypes.KcUserGuid));
+                _curentUser.UserGuid = new Guid(principal.FindFirstValue(HmcrClaimTypes.UserGuid));
                 _curentUser.UserType = UserTypeDto.INTERNAL;
             }
             else
@@ -96,7 +96,7 @@ namespace Hmcr.Api.Authentication
             _curentUser.UniversalId = username[0].ToUpperInvariant();
             _curentUser.AuthDirName = directory.ToUpperInvariant();
             _curentUser.Email = principal.FindFirstValue(ClaimTypes.Email);
-            _curentUser.UserName = principal.FindFirstValue(HmcrClaimTypes.KcUsername);
+            _curentUser.UserName = principal.FindFirstValue(HmcrClaimTypes.UserName);
             _curentUser.FirstName = principal.FindFirstValue(ClaimTypes.GivenName);
             _curentUser.LastName = principal.FindFirstValue(ClaimTypes.Surname);
         }
