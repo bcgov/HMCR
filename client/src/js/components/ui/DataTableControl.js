@@ -4,19 +4,14 @@ import { Table } from 'reactstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 import Authorize from '../fragments/Authorize';
-import MaterialCard from './MaterialCard';
 import FontAwesomeButton from './FontAwesomeButton';
 import DeleteButton from './DeleteButton';
-import PaginationControl from './PaginationControl';
 
 const DataTableControl = ({
   dataList,
   tableColumns,
   editable,
   editPermissionName,
-  searchPagination,
-  onPageNumberChange,
-  onPageSizeChange,
   onEditClicked,
   onDeleteClicked,
   onHeadingSortClicked,
@@ -26,7 +21,7 @@ const DataTableControl = ({
   };
 
   return (
-    <MaterialCard>
+    <React.Fragment>
       <Table size="sm" responsive>
         <thead className="thead-dark">
           <tr>
@@ -78,14 +73,7 @@ const DataTableControl = ({
           })}
         </tbody>
       </Table>
-      <PaginationControl
-        currentPage={searchPagination.pageNumber}
-        pageCount={searchPagination.pageCount}
-        onPageChange={onPageNumberChange}
-        pageSize={searchPagination.pageSize}
-        onPageSizeChange={onPageSizeChange}
-      />
-    </MaterialCard>
+    </React.Fragment>
   );
 };
 
@@ -100,19 +88,9 @@ DataTableControl.propTypes = {
   ).isRequired,
   editable: PropTypes.bool.isRequired,
   editPermissionName: PropTypes.string,
-  searchPagination: PropTypes.shape({
-    pageNumber: PropTypes.number.isRequired,
-    pageSize: PropTypes.number.isRequired,
-    pageCount: PropTypes.number.isRequired,
-    totalCount: PropTypes.number,
-    hasPreviousPage: PropTypes.bool,
-    hasNextPage: PropTypes.bool,
-  }).isRequired,
-  onPageNumberChange: PropTypes.func.isRequired,
-  onPageSizeChange: PropTypes.func.isRequired,
-  onEditClicked: PropTypes.func.isRequired,
-  onDeleteClicked: PropTypes.func.isRequired,
-  onHeadingSortClicked: PropTypes.func.isRequired,
+  onEditClicked: PropTypes.func,
+  onDeleteClicked: PropTypes.func,
+  onHeadingSortClicked: PropTypes.func,
 };
 
 DataTableControl.defaultProps = {

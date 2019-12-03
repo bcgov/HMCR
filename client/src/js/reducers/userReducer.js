@@ -12,6 +12,7 @@ const defaultState = {
   types: {},
   statuses: {},
   current: {},
+  list: {},
   searchCriteria: {
     serviceAreas: null,
     userTypes: null,
@@ -21,7 +22,6 @@ const defaultState = {
     pageNumber: 1,
     orderBy: null,
   },
-  searchResult: {},
   searchPagination: { currentPage: null, pageSize: null, pageCount: null, hasPreviousPage: null, hasNextPage: null },
 };
 
@@ -43,7 +43,7 @@ export default (state = defaultState, action) => {
       const pageCount = parseInt(action.payload.pageCount);
       return {
         ...state,
-        searchResult: { ...action.payload.sourceList },
+        list: { ...action.payload.sourceList },
         searchPagination: { hasPreviousPage, hasNextPage, pageNumber, pageSize, totalCount, pageCount },
       };
     default:
