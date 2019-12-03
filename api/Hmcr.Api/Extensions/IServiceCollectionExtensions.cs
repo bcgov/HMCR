@@ -89,32 +89,32 @@ namespace Hmcr.Api.Extensions
             services.AddSingleton(mapper);
         }
 
-        public static void AddHmcrAuthentication(this IServiceCollection services, IConfiguration config)
-        {
-            services.AddAuthentication(options =>
-            {
-                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-            })
-            .AddJwtBearer(options =>
-            {
-                options.Authority = config.GetValue<string>("JWT_AUTHORITY");
-                options.Audience = config.GetValue<string>("JWT_AUDIENCE");
-                options.RequireHttpsMetadata = false;
-                options.IncludeErrorDetails = true;
-                options.EventsType = typeof(HmcrJwtBearerEvents);
-            });
-        }
-
-        //public static void AddHmcrAuthentication(this IServiceCollection services, IConfiguration config = null)
+        //public static void AddHmcrAuthentication(this IServiceCollection services, IConfiguration config)
         //{
         //    services.AddAuthentication(options =>
         //    {
-        //        options.DefaultAuthenticateScheme = SmAuthenticationOptions.Scheme;
-        //        options.DefaultChallengeScheme = SmAuthenticationOptions.Scheme;
+        //        options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+        //        options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
         //    })
-        //    .AddScheme<SmAuthenticationOptions, SmAuthenticationHandler>(SmAuthenticationOptions.Scheme, null);
+        //    .AddJwtBearer(options =>
+        //    {
+        //        options.Authority = config.GetValue<string>("JWT_AUTHORITY");
+        //        options.Audience = config.GetValue<string>("JWT_AUDIENCE");
+        //        options.RequireHttpsMetadata = false;
+        //        options.IncludeErrorDetails = true;
+        //        options.EventsType = typeof(HmcrJwtBearerEvents);
+        //    });
         //}
+
+        public static void AddHmcrAuthentication(this IServiceCollection services, IConfiguration config = null)
+        {
+            services.AddAuthentication(options =>
+            {
+                options.DefaultAuthenticateScheme = SmAuthenticationOptions.Scheme;
+                options.DefaultChallengeScheme = SmAuthenticationOptions.Scheme;
+            })
+            .AddScheme<SmAuthenticationOptions, SmAuthenticationHandler>(SmAuthenticationOptions.Scheme, null);
+        }
 
         public static void AddHmcrSwagger(this IServiceCollection services, IWebHostEnvironment env)
         {
