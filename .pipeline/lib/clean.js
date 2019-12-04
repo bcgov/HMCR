@@ -1,5 +1,6 @@
 'use strict';
 const {OpenShiftClientX} = require('pipeline-cli')
+const KeyCloakClient = require('./keycloak');
 
 module.exports = (settings)=>{
   const phases = settings.phases
@@ -7,7 +8,12 @@ module.exports = (settings)=>{
   const oc=new OpenShiftClientX(Object.assign({'namespace':phases.build.namespace}, options));
   const target_phase=options.env
 
+  const kc = new KeyCloakClient(settings, oc);  
+
   for (var k in phases){
+    if(k.phase === 'dev')
+      kc.remmoveUris();
+
     if (phases.hasOwnProperty(k)) {
       const phase=phases[k]
       if (k == target_phase ){
