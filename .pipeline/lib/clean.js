@@ -9,11 +9,11 @@ module.exports = (settings)=>{
   const target_phase=options.env
 
   const kc = new KeyCloakClient(settings, oc);  
+  
+  if(target_phase ==='dev')
+    kc.remmoveUris();
 
   for (var k in phases){
-    if(k.phase === 'dev')
-      kc.remmoveUris();
-
     if (phases.hasOwnProperty(k)) {
       const phase=phases[k]
       if (k == target_phase ){
