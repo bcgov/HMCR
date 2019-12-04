@@ -76,10 +76,11 @@ module.exports = class KeyCloakClient {
     return { data, redirectUris, webOrigins };
   }
 
-  async addUris() {
+  async addUris() {   
+    await this.init();
+
     console.log("Attempting to add RedirectUri and WebOrigins");
 
-    await this.init();
     const { data, redirectUris, webOrigins } = await this.getUris();
     const putData = { id: data.id, clientId: data.clientId };
 
@@ -108,9 +109,10 @@ module.exports = class KeyCloakClient {
   }
 
   async remmoveUris() {
-    console.log("Attempting to remove RedirectUri and WebOrigins");
-
     await this.init();
+    
+    console.log("Attempting to remove RedirectUri and WebOrigins");
+    
     const { data, redirectUris, webOrigins } = await this.getUris();
     const putData = { id: data.id, clientId: data.clientId };
 
