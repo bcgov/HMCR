@@ -56,18 +56,18 @@ objects:
                 - name: CONNECTION_STRING
                   valueFrom:
                     secretKeyRef:
-                      name: api-connections
+                      name: api-connections${SUFFIX}
                       key: hmr.db
-                # - name: JWT_AUTHORITY
-                #   valueFrom:
-                #     secretKeyRef:
-                #       name: sso-configs
-                #       key: JWT_SSO_AUTHORITY
-                # - name: JWT_AUDIENCE
-                #   valueFrom:
-                #     secretKeyRef:
-                #       name: sso-configs
-                #       key: JWT_SSO_AUDIENCE
+                - name: JWT_AUTHORITY
+                  valueFrom:
+                    secretKeyRef:
+                      name: sso-configs
+                      key: JWT_SSO_AUTHORITY
+                - name: JWT_AUDIENCE
+                  valueFrom:
+                    secretKeyRef:
+                      name: sso-configs
+                      key: JWT_SSO_AUDIENCE
                 - name: ASPNETCORE_ENVIRONMENT
                   value: ${ASPNETCORE_ENVIRONMENT}
       test: false
