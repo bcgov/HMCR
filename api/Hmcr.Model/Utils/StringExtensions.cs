@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using Hmcr.Model.Dtos.User;
+using System.Collections.Generic;
 using System.Text.RegularExpressions;
 
 namespace Hmcr.Model.Utils
@@ -70,6 +71,16 @@ namespace Hmcr.Model.Utils
             {
                 dictionary.Add(keyName, new List<string> { item });
             }
+        }
+
+        public static bool IsIdirUser(this string str)
+        {
+            return str.ToUpperInvariant() == UserTypeDto.INTERNAL;
+        }
+
+        public static bool IsBusinessUser(this string str)
+        {
+            return str.ToUpperInvariant() == UserTypeDto.BUSINESS;
         }
     }
 }
