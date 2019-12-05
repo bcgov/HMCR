@@ -1,4 +1,6 @@
-﻿using Hmcr.Domain.Services;
+﻿using Hmcr.Api.Authorization;
+using Hmcr.Domain.Services;
+using Hmcr.Model;
 using Hmcr.Model.Dtos.WorkReport;
 using Microsoft.AspNetCore.Mvc;
 using System;
@@ -20,6 +22,7 @@ namespace Hmcr.Api.Controllers
         }
 
         [HttpPost]
+        [RequiresPermission(Permissions.FileUploadWrite)]
         public async Task<IActionResult> CreateWorkReportAsync([FromForm] WorkRptUploadDto upload)
         {
             var result = await _workRptService.PerformInitialValidation(upload);

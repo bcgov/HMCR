@@ -16,5 +16,6 @@ namespace Hmcr.Model.Dtos.ServiceArea
         public decimal ServiceAreaNumber { get; set; }
         public string ServiceAreaName { get; set; }
         public decimal DistrictNumber { get; set; }
+        public string Name => $"{ServiceAreaNumber} {ServiceAreaName}";
     }
 }

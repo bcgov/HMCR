@@ -12,6 +12,7 @@ using Hmcr.Model.Dtos.ServiceArea;
 using Hmcr.Model.Dtos.ServiceAreaUser;
 using Hmcr.Model.Dtos.SubmissionObject;
 using Hmcr.Model.Dtos.SubmissionStatus;
+using Hmcr.Model.Dtos.SubmissionStream;
 using Hmcr.Model.Dtos.User;
 using Hmcr.Model.Dtos.UserRole;
 
@@ -64,6 +65,8 @@ namespace Hmcr.Data.Mappings
             CreateMap<UserDeleteDto, HmrSystemUser>();
 
             CreateMap<UserRoleDto, HmrUserRole>();
+
+            CreateMap<SubmissionStreamDto, HmrSubmissionStream>();
         }
     }
 }
