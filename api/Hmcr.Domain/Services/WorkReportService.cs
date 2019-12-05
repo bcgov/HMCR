@@ -37,6 +37,7 @@ namespace Hmcr.Domain.Services
 
             //validate file size
             //get the party for the service area for the month (use enddate in the file?)
+            //duplicae record numbers
 
             var serviceArea = _currentUser.UserInfo.ServiceAreas.FirstOrDefault(x => x.ServiceAreaNumber == upload.ServiceAreaNumber);
 
