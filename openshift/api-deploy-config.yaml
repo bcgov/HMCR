@@ -68,6 +68,46 @@ objects:
                     secretKeyRef:
                       name: sso-configs
                       key: JWT_SSO_AUDIENCE
+                - name: CHRIS_MAP_URL
+                  valueFrom:
+                    secretKeyRef:
+                      name: chris-service
+                      key: CHRIS_MAP_URL
+                - name: CHRIS_OAS_URL
+                  valueFrom:
+                    secretKeyRef:
+                      name: chris-service
+                      key: CHRIS_OAS_URL
+                - name: CHRIS_USER
+                  valueFrom:
+                    secretKeyRef:
+                      name: chris-service
+                      key: CHRIS_USER
+                - name: CHRIS_PASSWORD
+                  valueFrom:
+                    secretKeyRef:
+                      name: chris-service
+                      key: CHRIS_PASSWORD
+                - name: BCEID_USER
+                  valueFrom:
+                    secretKeyRef:
+                      name: bceid-service
+                      key: BCEID_USER
+                - name: BCEID_PASSWORD
+                  valueFrom:
+                    secretKeyRef:
+                      name: bceid-service
+                      key: BCEID_PASSWORD
+                - name: BCEID_URL
+                  valueFrom:
+                    secretKeyRef:
+                      name: bceid-service
+                      key: BCEID_URL
+                - name: BCEID_OSID
+                  valueFrom:
+                    secretKeyRef:
+                      name: bceid-service
+                      key: BCEID_OSID
                 - name: ASPNETCORE_ENVIRONMENT
                   value: ${ASPNETCORE_ENVIRONMENT}
       test: false
