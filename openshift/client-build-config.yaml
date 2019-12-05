@@ -118,7 +118,6 @@ objects:
         dockerStrategy:
           from:
             kind: ImageStreamTag
-            #name: "nodejs:latest"
             name: "${PROJECT_NAME}-nginx:${VERSION}"
         type: Docker
       triggers:
