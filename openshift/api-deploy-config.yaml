@@ -56,7 +56,7 @@ objects:
                 - name: CONNECTION_STRING
                   valueFrom:
                     secretKeyRef:
-                      name: api-connections${SUFFIX}
+                      name: api-connections-${ENV}
                       key: hmr.db
                 - name: JWT_AUTHORITY
                   valueFrom:
@@ -167,6 +167,11 @@ parameters:
     name: SUFFIX
     required: false
     value: "-dev"
+  - description: Environment short name (dev,test,uat,prod)
+    displayName: ENV
+    name: ENV
+    required: false
+    value: "dev"
   - description: A version used for the image tags
     displayName: version
     name: VERSION
