@@ -99,13 +99,13 @@ objects:
           FROM nodejs/build-output:latest
 
           COPY src/src/build /usr/share/nginx/html
-          # COPY src/src/env2js.sh /env2js.sh
+          COPY src/src/env2js.sh /env2js.sh
 
-          # USER 0
-          # RUN chmod +x /env2js.sh
-          # USER nginx:nginx
+          USER 0
+          RUN chmod +x /env2js.sh
+          USER nginx:nginx
 
-          # CMD /env2js.sh > /usr/share/nginx/html/js/env.config.js && nginx -g "daemon off;"
+          CMD /env2js.sh > /usr/share/nginx/html/js/env.config.js && nginx -g "daemon off;"
         images:
           - from:
               kind: ImageStreamTag
