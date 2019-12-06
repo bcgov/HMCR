@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.Json;
 using System.Threading.Tasks;
 
 namespace Hmcr.Api.Controllers
@@ -21,11 +22,11 @@ namespace Hmcr.Api.Controllers
             _workRptService = workRptService;
         }
 
-        [HttpPost]
+        [HttpPost("duplicates")]
         [RequiresPermission(Permissions.FileUploadWrite)]
         public async Task<IActionResult> CreateWorkReportAsync([FromForm] WorkRptUploadDto upload)
         {
-            var result = await _workRptService.PerformInitialValidation(upload);
+            var result = await _workRptService.CreateWorkReportAsync(upload);
 
             if (result.SubmissionObjectId == 0)
             {
@@ -33,6 +34,21 @@ namespace Hmcr.Api.Controllers
             }
 
             return Ok();
+        }
+
+        [HttpPost]
+        [RequiresPermission(Permissions.FileUploadWrite)]
+        public async Task<IActionResult> CheckDuplicateAsync([FromForm] WorkRptUploadDto upload)
+        {
+            var (Errors, DuplicateRecordNumbers) = await _workRptService.CheckDuplicatesAsync(upload);
+
+            if (Errors.Count > 0)
+            {
+                return ValidationUtils.GetValidationErrorResult(Errors, ControllerContext);
+            }
+
+            //return Ok(JsonSerializer.Serialize(DuplicateRecordNumbers));
+            return Ok(DuplicateRecordNumbers);
         }
     }
 }

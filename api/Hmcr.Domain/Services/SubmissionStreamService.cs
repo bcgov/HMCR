@@ -10,6 +10,7 @@ namespace Hmcr.Domain.Services
     public interface ISubmissionStreamService
     {
         Task<IEnumerable<SubmissionStreamDto>> GetSubmissionStreamsAsync(bool? isActive = true);
+        Task<SubmissionStreamDto> GetSubmissionStreamByTableNameAsync(string tableName);
     }
     public class SubmissionStreamService : ISubmissionStreamService
     {
@@ -23,6 +24,11 @@ namespace Hmcr.Domain.Services
         public async Task<IEnumerable<SubmissionStreamDto>> GetSubmissionStreamsAsync(bool? isActive = true)
         {
             return await _streamRepo.GetSubmissionStreamsAsync(isActive);
+        }
+
+        public async Task<SubmissionStreamDto> GetSubmissionStreamByTableNameAsync(string tableName)
+        {
+            return await _streamRepo.GetSubmissionStreamByTableNameAsync(tableName);
         }
     }
 }

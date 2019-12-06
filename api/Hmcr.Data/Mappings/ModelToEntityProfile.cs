@@ -11,6 +11,7 @@ using Hmcr.Model.Dtos.RolePermission;
 using Hmcr.Model.Dtos.ServiceArea;
 using Hmcr.Model.Dtos.ServiceAreaUser;
 using Hmcr.Model.Dtos.SubmissionObject;
+using Hmcr.Model.Dtos.SubmissionRow;
 using Hmcr.Model.Dtos.SubmissionStatus;
 using Hmcr.Model.Dtos.SubmissionStream;
 using Hmcr.Model.Dtos.User;
@@ -54,6 +55,9 @@ namespace Hmcr.Data.Mappings
             CreateMap<ServiceAreaUserDto, HmrServiceAreaUser>();
 
             CreateMap<SubmissionObjectDto, HmrSubmissionObject>();
+            CreateMap<SubmissionObjectCreateDto, HmrSubmissionObject>();
+
+            CreateMap<SubmissionRowDto, HmrSubmissionRow>();
 
             CreateMap<SubmissionStatusDto, HmrSubmissionStatu>();
 
