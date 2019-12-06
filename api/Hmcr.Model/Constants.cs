@@ -7,6 +7,7 @@ namespace Hmcr.Model
     public static class Constants
     {
         public static DateTime MaxDate = new DateTime(9999, 12, 31);
+        public static decimal MaxFileSize = 2097152;
     }
 
     public static class Permissions
@@ -34,6 +35,19 @@ namespace Hmcr.Model
         public const string Date = "D";
     }
 
+    public static class TableNames
+    {
+        public const string WorkReport = "HMR_WORK_REPORT";
+        public const string RockFallReport = "HMR_ROCKFALL_REPORT";
+        public const string WildlifeReport = "HMR_WILDLIFE_REPORT";
+    }
+
+    public static class RowStatus
+    {
+        public const decimal Accepted = 1;
+        public const decimal Duplicate = 2;
+    }
+
     public static class Fields
     {
         public const string Username = "Username";
@@ -52,4 +66,6 @@ namespace Hmcr.Model
 
         public const string PermissionId = "PermissionId";
     }
+
+
 }

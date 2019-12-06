@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using Hmcr.Data.Database.Entities;
 using Hmcr.Data.Repositories.Base;
+using Hmcr.Model.Dtos.SubmissionRow;
 using Hmcr.Model.Dtos.SubmissionStream;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -14,6 +15,7 @@ namespace Hmcr.Data.Repositories
     public interface ISubmissionStreamRepository
     {
         Task<IEnumerable<SubmissionStreamDto>> GetSubmissionStreamsAsync(bool? isActive = true);
+        Task<SubmissionStreamDto> GetSubmissionStreamByTableNameAsync(string tableName);
     }
 
     public class SubmissionStreamRepository : HmcrRepositoryBase<HmrSubmissionStream>, ISubmissionStreamRepository
@@ -40,6 +42,13 @@ namespace Hmcr.Data.Repositories
             }
 
             return Mapper.Map<IEnumerable<SubmissionStreamDto>>(await query.ToListAsync());
+        }
+
+        public async Task<SubmissionStreamDto> GetSubmissionStreamByTableNameAsync(string tableName)
+        {
+            var stream = await DbSet.AsNoTracking().FirstAsync(x => x.StagingTableName == tableName);
+
+            return Mapper.Map<SubmissionStreamDto>(stream);
         }
     }
 }

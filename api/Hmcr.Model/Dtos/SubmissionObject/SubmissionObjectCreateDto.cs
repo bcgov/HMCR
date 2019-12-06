@@ -1,22 +1,22 @@
-﻿using Hmcr.Model.Dtos.MimeType;
-using Hmcr.Model.Dtos.Party;
-using Hmcr.Model.Dtos.ServiceArea;
-using Hmcr.Model.Dtos.SubmissionStatus;
+﻿using Hmcr.Model.Dtos.SubmissionRow;
 using System;
 using System.Collections.Generic;
 using System.Text;
-using System.Text.Json.Serialization;
 
 namespace Hmcr.Model.Dtos.SubmissionObject
 {
-    public class SubmissionObjectDto
+    public class SubmissionObjectCreateDto
     {
-        [JsonPropertyName("id")]
-        public decimal SubmissionObjectId { get; set; }
+        public SubmissionObjectCreateDto()
+        {
+            SubmissionRows = new List<SubmissionRowDto>();
+        }
+
         public string FileName { get; set; }
         public byte[] DigitalRepresentation { get; set; }
         public decimal MimeTypeId { get; set; }
         public decimal SubmissionStatusId { get; set; }
         public decimal ServiceAreaNumber { get; set; }
+        public IList<SubmissionRowDto> SubmissionRows { get; set; }
     }
 }

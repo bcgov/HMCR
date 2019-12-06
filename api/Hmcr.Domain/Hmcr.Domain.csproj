@@ -13,8 +13,4 @@
     <ProjectReference Include="..\Hmcr.Model\Hmcr.Model.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="CsvHelpers\" />
-  </ItemGroup>
-
 </Project>
