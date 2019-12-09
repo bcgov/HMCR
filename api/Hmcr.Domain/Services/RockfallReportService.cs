@@ -4,9 +4,9 @@ using Hmcr.Data.Database;
 using Hmcr.Data.Repositories;
 using Hmcr.Domain.CsvHelpers;
 using Hmcr.Model;
+using Hmcr.Model.Dtos.RockfallReport;
 using Hmcr.Model.Dtos.SubmissionObject;
 using Hmcr.Model.Dtos.SubmissionRow;
-using Hmcr.Model.Dtos.WorkReport;
 using Hmcr.Model.Utils;
 using System;
 using System.Collections.Generic;
@@ -19,35 +19,35 @@ using System.Threading.Tasks;
 
 namespace Hmcr.Domain.Services
 {
-    public interface IWorkReportService
+    public interface IRockfallReportService
     {
         Task<(Dictionary<string, List<string>> Errors, List<string> DuplicateRecordNumbers)> CheckDuplicatesAsync(FileUploadDto upload);
-        Task<(decimal SubmissionObjectId, Dictionary<string, List<string>> Errors)> CreateWorkReportAsync(FileUploadDto upload);
+        Task<(decimal SubmissionObjectId, Dictionary<string, List<string>> Errors)> CreateRockfallReportAsync(FileUploadDto upload);
+
     }
-    public class WorkReportService : IWorkReportService
+    public class RockfallReportService : IRockfallReportService
     {
         private IUnitOfWork _unitOfWork;
         private HmcrCurrentUser _currentUser;
-        private IFieldValidatorService _validator;
         private ISubmissionStreamService _streamService;
         private ISubmissionObjectRepository _submissionRepo;
         private ISumbissionRowRepository _rowRepo;
         private IContractTermRepository _contractRepo;
         private ISubmissionStatusRepository _statusRepo;
 
-        public WorkReportService(IUnitOfWork unitOfWork, HmcrCurrentUser currentUser, IFieldValidatorService validator, 
-            ISubmissionStreamService streamService, ISubmissionObjectRepository submissionRepo, ISumbissionRowRepository rowRepo, 
+        public RockfallReportService(IUnitOfWork unitOfWork, HmcrCurrentUser currentUser, 
+            ISubmissionStreamService streamService, ISubmissionObjectRepository submissionRepo, ISumbissionRowRepository rowRepo,
             IContractTermRepository contractRepo, ISubmissionStatusRepository statusRepo)
         {
             _unitOfWork = unitOfWork;
             _currentUser = currentUser;
-            _validator = validator;
             _streamService = streamService;
             _submissionRepo = submissionRepo;
             _rowRepo = rowRepo;
             _contractRepo = contractRepo;
             _statusRepo = statusRepo;
         }
+
         public async Task<(Dictionary<string, List<string>> Errors, List<string> DuplicateRecordNumbers)> CheckDuplicatesAsync(FileUploadDto upload)
         {
             var errors = new Dictionary<string, List<string>>();
@@ -66,41 +66,14 @@ namespace Hmcr.Domain.Services
             return (errors, recordNumbers);
         }
 
-        private static List<string> GetLines(FileUploadDto upload, Stream stream)
-        {
-            using var text = new StreamReader(stream, Encoding.UTF8);
-
-            var lines = new List<string>();
-            while (!text.EndOfStream)
-            {
-                lines.Add(text.ReadLine());
-            }
-
-            return lines;
-        }
-
-        private bool HasDuplicateRecordNumberInFile(IEnumerable<SubmissionRowDto> rows, Dictionary<string, List<string>> errors)
-        {
-            foreach(var row in rows)
-            {
-                if (rows.Count(x => x.RecordNumber == row.RecordNumber) > 1)
-                {
-                    errors.AddItem("RecordNumber", $"The file contains multiple rows with the same record number {row.RecordNumber}.");
-                    return true;
-                }
-            }
-
-            return false;
-        }
-
         private async Task<(Dictionary<string, List<string>> Errors, SubmissionObjectCreateDto Submission)> ValidateAndParseUploadFileAsync(FileUploadDto upload)
         {
             var errors = new Dictionary<string, List<string>>();
 
-            var reportType = await _streamService.GetSubmissionStreamByTableNameAsync(TableNames.WorkReport);
+            var reportType = await _streamService.GetSubmissionStreamByTableNameAsync(TableNames.RockfallReport);
             if (reportType == null)
             {
-                throw new Exception($"The submission stream for {TableNames.WorkReport} is not defined.");
+                throw new Exception($"The submission stream for {TableNames.RockfallReport} is not defined.");
             }
 
             var submission = new SubmissionObjectCreateDto();
@@ -137,7 +110,7 @@ namespace Hmcr.Domain.Services
 
             csv.Configuration.PrepareHeaderForMatch = (string header, int index) => Regex.Replace(header.ToLower(), @"\s", string.Empty);
             csv.Configuration.CultureInfo = CultureInfo.GetCultureInfo("en-CA");
-            csv.Configuration.RegisterClassMap<WorkRptInitCsvDtoMap>();
+            csv.Configuration.RegisterClassMap<RockfallRptInitCsvDtoMap>();
 
             csv.Configuration.TrimOptions = TrimOptions.Trim;
             csv.Configuration.HeaderValidated = (bool valid, string[] column, int row, ReadingContext context) =>
@@ -149,32 +122,26 @@ namespace Hmcr.Domain.Services
 
             while (csv.Read())
             {
-                WorkRptInitCsvDto row = null;
+                RockfallRptInitCsvDto row = null;
 
                 try
                 {
-                    row = csv.GetRecord<WorkRptInitCsvDto>();
+                    row = csv.GetRecord<RockfallRptInitCsvDto>();
                 }
-                catch (CsvHelperException)
+                catch (CsvHelperException ex)
                 {
                     break;
-                }
-
-                if (row.ServiceArea != serviceArea.ServiceAreaNumber.ToString())
-                {
-                    errors.AddItem("ServiceArea", $"The file contains service area which is not {serviceArea.ServiceAreaName} ({serviceArea.ServiceAreaNumber}).");
-                    return (errors, submission);
                 }
 
                 var line = csv.Context.RawRecord.RemoveLineBreak();
 
                 submission.SubmissionRows.Add(new SubmissionRowDto
                 {
-                    RecordNumber = row.RecordNumber,
+                    RecordNumber = row.MajorIncidentNumber,
                     RowValue = line,
                     RowHash = line.GetSha256Hash(),
                     RowStatusId = await _statusRepo.GetStatusIdByTypeAndCode(StatusType.Row, RowStatus.Accepted),
-                    EndDate = row.EndDate
+                    EndDate = (DateTime)row.ReportDate
                 });
             }
 
@@ -183,12 +150,7 @@ namespace Hmcr.Domain.Services
                 return (errors, submission);
             }
 
-            if (HasDuplicateRecordNumberInFile(submission.SubmissionRows, errors))
-            {
-                return (errors, submission);
-            }
-
-            if (! await _contractRepo.HasContractTermAsync(upload.ServiceAreaNumber, submission.SubmissionRows.Max(x => x.EndDate)))
+            if (!await _contractRepo.HasContractTermAsync(upload.ServiceAreaNumber, submission.SubmissionRows.Max(x => x.EndDate)))
             {
                 errors.AddItem("EndDate", $"Cannot find the contract term for this file");
                 return (errors, submission);
@@ -205,10 +167,10 @@ namespace Hmcr.Domain.Services
                 submission.SubmissionStatusId = await _statusRepo.GetStatusIdByTypeAndCode(StatusType.File, RowStatus.Accepted);
             }
 
-            return (errors, submission); 
+            return (errors, submission);
         }
 
-        public async Task<(decimal SubmissionObjectId, Dictionary<string, List<string>> Errors)> CreateWorkReportAsync(FileUploadDto upload)
+        public async Task<(decimal SubmissionObjectId, Dictionary<string, List<string>> Errors)> CreateRockfallReportAsync(FileUploadDto upload)
         {
             var (Errors, Submission) = await ValidateAndParseUploadFileAsync(upload);
 
@@ -220,5 +182,6 @@ namespace Hmcr.Domain.Services
 
             return (submissionEntity.SubmissionObjectId, null);
         }
+
     }
 }

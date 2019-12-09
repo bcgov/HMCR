@@ -35,17 +35,10 @@ namespace Hmcr.Model
         public const string Date = "D";
     }
 
-    public static class SubmissionStreams
-    {
-        public const decimal WorkReport = 1;
-        public const decimal RockfallReport = 2;
-        public const decimal WildlifeReport = 3;
-
-    }
     public static class TableNames
     {
         public const string WorkReport = "HMR_WORK_REPORT";
-        public const string RockFallReport = "HMR_ROCKFALL_REPORT";
+        public const string RockfallReport = "HMR_ROCKFALL_REPORT";
         public const string WildlifeReport = "HMR_WILDLIFE_REPORT";
     }
 

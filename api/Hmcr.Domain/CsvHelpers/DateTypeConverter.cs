@@ -15,7 +15,10 @@ namespace Hmcr.Domain.CsvHelpers
             if (string.IsNullOrEmpty(date))
                 return null;
 
-            return DateTime.ParseExact(date, "yyyyMMdd", CultureInfo.InvariantCulture);
+            if (date.Length == 8)
+                return DateTime.ParseExact(date, "yyyyMMdd", CultureInfo.InvariantCulture);
+            else 
+                return DateTime.ParseExact(date, "yyyy-MM-dd", CultureInfo.InvariantCulture);
         }
 
         public string ConvertToString(object value, IWriterRow row, MemberMapData memberMapData)

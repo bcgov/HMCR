@@ -9,23 +9,23 @@ using System.Threading.Tasks;
 namespace Hmcr.Api.Controllers
 {
     [ApiVersion("1.0")]
-    [Route("api/workreports")]
-    public class WorkReportsController : ControllerBase
+    [Route("api/rockfallreports")]
+    public class RockfallReportsController : ControllerBase
     {
-        private IWorkReportService _workRptService;
+        private IRockfallReportService _rockfallRptSerivce;
         private ISubmissionObjectService _submissionService;
 
-        public WorkReportsController(IWorkReportService workRptService, ISubmissionObjectService submissionService)
+        public RockfallReportsController(IRockfallReportService rockfallRptSerivce, ISubmissionObjectService submissionService)
         {
-            _workRptService = workRptService;
+            _rockfallRptSerivce = rockfallRptSerivce;
             _submissionService = submissionService;
         }
 
         [HttpPost]
         [RequiresPermission(Permissions.FileUploadWrite)]
-        public async Task<IActionResult> CreateWorkReportAsync([FromForm] FileUploadDto upload)
+        public async Task<IActionResult> CreateRockfallReportAsync([FromForm] FileUploadDto upload)
         {
-            var (SubmissionObjectId, Errors) = await _workRptService.CreateWorkReportAsync(upload);
+            var (SubmissionObjectId, Errors) = await _rockfallRptSerivce.CreateRockfallReportAsync(upload);
 
             if (SubmissionObjectId == 0)
             {
@@ -39,7 +39,7 @@ namespace Hmcr.Api.Controllers
         [RequiresPermission(Permissions.FileUploadWrite)]
         public async Task<ActionResult<List<string>>> CheckDuplicateAsync([FromForm] FileUploadDto upload)
         {
-            var (Errors, DuplicateRecordNumbers) = await _workRptService.CheckDuplicatesAsync(upload);
+            var (Errors, DuplicateRecordNumbers) = await _rockfallRptSerivce.CheckDuplicatesAsync(upload);
 
             if (Errors.Count > 0)
             {
