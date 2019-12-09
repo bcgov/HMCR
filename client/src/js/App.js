@@ -1,4 +1,5 @@
 import React from 'react';
+import { connect } from 'react-redux';
 import { BrowserRouter, Route, Switch, Redirect } from 'react-router-dom';
 import { Container } from 'reactstrap';
 
@@ -21,7 +22,7 @@ import * as Constants from './Constants';
 
 import '../scss/app.scss';
 
-const App = () => {
+const App = ({ currentUser }) => {
   addIconsToLibrary();
 
   return (
@@ -31,18 +32,7 @@ const App = () => {
           <Header />
           <Container>
             <Switch>
-              {/* <Route path={Constants.PATHS.HOME} exact component={Home} /> */}
-              <Route path={Constants.PATHS.HOME} exact>
-                <Redirect to={Constants.PATHS.ADMIN_USERS} />
-              </Route>
-              <AdminRoutes />
-              <AuthorizedRoute
-                path={Constants.PATHS.WORK_REPORTING}
-                requires={Constants.PERMISSIONS.FILE_R}
-                userType={Constants.USER_TYPE.BUSINESS}
-              >
-                <WorkReportingRoutes />
-              </AuthorizedRoute>
+              {Routes(currentUser.userType)}
               <Route path={Constants.PATHS.UNAUTHORIZED} exact component={Unauthorized} />
               <Route path="*" component={NoMatch} />
             </Switch>
@@ -62,11 +52,30 @@ const Unauthorized = () => {
   return <p>Unauthorized</p>;
 };
 
+const Routes = userType => {
+  switch (userType) {
+    case Constants.USER_TYPE.INTERNAL:
+      return AdminRoutes();
+    case Constants.USER_TYPE.BUSINESS:
+      return WorkReportingRoutes();
+    default:
+      return <Redirect to={Constants.PATHS.UNAUTHORIZED} />;
+  }
+};
+
 const WorkReportingRoutes = () => {
   return (
     <Switch>
+      <Route path={Constants.PATHS.ADMIN}>
+        <Redirect to={Constants.PATHS.UNAUTHORIZED} />
+      </Route>
+      <Route path={Constants.PATHS.HOME} exact>
+        <Redirect to={Constants.PATHS.WORK_REPORTING} />
+      </Route>
       <Route path={Constants.PATHS.WORK_REPORTING} exact component={WorkReporting} />
       <Route path={`${Constants.PATHS.WORK_REPORTING}/:submissionId`} component={WorkReportingSubmission} />
+      <Route path={Constants.PATHS.UNAUTHORIZED} exact component={Unauthorized} />
+      <Route path="*" component={NoMatch} />
     </Switch>
   );
 };
@@ -74,8 +83,9 @@ const WorkReportingRoutes = () => {
 const AdminRoutes = () => {
   return (
     <Switch>
-      <Route path={Constants.PATHS.ADMIN} exact component={ActivityAdmin} />
-
+      <Route path={Constants.PATHS.HOME} exact>
+        <Redirect to={Constants.PATHS.ADMIN_USERS} />
+      </Route>
       <AuthorizedRoute
         path={Constants.PATHS.ADMIN_ACTIVITIES}
         requires={Constants.PERMISSIONS.FILE_R}
@@ -103,4 +113,10 @@ const AdminRoutes = () => {
   );
 };
 
-export default App;
+const mapStateToProps = state => {
+  return {
+    currentUser: state.user.current,
+  };
+};
+
+export default connect(mapStateToProps, null)(App);

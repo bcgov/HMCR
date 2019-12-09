@@ -105,13 +105,7 @@ const UserAdmin = ({
             <Form>
               <Row form>
                 <Col>
-                  <MultiDropdown
-                    {...formikProps}
-                    items={serviceAreas}
-                    name="serviceAreaIds"
-                    title="Service Area"
-                    showId={true}
-                  />
+                  <MultiDropdown {...formikProps} items={serviceAreas} name="serviceAreaIds" title="Service Area" />
                 </Col>
 
                 <Col>

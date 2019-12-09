@@ -3,7 +3,7 @@ import { DropdownToggle, DropdownMenu, UncontrolledDropdown, DropdownItem, FormF
 import { useFormikContext, useField } from 'formik';
 
 const SingleDropdown = props => {
-  const { items, name, defaultTitle, showId, disabled } = props;
+  const { items, name, defaultTitle, disabled } = props;
   const { values, setFieldValue, setFieldTouched } = useFormikContext();
   const [title, setTitle] = useState(values[name] && values[name].length > 0 ? values[name] : defaultTitle);
   // eslint-disable-next-line
@@ -16,7 +16,7 @@ const SingleDropdown = props => {
 
   const renderMenuItems = () => {
     return items.map((item, index) => {
-      const displayName = showId ? `${item.id} - ${item.name}` : item.name;
+      const displayName = item.name;
 
       if (item.type === 'header') {
         return (

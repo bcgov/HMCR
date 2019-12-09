@@ -4,7 +4,7 @@ import { FieldArray } from 'formik';
 
 const maxSelectedItemDisplay = 2;
 
-const MultiDropdown = ({ values, setFieldValue, items, name, title, showId }) => {
+const MultiDropdown = ({ values, setFieldValue, items, name, title }) => {
   const [selectAll, setSelectAll] = useState(false);
   const selectedValues = values[name];
 
@@ -59,7 +59,7 @@ const MultiDropdown = ({ values, setFieldValue, items, name, title, showId }) =>
           {({ push, remove }) => (
             <div className="multi-menu">
               {items.map(item => {
-                const displayName = showId ? `${item.id} - ${item.name}` : item.name;
+                const displayName = item.name;
                 return (
                   <div key={item.id} className="multi-item">
                     <Label check className="multi-item-label">

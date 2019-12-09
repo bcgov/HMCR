@@ -43,7 +43,7 @@ const EditRoleFormFields = ({ permissionIds, disableEdit }) => {
         <FormInput type="text" name="description" placeholder="Role Description" disabled={disableEdit} />
       </FormRow>
       <FormRow name="permissions" label="Permissions*">
-        <MultiSelect items={permissionIds} name="permissions" showId={false} />
+        <MultiSelect items={permissionIds} name="permissions" />
       </FormRow>
       <FormRow name="endDate" label="End Date">
         <SingleDateField name="endDate" placeholder="End Date" />

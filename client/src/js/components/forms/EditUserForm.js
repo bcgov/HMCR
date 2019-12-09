@@ -71,10 +71,10 @@ const EditUserFormFields = ({ userTypes, roles, serviceAreas, disableEdit }) => 
         <FormInput type="email" name="email" placeholder="Email" />
       </FormRow>
       <FormRow name="userRoleIds" label="User Roles*">
-        <MultiSelect items={roles} name="userRoleIds" showId={false} />
+        <MultiSelect items={roles} name="userRoleIds" />
       </FormRow>
       <FormRow name="serviceAreaNumbers" label="Service Areas*">
-        <MultiSelect items={serviceAreas} name="serviceAreaNumbers" showId={true} />
+        <MultiSelect items={serviceAreas} name="serviceAreaNumbers" />
       </FormRow>
       {/* <FormRow name="active" label="Active">
     <FormCheckbox name="active" />
