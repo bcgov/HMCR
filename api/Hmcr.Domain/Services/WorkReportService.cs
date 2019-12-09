@@ -34,9 +34,12 @@ namespace Hmcr.Domain.Services
         private ISubmissionStreamService _streamService;
         private ISubmissionObjectRepository _submissionRepo;
         private ISumbissionRowRepository _rowRepo;
+        private IContractTermRepository _contractRepo;
+        private ISubmissionStatusRepository _statusRepo;
 
         public WorkReportService(IUnitOfWork unitOfWork, HmcrCurrentUser currentUser, IFieldValidatorService validator, 
-            ISubmissionStreamService streamService, ISubmissionObjectRepository submissionRepo, ISumbissionRowRepository rowRepo)
+            ISubmissionStreamService streamService, ISubmissionObjectRepository submissionRepo, ISumbissionRowRepository rowRepo, 
+            IContractTermRepository contractRepo, ISubmissionStatusRepository statusRepo)
         {
             _unitOfWork = unitOfWork;
             _currentUser = currentUser;
@@ -44,20 +47,25 @@ namespace Hmcr.Domain.Services
             _streamService = streamService;
             _submissionRepo = submissionRepo;
             _rowRepo = rowRepo;
+            _contractRepo = contractRepo;
+            _statusRepo = statusRepo;
         }
         public async Task<(Dictionary<string, List<string>> Errors, List<string> DuplicateRecordNumbers)> CheckDuplicatesAsync(WorkRptUploadDto upload)
         {
             var errors = new Dictionary<string, List<string>>();
-            var dupRows = new List<string>();
+            var recordNumbers = new List<string>();
 
             var (Errors, Submission) = await ValidateAndParseUploadFileAsync(upload);
 
             if (Errors.Count > 0)
-                return (Errors, dupRows);
+                return (Errors, recordNumbers);
 
-            //todo: find duplicate rows to overwrite
+            await foreach (var recordNumber in _rowRepo.FindDuplicateRowsToOverwriteAsync(Submission.SubmissionRows))
+            {
+                recordNumbers.Add(recordNumber);
+            }
 
-            return (errors, dupRows);
+            return (errors, recordNumbers);
         }
 
         private static List<string> GetLines(WorkRptUploadDto upload, Stream stream)
@@ -112,9 +120,10 @@ namespace Hmcr.Domain.Services
         private async Task<(Dictionary<string, List<string>> Errors, SubmissionObjectCreateDto Submission)> ValidateAndParseUploadFileAsync(WorkRptUploadDto upload)
         {
             var submission = new SubmissionObjectCreateDto();
-            submission.FileName = SanitizeFileName(Path.GetFileName(upload.ReportFile.FileName));
+            submission.FileName = SanitizeFileName(Path.GetFileName(upload.ReportFile.FileName)) + ".csv";
             submission.MimeTypeId = 1;
             submission.ServiceAreaNumber = upload.ServiceAreaNumber;
+            submission.SubmissionStreamId = SubmissionStreams.WorkReport;            
 
             var errors = new Dictionary<string, List<string>>();
 
@@ -188,16 +197,31 @@ namespace Hmcr.Domain.Services
                     RecordNumber = row.RecordNumber,
                     RowValue = line,
                     RowHash = line.GetSha256Hash(),
-                    RowStatusId = RowStatus.Accepted,
+                    RowStatusId = await _statusRepo.GetStatusIdByTypeAndCode(StatusType.Row, RowStatus.Accepted),
                     EndDate = row.EndDate
                 });
             }
 
-            HasDuplicateRecordNumberInFile(submission.SubmissionRows, errors);
+            if (HasDuplicateRecordNumberInFile(submission.SubmissionRows, errors))
+            {
+                return (errors, submission);
+            }
+
+            if (! await _contractRepo.HasContractTermAsync(upload.ServiceAreaNumber, submission.SubmissionRows.Max(x => x.EndDate)))
+            {
+                errors.AddItem("EndDate", $"Cannot find the contract term for this file");
+                return (errors, submission);
+            }
 
             await foreach (var row in _rowRepo.FindDuplicateRowsAsync(submission.SubmissionRows))
             {
-                row.RowStatusId = RowStatus.Duplicate;
+                row.RowStatusId = await _statusRepo.GetStatusIdByTypeAndCode(StatusType.Row, RowStatus.Duplicate);
+            }
+
+            if (errors.Count == 0)
+            {
+                submission.DigitalRepresentation = StreamToBytes(stream);
+                submission.SubmissionStatusId = await _statusRepo.GetStatusIdByTypeAndCode(StatusType.File, RowStatus.Accepted);
             }
 
             return (errors, submission); 
@@ -216,5 +240,12 @@ namespace Hmcr.Domain.Services
             return (submissionEntity.SubmissionObjectId, null);
         }
 
+        public static byte[] StreamToBytes(Stream stream)
+        {
+            stream.Position = 0;
+            using var ms = new MemoryStream();
+            stream.CopyTo(ms);
+            return ms.ToArray();
+        }
     }
 }

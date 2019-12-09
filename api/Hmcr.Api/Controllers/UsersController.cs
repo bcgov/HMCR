@@ -98,7 +98,12 @@ namespace Hmcr.Api.Controllers
         [RequiresPermission(Permissions.UserRead)]
         public async Task<ActionResult<UserDto>> GetUsersAsync(decimal id)
         {
-            return await _userService.GetUserAsync(id);
+            var user = await _userService.GetUserAsync(id); 
+
+            if (user == null)
+                return NotFound();
+
+            return user;
         }
 
         [HttpPost]

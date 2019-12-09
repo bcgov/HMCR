@@ -35,6 +35,13 @@ namespace Hmcr.Model
         public const string Date = "D";
     }
 
+    public static class SubmissionStreams
+    {
+        public const decimal WorkReport = 1;
+        public const decimal RockfallReport = 2;
+        public const decimal WildlifeReport = 3;
+
+    }
     public static class TableNames
     {
         public const string WorkReport = "HMR_WORK_REPORT";
@@ -42,10 +49,22 @@ namespace Hmcr.Model
         public const string WildlifeReport = "HMR_WILDLIFE_REPORT";
     }
 
+    public static class StatusType
+    {
+        public const string File = "F";
+        public const string Row = "R";
+    }
+
     public static class RowStatus
     {
-        public const decimal Accepted = 1;
-        public const decimal Duplicate = 2;
+        public const string Accepted = "A";
+        public const string Duplicate = "D";
+    }
+
+    public static class FileStatus
+    {
+        public const string Accepted = "A";
+        public const string Duplicate = "D";
     }
 
     public static class Fields

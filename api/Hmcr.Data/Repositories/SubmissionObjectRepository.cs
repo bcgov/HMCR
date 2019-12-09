@@ -2,6 +2,7 @@
 using Hmcr.Data.Database.Entities;
 using Hmcr.Data.Repositories.Base;
 using Hmcr.Model.Dtos.SubmissionObject;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -12,6 +13,7 @@ namespace Hmcr.Data.Repositories
     public interface ISubmissionObjectRepository
     {
         Task<HmrSubmissionObject> CreateSubmissionObjectAsync(SubmissionObjectCreateDto submission);
+        Task<SubmissionObjectDto> GetSubmissionObjectAsync(decimal submissionObjectId);
     }
     public class SubmissionObjectRepository : HmcrRepositoryBase<HmrSubmissionObject>, ISubmissionObjectRepository
     {
@@ -31,6 +33,11 @@ namespace Hmcr.Data.Repositories
             }
 
             return submissionEntity;
+        }
+
+        public async Task<SubmissionObjectDto> GetSubmissionObjectAsync(decimal submissionObjectId)
+        {
+            return await GetByIdAsync<SubmissionObjectDto>(submissionObjectId);
         }
     }
 }
