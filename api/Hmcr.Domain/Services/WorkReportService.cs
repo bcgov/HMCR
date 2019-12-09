@@ -23,8 +23,8 @@ namespace Hmcr.Domain.Services
 {
     public interface IWorkReportService
     {
-        Task<(Dictionary<string, List<string>> Errors, List<string> DuplicateRecordNumbers)> CheckDuplicatesAsync(WorkRptUploadDto upload);
-        Task<(decimal SubmissionObjectId, Dictionary<string, List<string>> Errors)> CreateWorkReportAsync(WorkRptUploadDto upload);
+        Task<(Dictionary<string, List<string>> Errors, List<string> DuplicateRecordNumbers)> CheckDuplicatesAsync(FileUploadDto upload);
+        Task<(decimal SubmissionObjectId, Dictionary<string, List<string>> Errors)> CreateWorkReportAsync(FileUploadDto upload);
     }
     public class WorkReportService : IWorkReportService
     {
@@ -50,7 +50,7 @@ namespace Hmcr.Domain.Services
             _contractRepo = contractRepo;
             _statusRepo = statusRepo;
         }
-        public async Task<(Dictionary<string, List<string>> Errors, List<string> DuplicateRecordNumbers)> CheckDuplicatesAsync(WorkRptUploadDto upload)
+        public async Task<(Dictionary<string, List<string>> Errors, List<string> DuplicateRecordNumbers)> CheckDuplicatesAsync(FileUploadDto upload)
         {
             var errors = new Dictionary<string, List<string>>();
             var recordNumbers = new List<string>();
@@ -68,7 +68,7 @@ namespace Hmcr.Domain.Services
             return (errors, recordNumbers);
         }
 
-        private static List<string> GetLines(WorkRptUploadDto upload, Stream stream)
+        private static List<string> GetLines(FileUploadDto upload, Stream stream)
         {
             using var text = new StreamReader(stream, Encoding.UTF8);
 
@@ -117,7 +117,7 @@ namespace Hmcr.Domain.Services
             return false;
         }
 
-        private async Task<(Dictionary<string, List<string>> Errors, SubmissionObjectCreateDto Submission)> ValidateAndParseUploadFileAsync(WorkRptUploadDto upload)
+        private async Task<(Dictionary<string, List<string>> Errors, SubmissionObjectCreateDto Submission)> ValidateAndParseUploadFileAsync(FileUploadDto upload)
         {
             var submission = new SubmissionObjectCreateDto();
             submission.FileName = SanitizeFileName(Path.GetFileName(upload.ReportFile.FileName)) + ".csv";
@@ -227,7 +227,7 @@ namespace Hmcr.Domain.Services
             return (errors, submission); 
         }
 
-        public async Task<(decimal SubmissionObjectId, Dictionary<string, List<string>> Errors)> CreateWorkReportAsync(WorkRptUploadDto upload)
+        public async Task<(decimal SubmissionObjectId, Dictionary<string, List<string>> Errors)> CreateWorkReportAsync(FileUploadDto upload)
         {
             var (Errors, Submission) = await ValidateAndParseUploadFileAsync(upload);
 

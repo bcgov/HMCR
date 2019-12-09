@@ -1,8 +1,8 @@
 ﻿using Microsoft.AspNetCore.Http;
 
-namespace Hmcr.Model.Dtos.WorkReport
+namespace Hmcr.Model.Dtos.SubmissionObject
 {
-    public class WorkRptUploadDto
+    public class FileUploadDto
     {
         public decimal ServiceAreaNumber { get; set; }
         public IFormFile ReportFile { get; set; }

@@ -27,7 +27,7 @@ namespace Hmcr.Api.Controllers
 
         [HttpPost]
         [RequiresPermission(Permissions.FileUploadWrite)]
-        public async Task<IActionResult> CreateWorkReportAsync([FromForm] WorkRptUploadDto upload)
+        public async Task<IActionResult> CreateWorkReportAsync([FromForm] FileUploadDto upload)
         {
             var (SubmissionObjectId, Errors) = await _workRptService.CreateWorkReportAsync(upload);
 
@@ -41,7 +41,7 @@ namespace Hmcr.Api.Controllers
 
         [HttpPost("duplicates")]
         [RequiresPermission(Permissions.FileUploadWrite)]
-        public async Task<ActionResult<List<string>>> CheckDuplicateAsync([FromForm] WorkRptUploadDto upload)
+        public async Task<ActionResult<List<string>>> CheckDuplicateAsync([FromForm] FileUploadDto upload)
         {
             var (Errors, DuplicateRecordNumbers) = await _workRptService.CheckDuplicatesAsync(upload);
 
