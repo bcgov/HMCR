@@ -15,9 +15,9 @@ namespace Hmcr.Data.Repositories
 {
     public interface ISumbissionRowRepository
     {
-        IAsyncEnumerable<SubmissionRowDto> FindDuplicateRowsAsync(IEnumerable<SubmissionRowDto> rows);
-        IAsyncEnumerable<int> FindDuplicateRowsAsync(IEnumerable<string> rows);
-        IAsyncEnumerable<string> FindDuplicateRowsToOverwriteAsync(IEnumerable<SubmissionRowDto> rows);
+        IAsyncEnumerable<SubmissionRowDto> FindDuplicateRowsAsync(decimal submissionStreamId, IEnumerable<SubmissionRowDto> rows);
+        IAsyncEnumerable<int> FindDuplicateRowsAsync(decimal submissionStreamId, IEnumerable<string> rows);
+        IAsyncEnumerable<string> FindDuplicateRowsToOverwriteAsync(decimal submissionStreamId, IEnumerable<SubmissionRowDto> rows);
     }
     public class SubmissionRowRepository : HmcrRepositoryBase<HmrSubmissionRow>, ISumbissionRowRepository
     {
@@ -29,38 +29,41 @@ namespace Hmcr.Data.Repositories
             _statusRepo = statusRepo;
         }
 
-        public async IAsyncEnumerable<SubmissionRowDto> FindDuplicateRowsAsync(IEnumerable<SubmissionRowDto> rows)
-        {
+        public async IAsyncEnumerable<SubmissionRowDto> FindDuplicateRowsAsync(decimal submissionStreamId, IEnumerable<SubmissionRowDto> rows)
+        {            
             foreach (var row in rows)
             {
-                if (await DbSet.AnyAsync(x => x.RowHash == row.RowHash))
+                var query = DbSet
+                    .AnyAsync(x => x.SubmissionObject.SubmissionStreamId == submissionStreamId && x.RowHash == row.RowHash);
+
+                if (await query)
                     yield return row;
             }
         }
 
-        public async IAsyncEnumerable<int> FindDuplicateRowsAsync(IEnumerable<string> rows)
+        public async IAsyncEnumerable<int> FindDuplicateRowsAsync(decimal submissionStreamId, IEnumerable<string> rows)
         {
             var i = 1;
             foreach (var row in rows)
             {
-                if (await DbSet.AnyAsync(x => x.RowHash == row.GetSha256Hash()))
+                var query = DbSet
+                    .AnyAsync(x => x.SubmissionObject.SubmissionStreamId == submissionStreamId && x.RowHash == row.GetSha256Hash());
+
+                if (await query)
                     yield return i;
 
                 i++;
             }
         }
 
-        public async IAsyncEnumerable<string> FindDuplicateRowsToOverwriteAsync(IEnumerable<SubmissionRowDto> rows)
+        public async IAsyncEnumerable<string> FindDuplicateRowsToOverwriteAsync(decimal submissionStreamId, IEnumerable<SubmissionRowDto> rows)
         {
             var duplicate = await _statusRepo.GetStatusIdByTypeAndCode(StatusType.Row, RowStatus.Duplicate);
 
             foreach (var row in rows.Where(x => x.RowStatusId != duplicate))
             {
                 var query = await DbSet
-                    .Include(x => x.SubmissionObject)
-                        .ThenInclude(x => x.ServiceAreaNumberNavigation)
-                            .ThenInclude(x => x.HmrContractTerms)
-                    .Where(x => x.RecordNumber == row.RecordNumber && x.RowStatusId != duplicate)
+                    .Where(x => x.SubmissionObject.SubmissionStreamId == submissionStreamId && x.RecordNumber == row.RecordNumber && x.RowStatusId != duplicate)
                     .SelectMany(x => x.SubmissionObject.ServiceAreaNumberNavigation.HmrContractTerms)
                     .AnyAsync(x => x.StartDate <= row.EndDate && x.EndDate > row.EndDate);
                     

@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.IO;
 
 namespace Hmcr.Model.Utils
 {
@@ -90,12 +91,33 @@ namespace Hmcr.Model.Utils
             if (string.IsNullOrEmpty(text))
                 return string.Empty;
 
-            using (var sha = new System.Security.Cryptography.SHA256Managed())
+            using var sha = new System.Security.Cryptography.SHA256Managed();
+
+            byte[] textData = Encoding.UTF8.GetBytes(text);
+            byte[] hash = sha.ComputeHash(textData);
+            return BitConverter.ToString(hash).Replace("-", string.Empty);
+        }
+
+        public static string SanitizeFileName(this string fileName)
+        {
+            var invalids = Path.GetInvalidFileNameChars();
+            var newFileName = String.Join("_", fileName.Split(invalids, StringSplitOptions.RemoveEmptyEntries)).TrimEnd('.');
+            newFileName = Path.GetFileNameWithoutExtension(newFileName);
+
+            if (newFileName.Length > 100)
             {
-                byte[] textData = Encoding.UTF8.GetBytes(text);
-                byte[] hash = sha.ComputeHash(textData);
-                return BitConverter.ToString(hash).Replace("-", string.Empty);
+                newFileName = newFileName.Substring(0, 100);
             }
+
+            return newFileName;
+        }
+
+        public static bool IsCsvFile(this string fileName)
+        {
+            if (!Path.HasExtension(fileName))
+                return false;
+
+            return Path.GetExtension(fileName).ToLowerInvariant() == ".csv";
         }
     }
 }
