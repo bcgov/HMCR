@@ -1,6 +1,7 @@
 ﻿using Hmcr.Api.Authorization;
 using Hmcr.Domain.Services;
 using Hmcr.Model;
+using Hmcr.Model.Dtos.SubmissionObject;
 using Hmcr.Model.Dtos.WorkReport;
 using Microsoft.AspNetCore.Mvc;
 using System;
@@ -16,29 +17,31 @@ namespace Hmcr.Api.Controllers
     public class WorkReportsController : ControllerBase
     {
         private IWorkReportService _workRptService;
+        private ISubmissionObjectService _submissionService;
 
-        public WorkReportsController(IWorkReportService workRptService)
+        public WorkReportsController(IWorkReportService workRptService, ISubmissionObjectService submissionService)
         {
             _workRptService = workRptService;
-        }
-
-        [HttpPost("duplicates")]
-        [RequiresPermission(Permissions.FileUploadWrite)]
-        public async Task<IActionResult> CreateWorkReportAsync([FromForm] WorkRptUploadDto upload)
-        {
-            var result = await _workRptService.CreateWorkReportAsync(upload);
-
-            if (result.SubmissionObjectId == 0)
-            {
-                return ValidationUtils.GetValidationErrorResult(result.Errors, ControllerContext);
-            }
-
-            return Ok();
+            _submissionService = submissionService;
         }
 
         [HttpPost]
         [RequiresPermission(Permissions.FileUploadWrite)]
-        public async Task<IActionResult> CheckDuplicateAsync([FromForm] WorkRptUploadDto upload)
+        public async Task<IActionResult> CreateWorkReportAsync([FromForm] WorkRptUploadDto upload)
+        {
+            var (SubmissionObjectId, Errors) = await _workRptService.CreateWorkReportAsync(upload);
+
+            if (SubmissionObjectId == 0)
+            {
+                return ValidationUtils.GetValidationErrorResult(Errors, ControllerContext);
+            }
+
+            return CreatedAtRoute("GetSubmissionObject", new { id = SubmissionObjectId }, await _submissionService.GetSubmissionObjectAsync(SubmissionObjectId));
+        }
+
+        [HttpPost("duplicates")]
+        [RequiresPermission(Permissions.FileUploadWrite)]
+        public async Task<ActionResult<List<string>>> CheckDuplicateAsync([FromForm] WorkRptUploadDto upload)
         {
             var (Errors, DuplicateRecordNumbers) = await _workRptService.CheckDuplicatesAsync(upload);
 
@@ -47,7 +50,6 @@ namespace Hmcr.Api.Controllers
                 return ValidationUtils.GetValidationErrorResult(Errors, ControllerContext);
             }
 
-            //return Ok(JsonSerializer.Serialize(DuplicateRecordNumbers));
             return Ok(DuplicateRecordNumbers);
         }
     }

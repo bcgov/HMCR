@@ -21,6 +21,7 @@ namespace Hmcr.Data.Repositories.Base
         void Delete(Expression<Func<TEntity, bool>> where);
         TDto GetById<TDto>(long id);
         TDto GetById<TDto>(string id);
+        Task<TDto> GetByIdAsync<TDto>(object id);
         IEnumerable<TDto> GetAll<TDto>();
         IEnumerable<TDto> GetAll<TDto>(Expression<Func<TEntity, bool>> where);
         Task<IEnumerable<TDto>> GetAllAsync<TDto>();
@@ -102,6 +103,10 @@ namespace Hmcr.Data.Repositories.Base
             return Mapper.Map<TDto>(DbSet.Find(id));
         }
 
+        public virtual async Task<TDto> GetByIdAsync<TDto>(object id)
+        {
+            return Mapper.Map<TDto>(await DbSet.FindAsync(id));
+        }
         public virtual IEnumerable<TDto> GetAll<TDto>()
         {
             return Mapper.Map<IEnumerable<TDto>>(DbSet.ToList());

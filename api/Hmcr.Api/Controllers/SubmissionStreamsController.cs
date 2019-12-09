@@ -1,5 +1,6 @@
 ﻿using Hmcr.Api.Authorization;
 using Hmcr.Domain.Services;
+using Hmcr.Model;
 using Hmcr.Model.Dtos.SubmissionStream;
 using Microsoft.AspNetCore.Mvc;
 using System;
@@ -21,6 +22,7 @@ namespace Hmcr.Api.Controllers
             _streamService = streamService;
         }
 
+        [RequiresPermission(Permissions.FileUploadRead)]
         [HttpGet]
         public async Task<ActionResult<IEnumerable<SubmissionStreamDto>>> GetSubmissionStreams([FromQuery]bool? isActive)
         {

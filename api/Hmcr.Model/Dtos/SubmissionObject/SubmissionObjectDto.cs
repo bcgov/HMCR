@@ -14,9 +14,10 @@ namespace Hmcr.Model.Dtos.SubmissionObject
         [JsonPropertyName("id")]
         public decimal SubmissionObjectId { get; set; }
         public string FileName { get; set; }
-        public byte[] DigitalRepresentation { get; set; }
+        //public byte[] DigitalRepresentation { get; set; }
         public decimal MimeTypeId { get; set; }
         public decimal SubmissionStatusId { get; set; }
         public decimal ServiceAreaNumber { get; set; }
+        public decimal SubmissionStreamId { get; set; }
     }
 }
