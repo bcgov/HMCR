@@ -6,5 +6,6 @@ namespace Hmcr.Model.Dtos.WildlifeReport
 {
     public class WildlifeRptInitCsvDto
     {
+        public string ServiceArea { get; set; }
     }
 }

@@ -1,6 +1,7 @@
 ﻿using CsvHelper;
 using CsvHelper.Configuration;
 using CsvHelper.TypeConversion;
+using Hmcr.Model.Utils;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -12,13 +13,13 @@ namespace Hmcr.Domain.CsvHelpers
     {
         public object ConvertFromString(string date, IReaderRow row, MemberMapData memberMapData)
         {
-            if (string.IsNullOrEmpty(date))
+            if (date.IsEmpty())
                 return null;
 
-            if (date.Length == 8)
-                return DateTime.ParseExact(date, "yyyyMMdd", CultureInfo.InvariantCulture);
-            else 
-                return DateTime.ParseExact(date, "yyyy-MM-dd", CultureInfo.InvariantCulture);
+            if (date.Length > 8)
+                date = date.Replace("-", "").Replace(".", "").Replace("/", "");
+
+            return DateTime.ParseExact(date, "yyyyMMdd", CultureInfo.InvariantCulture);
         }
 
         public string ConvertToString(object value, IWriterRow row, MemberMapData memberMapData)
