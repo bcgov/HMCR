@@ -27,7 +27,6 @@ namespace Hmcr.Domain.Services
     public class WorkReportService : IWorkReportService
     {
         private IUnitOfWork _unitOfWork;
-        private HmcrCurrentUser _currentUser;
         private IFieldValidatorService _validator;
         private ISubmissionStreamService _streamService;
         private ISubmissionObjectRepository _submissionRepo;
@@ -35,12 +34,11 @@ namespace Hmcr.Domain.Services
         private IContractTermRepository _contractRepo;
         private ISubmissionStatusRepository _statusRepo;
 
-        public WorkReportService(IUnitOfWork unitOfWork, HmcrCurrentUser currentUser, IFieldValidatorService validator, 
+        public WorkReportService(IUnitOfWork unitOfWork, IFieldValidatorService validator, 
             ISubmissionStreamService streamService, ISubmissionObjectRepository submissionRepo, ISumbissionRowRepository rowRepo, 
             IContractTermRepository contractRepo, ISubmissionStatusRepository statusRepo)
         {
             _unitOfWork = unitOfWork;
-            _currentUser = currentUser;
             _validator = validator;
             _streamService = streamService;
             _submissionRepo = submissionRepo;
@@ -115,13 +113,6 @@ namespace Hmcr.Domain.Services
                 return (errors, submission);
             }
 
-            var serviceArea = _currentUser.UserInfo.ServiceAreas.FirstOrDefault(x => x.ServiceAreaNumber == upload.ServiceAreaNumber);
-            if (serviceArea == null)
-            {
-                errors.AddItem("SerivceArea", $"The user has no access to the service area {upload.ServiceAreaNumber}.");
-                return (errors, submission);
-            }
-
             using var stream = upload.ReportFile.OpenReadStream();
             using var text = new StreamReader(stream, Encoding.UTF8);
             using var csv = new CsvReader(text);
@@ -160,9 +151,9 @@ namespace Hmcr.Domain.Services
                     break;
                 }
 
-                if (row.ServiceArea != serviceArea.ServiceAreaNumber.ToString())
+                if (row.ServiceArea != upload.ServiceAreaNumber.ToString())
                 {
-                    errors.AddItem("ServiceArea", $"The file contains service area which is not {serviceArea.ServiceAreaName} ({serviceArea.ServiceAreaNumber}).");
+                    errors.AddItem("ServiceArea", $"The file contains service area which is not {upload.ServiceAreaNumber}.");
                     return (errors, submission);
                 }
 

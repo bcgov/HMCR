@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Hmcr.Api.Controllers.Base;
 using Hmcr.Domain.Services;
 using Hmcr.Model;
 using Hmcr.Model.Dtos.ServiceArea;
@@ -14,7 +15,7 @@ namespace Hmcr.Api.Controllers
     [ApiVersion("1.0")]
     [Route("api/serviceareas")]
     [ApiController]
-    public class ServiceAreasController : ControllerBase
+    public class ServiceAreasController : HmcrControllerBase
     {
         private IServiceAreaService _svcAreaSvc;
 
@@ -23,7 +24,7 @@ namespace Hmcr.Api.Controllers
             _svcAreaSvc = svcAreaSvc;
         }
 
-        [HttpGet("")]
+        [HttpGet]
         public async Task<ActionResult<IEnumerable<ServiceAreaNumberDto>>> GetAllServiceArea()
         {
             return Ok(await _svcAreaSvc.GetAllServiceAreasAsync());

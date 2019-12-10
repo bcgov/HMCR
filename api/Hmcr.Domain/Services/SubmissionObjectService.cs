@@ -10,6 +10,7 @@ namespace Hmcr.Domain.Services
     public interface ISubmissionObjectService
     {
         Task<SubmissionObjectDto> GetSubmissionObjectAsync(decimal submissionObjectId);
+        Task<IEnumerable<SubmissionObjectSearchDto>> GetSubmissionObjectsAsync(decimal serviceAreaNumber, DateTime dateFrom, DateTime dateTo);
     }
     public class SubmissionObjectService : ISubmissionObjectService
     {
@@ -23,6 +24,11 @@ namespace Hmcr.Domain.Services
         public async Task<SubmissionObjectDto> GetSubmissionObjectAsync(decimal submissionObjectId)
         {
             return await _submissionRepo.GetSubmissionObjectAsync(submissionObjectId);
+        }
+
+        public async Task<IEnumerable<SubmissionObjectSearchDto>> GetSubmissionObjectsAsync(decimal serviceAreaNumber, DateTime dateFrom, DateTime dateTo)
+        {
+            return await _submissionRepo.GetSubmissionObjectsAsync(serviceAreaNumber, dateFrom, dateTo);
         }
     }
 }
