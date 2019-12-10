@@ -17,7 +17,7 @@ namespace Hmcr.Data.Repositories
     {
         IAsyncEnumerable<SubmissionRowDto> FindDuplicateRowsAsync(decimal submissionStreamId, IEnumerable<SubmissionRowDto> rows);
         IAsyncEnumerable<int> FindDuplicateRowsAsync(decimal submissionStreamId, IEnumerable<string> rows);
-        IAsyncEnumerable<string> FindDuplicateRowsToOverwriteAsync(decimal submissionStreamId, IEnumerable<SubmissionRowDto> rows);
+        IAsyncEnumerable<string> FindDuplicateRowsToOverwriteAsync(decimal submissionStreamId, decimal partyId, IEnumerable<SubmissionRowDto> rows);
     }
     public class SubmissionRowRepository : HmcrRepositoryBase<HmrSubmissionRow>, ISumbissionRowRepository
     {
@@ -56,7 +56,7 @@ namespace Hmcr.Data.Repositories
             }
         }
 
-        public async IAsyncEnumerable<string> FindDuplicateRowsToOverwriteAsync(decimal submissionStreamId, IEnumerable<SubmissionRowDto> rows)
+        public async IAsyncEnumerable<string> FindDuplicateRowsToOverwriteAsync(decimal submissionStreamId, decimal partyId, IEnumerable<SubmissionRowDto> rows)
         {
             var duplicate = await _statusRepo.GetStatusIdByTypeAndCode(StatusType.Row, RowStatus.Duplicate);
 
@@ -65,7 +65,7 @@ namespace Hmcr.Data.Repositories
                 var query = await DbSet
                     .Where(x => x.SubmissionObject.SubmissionStreamId == submissionStreamId && x.RecordNumber == row.RecordNumber && x.RowStatusId != duplicate)
                     .SelectMany(x => x.SubmissionObject.ServiceAreaNumberNavigation.HmrContractTerms)
-                    .AnyAsync(x => x.StartDate <= row.EndDate && x.EndDate > row.EndDate);
+                    .AnyAsync(x => x.PartyId == partyId);
                     
                 if (query)
                     yield return row.RecordNumber;

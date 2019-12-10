@@ -58,7 +58,7 @@ namespace Hmcr.Domain.Services
             if (Errors.Count > 0)
                 return (Errors, recordNumbers);
 
-            await foreach (var recordNumber in _rowRepo.FindDuplicateRowsToOverwriteAsync(Submission.SubmissionStreamId, Submission.SubmissionRows))
+            await foreach (var recordNumber in _rowRepo.FindDuplicateRowsToOverwriteAsync(Submission.SubmissionStreamId, Submission.PartyId, Submission.SubmissionRows))
             {
                 recordNumbers.Add(recordNumber);
             }
@@ -188,11 +188,15 @@ namespace Hmcr.Domain.Services
                 return (errors, submission);
             }
 
-            if (! await _contractRepo.HasContractTermAsync(upload.ServiceAreaNumber, submission.SubmissionRows.Max(x => x.EndDate)))
+            var partyId = await _contractRepo.GetContractPartyId(upload.ServiceAreaNumber, submission.SubmissionRows.Max(x => x.EndDate));
+
+            if (partyId == 0)
             {
                 errors.AddItem("EndDate", $"Cannot find the contract term for this file");
                 return (errors, submission);
             }
+
+            submission.PartyId = partyId;
 
             await foreach (var row in _rowRepo.FindDuplicateRowsAsync(submission.SubmissionStreamId, submission.SubmissionRows))
             {

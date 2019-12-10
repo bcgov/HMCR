@@ -11,7 +11,7 @@ namespace Hmcr.Data.Repositories
 {
     public interface IContractTermRepository 
     {
-        Task<bool> HasContractTermAsync(decimal serviceAreaNumber, DateTime date);
+        Task<decimal> GetContractPartyId(decimal serviceAreaNumber, DateTime date);
     }
     public class ContractTermRepository : HmcrRepositoryBase<HmrContractTerm>, IContractTermRepository
     {
@@ -20,9 +20,11 @@ namespace Hmcr.Data.Repositories
         {
         }
 
-        public async Task<bool> HasContractTermAsync(decimal serviceAreaNumber, DateTime date)
+        public async Task<decimal> GetContractPartyId(decimal serviceAreaNumber, DateTime date)
         {
-            return await DbSet.AnyAsync(x => x.ServiceAreaNumber == serviceAreaNumber && x.StartDate <= date && x.EndDate > date);
+            var contract = await DbSet.FirstOrDefaultAsync(x => x.ServiceAreaNumber == serviceAreaNumber && x.StartDate <= date && x.EndDate > date);
+
+            return contract == null ? 0 : contract.PartyId;
         }
     }
 }
