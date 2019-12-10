@@ -1,4 +1,5 @@
 ﻿using Hmcr.Api.Authorization;
+using Hmcr.Api.Controllers.Base;
 using Hmcr.Domain.Services;
 using Hmcr.Model;
 using Hmcr.Model.Dtos.SubmissionStream;
@@ -13,7 +14,7 @@ namespace Hmcr.Api.Controllers
     [ApiVersion("1.0")]
     [Route("api/submissionstreams")]
     [ApiController]
-    public class SubmissionStreamsController : ControllerBase
+    public class SubmissionStreamsController : HmcrControllerBase
     {
         private ISubmissionStreamService _streamService;
 
@@ -22,7 +23,6 @@ namespace Hmcr.Api.Controllers
             _streamService = streamService;
         }
 
-        [RequiresPermission(Permissions.FileUploadRead)]
         [HttpGet]
         public async Task<ActionResult<IEnumerable<SubmissionStreamDto>>> GetSubmissionStreams([FromQuery]bool? isActive)
         {

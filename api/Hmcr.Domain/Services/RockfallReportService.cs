@@ -28,19 +28,17 @@ namespace Hmcr.Domain.Services
     public class RockfallReportService : IRockfallReportService
     {
         private IUnitOfWork _unitOfWork;
-        private HmcrCurrentUser _currentUser;
         private ISubmissionStreamService _streamService;
         private ISubmissionObjectRepository _submissionRepo;
         private ISumbissionRowRepository _rowRepo;
         private IContractTermRepository _contractRepo;
         private ISubmissionStatusRepository _statusRepo;
 
-        public RockfallReportService(IUnitOfWork unitOfWork, HmcrCurrentUser currentUser, 
+        public RockfallReportService(IUnitOfWork unitOfWork, 
             ISubmissionStreamService streamService, ISubmissionObjectRepository submissionRepo, ISumbissionRowRepository rowRepo,
             IContractTermRepository contractRepo, ISubmissionStatusRepository statusRepo)
         {
             _unitOfWork = unitOfWork;
-            _currentUser = currentUser;
             _streamService = streamService;
             _submissionRepo = submissionRepo;
             _rowRepo = rowRepo;
@@ -85,13 +83,6 @@ namespace Hmcr.Domain.Services
             if (!upload.ReportFile.FileName.IsCsvFile())
             {
                 errors.AddItem("FileName", $"The file is not a CSV file.");
-                return (errors, submission);
-            }
-
-            var serviceArea = _currentUser.UserInfo.ServiceAreas.FirstOrDefault(x => x.ServiceAreaNumber == upload.ServiceAreaNumber);
-            if (serviceArea == null)
-            {
-                errors.AddItem("SerivceArea", $"The user has no access to the service area {upload.ServiceAreaNumber}.");
                 return (errors, submission);
             }
 

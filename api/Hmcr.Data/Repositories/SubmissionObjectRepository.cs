@@ -5,6 +5,7 @@ using Hmcr.Model.Dtos.SubmissionObject;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -14,6 +15,7 @@ namespace Hmcr.Data.Repositories
     {
         Task<HmrSubmissionObject> CreateSubmissionObjectAsync(SubmissionObjectCreateDto submission);
         Task<SubmissionObjectDto> GetSubmissionObjectAsync(decimal submissionObjectId);
+        Task<IEnumerable<SubmissionObjectSearchDto>> GetSubmissionObjectsAsync(decimal serviceAreaNumber, DateTime dateFrom, DateTime dateTo);
     }
     public class SubmissionObjectRepository : HmcrRepositoryBase<HmrSubmissionObject>, ISubmissionObjectRepository
     {
@@ -38,6 +40,36 @@ namespace Hmcr.Data.Repositories
         public async Task<SubmissionObjectDto> GetSubmissionObjectAsync(decimal submissionObjectId)
         {
             return await GetByIdAsync<SubmissionObjectDto>(submissionObjectId);
+        }
+
+        public async Task<IEnumerable<SubmissionObjectSearchDto>> GetSubmissionObjectsAsync(decimal serviceAreaNumber, DateTime dateFrom, DateTime dateTo)
+        {
+            var submissions = await DbSet.AsNoTracking()
+                .Include(x => x.SubmissionStatus)
+                .Include(x => x.SubmissionStream)
+                .Where(x => x.ServiceAreaNumber == serviceAreaNumber && x.AppCreateTimestamp >= dateFrom && x.AppCreateTimestamp <= dateTo)
+                .Join(DbContext.HmrSystemUsers, 
+                    x => x.AppCreateUserGuid, 
+                    y => y.UserGuid, 
+                    (x, y) => new SubmissionObjectSearchDto
+                    {
+                        SubmissionObjectId = x.SubmissionObjectId,
+                        AppCreateTimestamp = x.AppCreateTimestamp,
+                        AppCreateUserid = x.AppCreateUserid,
+                        FileName = x.FileName,
+                        FirstName = y.FirstName,
+                        LastName = y.LastName,
+                        SubmissionStreamId = x.SubmissionStreamId,
+                        StreamName = x.SubmissionStream.StreamName,
+                        ServiceAreaNumber = x.ServiceAreaNumber,
+                        SubmissionStatusId = x.SubmissionStatusId,
+                        SubmissionStatusCode = x.SubmissionStatus.StatusCode,
+                        Description = x.SubmissionStatus.Description
+                    })
+                .OrderBy(x => x.AppCreateTimestamp)
+                .ToListAsync();
+
+            return submissions;
         }
     }
 }

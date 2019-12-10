@@ -5,13 +5,14 @@ using System.Reflection;
 using System.Runtime.Versioning;
 using Hmcr.Model;
 using Microsoft.Extensions.Hosting;
+using Hmcr.Api.Controllers.Base;
 
 namespace Hmcr.Api.Controllers
 {
     [ApiVersion("1.0")]
     [Route("api/version")]
     [ApiController]
-    public class VersionController : ControllerBase
+    public class VersionController : HmcrControllerBase
     {
         private const string CommitKey = "OPENSHIFT_BUILD_COMMIT";
 

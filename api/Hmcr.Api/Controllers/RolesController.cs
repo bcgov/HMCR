@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Hmcr.Api.Authorization;
+using Hmcr.Api.Controllers.Base;
 using Hmcr.Domain.Services;
 using Hmcr.Model;
 using Hmcr.Model.Dtos.Role;
@@ -12,7 +13,7 @@ namespace Hmcr.Api.Controllers
     [ApiVersion("1.0")]
     [Route("api/roles")]
     [ApiController]
-    public class RolesController : ControllerBase
+    public class RolesController : HmcrControllerBase
     {
         private IRoleService _roleSvc;
 
@@ -32,7 +33,12 @@ namespace Hmcr.Api.Controllers
         [RequiresPermission(Permissions.RoleRead)]
         public async Task<ActionResult<RoleDto>> GetRoleAsync(decimal id)
         {
-            return await _roleSvc.GetRoleAsync(id);
+            var role = await _roleSvc.GetRoleAsync(id);
+
+            if (role == null)
+                return NotFound();
+
+            return Ok(role);
         }
 
         [HttpPost]

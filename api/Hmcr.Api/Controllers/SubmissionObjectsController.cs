@@ -1,4 +1,5 @@
 ﻿using Hmcr.Api.Authorization;
+using Hmcr.Api.Controllers.Base;
 using Hmcr.Domain.Services;
 using Hmcr.Model;
 using Hmcr.Model.Dtos.SubmissionObject;
@@ -13,13 +14,15 @@ namespace Hmcr.Api.Controllers
     [ApiVersion("1.0")]
     [Route("api/submissionobjects")]
     [ApiController]
-    public class SubmissionObjectsController : ControllerBase
+    public class SubmissionObjectsController : HmcrControllerBase
     {
         private ISubmissionObjectService _submissionService;
+        private HmcrCurrentUser _currentUser;
 
-        public SubmissionObjectsController(ISubmissionObjectService submissionService)
+        public SubmissionObjectsController(ISubmissionObjectService submissionService, HmcrCurrentUser currentUser)
         {
             _submissionService = submissionService;
+            _currentUser = currentUser;
         }
 
         [HttpGet("{id}", Name = "GetSubmissionObject")]
@@ -31,7 +34,26 @@ namespace Hmcr.Api.Controllers
             if (submission == null)
                 return NotFound();
 
-            return submission;
+            var problem = IsServiceAreaAuthorized(_currentUser, submission.ServiceAreaNumber);
+            if (problem != null)
+            {
+                return Unauthorized(problem);
+            }
+
+            return Ok(submission);
+        }
+
+        [HttpGet]
+        [RequiresPermission(Permissions.FileUploadRead)]
+        public async Task<ActionResult<IEnumerable<SubmissionObjectSearchDto>>> GetSubmissionObjectsAsync(decimal serviceAreaNumber, DateTime dateFrom, DateTime dateTo)
+        {
+            var problem = IsServiceAreaAuthorized(_currentUser, serviceAreaNumber);
+            if (problem != null)
+            {
+                return Unauthorized(problem);
+            }
+
+            return Ok(await _submissionService.GetSubmissionObjectsAsync(serviceAreaNumber, dateFrom, dateTo));
         }
     }
 }
