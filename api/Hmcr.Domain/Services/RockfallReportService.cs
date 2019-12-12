@@ -75,16 +75,23 @@ namespace Hmcr.Domain.Services
             }
 
             var submission = new SubmissionObjectCreateDto();
-            submission.FileName = Path.GetFileName(upload.ReportFile.FileName).SanitizeFileName() + ".csv";
             submission.MimeTypeId = 1;
             submission.ServiceAreaNumber = upload.ServiceAreaNumber;
             submission.SubmissionStreamId = reportType.SubmissionStreamId;
+
+            if (upload.ReportFile == null)
+            {
+                errors.AddItem("File", $"The file is null or empty.");
+                return (errors, submission);
+            }
 
             if (!upload.ReportFile.FileName.IsCsvFile())
             {
                 errors.AddItem("FileName", $"The file is not a CSV file.");
                 return (errors, submission);
             }
+
+            submission.FileName = Path.GetFileName(upload.ReportFile.FileName).SanitizeFileName() + ".csv";
 
             using var stream = upload.ReportFile.OpenReadStream();
             using var streamReader = new StreamReader(stream, Encoding.UTF8);
