@@ -78,6 +78,7 @@ namespace Hmcr.Domain.Services
             submission.MimeTypeId = 1;
             submission.ServiceAreaNumber = upload.ServiceAreaNumber;
             submission.SubmissionStreamId = reportType.SubmissionStreamId;
+            submission.FileName = "";
 
             if (upload.ReportFile == null)
             {
