@@ -22,7 +22,7 @@ namespace Hmcr.Domain.Services
     public interface IWorkReportService
     {
         Task<(Dictionary<string, List<string>> Errors, List<string> DuplicateRecordNumbers)> CheckDuplicatesAsync(FileUploadDto upload);
-        Task<(decimal SubmissionObjectId, Dictionary<string, List<string>> Errors)> CreateWorkReportAsync(FileUploadDto upload);
+        Task<(decimal SubmissionObjectId, Dictionary<string, List<string>> Errors)> CreateReportAsync(FileUploadDto upload);
     }
     public class WorkReportService : IWorkReportService
     {
@@ -51,7 +51,7 @@ namespace Hmcr.Domain.Services
             var errors = new Dictionary<string, List<string>>();
             var recordNumbers = new List<string>();
 
-            var (Errors, Submission) = await ValidateAndParseUploadFileAsync(upload);
+            var (Errors, Submission) = await ValidateAndLogReportErrorAsync(upload);
 
             if (Errors.Count > 0)
                 return (Errors, recordNumbers);
@@ -62,19 +62,6 @@ namespace Hmcr.Domain.Services
             }
 
             return (errors, recordNumbers);
-        }
-
-        private static List<string> GetLines(FileUploadDto upload, Stream stream)
-        {
-            using var text = new StreamReader(stream, Encoding.UTF8);
-
-            var lines = new List<string>();
-            while (!text.EndOfStream)
-            {
-                lines.Add(text.ReadLine());
-            }
-
-            return lines;
         }
 
         private bool HasDuplicateRecordNumberInFile(IEnumerable<SubmissionRowDto> rows, Dictionary<string, List<string>> errors)
@@ -109,13 +96,23 @@ namespace Hmcr.Domain.Services
 
             if (!upload.ReportFile.FileName.IsCsvFile())
             {
-                errors.AddItem("FileName", $"The file is not a CSV file.");
+                errors.AddItem("FileName", "The file is not a CSV file.");
                 return (errors, submission);
             }
 
             using var stream = upload.ReportFile.OpenReadStream();
-            using var text = new StreamReader(stream, Encoding.UTF8);
-            using var csv = new CsvReader(text);
+            using var streamReader = new StreamReader(stream, Encoding.UTF8);
+
+            var text = streamReader.ReadToEnd();
+            submission.FileHash = text.GetSha256Hash();
+            if (await _submissionRepo.IsDuplicateFileAsync(submission))
+            {
+                errors.AddItem("File", "Duplicate file exists");
+                return (errors, submission);
+            }
+
+            using var stringReader = new StringReader(text);
+            using var csv = new CsvReader(stringReader);
 
             //file size
             var size = stream.Length;
@@ -194,26 +191,52 @@ namespace Hmcr.Domain.Services
                 row.RowStatusId = await _statusRepo.GetStatusIdByTypeAndCode(StatusType.Row, RowStatus.Duplicate);
             }
 
-            if (errors.Count == 0)
-            {
-                submission.DigitalRepresentation = stream.ToBytes();
-                submission.SubmissionStatusId = await _statusRepo.GetStatusIdByTypeAndCode(StatusType.File, RowStatus.Accepted);
-            }
+            submission.DigitalRepresentation = stream.ToBytes();
+            submission.SubmissionStatusId = await _statusRepo.GetStatusIdByTypeAndCode(StatusType.File, RowStatus.Accepted);
 
             return (errors, submission); 
         }
 
-        public async Task<(decimal SubmissionObjectId, Dictionary<string, List<string>> Errors)> CreateWorkReportAsync(FileUploadDto upload)
+        public async Task<(decimal SubmissionObjectId, Dictionary<string, List<string>> Errors)> CreateReportAsync(FileUploadDto upload)
         {
-            var (Errors, Submission) = await ValidateAndParseUploadFileAsync(upload);
+            var (Errors, Submission) = await ValidateAndLogReportErrorAsync(upload);
 
             if (Errors.Count > 0)
+            {
                 return (0, Errors);
+            }
 
             var submissionEntity = await _submissionRepo.CreateSubmissionObjectAsync(Submission);
             await _unitOfWork.CommitAsync();
 
-            return (submissionEntity.SubmissionObjectId, null);
+            return (submissionEntity.SubmissionObjectId, Errors);
+        }
+
+        public async Task<(Dictionary<string, List<string>> Errors, SubmissionObjectCreateDto Submission)> ValidateAndLogReportErrorAsync(FileUploadDto upload)
+        {
+            var (Errors, Submission) = await ValidateAndParseUploadFileAsync(upload);
+
+            if (Errors.Count > 0)
+            {
+                Submission.ErrorDetail = GetErrorDetail(Errors);
+                Submission.SubmissionRows = new List<SubmissionRowDto>();
+                Submission.SubmissionStatusId = await _statusRepo.GetStatusIdByTypeAndCode(StatusType.File, FileStatus.Error);
+                await _submissionRepo.CreateSubmissionObjectAsync(Submission);
+                await _unitOfWork.CommitAsync();
+            }
+
+            return (Errors, Submission);
+        }
+
+        private string GetErrorDetail(Dictionary<string, List<string>> errors)
+        {
+            var errorDetail = new StringBuilder();
+            foreach (var (error, detail) in errors.SelectMany(error => error.Value.Select(detail => (error, detail))))
+            {
+                errorDetail.AppendLine($"{error.Key}: {detail}");
+            }
+
+            return errorDetail.ToString();
         }
     }
 }

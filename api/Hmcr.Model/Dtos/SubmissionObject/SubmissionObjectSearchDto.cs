@@ -20,5 +20,6 @@ namespace Hmcr.Model.Dtos.SubmissionObject
         public decimal SubmissionStatusId { get; set; }
         public string SubmissionStatusCode { get; set; }
         public string Description { get; set; }
+        public string ErrorDetail { get; set; }
     }
 }

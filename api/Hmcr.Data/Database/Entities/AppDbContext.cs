@@ -65,7 +65,7 @@ namespace Hmcr.Data.Database.Entities
             if (!optionsBuilder.IsConfigured)
             {
 #warning To protect potentially sensitive information in your connection string, you should move it out of source code. See http://go.microsoft.com/fwlink/?LinkId=723263 for guidance on storing connection strings.
-                optionsBuilder.UseSqlServer("Data Source=nc056697;Initial Catalog=HMR_DEV;Integrated Security=True");
+                optionsBuilder.UseSqlServer("Data Source=sqldevtst.th.gov.bc.ca;Initial Catalog=HMR_DEV;Trusted_Connection=True;");
             }
         }
 
@@ -3406,6 +3406,16 @@ Offset from beginning of segment.");
                     .HasColumnName("DIGITAL_REPRESENTATION")
                     .HasColumnType("image")
                     .HasComment("Raw file storage within the database.");
+
+                entity.Property(e => e.ErrorDetail)
+                    .HasColumnName("ERROR_DETAIL")
+                    .HasMaxLength(4000)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.FileHash)
+                    .HasColumnName("FILE_HASH")
+                    .HasMaxLength(256)
+                    .IsUnicode(false);
 
                 entity.Property(e => e.FileName)
                     .IsRequired()

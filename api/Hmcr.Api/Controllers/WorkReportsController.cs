@@ -34,9 +34,9 @@ namespace Hmcr.Api.Controllers
                 return Unauthorized(problem);
             }
 
-            var (SubmissionObjectId, Errors) = await _workRptService.CreateWorkReportAsync(upload);
+            var (SubmissionObjectId, Errors) = await _workRptService.CreateReportAsync(upload);
 
-            if (SubmissionObjectId == 0)
+            if (Errors.Count > 0)
             {
                 return ValidationUtils.GetValidationErrorResult(Errors, ControllerContext);
             }

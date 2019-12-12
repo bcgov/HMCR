@@ -58,6 +58,7 @@ namespace Hmcr.Model
     {
         public const string Accepted = "A";
         public const string Duplicate = "D";
+        public const string Error = "E";
     }
 
     public static class Fields
