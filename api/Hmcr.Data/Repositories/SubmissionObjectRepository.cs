@@ -16,6 +16,7 @@ namespace Hmcr.Data.Repositories
         Task<HmrSubmissionObject> CreateSubmissionObjectAsync(SubmissionObjectCreateDto submission);
         Task<SubmissionObjectDto> GetSubmissionObjectAsync(decimal submissionObjectId);
         Task<IEnumerable<SubmissionObjectSearchDto>> GetSubmissionObjectsAsync(decimal serviceAreaNumber, DateTime dateFrom, DateTime dateTo);
+        Task<bool> IsDuplicateFileAsync(SubmissionObjectCreateDto submission);
     }
     public class SubmissionObjectRepository : HmcrRepositoryBase<HmrSubmissionObject>, ISubmissionObjectRepository
     {
@@ -70,6 +71,12 @@ namespace Hmcr.Data.Repositories
                 .ToListAsync();
 
             return submissions;
+        }
+
+        public async Task<bool> IsDuplicateFileAsync(SubmissionObjectCreateDto submission)
+        {
+            return await DbSet
+                .AnyAsync(x => x.SubmissionStreamId == submission.SubmissionStreamId && x.FileHash == submission.FileHash);
         }
     }
 }

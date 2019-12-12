@@ -34,7 +34,7 @@ namespace Hmcr.Api.Controllers
                 return Unauthorized(problem);
             }
 
-            var (SubmissionObjectId, Errors) = await _rockfallRptSerivce.CreateRockfallReportAsync(upload);
+            var (SubmissionObjectId, Errors) = await _rockfallRptSerivce.CreateReportAsync(upload);
 
             if (SubmissionObjectId == 0)
             {
