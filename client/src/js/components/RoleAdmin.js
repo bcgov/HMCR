@@ -8,6 +8,7 @@ import MaterialCard from './ui/MaterialCard';
 import SingleDropdown from './ui/SingleDropdown';
 import EditRoleForm from './forms/EditRoleForm';
 import DataTableControl from './ui/DataTableControl';
+import SubmitButton from './ui/SubmitButton';
 
 import { setSingleRoleSeachCriteria, searchRoles } from '../actions';
 
@@ -24,6 +25,7 @@ const tableColumns = [
 
 const RoleAdmin = ({ roleStatuses, setSingleRoleSeachCriteria, searchRoles, searchResult }) => {
   const [editRoleForm, setEditRoleForm] = useState({ isOpen: false });
+  const [searching, setSearching] = useState(false);
 
   useEffect(() => {
     searchRoles();
@@ -36,7 +38,8 @@ const RoleAdmin = ({ roleStatuses, setSingleRoleSeachCriteria, searchRoles, sear
 
     setSingleRoleSeachCriteria('isActive', values.isActive === 'ACTIVE');
 
-    searchRoles();
+    setSearching(true);
+    searchRoles().finally(() => setSearching(false));
   };
 
   const onEditClicked = roleId => {
@@ -76,9 +79,9 @@ const RoleAdmin = ({ roleStatuses, setSingleRoleSeachCriteria, searchRoles, sear
                 <Col />
                 <Col>
                   <div className="float-right">
-                    <Button type="submit" color="primary" className="mr-2">
+                    <SubmitButton className="mr-2" disabled={searching} submitting={searching}>
                       Search
-                    </Button>
+                    </SubmitButton>
                     <Button type="reset">Clear</Button>
                   </div>
                 </Col>

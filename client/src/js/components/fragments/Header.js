@@ -4,7 +4,9 @@ import { Link } from 'react-router-dom';
 import { Button, Container, Collapse, Navbar, NavbarToggler, NavbarBrand, Nav, NavItem } from 'reactstrap';
 
 import NavLinkWithMatch from '../ui/NavLinkWithMatch';
+import Authorize from '../fragments/Authorize';
 
+import * as Keycloak from '../../Keycloak';
 import * as Constants from '../../Constants';
 
 const Header = ({ currentUser }) => {
@@ -48,14 +50,32 @@ const Header = ({ currentUser }) => {
         <Container>
           <Collapse isOpen={!collapsed} navbar>
             <Nav className="navbar-nav">
-              <NavLinkWithMatch hideNavbar={hideNavbar} to={Constants.PATHS.ADMIN_ACTIVITIES} text="Activities" />
-              <NavLinkWithMatch hideNavbar={hideNavbar} to={Constants.PATHS.ADMIN_USERS} text="Users" />
-              <NavLinkWithMatch hideNavbar={hideNavbar} to={Constants.PATHS.ADMIN_ROLES} text="Roles and Permissions" />
-              {/* <NavLinkWithMatch hideNavbar={hideNavbar} to={Constants.PATHS.WORK_REPORTING} text="Work Reporting" /> */}
+              {currentUser.userType === Constants.USER_TYPE.INTERNAL && (
+                <React.Fragment>
+                  <Authorize requires={Constants.PERMISSIONS.FILE_R}>
+                    <NavLinkWithMatch hideNavbar={hideNavbar} to={Constants.PATHS.ADMIN_ACTIVITIES} text="Activities" />
+                  </Authorize>
+                  <Authorize requires={Constants.PERMISSIONS.USER_R}>
+                    <NavLinkWithMatch hideNavbar={hideNavbar} to={Constants.PATHS.ADMIN_USERS} text="Users" />
+                  </Authorize>
+                  <Authorize requires={Constants.PERMISSIONS.ROLE_R}>
+                    <NavLinkWithMatch
+                      hideNavbar={hideNavbar}
+                      to={Constants.PATHS.ADMIN_ROLES}
+                      text="Roles and Permissions"
+                    />
+                  </Authorize>
+                </React.Fragment>
+              )}
+              <Authorize requires={Constants.PERMISSIONS.FILE_R}>
+                <NavLinkWithMatch hideNavbar={hideNavbar} to={Constants.PATHS.WORK_REPORTING} text="Work Reporting" />
+              </Authorize>
             </Nav>
             <Nav className="navbar-nav ml-auto">
               <NavItem>
-                <Button color="link">{`${currentUser.username},  Logout`} </Button>
+                <Button color="link" onClick={() => Keycloak.logout()}>
+                  {`${currentUser.username},  Logout`}
+                </Button>
               </NavItem>
             </Nav>
           </Collapse>

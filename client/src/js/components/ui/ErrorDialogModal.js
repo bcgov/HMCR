@@ -1,11 +1,21 @@
 import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
-import { Button, Modal, ModalHeader, ModalBody, ModalFooter } from 'reactstrap';
+import { Alert, Button, Modal, ModalHeader, ModalBody, ModalFooter } from 'reactstrap';
 
 import { hideErrorDialog } from '../../actions';
 
-const ErrorDialogModal = ({ isOpen, message, statusCode, detail, errors, path, method, hideErrorDialog }) => {
+const ErrorDialogModal = ({
+  isOpen,
+  title,
+  message,
+  statusCode,
+  errors,
+  path,
+  method,
+  hideErrorDialog,
+  hidePrimaryButton,
+}) => {
   const [clicked, setClicked] = useState(false);
 
   useEffect(() => {
@@ -22,7 +32,7 @@ const ErrorDialogModal = ({ isOpen, message, statusCode, detail, errors, path, m
   return (
     <div>
       <Modal isOpen={isOpen}>
-        <ModalHeader toggle={hideErrorDialog}>Server Error</ModalHeader>
+        <ModalHeader toggle={hideErrorDialog}>{title ? title : 'Server Error'}</ModalHeader>
         <ModalBody>
           {message && (
             <p>
@@ -37,18 +47,32 @@ const ErrorDialogModal = ({ isOpen, message, statusCode, detail, errors, path, m
               </small>
             </p>
           )}
-          {errors && <p>{Object.keys(errors).map(key => errors[key].map(error => <small>{error}</small>))}</p>}
+          {errors && Object.keys(errors).length > 0 && (
+            <Alert color="danger">
+              <ul>
+                {Object.keys(errors).map(key =>
+                  errors[key].map((error, index) => (
+                    <li key={`${key}_${index}`} style={{ marginLeft: '-32px' }}>
+                      {error}
+                    </li>
+                  ))
+                )}
+              </ul>
+            </Alert>
+          )}
         </ModalBody>
         <ModalFooter>
-          <Button
-            size="sm"
-            color="primary"
-            disabled={clicked}
-            onClick={() => handleOnClick(true)}
-            style={{ minWidth: '50px' }}
-          >
-            Reload
-          </Button>
+          {!hidePrimaryButton && (
+            <Button
+              size="sm"
+              color="primary"
+              disabled={clicked}
+              onClick={() => handleOnClick(true)}
+              style={{ minWidth: '50px' }}
+            >
+              Reload
+            </Button>
+          )}
           <Button size="sm" color="secondary" onClick={() => handleOnClick(false)} disabled={clicked}>
             Close
           </Button>
@@ -60,16 +84,14 @@ const ErrorDialogModal = ({ isOpen, message, statusCode, detail, errors, path, m
 
 ErrorDialogModal.propTypes = {
   isOpen: PropTypes.bool.isRequired,
-  statusCode: PropTypes.number.isRequired,
-  path: PropTypes.string.isRequired,
-  method: PropTypes.string.isRequired,
+  statusCode: PropTypes.number,
+  path: PropTypes.string,
+  method: PropTypes.string,
   hideErrorDialog: PropTypes.func.isRequired,
+  title: PropTypes.string,
   message: PropTypes.string,
-  detail: PropTypes.string,
   errors: PropTypes.object,
+  hidePrimaryButton: PropTypes.bool,
 };
 
-export default connect(
-  null,
-  { hideErrorDialog }
-)(ErrorDialogModal);
+export default connect(null, { hideErrorDialog })(ErrorDialogModal);

@@ -1,13 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import { connect } from 'react-redux';
 
-import Spinner from './ui/Spinner';
+import PageSpinner from './ui/PageSpinner';
 import ErrorDialogModal from './ui/ErrorDialogModal';
 
 import { fetchCurrentUser, fetchServiceAreas, fetchUserStatuses, fetchUserTypes } from '../actions';
+import { ErrorDialogContext } from '../contexts';
 
 const Main = ({ errorDialog, children, fetchCurrentUser, fetchServiceAreas, fetchUserStatuses, fetchUserTypes }) => {
   const [loading, setLoading] = useState(true);
+
+  const showLocalErrorDialog = error => {};
 
   useEffect(() => {
     Promise.all([fetchServiceAreas(), fetchCurrentUser(), fetchUserStatuses(), fetchUserTypes()]).then(() =>
@@ -17,10 +20,10 @@ const Main = ({ errorDialog, children, fetchCurrentUser, fetchServiceAreas, fetc
   }, []);
 
   return (
-    <React.Fragment>
-      {loading ? <Spinner /> : children}
+    <ErrorDialogContext.Provider value={showLocalErrorDialog}>
+      {loading ? <PageSpinner /> : children}
       {errorDialog.show && <ErrorDialogModal isOpen={errorDialog.show} {...errorDialog} />}
-    </React.Fragment>
+    </ErrorDialogContext.Provider>
   );
 };
 
@@ -30,7 +33,6 @@ const mapStateToProps = state => {
   };
 };
 
-export default connect(
-  mapStateToProps,
-  { fetchCurrentUser, fetchServiceAreas, fetchUserStatuses, fetchUserTypes }
-)(Main);
+export default connect(mapStateToProps, { fetchCurrentUser, fetchServiceAreas, fetchUserStatuses, fetchUserTypes })(
+  Main
+);

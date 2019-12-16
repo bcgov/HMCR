@@ -71,9 +71,8 @@ module.exports = class KeyCloakClient {
 
     const data = { ...response.data };
     const redirectUris = data.redirectUris;
-    const webOrigins = data.webOrigins;
 
-    return { data, redirectUris, webOrigins };
+    return { data, redirectUris };
   }
 
   async addUris() {   
@@ -81,25 +80,19 @@ module.exports = class KeyCloakClient {
 
     console.log("Attempting to add RedirectUri and WebOrigins");
 
-    const { data, redirectUris, webOrigins } = await this.getUris();
+    const { data, redirectUris} = await this.getUris();
     const putData = { id: data.id, clientId: data.clientId };
 
     const hasRedirectUris = redirectUris.find(item =>
       item.includes(this.hmcrHost)
     );
-    const hasWebOrigins = webOrigins.find(item => item.includes(this.hmcrHost));
 
     if (!hasRedirectUris) {
       redirectUris.push(`https://${this.hmcrHost}/*`);
       putData.redirectUris = redirectUris;
     }
 
-    if (!hasWebOrigins) {
-      webOrigins.push(`https://${this.hmcrHost}`);
-      putData.webOrigins = webOrigins;
-    }
-
-    if (!(hasRedirectUris && hasWebOrigins)) {
+    if (!(hasRedirectUris)) {
       this.api
         .put(this.hmcrPublicClientPath, putData)
         .then(() => console.log("RedirectUri and WebOrigins added."));
@@ -113,13 +106,12 @@ module.exports = class KeyCloakClient {
     
     console.log("Attempting to remove RedirectUri and WebOrigins");
     
-    const { data, redirectUris, webOrigins } = await this.getUris();
+    const { data, redirectUris } = await this.getUris();
     const putData = { id: data.id, clientId: data.clientId };
 
     const hasRedirectUris = redirectUris.find(item =>
       item.includes(this.hmcrHost)
     );
-    const hasWebOrigins = webOrigins.find(item => item.includes(this.hmcrHost));
 
     if (hasRedirectUris) {
       putData.redirectUris = redirectUris.filter(
@@ -127,13 +119,7 @@ module.exports = class KeyCloakClient {
       );
     }
 
-    if (hasWebOrigins) {
-      putData.webOrigins = webOrigins.filter(
-        item => !item.includes(this.hmcrHost)
-      );
-    }
-
-    if (hasRedirectUris || hasWebOrigins) {
+    if (hasRedirectUris) {
       this.api
         .put(this.hmcrPublicClientPath, putData)
         .then(() => console.log("RedirectUri and WebOrigins removed."));
