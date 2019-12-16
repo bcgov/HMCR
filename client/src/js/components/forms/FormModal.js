@@ -2,6 +2,8 @@ import React from 'react';
 import { Button, Modal, ModalHeader, ModalBody, ModalFooter } from 'reactstrap';
 import { Formik, Form } from 'formik';
 
+import SubmitButton from '../ui/SubmitButton';
+
 const FormModal = ({ toggle, isOpen, children, title, submitting, initialValues, validationSchema, onSubmit }) => {
   return (
     <Modal isOpen={isOpen} toggle={toggle} backdrop="static">
@@ -16,9 +18,9 @@ const FormModal = ({ toggle, isOpen, children, title, submitting, initialValues,
           <Form>
             <ModalBody>{children}</ModalBody>
             <ModalFooter>
-              <Button color="primary" size="sm" type="submit" disabled={submitting || !dirty}>
+              <SubmitButton size="sm" submitting={submitting} disabled={submitting || !dirty}>
                 Submit
-              </Button>
+              </SubmitButton>
               <Button color="secondary" size="sm" onClick={toggle}>
                 Cancel
               </Button>

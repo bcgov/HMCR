@@ -16,7 +16,9 @@ instance.interceptors.response.use(
     return response;
   },
   error => {
-    store.dispatch({ type: SHOW_ERROR_DIALOG_MODAL, payload: buildApiErrorObject(error.response) });
+    if (!error.response || error.response.status !== 422)
+      store.dispatch({ type: SHOW_ERROR_DIALOG_MODAL, payload: buildApiErrorObject(error.response) });
+
     return Promise.reject(error);
   }
 );

@@ -8,6 +8,8 @@ import {
   SEARCH_USERS,
 } from '../actions/types';
 
+import * as Constants from '../Constants';
+
 const defaultState = {
   types: {},
   statuses: {},
@@ -17,8 +19,8 @@ const defaultState = {
     serviceAreas: null,
     userTypes: null,
     searchText: null,
-    isActive: null,
-    pageSize: 25,
+    isActive: true,
+    pageSize: Constants.DEFAULT_PAGE_SIZE,
     pageNumber: 1,
     orderBy: null,
   },

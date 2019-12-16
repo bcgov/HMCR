@@ -10,6 +10,9 @@ export const API_PATHS = {
   USER_CURRENT: '/users/current',
   USER_TYPES: '/users/usertypes',
   USER_STATUSES: '/users/userstatus',
+  ROCKFALL_REPORT: '/rockfallreports',
+  WILDLIFE_REPORT: '/wildlifereports',
+  WORK_REPORT: '/workreports',
   VERSION: '/version',
 };
 
@@ -40,3 +43,23 @@ export const PERMISSIONS = {
 };
 
 export const USER_TYPE = { INTERNAL: 'INTERNAL', BUSINESS: 'BUSINESS' };
+
+export const UPLOAD_STATE = {
+  DUP_CHECK: 'DUP_CHECK',
+  SAVING: 'SAVING',
+  ERROR: 'ERROR',
+  COMPLETE: 'COMPLETE',
+};
+
+export const UPLOAD_STATE_STATUS = {
+  START: 'START',
+  COMPLETE: 'COMPLETE',
+  ERROR: 'ERROR',
+  WARNING: 'WARNING',
+};
+
+export const DEFAULT_PAGE_SIZE_OPTIONS = process.env.REACT_APP_DEFAULT_PAGE_SIZE_OPTIONS.split(',').map(o =>
+  parseInt(o)
+);
+
+export const DEFAULT_PAGE_SIZE = parseInt(process.env.REACT_APP_DEFAULT_PAGE_SIZE);

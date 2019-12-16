@@ -5,7 +5,7 @@ import moment from 'moment';
 
 import MultiSelect from '../ui/MultiSelect';
 import SingleDateField from '../ui/SingleDateField';
-import Spinner from '../ui/Spinner';
+import PageSpinner from '../ui/PageSpinner';
 import { FormRow, FormInput } from './FormInputs';
 import FormModal from './FormModal';
 
@@ -107,7 +107,7 @@ const EditRoleForm = ({ toggle, isOpen, formType, roleId }) => {
       onSubmit={handleFormSubmit}
       submitting={submitting}
     >
-      {loading ? <Spinner /> : <EditRoleFormFields permissionIds={permissionIds} />}
+      {loading ? <PageSpinner /> : <EditRoleFormFields permissionIds={permissionIds} />}
     </FormModal>
   );
 };

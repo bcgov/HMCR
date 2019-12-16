@@ -8,12 +8,13 @@ import MaterialCard from './ui/MaterialCard';
 import MultiDropdown from './ui/MultiDropdown';
 import EditUserForm from './forms/EditUserForm';
 import DataTableWithPaginaionControl from './ui/DataTableWithPaginaionControl';
+import SubmitButton from './ui/SubmitButton';
 
 import { setSingleUserSeachCriteria, searchUsers, deleteUser } from '../actions';
 
 import * as Constants from '../Constants';
 
-const defaultSearchFormValues = { serviceAreaIds: [], userTypeIds: [], searchText: '', userStatusIds: [] };
+const defaultSearchFormValues = { serviceAreaIds: [], userTypeIds: [], searchText: '', userStatusIds: ['ACTIVE'] };
 const tableColumns = [
   { heading: 'ID Type', key: 'userType' },
   { heading: 'First Name', key: 'firstName' },
@@ -35,6 +36,7 @@ const UserAdmin = ({
   deleteUser,
 }) => {
   const [editUserForm, setEditUserForm] = useState({ isOpen: false });
+  const [searching, setSearching] = useState(false);
 
   useEffect(() => {
     searchUsers();
@@ -57,7 +59,8 @@ const UserAdmin = ({
     }
     setSingleUserSeachCriteria('isActive', isActive);
 
-    searchUsers();
+    setSearching(true);
+    searchUsers().finally(() => setSearching(false));
   };
 
   const onEditClicked = userId => {
@@ -119,9 +122,9 @@ const UserAdmin = ({
                 </Col>
                 <Col>
                   <div className="float-right">
-                    <Button type="submit" color="primary" className="mr-2">
+                    <SubmitButton className="mr-2" disabled={searching} submitting={searching}>
                       Search
-                    </Button>
+                    </SubmitButton>
                     <Button type="reset">Clear</Button>
                   </div>
                 </Col>

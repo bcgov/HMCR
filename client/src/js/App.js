@@ -14,7 +14,7 @@ import ActivityAdmin from './components/ActivityAdmin';
 import UserAdmin from './components/UserAdmin';
 import RoleAdmin from './components/RoleAdmin';
 import WorkReporting from './components/WorkReporting';
-import WorkReportingSubmission from './components/WorkReportingSubmission';
+import WorkReportingHistory from './components/WorkReportingHistory';
 // import Home from './components/Home';
 
 import addIconsToLibrary from './fontAwesome';
@@ -73,7 +73,7 @@ const WorkReportingRoutes = () => {
         <Redirect to={Constants.PATHS.WORK_REPORTING} />
       </Route>
       <Route path={Constants.PATHS.WORK_REPORTING} exact component={WorkReporting} />
-      <Route path={`${Constants.PATHS.WORK_REPORTING}/:submissionId`} component={WorkReportingSubmission} />
+      <Route path={`${Constants.PATHS.WORK_REPORTING}/:submissionId`} component={WorkReportingHistory} />
       <Route path={Constants.PATHS.UNAUTHORIZED} exact component={Unauthorized} />
       <Route path="*" component={NoMatch} />
     </Switch>

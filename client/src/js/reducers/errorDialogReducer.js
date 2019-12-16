@@ -2,12 +2,14 @@ import { SHOW_ERROR_DIALOG_MODAL, HIDE_ERROR_DIALOG_MODAL } from '../actions/typ
 
 const defaultState = {
   show: false,
+  title: undefined,
   message: undefined,
   statusCode: undefined,
   detail: undefined,
   errors: undefined,
   path: undefined,
   method: undefined,
+  hidePrimaryButton: false,
 };
 
 export default (state = defaultState, action) => {

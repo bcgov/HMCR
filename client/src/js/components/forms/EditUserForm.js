@@ -6,7 +6,7 @@ import moment from 'moment';
 import MultiSelect from '../ui/MultiSelect';
 import SingleDropdown from '../ui/SingleDropdown';
 import SingleDateField from '../ui/SingleDateField';
-import Spinner from '../ui/Spinner';
+import PageSpinner from '../ui/PageSpinner';
 import { FormRow, FormInput } from './FormInputs';
 import FormModal from './FormModal';
 
@@ -146,7 +146,7 @@ const EditUserForm = ({ toggle, isOpen, userTypes, serviceAreas, createUser, edi
       submitting={submitting}
     >
       {loading ? (
-        <Spinner />
+        <PageSpinner />
       ) : (
         <EditUserFormFields userTypes={userTypes} roles={roles} serviceAreas={serviceAreas} disableEdit={disableEdit} />
       )}
