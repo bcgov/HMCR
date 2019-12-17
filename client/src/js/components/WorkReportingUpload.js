@@ -3,8 +3,8 @@ import { connect } from 'react-redux';
 import { Col, FormGroup, FormFeedback, Label, CustomInput, Spinner, Alert, Button } from 'reactstrap';
 import { Formik, Form } from 'formik';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import _ from 'lodash';
 
-import MaterialCard from './ui/MaterialCard';
 import SingleDropdown from './ui/SingleDropdown';
 import { FormRow } from './forms/FormInputs';
 import SubmitButton from './ui/SubmitButton';
@@ -123,7 +123,7 @@ const WorkReportingUpload = ({ currentUser, showValidationErrorDialog, ...props 
                     <li key={index}>{duplicate}</li>
                   ))}
                 </ul>
-                <p>Would you like to overwrite the existing database values.</p>
+                <p>Would you like to overwrite the existing database values?</p>
                 <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
                   <Button
                     color="danger"
@@ -165,11 +165,7 @@ const WorkReportingUpload = ({ currentUser, showValidationErrorDialog, ...props 
         setDupCheckStatus(
           updateUploadStatusMessage(Constants.UPLOAD_STATE.DUP_CHECK, Constants.UPLOAD_STATE_STATUS.ERROR)
         );
-        const errors = [];
-        Object.keys(error.response.data.errors).forEach(key =>
-          error.response.data.errors[key].forEach(message => errors.push(message))
-        );
-        setErrorMessages(errors);
+        setErrorMessages(Object.values(error.response.data.errors));
         resetCallback();
       });
   };
@@ -187,11 +183,7 @@ const WorkReportingUpload = ({ currentUser, showValidationErrorDialog, ...props 
       })
       .catch(error => {
         setSavingStatus(updateUploadStatusMessage(Constants.UPLOAD_STATE.SAVING, Constants.UPLOAD_STATE_STATUS.ERROR));
-        const errors = [];
-        Object.keys(error.response.data.errors).forEach(key =>
-          error.response.data.errors[key].forEach(message => errors.push(message))
-        );
-        setErrorMessages(errors);
+        setErrorMessages(Object.values(error.response.data.errors));
       })
       .finally(() => {
         resetCallback();
@@ -214,14 +206,14 @@ const WorkReportingUpload = ({ currentUser, showValidationErrorDialog, ...props 
   };
 
   return (
-    <MaterialCard>
+    <React.Fragment>
       <Formik enableReinitialize={true} initialValues={defaultFormValues}>
         {({ values, errors, setFieldValue, setFieldError }) => (
           <Form>
             <FormRow name="serviceAreaId" label="Service Area">
               <SingleDropdown
                 defaultTitle="Select Servcie Area"
-                items={currentUser.serviceAreas}
+                items={_.orderBy(currentUser.serviceAreas, ['id'])}
                 name="serviceAreaId"
               />
             </FormRow>
@@ -311,7 +303,7 @@ const WorkReportingUpload = ({ currentUser, showValidationErrorDialog, ...props 
           </Alert>
         )}
       </SimpleModalWrapper>
-    </MaterialCard>
+    </React.Fragment>
   );
 };
 

@@ -107,6 +107,13 @@ const AdminRoutes = () => {
       >
         <Route path={Constants.PATHS.ADMIN_ROLES} exact component={RoleAdmin} />
       </AuthorizedRoute>
+      <AuthorizedRoute
+        path={Constants.PATHS.WORK_REPORTING}
+        requires={Constants.PERMISSIONS.FILE_R}
+        userType={Constants.USER_TYPE.INTERNAL}
+      >
+        <Route path={Constants.PATHS.WORK_REPORTING} exact component={WorkReporting} />
+      </AuthorizedRoute>
       <Route path={Constants.PATHS.UNAUTHORIZED} exact component={Unauthorized} />
       <Route path="*" component={NoMatch} />
     </Switch>

@@ -9,7 +9,7 @@ import PageSpinner from '../ui/PageSpinner';
 import { FormRow, FormInput } from './FormInputs';
 import FormModal from './FormModal';
 
-import {} from '../../actions';
+import { showValidationErrorDialog } from '../../actions';
 
 import * as api from '../../Api';
 import * as Constants from '../../Constants';
@@ -52,7 +52,7 @@ const EditRoleFormFields = ({ permissionIds, disableEdit }) => {
   );
 };
 
-const EditRoleForm = ({ toggle, isOpen, formType, roleId }) => {
+const EditRoleForm = ({ toggle, isOpen, formType, roleId, showValidationErrorDialog }) => {
   // This is needed until Formik fixes its own setSubmitting function
   const [submitting, setSubmitting] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -82,15 +82,25 @@ const EditRoleForm = ({ toggle, isOpen, formType, roleId }) => {
       setSubmitting(true);
 
       if (formType === Constants.FORM_TYPE.ADD) {
-        api.postRole(values).then(() => {
-          setSubmitting(false);
-          toggle(true);
-        });
+        api
+          .postRole(values)
+          .then(() => {
+            toggle(true);
+          })
+          .catch(error => {
+            showValidationErrorDialog(error.response.data.errors);
+            setSubmitting(false);
+          });
       } else {
-        api.putRole(roleId, values).then(() => {
-          setSubmitting(false);
-          toggle(true);
-        });
+        api
+          .putRole(roleId, values)
+          .then(() => {
+            toggle(true);
+          })
+          .catch(error => {
+            showValidationErrorDialog(error.response.data.errors);
+            setSubmitting(false);
+          });
       }
     }
   };
@@ -112,8 +122,4 @@ const EditRoleForm = ({ toggle, isOpen, formType, roleId }) => {
   );
 };
 
-const mapStateToProps = state => {
-  return {};
-};
-
-export default connect(mapStateToProps, {})(EditRoleForm);
+export default connect(null, { showValidationErrorDialog })(EditRoleForm);

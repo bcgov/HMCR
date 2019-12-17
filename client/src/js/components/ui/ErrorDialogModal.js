@@ -50,13 +50,11 @@ const ErrorDialogModal = ({
           {errors && Object.keys(errors).length > 0 && (
             <Alert color="danger">
               <ul>
-                {Object.keys(errors).map(key =>
-                  errors[key].map((error, index) => (
-                    <li key={`${key}_${index}`} style={{ marginLeft: '-32px' }}>
-                      {error}
-                    </li>
-                  ))
-                )}
+                {Object.values(errors).map((error, index) => (
+                  <li key={index} style={{ marginLeft: '-32px' }}>
+                    {error}
+                  </li>
+                ))}
               </ul>
             </Alert>
           )}
