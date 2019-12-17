@@ -35,7 +35,7 @@ namespace Hmcr.Api.Controllers
 
             var (SubmissionObjectId, Errors) = await _wildlifeRptService.CreateReportAsync(upload);
 
-            if (SubmissionObjectId == 0)
+            if (Errors.Count > 0)
             {
                 return ValidationUtils.GetValidationErrorResult(Errors, ControllerContext);
             }
