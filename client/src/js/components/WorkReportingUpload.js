@@ -3,6 +3,7 @@ import { connect } from 'react-redux';
 import { Col, FormGroup, FormFeedback, Label, CustomInput, Spinner, Alert, Button } from 'reactstrap';
 import { Formik, Form } from 'formik';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import _ from 'lodash';
 
 import MaterialCard from './ui/MaterialCard';
 import SingleDropdown from './ui/SingleDropdown';
@@ -221,7 +222,7 @@ const WorkReportingUpload = ({ currentUser, showValidationErrorDialog, ...props 
             <FormRow name="serviceAreaId" label="Service Area">
               <SingleDropdown
                 defaultTitle="Select Servcie Area"
-                items={currentUser.serviceAreas}
+                items={_.orderBy(currentUser.serviceAreas, ['id'])}
                 name="serviceAreaId"
               />
             </FormRow>
