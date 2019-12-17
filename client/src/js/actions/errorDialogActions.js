@@ -5,7 +5,7 @@ export const showValidationErrorDialog = errors => {
     type: SHOW_ERROR_DIALOG_MODAL,
     payload: {
       title: 'Validation Failed',
-      message: 'The uploaded file has failed initial validations.  Please see below for details.',
+      message: 'The server has failed to validate the submitted data.  Please see below for details.',
       errors,
       hidePrimaryButton: true,
     },

@@ -10,7 +10,7 @@ import PageSpinner from '../ui/PageSpinner';
 import { FormRow, FormInput } from './FormInputs';
 import FormModal from './FormModal';
 
-import { createUser, editUser } from '../../actions';
+import { createUser, editUser, showValidationErrorDialog } from '../../actions';
 
 import * as api from '../../Api';
 import * as Constants from '../../Constants';
@@ -86,7 +86,17 @@ const EditUserFormFields = ({ userTypes, roles, serviceAreas, disableEdit }) => 
   );
 };
 
-const EditUserForm = ({ toggle, isOpen, userTypes, serviceAreas, createUser, editUser, formType, userId }) => {
+const EditUserForm = ({
+  toggle,
+  isOpen,
+  userTypes,
+  serviceAreas,
+  createUser,
+  editUser,
+  formType,
+  userId,
+  showValidationErrorDialog,
+}) => {
   // This is needed until Formik fixes its own setSubmitting function
   const [submitting, setSubmitting] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -120,15 +130,23 @@ const EditUserForm = ({ toggle, isOpen, userTypes, serviceAreas, createUser, edi
       setSubmitting(true);
 
       if (formType === Constants.FORM_TYPE.ADD) {
-        createUser(values).then(() => {
-          setSubmitting(false);
-          toggle(true);
-        });
+        createUser(values)
+          .then(() => {
+            toggle(true);
+          })
+          .catch(error => {
+            showValidationErrorDialog(error.response.data.errors);
+            setSubmitting(false);
+          });
       } else {
-        editUser(userId, values).then(() => {
-          setSubmitting(false);
-          toggle(true);
-        });
+        editUser(userId, values)
+          .then(() => {
+            toggle(true);
+          })
+          .catch(error => {
+            showValidationErrorDialog(error.response.data.errors);
+            setSubmitting(false);
+          });
       }
     }
   };
@@ -161,4 +179,4 @@ const mapStateToProps = state => {
   };
 };
 
-export default connect(mapStateToProps, { createUser, editUser })(EditUserForm);
+export default connect(mapStateToProps, { createUser, editUser, showValidationErrorDialog })(EditUserForm);

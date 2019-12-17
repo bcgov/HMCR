@@ -16,7 +16,7 @@ import * as Constants from '../Constants';
 
 const defaultSearchFormValues = { serviceAreaIds: [], userTypeIds: [], searchText: '', userStatusIds: ['ACTIVE'] };
 const tableColumns = [
-  { heading: 'ID Type', key: 'userType' },
+  { heading: 'User Type', key: 'userType' },
   { heading: 'First Name', key: 'firstName' },
   { heading: 'Last Name', key: 'lastName' },
   { heading: 'User ID', key: 'username' },
@@ -108,14 +108,18 @@ const UserAdmin = ({
             <Form>
               <Row form>
                 <Col>
+                  <Field
+                    type="text"
+                    name="searchText"
+                    placeholder="User Id/Name/Organization"
+                    className="form-control"
+                  />
+                </Col>
+                <Col>
                   <MultiDropdown {...formikProps} items={serviceAreas} name="serviceAreaIds" title="Service Area" />
                 </Col>
-
                 <Col>
                   <MultiDropdown {...formikProps} items={userTypes} name="userTypeIds" title="User Type" />
-                </Col>
-                <Col>
-                  <Field type="text" name="searchText" placeholder="User Id/Name" className="form-control" />
                 </Col>
                 <Col>
                   <MultiDropdown {...formikProps} items={userStatuses} name="userStatusIds" title="User Status" />
