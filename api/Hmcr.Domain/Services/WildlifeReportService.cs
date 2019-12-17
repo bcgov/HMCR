@@ -3,6 +3,7 @@ using CsvHelper.Configuration;
 using Hmcr.Data.Database;
 using Hmcr.Data.Repositories;
 using Hmcr.Domain.CsvHelpers;
+using Hmcr.Domain.Services.Base;
 using Hmcr.Model;
 using Hmcr.Model.Dtos.SubmissionObject;
 using Hmcr.Model.Dtos.SubmissionRow;
@@ -23,89 +24,23 @@ namespace Hmcr.Domain.Services
     {
         Task<(decimal SubmissionObjectId, Dictionary<string, List<string>> Errors)> CreateReportAsync(FileUploadDto upload);
     }
-    public class WildlifeReportService : IWildlifeReportService
+    public class WildlifeReportService : ReportServiceBase, IWildlifeReportService
     {
-        private IUnitOfWork _unitOfWork;
-        private ISubmissionStreamService _streamService;
-        private ISubmissionObjectRepository _submissionRepo;
-        private IContractTermRepository _contractRepo;
-        private ISubmissionStatusRepository _statusRepo;
-
         public WildlifeReportService(IUnitOfWork unitOfWork,
-            ISubmissionStreamService streamService, ISubmissionObjectRepository submissionRepo, 
+            ISubmissionStreamService streamService, ISubmissionObjectRepository submissionRepo, ISumbissionRowRepository rowRepo,
             IContractTermRepository contractRepo, ISubmissionStatusRepository statusRepo)
+            : base(unitOfWork, streamService, submissionRepo, rowRepo, contractRepo, statusRepo)
         {
-            _unitOfWork = unitOfWork;
-            _streamService = streamService;
-            _submissionRepo = submissionRepo;
-            _contractRepo = contractRepo;
-            _statusRepo = statusRepo;
+            TableName = TableNames.WildlifeReport;
+            CheckDuplicate = false;
         }
-
-        private async Task<(Dictionary<string, List<string>> Errors, SubmissionObjectCreateDto Submission)> ValidateAndParseUploadFileAsync(FileUploadDto upload)
+        protected override async Task<bool> ParseRowsAsync(SubmissionObjectCreateDto submission, string text, Dictionary<string, List<string>> errors)
         {
-            var errors = new Dictionary<string, List<string>>();
-
-            var reportType = await _streamService.GetSubmissionStreamByTableNameAsync(TableNames.WildlifeReport);
-            if (reportType == null)
-            {
-                throw new Exception($"The submission stream for {TableNames.WildlifeReport} is not defined.");
-            }
-
-            var submission = new SubmissionObjectCreateDto();
-            submission.MimeTypeId = 1;
-            submission.ServiceAreaNumber = upload.ServiceAreaNumber;
-            submission.SubmissionStreamId = reportType.SubmissionStreamId;
-            submission.FileName = "";
-
-            if (upload.ReportFile == null)
-            {
-                errors.AddItem("File", $"The file is null or empty.");
-                return (errors, submission);
-            }
-
-            if (!upload.ReportFile.FileName.IsCsvFile())
-            {
-                errors.AddItem("FileName", $"The file is not a CSV file.");
-                return (errors, submission);
-            }
-
-            submission.FileName = Path.GetFileName(upload.ReportFile.FileName).SanitizeFileName() + ".csv";
-
-            using var stream = upload.ReportFile.OpenReadStream();
-            using var streamReader = new StreamReader(stream, Encoding.UTF8);
-
-            var text = streamReader.ReadToEnd();
-            submission.FileHash = text.GetSha256Hash();
-            if (await _submissionRepo.IsDuplicateFileAsync(submission))
-            {
-                errors.AddItem("File", "Duplicate file exists");
-                return (errors, submission);
-            }
-
             using var stringReader = new StringReader(text);
             using var csv = new CsvReader(stringReader);
 
-            //file size
-            var size = stream.Length;
-            var maxSize = reportType.FileSizeLimit ?? Constants.MaxFileSize;
-            if (size > maxSize)
-            {
-                errors.AddItem("FileSize", $"The file size exceeds the maximum size {maxSize / 1024 / 1024}MB.");
-                return (errors, submission);
-            }
-
-            csv.Configuration.PrepareHeaderForMatch = (string header, int index) => Regex.Replace(header.ToLower(), @"\s", string.Empty);
-            csv.Configuration.CultureInfo = CultureInfo.GetCultureInfo("en-CA");
+            ConfigCsvHelper(errors, csv);
             csv.Configuration.RegisterClassMap<WildlifeRptInitCsvDtoMap>();
-
-            csv.Configuration.TrimOptions = TrimOptions.Trim;
-            csv.Configuration.HeaderValidated = (bool valid, string[] column, int row, ReadingContext context) =>
-            {
-                if (valid) return;
-
-                errors.AddItem($"{column[0]}", $"The header [{column[0].WordToWords()}] is missing.");
-            };
 
             while (csv.Read())
             {
@@ -115,9 +50,15 @@ namespace Hmcr.Domain.Services
                 {
                     row = csv.GetRecord<WildlifeRptInitCsvDto>();
                 }
-                catch (CsvHelperException ex)
+                catch (CsvHelperException)
                 {
                     break;
+                }
+
+                if (row.ServiceArea != submission.ServiceAreaNumber.ToString())
+                {
+                    errors.AddItem("ServiceArea", $"The file contains service area which is not {submission.ServiceAreaNumber}.");
+                    return false;
                 }
 
                 var line = csv.Context.RawRecord.RemoveLineBreak();
@@ -127,73 +68,12 @@ namespace Hmcr.Domain.Services
                     RecordNumber = "",
                     RowValue = line,
                     RowHash = line.GetSha256Hash(),
-                    RowStatusId = await _statusRepo.GetStatusIdByTypeAndCode(StatusType.Row, RowStatus.Accepted),
+                    RowStatusId = await _statusRepo.GetStatusIdByTypeAndCodeAsync(StatusType.Row, RowStatus.Accepted),
                     EndDate = DateTime.Today
-                }); ;
+                });
             }
 
-            if (errors.Count > 0)
-            {
-                return (errors, submission);
-            }
-
-            var partyId = await _contractRepo.GetContractPartyId(upload.ServiceAreaNumber, submission.SubmissionRows.Max(x => x.EndDate));
-
-            if (partyId == 0)
-            {
-                errors.AddItem("EndDate", $"Cannot find the contract term for this file");
-                return (errors, submission);
-            }
-
-            submission.PartyId = partyId;
-
-            submission.DigitalRepresentation = stream.ToBytes();
-            submission.SubmissionStatusId = await _statusRepo.GetStatusIdByTypeAndCode(StatusType.File, RowStatus.Accepted);
-
-            return (errors, submission);
-        }
-
-        public async Task<(decimal SubmissionObjectId, Dictionary<string, List<string>> Errors)> CreateReportAsync(FileUploadDto upload)
-        {
-            var (Errors, Submission) = await ValidateAndLogReportErrorAsync(upload);
-
-            if (Errors.Count > 0)
-            {
-                Submission.ErrorDetail = GetErrorDetail(Errors);
-                Submission.SubmissionRows = new List<SubmissionRowDto>();
-            }
-
-            var submissionEntity = await _submissionRepo.CreateSubmissionObjectAsync(Submission);
-            await _unitOfWork.CommitAsync();
-
-            return (submissionEntity.SubmissionObjectId, Errors);
-        }
-
-        public async Task<(Dictionary<string, List<string>> Errors, SubmissionObjectCreateDto Submission)> ValidateAndLogReportErrorAsync(FileUploadDto upload)
-        {
-            var (Errors, Submission) = await ValidateAndParseUploadFileAsync(upload);
-
-            if (Errors.Count > 0)
-            {
-                Submission.ErrorDetail = GetErrorDetail(Errors);
-                Submission.SubmissionRows = new List<SubmissionRowDto>();
-                Submission.SubmissionStatusId = await _statusRepo.GetStatusIdByTypeAndCode(StatusType.File, FileStatus.Error);
-                var submissionEntity = await _submissionRepo.CreateSubmissionObjectAsync(Submission);
-                await _unitOfWork.CommitAsync();
-            }
-
-            return (Errors, Submission);
-        }
-
-        private string GetErrorDetail(Dictionary<string, List<string>> errors)
-        {
-            var errorDetail = new StringBuilder();
-            foreach (var (error, detail) in errors.SelectMany(error => error.Value.Select(detail => (error, detail))))
-            {
-                errorDetail.AppendLine($"{error.Key}: {detail}");
-            }
-
-            return errorDetail.ToString();
+            return errors.Count == 0;
         }
     }
 }

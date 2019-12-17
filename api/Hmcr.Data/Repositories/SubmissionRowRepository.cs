@@ -58,12 +58,12 @@ namespace Hmcr.Data.Repositories
 
         public async IAsyncEnumerable<string> FindDuplicateRowsToOverwriteAsync(decimal submissionStreamId, decimal partyId, IEnumerable<SubmissionRowDto> rows)
         {
-            var duplicate = await _statusRepo.GetStatusIdByTypeAndCode(StatusType.Row, RowStatus.Duplicate);
+            var duplicate = await _statusRepo.GetStatusIdByTypeAndCodeAsync(StatusType.Row, RowStatus.Duplicate);
 
             foreach (var row in rows.Where(x => x.RowStatusId != duplicate))
             {
                 var query = await DbSet
-                    .Where(x => x.SubmissionObject.SubmissionStreamId == submissionStreamId && x.RecordNumber == row.RecordNumber && x.RowStatusId != duplicate)
+                    .Where(x => x.SubmissionObject.SubmissionStreamId == submissionStreamId && x.RecordNumber == row.RecordNumber && x.RowStatusId != duplicate && x.RowHash != row.RowHash)
                     .SelectMany(x => x.SubmissionObject.ServiceAreaNumberNavigation.HmrContractTerms)
                     .AnyAsync(x => x.PartyId == partyId);
                     
