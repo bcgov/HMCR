@@ -45,7 +45,7 @@ namespace Hmcr.Api.Controllers
 
         [HttpGet]
         [RequiresPermission(Permissions.FileUploadRead)]
-        public async Task<ActionResult<IEnumerable<SubmissionObjectSearchDto>>> GetSubmissionObjectsAsync(decimal serviceAreaNumber, DateTime dateFrom, DateTime dateTo)
+        public async Task<ActionResult<IEnumerable<SubmissionObjectSearchDto>>> GetSubmissionObjectsAsync(decimal serviceAreaNumber, DateTime dateFrom, DateTime dateTo, int pageSize, int pageNumber, string orderBy = "AppCreateTimestamp DESC")
         {
             var problem = IsServiceAreaAuthorized(_currentUser, serviceAreaNumber);
             if (problem != null)
@@ -53,7 +53,7 @@ namespace Hmcr.Api.Controllers
                 return Unauthorized(problem);
             }
 
-            return Ok(await _submissionService.GetSubmissionObjectsAsync(serviceAreaNumber, dateFrom, dateTo));
+            return Ok(await _submissionService.GetSubmissionObjectsAsync(serviceAreaNumber, dateFrom, dateTo, pageSize, pageNumber, orderBy));
         }
     }
 }
