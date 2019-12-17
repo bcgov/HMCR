@@ -16,6 +16,7 @@ namespace Hmcr.Bceid
                 var password = config.GetValue<string>("BCEID_PASSWORD");
                 var url = config.GetValue<string>("BCEID_URL");
                 var osid = config.GetValue<string>("BCEID_OSID");
+                var guid = config.GetValue<string>("BCEID_GUID");
 
                 var binding = new BasicHttpsBinding(BasicHttpsSecurityMode.Transport);
                 binding.Security.Transport.ClientCredentialType = HttpClientCredentialType.Basic;
@@ -27,6 +28,7 @@ namespace Hmcr.Bceid
                 client.Endpoint.Binding = binding;
                 client.Endpoint.Address = new EndpointAddress(url);
                 client.Osid = osid;
+                client.Guid = guid;
 
                 return client;
             });
