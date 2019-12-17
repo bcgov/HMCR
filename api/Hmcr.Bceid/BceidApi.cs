@@ -30,7 +30,7 @@ namespace Hmcr.Bceid
             var request = new AccountDetailRequest();
             request.requesterAccountTypeCode = BCeIDAccountTypeCode.Internal;
             request.requesterUserGuid = requestUserGuid;
-            request.accountTypeCode = BCeIDAccountTypeCode.Business;
+            request.accountTypeCode = typeCode;
             request.userId = username;
             request.onlineServiceId = _client.Osid;
 
@@ -51,18 +51,15 @@ namespace Hmcr.Bceid
             account.UserGuid = new Guid(response.account.guid.value);
             account.UserType = userType;
 
-            if (!account.UserType.IsBusinessUser())
+            if (account.UserType.IsBusinessUser())
             {
                 account.BusinessGuid = new Guid(response.account.business.guid.value);
                 account.BusinessLegalName = response.account.business.legalName.value;
-                account.BusinessNumber = Convert.ToDecimal(response.account.business.businessNumber.value);
-                account.DisplayName = response.account.business.doingBusinessAs.value;
-            }
-            else
-            {
-                account.DisplayName = response.account.displayName.value;
+                account.BusinessNumber = response.account.business.businessNumber.value.IsEmpty() ? (decimal?) null : Convert.ToDecimal(response.account.business.businessNumber.value);
+                account.DoingBusinessAs = response.account.business.doingBusinessAs.value.IsEmpty() ? account.BusinessLegalName : response.account.business.doingBusinessAs.value;
             }
 
+            account.DisplayName = response.account.displayName.value;
             account.FirstName = response.account.individualIdentity.name.firstname.value;
             account.LastName = response.account.individualIdentity.name.surname.value;
             account.Email = response.account.contact.email.value;           
