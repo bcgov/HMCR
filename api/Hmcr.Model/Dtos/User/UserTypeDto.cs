@@ -9,6 +9,8 @@ namespace Hmcr.Model.Dtos.User
     {
         public const string INTERNAL = "INTERNAL";
         public const string BUSINESS = "BUSINESS";
+        public const string IDIR = "IDIR";
+        public const string BCeId = "BCeID";
 
         [JsonPropertyName("id")]
         public string UserTypeId { get; set; }

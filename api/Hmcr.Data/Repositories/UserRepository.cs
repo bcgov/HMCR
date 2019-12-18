@@ -52,7 +52,7 @@ namespace Hmcr.Data.Repositories
                                             .ThenInclude(x => x.Permission)
                                 .Include(x => x.HmrServiceAreaUsers)
                                     .ThenInclude(x => x.ServiceAreaNumberNavigation)
-                                .FirstAsync(u => u.Username == _currentUser.UniversalId);
+                                .FirstAsync(u => u.UserGuid == _currentUser.UserGuid);
 
             var currentUser = Mapper.Map<UserCurrentDto>(userEntity);
 
@@ -82,7 +82,7 @@ namespace Hmcr.Data.Repositories
 
         public async Task<HmrSystemUser> GetCurrentActiveUserEntityAsync()
         {
-            return await DbSet.FirstOrDefaultAsync(u => u.Username == _currentUser.UniversalId && (u.EndDate == null || u.EndDate > DateTime.Today));
+            return await DbSet.FirstOrDefaultAsync(u => u.Username == _currentUser.UserName && (u.EndDate == null || u.EndDate > DateTime.Today)); //todo: change username to userguid
         }
 
         /// <summary>
@@ -94,18 +94,18 @@ namespace Hmcr.Data.Repositories
 
             DbContext.Database.ExecuteSqlInterpolated($"SELECT 1 FROM HMR_SYSTEM_USER WITH(XLOCK, ROWLOCK) WHERE USERNAME = {_currentUser.UserName}");
 
-            var userEntity = DbSet.First(u => u.Username == _currentUser.UniversalId);
+            var userEntity = DbSet.First(u => u.Username == _currentUser.UserName); //replace it with guid after user managment workflow has changed
 
             if (userEntity.UserGuid == null)
             {
+                userEntity.Username = _currentUser.UniversalId;
                 userEntity.UserGuid = _currentUser.UserGuid;
                 userEntity.BusinessGuid = _currentUser.BusinessGuid;
                 userEntity.BusinessLegalName = _currentUser.BusinessLegalName;
                 userEntity.UserType = _currentUser.UserType;
-                //todo: uncomment after Keycloak implementation
-                //userEntity.FirstName = _currentUser.FirstName;
-                //userEntity.LastName = _currentUser.LastName;
-                //userEntity.Email = _currentUser.Email;
+                userEntity.FirstName = _currentUser.FirstName;
+                userEntity.LastName = _currentUser.LastName;
+                userEntity.Email = _currentUser.Email;
 
                 if (_currentUser.UserType == UserTypeDto.INTERNAL)
                 {
