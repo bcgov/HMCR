@@ -13,6 +13,7 @@ namespace Hmcr.Bceid
     public interface IBceidApi
     {
         Task<(string Error, BceidAccount account)> GetBceidAccountAsync(string username, string userType);
+        Task<(string Error, BceidAccount account)> GetBceidAccountCachedAsync(string username, string userType);
     }
 
     public class BceidApi : IBceidApi
@@ -38,7 +39,7 @@ namespace Hmcr.Bceid
             _accountCache.Clear();
         }
 
-        public async Task<(string Error, BceidAccount account)> GetBceidAccountAsync(string username, string userType)
+        public async Task<(string Error, BceidAccount account)> GetBceidAccountCachedAsync(string username, string userType)
         {
             //to minimize the BCeID web service calls - may have a performance issue when multiple fresh users log in at the same time.            
             await _semaphore.WaitAsync(); 
@@ -101,5 +102,48 @@ namespace Hmcr.Bceid
             }
         }
 
+        public async Task<(string Error, BceidAccount account)> GetBceidAccountAsync(string username, string userType)
+        {
+            var typeCode = userType.IsIdirUser() ? BCeIDAccountTypeCode.Internal : BCeIDAccountTypeCode.Business;
+
+            var request = new AccountDetailRequest();
+            request.requesterAccountTypeCode = BCeIDAccountTypeCode.Internal;
+            request.requesterUserGuid = _client.Guid;
+            request.accountTypeCode = typeCode;
+            request.userId = username;
+            request.onlineServiceId = _client.Osid;
+
+            var response = await _client.getAccountDetailAsync(request);
+
+            if (response.code != ResponseCode.Success)
+            {
+                return (response.message, null);
+            }
+            else if (response.failureCode == FailureCode.NoResults)
+            {
+                return ("", null);
+            }
+
+            var account = new BceidAccount();
+
+            account.Username = response.account.userId.value;
+            account.UserGuid = new Guid(response.account.guid.value);
+            account.UserType = userType;
+
+            if (account.UserType.IsBusinessUser())
+            {
+                account.BusinessGuid = new Guid(response.account.business.guid.value);
+                account.BusinessLegalName = response.account.business.legalName.value;
+                account.BusinessNumber = response.account.business.businessNumber.value ?? "";
+                account.DoingBusinessAs = response.account.business.doingBusinessAs.value.IsEmpty() ? account.BusinessLegalName : response.account.business.doingBusinessAs.value;
+            }
+
+            account.DisplayName = response.account.displayName.value;
+            account.FirstName = response.account.individualIdentity.name.firstname.value;
+            account.LastName = response.account.individualIdentity.name.surname.value;
+            account.Email = response.account.contact.email.value;
+
+            return ("", account);
+        }
     }
 }
