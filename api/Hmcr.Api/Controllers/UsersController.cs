@@ -41,12 +41,12 @@ namespace Hmcr.Api.Controllers
                 new UserTypeDto
                 {
                     UserTypeId = UserTypeDto.INTERNAL,
-                    UserType = UserTypeDto.INTERNAL
+                    UserType = UserTypeDto.IDIR
                 },
                 new UserTypeDto
                 {
                     UserTypeId = UserTypeDto.BUSINESS,
-                    UserType = UserTypeDto.BUSINESS
+                    UserType = UserTypeDto.BCeId
                 }
             };
 

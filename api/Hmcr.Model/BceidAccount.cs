@@ -12,7 +12,7 @@ namespace Hmcr.Model
         public string FirstName { get; set; }
         public string LastName { get; set; }
         public string BusinessLegalName { get; set; }
-        public decimal? BusinessNumber { get; set; }
+        public string BusinessNumber { get; set; }
         public string DoingBusinessAs { get; set; }
         public string Email { get; set; }
         public string UserType { get; set; }

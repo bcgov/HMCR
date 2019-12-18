@@ -50,6 +50,8 @@ namespace Hmcr.Domain.Services
             return await _userRepo.GetCurrentUserAsync();
         }
 
+
+        //todo: change the method to sync db record with bceid info when there are any changes.
         public async Task<bool> ProcessFirstUserLoginAsync()
         {
             var userEntity = await _userRepo.GetCurrentActiveUserEntityAsync();
@@ -58,10 +60,10 @@ namespace Hmcr.Domain.Services
             {
                 return false;
             }
-
+            
             if (userEntity.UserGuid == null)
             {
-                if (userEntity.UserType == _currentUser.UserType) //todo: check email address once the email address is available.
+                if (userEntity.UserType == _currentUser.UserType) 
                 {
                     _userRepo.ProcessFirstUserLogin();
                 }

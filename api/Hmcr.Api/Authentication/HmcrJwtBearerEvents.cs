@@ -1,4 +1,5 @@
 ﻿using Hmcr.Api.Extensions;
+using Hmcr.Bceid;
 using Hmcr.Domain.Services;
 using Hmcr.Model;
 using Hmcr.Model.Dtos.User;
@@ -19,12 +20,14 @@ namespace Hmcr.Api.Authentication
     {
         private IUserService _userService;
         private HmcrCurrentUser _curentUser;
+        private IBceidApi _bceid;
 
         public HmcrJwtBearerEvents(IWebHostEnvironment env, IUserService userService,
-            HmcrCurrentUser currentUser) : base()
+            HmcrCurrentUser currentUser, IBceidApi bceid) : base()
         {
             _userService = userService;
             _curentUser = currentUser;
+            _bceid = bceid;
         }
 
         public override async Task AuthenticationFailed(AuthenticationFailedContext context)
@@ -48,7 +51,7 @@ namespace Hmcr.Api.Authentication
 
         public override async Task TokenValidated(TokenValidatedContext context)
         {
-            PopulateCurrentUser(context.Principal);
+            await PopulateCurrentUser(context.Principal);
 
             if (_curentUser.UserGuid == null)
             {
@@ -67,38 +70,43 @@ namespace Hmcr.Api.Authentication
             _curentUser.UserInfo = await _userService.GetCurrentUserAsync();
 
             AddClaimsFromUserInfo(context.Principal, _curentUser.UserInfo);
-
-            await Task.CompletedTask;
         }
 
-        private void PopulateCurrentUser(ClaimsPrincipal principal)
+        private async Task PopulateCurrentUser(ClaimsPrincipal principal)
         {
-            _curentUser.UserName = principal.FindFirstValue(HmcrClaimTypes.UserName);
+            _curentUser.UserName = principal.FindFirstValue(HmcrClaimTypes.KcUsername);
             var username = _curentUser.UserName.Split("@");
-            var directory = username[1];
+            var userid = username[0].ToUpperInvariant();
+            var directory = username[1].ToUpperInvariant();            
+            var userType = directory.ToUpperInvariant() == "IDIR" ? UserTypeDto.INTERNAL : UserTypeDto.BUSINESS;
 
-            if (directory.ToUpperInvariant() == "IDIR")
+            var (Error, Account) = await _bceid.GetBceidAccountAsync(userid, userType);
+            if (Error.IsNotEmpty())
             {
-                _curentUser.UserGuid = new Guid(principal.FindFirstValue(HmcrClaimTypes.UserGuid));
+                throw new Exception(Error);
+            }
+
+            if (directory == "IDIR")
+            {
+                _curentUser.UserGuid = Account.UserGuid;
                 _curentUser.UserType = UserTypeDto.INTERNAL;
+
             }
             else
             {
-                //todo: set UserGuid and BusinessGuid
-                //_curentUser.UserGuid = new Guid(principal.FindFirstValue(HmcrClaimTypes.BceidGuid));
-                //_curentUser.BusinessGuid = new Guid(principal.FindFirstValue(HmcrClaimTypes.BizGuid));
-                //_curentUser.BusinessLegalName = principal.FindFirstValue(HmcrClaimTypes.BizLegalName);
-                //_curentUser.BusinessNumber = principal.FindFirstValue(HmcrClaimTypes.BizNumber);
-
+                _curentUser.UserGuid = Account.UserGuid;
+                _curentUser.BusinessGuid = Account.BusinessGuid;
+                _curentUser.BusinessLegalName = Account.BusinessLegalName;
+                _curentUser.BusinessNumber = Account.BusinessNumber;
                 _curentUser.UserType = UserTypeDto.BUSINESS;
             }
 
-            _curentUser.UniversalId = username[0].ToUpperInvariant();
-            _curentUser.AuthDirName = directory.ToUpperInvariant();
-            _curentUser.Email = principal.FindFirstValue(ClaimTypes.Email);
-            _curentUser.UserName = principal.FindFirstValue(HmcrClaimTypes.UserName);
-            _curentUser.FirstName = principal.FindFirstValue(ClaimTypes.GivenName);
-            _curentUser.LastName = principal.FindFirstValue(ClaimTypes.Surname);
+            _curentUser.UniversalId = userid;
+            _curentUser.AuthDirName = directory;
+            _curentUser.Email = Account.Email;
+            _curentUser.UserName = userid;
+            _curentUser.FirstName = Account.FirstName;
+            _curentUser.LastName = Account.LastName;
         }
 
         private void AddClaimsFromUserInfo(ClaimsPrincipal principal, UserCurrentDto user)
