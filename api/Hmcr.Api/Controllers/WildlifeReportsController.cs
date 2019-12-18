@@ -4,6 +4,7 @@ using Hmcr.Domain.Services;
 using Hmcr.Model;
 using Hmcr.Model.Dtos.SubmissionObject;
 using Microsoft.AspNetCore.Mvc;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace Hmcr.Api.Controllers
@@ -41,6 +42,19 @@ namespace Hmcr.Api.Controllers
             }
 
             return CreatedAtRoute("GetSubmissionObject", new { id = SubmissionObjectId }, await _submissionService.GetSubmissionObjectAsync(SubmissionObjectId));
+        }
+
+        [HttpPost("duplicates")]
+        [RequiresPermission(Permissions.FileUploadWrite)]
+        public ActionResult<List<string>> CheckDuplicate([FromForm] FileUploadDto upload)
+        {
+            var problem = IsServiceAreaAuthorized(_currentUser, upload.ServiceAreaNumber);
+            if (problem != null)
+            {
+                return Unauthorized(problem);
+            }
+            
+            return Ok(new List<string>());
         }
     }
 }

@@ -11,7 +11,7 @@ namespace Hmcr.Bceid
 {
     public interface IBceidApi
     {
-        Task<(string Error, BceidAccount account)> GetBceidAccountAsync(string requestUserGuid, string username, string userType);
+        Task<(string Error, BceidAccount account)> GetBceidAccountAsync(string username, string userType);
     }
 
     public class BceidApi : IBceidApi
@@ -23,13 +23,13 @@ namespace Hmcr.Bceid
             _client = client;
         }
 
-        public async Task<(string Error, BceidAccount account)> GetBceidAccountAsync(string requestUserGuid, string username, string userType)
+        public async Task<(string Error, BceidAccount account)> GetBceidAccountAsync(string username, string userType)
         {
             var typeCode = userType.IsIdirUser() ? BCeIDAccountTypeCode.Internal : BCeIDAccountTypeCode.Business;
 
             var request = new AccountDetailRequest();
             request.requesterAccountTypeCode = BCeIDAccountTypeCode.Internal;
-            request.requesterUserGuid = requestUserGuid;
+            request.requesterUserGuid = _client.Guid;
             request.accountTypeCode = typeCode;
             request.userId = username;
             request.onlineServiceId = _client.Osid;

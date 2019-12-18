@@ -7,5 +7,6 @@ namespace BceidService
     public partial class BCeIDServiceSoapClient
     {
         public string Osid { get; set; }
+        public string Guid { get; set; }
     }
 }
