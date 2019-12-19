@@ -1,7 +1,20 @@
 import React, { useState } from 'react';
 import { connect } from 'react-redux';
 import { Link } from 'react-router-dom';
-import { Button, Container, Collapse, Navbar, NavbarToggler, NavbarBrand, Nav, NavItem } from 'reactstrap';
+import {
+  Button,
+  Container,
+  Collapse,
+  Navbar,
+  NavbarToggler,
+  NavbarBrand,
+  Nav,
+  NavItem,
+  UncontrolledDropdown,
+  DropdownToggle,
+  DropdownMenu,
+  DropdownItem,
+} from 'reactstrap';
 
 import NavLinkWithMatch from '../ui/NavLinkWithMatch';
 import Authorize from '../fragments/Authorize';
@@ -70,6 +83,17 @@ const Header = ({ currentUser }) => {
               <Authorize requires={Constants.PERMISSIONS.FILE_R}>
                 <NavLinkWithMatch hideNavbar={hideNavbar} to={Constants.PATHS.WORK_REPORTING} text="Work Reporting" />
               </Authorize>
+              <UncontrolledDropdown nav inNavbar>
+                <DropdownToggle nav caret>
+                  Quick Links
+                </DropdownToggle>
+                <DropdownMenu right>
+                  <DropdownItem>Link 1</DropdownItem>
+                  <DropdownItem>Link 2</DropdownItem>
+                  <DropdownItem>Link 3</DropdownItem>
+                  <DropdownItem>Link 4</DropdownItem>
+                </DropdownMenu>
+              </UncontrolledDropdown>
             </Nav>
             <Nav className="navbar-nav ml-auto">
               <NavItem>

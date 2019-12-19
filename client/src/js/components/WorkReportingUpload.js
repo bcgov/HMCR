@@ -1,11 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { connect } from 'react-redux';
+import { Link } from 'react-router-dom';
 import { Col, FormGroup, FormFeedback, Label, CustomInput, Spinner, Alert, Button } from 'reactstrap';
 import { Formik, Form } from 'formik';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import _ from 'lodash';
 
-import SingleDropdown from './ui/SingleDropdown';
+import SingleDropdownField from './ui/SingleDropdownField';
 import { FormRow } from './forms/FormInputs';
 import SubmitButton from './ui/SubmitButton';
 import SimpleModalWrapper from './ui/SimpleModalWrapper';
@@ -15,13 +15,7 @@ import { showValidationErrorDialog } from '../actions';
 import * as Constants from '../Constants';
 import * as api from '../Api';
 
-const reportTypes = [
-  { id: 1, name: 'MC Work Reporting', duplicate: true },
-  { id: 2, name: 'Rockfall Reporting', duplicate: true },
-  { id: 3, name: 'Wildlife Reporting' },
-];
-
-const defaultFormValues = { serviceAreaId: null, reportTypeId: null, reportFile: null };
+const defaultFormValues = { reportTypeId: null, reportFile: null };
 
 const getApiPath = reportTypeId => {
   switch (reportTypeId) {
@@ -62,7 +56,13 @@ const updateUploadStatusMessage = (state, status) => {
   }
 };
 
-const WorkReportingUpload = ({ currentUser, showValidationErrorDialog, ...props }) => {
+const WorkReportingUpload = ({
+  currentUser,
+  showValidationErrorDialog,
+  serviceArea,
+  handleFileSubmitted,
+  ...props
+}) => {
   const [fileInputKey, setFileInputKey] = useState(Math.random());
   const [submitting, setSubmitting] = useState(false);
   const [showStatusModal, setShowStatusModal] = useState(false);
@@ -70,6 +70,11 @@ const WorkReportingUpload = ({ currentUser, showValidationErrorDialog, ...props 
   const [savingStatus, setSavingStatus] = useState(null);
   const [errorMessages, setErrorMessages] = useState(null);
   const [completeMessage, setCompleteMessage] = useState(null);
+  const [reportTypes, setReportTypes] = useState([]);
+
+  useEffect(() => {
+    api.getSubmissionStreams().then(response => setReportTypes(response.data));
+  }, []);
 
   const resetUploadStatus = () => {
     setFileInputKey(Math.random());
@@ -86,8 +91,6 @@ const WorkReportingUpload = ({ currentUser, showValidationErrorDialog, ...props 
   const handleSubmit = (values, setFieldValue) => {
     const apiPath = getApiPath(values.reportTypeId);
     if (!apiPath) return;
-    const reportSetting = reportTypes.find(o => o.id === values.reportTypeId);
-    if (!reportSetting) return;
 
     const reset = () => {
       resetUploadStatus();
@@ -96,15 +99,12 @@ const WorkReportingUpload = ({ currentUser, showValidationErrorDialog, ...props 
 
     const formData = new FormData();
     formData.append('reportFile', values.reportFile);
-    formData.append('serviceAreaNumber', values.serviceAreaId);
+    formData.append('serviceAreaNumber', serviceArea);
 
     setSubmitting(true);
     setShowStatusModal(true);
-    if (reportSetting.duplicate) {
-      handleCheckDuplicates(apiPath, formData, reset);
-    } else {
-      handleUploadFile(apiPath, formData, reset);
-    }
+
+    handleCheckDuplicates(apiPath, formData, reset);
   };
 
   const handleCheckDuplicates = (apiPath, data, resetCallback) => {
@@ -180,6 +180,7 @@ const WorkReportingUpload = ({ currentUser, showValidationErrorDialog, ...props 
         );
         setCompleteMessage(response.data);
         resetCallback();
+        handleFileSubmitted();
       })
       .catch(error => {
         setSavingStatus(updateUploadStatusMessage(Constants.UPLOAD_STATE.SAVING, Constants.UPLOAD_STATE_STATUS.ERROR));
@@ -210,62 +211,53 @@ const WorkReportingUpload = ({ currentUser, showValidationErrorDialog, ...props 
       <Formik enableReinitialize={true} initialValues={defaultFormValues}>
         {({ values, errors, setFieldValue, setFieldError }) => (
           <Form>
-            <FormRow name="serviceAreaId" label="Service Area">
-              <SingleDropdown
-                defaultTitle="Select Servcie Area"
-                items={_.orderBy(currentUser.serviceAreas, ['id'])}
-                name="serviceAreaId"
-              />
-            </FormRow>
-            {values.serviceAreaId && (
-              <React.Fragment>
-                <FormRow name="reportTypeId" label="Report Type">
-                  <SingleDropdown defaultTitle="Select Report Type" items={reportTypes} name="reportTypeId" />
-                </FormRow>
-                {values.reportTypeId && (
-                  <React.Fragment>
-                    <div></div>
-                    <FormGroup row>
-                      <Col sm={3} />
-                      <Col sm={9}>Description about the file restrictions can go here.</Col>
-                    </FormGroup>
-                    <FormGroup row>
-                      <Label for="reportFileBrowser" sm={3}>
-                        Report File
-                      </Label>
-                      <Col sm={9}>
-                        <CustomInput
-                          type="file"
-                          id="reportFileBrowser"
-                          name="reportFile"
-                          label="Select Report File"
-                          accept=".csv"
-                          onChange={e => validateFile(e, setFieldValue, setFieldError, 'reportFile')}
-                          key={fileInputKey}
-                          invalid={errors.reportFile && errors.reportFile.length > 0}
-                        />
-                        {errors.reportFile && (
-                          <FormFeedback style={{ display: 'unset' }}>{errors.reportFile}</FormFeedback>
-                        )}
-                      </Col>
-                    </FormGroup>
-                    <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-                      <SubmitButton
-                        size="sm"
-                        type="Button"
-                        disabled={
-                          !values.reportFile || submitting || (errors.reportFile && errors.reportFile.length > 0)
-                        }
-                        submitting={submitting}
-                        onClick={() => handleSubmit(values, setFieldValue)}
-                      >
-                        Submit
-                      </SubmitButton>
-                    </div>
-                  </React.Fragment>
-                )}
-              </React.Fragment>
-            )}
+            <React.Fragment>
+              <FormRow name="reportTypeId" label="Report Type">
+                <SingleDropdownField defaultTitle="Select Report Type" items={reportTypes} name="reportTypeId" />
+              </FormRow>
+              {values.reportTypeId && (
+                <React.Fragment>
+                  <FormGroup row>
+                    <Label for="reportFileBrowser" sm={3}>
+                      Report File
+                    </Label>
+                    <Col sm={9}>
+                      <Alert color="info">
+                        File restrictions:{' '}
+                        <ul>
+                          <li>.csv files only</li>
+                          <li>Up to {reportTypes.find(o => o.id === values.reportTypeId).fileSizeLimit}MB per file</li>
+                        </ul>
+                      </Alert>
+                      <CustomInput
+                        type="file"
+                        id="reportFileBrowser"
+                        name="reportFile"
+                        label="Select Report File"
+                        accept=".csv"
+                        onChange={e => validateFile(e, setFieldValue, setFieldError, 'reportFile')}
+                        key={fileInputKey}
+                        invalid={errors.reportFile && errors.reportFile.length > 0}
+                      />
+                      {errors.reportFile && (
+                        <FormFeedback style={{ display: 'unset' }}>{errors.reportFile}</FormFeedback>
+                      )}
+                    </Col>
+                  </FormGroup>
+                  <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+                    <SubmitButton
+                      size="sm"
+                      type="Button"
+                      disabled={!values.reportFile || submitting || (errors.reportFile && errors.reportFile.length > 0)}
+                      submitting={submitting}
+                      onClick={() => handleSubmit(values, setFieldValue)}
+                    >
+                      Submit
+                    </SubmitButton>
+                  </div>
+                </React.Fragment>
+              )}
+            </React.Fragment>
           </Form>
         )}
       </Formik>
@@ -295,7 +287,9 @@ const WorkReportingUpload = ({ currentUser, showValidationErrorDialog, ...props 
           <Alert color="success">
             Upload successful.
             <ul>
-              <li>Submission ID: {completeMessage.id}</li>
+              <li>
+                Submission ID: <Link to="#">{completeMessage.id}</Link>
+              </li>
               <li>Filename: {completeMessage.fileName}</li>
               <li>Service Area: {completeMessage.serviceAreaNumber}</li>
               <li>Type: {reportTypes.find(o => o.id === completeMessage.submissionStreamId).name}</li>

@@ -11,6 +11,8 @@ export const API_PATHS = {
   USER_TYPES: '/users/usertypes',
   USER_STATUSES: '/users/userstatus',
   ROCKFALL_REPORT: '/rockfallreports',
+  SUBMISSIONS: '/submissionobjects',
+  SUBMISSION_STREAMS: '/submissionstreams',
   WILDLIFE_REPORT: '/wildlifereports',
   WORK_REPORT: '/workreports',
   VERSION: '/version',
@@ -28,6 +30,8 @@ export const PATHS = {
 };
 
 export const MESSAGE_DATE_FORMAT = 'YYYY-MM-DD hh:mmA';
+
+export const DATE_FORMAT = 'YYYY-MM-DD';
 
 export const FORM_TYPE = { ADD: 'ADD_FORM', EDIT: 'EDIT_FORM' };
 

@@ -1,32 +1,71 @@
-import React from 'react';
+import React, { useState } from 'react';
+import { connect } from 'react-redux';
 import { Row, Col } from 'reactstrap';
+import _ from 'lodash';
 // import { Link } from 'react-router-dom';
 
+import SingleDropdown from './ui/SingleDropdown';
 import MaterialCard from './ui/MaterialCard';
 import WorkReportingUpload from './WorkReportingUpload';
+import WorkReportingSubmissions from './WorkReportingSubmissions';
 import Authorize from './fragments/Authorize';
 
 import * as Constants from '../Constants';
 
-const WorkReporting = () => {
+const WorkReporting = ({ currentUser }) => {
+  const [serviceArea, setServiceArea] = useState(null);
+  const [triggerRefresh, setTriggerRefresh] = useState(null);
+
+  const handleFileSubmitted = () => {
+    setTriggerRefresh(Math.random());
+  };
+
   return (
-    <Row>
-      <Col sm={{ size: 12, order: 2 }} lg={{ size: 8, order: 1 }}>
-        <MaterialCard>
-          <h4>Report Upload</h4>
-          <Authorize
-            requires={Constants.PERMISSIONS.FILE_W}
-            unauthorizedError={<p>Upload disabled due to missing permissions.</p>}
-          >
-            <WorkReportingUpload />
+    <React.Fragment>
+      <MaterialCard>
+        <Row>
+          <Col>
+            <Row>
+              <Col sm={3}>Service Area</Col>
+              <Col sm={9}>
+                <SingleDropdown
+                  items={_.orderBy(currentUser.serviceAreas, ['id'])}
+                  defaultTitle="Select Servcie Area"
+                  value={serviceArea}
+                  handleOnChange={serviceArea => setServiceArea(serviceArea)}
+                />
+              </Col>
+            </Row>
+          </Col>
+          <Col></Col>
+        </Row>
+      </MaterialCard>
+      {serviceArea && (
+        <React.Fragment>
+          <Authorize requires={Constants.PERMISSIONS.FILE_W}>
+            <MaterialCard>
+              <Row>
+                <Col>
+                  <h4>Report Upload</h4>
+                  <WorkReportingUpload serviceArea={serviceArea} handleFileSubmitted={handleFileSubmitted} />
+                </Col>
+                <Col></Col>
+              </Row>
+            </MaterialCard>
           </Authorize>
-        </MaterialCard>
-      </Col>
-      <Col sm={{ size: 12, order: 1 }} lg={{ size: 4, order: 2 }}>
-        <MaterialCard>Quick Links...to be updated</MaterialCard>
-      </Col>
-    </Row>
+          <MaterialCard>
+            <WorkReportingSubmissions serviceArea={serviceArea} triggerRefresh={triggerRefresh} />
+          </MaterialCard>
+        </React.Fragment>
+      )}
+    </React.Fragment>
   );
 };
 
-export default WorkReporting;
+const mapStateToProps = state => {
+  return {
+    currentUser: state.user.current,
+  };
+};
+
+export default connect(mapStateToProps, null)(WorkReporting);

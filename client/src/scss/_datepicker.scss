@@ -78,3 +78,37 @@
     }
   }
 }
+
+.DateRangePicker {
+  .DateRangePickerInput_calendarIcon {
+    margin-right: 0;
+    background-color: theme-color(primary);
+
+    border-radius: 0;
+    border-top-right-radius: $input-border-radius;
+    border-bottom-right-radius: $input-border-radius;
+
+    .DateRangePickerInput_calendarIcon_svg {
+      fill: white;
+    }
+  }
+
+  .DateInput_input__focused {
+    border-bottom: 2px solid theme-color(primary);
+  }
+
+  .CalendarDay__selected,
+  .CalendarDay__selected:active,
+  .CalendarDay__selected:hover {
+    background: theme-color(primary);
+    border: 1px double theme-color(primary);
+  }
+
+  .CalendarDay__selected_span,
+  .CalendarDay__hovered_span,
+  .CalendarDay__hovered_span:hover {
+    background: theme-color(info);
+    border: 1px double theme-color(info);
+    color: white;
+  }
+}

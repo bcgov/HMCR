@@ -39,9 +39,9 @@ const DataTableControl = ({
           </tr>
         </thead>
         <tbody>
-          {dataList.map(item => {
+          {dataList.map((item, index) => {
             return (
-              <tr key={item.id}>
+              <tr key={index}>
                 {tableColumns.map(column =>
                   column.key === 'isActive' ? (
                     <td key={column.key}>
