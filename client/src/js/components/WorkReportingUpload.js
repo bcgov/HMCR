@@ -217,16 +217,18 @@ const WorkReportingUpload = ({
               </FormRow>
               {values.reportTypeId && (
                 <React.Fragment>
-                  <div></div>
-                  <FormGroup row>
-                    <Col sm={3} />
-                    <Col sm={9}>Description about the file restrictions can go here.</Col>
-                  </FormGroup>
                   <FormGroup row>
                     <Label for="reportFileBrowser" sm={3}>
                       Report File
                     </Label>
                     <Col sm={9}>
+                      <Alert color="info">
+                        File restrictions:{' '}
+                        <ul>
+                          <li>.csv files only</li>
+                          <li>Up to 10MB per file</li>
+                        </ul>
+                      </Alert>
                       <CustomInput
                         type="file"
                         id="reportFileBrowser"
