@@ -4,7 +4,7 @@ import * as Yup from 'yup';
 import moment from 'moment';
 
 import MultiSelect from '../ui/MultiSelect';
-import SingleDropdown from '../ui/SingleDropdown';
+import SingleDropdownField from '../ui/SingleDropdownField';
 import SingleDateField from '../ui/SingleDateField';
 import PageSpinner from '../ui/PageSpinner';
 import { FormRow, FormInput } from './FormInputs';
@@ -56,7 +56,7 @@ const EditUserFormFields = ({ userTypes, roles, serviceAreas, disableEdit }) => 
   return (
     <React.Fragment>
       <FormRow name="userType" label="User Type*">
-        <SingleDropdown defaultTitle="Select User Type" items={userTypes} name="userType" disabled={disableEdit} />
+        <SingleDropdownField defaultTitle="Select User Type" items={userTypes} name="userType" disabled={disableEdit} />
       </FormRow>
       <FormRow name="username" label="User Id*">
         <FormInput type="text" name="username" placeholder="User Id" disabled={disableEdit} />

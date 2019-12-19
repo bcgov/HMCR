@@ -3,10 +3,10 @@ import { Link } from 'react-router-dom';
 
 import * as Constants from '../Constants';
 
-const WorkReportingHistory = () => {
+const WorkReportingSubmissionDetail = () => {
   return (
     <div>
-      WorkReportingHistory{' '}
+      WorkReportingSubmissionDetail{' '}
       <div>
         <Link to={Constants.PATHS.WORK_REPORTING}>Back</Link>
       </div>
@@ -14,4 +14,4 @@ const WorkReportingHistory = () => {
   );
 };
 
-export default WorkReportingHistory;
+export default WorkReportingSubmissionDetail;

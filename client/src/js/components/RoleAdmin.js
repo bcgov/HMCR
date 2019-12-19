@@ -5,10 +5,11 @@ import { Formik, Form, Field } from 'formik';
 
 import Authorize from './fragments/Authorize';
 import MaterialCard from './ui/MaterialCard';
-import SingleDropdown from './ui/SingleDropdown';
+import SingleDropdownField from './ui/SingleDropdownField';
 import EditRoleForm from './forms/EditRoleForm';
 import DataTableControl from './ui/DataTableControl';
 import SubmitButton from './ui/SubmitButton';
+import PageSpinner from './ui/PageSpinner';
 
 import { setSingleRoleSeachCriteria, searchRoles } from '../actions';
 
@@ -28,9 +29,20 @@ const RoleAdmin = ({ roleStatuses, setSingleRoleSeachCriteria, searchRoles, sear
   const [searching, setSearching] = useState(false);
 
   useEffect(() => {
-    searchRoles();
-    // eslint-disable-next-line
-  }, []);
+    const search = async () => {
+      setSearching(true);
+      await searchRoles();
+      setSearching(false);
+    };
+
+    search();
+  }, [searchRoles]);
+
+  const startSearch = async () => {
+    setSearching(true);
+    await searchRoles();
+    setSearching(false);
+  };
 
   const handleSearchFormSubmit = values => {
     const searchText = values.searchText.trim() || null;
@@ -38,8 +50,7 @@ const RoleAdmin = ({ roleStatuses, setSingleRoleSeachCriteria, searchRoles, sear
 
     setSingleRoleSeachCriteria('isActive', values.isActive === 'ACTIVE');
 
-    setSearching(true);
-    searchRoles().finally(() => setSearching(false));
+    startSearch();
   };
 
   const onEditClicked = roleId => {
@@ -47,12 +58,12 @@ const RoleAdmin = ({ roleStatuses, setSingleRoleSeachCriteria, searchRoles, sear
   };
 
   const onDeleteClicked = (roleId, endDate) => {
-    api.deleteRole(roleId, endDate).then(() => searchRoles());
+    api.deleteRole(roleId, endDate).then(() => startSearch());
   };
 
   const handleEditUserFormClose = refresh => {
     if (refresh) {
-      searchRoles();
+      startSearch();
     }
     setEditRoleForm({ isOpen: false });
   };
@@ -73,7 +84,12 @@ const RoleAdmin = ({ roleStatuses, setSingleRoleSeachCriteria, searchRoles, sear
                   <Field type="text" name="searchText" placeholder="Role/Description" className="form-control" />
                 </Col>
                 <Col>
-                  <SingleDropdown {...formikProps} defaultTitle="Select Status" items={roleStatuses} name="isActive" />
+                  <SingleDropdownField
+                    {...formikProps}
+                    defaultTitle="Select Status"
+                    items={roleStatuses}
+                    name="isActive"
+                  />
                 </Col>
                 <Col />
                 <Col />
@@ -104,7 +120,8 @@ const RoleAdmin = ({ roleStatuses, setSingleRoleSeachCriteria, searchRoles, sear
           </Col>
         </Row>
       </Authorize>
-      {searchResult.length > 0 && (
+      {searching && <PageSpinner />}
+      {!searching && searchResult.length > 0 && (
         <MaterialCard>
           <DataTableControl
             dataList={searchResult}

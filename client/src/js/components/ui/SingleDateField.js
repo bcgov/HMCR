@@ -2,7 +2,9 @@ import React, { useState } from 'react';
 import { SingleDatePicker } from 'react-dates';
 import { Field, useFormikContext } from 'formik';
 
-const SingleDatePickerWithFormik = ({ field: { name }, placeholder }) => {
+import * as Constants from '../../Constants';
+
+const SingleDatePickerWithFormik = ({ field: { name }, placeholder, style, isOutsideRange }) => {
   const [focusedInput, setFocusedInput] = useState(false);
   const [focusClassName, setFocusClassName] = useState('');
   const { values, setFieldValue } = useFormikContext();
@@ -14,7 +16,7 @@ const SingleDatePickerWithFormik = ({ field: { name }, placeholder }) => {
   };
 
   return (
-    <div className={`DatePickerWrapper ${focusClassName}`}>
+    <div className={`DatePickerWrapper ${focusClassName}`} style={style}>
       <SingleDatePicker
         id={name}
         date={values[name]}
@@ -30,6 +32,8 @@ const SingleDatePickerWithFormik = ({ field: { name }, placeholder }) => {
         showDefaultInputIcon={true}
         inputIconPosition="after"
         placeholder={placeholder}
+        isOutsideRange={isOutsideRange}
+        displayFormat={Constants.DATE_FORMAT}
       />
     </div>
   );

@@ -9,6 +9,7 @@ import MultiDropdown from './ui/MultiDropdown';
 import EditUserForm from './forms/EditUserForm';
 import DataTableWithPaginaionControl from './ui/DataTableWithPaginaionControl';
 import SubmitButton from './ui/SubmitButton';
+import PageSpinner from './ui/PageSpinner';
 
 import { setSingleUserSeachCriteria, searchUsers, deleteUser } from '../actions';
 
@@ -39,9 +40,20 @@ const UserAdmin = ({
   const [searching, setSearching] = useState(false);
 
   useEffect(() => {
-    searchUsers();
-    // eslint-disable-next-line
-  }, []);
+    const search = async () => {
+      setSearching(true);
+      await searchUsers();
+      setSearching(false);
+    };
+
+    search();
+  }, [searchUsers]);
+
+  const startSearch = async () => {
+    setSearching(true);
+    await searchUsers();
+    setSearching(false);
+  };
 
   const handleSearchFormSubmit = values => {
     const serviceAreas = values.serviceAreaIds.join(',') || null;
@@ -59,8 +71,7 @@ const UserAdmin = ({
     }
     setSingleUserSeachCriteria('isActive', isActive);
 
-    setSearching(true);
-    searchUsers().finally(() => setSearching(false));
+    startSearch();
   };
 
   const onEditClicked = userId => {
@@ -73,26 +84,26 @@ const UserAdmin = ({
 
   const handleEditUserFormClose = refresh => {
     if (refresh) {
-      searchUsers();
+      startSearch();
     }
     setEditUserForm({ isOpen: false });
   };
 
   const handleChangePage = newPage => {
     setSingleUserSeachCriteria('pageNumber', newPage);
-    searchUsers();
+    startSearch();
   };
 
   const handleChangePageSize = newSize => {
     setSingleUserSeachCriteria('pageSize', newSize);
     setSingleUserSeachCriteria('pageNumber', 1);
-    searchUsers();
+    startSearch();
   };
 
   const handleHeadingSortClicked = headingKey => {
     setSingleUserSeachCriteria('pageNumber', 1);
     setSingleUserSeachCriteria('orderBy', headingKey);
-    searchUsers();
+    startSearch();
   };
 
   return (
@@ -151,7 +162,8 @@ const UserAdmin = ({
           </Col>
         </Row>
       </Authorize>
-      {searchResult.length > 0 && (
+      {searching && <PageSpinner />}
+      {!searching && searchResult.length > 0 && (
         <MaterialCard>
           <DataTableWithPaginaionControl
             dataList={searchResult}
