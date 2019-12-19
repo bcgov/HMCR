@@ -12,8 +12,8 @@ namespace Hmcr.Bceid
 {
     public interface IBceidApi
     {
-        Task<(string Error, BceidAccount account)> GetBceidAccountAsync(string username, string userType);
-        Task<(string Error, BceidAccount account)> GetBceidAccountCachedAsync(string username, string userType);
+        Task<(string error, BceidAccount account)> GetBceidAccountAsync(string username, string userType);
+        Task<(string error, BceidAccount account)> GetBceidAccountCachedAsync(string username, string userType);
     }
 
     public class BceidApi : IBceidApi
@@ -39,7 +39,7 @@ namespace Hmcr.Bceid
             _accountCache.Clear();
         }
 
-        public async Task<(string Error, BceidAccount account)> GetBceidAccountCachedAsync(string username, string userType)
+        public async Task<(string error, BceidAccount account)> GetBceidAccountCachedAsync(string username, string userType)
         {
             //to minimize the BCeID web service calls - may have a performance issue when multiple fresh users log in at the same time.            
             await _semaphore.WaitAsync(); 
