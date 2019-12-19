@@ -123,7 +123,7 @@ namespace Hmcr.Data.Repositories
                 {
                     BusinessGuid = _currentUser.BusinessGuid,
                     BusinessLegalName = _currentUser.BusinessLegalName.Trim(),
-                    BusinessNumber = Convert.ToDecimal(_currentUser.BusinessNumber),
+                    BusinessNumber = _currentUser.BusinessNumber,
                     DisplayName = _currentUser.BusinessLegalName.Trim()
                 };
 

@@ -101,7 +101,7 @@ namespace Hmcr.Bceid
             {
                 account.BusinessGuid = new Guid(response.account.business.guid.value);
                 account.BusinessLegalName = response.account.business.legalName.value;
-                account.BusinessNumber = response.account.business.businessNumber.value ?? "";
+                account.BusinessNumber = Convert.ToDecimal(response.account.business.businessNumber.value ?? "0");
                 account.DoingBusinessAs = response.account.business.doingBusinessAs.value.IsEmpty() ? account.BusinessLegalName : response.account.business.doingBusinessAs.value;
             }
 
