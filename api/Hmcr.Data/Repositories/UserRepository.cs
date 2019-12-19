@@ -94,7 +94,7 @@ namespace Hmcr.Data.Repositories
 
             DbContext.Database.ExecuteSqlInterpolated($"SELECT 1 FROM HMR_SYSTEM_USER WITH(XLOCK, ROWLOCK) WHERE USERNAME = {_currentUser.UserName}");
 
-            var userEntity = DbSet.First(u => u.Username == _currentUser.UserName); //replace it with guid after user managment workflow has changed
+            var userEntity = DbSet.First(u => u.Username == _currentUser.UserName); //todo: replace it with guid after user managment workflow has changed
 
             if (userEntity.UserGuid == null)
             {
@@ -119,7 +119,7 @@ namespace Hmcr.Data.Repositories
                 if (partyEntity != null)
                     return;
 
-                var party = new PartyDto
+                userEntity.Party = new HmrParty
                 {
                     BusinessGuid = _currentUser.BusinessGuid,
                     BusinessLegalName = _currentUser.BusinessLegalName.Trim(),
@@ -127,7 +127,6 @@ namespace Hmcr.Data.Repositories
                     DisplayName = _currentUser.BusinessLegalName.Trim()
                 };
 
-                _partyRepo.Add(party);
                 DbContext.SaveChanges();
             }
 

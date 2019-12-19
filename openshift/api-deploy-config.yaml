@@ -108,6 +108,11 @@ objects:
                     secretKeyRef:
                       name: bceid-service
                       key: BCEID_OSID
+                - name: BCEID_GUID
+                  valueFrom:
+                    secretKeyRef:
+                      name: bceid-service
+                      key: BCEID_GUID
                 - name: ASPNETCORE_ENVIRONMENT
                   value: ${ASPNETCORE_ENVIRONMENT}
       test: false
