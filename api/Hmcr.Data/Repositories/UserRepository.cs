@@ -119,7 +119,7 @@ namespace Hmcr.Data.Repositories
                 if (partyEntity != null)
                     return;
 
-                var party = new PartyDto
+                userEntity.Party = new HmrParty
                 {
                     BusinessGuid = _currentUser.BusinessGuid,
                     BusinessLegalName = _currentUser.BusinessLegalName.Trim(),
@@ -127,7 +127,6 @@ namespace Hmcr.Data.Repositories
                     DisplayName = _currentUser.BusinessLegalName.Trim()
                 };
 
-                _partyRepo.Add(party);
                 DbContext.SaveChanges();
             }
 

@@ -81,7 +81,7 @@ namespace Hmcr.Api.Authentication
             var userType = directory.ToUpperInvariant() == "IDIR" ? UserTypeDto.INTERNAL : UserTypeDto.BUSINESS;
 
             var (error, account) = await _bceid.GetBceidAccountCachedAsync(userid, userType);
-            if (error.IsNotEmpty())
+            if (account == null)
             {
                 throw new Exception(error);
             }
@@ -90,7 +90,6 @@ namespace Hmcr.Api.Authentication
             {
                 _curentUser.UserGuid = account.UserGuid;
                 _curentUser.UserType = UserTypeDto.INTERNAL;
-
             }
             else
             {
