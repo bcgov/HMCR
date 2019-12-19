@@ -94,7 +94,7 @@ namespace Hmcr.Data.Repositories
 
             DbContext.Database.ExecuteSqlInterpolated($"SELECT 1 FROM HMR_SYSTEM_USER WITH(XLOCK, ROWLOCK) WHERE USERNAME = {_currentUser.UserName}");
 
-            var userEntity = DbSet.First(u => u.Username == _currentUser.UserName); //replace it with guid after user managment workflow has changed
+            var userEntity = DbSet.First(u => u.Username == _currentUser.UserName); //todo: replace it with guid after user managment workflow has changed
 
             if (userEntity.UserGuid == null)
             {
