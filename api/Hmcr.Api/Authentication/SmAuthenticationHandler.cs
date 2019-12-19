@@ -99,7 +99,7 @@ namespace Hmcr.Api.Authentication
             _curentUser.Email = _context.Request.Headers[HmcrClaimTypes.Email].FirstOrDefault();
             _curentUser.UserName = _context.Request.Headers[HmcrClaimTypes.UserName].FirstOrDefault();
             _curentUser.BusinessLegalName = _context.Request.Headers[HmcrClaimTypes.BusinessLegalName].FirstOrDefault();
-            _curentUser.BusinessNumber = _context.Request.Headers[HmcrClaimTypes.BusinessNumber].FirstOrDefault();
+            _curentUser.BusinessNumber = Convert.ToDecimal(_context.Request.Headers[HmcrClaimTypes.BusinessNumber].FirstOrDefault() ?? "0");
         }
 
         private List<Claim> GetClaims()
@@ -119,7 +119,7 @@ namespace Hmcr.Api.Authentication
             if (_curentUser.Email.IsNotEmpty()) claims.Add(new Claim(HmcrClaimTypes.Email, _curentUser.Email));
             if (_curentUser.UserName.IsNotEmpty()) claims.Add(new Claim(HmcrClaimTypes.UserName, _curentUser.UserName));
             if (_curentUser.BusinessLegalName.IsNotEmpty()) claims.Add(new Claim(HmcrClaimTypes.BusinessLegalName, _curentUser.BusinessLegalName));
-            if (_curentUser.BusinessNumber.IsNotEmpty()) claims.Add(new Claim(HmcrClaimTypes.BusinessNumber, _curentUser.BusinessNumber));
+            claims.Add(new Claim(HmcrClaimTypes.BusinessNumber, _curentUser.BusinessNumber.ToString()));
 
             return claims;
         }
