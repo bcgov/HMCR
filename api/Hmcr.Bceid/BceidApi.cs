@@ -53,48 +53,15 @@ namespace Hmcr.Bceid
                     return ("", _accountCache[key]);
                 }
 
-                var typeCode = userType.IsIdirUser() ? BCeIDAccountTypeCode.Internal : BCeIDAccountTypeCode.Business;
+                var (error, account) = await GetBceidAccountAsync(username, userType);
 
-                var request = new AccountDetailRequest();
-                request.requesterAccountTypeCode = BCeIDAccountTypeCode.Internal;
-                request.requesterUserGuid = _client.Guid;
-                request.accountTypeCode = typeCode;
-                request.userId = username;
-                request.onlineServiceId = _client.Osid;
-
-                var response = await _client.getAccountDetailAsync(request);
-
-                if (response.code != ResponseCode.Success)
+                if (account != null)
                 {
-                    return (response.message, null);
-                }
-                else if (response.failureCode == FailureCode.NoResults)
-                {
-                    return ("", null);
+                    Debug.WriteLine($"BCeID new key: {key}");
+                    _accountCache[key] = account;
                 }
 
-                var account = new BceidAccount();
-
-                account.Username = response.account.userId.value;
-                account.UserGuid = new Guid(response.account.guid.value);
-                account.UserType = userType;
-
-                if (account.UserType.IsBusinessUser())
-                {
-                    account.BusinessGuid = new Guid(response.account.business.guid.value);
-                    account.BusinessLegalName = response.account.business.legalName.value;
-                    account.BusinessNumber = response.account.business.businessNumber.value ?? "";
-                    account.DoingBusinessAs = response.account.business.doingBusinessAs.value.IsEmpty() ? account.BusinessLegalName : response.account.business.doingBusinessAs.value;
-                }
-
-                account.DisplayName = response.account.displayName.value;
-                account.FirstName = response.account.individualIdentity.name.firstname.value;
-                account.LastName = response.account.individualIdentity.name.surname.value;
-                account.Email = response.account.contact.email.value;
-
-                Debug.WriteLine($"BCeID new key: {key}");
-                _accountCache[key] = account;
-                return ("", account);
+                return (error, account);
             }
             finally
             {
@@ -102,7 +69,7 @@ namespace Hmcr.Bceid
             }
         }
 
-        public async Task<(string Error, BceidAccount account)> GetBceidAccountAsync(string username, string userType)
+        public async Task<(string error, BceidAccount account)> GetBceidAccountAsync(string username, string userType)
         {
             var typeCode = userType.IsIdirUser() ? BCeIDAccountTypeCode.Internal : BCeIDAccountTypeCode.Business;
 

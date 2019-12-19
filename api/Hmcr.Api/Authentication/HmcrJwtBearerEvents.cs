@@ -80,33 +80,33 @@ namespace Hmcr.Api.Authentication
             var directory = username[1].ToUpperInvariant();            
             var userType = directory.ToUpperInvariant() == "IDIR" ? UserTypeDto.INTERNAL : UserTypeDto.BUSINESS;
 
-            var (Error, Account) = await _bceid.GetBceidAccountCachedAsync(userid, userType);
-            if (Error.IsNotEmpty())
+            var (error, account) = await _bceid.GetBceidAccountCachedAsync(userid, userType);
+            if (error.IsNotEmpty())
             {
-                throw new Exception(Error);
+                throw new Exception(error);
             }
 
             if (directory == "IDIR")
             {
-                _curentUser.UserGuid = Account.UserGuid;
+                _curentUser.UserGuid = account.UserGuid;
                 _curentUser.UserType = UserTypeDto.INTERNAL;
 
             }
             else
             {
-                _curentUser.UserGuid = Account.UserGuid;
-                _curentUser.BusinessGuid = Account.BusinessGuid;
-                _curentUser.BusinessLegalName = Account.BusinessLegalName;
-                _curentUser.BusinessNumber = Account.BusinessNumber;
+                _curentUser.UserGuid = account.UserGuid;
+                _curentUser.BusinessGuid = account.BusinessGuid;
+                _curentUser.BusinessLegalName = account.BusinessLegalName;
+                _curentUser.BusinessNumber = account.BusinessNumber;
                 _curentUser.UserType = UserTypeDto.BUSINESS;
             }
 
             _curentUser.UniversalId = userid;
             _curentUser.AuthDirName = directory;
-            _curentUser.Email = Account.Email;
+            _curentUser.Email = account.Email;
             _curentUser.UserName = userid;
-            _curentUser.FirstName = Account.FirstName;
-            _curentUser.LastName = Account.LastName;
+            _curentUser.FirstName = account.FirstName;
+            _curentUser.LastName = account.LastName;
         }
 
         private void AddClaimsFromUserInfo(ClaimsPrincipal principal, UserCurrentDto user)
