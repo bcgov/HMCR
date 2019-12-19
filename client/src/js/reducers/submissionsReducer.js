@@ -11,7 +11,7 @@ const defaultState = {
       .subtract(1, 'months')
       .format(Constants.DATE_FORMAT),
     dateTo: moment().format(Constants.DATE_FORMAT),
-    serviceAreaNumber: 10,
+    serviceAreaNumber: null,
     pageSize: Constants.DEFAULT_PAGE_SIZE,
     pageNumber: 1,
   },

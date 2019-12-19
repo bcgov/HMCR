@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { connect } from 'react-redux';
+import { Link } from 'react-router-dom';
 import { Col, FormGroup, FormFeedback, Label, CustomInput, Spinner, Alert, Button } from 'reactstrap';
 import { Formik, Form } from 'formik';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -55,7 +56,13 @@ const updateUploadStatusMessage = (state, status) => {
   }
 };
 
-const WorkReportingUpload = ({ currentUser, showValidationErrorDialog, serviceArea, ...props }) => {
+const WorkReportingUpload = ({
+  currentUser,
+  showValidationErrorDialog,
+  serviceArea,
+  handleFileSubmitted,
+  ...props
+}) => {
   const [fileInputKey, setFileInputKey] = useState(Math.random());
   const [submitting, setSubmitting] = useState(false);
   const [showStatusModal, setShowStatusModal] = useState(false);
@@ -173,6 +180,7 @@ const WorkReportingUpload = ({ currentUser, showValidationErrorDialog, serviceAr
         );
         setCompleteMessage(response.data);
         resetCallback();
+        handleFileSubmitted();
       })
       .catch(error => {
         setSavingStatus(updateUploadStatusMessage(Constants.UPLOAD_STATE.SAVING, Constants.UPLOAD_STATE_STATUS.ERROR));
@@ -277,7 +285,9 @@ const WorkReportingUpload = ({ currentUser, showValidationErrorDialog, serviceAr
           <Alert color="success">
             Upload successful.
             <ul>
-              <li>Submission ID: {completeMessage.id}</li>
+              <li>
+                Submission ID: <Link to="#">{completeMessage.id}</Link>
+              </li>
               <li>Filename: {completeMessage.fileName}</li>
               <li>Service Area: {completeMessage.serviceAreaNumber}</li>
               <li>Type: {reportTypes.find(o => o.id === completeMessage.submissionStreamId).name}</li>

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { connect } from 'react-redux';
+import { Link } from 'react-router-dom';
 import { Row, Col } from 'reactstrap';
 import moment from 'moment';
 import { DateRangePicker } from 'react-dates';
@@ -28,6 +29,8 @@ const WorkReportingSubmissions = ({
   searchResult,
   searchPagination,
   searchCriteria,
+  serviceArea,
+  triggerRefresh,
 }) => {
   const [startDate, setStartDate] = useState(searchCriteria.dateFrom ? moment(searchCriteria.dateFrom) : null);
   const [endDate, setEndDate] = useState(searchCriteria.dateTo ? moment(searchCriteria.dateTo) : null);
@@ -37,37 +40,29 @@ const WorkReportingSubmissions = ({
   useEffect(() => {
     const search = async () => {
       setSearching(true);
+      if (searchCriteria.serviceAreaNumber !== serviceArea)
+        setSingleSubmissionsSeachCriteria('serviceAreaNumber', serviceArea);
       await searchSubmissions();
       setSearching(false);
     };
 
     search();
-  }, [searchSubmissions]);
-
-  const startSearch = async () => {
-    setSearching(true);
-    await searchSubmissions();
-    setSearching(false);
-  };
+  }, [searchSubmissions, serviceArea, setSingleSubmissionsSeachCriteria, triggerRefresh, searchCriteria]);
 
   const handleDateChanged = (startDate, endDate) => {
     if (!(startDate && endDate && startDate.isSameOrBefore(endDate))) return;
 
     setSingleSubmissionsSeachCriteria('dateFrom', startDate.format(Constants.DATE_FORMAT));
     setSingleSubmissionsSeachCriteria('dateTo', endDate.format(Constants.DATE_FORMAT));
-
-    startSearch();
   };
 
   const handleChangePage = newPage => {
     setSingleSubmissionsSeachCriteria('pageNumber', newPage);
-    startSearch();
   };
 
   const handleChangePageSize = newSize => {
     setSingleSubmissionsSeachCriteria('pageSize', newSize);
     setSingleSubmissionsSeachCriteria('pageNumber', 1);
-    startSearch();
   };
 
   return (
@@ -95,27 +90,36 @@ const WorkReportingSubmissions = ({
               displayFormat={Constants.DATE_FORMAT}
               startDatePlaceholderText="Date From"
               endDatePlaceholderText="Date To"
-              isOutsideRange={date => date.isBefore(startDateLimit) || moment().isBefore(date)}
+              isOutsideRange={date =>
+                date.isBefore(startDateLimit) ||
+                moment()
+                  .endOf('day')
+                  .isBefore(date)
+              }
               minimumNights={0}
             />
           </div>
         </Col>
       </Row>
       {searching && <PageSpinner />}
-      {!searching && searchResult.length > 0 && (
+      {!searching && (
         <Row>
           <Col>
-            <DataTableWithPaginaionControl
-              dataList={searchResult.map(item => ({
-                ...item,
-                name: `${item.firstName} ${item.lastName}`,
-                date: moment(item.appCreateTimestamp).format(Constants.DATE_FORMAT),
-              }))}
-              tableColumns={tableColumns}
-              searchPagination={searchPagination}
-              onPageNumberChange={handleChangePage}
-              onPageSizeChange={handleChangePageSize}
-            />
+            {searchResult.length > 0 && (
+              <DataTableWithPaginaionControl
+                dataList={searchResult.map(item => ({
+                  ...item,
+                  name: `${item.firstName} ${item.lastName}`,
+                  date: moment(item.appCreateTimestamp).format(Constants.DATE_FORMAT),
+                  id: <Link to="#">{item.id}</Link>,
+                }))}
+                tableColumns={tableColumns}
+                searchPagination={searchPagination}
+                onPageNumberChange={handleChangePage}
+                onPageSizeChange={handleChangePageSize}
+              />
+            )}
+            {searchResult.length <= 0 && <div>No submissions found</div>}
           </Col>
         </Row>
       )}

@@ -14,6 +14,11 @@ import * as Constants from '../Constants';
 
 const WorkReporting = ({ currentUser }) => {
   const [serviceArea, setServiceArea] = useState(null);
+  const [triggerRefresh, setTriggerRefresh] = useState(null);
+
+  const handleFileSubmitted = () => {
+    setTriggerRefresh(Math.random());
+  };
 
   return (
     <React.Fragment>
@@ -42,14 +47,14 @@ const WorkReporting = ({ currentUser }) => {
               <Row>
                 <Col>
                   <h4>Report Upload</h4>
-                  <WorkReportingUpload serviceArea={serviceArea} />
+                  <WorkReportingUpload serviceArea={serviceArea} handleFileSubmitted={handleFileSubmitted} />
                 </Col>
                 <Col></Col>
               </Row>
             </MaterialCard>
           </Authorize>
           <MaterialCard>
-            <WorkReportingSubmissions />
+            <WorkReportingSubmissions serviceArea={serviceArea} triggerRefresh={triggerRefresh} />
           </MaterialCard>
         </React.Fragment>
       )}
