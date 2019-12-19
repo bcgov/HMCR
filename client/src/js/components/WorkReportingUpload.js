@@ -226,7 +226,7 @@ const WorkReportingUpload = ({
                         File restrictions:{' '}
                         <ul>
                           <li>.csv files only</li>
-                          <li>Up to 10MB per file</li>
+                          <li>Up to {reportTypes.find(o => o.id === values.reportTypeId).fileSizeLimit}MB per file</li>
                         </ul>
                       </Alert>
                       <CustomInput
