@@ -1,11 +1,11 @@
 @import './vendor/bootstrap-theme.scss';
 
-$nav-link-active-bg: lighten(theme-color(secondary-nav), 10%);
+@mixin main-nav-colors($background-color) {
+  $nav-link-active-bg: lighten($background-color, 10%);
 
-.main-nav {
   padding: 0 1rem;
   border-bottom: 0;
-  background-color: theme-color(secondary-nav);
+  background-color: $background-color;
   font-size: 0.85rem;
 
   .nav-link {
@@ -24,6 +24,22 @@ $nav-link-active-bg: lighten(theme-color(secondary-nav), 10%);
     text-decoration: none;
     font-size: 0.85rem;
   }
+}
+
+.main-nav {
+  @include main-nav-colors(theme-color(secondary-nav));
+}
+
+.main-nav.development {
+  @include main-nav-colors(#ef6c00);
+}
+
+.main-nav.test {
+  @include main-nav-colors(#4527a0);
+}
+
+.main-nav.uat {
+  @include main-nav-colors(#2e7d32);
 }
 
 .navbar-brand {

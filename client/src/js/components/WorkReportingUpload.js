@@ -73,7 +73,11 @@ const WorkReportingUpload = ({
   const [reportTypes, setReportTypes] = useState([]);
 
   useEffect(() => {
-    api.getSubmissionStreams().then(response => setReportTypes(response.data));
+    api
+      .getSubmissionStreams()
+      .then(response =>
+        setReportTypes(response.data.map(o => ({ ...o, fileSizeLimit: o.fileSizeLimit / 1024 / 1024 })))
+      );
   }, []);
 
   const resetUploadStatus = () => {
