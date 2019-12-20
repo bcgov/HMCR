@@ -1,5 +1,6 @@
 using Hmcr.Api.Authentication;
 using Hmcr.Api.Extensions;
+using Hmcr.Bceid;
 using Hmcr.Chris;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -35,6 +36,7 @@ namespace Hmcr.Api
             services.AddHmcrTypes();
             services.AddHmcrSwagger(_env);
             services.AddChrisHttpClient(Configuration);
+            services.AddBceidSoapClient(Configuration);
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)

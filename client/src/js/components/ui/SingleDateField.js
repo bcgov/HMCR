@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
 import { SingleDatePicker } from 'react-dates';
-import { Field } from 'formik';
+import { Field, useFormikContext } from 'formik';
 
-const SingleDatePickerWithFormik = ({ field: { name }, values, setFieldValue, placeholder }) => {
+const SingleDatePickerWithFormik = ({ field: { name }, placeholder }) => {
   const [focusedInput, setFocusedInput] = useState(false);
   const [focusClassName, setFocusClassName] = useState('');
+  const { values, setFieldValue } = useFormikContext();
 
   const handleFocusChanged = focused => {
     setFocusedInput(focused);

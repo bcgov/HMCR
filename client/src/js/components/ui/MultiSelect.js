@@ -1,11 +1,12 @@
 import React from 'react';
 import { CustomInput, FormFeedback } from 'reactstrap';
-import { FieldArray, useField } from 'formik';
+import { FieldArray, useField, useFormikContext } from 'formik';
 
-const MultiSelect = ({ ...props }) => {
-  const { values, items, name, showId, handleBlur } = props;
+const MultiSelect = props => {
+  const { items, name, showId, handleBlur } = props;
   // eslint-disable-next-line
   const [field, meta] = useField(props);
+  const { values } = useFormikContext();
   const selectedValues = values[name];
 
   const handleItemSelected = (checked, itemId, push, remove) => {
@@ -23,7 +24,8 @@ const MultiSelect = ({ ...props }) => {
         <FieldArray name={name}>
           {({ push, remove }) =>
             items.map(item => {
-              const displayName = showId ? `${item.id} - ${item.name}` : item.name;
+              const description = item.description ? item.description : item.name;
+              const displayName = showId ? `${item.id} - ${description}` : description;
               return (
                 <CustomInput
                   key={item.id}

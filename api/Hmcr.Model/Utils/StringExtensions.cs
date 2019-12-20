@@ -1,4 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using Hmcr.Model.Dtos.User;
+using System;
+using System.Collections.Generic;
+using System.Text;
 using System.Text.RegularExpressions;
 
 namespace Hmcr.Model.Utils
@@ -69,6 +72,29 @@ namespace Hmcr.Model.Utils
             else
             {
                 dictionary.Add(keyName, new List<string> { item });
+            }
+        }
+
+        public static bool IsIdirUser(this string str)
+        {
+            return str.ToUpperInvariant() == UserTypeDto.INTERNAL;
+        }
+
+        public static bool IsBusinessUser(this string str)
+        {
+            return str.ToUpperInvariant() == UserTypeDto.BUSINESS;
+        }
+
+        public static string GetSha256Hash(this string text)
+        {
+            if (string.IsNullOrEmpty(text))
+                return string.Empty;
+
+            using (var sha = new System.Security.Cryptography.SHA256Managed())
+            {
+                byte[] textData = Encoding.UTF8.GetBytes(text);
+                byte[] hash = sha.ComputeHash(textData);
+                return BitConverter.ToString(hash).Replace("-", string.Empty);
             }
         }
     }

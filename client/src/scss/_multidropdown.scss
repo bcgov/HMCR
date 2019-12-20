@@ -78,3 +78,14 @@
     overflow-y: auto;
   }
 }
+
+.form-input.dropdown.disabled {
+  background-color: #e9ecef;
+  opacity: 1;
+}
+
+.form-control.form-input.dropdown {
+  .dropdown-toggle {
+    border: unset;
+  }
+}

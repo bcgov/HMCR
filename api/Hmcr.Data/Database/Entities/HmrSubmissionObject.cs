@@ -19,7 +19,6 @@ namespace Hmcr.Data.Database.Entities
         public decimal MimeTypeId { get; set; }
         public decimal SubmissionStatusId { get; set; }
         public decimal ServiceAreaNumber { get; set; }
-        public decimal PartyId { get; set; }
         public decimal SubmissionStreamId { get; set; }
         public long ConcurrencyControlNumber { get; set; }
         public string AppCreateUserid { get; set; }
@@ -36,7 +35,6 @@ namespace Hmcr.Data.Database.Entities
         public DateTime DbAuditLastUpdateTimestamp { get; set; }
 
         public virtual HmrMimeType MimeType { get; set; }
-        public virtual HmrParty Party { get; set; }
         public virtual HmrServiceArea ServiceAreaNumberNavigation { get; set; }
         public virtual HmrSubmissionStatu SubmissionStatus { get; set; }
         public virtual HmrSubmissionStream SubmissionStream { get; set; }

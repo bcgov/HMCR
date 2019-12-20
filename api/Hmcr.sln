@@ -11,7 +11,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Hmcr.Model", "Hmcr.Model\Hm
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Hmcr.Domain", "Hmcr.Domain\Hmcr.Domain.csproj", "{776F52F7-9369-4400-A6EB-8B972B63AF27}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Hmcr.Chris", "Hmcr.Chris\Hmcr.Chris.csproj", "{E0E144A5-5859-4B33-B540-9A6A8139490C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Hmcr.Chris", "Hmcr.Chris\Hmcr.Chris.csproj", "{E0E144A5-5859-4B33-B540-9A6A8139490C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Hmcr.Bceid", "Hmcr.Bceid\Hmcr.Bceid.csproj", "{0078AD21-A559-41B2-B960-EE2D685D3E6F}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -39,6 +41,10 @@ Global
 		{E0E144A5-5859-4B33-B540-9A6A8139490C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E0E144A5-5859-4B33-B540-9A6A8139490C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E0E144A5-5859-4B33-B540-9A6A8139490C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0078AD21-A559-41B2-B960-EE2D685D3E6F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0078AD21-A559-41B2-B960-EE2D685D3E6F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0078AD21-A559-41B2-B960-EE2D685D3E6F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0078AD21-A559-41B2-B960-EE2D685D3E6F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -10,7 +10,7 @@ namespace Hmcr.Model.Dtos.ServiceArea
         [JsonPropertyName("id")]
         public decimal ServiceAreaNumber { get; set; }
 
-        [JsonPropertyName("name")]
         public string ServiceAreaName { get; set; }
+        public string Name => $"{ServiceAreaNumber} {ServiceAreaName}";
     }
 }

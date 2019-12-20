@@ -18,6 +18,5 @@ namespace Hmcr.Model.Dtos.SubmissionObject
         public decimal MimeTypeId { get; set; }
         public decimal SubmissionStatusId { get; set; }
         public decimal ServiceAreaNumber { get; set; }
-        public decimal PartyId { get; set; }
     }
 }

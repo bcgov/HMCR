@@ -1,5 +1,4 @@
 import * as api from '../Api';
-import * as Constants from '../Constants';
 
 import {
   FETCH_CURRENT_USER,
@@ -13,42 +12,42 @@ import {
 } from './types';
 
 export const fetchCurrentUser = () => dispatch => {
-  return api.instance.get(Constants.API_PATHS.USER_CURRENT).then(response => {
+  return api.getCurrentUser().then(response => {
     const data = response.data;
     dispatch({ type: FETCH_CURRENT_USER, payload: data });
   });
 };
 
 export const fetchUserStatuses = () => dispatch => {
-  return api.instance.get(Constants.API_PATHS.USER_STATUSES).then(response => {
+  return api.getUserStatuses().then(response => {
     const data = response.data;
     dispatch({ type: FETCH_USER_STATUSES, payload: data });
   });
 };
 
 export const fetchUserTypes = () => dispatch => {
-  return api.instance.get(Constants.API_PATHS.USER_TYPES).then(response => {
+  return api.getUserTypes().then(response => {
     const data = response.data;
     dispatch({ type: FETCH_USER_TYPES, payload: data });
   });
 };
 
 export const createUser = userData => dispatch => {
-  return api.instance.post(Constants.API_PATHS.USER, userData).then(response => {
+  return api.postUser(userData).then(response => {
     const data = response.data;
     dispatch({ type: CREATE_USER, payload: data });
   });
 };
 
 export const editUser = (id, userData) => dispatch => {
-  return api.instance.put(`${Constants.API_PATHS.USER}/${id}`, userData).then(response => {
+  return api.putUser(id, userData).then(response => {
     const data = response.data;
     dispatch({ type: EDIT_USER, payload: data });
   });
 };
 
 export const deleteUser = (id, endDate) => dispatch => {
-  return api.instance.delete(`${Constants.API_PATHS.USER}/${id}`, { data: { id, endDate } }).then(response => {
+  return api.deleteUser(id, endDate).then(response => {
     const data = response.data;
     dispatch({ type: DELETE_USER, payload: data });
   });
@@ -57,7 +56,7 @@ export const deleteUser = (id, endDate) => dispatch => {
 export const searchUsers = () => (dispatch, getState) => {
   const params = { ...getState().user.searchCriteria };
 
-  return api.instance.get(Constants.API_PATHS.USER, { params: { ...params } }).then(response => {
+  return api.searchUsers(params).then(response => {
     const data = response.data;
     dispatch({ type: SEARCH_USERS, payload: data });
   });

@@ -60,6 +60,15 @@ namespace Hmcr.Data.Database.Entities
         public virtual DbSet<HmrWorkReport> HmrWorkReports { get; set; }
         public virtual DbSet<HmrWorkReportHist> HmrWorkReportHists { get; set; }
 
+        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        {
+            if (!optionsBuilder.IsConfigured)
+            {
+#warning To protect potentially sensitive information in your connection string, you should move it out of source code. See http://go.microsoft.com/fwlink/?LinkId=723263 for guidance on storing connection strings.
+                optionsBuilder.UseSqlServer("Data Source=nc056697;Initial Catalog=HMR_DEV;Integrated Security=True");
+            }
+        }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<HmrActivityCode>(entity =>
@@ -3410,10 +3419,6 @@ Offset from beginning of segment.");
                     .HasColumnType("numeric(9, 0)")
                     .HasComment("Multipurpose Internet Mail Extensions (MIME) type of the submitted file");
 
-                entity.Property(e => e.PartyId)
-                    .HasColumnName("PARTY_ID")
-                    .HasColumnType("numeric(9, 0)");
-
                 entity.Property(e => e.ServiceAreaNumber)
                     .HasColumnName("SERVICE_AREA_NUMBER")
                     .HasColumnType("numeric(9, 0)")
@@ -3434,12 +3439,6 @@ Offset from beginning of segment.");
                     .HasForeignKey(d => d.MimeTypeId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("HRM_SUBM_OBJ_MIME_TYPE_FK");
-
-                entity.HasOne(d => d.Party)
-                    .WithMany(p => p.HmrSubmissionObjects)
-                    .HasForeignKey(d => d.PartyId)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("HMR_SUBMISSION_OBJECT_HMR_PARTY_FK");
 
                 entity.HasOne(d => d.ServiceAreaNumberNavigation)
                     .WithMany(p => p.HmrSubmissionObjects)
