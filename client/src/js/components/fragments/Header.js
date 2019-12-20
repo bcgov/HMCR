@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { connect } from 'react-redux';
 import { Link } from 'react-router-dom';
 import {
@@ -21,9 +21,15 @@ import Authorize from '../fragments/Authorize';
 
 import * as Keycloak from '../../Keycloak';
 import * as Constants from '../../Constants';
+import * as api from '../../Api';
 
 const Header = ({ currentUser }) => {
   const [collapsed, setCollapsed] = useState(true);
+  const [version, setVersion] = useState(null);
+
+  useEffect(() => {
+    api.getVersion().then(response => setVersion(response.data.environment.toLowerCase()));
+  });
 
   const toggleNavbar = () => {
     setCollapsed(!collapsed);
@@ -59,7 +65,7 @@ const Header = ({ currentUser }) => {
           <Collapse isOpen={!collapsed} navbar />
         </Container>
       </Navbar>
-      <Navbar expand="lg" className="navbar-dark main-nav">
+      <Navbar expand="lg" className={`navbar-dark main-nav ${version}`}>
         <Container>
           <Collapse isOpen={!collapsed} navbar>
             <Nav className="navbar-nav">

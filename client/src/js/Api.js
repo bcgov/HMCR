@@ -46,3 +46,5 @@ export const getPermissions = () => instance.get(Constants.API_PATHS.PERMISSIONS
 export const getSubmissionStreams = () => instance.get(Constants.API_PATHS.SUBMISSION_STREAMS);
 
 export const searchSubmissions = params => instance.get(Constants.API_PATHS.SUBMISSIONS, { params: { ...params } });
+
+export const getVersion = () => instance.get(Constants.API_PATHS.VERSION);

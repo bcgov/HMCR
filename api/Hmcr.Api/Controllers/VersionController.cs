@@ -42,7 +42,7 @@ namespace Hmcr.Api.Controllers
             {
                 environment = "Test";
             }
-            else if (_env.IsDevelopment())
+            else if (_env.IsDevelopment() || _env.IsEnvironment("Local"))
             {
                 environment = "Development";
             }
