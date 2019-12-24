@@ -18,6 +18,7 @@ namespace Hmcr.Data.Repositories
         Task<SubmissionObjectDto> GetSubmissionObjectAsync(decimal submissionObjectId);
         Task<PagedDto<SubmissionObjectSearchDto>> GetSubmissionObjectsAsync(decimal serviceAreaNumber, DateTime dateFrom, DateTime dateTo, int pageSize, int pageNumber, string orderBy = "AppCreateTimestamp DESC");
         Task<bool> IsDuplicateFileAsync(SubmissionObjectCreateDto submission);
+        Task<HmrSubmissionObject> GetSubmissionObjectEntityAsync(decimal submissionObjectId);
     }
     public class SubmissionObjectRepository : HmcrRepositoryBase<HmrSubmissionObject>, ISubmissionObjectRepository
     {
@@ -42,6 +43,11 @@ namespace Hmcr.Data.Repositories
         public async Task<SubmissionObjectDto> GetSubmissionObjectAsync(decimal submissionObjectId)
         {
             return await GetByIdAsync<SubmissionObjectDto>(submissionObjectId);
+        }
+
+        public async Task<HmrSubmissionObject> GetSubmissionObjectEntityAsync(decimal submissionObjectId)
+        {
+            return await DbSet.Include(x => x.HmrSubmissionRows).FirstAsync(x => x.SubmissionObjectId == submissionObjectId);
         }
 
         //public async Task<IEnumerable<SubmissionObjectSearchDto>> GetSubmissionObjectsAsync(decimal serviceAreaNumber, DateTime dateFrom, DateTime dateTo)

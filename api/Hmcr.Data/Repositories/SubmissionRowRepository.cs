@@ -36,6 +36,8 @@ namespace Hmcr.Data.Repositories
                 var query = DbSet
                     .AnyAsync(x => x.SubmissionObject.SubmissionStreamId == submissionStreamId && x.RowHash == row.RowHash);
 
+                //todo: should we check if the file was successfully processed
+
                 if (await query)
                     yield return row;
             }
@@ -48,6 +50,8 @@ namespace Hmcr.Data.Repositories
             {
                 var query = DbSet
                     .AnyAsync(x => x.SubmissionObject.SubmissionStreamId == submissionStreamId && x.RowHash == row.GetSha256Hash());
+
+                //todo: should we check if the file was successfully processed
 
                 if (await query)
                     yield return i;
@@ -66,7 +70,9 @@ namespace Hmcr.Data.Repositories
                     .Where(x => x.SubmissionObject.SubmissionStreamId == submissionStreamId && x.RecordNumber == row.RecordNumber && x.RowStatusId != duplicate && x.RowHash != row.RowHash)
                     .SelectMany(x => x.SubmissionObject.ServiceAreaNumberNavigation.HmrContractTerms)
                     .AnyAsync(x => x.PartyId == partyId);
-                    
+
+                //todo: should we check if the file was successfully processed
+
                 if (query)
                     yield return row.RecordNumber;
             }

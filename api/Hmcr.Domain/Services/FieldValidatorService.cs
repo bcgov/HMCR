@@ -45,6 +45,11 @@ namespace Hmcr.Domain.Services
             _rules.Add(new FieldValidationRule(Entities.Role, Fields.EndDate, FieldTypes.Date, false, null, null, null, null, new DateTime(1900, 1, 1), new DateTime(9999, 12, 31), null, null));
         }
 
+        private void LoadWorkReportEntityRule()
+        {
+
+        }
+
         public void Validate<T>(string entityName, T entity, Dictionary<string, List<string>> errors, params string[] fieldsToSkip)
         {
             var fields = typeof(T).GetProperties();
