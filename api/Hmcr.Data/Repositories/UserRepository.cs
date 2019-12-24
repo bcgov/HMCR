@@ -116,16 +116,16 @@ namespace Hmcr.Data.Repositories
 
                 var partyEntity = _partyRepo.GetPartyEntityByGuid(_currentUser.BusinessGuid);
 
-                if (partyEntity != null)
-                    return;
-
-                userEntity.Party = new HmrParty
+                if (partyEntity == null)
                 {
-                    BusinessGuid = _currentUser.BusinessGuid,
-                    BusinessLegalName = _currentUser.BusinessLegalName.Trim(),
-                    BusinessNumber = _currentUser.BusinessNumber,
-                    DisplayName = _currentUser.BusinessLegalName.Trim()
-                };
+                    userEntity.Party = new HmrParty
+                    {
+                        BusinessGuid = _currentUser.BusinessGuid,
+                        BusinessLegalName = _currentUser.BusinessLegalName.Trim(),
+                        BusinessNumber = _currentUser.BusinessNumber,
+                        DisplayName = _currentUser.BusinessLegalName.Trim()
+                    };
+                }
 
                 DbContext.SaveChanges();
             }
