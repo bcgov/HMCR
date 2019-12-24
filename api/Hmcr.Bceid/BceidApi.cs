@@ -29,7 +29,7 @@ namespace Hmcr.Bceid
             _accountCache = new Dictionary<string, BceidAccount>();
             _timer = new System.Timers.Timer();
             _timer.Elapsed += new ElapsedEventHandler(RefreshCache);
-            _timer.Interval = _client.CacheLifespan * 60000; //minutes
+            _timer.Interval = TimeSpan.FromMinutes(_client.CacheLifespan).TotalMilliseconds;
             _timer.Enabled = true;
         }
 

@@ -1,3 +1,4 @@
+using Hangfire;
 using Hmcr.Api.Authentication;
 using Hmcr.Api.Extensions;
 using Hmcr.Bceid;
@@ -26,9 +27,11 @@ namespace Hmcr.Api
 
         public void ConfigureServices(IServiceCollection services)
         {
+            var connectionString = Configuration.GetValue<string>("CONNECTION_STRING");
+
             services.AddHttpContextAccessor();
             services.AddHmcrAuthentication(Configuration);
-            services.AddHmcrDbContext(Configuration.GetValue<string>("CONNECTION_STRING"));
+            services.AddHmcrDbContext(connectionString);
             services.AddCors();
             services.AddHmcrControllers();
             services.AddHmcrAutoMapper();
@@ -37,6 +40,7 @@ namespace Hmcr.Api
             services.AddHmcrSwagger(_env);
             services.AddChrisHttpClient(Configuration);
             services.AddBceidSoapClient(Configuration);
+            services.AddHmcrHangfire(connectionString);
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
@@ -46,13 +50,14 @@ namespace Hmcr.Api
                 app.UseDeveloperExceptionPage();
 
             app.UseHttpsRedirection();
-            app.UseExceptionMiddleware();
-            app.UseAuthentication();
             app.UseHmcrCors();
-            app.UseHmcrSwagger(env, Configuration.GetSection("Constants:SwaggerApiUrl").Value);
-            app.UseRouting();
+            app.UseExceptionMiddleware();
             app.UseAuthorization();
+            app.UseAuthentication();
+            app.UseRouting();
             app.UseHmcrEndpoints();
+            app.UseHangfireDashboard();
+            app.UseHmcrSwagger(env, Configuration.GetSection("Constants:SwaggerApiUrl").Value);
         }
     }
 }

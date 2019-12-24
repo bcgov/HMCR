@@ -1,4 +1,5 @@
-﻿using Hmcr.Api.Authorization;
+﻿using Hangfire;
+using Hmcr.Api.Authorization;
 using Hmcr.Api.Controllers.Base;
 using Hmcr.Domain.Services;
 using Hmcr.Model;
@@ -34,14 +35,16 @@ namespace Hmcr.Api.Controllers
                 return Unauthorized(problem);
             }
 
-            var (SubmissionObjectId, Errors) = await _workRptService.CreateReportAsync(upload);
+            var (submissionObjectId, errors) = await _workRptService.CreateReportAsync(upload);
 
-            if (Errors.Count > 0)
+            if (errors.Count > 0)
             {
-                return ValidationUtils.GetValidationErrorResult(Errors, ControllerContext);
+                return ValidationUtils.GetValidationErrorResult(errors, ControllerContext);
             }
 
-            return CreatedAtRoute("GetSubmissionObject", new { id = SubmissionObjectId }, await _submissionService.GetSubmissionObjectAsync(SubmissionObjectId));
+            //BackgroundJob.Enqueue<IWorkReportService>(x => x.StartBackgroundProcess(submissionObjectId));
+
+            return CreatedAtRoute("GetSubmissionObject", new { id = submissionObjectId }, await _submissionService.GetSubmissionObjectAsync(submissionObjectId));
         }
 
         [HttpPost("duplicates")]
@@ -54,14 +57,21 @@ namespace Hmcr.Api.Controllers
                 return Unauthorized(problem);
             }
 
-            var (Errors, DuplicateRecordNumbers) = await _workRptService.CheckDuplicatesAsync(upload);
+            var (errors, duplicateRecordNumbers) = await _workRptService.CheckDuplicatesAsync(upload);
 
-            if (Errors.Count > 0)
+            if (errors.Count > 0)
             {
-                return ValidationUtils.GetValidationErrorResult(Errors, ControllerContext);
+                return ValidationUtils.GetValidationErrorResult(errors, ControllerContext);
             }
 
-            return Ok(DuplicateRecordNumbers);
+            return Ok(duplicateRecordNumbers);
+        }
+
+        [HttpPost("tests/{id}")]
+        [RequiresPermission(Permissions.FileUploadWrite)]
+        public async Task TestAsync(decimal id)
+        {
+            await _workRptService.StartBackgroundProcess(id);
         }
     }
 }

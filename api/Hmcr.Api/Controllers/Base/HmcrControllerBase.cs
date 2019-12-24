@@ -7,7 +7,7 @@ namespace Hmcr.Api.Controllers.Base
 {
     public class HmcrControllerBase : ControllerBase
     {
-        public ValidationProblemDetails IsServiceAreaAuthorized(HmcrCurrentUser currentUser, decimal serviceAreaNumber)
+        protected ValidationProblemDetails IsServiceAreaAuthorized(HmcrCurrentUser currentUser, decimal serviceAreaNumber)
         {
             var serviceArea = currentUser.UserInfo.ServiceAreas.FirstOrDefault(x => x.ServiceAreaNumber == serviceAreaNumber);
             if (serviceArea == null)

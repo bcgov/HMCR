@@ -11,4 +11,12 @@ namespace Hmcr.Domain.CsvHelpers
             Map(m => m.EndDate).TypeConverter<DateTypeConverter>();
         }
     }
+
+    public class WorkRptUntypedCsvDtoMap : ClassMap<WorkRptUntypedCsvDto>
+    {
+        public WorkRptUntypedCsvDtoMap()
+        {
+            AutoMap();
+        }
+    }
 }

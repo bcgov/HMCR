@@ -23,7 +23,7 @@ namespace Hmcr.Api.Controllers
             _permissionService = permissionService;
         }
 
-        [HttpGet("")]
+        [HttpGet]
         [RequiresPermission(Permissions.RoleRead)]
         public async Task<ActionResult<IEnumerable<PermissionDto>>> GetActivePermissionsAsync()
         {

@@ -22,6 +22,9 @@ using Hmcr.Model.JsonConverters;
 using Hmcr.Domain.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Extensions.Configuration;
+using Hangfire;
+using Hangfire.SqlServer;
+using System;
 
 namespace Hmcr.Api.Extensions
 {
@@ -163,6 +166,26 @@ namespace Hmcr.Api.Extensions
 
             //Jwt Bearer Handler
             services.AddScoped<HmcrJwtBearerEvents>();
+        }
+
+        public static void AddHmcrHangfire(this IServiceCollection services, string connectionString)
+        {
+            services.AddHangfire(configuration => configuration
+                .UseSerilogLogProvider()
+                .SetDataCompatibilityLevel(CompatibilityLevel.Version_170)
+                .UseSimpleAssemblyNameTypeSerializer()
+                .UseRecommendedSerializerSettings()
+                .UseSqlServerStorage(connectionString, new SqlServerStorageOptions
+                {
+                    CommandBatchMaxTimeout = TimeSpan.FromMinutes(5),
+                    SlidingInvisibilityTimeout = TimeSpan.FromMinutes(5),
+                    QueuePollInterval = TimeSpan.Zero,
+                    UseRecommendedIsolationLevel = true,
+                    UsePageLocksOnDequeue = true,
+                    DisableGlobalLocks = true
+                }));
+
+            services.AddHangfireServer(options => options.WorkerCount = Environment.ProcessorCount * 3);
         }
     }
 }
