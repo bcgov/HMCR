@@ -121,7 +121,7 @@ const WorkReportingUpload = ({
             <React.Fragment>
               {updateUploadStatusMessage(Constants.UPLOAD_STATE.DUP_CHECK, Constants.UPLOAD_STATE_STATUS.WARNING)}
               <Alert color="warning">
-                <p>The following record number rows are different from the existing data in the database:</p>
+                <p>The following rows are different from the existing data in the database:</p>
                 <ul>
                   {response.data.map((duplicate, index) => (
                     <li key={index}>{duplicate}</li>
@@ -184,7 +184,6 @@ const WorkReportingUpload = ({
         );
         setCompleteMessage(response.data);
         resetCallback();
-        handleFileSubmitted();
       })
       .catch(error => {
         setSavingStatus(updateUploadStatusMessage(Constants.UPLOAD_STATE.SAVING, Constants.UPLOAD_STATE_STATUS.ERROR));
@@ -192,6 +191,7 @@ const WorkReportingUpload = ({
       })
       .finally(() => {
         resetCallback();
+        handleFileSubmitted();
       });
   };
 
@@ -276,6 +276,7 @@ const WorkReportingUpload = ({
         onComplete={resetMessages}
       >
         {dupCheckStatus}
+        {savingStatus}
         {errorMessages && errorMessages.length > 0 && (
           <Alert color="danger">
             <p>Upload unsuccessful. The following errors were found:</p>
@@ -286,7 +287,6 @@ const WorkReportingUpload = ({
             </ul>
           </Alert>
         )}
-        {savingStatus}
         {completeMessage && (
           <Alert color="success">
             Upload successful.
