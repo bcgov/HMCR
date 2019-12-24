@@ -4,9 +4,10 @@ using System.Text;
 
 namespace Hmcr.Model.Dtos.WorkReport
 {
-    public class WorkRptUntypedCsvDto
+    public class WorkReportCsvDto
     {
         public decimal RowId { get; set; }
+        public int RowNumber { get; set; }
         public string RecordType { get; set; }
         public string ServiceArea { get; set; }
         public string RecordNumber { get; set; }

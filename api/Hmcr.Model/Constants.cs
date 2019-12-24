@@ -26,6 +26,11 @@ namespace Hmcr.Model
     {
         public const string User = "user";
         public const string Role = "role";
+        public const string WorkReportD2 = "wr2";
+        public const string WorkReportD3 = "wr3";
+        public const string WorkReportD3Site = "wr3s";
+        public const string WorkReportD4 = "wr4";
+        public const string WorkReportD4Site = "wr4s";
     }
 
     public static class FieldTypes
@@ -52,6 +57,7 @@ namespace Hmcr.Model
     {
         public const string Accepted = "A";
         public const string Duplicate = "D";
+        public const string Error = "E";
     }
 
     public static class FileStatus
@@ -78,7 +84,37 @@ namespace Hmcr.Model
         public const string Description = "Description";
 
         public const string PermissionId = "PermissionId";
+
+        public const string RecordType = "RecordType";
+        public const string RecordNumber = "RecordNumber";
+        public const string ServiceArea = "ServiceArea";
+        public const string TaskNumber = "TaskNumber";
+        public const string ActivityNumber = "ActivityNumber";
+        public const string StartDate = "StartDate";
+        public const string Accomplishment = "Accomplishment";
+        public const string UnitOfMeasure = "UnitOfMeasure";
+        public const string PostedDate = "PostedDate";
+        public const string HighwayUnique = "HighwayUnique";
+        public const string Landmark = "Landmark";
+        public const string StartOffset = "StartOffset";
+        public const string EndOffset = "EndOffset";
+        public const string StartLatitude = "StartLatitude";
+        public const string StartLongitude = "StartLongitude";
+        public const string EndLatitude = "EndLatitude";
+        public const string EndLongitude = "EndLongitude";
+        public const string StructureNumber = "StructureNumber";
+        public const string SiteNumber = "SiteNumber";
+        public const string ValueOfWork = "ValueOfWork";
+        public const string Comments = "Comments";
     }
 
+    public static class WorkReportHeaders
+    {
+        public static string[] CommonMandatoryFields = new string[] 
+        {
+            Fields.RecordType, Fields.ServiceArea, Fields.RecordNumber, Fields.ActivityNumber, 
+            Fields.EndDate, Fields.Accomplishment, Fields.UnitOfMeasure, Fields.PostedDate 
+        };
+    }
 
 }

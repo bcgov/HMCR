@@ -22,7 +22,7 @@ namespace Hmcr.Domain.Services
 {
     public interface IWildlifeReportService
     {
-        Task<(decimal SubmissionObjectId, Dictionary<string, List<string>> Errors)> CreateReportAsync(FileUploadDto upload);
+        Task<(decimal submissionObjectId, Dictionary<string, List<string>> errors)> CreateReportAsync(FileUploadDto upload);
     }
     public class WildlifeReportService : ReportServiceBase, IWildlifeReportService
     {
@@ -39,7 +39,7 @@ namespace Hmcr.Domain.Services
             using var stringReader = new StringReader(text);
             using var csv = new CsvReader(stringReader);
 
-            ConfigCsvHelper(errors, csv);
+            CsvHelperUtils.Config(errors, csv);
             csv.Configuration.RegisterClassMap<WildlifeRptInitCsvDtoMap>();
 
             while (csv.Read())

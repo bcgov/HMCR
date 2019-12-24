@@ -15,6 +15,7 @@ namespace Hmcr.Data.Repositories
     {
         Task<IEnumerable<ServiceAreaDto>> GetServiceAreaBySystemUserIdAsync(long systemUserId);
         Task<IEnumerable<ServiceAreaNumberDto>> GetAllServiceAreasAsync();
+        IEnumerable<ServiceAreaNumberDto> GetAllServiceAreas();
         Task<int> CountServiceAreaNumbersAsync(IEnumerable<decimal> serviceAreaNumbers);
     }
 
@@ -37,6 +38,11 @@ namespace Hmcr.Data.Repositories
         public async Task<IEnumerable<ServiceAreaNumberDto>> GetAllServiceAreasAsync()
         {
             return await GetAllAsync<ServiceAreaNumberDto>();
+        }
+
+        public IEnumerable<ServiceAreaNumberDto> GetAllServiceAreas()
+        {
+            return GetAll<ServiceAreaNumberDto>();
         }
 
         public async Task<int> CountServiceAreaNumbersAsync(IEnumerable<decimal> serviceAreaNumbers)

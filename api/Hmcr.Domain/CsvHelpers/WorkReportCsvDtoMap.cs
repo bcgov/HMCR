@@ -12,9 +12,9 @@ namespace Hmcr.Domain.CsvHelpers
         }
     }
 
-    public class WorkRptUntypedCsvDtoMap : ClassMap<WorkRptUntypedCsvDto>
+    public class WorkReportCsvDtoMap : ClassMap<WorkReportCsvDto>
     {
-        public WorkRptUntypedCsvDtoMap()
+        public WorkReportCsvDtoMap()
         {
             AutoMap();
         }

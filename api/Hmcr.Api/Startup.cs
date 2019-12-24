@@ -1,14 +1,18 @@
 using Hangfire;
+using Hangfire.AspNetCore;
 using Hmcr.Api.Authentication;
 using Hmcr.Api.Extensions;
 using Hmcr.Bceid;
 using Hmcr.Chris;
+using Hmcr.Domain.Hangfire;
+using Hmcr.Domain.Services;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-
+using System;
+using System.Linq;
 
 namespace Hmcr.Api
 {
@@ -43,9 +47,9 @@ namespace Hmcr.Api
             services.AddHmcrHangfire(connectionString);
         }
 
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, ISubmissionObjectJobService jobService, 
+            IServiceScopeFactory serviceScopeFactory, IServiceAreaService svcAreaService)
         {
-
             if (env.IsDevelopment())
                 app.UseDeveloperExceptionPage();
 
@@ -58,6 +62,10 @@ namespace Hmcr.Api
             app.UseHmcrEndpoints();
             app.UseHangfireDashboard();
             app.UseHmcrSwagger(env, Configuration.GetSection("Constants:SwaggerApiUrl").Value);
+
+            //Register Hangfire Recurring Jobs 
+            var serviceAreas = svcAreaService.GetAllServiceAreas().Where(x => x.ServiceAreaNumber == 10);
+            SubmissionObjectJobService.RegisterReportingJobs(serviceAreas);
         }
     }
 }

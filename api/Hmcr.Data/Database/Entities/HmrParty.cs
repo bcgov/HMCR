@@ -8,6 +8,7 @@ namespace Hmcr.Data.Database.Entities
         public HmrParty()
         {
             HmrContractTerms = new HashSet<HmrContractTerm>();
+            HmrSubmissionObjects = new HashSet<HmrSubmissionObject>();
             HmrSystemUsers = new HashSet<HmrSystemUser>();
         }
 
@@ -35,6 +36,7 @@ namespace Hmcr.Data.Database.Entities
         public DateTime DbAuditLastUpdateTimestamp { get; set; }
 
         public virtual ICollection<HmrContractTerm> HmrContractTerms { get; set; }
+        public virtual ICollection<HmrSubmissionObject> HmrSubmissionObjects { get; set; }
         public virtual ICollection<HmrSystemUser> HmrSystemUsers { get; set; }
     }
 }

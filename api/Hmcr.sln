@@ -13,7 +13,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Hmcr.Domain", "Hmcr.Domain\
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Hmcr.Chris", "Hmcr.Chris\Hmcr.Chris.csproj", "{E0E144A5-5859-4B33-B540-9A6A8139490C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Hmcr.Bceid", "Hmcr.Bceid\Hmcr.Bceid.csproj", "{0078AD21-A559-41B2-B960-EE2D685D3E6F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Hmcr.Bceid", "Hmcr.Bceid\Hmcr.Bceid.csproj", "{0078AD21-A559-41B2-B960-EE2D685D3E6F}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

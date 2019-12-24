@@ -1,5 +1,4 @@
-﻿using Hangfire;
-using Hmcr.Api.Authorization;
+﻿using Hmcr.Api.Authorization;
 using Hmcr.Api.Controllers.Base;
 using Hmcr.Domain.Services;
 using Hmcr.Model;
@@ -65,13 +64,6 @@ namespace Hmcr.Api.Controllers
             }
 
             return Ok(duplicateRecordNumbers);
-        }
-
-        [HttpPost("tests/{id}")]
-        [RequiresPermission(Permissions.FileUploadWrite)]
-        public async Task TestAsync(decimal id)
-        {
-            await _workRptService.StartBackgroundProcess(id);
         }
     }
 }

@@ -3,20 +3,15 @@ using Hmcr.Data.Database.Entities;
 using Hmcr.Data.Repositories.Base;
 using Hmcr.Model;
 using Hmcr.Model.Dtos.SubmissionRow;
-using Hmcr.Model.Utils;
 using Microsoft.EntityFrameworkCore;
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Hmcr.Data.Repositories
 {
     public interface ISumbissionRowRepository
     {
-        IAsyncEnumerable<SubmissionRowDto> FindDuplicateRowsAsync(decimal submissionStreamId, IEnumerable<SubmissionRowDto> rows);
-        IAsyncEnumerable<int> FindDuplicateRowsAsync(decimal submissionStreamId, IEnumerable<string> rows);
+        IAsyncEnumerable<SubmissionRowDto> FindDuplicateRowsAsync(decimal submissionStreamId, decimal partyId, IEnumerable<SubmissionRowDto> rows);
         IAsyncEnumerable<string> FindDuplicateRowsToOverwriteAsync(decimal submissionStreamId, decimal partyId, IEnumerable<SubmissionRowDto> rows);
     }
     public class SubmissionRowRepository : HmcrRepositoryBase<HmrSubmissionRow>, ISumbissionRowRepository
@@ -29,34 +24,19 @@ namespace Hmcr.Data.Repositories
             _statusRepo = statusRepo;
         }
 
-        public async IAsyncEnumerable<SubmissionRowDto> FindDuplicateRowsAsync(decimal submissionStreamId, IEnumerable<SubmissionRowDto> rows)
+        public async IAsyncEnumerable<SubmissionRowDto> FindDuplicateRowsAsync(decimal submissionStreamId, decimal partyId, IEnumerable<SubmissionRowDto> rows)
         {            
             foreach (var row in rows)
             {
-                var query = DbSet
-                    .AnyAsync(x => x.SubmissionObject.SubmissionStreamId == submissionStreamId && x.RowHash == row.RowHash);
+                var latestRow = await DbSet
+                    .Where(x => x.SubmissionObject.SubmissionStreamId == submissionStreamId 
+                        && x.RecordNumber == row.RecordNumber
+                        && x.SubmissionObject.PartyId == partyId) //todo: also check if the file was processed successfully
+                    .OrderByDescending(x => x.RowId)
+                    .FirstOrDefaultAsync();
 
-                //todo: should we check if the file was successfully processed
-
-                if (await query)
+                if (latestRow != null && latestRow.RowHash == row.RowHash)
                     yield return row;
-            }
-        }
-
-        public async IAsyncEnumerable<int> FindDuplicateRowsAsync(decimal submissionStreamId, IEnumerable<string> rows)
-        {
-            var i = 1;
-            foreach (var row in rows)
-            {
-                var query = DbSet
-                    .AnyAsync(x => x.SubmissionObject.SubmissionStreamId == submissionStreamId && x.RowHash == row.GetSha256Hash());
-
-                //todo: should we check if the file was successfully processed
-
-                if (await query)
-                    yield return i;
-
-                i++;
             }
         }
 
@@ -66,14 +46,14 @@ namespace Hmcr.Data.Repositories
 
             foreach (var row in rows.Where(x => x.RowStatusId != duplicate))
             {
-                var query = await DbSet
-                    .Where(x => x.SubmissionObject.SubmissionStreamId == submissionStreamId && x.RecordNumber == row.RecordNumber && x.RowStatusId != duplicate && x.RowHash != row.RowHash)
-                    .SelectMany(x => x.SubmissionObject.ServiceAreaNumberNavigation.HmrContractTerms)
-                    .AnyAsync(x => x.PartyId == partyId);
-
-                //todo: should we check if the file was successfully processed
-
-                if (query)
+                var latestRow = await DbSet
+                    .Where(x => x.SubmissionObject.SubmissionStreamId == submissionStreamId
+                        && x.RecordNumber == row.RecordNumber
+                        && x.SubmissionObject.PartyId == partyId) //todo: also check if the file was processed successfully
+                    .OrderByDescending(x => x.RowId)
+                    .FirstOrDefaultAsync();
+                
+                if (latestRow != null && latestRow.RowHash != row.RowHash)
                     yield return row.RecordNumber;
             }
         }
