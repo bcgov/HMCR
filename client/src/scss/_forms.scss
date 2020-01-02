@@ -89,3 +89,14 @@
 .form-control.multi-select.is-invalid {
   border-color: #d93e45;
 }
+
+.multiselect-all {
+  // margin-left: -0.75rem;
+  // padding-left: 2.25rem;
+  // margin-right: -0.75rem;
+  // padding-right: 0.75rem;
+
+  .custom-control-label {
+    font-weight: bold;
+  }
+}
