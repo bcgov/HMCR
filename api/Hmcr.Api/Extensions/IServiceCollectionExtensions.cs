@@ -165,6 +165,9 @@ namespace Hmcr.Api.Extensions
             //FieldValidationService as Singleton
             services.AddSingleton<IFieldValidatorService, FieldValidatorService>();
 
+            //RegexDefs as Singleton
+            services.AddSingleton<RegexDefs>();
+
             //Jwt Bearer Handler
             services.AddScoped<HmcrJwtBearerEvents>();
         }

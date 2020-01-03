@@ -60,12 +60,11 @@ namespace Hmcr.Api
             app.UseAuthentication();
             app.UseRouting();
             app.UseHmcrEndpoints();
-            app.UseHangfireDashboard();
             app.UseHmcrSwagger(env, Configuration.GetSection("Constants:SwaggerApiUrl").Value);
 
             //Register Hangfire Recurring Jobs 
-            var serviceAreas = svcAreaService.GetAllServiceAreas().Where(x => x.ServiceAreaNumber == 10);
-            SubmissionObjectJobService.RegisterReportingJobs(serviceAreas);
+            //var serviceAreas = svcAreaService.GetAllServiceAreas();
+            //SubmissionObjectJobService.RegisterReportingJobs(serviceAreas);
         }
     }
 }
