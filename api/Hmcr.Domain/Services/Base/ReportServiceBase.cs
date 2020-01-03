@@ -45,20 +45,19 @@ namespace Hmcr.Domain.Services.Base
             _contractRepo = contractRepo;
             _statusRepo = statusRepo;
         }
-        public async Task<(Dictionary<string, List<string>> Errors, List<string> DuplicateRecordNumbers)> CheckDuplicatesAsync(FileUploadDto upload)
+        public async Task<(Dictionary<string, List<string>> errors, List<string> duplicateRecordNumbers)> CheckDuplicatesAsync(FileUploadDto upload)
         {
-            var errors = new Dictionary<string, List<string>>();
             var recordNumbers = new List<string>();
 
             if (!CheckDuplicate)
+                return (new Dictionary<string, List<string>>(), recordNumbers);
+
+            var (errors, submission) = await ValidateAndLogReportErrorAsync(upload);
+
+            if (errors.Count > 0)
                 return (errors, recordNumbers);
 
-            var (Errors, Submission) = await ValidateAndLogReportErrorAsync(upload);
-
-            if (Errors.Count > 0)
-                return (Errors, recordNumbers);
-
-            await foreach (var recordNumber in _rowRepo.FindDuplicateRowsToOverwriteAsync(Submission.SubmissionStreamId, Submission.PartyId, Submission.SubmissionRows))
+            await foreach (var recordNumber in _rowRepo.FindDuplicateRowsToOverwriteAsync(submission.SubmissionStreamId, (decimal)submission.PartyId, submission.SubmissionRows))
             {
                 recordNumbers.Add(recordNumber);
             }
@@ -80,14 +79,14 @@ namespace Hmcr.Domain.Services.Base
             return false;
         }
 
-        private async Task<(Dictionary<string, List<string>> Errors, SubmissionObjectCreateDto Submission)> ValidateAndParseUploadFileAsync(FileUploadDto upload)
+        private async Task<(Dictionary<string, List<string>> errors, SubmissionObjectCreateDto submission)> ValidateAndParseUploadFileAsync(FileUploadDto upload)
         {
             var errors = new Dictionary<string, List<string>>();
 
             var reportType = await _streamService.GetSubmissionStreamByTableNameAsync(TableName);
             if (reportType == null)
             {
-                throw new Exception($"The submission stream for {TableNames.WorkReport} is not defined.");
+                throw new Exception($"The submission stream for {TableName} is not defined.");
             }
 
             var submission = new SubmissionObjectCreateDto();
@@ -131,6 +130,12 @@ namespace Hmcr.Domain.Services.Base
                 return (errors, submission);
             }
 
+            if (submission.SubmissionRows.Count == 0)
+            {
+                errors.AddItem("File", "The file contains no rows");
+                return (errors, submission);
+            }
+
             if (CheckDuplicate && HasDuplicateRecordNumberInFile(submission.SubmissionRows, errors))
             {
                 return (errors, submission);
@@ -140,6 +145,7 @@ namespace Hmcr.Domain.Services.Base
 
             if (partyId == 0)
             {
+                submission.FileHash = null; //it's an error outside of the file; user can submit the same file again and the system should be able to accept it.
                 errors.AddItem("EndDate", $"Cannot find the contract term for this file");
                 return (errors, submission);
             }
@@ -157,7 +163,7 @@ namespace Hmcr.Domain.Services.Base
 
         private async Task MarkDuplicateRowAsync(SubmissionObjectCreateDto submission)
         {
-            await foreach (var row in _rowRepo.FindDuplicateRowsAsync(submission.SubmissionStreamId, submission.SubmissionRows))
+            await foreach (var row in _rowRepo.FindDuplicateRowsAsync(submission.SubmissionStreamId, (decimal)submission.PartyId, submission.SubmissionRows))
             {
                 row.RowStatusId = await _statusRepo.GetStatusIdByTypeAndCodeAsync(StatusType.Row, RowStatus.Duplicate);
             }
@@ -180,60 +186,35 @@ namespace Hmcr.Domain.Services.Base
             throw new NotImplementedException();
         }
 
-        protected static void ConfigCsvHelper(Dictionary<string, List<string>> errors, CsvReader csv)
+        private async Task<(Dictionary<string, List<string>> errors, SubmissionObjectCreateDto submission)> ValidateAndLogReportErrorAsync(FileUploadDto upload)
         {
-            csv.Configuration.PrepareHeaderForMatch = (string header, int index) => Regex.Replace(header.ToLower(), @"\s", string.Empty);
-            csv.Configuration.CultureInfo = CultureInfo.GetCultureInfo("en-CA");
+            var (errors, submission) = await ValidateAndParseUploadFileAsync(upload);
 
-            csv.Configuration.TrimOptions = TrimOptions.Trim;
-            csv.Configuration.HeaderValidated = (bool valid, string[] column, int row, ReadingContext context) =>
+            if (errors.Count > 0)
             {
-                if (valid) return;
-
-                errors.AddItem($"{column[0]}", $"The header [{column[0].WordToWords()}] is missing.");
-            };
-        }
-
-        private async Task<(Dictionary<string, List<string>> Errors, SubmissionObjectCreateDto Submission)> ValidateAndLogReportErrorAsync(FileUploadDto upload)
-        {
-            var (Errors, Submission) = await ValidateAndParseUploadFileAsync(upload);
-
-            if (Errors.Count > 0)
-            {
-                Submission.ErrorDetail = GetErrorDetail(Errors);
-                Submission.SubmissionRows = new List<SubmissionRowDto>();
-                Submission.SubmissionStatusId = await _statusRepo.GetStatusIdByTypeAndCodeAsync(StatusType.File, FileStatus.Error);
-                await _submissionRepo.CreateSubmissionObjectAsync(Submission);
+                submission.ErrorDetail = errors.GetErrorDetail();
+                submission.SubmissionRows = new List<SubmissionRowDto>();
+                submission.SubmissionStatusId = await _statusRepo.GetStatusIdByTypeAndCodeAsync(StatusType.File, FileStatus.Error);
+                await _submissionRepo.CreateSubmissionObjectAsync(submission);
                 await _unitOfWork.CommitAsync();
             }
 
-            return (Errors, Submission);
+            return (errors, submission);
         }
 
-        private string GetErrorDetail(Dictionary<string, List<string>> errors)
+        public async Task<(decimal submissionObjectId, Dictionary<string, List<string>> errors)> CreateReportAsync(FileUploadDto upload)
         {
-            var errorDetail = new StringBuilder();
-            foreach (var (error, detail) in errors.SelectMany(error => error.Value.Select(detail => (error, detail))))
+            var (errors, submission) = await ValidateAndLogReportErrorAsync(upload);
+
+            if (errors.Count > 0)
             {
-                errorDetail.AppendLine($"{error.Key}: {detail}");
+                return (0, errors);
             }
 
-            return errorDetail.ToString();
-        }
-
-        public async Task<(decimal SubmissionObjectId, Dictionary<string, List<string>> Errors)> CreateReportAsync(FileUploadDto upload)
-        {
-            var (Errors, Submission) = await ValidateAndLogReportErrorAsync(upload);
-
-            if (Errors.Count > 0)
-            {
-                return (0, Errors);
-            }
-
-            var submissionEntity = await _submissionRepo.CreateSubmissionObjectAsync(Submission);
+            var submissionEntity = await _submissionRepo.CreateSubmissionObjectAsync(submission);
             await _unitOfWork.CommitAsync();
 
-            return (submissionEntity.SubmissionObjectId, Errors);
+            return (submissionEntity.SubmissionObjectId, errors);
         }
     }
 }

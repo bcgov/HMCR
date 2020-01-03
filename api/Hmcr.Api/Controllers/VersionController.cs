@@ -25,7 +25,6 @@ namespace Hmcr.Api.Controllers
             _env = env;
         }
 
-        [Route("")]
         [HttpGet]
         public ActionResult<VersionInfo> GetVersionInfo()
         {

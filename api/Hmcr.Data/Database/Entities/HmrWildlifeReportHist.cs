@@ -12,7 +12,7 @@ namespace Hmcr.Data.Database.Entities
         public decimal SubmissionObjectId { get; set; }
         public decimal? ValidationStatusId { get; set; }
         public string RecordType { get; set; }
-        public decimal ContractServiceArea { get; set; }
+        public decimal ServiceArea { get; set; }
         public DateTime? AccidentDate { get; set; }
         public string TimeOfKill { get; set; }
         public decimal? Latitude { get; set; }

@@ -12,6 +12,7 @@ namespace Hmcr.Data.Database.Entities
         public decimal SubmissionObjectId { get; set; }
         public decimal? ValidationStatusId { get; set; }
         public string RecordType { get; set; }
+        public decimal ServiceArea { get; set; }
         public string RecordNumber { get; set; }
         public string TaskNumber { get; set; }
         public string ActivityNumber { get; set; }

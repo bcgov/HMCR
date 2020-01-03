@@ -1,13 +1,18 @@
+using Hangfire;
+using Hangfire.AspNetCore;
 using Hmcr.Api.Authentication;
 using Hmcr.Api.Extensions;
 using Hmcr.Bceid;
 using Hmcr.Chris;
+using Hmcr.Domain.Hangfire;
+using Hmcr.Domain.Services;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-
+using System;
+using System.Linq;
 
 namespace Hmcr.Api
 {
@@ -26,9 +31,11 @@ namespace Hmcr.Api
 
         public void ConfigureServices(IServiceCollection services)
         {
+            var connectionString = Configuration.GetValue<string>("CONNECTION_STRING");
+
             services.AddHttpContextAccessor();
             services.AddHmcrAuthentication(Configuration);
-            services.AddHmcrDbContext(Configuration.GetValue<string>("CONNECTION_STRING"));
+            services.AddHmcrDbContext(connectionString);
             services.AddCors();
             services.AddHmcrControllers();
             services.AddHmcrAutoMapper();
@@ -37,22 +44,27 @@ namespace Hmcr.Api
             services.AddHmcrSwagger(_env);
             services.AddChrisHttpClient(Configuration);
             services.AddBceidSoapClient(Configuration);
+            services.AddHmcrHangfire(connectionString);
         }
 
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, ISubmissionObjectJobService jobService, 
+            IServiceScopeFactory serviceScopeFactory, IServiceAreaService svcAreaService)
         {
-
             if (env.IsDevelopment())
                 app.UseDeveloperExceptionPage();
 
             app.UseHttpsRedirection();
-            app.UseExceptionMiddleware();
-            app.UseAuthentication();
             app.UseHmcrCors();
-            app.UseHmcrSwagger(env, Configuration.GetSection("Constants:SwaggerApiUrl").Value);
-            app.UseRouting();
+            app.UseExceptionMiddleware();
             app.UseAuthorization();
+            app.UseAuthentication();
+            app.UseRouting();
             app.UseHmcrEndpoints();
+            app.UseHmcrSwagger(env, Configuration.GetSection("Constants:SwaggerApiUrl").Value);
+
+            //Register Hangfire Recurring Jobs 
+            //var serviceAreas = svcAreaService.GetAllServiceAreas();
+            //SubmissionObjectJobService.RegisterReportingJobs(serviceAreas);
         }
     }
 }

@@ -22,8 +22,8 @@ namespace Hmcr.Domain.Services
 {
     public interface IRockfallReportService
     {
-        Task<(Dictionary<string, List<string>> Errors, List<string> DuplicateRecordNumbers)> CheckDuplicatesAsync(FileUploadDto upload);
-        Task<(decimal SubmissionObjectId, Dictionary<string, List<string>> Errors)> CreateReportAsync(FileUploadDto upload);
+        Task<(Dictionary<string, List<string>> errors, List<string> duplicateRecordNumbers)> CheckDuplicatesAsync(FileUploadDto upload);
+        Task<(decimal submissionObjectId, Dictionary<string, List<string>> errors)> CreateReportAsync(FileUploadDto upload);
 
     }
     public class RockfallReportService : ReportServiceBase, IRockfallReportService
@@ -44,7 +44,7 @@ namespace Hmcr.Domain.Services
             using var stringReader = new StringReader(text);
             using var csv = new CsvReader(stringReader);
 
-            ConfigCsvHelper(errors, csv);
+            CsvHelperUtils.Config(errors, csv);
             csv.Configuration.RegisterClassMap<RockfallRptInitCsvDtoMap>();
 
             while (csv.Read())

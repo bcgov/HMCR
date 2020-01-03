@@ -9,8 +9,9 @@ namespace Hmcr.Model.Dtos.SubmissionStatus
     public class SubmissionStatusDto
     {
         [JsonPropertyName("id")]
-        public decimal SubmissionStatusId { get; set; }
-        public string SubmissionStatusCode { get; set; }
+        public decimal StatusId { get; set; }
+        public string StatusCode { get; set; }
         public string Description { get; set; }
+        public string StatusType { get; set; }
     }
 }
