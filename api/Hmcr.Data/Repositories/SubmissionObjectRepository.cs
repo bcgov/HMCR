@@ -61,7 +61,7 @@ namespace Hmcr.Data.Repositories
                 .Include(x => x.SubmissionStream)
                 .Include(x => x.SubmissionStatus)
                 .Include(x => x.HmrSubmissionRows)
-                .OrderBy(x => x.SubmissionObjectId)
+                .OrderBy(x => x.SubmissionObjectId) //must be ascending order
                 .ToArrayAsync();
 
             return submissions;

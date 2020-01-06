@@ -27,6 +27,7 @@ namespace Hmcr.Model
         public const string User = "user";
         public const string Role = "role";
         public const string WorkReportD2 = "wr2";
+        public const string WorkReportD2B = "wr2b";
         public const string WorkReportD3 = "wr3";
         public const string WorkReportD3Site = "wr3s";
         public const string WorkReportD4 = "wr4";
@@ -58,6 +59,7 @@ namespace Hmcr.Model
         public const string Accepted = "A";
         public const string Duplicate = "D";
         public const string Error = "E";
+        public const string Success = "S";
     }
 
     public static class FileStatus
@@ -65,6 +67,7 @@ namespace Hmcr.Model
         public const string Accepted = "A";
         public const string Duplicate = "D";
         public const string Error = "E";
+        public const string Success = "S";
     }
 
     public static class Fields

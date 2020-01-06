@@ -17,6 +17,7 @@ using Hmcr.Model.Dtos.SubmissionStatus;
 using Hmcr.Model.Dtos.SubmissionStream;
 using Hmcr.Model.Dtos.User;
 using Hmcr.Model.Dtos.UserRole;
+using Hmcr.Model.Dtos.WorkReport;
 
 namespace Hmcr.Data.Mappings
 {
@@ -72,6 +73,8 @@ namespace Hmcr.Data.Mappings
 
             CreateMap<HmrActivityCode, ActivityCodeDto>();
             CreateMap<HmrLocationCode, LocationCodeDto>();
+
+            CreateMap<HmrWorkReport, WorkReportDto>();
         }
     }
 }

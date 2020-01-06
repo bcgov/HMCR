@@ -3,9 +3,6 @@ using CsvHelper.Configuration;
 using CsvHelper.TypeConversion;
 using Hmcr.Model.Utils;
 using System;
-using System.Collections.Generic;
-using System.Globalization;
-using System.Text;
 
 namespace Hmcr.Domain.CsvHelpers
 {
@@ -13,13 +10,12 @@ namespace Hmcr.Domain.CsvHelpers
     {
         public object ConvertFromString(string date, IReaderRow row, MemberMapData memberMapData)
         {
-            if (date.IsEmpty())
-                return null;
+            var (parsed, parsedDate) = DateUtils.ParseDate(date);
 
-            if (date.Length > 8)
-                date = date.Replace("-", "").Replace(".", "").Replace("/", "");
+            if (!parsed)
+                throw new Exception($"The value [{date}] cannot be parsed into date.");
 
-            return DateTime.ParseExact(date, "yyyyMMdd", CultureInfo.InvariantCulture);
+            return parsedDate;
         }
 
         public string ConvertToString(object value, IWriterRow row, MemberMapData memberMapData)

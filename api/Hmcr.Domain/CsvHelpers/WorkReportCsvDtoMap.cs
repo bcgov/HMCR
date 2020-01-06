@@ -19,4 +19,15 @@ namespace Hmcr.Domain.CsvHelpers
             AutoMap();
         }
     }
+
+    public class WorkReportDtoMap : ClassMap<WorkReportDto>
+    {
+        public WorkReportDtoMap()
+        {
+            AutoMap();
+            Map(m => m.StartDate).TypeConverter<DateTypeConverter>();
+            Map(m => m.EndDate).TypeConverter<DateTypeConverter>();
+            Map(m => m.PostedDate).TypeConverter<DateTypeConverter>();
+        }
+    }
 }

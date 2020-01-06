@@ -26,6 +26,7 @@ namespace Hmcr.Domain.Services
             LoadUserEntityRules();
             LoadRoleEntityRules();
             LoadWorkReportD2Rules();
+            LoadWorkReportD2BRules();
             LoadWorkReportD3Rules();
             LoadWorkReportD3SiteRules();
             LoadWorkReportD4Rules();
@@ -66,7 +67,49 @@ namespace Hmcr.Domain.Services
             _rules.Add(new FieldValidationRule(Entities.WorkReportD2, Fields.UnitOfMeasure, FieldTypes.String, true, 1, 3, null, null, null, null, null, null)); //todo lookup
             _rules.Add(new FieldValidationRule(Entities.WorkReportD2, Fields.PostedDate, FieldTypes.Date, true, null, null, null, null, new DateTime(1900, 1, 1), new DateTime(9999, 12, 31), null, null));
             _rules.Add(new FieldValidationRule(Entities.WorkReportD2, Fields.HighwayUnique, FieldTypes.String, false, 0, 16, null, null, null, null, null, null));
+
+            _rules.Add(new FieldValidationRule(Entities.WorkReportD2, Fields.StartLatitude, FieldTypes.String, false, null, null, null, null, null, null, _regex.GetRegexInfo(RegexDefs.D5_6), null));
+            _rules.Add(new FieldValidationRule(Entities.WorkReportD2, Fields.StartLongitude, FieldTypes.String, false, null, null, null, null, null, null, _regex.GetRegexInfo(RegexDefs.D5_6), null));
+            _rules.Add(new FieldValidationRule(Entities.WorkReportD2, Fields.EndLatitude, FieldTypes.String, false, null, null, null, null, null, null, _regex.GetRegexInfo(RegexDefs.D5_6), null));
+            _rules.Add(new FieldValidationRule(Entities.WorkReportD2, Fields.EndLongitude, FieldTypes.String, false, null, null, null, null, null, null, _regex.GetRegexInfo(RegexDefs.D5_6), null));
+
+            _rules.Add(new FieldValidationRule(Entities.WorkReportD2, Fields.Landmark, FieldTypes.String, false, 0, 8, null, null, null, null, null, null));
+            _rules.Add(new FieldValidationRule(Entities.WorkReportD2, Fields.StartOffset, FieldTypes.String, false, null, null, null, null, null, null, _regex.GetRegexInfo(RegexDefs.D4_3), null));
+            _rules.Add(new FieldValidationRule(Entities.WorkReportD2, Fields.EndOffset, FieldTypes.String, false, null, null, null, null, null, null, _regex.GetRegexInfo(RegexDefs.D4_3), null));
+
+            _rules.Add(new FieldValidationRule(Entities.WorkReportD2, Fields.StructureNumber, FieldTypes.String, false, 0, 5, null, null, null, null, null, null));
+            _rules.Add(new FieldValidationRule(Entities.WorkReportD2, Fields.SiteNumber, FieldTypes.String, false, 0, 8, null, null, null, null, _regex.GetRegexInfo(RegexDefs.SiteNumber), null));
+
+            _rules.Add(new FieldValidationRule(Entities.WorkReportD2, Fields.ValueOfWork, FieldTypes.String, false, null, null, null, null, null, null, _regex.GetRegexInfo(RegexDefs.Dollar6_2), null));
             _rules.Add(new FieldValidationRule(Entities.WorkReportD2, Fields.Comments, FieldTypes.String, false, 0, 1024, null, null, null, null, null, null));
+        }
+        private void LoadWorkReportD2BRules()
+        {
+            _rules.Add(new FieldValidationRule(Entities.WorkReportD2B, Fields.RecordType, FieldTypes.String, true, 1, 1, null, null, null, null, _regex.GetRegexInfo(RegexDefs.QREA), null));
+            _rules.Add(new FieldValidationRule(Entities.WorkReportD2B, Fields.RecordNumber, FieldTypes.String, true, 1, 8, null, null, null, null, null, null));
+            _rules.Add(new FieldValidationRule(Entities.WorkReportD2B, Fields.TaskNumber, FieldTypes.String, false, 0, 6, null, null, null, null, null, null));
+            _rules.Add(new FieldValidationRule(Entities.WorkReportD2B, Fields.ActivityNumber, FieldTypes.String, true, 6, 6, null, null, null, null, null, null));
+            _rules.Add(new FieldValidationRule(Entities.WorkReportD2B, Fields.StartDate, FieldTypes.Date, false, null, null, null, null, new DateTime(1900, 1, 1), new DateTime(9999, 12, 31), null, null));
+            _rules.Add(new FieldValidationRule(Entities.WorkReportD2B, Fields.EndDate, FieldTypes.Date, true, null, null, null, null, new DateTime(1900, 1, 1), new DateTime(9999, 12, 31), null, null));
+            _rules.Add(new FieldValidationRule(Entities.WorkReportD2B, Fields.Accomplishment, FieldTypes.String, true, null, null, null, null, null, null, _regex.GetRegexInfo(RegexDefs.D5_2), null));
+            _rules.Add(new FieldValidationRule(Entities.WorkReportD2B, Fields.UnitOfMeasure, FieldTypes.String, true, 1, 3, null, null, null, null, null, null)); //todo lookup
+            _rules.Add(new FieldValidationRule(Entities.WorkReportD2B, Fields.PostedDate, FieldTypes.Date, true, null, null, null, null, new DateTime(1900, 1, 1), new DateTime(9999, 12, 31), null, null));
+            _rules.Add(new FieldValidationRule(Entities.WorkReportD2B, Fields.HighwayUnique, FieldTypes.String, true, 0, 16, null, null, null, null, null, null));
+
+            _rules.Add(new FieldValidationRule(Entities.WorkReportD2B, Fields.StartLatitude, FieldTypes.String, false, null, null, null, null, null, null, _regex.GetRegexInfo(RegexDefs.D5_6), null));
+            _rules.Add(new FieldValidationRule(Entities.WorkReportD2B, Fields.StartLongitude, FieldTypes.String, false, null, null, null, null, null, null, _regex.GetRegexInfo(RegexDefs.D5_6), null));
+            _rules.Add(new FieldValidationRule(Entities.WorkReportD2B, Fields.EndLatitude, FieldTypes.String, false, null, null, null, null, null, null, _regex.GetRegexInfo(RegexDefs.D5_6), null));
+            _rules.Add(new FieldValidationRule(Entities.WorkReportD2B, Fields.EndLongitude, FieldTypes.String, false, null, null, null, null, null, null, _regex.GetRegexInfo(RegexDefs.D5_6), null));
+
+            _rules.Add(new FieldValidationRule(Entities.WorkReportD2B, Fields.Landmark, FieldTypes.String, false, 0, 8, null, null, null, null, null, null));
+            _rules.Add(new FieldValidationRule(Entities.WorkReportD2B, Fields.StartOffset, FieldTypes.String, false, null, null, null, null, null, null, _regex.GetRegexInfo(RegexDefs.D4_3), null));
+            _rules.Add(new FieldValidationRule(Entities.WorkReportD2B, Fields.EndOffset, FieldTypes.String, false, null, null, null, null, null, null, _regex.GetRegexInfo(RegexDefs.D4_3), null));
+
+            _rules.Add(new FieldValidationRule(Entities.WorkReportD2B, Fields.StructureNumber, FieldTypes.String, false, 0, 5, null, null, null, null, null, null));
+            _rules.Add(new FieldValidationRule(Entities.WorkReportD2B, Fields.SiteNumber, FieldTypes.String, false, 0, 8, null, null, null, null, _regex.GetRegexInfo(RegexDefs.SiteNumber), null));
+
+            _rules.Add(new FieldValidationRule(Entities.WorkReportD2B, Fields.ValueOfWork, FieldTypes.String, false, null, null, null, null, null, null, _regex.GetRegexInfo(RegexDefs.Dollar6_2), null));
+            _rules.Add(new FieldValidationRule(Entities.WorkReportD2B, Fields.Comments, FieldTypes.String, false, 0, 1024, null, null, null, null, null, null));
         }
 
         private void LoadWorkReportD3Rules()
@@ -86,6 +129,13 @@ namespace Hmcr.Domain.Services
             _rules.Add(new FieldValidationRule(Entities.WorkReportD3, Fields.StartLongitude, FieldTypes.String, true, null, null, null, null, null, null, _regex.GetRegexInfo(RegexDefs.D5_6), null));
             _rules.Add(new FieldValidationRule(Entities.WorkReportD3, Fields.EndLatitude, FieldTypes.String, true, null, null, null, null, null, null, _regex.GetRegexInfo(RegexDefs.D5_6), null));
             _rules.Add(new FieldValidationRule(Entities.WorkReportD3, Fields.EndLongitude, FieldTypes.String, true, null, null, null, null, null, null, _regex.GetRegexInfo(RegexDefs.D5_6), null));
+
+            _rules.Add(new FieldValidationRule(Entities.WorkReportD3, Fields.Landmark, FieldTypes.String, false, 0, 8, null, null, null, null, null, null));
+            _rules.Add(new FieldValidationRule(Entities.WorkReportD3, Fields.StartOffset, FieldTypes.String, false, null, null, null, null, null, null, _regex.GetRegexInfo(RegexDefs.D4_3), null));
+            _rules.Add(new FieldValidationRule(Entities.WorkReportD3, Fields.EndOffset, FieldTypes.String, false, null, null, null, null, null, null, _regex.GetRegexInfo(RegexDefs.D4_3), null));
+
+            _rules.Add(new FieldValidationRule(Entities.WorkReportD3, Fields.StructureNumber, FieldTypes.String, false, 0, 5, null, null, null, null, null, null));
+            _rules.Add(new FieldValidationRule(Entities.WorkReportD3, Fields.SiteNumber, FieldTypes.String, false, 0, 8, null, null, null, null, _regex.GetRegexInfo(RegexDefs.SiteNumber), null));
 
             _rules.Add(new FieldValidationRule(Entities.WorkReportD3, Fields.ValueOfWork, FieldTypes.String, true, null, null, null, null, null, null, _regex.GetRegexInfo(RegexDefs.Dollar6_2), null));
             _rules.Add(new FieldValidationRule(Entities.WorkReportD3, Fields.Comments, FieldTypes.String, false, 0, 1024, null, null, null, null, null, null));
@@ -109,6 +159,10 @@ namespace Hmcr.Domain.Services
             _rules.Add(new FieldValidationRule(Entities.WorkReportD3Site, Fields.EndLatitude, FieldTypes.String, true, null, null, null, null, null, null, _regex.GetRegexInfo(RegexDefs.D5_6), null));
             _rules.Add(new FieldValidationRule(Entities.WorkReportD3Site, Fields.EndLongitude, FieldTypes.String, true, null, null, null, null, null, null, _regex.GetRegexInfo(RegexDefs.D5_6), null));
 
+            _rules.Add(new FieldValidationRule(Entities.WorkReportD3Site, Fields.Landmark, FieldTypes.String, false, 0, 8, null, null, null, null, null, null));
+            _rules.Add(new FieldValidationRule(Entities.WorkReportD3Site, Fields.StartOffset, FieldTypes.String, false, null, null, null, null, null, null, _regex.GetRegexInfo(RegexDefs.D4_3), null));
+            _rules.Add(new FieldValidationRule(Entities.WorkReportD3Site, Fields.EndOffset, FieldTypes.String, false, null, null, null, null, null, null, _regex.GetRegexInfo(RegexDefs.D4_3), null));
+
             _rules.Add(new FieldValidationRule(Entities.WorkReportD3Site, Fields.StructureNumber, FieldTypes.String, true, 0, 5, null, null, null, null, null, null));
             _rules.Add(new FieldValidationRule(Entities.WorkReportD3Site, Fields.SiteNumber, FieldTypes.String, true, 0, 8, null, null, null, null, _regex.GetRegexInfo(RegexDefs.SiteNumber), null));
 
@@ -129,9 +183,18 @@ namespace Hmcr.Domain.Services
             _rules.Add(new FieldValidationRule(Entities.WorkReportD4, Fields.PostedDate, FieldTypes.Date, true, null, null, null, null, new DateTime(1900, 1, 1), new DateTime(9999, 12, 31), null, null));
             _rules.Add(new FieldValidationRule(Entities.WorkReportD4, Fields.HighwayUnique, FieldTypes.String, true, 0, 16, null, null, null, null, null, null));
 
-            _rules.Add(new FieldValidationRule(Entities.WorkReportD4, Fields.Landmark, FieldTypes.String, false, 0, 8, null, null, null, null, null, null));
-            _rules.Add(new FieldValidationRule(Entities.WorkReportD4, Fields.StartOffset, FieldTypes.String, false, null, null, null, null, null, null, _regex.GetRegexInfo(RegexDefs.D4_3), null));
-            _rules.Add(new FieldValidationRule(Entities.WorkReportD4, Fields.EndOffset, FieldTypes.String, false, null, null, null, null, null, null, _regex.GetRegexInfo(RegexDefs.D4_3), null));
+            _rules.Add(new FieldValidationRule(Entities.WorkReportD4, Fields.StartLatitude, FieldTypes.String, false, null, null, null, null, null, null, _regex.GetRegexInfo(RegexDefs.D5_6), null));
+            _rules.Add(new FieldValidationRule(Entities.WorkReportD4, Fields.StartLongitude, FieldTypes.String, false, null, null, null, null, null, null, _regex.GetRegexInfo(RegexDefs.D5_6), null));
+            _rules.Add(new FieldValidationRule(Entities.WorkReportD4, Fields.EndLatitude, FieldTypes.String, false, null, null, null, null, null, null, _regex.GetRegexInfo(RegexDefs.D5_6), null));
+            _rules.Add(new FieldValidationRule(Entities.WorkReportD4, Fields.EndLongitude, FieldTypes.String, false, null, null, null, null, null, null, _regex.GetRegexInfo(RegexDefs.D5_6), null));
+
+            _rules.Add(new FieldValidationRule(Entities.WorkReportD4, Fields.Landmark, FieldTypes.String, true, 0, 8, null, null, null, null, null, null));
+            _rules.Add(new FieldValidationRule(Entities.WorkReportD4, Fields.StartOffset, FieldTypes.String, true, null, null, null, null, null, null, _regex.GetRegexInfo(RegexDefs.D4_3), null));
+            _rules.Add(new FieldValidationRule(Entities.WorkReportD4, Fields.EndOffset, FieldTypes.String, true, null, null, null, null, null, null, _regex.GetRegexInfo(RegexDefs.D4_3), null));
+
+            _rules.Add(new FieldValidationRule(Entities.WorkReportD4, Fields.StructureNumber, FieldTypes.String, false, 0, 5, null, null, null, null, null, null));
+            _rules.Add(new FieldValidationRule(Entities.WorkReportD4, Fields.SiteNumber, FieldTypes.String, false, 0, 8, null, null, null, null, _regex.GetRegexInfo(RegexDefs.SiteNumber), null));
+
             _rules.Add(new FieldValidationRule(Entities.WorkReportD4, Fields.ValueOfWork, FieldTypes.String, true, null, null, null, null, null, null, _regex.GetRegexInfo(RegexDefs.Dollar6_2), null));
             _rules.Add(new FieldValidationRule(Entities.WorkReportD4, Fields.Comments, FieldTypes.String, false, 0, 1024, null, null, null, null, null, null));
         }
@@ -149,9 +212,14 @@ namespace Hmcr.Domain.Services
             _rules.Add(new FieldValidationRule(Entities.WorkReportD4Site, Fields.PostedDate, FieldTypes.Date, true, null, null, null, null, new DateTime(1900, 1, 1), new DateTime(9999, 12, 31), null, null));
             _rules.Add(new FieldValidationRule(Entities.WorkReportD4Site, Fields.HighwayUnique, FieldTypes.String, true, 0, 16, null, null, null, null, null, null));
 
-            _rules.Add(new FieldValidationRule(Entities.WorkReportD4Site, Fields.Landmark, FieldTypes.String, false, 0, 8, null, null, null, null, null, null));
-            _rules.Add(new FieldValidationRule(Entities.WorkReportD4Site, Fields.StartOffset, FieldTypes.String, false, null, null, null, null, null, null, _regex.GetRegexInfo(RegexDefs.D4_3), null));
-            _rules.Add(new FieldValidationRule(Entities.WorkReportD4Site, Fields.EndOffset, FieldTypes.String, false, null, null, null, null, null, null, _regex.GetRegexInfo(RegexDefs.D4_3), null));
+            _rules.Add(new FieldValidationRule(Entities.WorkReportD4Site, Fields.StartLatitude, FieldTypes.String, false, null, null, null, null, null, null, _regex.GetRegexInfo(RegexDefs.D5_6), null));
+            _rules.Add(new FieldValidationRule(Entities.WorkReportD4Site, Fields.StartLongitude, FieldTypes.String, false, null, null, null, null, null, null, _regex.GetRegexInfo(RegexDefs.D5_6), null));
+            _rules.Add(new FieldValidationRule(Entities.WorkReportD4Site, Fields.EndLatitude, FieldTypes.String, false, null, null, null, null, null, null, _regex.GetRegexInfo(RegexDefs.D5_6), null));
+            _rules.Add(new FieldValidationRule(Entities.WorkReportD4Site, Fields.EndLongitude, FieldTypes.String, false, null, null, null, null, null, null, _regex.GetRegexInfo(RegexDefs.D5_6), null));
+
+            _rules.Add(new FieldValidationRule(Entities.WorkReportD4Site, Fields.Landmark, FieldTypes.String, true, 0, 8, null, null, null, null, null, null));
+            _rules.Add(new FieldValidationRule(Entities.WorkReportD4Site, Fields.StartOffset, FieldTypes.String, true, null, null, null, null, null, null, _regex.GetRegexInfo(RegexDefs.D4_3), null));
+            _rules.Add(new FieldValidationRule(Entities.WorkReportD4Site, Fields.EndOffset, FieldTypes.String, true, null, null, null, null, null, null, _regex.GetRegexInfo(RegexDefs.D4_3), null));
 
             _rules.Add(new FieldValidationRule(Entities.WorkReportD4Site, Fields.StructureNumber, FieldTypes.String, true, 0, 5, null, null, null, null, null, null));
             _rules.Add(new FieldValidationRule(Entities.WorkReportD4Site, Fields.SiteNumber, FieldTypes.String, true, 0, 8, null, null, null, null, _regex.GetRegexInfo(RegexDefs.SiteNumber), null));
@@ -247,8 +315,7 @@ namespace Hmcr.Domain.Services
             if (!rule.Required && (val is null || val.ToString().IsEmpty()))
                 return messages;
 
-
-            var (parsed, parsedDate) = ParseDate(val);
+            var (parsed, parsedDate) = DateUtils.ParseDate(val);
 
             if (!parsed)
             {
@@ -267,23 +334,6 @@ namespace Hmcr.Domain.Services
             }
 
             return messages;
-        }
-
-        private (bool parsed, DateTime parsedDate) ParseDate(object val)
-        {
-            if (val.GetType() == typeof(DateTime))
-            {
-                return (true, (DateTime)val);
-            }
-
-            var formats = new string[] { "yyyyMMdd", "yyyy-MM-dd", "yyyy/MM/dd" };
-            var dateStr = val.ToString();
-            var parsedDate = new DateTime();
-
-            if (dateStr.IsEmpty())
-                return (false, parsedDate);
-
-            return (DateTime.TryParseExact(dateStr, formats, CultureInfo.InvariantCulture, DateTimeStyles.None, out parsedDate), parsedDate);
         }
     }
 }

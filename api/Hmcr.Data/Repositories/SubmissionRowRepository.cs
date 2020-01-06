@@ -31,7 +31,8 @@ namespace Hmcr.Data.Repositories
                 var latestRow = await DbSet
                     .Where(x => x.SubmissionObject.SubmissionStreamId == submissionStreamId 
                         && x.RecordNumber == row.RecordNumber
-                        && x.SubmissionObject.PartyId == partyId) //todo: also check if the file was processed successfully
+                        && x.SubmissionObject.PartyId == partyId
+                        && x.SubmissionObject.SubmissionStatus.StatusCode == FileStatus.Success)
                     .OrderByDescending(x => x.RowId)
                     .FirstOrDefaultAsync();
 
@@ -49,7 +50,8 @@ namespace Hmcr.Data.Repositories
                 var latestRow = await DbSet
                     .Where(x => x.SubmissionObject.SubmissionStreamId == submissionStreamId
                         && x.RecordNumber == row.RecordNumber
-                        && x.SubmissionObject.PartyId == partyId) //todo: also check if the file was processed successfully
+                        && x.SubmissionObject.PartyId == partyId
+                        && x.SubmissionObject.SubmissionStatus.StatusCode == FileStatus.Success)
                     .OrderByDescending(x => x.RowId)
                     .FirstOrDefaultAsync();
                 
