@@ -21,7 +21,7 @@ namespace Hmcr.Domain.Hangfire
 {
     public interface IWorkReportJobService
     {
-        Task ProcessSubmission(HmrSubmissionObject submission, IEnumerable<ActivityCodeDto> activityCodes, IEnumerable<SubmissionStatusDto> statuses);
+        Task ProcessSubmission(HmrSubmissionObject submission);
     }
 
     public class WorkReportJobService : IWorkReportJobService
@@ -33,11 +33,14 @@ namespace Hmcr.Domain.Hangfire
         protected ISubmissionObjectRepository _submissionRepo;
         protected ISumbissionRowRepository _rowRepo;
         protected IContractTermRepository _contractRepo;
+        private IActivityCodeRepository _activityRepo;
         protected ISubmissionStatusRepository _statusRepo;
+        private IWorkReportRepository _workReportRepo;
 
         public WorkReportJobService(IUnitOfWork unitOfWork, ILogger<IWorkReportJobService> logger,
             ISubmissionStreamService streamService, ISubmissionObjectRepository submissionRepo, ISumbissionRowRepository rowRepo,
-            IContractTermRepository contractRepo, ISubmissionStatusRepository statusRepo, IFieldValidatorService validator)
+            IContractTermRepository contractRepo, IActivityCodeRepository activityRepo, ISubmissionStatusRepository statusRepo, 
+            IWorkReportRepository workReportRepo, IFieldValidatorService validator)
         {
             _unitOfWork = unitOfWork;
             _logger = logger;
@@ -45,24 +48,32 @@ namespace Hmcr.Domain.Hangfire
             _submissionRepo = submissionRepo;
             _rowRepo = rowRepo;
             _contractRepo = contractRepo;
+            _activityRepo = activityRepo;
             _statusRepo = statusRepo;
+            _workReportRepo = workReportRepo;
             _validator = validator;
         }
 
-        public async Task ProcessSubmission(HmrSubmissionObject submission, IEnumerable<ActivityCodeDto> activityCodes, IEnumerable<SubmissionStatusDto> statuses)
+        public async Task ProcessSubmission(HmrSubmissionObject submission)
         {
             _logger.LogInformation("[Hangfire] Starting submission {submissionObjectId}", submission.SubmissionObjectId);
             var errors = new Dictionary<string, List<string>>();
 
+            var activityCodes = await _activityRepo.GetActiveActivityCodesAsync();
+            var statuses = await _statusRepo.GetActiveStatuses();
+
             var duplicateRowStatusId = statuses.First(x => x.StatusType == StatusType.Row && x.StatusCode == RowStatus.Duplicate).StatusId;
             var errorRowStatusId = statuses.First(x => x.StatusType == StatusType.Row && x.StatusCode == RowStatus.Error).StatusId;
+            var successRowStatusId = statuses.First(x => x.StatusType == StatusType.Row && x.StatusCode == RowStatus.Success).StatusId;
+
             var errorFileStatusId = statuses.First(x => x.StatusType == StatusType.File && x.StatusCode == FileStatus.Error).StatusId;
+            var successFileStatusId = statuses.First(x => x.StatusType == StatusType.File && x.StatusCode == RowStatus.Success).StatusId;
 
             Console.WriteLine($"Hangfire job {submission.SubmissionObjectId}");
 
-            var rows = ParseRowsUnTyped(submission, errors);
+            var (untypedRows, headers) = ParseRowsUnTyped(submission, errors);
 
-            if (!CheckCommonMandatoryHeaders(rows, errors))
+            if (!CheckCommonMandatoryHeaders(untypedRows, errors))
             {
                 if (errors.Count > 0)
                 {
@@ -73,39 +84,48 @@ namespace Hmcr.Domain.Hangfire
                 }
             }
 
-            SetRowIdAndRemoveDuplicate(submission, duplicateRowStatusId, rows);
+            //text after duplicate lines are removed. Will be used for importing to typed DTO.
+            var text = SetRowIdAndRemoveDuplicate(submission, duplicateRowStatusId, untypedRows, headers);
 
             //validate and populate staged row
-            foreach(var row in rows)
+            foreach(var untypedRow in untypedRows)
             {
-                //reset errors
                 errors = new Dictionary<string, List<string>>();
-                var submissionRow = submission.HmrSubmissionRows.First(x => x.RowId == row.RowId);
+                var submissionRow = submission.HmrSubmissionRows.First(x => x.RowId == untypedRow.RowId);
+                submissionRow.RowStatusId = successRowStatusId; //set the initial row status as success 
 
-                var activityCode = activityCodes.FirstOrDefault(x => x.ActivityNumber == row.ActivityNumber);
+                var activityCode = activityCodes.FirstOrDefault(x => x.ActivityNumber == untypedRow.ActivityNumber);
 
                 if (activityCode == null)
                 {
                     submissionRow.RowStatusId = errorRowStatusId;
-                    submissionRow.ErrorDetail = $"Row[{row.RowNumber}]: Activity Number[{row.ActivityNumber}] not found"; 
+                    submissionRow.ErrorDetail = $"Row[{untypedRow.RowNumber}]: Activity Number[{untypedRow.ActivityNumber}] not found"; 
                     submission.ErrorDetail = "Please refer to row errors";
                     submission.SubmissionStatusId = errorFileStatusId;
-                    _logger.LogInformation("Row[{rownumber}]: Activity Number[{ativityNumber}] not found", row.RowNumber, row.ActivityNumber);
+                    _logger.LogInformation("Row[{rownumber}]: Activity Number[{ativityNumber}] not found", untypedRow.RowNumber, untypedRow.ActivityNumber);
                     continue;
                 }
 
-                var entityName = GetValidationEntityName(row, activityCode);
+                var entityName = GetValidationEntityName(untypedRow, activityCode);
 
-                _validator.Validate(entityName, row, errors);
+                _validator.Validate(entityName, untypedRow, errors);
 
                 if (errors.Count > 0)
                 {
                     submissionRow.RowStatusId = errorRowStatusId;
-                    submissionRow.ErrorDetail = $"Row[{row.RowNumber}]: {errors.GetErrorDetail()}";                     
+                    submissionRow.ErrorDetail = $"Row[{untypedRow.RowNumber}]: {errors.GetErrorDetail()}";                     
                     submission.ErrorDetail = "Please refer to row error";
                     submission.SubmissionStatusId = errorFileStatusId;
-                    _logger.LogInformation("Row[{rownumber}]: {errors}", row.RowNumber, errors.GetErrorDetail());
+                    _logger.LogInformation("Row[{rownumber}]: {errors}", untypedRow.RowNumber, errors.GetErrorDetail());
                 }
+            }
+
+            var typedRows = new List<WorkReportDto>();
+
+            if (submission.SubmissionStatusId != errorFileStatusId)
+            {
+                typedRows = ParseRowsTyped(text, errors);
+                await PerformAdditionalValidationAsync(submission, typedRows, untypedRows);
             }
 
             if (submission.SubmissionStatusId == errorFileStatusId)
@@ -114,25 +134,68 @@ namespace Hmcr.Domain.Hangfire
             }
             else
             {
-                //submission.SubmissionStatusId = success
-                //submission row status = success
-                //save
+                submission.SubmissionStatusId = successFileStatusId;
+
+                await foreach (var entity in _workReportRepo.SaveWorkReportAsnyc(submission, typedRows)) { }
+
+                await _unitOfWork.CommitAsync();
+
                 _logger.LogInformation("Report Saved");
             }
 
             _logger.LogInformation("[Hangfire] Finishing submission {submissionObjectId}", submission.SubmissionObjectId);
         }
 
+        private async Task PerformAdditionalValidationAsync(HmrSubmissionObject submission, List<WorkReportDto> typedRows, List<WorkReportCsvDto> untypedRows)
+        {
+            var activityCodes = await _activityRepo.GetActiveActivityCodesAsync();
+            var statuses = await _statusRepo.GetActiveStatuses();
+
+            var errorRowStatusId = statuses.First(x => x.StatusType == StatusType.Row && x.StatusCode == RowStatus.Error).StatusId;
+            var errorFileStatusId = statuses.First(x => x.StatusType == StatusType.File && x.StatusCode == FileStatus.Error).StatusId;
+
+            foreach (var typedRow in typedRows)
+            {
+                var untypedRow = untypedRows.First(x => x.RecordNumber == typedRow.RecordNumber);
+
+                typedRow.RowNumber = untypedRow.RowNumber;                
+
+                var errors = new Dictionary<string, List<string>>();
+                var submissionRow = submission.HmrSubmissionRows.First(x => x.RecordNumber == typedRow.RecordNumber); 
+
+                if (typedRow.StartDate != null && typedRow.EndDate < typedRow.StartDate)
+                {
+                    errors.AddItem("StartDate", "Start Date cannot be greater than End Date");
+                }
+
+                if (typedRow.StartOffset != null && typedRow.EndOffset < typedRow.StartOffset)
+                {
+                    errors.AddItem("StartOffset", "Start Offset cannot be greater than End Offset");
+                }
+
+                //Geo-spatial Validation here
+
+                if (errors.Count > 0)
+                {
+                    submissionRow.RowStatusId = errorRowStatusId;
+                    submissionRow.ErrorDetail = $"Row[{typedRow.RowNumber}]: {errors.GetErrorDetail()}";
+                    submission.ErrorDetail = "Please refer to row error";
+                    submission.SubmissionStatusId = errorFileStatusId;
+                    _logger.LogInformation("Row[{rownumber}]: {errors}", typedRow.RowNumber, errors.GetErrorDetail());
+                }
+            }
+        }
+
         private string GetValidationEntityName(WorkReportCsvDto row, ActivityCodeDto activityCode)
         {
-            var entityName = "";
             var isSite = activityCode.ActivityNumber.Substring(0, 1) == "6";
 
             var locationCode = activityCode.LocationCode;
 
+            string entityName;
             if (locationCode.LocationCode == "C")
             {
-                if (row.StartOffset.IsNotEmpty())
+                if (row.EndLatitude.IsEmpty())
                 {
                     entityName = isSite ? Entities.WorkReportD4Site : Entities.WorkReportD4;
                 }
@@ -143,7 +206,7 @@ namespace Hmcr.Domain.Hangfire
             }
             else
             {
-                entityName = Entities.WorkReportD2;
+                entityName = (locationCode.LocationCode == "B") ? Entities.WorkReportD2B : Entities.WorkReportD2;
             }
 
             return entityName;
@@ -172,8 +235,11 @@ namespace Hmcr.Domain.Hangfire
             return errors.Count == 0;
         }
 
-        private void SetRowIdAndRemoveDuplicate(HmrSubmissionObject submission, decimal duplicateStatusId, List<WorkReportCsvDto> rows)
+        private string SetRowIdAndRemoveDuplicate(HmrSubmissionObject submission, decimal duplicateStatusId, List<WorkReportCsvDto> rows, string headers)
         {
+            var text = new StringBuilder();
+            text.AppendLine(headers);
+
             for (int i = rows.Count - 1; i >= 0; i--)
             {
                 var row = rows[i];
@@ -187,11 +253,14 @@ namespace Hmcr.Domain.Hangfire
                     continue;
                 }
 
+                text.AppendLine(entity.RowValue);
                 row.RowId = entity.RowId;
             }
+
+            return text.ToString();
         }
 
-        private List<WorkReportCsvDto> ParseRowsUnTyped(HmrSubmissionObject submission, Dictionary<string, List<string>> errors)
+        private (List<WorkReportCsvDto> untypedRows, string headers) ParseRowsUnTyped(HmrSubmissionObject submission, Dictionary<string, List<string>> errors)
         {
             var text = Encoding.UTF8.GetString(submission.DigitalRepresentation);
 
@@ -201,7 +270,18 @@ namespace Hmcr.Domain.Hangfire
             CsvHelperUtils.Config(errors, csv, false);
             csv.Configuration.RegisterClassMap<WorkReportCsvDtoMap>();
 
-            return csv.GetRecords<WorkReportCsvDto>().ToList();
+            return (csv.GetRecords<WorkReportCsvDto>().ToList(), text.Substring(0, text.IndexOf(Environment.NewLine)));
+        }
+
+        private List<WorkReportDto> ParseRowsTyped(string text, Dictionary<string, List<string>> errors)
+        {
+            using var stringReader = new StringReader(text);
+            using var csv = new CsvReader(stringReader);
+
+            CsvHelperUtils.Config(errors, csv, false);
+            csv.Configuration.RegisterClassMap<WorkReportDtoMap>();
+
+            return csv.GetRecords<WorkReportDto>().ToList();            
         }
     }
 }

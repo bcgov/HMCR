@@ -38,7 +38,7 @@ namespace Hmcr.Domain.Hangfire
         {
             foreach (var serviceArea in serviceAreas)
             {
-                RecurringJob.AddOrUpdate<SubmissionObjectJobService>($"SA{serviceArea.ServiceAreaNumber}", x => x.RunReportingJob(serviceArea.ServiceAreaNumber), "*/1 * * * *");
+                RecurringJob.AddOrUpdate<SubmissionObjectJobService>($"SA{serviceArea.ServiceAreaNumber}", x => x.RunReportingJob(serviceArea.ServiceAreaNumber), "*/5 * * * *");
             }
         }
 
@@ -50,18 +50,15 @@ namespace Hmcr.Domain.Hangfire
             _user.UniversalId = "hangfire";
             _user.UserGuid = new Guid();
 
-            //Jobs must be processed chronologically. GetSubmissionObjecsForBackgroundJobAsync returns submissions odered by SubmissionObjectId.
+            //Jobs must be processed chronologically. GetSubmissionObjecsForBackgroundJobAsync returns submissions by ascending order
             var submissions = await _submissionRepo.GetSubmissionObjecsForBackgroundJobAsync(serviceAreaNumber); //todo: get staged rows too
-
-            var activityCodes = await _activityRepo.GetActiveActivityCodesAsync();
-            var statuses = await _statusRepo.GetActiveStatuses();
 
             foreach (var submission in submissions)
             {
                 switch (submission.SubmissionStream.StagingTableName)
                 {
                     case TableNames.WorkReport:
-                        await _workRptJobService.ProcessSubmission(submission, activityCodes, statuses);
+                        await _workRptJobService.ProcessSubmission(submission);
                         break;
                     case TableNames.RockfallReport:
                         break;
