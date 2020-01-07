@@ -93,6 +93,7 @@ namespace Hmcr.Domain.Services.Base
             submission.MimeTypeId = 1;
             submission.ServiceAreaNumber = upload.ServiceAreaNumber;
             submission.SubmissionStreamId = reportType.SubmissionStreamId;
+            submission.SubmissionStatusId = await _statusRepo.GetStatusIdByTypeAndCodeAsync(StatusType.File, FileStatus.FileError);
             submission.FileName = "";
 
             if (upload.ReportFile == null)
@@ -117,6 +118,7 @@ namespace Hmcr.Domain.Services.Base
             if (await _submissionRepo.IsDuplicateFileAsync(submission))
             {
                 errors.AddItem("File", "Duplicate file exists");
+                submission.SubmissionStatusId = await _statusRepo.GetStatusIdByTypeAndCodeAsync(StatusType.File, FileStatus.DuplicateSubmission);
                 return (errors, submission);
             }
 
@@ -194,7 +196,6 @@ namespace Hmcr.Domain.Services.Base
             {
                 submission.ErrorDetail = errors.GetErrorDetail();
                 submission.SubmissionRows = new List<SubmissionRowDto>();
-                submission.SubmissionStatusId = await _statusRepo.GetStatusIdByTypeAndCodeAsync(StatusType.File, FileStatus.FileError);
                 await _submissionRepo.CreateSubmissionObjectAsync(submission);
                 await _unitOfWork.CommitAsync();
             }
