@@ -68,7 +68,7 @@ namespace Hmcr.Domain.Services
                     RecordNumber = "",
                     RowValue = line,
                     RowHash = line.GetSha256Hash(),
-                    RowStatusId = await _statusRepo.GetStatusIdByTypeAndCodeAsync(StatusType.Row, RowStatus.Accepted),
+                    RowStatusId = await _statusRepo.GetStatusIdByTypeAndCodeAsync(StatusType.Row, RowStatus.RowReceived),
                     EndDate = DateTime.Today
                 });
             }

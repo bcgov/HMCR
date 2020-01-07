@@ -25,7 +25,7 @@ namespace Hmcr.Data.Repositories
 
         public async Task<IEnumerable<ActivityCodeDto>> GetActiveActivityCodesAsync()
         {
-            var activities = await DbSet.AsNoTracking()
+            var activities = await DbSet
                 .Include(x => x.LocationCode)
                 .ToListAsync();
 
