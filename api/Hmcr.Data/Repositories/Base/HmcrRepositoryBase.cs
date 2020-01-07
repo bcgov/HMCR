@@ -109,7 +109,7 @@ namespace Hmcr.Data.Repositories.Base
         }
         public virtual IEnumerable<TDto> GetAll<TDto>()
         {
-            return Mapper.Map<IEnumerable<TDto>>(DbSet.AsNoTracking().ToList());
+            return Mapper.Map<IEnumerable<TDto>>(DbSet.ToList());
         }
 
         public virtual IEnumerable<TDto> GetAll<TDto>(Expression<Func<TEntity, bool>> where)
@@ -119,7 +119,7 @@ namespace Hmcr.Data.Repositories.Base
 
         public virtual async Task<IEnumerable<TDto>> GetAllAsync<TDto>()
         {
-            return Mapper.Map<IEnumerable<TDto>>(await DbSet.AsNoTracking().ToListAsync());
+            return Mapper.Map<IEnumerable<TDto>>(await DbSet.ToListAsync());
         }
 
         public virtual async Task<IEnumerable<TDto>> GetAllAsync<TDto>(Expression<Func<TEntity, bool>> where)
