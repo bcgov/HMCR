@@ -62,12 +62,12 @@ namespace Hmcr.Domain.Hangfire
             var activityCodes = await _activityRepo.GetActiveActivityCodesAsync();
             var statuses = await _statusRepo.GetActiveStatuses();
 
-            var duplicateRowStatusId = statuses.First(x => x.StatusType == StatusType.Row && x.StatusCode == RowStatus.Duplicate).StatusId;
-            var errorRowStatusId = statuses.First(x => x.StatusType == StatusType.Row && x.StatusCode == RowStatus.Error).StatusId;
+            var duplicateRowStatusId = statuses.First(x => x.StatusType == StatusType.Row && x.StatusCode == RowStatus.DuplicateRow).StatusId;
+            var errorRowStatusId = statuses.First(x => x.StatusType == StatusType.Row && x.StatusCode == RowStatus.RowError).StatusId;
             var successRowStatusId = statuses.First(x => x.StatusType == StatusType.Row && x.StatusCode == RowStatus.Success).StatusId;
 
-            var errorFileStatusId = statuses.First(x => x.StatusType == StatusType.File && x.StatusCode == FileStatus.Error).StatusId;
-            var successFileStatusId = statuses.First(x => x.StatusType == StatusType.File && x.StatusCode == RowStatus.Success).StatusId;
+            var errorFileStatusId = statuses.First(x => x.StatusType == StatusType.File && x.StatusCode == FileStatus.DataError).StatusId;
+            var successFileStatusId = statuses.First(x => x.StatusType == StatusType.File && x.StatusCode == FileStatus.Success).StatusId;
 
             Console.WriteLine($"Hangfire job {submission.SubmissionObjectId}");
 
@@ -151,8 +151,12 @@ namespace Hmcr.Domain.Hangfire
             var activityCodes = await _activityRepo.GetActiveActivityCodesAsync();
             var statuses = await _statusRepo.GetActiveStatuses();
 
-            var errorRowStatusId = statuses.First(x => x.StatusType == StatusType.Row && x.StatusCode == RowStatus.Error).StatusId;
-            var errorFileStatusId = statuses.First(x => x.StatusType == StatusType.File && x.StatusCode == FileStatus.Error).StatusId;
+            var errorRowStatusId = statuses.First(x => x.StatusType == StatusType.Row && x.StatusCode == RowStatus.RowError).StatusId;
+            var inProgressRowStatusId = statuses.First(x => x.StatusType == StatusType.File && x.StatusCode == FileStatus.InProgress).StatusId;
+            var errorFileStatusId = statuses.First(x => x.StatusType == StatusType.File && x.StatusCode == FileStatus.DataError).StatusId;
+
+            submission.SubmissionStatusId = inProgressRowStatusId;
+            _unitOfWork.Commit();
 
             foreach (var typedRow in typedRows)
             {

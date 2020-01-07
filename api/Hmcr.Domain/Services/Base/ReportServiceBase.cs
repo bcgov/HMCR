@@ -156,7 +156,7 @@ namespace Hmcr.Domain.Services.Base
                 await MarkDuplicateRowAsync(submission);
 
             submission.DigitalRepresentation = stream.ToBytes();
-            submission.SubmissionStatusId = await _statusRepo.GetStatusIdByTypeAndCodeAsync(StatusType.File, RowStatus.Accepted);
+            submission.SubmissionStatusId = await _statusRepo.GetStatusIdByTypeAndCodeAsync(StatusType.File, FileStatus.FileReceived);
 
             return (errors, submission);
         }
@@ -165,7 +165,7 @@ namespace Hmcr.Domain.Services.Base
         {
             await foreach (var row in _rowRepo.FindDuplicateRowsAsync(submission.SubmissionStreamId, (decimal)submission.PartyId, submission.SubmissionRows))
             {
-                row.RowStatusId = await _statusRepo.GetStatusIdByTypeAndCodeAsync(StatusType.Row, RowStatus.Duplicate);
+                row.RowStatusId = await _statusRepo.GetStatusIdByTypeAndCodeAsync(StatusType.Row, RowStatus.DuplicateRow);
             }
         }
 
@@ -194,7 +194,7 @@ namespace Hmcr.Domain.Services.Base
             {
                 submission.ErrorDetail = errors.GetErrorDetail();
                 submission.SubmissionRows = new List<SubmissionRowDto>();
-                submission.SubmissionStatusId = await _statusRepo.GetStatusIdByTypeAndCodeAsync(StatusType.File, FileStatus.Error);
+                submission.SubmissionStatusId = await _statusRepo.GetStatusIdByTypeAndCodeAsync(StatusType.File, FileStatus.FileError);
                 await _submissionRepo.CreateSubmissionObjectAsync(submission);
                 await _unitOfWork.CommitAsync();
             }

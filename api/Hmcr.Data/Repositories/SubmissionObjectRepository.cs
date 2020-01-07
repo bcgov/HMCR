@@ -54,7 +54,7 @@ namespace Hmcr.Data.Repositories
 
         public async Task<HmrSubmissionObject[]> GetSubmissionObjecsForBackgroundJobAsync(decimal serviceAreaNumber)
         {
-            var acceptedStatus = await DbContext.HmrSubmissionStatus.FirstAsync(x => x.StatusCode == FileStatus.Accepted && x.StatusType == StatusType.File);
+            var acceptedStatus = await DbContext.HmrSubmissionStatus.FirstAsync(x => (x.StatusCode == FileStatus.FileReceived || x.StatusCode == FileStatus.InProgress) && x.StatusType == StatusType.File);
 
             var submissions = await DbSet
                 .Where(x => x.ServiceAreaNumber == serviceAreaNumber && x.SubmissionStatusId == acceptedStatus.StatusId)
