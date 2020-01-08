@@ -274,7 +274,18 @@ namespace Hmcr.Domain.Hangfire
             CsvHelperUtils.Config(errors, csv, false);
             csv.Configuration.RegisterClassMap<WorkReportCsvDtoMap>();
 
-            return (csv.GetRecords<WorkReportCsvDto>().ToList(), text.Substring(0, text.IndexOf(Environment.NewLine)));
+            return (csv.GetRecords<WorkReportCsvDto>().ToList(), GetHeader(text));
+        }
+
+        private string GetHeader(string text)
+        {
+            if (text == null)
+                return "";
+
+            var reader = new StringReader(text);
+            var header = reader.ReadLine();
+
+            return header ?? "";
         }
 
         private List<WorkReportDto> ParseRowsTyped(string text, Dictionary<string, List<string>> errors)
