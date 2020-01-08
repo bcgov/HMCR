@@ -33,13 +33,13 @@ namespace Hmcr.Data.Repositories
 
     public class UserRepository : HmcrRepositoryBase<HmrSystemUser>, IUserRepository
     {
-        private HmcrCurrentUser account;
+        private HmcrCurrentUser _currentUser;
         private IPartyRepository _partyRepo;
 
         public UserRepository(AppDbContext dbContext, IMapper mapper, HmcrCurrentUser currentUser, IPartyRepository partyRepo)
             : base(dbContext, mapper)
         {
-            account = currentUser;
+            _currentUser = currentUser;
             _partyRepo = partyRepo;
         }
 
@@ -52,7 +52,7 @@ namespace Hmcr.Data.Repositories
                                             .ThenInclude(x => x.Permission)
                                 .Include(x => x.HmrServiceAreaUsers)
                                     .ThenInclude(x => x.ServiceAreaNumberNavigation)
-                                .FirstAsync(u => u.UserGuid == account.UserGuid);
+                                .FirstAsync(u => u.UserGuid == _currentUser.UserGuid);
 
             var currentUser = Mapper.Map<UserCurrentDto>(userEntity);
 
@@ -82,7 +82,7 @@ namespace Hmcr.Data.Repositories
 
         public async Task<HmrSystemUser> GetCurrentActiveUserEntityAsync()
         {
-            return await DbSet.FirstOrDefaultAsync(u => u.Username == account.UserName && (u.EndDate == null || u.EndDate > DateTime.Today)); //todo: change username to userguid
+            return await DbSet.FirstOrDefaultAsync(u => u.Username == _currentUser.UserName && (u.EndDate == null || u.EndDate > DateTime.Today)); //todo: change username to userguid
         }
 
         /// <summary>

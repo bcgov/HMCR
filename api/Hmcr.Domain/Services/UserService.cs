@@ -69,7 +69,16 @@ namespace Hmcr.Domain.Services
 
             if (userEntity.UserGuid == null)
             {
-                if (userEntity.UserType != _currentUser.UserType)
+                if (userEntity.UserType == _currentUser.UserType)
+                {
+                    var (error, account) = await _bceid.GetBceidAccountCachedAsync(_currentUser.UserName, _currentUser.UserType);
+
+                    if (string.IsNullOrEmpty(error))
+                    {
+                        _userRepo.ProcessFirstUserLogin(account);
+                    }
+                }
+                else if(userEntity.UserType != _currentUser.UserType)
                 {
                     throw new HmcrException($"User[{_currentUser.UniversalId}] exists in the user table with a wrong user type [{_currentUser.UserType}].");
                 }
