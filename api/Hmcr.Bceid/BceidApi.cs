@@ -42,7 +42,7 @@ namespace Hmcr.Bceid
         public async Task<(string error, BceidAccount account)> GetBceidAccountCachedAsync(string username, string userType)
         {
             //to minimize the BCeID web service calls - may have a performance issue when multiple fresh users log in at the same time.            
-            await _semaphore.WaitAsync(); 
+            await _semaphore.WaitAsync();
 
             try
             {
@@ -60,6 +60,8 @@ namespace Hmcr.Bceid
                     Debug.WriteLine($"BCeID new key: {key}");
                     _accountCache[key] = account;
                 }
+
+                if (account != null && string.IsNullOrEmpty(account.Username)) account.Username = username;
 
                 return (error, account);
             }

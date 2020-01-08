@@ -46,7 +46,6 @@ const WorkReporting = ({ currentUser }) => {
             <MaterialCard>
               <Row>
                 <Col>
-                  <h4>Report Upload</h4>
                   <WorkReportingUpload serviceArea={serviceArea} handleFileSubmitted={handleFileSubmitted} />
                 </Col>
                 <Col></Col>

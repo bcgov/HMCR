@@ -10,6 +10,7 @@ export const API_PATHS = {
   USER_CURRENT: '/users/current',
   USER_TYPES: '/users/usertypes',
   USER_STATUSES: '/users/userstatus',
+  USER_BCEID_ACCOUNT: '/users/bceidaccount',
   ROCKFALL_REPORT: '/rockfallreports',
   SUBMISSIONS: '/submissionobjects',
   SUBMISSION_STREAMS: '/submissionstreams',
