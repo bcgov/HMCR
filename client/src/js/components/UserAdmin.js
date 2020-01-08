@@ -7,6 +7,7 @@ import Authorize from './fragments/Authorize';
 import MaterialCard from './ui/MaterialCard';
 import MultiDropdown from './ui/MultiDropdown';
 import EditUserForm from './forms/EditUserForm';
+import AddUserWizard from './forms/AddUserWizard';
 import DataTableWithPaginaionControl from './ui/DataTableWithPaginaionControl';
 import SubmitButton from './ui/SubmitButton';
 import PageSpinner from './ui/PageSpinner';
@@ -37,6 +38,7 @@ const UserAdmin = ({
   deleteUser,
 }) => {
   const [editUserForm, setEditUserForm] = useState({ isOpen: false });
+  const [addUserWizardIsOpen, setAddUserWizardIsOpen] = useState(false);
   const [searching, setSearching] = useState(false);
 
   useEffect(() => {
@@ -75,7 +77,7 @@ const UserAdmin = ({
   };
 
   const onEditClicked = userId => {
-    setEditUserForm({ isOpen: true, formType: Constants.FORM_TYPE.EDIT, userId });
+    setEditUserForm({ isOpen: true, userId });
   };
 
   const onDeleteClicked = (userId, endDate) => {
@@ -83,10 +85,11 @@ const UserAdmin = ({
   };
 
   const handleEditUserFormClose = refresh => {
-    if (refresh) {
+    if (refresh === true) {
       startSearch();
     }
     setEditUserForm({ isOpen: false });
+    setAddUserWizardIsOpen(false);
   };
 
   const handleChangePage = newPage => {
@@ -151,12 +154,7 @@ const UserAdmin = ({
       <Authorize requires={Constants.PERMISSIONS.USER_W}>
         <Row>
           <Col>
-            <Button
-              size="sm"
-              color="primary"
-              className="float-right mb-3"
-              onClick={() => setEditUserForm({ isOpen: true, formType: Constants.FORM_TYPE.ADD })}
-            >
+            <Button size="sm" color="primary" className="float-right mb-3" onClick={() => setAddUserWizardIsOpen(true)}>
               Add User
             </Button>
           </Col>
@@ -180,6 +178,7 @@ const UserAdmin = ({
         </MaterialCard>
       )}
       {editUserForm.isOpen && <EditUserForm {...editUserForm} toggle={handleEditUserFormClose} />}
+      {addUserWizardIsOpen && <AddUserWizard isOpen={addUserWizardIsOpen} toggle={handleEditUserFormClose} />}
     </React.Fragment>
   );
 };

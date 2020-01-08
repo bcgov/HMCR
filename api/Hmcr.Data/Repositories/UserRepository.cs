@@ -22,7 +22,7 @@ namespace Hmcr.Data.Repositories
     {
         Task<UserCurrentDto> GetCurrentUserAsync();
         Task<HmrSystemUser> GetCurrentActiveUserEntityAsync();
-        void ProcessFirstUserLogin();
+        void ProcessFirstUserLogin(BceidAccount account);
         Task<PagedDto<UserSearchDto>> GetUsersAsync(decimal[]? serviceAreas, string[]? userTypes, string searchText, bool? isActive, int pageSize, int pageNumber, string orderBy);
         Task<UserDto> GetUserAsync(decimal systemUserId);
         Task<HmrSystemUser> CreateUserAsync(UserCreateDto user);
@@ -88,42 +88,42 @@ namespace Hmcr.Data.Repositories
         /// <summary>
         /// This method is self-committing
         /// </summary>
-        public void ProcessFirstUserLogin()
+        public void ProcessFirstUserLogin(BceidAccount account)
         {
             using var transaction = DbContext.Database.BeginTransaction(IsolationLevel.Serializable);
 
-            DbContext.Database.ExecuteSqlInterpolated($"SELECT 1 FROM HMR_SYSTEM_USER WITH(XLOCK, ROWLOCK) WHERE USERNAME = {_currentUser.UserName}");
+            DbContext.Database.ExecuteSqlInterpolated($"SELECT 1 FROM HMR_SYSTEM_USER WITH(XLOCK, ROWLOCK) WHERE USERNAME = {account.Username}");
 
-            var userEntity = DbSet.First(u => u.Username == _currentUser.UserName); //todo: replace it with guid after user managment workflow has changed
+            var userEntity = DbSet.First(u => u.Username == account.Username); //todo: replace it with guid after user managment workflow has changed
 
             if (userEntity.UserGuid == null)
             {
-                userEntity.Username = _currentUser.UniversalId;
-                userEntity.UserGuid = _currentUser.UserGuid;
-                userEntity.BusinessGuid = _currentUser.BusinessGuid;
-                userEntity.BusinessLegalName = _currentUser.BusinessLegalName;
-                userEntity.UserType = _currentUser.UserType;
-                userEntity.FirstName = _currentUser.FirstName;
-                userEntity.LastName = _currentUser.LastName;
-                userEntity.Email = _currentUser.Email;
+                userEntity.Username = account.Username;
+                userEntity.UserGuid = account.UserGuid;
+                userEntity.BusinessGuid = account.BusinessGuid;
+                userEntity.BusinessLegalName = account.BusinessLegalName;
+                userEntity.UserType = account.UserType;
+                userEntity.FirstName = account.FirstName;
+                userEntity.LastName = account.LastName;
+                userEntity.Email = account.Email;
 
-                if (_currentUser.UserType == UserTypeDto.INTERNAL)
+                if (account.UserType == UserTypeDto.INTERNAL)
                 {
                     DbContext.SaveChanges();
                     transaction.Commit();
                     return;
                 }
 
-                var partyEntity = _partyRepo.GetPartyEntityByGuid(_currentUser.BusinessGuid);
+                var partyEntity = _partyRepo.GetPartyEntityByGuid(account.BusinessGuid);
 
                 if (partyEntity == null)
                 {
                     userEntity.Party = new HmrParty
                     {
-                        BusinessGuid = _currentUser.BusinessGuid,
-                        BusinessLegalName = _currentUser.BusinessLegalName.Trim(),
-                        BusinessNumber = _currentUser.BusinessNumber,
-                        DisplayName = _currentUser.BusinessLegalName.Trim()
+                        BusinessGuid = account.BusinessGuid,
+                        BusinessLegalName = account.BusinessLegalName.Trim(),
+                        BusinessNumber = account.BusinessNumber,
+                        DisplayName = account.BusinessLegalName.Trim()
                     };
                 }
 
