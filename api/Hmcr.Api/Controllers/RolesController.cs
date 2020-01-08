@@ -22,7 +22,7 @@ namespace Hmcr.Api.Controllers
             _roleSvc = roleSvc;
         }
 
-        [HttpGet("")]
+        [HttpGet]
         [RequiresPermission(Permissions.RoleRead)]
         public async Task<ActionResult<IEnumerable<RoleSearchDto>>> GetRolesAsync([FromQuery]string searchText = null, [FromQuery]bool? isActive = true)
         {

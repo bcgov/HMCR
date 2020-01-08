@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.IO;
+using System.Linq;
 
 namespace Hmcr.Model.Utils
 {
@@ -74,6 +75,16 @@ namespace Hmcr.Model.Utils
             {
                 dictionary.Add(keyName, new List<string> { item });
             }
+        }
+        public static string GetErrorDetail(this Dictionary<string, List<string>> errors)
+        {
+            var errorDetail = new StringBuilder();
+            foreach (var (error, detail) in errors.SelectMany(error => error.Value.Select(detail => (error, detail))))
+            {
+                errorDetail.AppendLine($"{error.Key}: {detail}");
+            }
+
+            return errorDetail.ToString();
         }
 
         public static bool IsIdirUser(this string str)

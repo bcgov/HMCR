@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using Hmcr.Data.Database.Entities;
 using Hmcr.Data.Repositories.Base;
+using Hmcr.Model;
 using Hmcr.Model.Dtos;
 using Hmcr.Model.Dtos.SubmissionObject;
 using Microsoft.EntityFrameworkCore;
@@ -18,6 +19,8 @@ namespace Hmcr.Data.Repositories
         Task<SubmissionObjectDto> GetSubmissionObjectAsync(decimal submissionObjectId);
         Task<PagedDto<SubmissionObjectSearchDto>> GetSubmissionObjectsAsync(decimal serviceAreaNumber, DateTime dateFrom, DateTime dateTo, int pageSize, int pageNumber, string orderBy = "AppCreateTimestamp DESC");
         Task<bool> IsDuplicateFileAsync(SubmissionObjectCreateDto submission);
+        Task<HmrSubmissionObject> GetSubmissionObjectEntityAsync(decimal submissionObjectId);
+        Task<HmrSubmissionObject[]> GetSubmissionObjecsForBackgroundJobAsync(decimal serviceAreaNumber);
     }
     public class SubmissionObjectRepository : HmcrRepositoryBase<HmrSubmissionObject>, ISubmissionObjectRepository
     {
@@ -42,6 +45,26 @@ namespace Hmcr.Data.Repositories
         public async Task<SubmissionObjectDto> GetSubmissionObjectAsync(decimal submissionObjectId)
         {
             return await GetByIdAsync<SubmissionObjectDto>(submissionObjectId);
+        }
+
+        public async Task<HmrSubmissionObject> GetSubmissionObjectEntityAsync(decimal submissionObjectId)
+        {
+            return await DbSet.Include(x => x.HmrSubmissionRows).FirstAsync(x => x.SubmissionObjectId == submissionObjectId);
+        }
+
+        public async Task<HmrSubmissionObject[]> GetSubmissionObjecsForBackgroundJobAsync(decimal serviceAreaNumber)
+        {
+            var acceptedStatus = await DbContext.HmrSubmissionStatus.FirstAsync(x => (x.StatusCode == FileStatus.FileReceived || x.StatusCode == FileStatus.InProgress) && x.StatusType == StatusType.File);
+
+            var submissions = await DbSet
+                .Where(x => x.ServiceAreaNumber == serviceAreaNumber && x.SubmissionStatusId == acceptedStatus.StatusId)
+                .Include(x => x.SubmissionStream)
+                .Include(x => x.SubmissionStatus)
+                .Include(x => x.HmrSubmissionRows)
+                .OrderBy(x => x.SubmissionObjectId) //must be ascending order
+                .ToArrayAsync();
+
+            return submissions;
         }
 
         //public async Task<IEnumerable<SubmissionObjectSearchDto>> GetSubmissionObjectsAsync(decimal serviceAreaNumber, DateTime dateFrom, DateTime dateTo)
@@ -104,8 +127,29 @@ namespace Hmcr.Data.Repositories
 
         public async Task<bool> IsDuplicateFileAsync(SubmissionObjectCreateDto submission)
         {
-            return await DbSet
-                .AnyAsync(x => x.SubmissionStreamId == submission.SubmissionStreamId && x.FileHash == submission.FileHash);
+            //check only the previous submission regardless of success or failure in order to cover the following scenarios
+
+            //S1.
+            //  1. user submits a file #1 (success)
+            //  2. user submits a file #2 (success)
+            //  3. user submits a file #1 again 
+            //  The net result should be file #1 submission success instead of duplicate file error.
+            
+            //S2.
+            //  1. user submits a file #1 (fail while processing )
+            //  2. user submits a file #2 (success)
+            //  3. user submits a file #1 again 
+            //  The net result should be file #1 submission error instead of duplicate file error.
+
+            var latestFile = await DbSet
+                .Where(x => x.SubmissionStreamId == submission.SubmissionStreamId && x.ServiceAreaNumber == submission.ServiceAreaNumber) 
+                .OrderByDescending(x => x.SubmissionObjectId)
+                .FirstOrDefaultAsync();
+
+            if (latestFile == null)
+                return false;
+
+            return latestFile.FileHash == submission.FileHash;
         }
     }
 }

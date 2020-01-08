@@ -1,8 +1,9 @@
 ﻿using CsvHelper;
-using CsvHelper.Configuration;
 using Hmcr.Data.Database;
+using Hmcr.Data.Database.Entities;
 using Hmcr.Data.Repositories;
 using Hmcr.Domain.CsvHelpers;
+using Hmcr.Domain.Hangfire;
 using Hmcr.Domain.Services.Base;
 using Hmcr.Model;
 using Hmcr.Model.Dtos.SubmissionObject;
@@ -11,19 +12,17 @@ using Hmcr.Model.Dtos.WorkReport;
 using Hmcr.Model.Utils;
 using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
-using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace Hmcr.Domain.Services
 {
     public interface IWorkReportService
     {
-        Task<(Dictionary<string, List<string>> Errors, List<string> DuplicateRecordNumbers)> CheckDuplicatesAsync(FileUploadDto upload);
-        Task<(decimal SubmissionObjectId, Dictionary<string, List<string>> Errors)> CreateReportAsync(FileUploadDto upload);
+        Task<(Dictionary<string, List<string>> errors, List<string> duplicateRecordNumbers)> CheckDuplicatesAsync(FileUploadDto upload);
+        Task<(decimal submissionObjectId, Dictionary<string, List<string>> errors)> CreateReportAsync(FileUploadDto upload);        
     }
     public class WorkReportService : ReportServiceBase, IWorkReportService
     {
@@ -42,7 +41,7 @@ namespace Hmcr.Domain.Services
             using var stringReader = new StringReader(text);
             using var csv = new CsvReader(stringReader);
 
-            ConfigCsvHelper(errors, csv);
+            CsvHelperUtils.Config(errors, csv);
             csv.Configuration.RegisterClassMap<WorkRptInitCsvDtoMap>();
 
             while (csv.Read())
@@ -71,7 +70,7 @@ namespace Hmcr.Domain.Services
                     RecordNumber = row.RecordNumber,
                     RowValue = line,
                     RowHash = line.GetSha256Hash(),
-                    RowStatusId = await _statusRepo.GetStatusIdByTypeAndCodeAsync(StatusType.Row, RowStatus.Accepted),
+                    RowStatusId = await _statusRepo.GetStatusIdByTypeAndCodeAsync(StatusType.Row, RowStatus.RowReceived),
                     EndDate = row.EndDate
                 });
             }

@@ -74,7 +74,7 @@ const EditUserFormFields = ({ userTypes, roles, serviceAreas, disableEdit }) => 
         <MultiSelect items={roles} name="userRoleIds" />
       </FormRow>
       <FormRow name="serviceAreaNumbers" label="Service Areas*">
-        <MultiSelect items={serviceAreas} name="serviceAreaNumbers" />
+        <MultiSelect items={serviceAreas} name="serviceAreaNumbers" showSelectAll={true} />
       </FormRow>
       {/* <FormRow name="active" label="Active">
     <FormCheckbox name="active" />

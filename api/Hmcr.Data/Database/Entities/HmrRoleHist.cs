@@ -11,6 +11,7 @@ namespace Hmcr.Data.Database.Entities
         public decimal RoleId { get; set; }
         public string Name { get; set; }
         public string Description { get; set; }
+        public string IsInternal { get; set; }
         public DateTime? EndDate { get; set; }
         public long ConcurrencyControlNumber { get; set; }
         public string AppCreateUserid { get; set; }

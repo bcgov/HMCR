@@ -61,12 +61,12 @@ objects:
                 - name: JWT_AUTHORITY
                   valueFrom:
                     secretKeyRef:
-                      name: sso-configs
+                      name: sso-configs-${ENV}
                       key: JWT_SSO_AUTHORITY
                 - name: JWT_AUDIENCE
                   valueFrom:
                     secretKeyRef:
-                      name: sso-configs
+                      name: sso-configs-${ENV}
                       key: JWT_SSO_AUDIENCE
                 - name: CHRIS_MAP_URL
                   valueFrom:

@@ -9,7 +9,7 @@ namespace Hmcr.Data.Database.Entities
         public decimal SubmissionObjectId { get; set; }
         public decimal? ValidationStatusId { get; set; }
         public string RecordType { get; set; }
-        public decimal ContractServiceArea { get; set; }
+        public decimal ServiceArea { get; set; }
         public DateTime? AccidentDate { get; set; }
         public string TimeOfKill { get; set; }
         public decimal? Latitude { get; set; }
@@ -38,7 +38,7 @@ namespace Hmcr.Data.Database.Entities
         public string DbAuditLastUpdateUserid { get; set; }
         public DateTime DbAuditLastUpdateTimestamp { get; set; }
 
-        public virtual HmrServiceArea ContractServiceAreaNavigation { get; set; }
+        public virtual HmrServiceArea ServiceAreaNavigation { get; set; }
         public virtual HmrSubmissionObject SubmissionObject { get; set; }
         public virtual HmrSubmissionStatu ValidationStatus { get; set; }
     }

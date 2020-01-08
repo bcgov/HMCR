@@ -7,6 +7,7 @@ namespace Hmcr.Data.Database.Entities
     {
         public HmrSubmissionObject()
         {
+            HmrFeedbackMessages = new HashSet<HmrFeedbackMessage>();
             HmrRockfallReports = new HashSet<HmrRockfallReport>();
             HmrSubmissionRows = new HashSet<HmrSubmissionRow>();
             HmrWildlifeReports = new HashSet<HmrWildlifeReport>();
@@ -19,9 +20,10 @@ namespace Hmcr.Data.Database.Entities
         public decimal MimeTypeId { get; set; }
         public decimal SubmissionStatusId { get; set; }
         public decimal ServiceAreaNumber { get; set; }
-        public decimal SubmissionStreamId { get; set; }
-        public string ErrorDetail { get; set; }
+        public decimal? PartyId { get; set; }
         public string FileHash { get; set; }
+        public string ErrorDetail { get; set; }
+        public decimal SubmissionStreamId { get; set; }
         public long ConcurrencyControlNumber { get; set; }
         public string AppCreateUserid { get; set; }
         public DateTime AppCreateTimestamp { get; set; }
@@ -37,9 +39,11 @@ namespace Hmcr.Data.Database.Entities
         public DateTime DbAuditLastUpdateTimestamp { get; set; }
 
         public virtual HmrMimeType MimeType { get; set; }
+        public virtual HmrParty Party { get; set; }
         public virtual HmrServiceArea ServiceAreaNumberNavigation { get; set; }
         public virtual HmrSubmissionStatu SubmissionStatus { get; set; }
         public virtual HmrSubmissionStream SubmissionStream { get; set; }
+        public virtual ICollection<HmrFeedbackMessage> HmrFeedbackMessages { get; set; }
         public virtual ICollection<HmrRockfallReport> HmrRockfallReports { get; set; }
         public virtual ICollection<HmrSubmissionRow> HmrSubmissionRows { get; set; }
         public virtual ICollection<HmrWildlifeReport> HmrWildlifeReports { get; set; }

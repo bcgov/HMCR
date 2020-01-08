@@ -1,18 +1,39 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { CustomInput, FormFeedback } from 'reactstrap';
 import { FieldArray, useField, useFormikContext } from 'formik';
 
 const MultiSelect = props => {
-  const { items, name, handleBlur } = props;
+  const { items, name, handleBlur, showSelectAll } = props;
   // eslint-disable-next-line
   const [field, meta] = useField(props);
-  const { values } = useFormikContext();
+  const { values, setFieldValue } = useFormikContext();
   const selectedValues = values[name];
+
+  const [selectAll, setSelectAll] = useState(false);
 
   const handleItemSelected = (checked, itemId, push, remove) => {
     if (checked) push(itemId);
     else remove(selectedValues.indexOf(itemId));
   };
+
+  const updateSelectAll = () => {
+    if (selectedValues.length === items.length && !selectAll) setSelectAll(true);
+    else if (selectedValues.length !== items.length && selectAll) setSelectAll(false);
+  };
+
+  const handleSelectedAllChecked = checked => {
+    setSelectAll(checked);
+
+    if (checked)
+      setFieldValue(
+        name,
+        items.map(o => o.id),
+        true
+      );
+    else setFieldValue(name, [], true);
+  };
+
+  updateSelectAll();
 
   return (
     <React.Fragment>
@@ -21,6 +42,20 @@ const MultiSelect = props => {
           meta.touched && meta.error && typeof meta.error === 'string' && meta.value.length === 0 ? 'is-invalid' : ''
         }`}
       >
+        {showSelectAll && (
+          <CustomInput
+            type="checkbox"
+            id={`${name}_select_all`}
+            label="Select All"
+            value="select_all"
+            checked={selectAll}
+            onBlur={handleBlur}
+            onChange={e => {
+              handleSelectedAllChecked(e.target.checked);
+            }}
+            className="multiselect-all"
+          />
+        )}
         <FieldArray name={name}>
           {({ push, remove }) =>
             items.map(item => {

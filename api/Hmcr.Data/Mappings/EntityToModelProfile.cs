@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using Hmcr.Data.Database.Entities;
+using Hmcr.Model.Dtos.ActivityCode;
 using Hmcr.Model.Dtos.ContractTerm;
 using Hmcr.Model.Dtos.District;
 using Hmcr.Model.Dtos.MimeType;
@@ -16,6 +17,7 @@ using Hmcr.Model.Dtos.SubmissionStatus;
 using Hmcr.Model.Dtos.SubmissionStream;
 using Hmcr.Model.Dtos.User;
 using Hmcr.Model.Dtos.UserRole;
+using Hmcr.Model.Dtos.WorkReport;
 
 namespace Hmcr.Data.Mappings
 {
@@ -68,6 +70,11 @@ namespace Hmcr.Data.Mappings
             CreateMap<HmrUserRole, UserRoleDto>();
 
             CreateMap<HmrSubmissionStream, SubmissionStreamDto>();
+
+            CreateMap<HmrActivityCode, ActivityCodeDto>();
+            CreateMap<HmrLocationCode, LocationCodeDto>();
+
+            CreateMap<HmrWorkReport, WorkReportDto>();
         }
     }
 }

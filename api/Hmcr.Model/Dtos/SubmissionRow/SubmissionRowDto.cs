@@ -12,6 +12,9 @@ namespace Hmcr.Model.Dtos.SubmissionRow
         public string RecordNumber { get; set; }
         public string RowValue { get; set; }
         public string RowHash { get; set; }
+        public string ErrorDetail { get; set; }
+
+        //this filed doesn't exist in the entity.
         public DateTime EndDate { get; set; }
     }
 }

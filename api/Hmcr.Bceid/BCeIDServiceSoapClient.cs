@@ -8,6 +8,6 @@ namespace BceidService
     {
         public string Osid { get; set; }
         public string Guid { get; set; }
-        public int CacheLifespan { get; set; }
+        public double CacheLifespan { get; set; }
     }
 }
