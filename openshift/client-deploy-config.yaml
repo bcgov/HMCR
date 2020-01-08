@@ -77,17 +77,17 @@ objects:
                 - name: REACT_APP_SSO_HOST
                   valueFrom:
                     secretKeyRef:
-                      name: sso-configs
+                      name: sso-configs-${ENV}
                       key: CLIENT_SSO_HOST
                 - name: REACT_APP_SSO_REALM
                   valueFrom:
                     secretKeyRef:
-                      name: sso-configs
+                      name: sso-configs-${ENV}
                       key: CLIENT_SSO_REALM
                 - name: REACT_APP_SSO_CLIENT
                   valueFrom:
                     secretKeyRef:
-                      name: sso-configs
+                      name: sso-configs-${ENV}
                       key: CLIENT_SSO_CLIENTID
                 - name: REACT_APP_API_HOST
                   value: ${HOST}
@@ -160,6 +160,11 @@ parameters:
     name: SUFFIX
     required: false
     value: "-dev"
+  - description: Environment short name (dev,test,uat,prod)
+    displayName: ENV
+    name: ENV
+    required: false
+    value: "dev"
   - description: A version used for the image tags
     displayName: version
     name: VERSION
