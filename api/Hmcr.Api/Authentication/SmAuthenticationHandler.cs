@@ -50,7 +50,7 @@ namespace Hmcr.Api.Authentication
 
             ReadSmHeaders();
 
-            var userExists = await _userService.ProcessFirstUserLoginAsync();
+            var userExists = await _userService.ValidateUserLoginAsync();
 
             if (!userExists)
             {

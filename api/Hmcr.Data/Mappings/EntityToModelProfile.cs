@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using Hmcr.Data.Database.Entities;
+using Hmcr.Model;
 using Hmcr.Model.Dtos.ActivityCode;
 using Hmcr.Model.Dtos.ContractTerm;
 using Hmcr.Model.Dtos.District;
@@ -66,6 +67,8 @@ namespace Hmcr.Data.Mappings
             CreateMap<HmrSystemUser, UserSearchDto>();
             CreateMap<HmrSystemUser, UserUpdateDto>();
             CreateMap<HmrSystemUser, UserDeleteDto>();
+
+            CreateMap<BceidAccount, UserBceidAccountDto>();
 
             CreateMap<HmrUserRole, UserRoleDto>();
 

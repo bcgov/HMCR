@@ -10,10 +10,9 @@ import PageSpinner from '../ui/PageSpinner';
 import { FormRow, FormInput } from './FormInputs';
 import FormModal from './FormModal';
 
-import { createUser, editUser, showValidationErrorDialog } from '../../actions';
+import { editUser, showValidationErrorDialog } from '../../actions';
 
 import * as api from '../../Api';
-import * as Constants from '../../Constants';
 
 const defaultValues = {
   userType: '',
@@ -36,39 +35,17 @@ const validationSchema = Yup.object({
     .required('Required')
     .max(32)
     .trim(),
-  firstName: Yup.string()
-    .required('Required')
-    .max(150)
-    .trim(),
-  lastName: Yup.string()
-    .required('Required')
-    .max(150)
-    .trim(),
-  email: Yup.string()
-    .email('Invalid email address')
-    .required('Required')
-    .max(100)
-    .trim(),
   userRoleIds: Yup.array().required('Require at least one role'),
 });
 
-const EditUserFormFields = ({ userTypes, roles, serviceAreas, disableEdit }) => {
+const EditUserFormFields = ({ userTypes, roles, serviceAreas }) => {
   return (
     <React.Fragment>
       <FormRow name="userType" label="User Type*">
-        <SingleDropdownField defaultTitle="Select User Type" items={userTypes} name="userType" disabled={disableEdit} />
+        <SingleDropdownField defaultTitle="Select User Type" items={userTypes} name="userType" disabled />
       </FormRow>
       <FormRow name="username" label="User Id*">
-        <FormInput type="text" name="username" placeholder="User Id" disabled={disableEdit} />
-      </FormRow>
-      <FormRow name="firstName" label="First Name*">
-        <FormInput type="text" name="firstName" placeholder="First Name" disabled={disableEdit} />
-      </FormRow>
-      <FormRow name="lastName" label="Last Name*">
-        <FormInput type="text" name="lastName" placeholder="Last Name" disabled={disableEdit} />
-      </FormRow>
-      <FormRow name="email" label="Email*">
-        <FormInput type="email" name="email" placeholder="Email" />
+        <FormInput type="text" name="username" placeholder="User Id" disabled />
       </FormRow>
       <FormRow name="userRoleIds" label="User Roles*">
         <MultiSelect items={roles} name="userRoleIds" />
@@ -76,9 +53,6 @@ const EditUserFormFields = ({ userTypes, roles, serviceAreas, disableEdit }) => 
       <FormRow name="serviceAreaNumbers" label="Service Areas*">
         <MultiSelect items={serviceAreas} name="serviceAreaNumbers" showSelectAll={true} />
       </FormRow>
-      {/* <FormRow name="active" label="Active">
-    <FormCheckbox name="active" />
-  </FormRow> */}
       <FormRow name="endDate" label="End Date">
         <SingleDateField name="endDate" placeholder="End Date" />
       </FormRow>
@@ -86,22 +60,11 @@ const EditUserFormFields = ({ userTypes, roles, serviceAreas, disableEdit }) => 
   );
 };
 
-const EditUserForm = ({
-  toggle,
-  isOpen,
-  userTypes,
-  serviceAreas,
-  createUser,
-  editUser,
-  formType,
-  userId,
-  showValidationErrorDialog,
-}) => {
+const EditUserForm = ({ toggle, isOpen, userTypes, serviceAreas, editUser, userId, showValidationErrorDialog }) => {
   // This is needed until Formik fixes its own setSubmitting function
   const [submitting, setSubmitting] = useState(false);
   const [loading, setLoading] = useState(true);
   const [initialValues, setInitialValues] = useState(defaultValues);
-  const [disableEdit, setDisableEdit] = useState(false);
   const [roles, setRoles] = useState([]);
 
   useEffect(() => {
@@ -110,54 +73,36 @@ const EditUserForm = ({
       .then(response => {
         setRoles(response.data);
 
-        if (formType === Constants.FORM_TYPE.ADD) {
-          setLoading(false);
-        } else {
-          return api.getUser(userId).then(response => {
-            setInitialValues({
-              ...response.data,
-              endDate: response.data.endDate ? moment(response.data.endDate) : null,
-            });
-            setDisableEdit(response.data.hasLogInHistory);
+        return api.getUser(userId).then(response => {
+          setInitialValues({
+            ...response.data,
+            endDate: response.data.endDate ? moment(response.data.endDate) : null,
           });
-        }
+        });
       })
       .then(() => setLoading(false));
-  }, [formType, userId]);
+  }, [userId]);
 
   const handleFormSubmit = values => {
     if (!submitting) {
       setSubmitting(true);
 
-      if (formType === Constants.FORM_TYPE.ADD) {
-        createUser(values)
-          .then(() => {
-            toggle(true);
-          })
-          .catch(error => {
-            showValidationErrorDialog(error.response.data.errors);
-            setSubmitting(false);
-          });
-      } else {
-        editUser(userId, values)
-          .then(() => {
-            toggle(true);
-          })
-          .catch(error => {
-            showValidationErrorDialog(error.response.data.errors);
-            setSubmitting(false);
-          });
-      }
+      editUser(userId, values)
+        .then(() => {
+          toggle(true);
+        })
+        .catch(error => {
+          showValidationErrorDialog(error.response.data.errors);
+          setSubmitting(false);
+        });
     }
   };
-
-  const title = formType === Constants.FORM_TYPE.ADD ? 'Add User' : 'Edit User';
 
   return (
     <FormModal
       isOpen={isOpen}
       toggle={toggle}
-      title={title}
+      title="Edit User"
       initialValues={initialValues}
       validationSchema={validationSchema}
       onSubmit={handleFormSubmit}
@@ -166,7 +111,12 @@ const EditUserForm = ({
       {loading ? (
         <PageSpinner />
       ) : (
-        <EditUserFormFields userTypes={userTypes} roles={roles} serviceAreas={serviceAreas} disableEdit={disableEdit} />
+        <EditUserFormFields
+          userTypes={userTypes}
+          roles={roles}
+          serviceAreas={serviceAreas}
+          initialValues={initialValues}
+        />
       )}
     </FormModal>
   );
@@ -179,4 +129,4 @@ const mapStateToProps = state => {
   };
 };
 
-export default connect(mapStateToProps, { createUser, editUser, showValidationErrorDialog })(EditUserForm);
+export default connect(mapStateToProps, { editUser, showValidationErrorDialog })(EditUserForm);

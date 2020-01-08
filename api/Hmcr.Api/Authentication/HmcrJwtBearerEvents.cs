@@ -59,7 +59,7 @@ namespace Hmcr.Api.Authentication
                 return;
             }
 
-            var userExists = await _userService.ProcessFirstUserLoginAsync();
+            var userExists = await _userService.ValidateUserLoginAsync();
 
             if (!userExists)
             {
@@ -77,7 +77,7 @@ namespace Hmcr.Api.Authentication
             _curentUser.UserName = principal.FindFirstValue(HmcrClaimTypes.KcUsername);
             var username = _curentUser.UserName.Split("@");
             var userid = username[0].ToUpperInvariant();
-            var directory = username[1].ToUpperInvariant();            
+            var directory = username[1].ToUpperInvariant();
             var userType = directory.ToUpperInvariant() == "IDIR" ? UserTypeDto.INTERNAL : UserTypeDto.BUSINESS;
 
             var (error, account) = await _bceid.GetBceidAccountCachedAsync(userid, userType);

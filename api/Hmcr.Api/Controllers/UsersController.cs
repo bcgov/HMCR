@@ -107,6 +107,18 @@ namespace Hmcr.Api.Controllers
             return user;
         }
 
+        [HttpGet("bceidaccount/{userType}/{username}", Name = "GetBceidAccount")]
+        [RequiresPermission(Permissions.UserWrite)]
+        public async Task<ActionResult<UserBceidAccountDto>> GetBceidAccountAsync(string username, string userType)
+        {
+            var bceidAccount = await _userService.GetBceidAccountAsync(username, userType);
+
+            if (bceidAccount == null)
+                return NotFound();
+
+            return bceidAccount;
+        }
+
         [HttpPost]
         [RequiresPermission(Permissions.UserWrite)]
         public async Task<ActionResult<UserDto>> CreateUser(UserCreateDto user)

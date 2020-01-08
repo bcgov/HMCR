@@ -1,4 +1,6 @@
-﻿using Hmcr.Data.Database;
+﻿using AutoMapper;
+using Hmcr.Bceid;
+using Hmcr.Data.Database;
 using Hmcr.Data.Database.Entities;
 using Hmcr.Data.Repositories;
 using Hmcr.Model;
@@ -16,9 +18,10 @@ namespace Hmcr.Domain.Services
     public interface IUserService
     {
         Task<UserCurrentDto> GetCurrentUserAsync();
-        Task<bool> ProcessFirstUserLoginAsync();
+        Task<bool> ValidateUserLoginAsync();
         Task<PagedDto<UserSearchDto>> GetUsersAsync(decimal[]? serviceAreas, string[]? userTypes, string searchText, bool? isActive, int pageSize, int pageNumber, string orderBy);
         Task<UserDto> GetUserAsync(decimal systemUserId);
+        Task<UserBceidAccountDto> GetBceidAccountAsync(string username, string userType);
         Task<(decimal SystemUserId, Dictionary<string, List<string>> Errors)> CreateUserAsync(UserCreateDto user);
         Task<(bool NotFound, Dictionary<string, List<string>> Errors)> UpdateUserAsync(UserUpdateDto user);
         Task<(bool NotFound, Dictionary<string, List<string>> Errors)> DeleteUserAsync(UserDeleteDto user);
@@ -32,9 +35,11 @@ namespace Hmcr.Domain.Services
         private IUnitOfWork _unitOfWork;
         private HmcrCurrentUser _currentUser;
         private IFieldValidatorService _validator;
+        private IBceidApi _bceid;
+        private IMapper _mapper;
 
         public UserService(IUserRepository userRepo, IPartyRepository partyRepo, IServiceAreaRepository serviceAreaRepo, IRoleRepository roleRepo,
-            IUnitOfWork unitOfWork, HmcrCurrentUser currentUser, IFieldValidatorService validator)
+            IUnitOfWork unitOfWork, HmcrCurrentUser currentUser, IFieldValidatorService validator, IBceidApi bceid, IMapper mapper)
         {
             _userRepo = userRepo;
             _partyRepo = partyRepo;
@@ -43,6 +48,8 @@ namespace Hmcr.Domain.Services
             _unitOfWork = unitOfWork;
             _currentUser = currentUser;
             _validator = validator;
+            _bceid = bceid;
+            _mapper = mapper;
         }
 
         public async Task<UserCurrentDto> GetCurrentUserAsync()
@@ -50,9 +57,8 @@ namespace Hmcr.Domain.Services
             return await _userRepo.GetCurrentUserAsync();
         }
 
-
-        //todo: change the method to sync db record with bceid info when there are any changes.
-        public async Task<bool> ProcessFirstUserLoginAsync()
+        //todo: allow same username for different userType
+        public async Task<bool> ValidateUserLoginAsync()
         {
             var userEntity = await _userRepo.GetCurrentActiveUserEntityAsync();
 
@@ -60,14 +66,10 @@ namespace Hmcr.Domain.Services
             {
                 return false;
             }
-            
+
             if (userEntity.UserGuid == null)
             {
-                if (userEntity.UserType == _currentUser.UserType) 
-                {
-                    _userRepo.ProcessFirstUserLogin();
-                }
-                else
+                if (userEntity.UserType != _currentUser.UserType)
                 {
                     throw new HmcrException($"User[{_currentUser.UniversalId}] exists in the user table with a wrong user type [{_currentUser.UserType}].");
                 }
@@ -90,6 +92,18 @@ namespace Hmcr.Domain.Services
             return await _userRepo.GetUserAsync(systemUserId);
         }
 
+        public async Task<UserBceidAccountDto> GetBceidAccountAsync(string username, string userType)
+        {
+            var (error, account) = await _bceid.GetBceidAccountCachedAsync(username, userType);
+
+            if (string.IsNullOrEmpty(error))
+            {
+                return _mapper.Map<UserBceidAccountDto>(account);
+            }
+
+            return null;
+        }
+
         public async Task<(decimal SystemUserId, Dictionary<string, List<string>> Errors)> CreateUserAsync(UserCreateDto user)
         {
             var errors = await ValidateUserDtoAsync(user);
@@ -110,6 +124,17 @@ namespace Hmcr.Domain.Services
             var userEntity = await _userRepo.CreateUserAsync(user);
 
             await _unitOfWork.CommitAsync();
+
+            var (error, account) = await _bceid.GetBceidAccountCachedAsync(user.Username, user.UserType);
+
+            if (string.IsNullOrEmpty(error))
+            {
+                _userRepo.ProcessFirstUserLogin(account);
+            }
+            else
+            {
+                throw new HmcrException($"Unable to retrieve User[{user.Username}] of type [{user.UserType}] from BCeID Service.");
+            }
 
             return (userEntity.SystemUserId, errors);
         }

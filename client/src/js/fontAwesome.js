@@ -9,6 +9,7 @@ import {
   faTimesCircle,
   faExclamationCircle,
 } from '@fortawesome/free-solid-svg-icons';
+import { faCheckCircle as farCheckCircle } from '@fortawesome/free-regular-svg-icons';
 
 const addIconsToLibrary = () => {
   library.add(faCalendarAlt);
@@ -19,6 +20,7 @@ const addIconsToLibrary = () => {
   library.add(faExclamationCircle);
   library.add(faBan);
   library.add(faSort);
+  library.add(farCheckCircle);
 };
 
 export default addIconsToLibrary;
