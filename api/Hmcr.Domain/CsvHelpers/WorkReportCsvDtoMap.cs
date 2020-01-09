@@ -17,6 +17,7 @@ namespace Hmcr.Domain.CsvHelpers
         public WorkReportCsvDtoMap()
         {
             AutoMap();
+            Map(m => m.ValueOfWork).TypeConverter<DollarValueConverter>();
         }
     }
 
@@ -28,6 +29,7 @@ namespace Hmcr.Domain.CsvHelpers
             Map(m => m.StartDate).TypeConverter<DateTypeConverter>();
             Map(m => m.EndDate).TypeConverter<DateTypeConverter>();
             Map(m => m.PostedDate).TypeConverter<DateTypeConverter>();
+            Map(m => m.ValueOfWork).TypeConverter<DollarValueConverter>();
         }
     }
 }

@@ -12,7 +12,6 @@ namespace Hmcr.Domain.CsvHelpers
         public WildlifeRptInitCsvDtoMap()
         {
             AutoMap();
-            //Map(m => m.ServiceArea).Name("contractservicearea");
         }
     }
 }

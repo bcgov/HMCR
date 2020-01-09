@@ -79,7 +79,7 @@ namespace Hmcr.Model.Utils
         public static string GetErrorDetail(this Dictionary<string, List<string>> errors)
         {
             var errorDetail = new StringBuilder();
-            foreach (var (error, detail) in errors.SelectMany(error => error.Value.Select(detail => (error, detail))))
+            foreach (var (error, detail) in errors.SelectMany(error => error.Value.Select(detail => (error, detail + Environment.NewLine))))
             {
                 errorDetail.AppendLine($"{error.Key}: {detail}");
             }

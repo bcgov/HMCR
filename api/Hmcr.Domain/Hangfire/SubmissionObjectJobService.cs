@@ -21,9 +21,11 @@ namespace Hmcr.Domain.Hangfire
         private IActivityCodeRepository _activityRepo;
         private ISubmissionStatusRepository _statusRepo;
         private HmcrCurrentUser _user;
+        private IRockfallReportJobService _rockfallRptJobService;
 
         public SubmissionObjectJobService(ISubmissionObjectRepository submissionRepo, IServiceAreaService svcAreaService, 
-            IWorkReportJobService workRptJobService, IActivityCodeRepository activityRepo, ISubmissionStatusRepository statusRepo,
+            IWorkReportJobService workRptJobService, IRockfallReportJobService rockfallRptJobService,
+            IActivityCodeRepository activityRepo, ISubmissionStatusRepository statusRepo,
             HmcrCurrentUser user)
         {
             _submissionRepo = submissionRepo;
@@ -32,13 +34,17 @@ namespace Hmcr.Domain.Hangfire
             _activityRepo = activityRepo;
             _statusRepo = statusRepo;
             _user = user;
+            _rockfallRptJobService = rockfallRptJobService;
         }
 
-        public static void RegisterReportingJobs(IEnumerable<ServiceAreaNumberDto> serviceAreas)
+        public static void RegisterReportingJobs(IEnumerable<ServiceAreaNumberDto> serviceAreas, int minutes)
         {
+            if (minutes < 1)
+                minutes = 5;
+
             foreach (var serviceArea in serviceAreas)
             {
-                RecurringJob.AddOrUpdate<SubmissionObjectJobService>($"SA{serviceArea.ServiceAreaNumber}", x => x.RunReportingJob(serviceArea.ServiceAreaNumber), "*/5 * * * *");
+                RecurringJob.AddOrUpdate<SubmissionObjectJobService>($"SA{serviceArea.ServiceAreaNumber}", x => x.RunReportingJob(serviceArea.ServiceAreaNumber), $"*/{minutes} * * * *");
             }
         }
 
@@ -61,6 +67,7 @@ namespace Hmcr.Domain.Hangfire
                         await _workRptJobService.ProcessSubmission(submission);
                         break;
                     case TableNames.RockfallReport:
+                        await _rockfallRptJobService.ProcessSubmission(submission);
                         break;
                     case TableNames.WildlifeReport:
                         break;
