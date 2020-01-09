@@ -13,7 +13,7 @@ namespace Hmcr.Domain.CsvHelpers
     {
         public static void Config(Dictionary<string, List<string>> errors, CsvReader csv, bool checkHeader = true)
         {
-            csv.Configuration.PrepareHeaderForMatch = (string header, int index) => Regex.Replace(header.ToLower(), @"\s", string.Empty);
+            csv.Configuration.PrepareHeaderForMatch = (string header, int index) => Regex.Replace(header.ToLower(), @"[\s|\/]", string.Empty);
             csv.Configuration.CultureInfo = CultureInfo.GetCultureInfo("en-CA");
 
             csv.Configuration.TrimOptions = TrimOptions.Trim;

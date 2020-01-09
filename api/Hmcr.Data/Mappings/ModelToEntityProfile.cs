@@ -7,6 +7,7 @@ using Hmcr.Model.Dtos.MimeType;
 using Hmcr.Model.Dtos.Party;
 using Hmcr.Model.Dtos.Permission;
 using Hmcr.Model.Dtos.Region;
+using Hmcr.Model.Dtos.RockfallReport;
 using Hmcr.Model.Dtos.Role;
 using Hmcr.Model.Dtos.RolePermission;
 using Hmcr.Model.Dtos.ServiceArea;
@@ -78,6 +79,8 @@ namespace Hmcr.Data.Mappings
             CreateMap<LocationCodeDto, HmrLocationCode>();
 
             CreateMap<WorkReportDto, HmrWorkReport>();
+
+            CreateMap<RockfallReportDto, HmrRockfallReport>();
         }
     }
 }

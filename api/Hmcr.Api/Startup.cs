@@ -65,7 +65,8 @@ namespace Hmcr.Api
 
             //Register Hangfire Recurring Jobs 
             var serviceAreas = svcAreaService.GetAllServiceAreas();
-            SubmissionObjectJobService.RegisterReportingJobs(serviceAreas);
+            var minute = Configuration.GetValue<int>("ReportJobIntervalInMinutes");
+            SubmissionObjectJobService.RegisterReportingJobs(serviceAreas, minute);
         }
     }
 }

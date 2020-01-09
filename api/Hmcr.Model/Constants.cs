@@ -26,12 +26,17 @@ namespace Hmcr.Model
     {
         public const string User = "user";
         public const string Role = "role";
-        public const string WorkReportD2 = "wr2";
-        public const string WorkReportD2B = "wr2b";
-        public const string WorkReportD3 = "wr3";
-        public const string WorkReportD3Site = "wr3s";
-        public const string WorkReportD4 = "wr4";
-        public const string WorkReportD4Site = "wr4s";
+
+        public const string WorkReportD2 = "workd2";
+        public const string WorkReportD2B = "workd2b";
+        public const string WorkReportD3 = "workd3";
+        public const string WorkReportD3Site = "workrd3site";
+        public const string WorkReportD4 = "workd4";
+        public const string WorkReportD4Site = "workd4site";
+
+        public const string RockfallReport = "rockfall";
+        public const string RockfallReportGps = "rockfallgps";
+        public const string RockfallReportLrs = "rockfalllrs";
     }
 
     public static class FieldTypes
@@ -111,6 +116,25 @@ namespace Hmcr.Model
         public const string SiteNumber = "SiteNumber";
         public const string ValueOfWork = "ValueOfWork";
         public const string Comments = "Comments";
+        
+        public const string McrrIncidentNumber = "McrrIncidentNumber";
+        public const string EstimatedRockfallDate = "EstimatedRockfallDate";
+        public const string EstimatedRockfallTime = "EstimatedRockfallTime";
+        public const string HighwayUniqueNumber = "HighwayUniqueNumber";
+        public const string HighwayUniqueName = "HighwayUniqueName";
+        public const string LandMarkName = "LandMarkName";
+        public const string DirectionFromLandmark = "DirectionFromLandmark";
+        public const string DitchVolume = "DitchVolume";
+        public const string TravelledLanesVolume = "TravelledLanesVolume";
+        public const string HeavyPrecip = "HeavyPrecip";
+        public const string FreezeThaw = "FreezeThaw";
+        public const string DitchSnowIce = "DitchSnowIce";
+        public const string VehicleDamage = "VehicleDamage";
+        public const string McPhoneNumber = "McPhoneNumber";
+        public const string McName = "McName";
+        public const string ReportDate = "ReportDate";
+        public const string LocationDescription = "LocationDescription";
+        public const string OtherVolume = "OtherVolume";
     }
 
     public static class WorkReportHeaders
@@ -119,6 +143,18 @@ namespace Hmcr.Model
         {
             Fields.RecordType, Fields.ServiceArea, Fields.RecordNumber, Fields.ActivityNumber, 
             Fields.EndDate, Fields.Accomplishment, Fields.UnitOfMeasure, Fields.PostedDate 
+        };
+    }
+
+    public static class RockfallReportHeaders
+    {
+        public static string[] CommonMandatoryFields = new string[]
+        {
+            Fields.RecordType, Fields.ServiceArea, Fields.McrrIncidentNumber, Fields.EstimatedRockfallDate, Fields.EstimatedRockfallTime,
+            Fields.StartLatitude, Fields.StartLongitude, Fields.HighwayUniqueNumber, Fields.HighwayUniqueName, Fields.Landmark,
+            Fields.LandMarkName, Fields.StartOffset, Fields.DirectionFromLandmark, Fields.DitchVolume, Fields.TravelledLanesVolume,
+            Fields.HeavyPrecip, Fields.FreezeThaw, Fields.DitchSnowIce, Fields.VehicleDamage, Fields.Name,
+            Fields.McPhoneNumber, Fields.McName, Fields.ReportDate
         };
     }
 
