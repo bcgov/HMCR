@@ -184,11 +184,16 @@ const UserAdmin = ({
 };
 
 const mapStateToProps = state => {
+  const userTypes = Object.values(state.user.types);
+  const userList = Object.values(state.user.list).map(user => ({
+    ...user,
+    userType: state.user.types[user.userType].name,
+  }));
   return {
     serviceAreas: Object.values(state.serviceAreas),
     userStatuses: Object.values(state.user.statuses),
-    userTypes: Object.values(state.user.types),
-    searchResult: Object.values(state.user.list),
+    userTypes,
+    searchResult: userList,
     searchPagination: state.user.searchPagination,
   };
 };

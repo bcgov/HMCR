@@ -15,6 +15,7 @@ import {
   DropdownMenu,
   DropdownItem,
 } from 'reactstrap';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 import NavLinkWithMatch from '../ui/NavLinkWithMatch';
 import Authorize from '../fragments/Authorize';
@@ -71,9 +72,9 @@ const Header = ({ currentUser }) => {
             <Nav className="navbar-nav">
               {currentUser.userType === Constants.USER_TYPE.INTERNAL && (
                 <React.Fragment>
-                  <Authorize requires={Constants.PERMISSIONS.FILE_R}>
+                  {/* <Authorize requires={Constants.PERMISSIONS.FILE_R}>
                     <NavLinkWithMatch hideNavbar={hideNavbar} to={Constants.PATHS.ADMIN_ACTIVITIES} text="Activities" />
-                  </Authorize>
+                  </Authorize> */}
                   <Authorize requires={Constants.PERMISSIONS.USER_R}>
                     <NavLinkWithMatch hideNavbar={hideNavbar} to={Constants.PATHS.ADMIN_USERS} text="Users" />
                   </Authorize>
@@ -104,7 +105,7 @@ const Header = ({ currentUser }) => {
             <Nav className="navbar-nav ml-auto">
               <NavItem>
                 <Button color="link" onClick={() => Keycloak.logout()}>
-                  {`${currentUser.username},  Logout`}
+                  <FontAwesomeIcon icon="user" /> {`${currentUser.username},  Logout`}
                 </Button>
               </NavItem>
             </Nav>

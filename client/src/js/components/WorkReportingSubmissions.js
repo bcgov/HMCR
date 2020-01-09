@@ -69,8 +69,8 @@ const WorkReportingSubmissions = ({
     <React.Fragment>
       <Row className="mb-3">
         <Col>
-          <div style={{ display: 'flex', alignItems: 'center' }}>
-            <strong className="mr-2">Report Submit Date</strong>
+          <div style={{ display: 'flex', alignItems: 'flex-end' }}>
+            <span className="mr-2">Report Submit Date</span>
             <DateRangePicker
               startDate={startDate}
               startDateId="searchStartDate"

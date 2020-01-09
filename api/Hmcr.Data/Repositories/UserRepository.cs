@@ -26,7 +26,7 @@ namespace Hmcr.Data.Repositories
         Task<PagedDto<UserSearchDto>> GetUsersAsync(decimal[]? serviceAreas, string[]? userTypes, string searchText, bool? isActive, int pageSize, int pageNumber, string orderBy);
         Task<UserDto> GetUserAsync(decimal systemUserId);
         Task<HmrSystemUser> CreateUserAsync(UserCreateDto user);
-        Task<bool> DoesUsernameExistAsync(string username);
+        Task<bool> DoesUsernameExistAsync(string username, string userType);
         Task UpdateUserAsync(UserUpdateDto userDto);
         Task DeleteUserAsync(UserDeleteDto user);
     }
@@ -219,9 +219,9 @@ namespace Hmcr.Data.Repositories
             return user;
         }
 
-        public async Task<bool> DoesUsernameExistAsync(string username)
+        public async Task<bool> DoesUsernameExistAsync(string username, string userType)
         {
-            return await DbSet.AnyAsync(u => u.Username == username);
+            return await DbSet.AnyAsync(u => u.Username == username && u.UserType == userType);
         }
 
         public async Task<HmrSystemUser> CreateUserAsync(UserCreateDto user)

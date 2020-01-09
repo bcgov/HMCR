@@ -119,9 +119,9 @@ namespace Hmcr.Domain.Services
 
             if (user.Username.IsNotEmpty())
             {
-                if (await _userRepo.DoesUsernameExistAsync(user.Username))
+                if (await _userRepo.DoesUsernameExistAsync(user.Username, user.UserType))
                 {
-                    errors.AddItem(Fields.Username, $"Username [{user.Username}] already exists.");
+                    errors.AddItem(Fields.Username, $"Username [{user.Username} ({user.UserType})] already exists.");
                 }
             }
 
@@ -142,7 +142,7 @@ namespace Hmcr.Domain.Services
             }
             else
             {
-                throw new HmcrException($"Unable to retrieve User[{user.Username}] of type [{user.UserType}] from BCeID Service.");
+                throw new HmcrException($"Unable to retrieve User[{user.Username} ({user.UserType})] from BCeID Service.");
             }
 
             return (userEntity.SystemUserId, errors);
@@ -166,9 +166,9 @@ namespace Hmcr.Domain.Services
 
             if (user.Username != userFromDb.Username)
             {
-                if (await _userRepo.DoesUsernameExistAsync(user.Username))
+                if (await _userRepo.DoesUsernameExistAsync(user.Username, user.UserType))
                 {
-                    errors.AddItem(Fields.Username, $"Username [{user.Username}] already exists.");
+                    errors.AddItem(Fields.Username, $"Username [{user.Username} ({user.UserType})] already exists.");
                 }
             }
 

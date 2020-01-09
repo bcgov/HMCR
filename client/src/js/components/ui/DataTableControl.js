@@ -1,7 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { Table } from 'reactstrap';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { Table, Badge } from 'reactstrap';
 
 import Authorize from '../fragments/Authorize';
 import FontAwesomeButton from './FontAwesomeButton';
@@ -46,9 +45,9 @@ const DataTableControl = ({
                   column.key === 'isActive' ? (
                     <td key={column.key}>
                       {item[column.key] ? (
-                        <FontAwesomeIcon icon="check-circle" className="fa-color-primary" />
+                        <Badge color="success">Active</Badge>
                       ) : (
-                        <FontAwesomeIcon icon="ban" className="fa-color-danger" />
+                        <Badge color="danger">Inactive</Badge>
                       )}
                     </td>
                   ) : (
