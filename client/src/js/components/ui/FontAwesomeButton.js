@@ -5,13 +5,14 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 const FontAwesomeButton = props => {
   return (
     <Button
-      size="xs"
-      color={props.color ? props.color : 'primary'}
+      size={props.size || 'xs'}
+      color={props.color || 'primary'}
       className={`fontawesome-button ${props.className}`}
       onClick={props.onClick}
       id={props.id}
+      disabled={props.disabled}
     >
-      <FontAwesomeIcon icon={props.icon} />
+      <FontAwesomeIcon icon={props.icon} spin={props.spin} />
     </Button>
   );
 };

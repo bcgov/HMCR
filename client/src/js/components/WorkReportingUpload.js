@@ -171,6 +171,7 @@ const WorkReportingUpload = ({
         );
         setErrorMessages(Object.values(error.response.data.errors));
         resetCallback();
+        handleFileSubmitted();
       });
   };
 
