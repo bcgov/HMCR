@@ -14,7 +14,6 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Hmcr.Domain.CsvHelpers;
 
 namespace Hmcr.Domain.Hangfire
 {
@@ -59,8 +58,6 @@ namespace Hmcr.Domain.Hangfire
 
             var errorFileStatusId = statuses.First(x => x.StatusType == StatusType.File && x.StatusCode == FileStatus.DataError).StatusId;
             var successFileStatusId = statuses.First(x => x.StatusType == StatusType.File && x.StatusCode == FileStatus.Success).StatusId;
-
-
 
             var (untypedRows, headers) = ParseRowsUnTyped(submission, errors);
 
@@ -230,7 +227,7 @@ namespace Hmcr.Domain.Hangfire
                 return "";
 
             using var reader = new StringReader(text);
-            var header = reader.ReadLine();
+            var header = reader.ReadLine().Replace("\"", "");
 
             return header ?? "";
         }

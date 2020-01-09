@@ -271,7 +271,7 @@ namespace Hmcr.Domain.Hangfire
                 return "";
 
             using var reader = new StringReader(text);
-            var header = reader.ReadLine();
+            var header = reader.ReadLine().Replace("\"", "");
 
             return header ?? "";
         }
