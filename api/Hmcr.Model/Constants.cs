@@ -37,6 +37,10 @@ namespace Hmcr.Model
         public const string RockfallReport = "rockfall";
         public const string RockfallReportGps = "rockfallgps";
         public const string RockfallReportLrs = "rockfalllrs";
+
+        public const string WildlifeReport = "wildlife";
+        public const string WildlifeReportGps = "wildlifegps";
+        public const string WildlifeReportLrs = "wildlifelrs";
     }
 
     public static class FieldTypes
@@ -135,6 +139,17 @@ namespace Hmcr.Model
         public const string ReportDate = "ReportDate";
         public const string LocationDescription = "LocationDescription";
         public const string OtherVolume = "OtherVolume";
+
+        public const string AccidentDate = "AccidentDate";
+        public const string TimeOfKill = "TimeOfKill";
+        public const string Latitude = "Latitude";
+        public const string Longitude = "Longitude";
+        public const string NearestTown = "NearestTown";
+        public const string WildlifeSign = "WildlifeSign";
+        public const string Quantity = "Quantity";
+        public const string Species = "Species";
+        public const string Sex = "Sex";
+        public const string Age = "Age";
     }
 
     public static class WorkReportHeaders
@@ -158,4 +173,25 @@ namespace Hmcr.Model
         };
     }
 
+    public static class WildlifeReportHeaders
+    {
+        public static string[] CommonMandatoryFields = new string[]
+        {
+            Fields.RecordType, Fields.ServiceArea, Fields.AccidentDate, Fields.TimeOfKill, 
+            Fields.WildlifeSign, Fields.Quantity, Fields.Species, Fields.Sex, Fields.Age
+        };
+    }
+
+    public static class CodeSet
+    {
+        public const string UnitOfMeasure = "UOM";
+        public const string WarSpecies = "WARS_SPECIES";
+        public const string WarsTime = "WARS_TIME";
+        public const string WarsSex = "WARS_SEX";
+        public const string WarsAge = "WARS_AGE";
+        public const string WrkRptMaintType = "WRK_RPT_MAINT_TYPE";
+        public const string VolumeRange = "VOLUME_RANGE1";
+        public const string WarsRptRecordType = "WARS_RPT_RECORD_TYPE";
+        public const string WarsRptSign = "WARS_RPT_SIGN";
+    }
 }

@@ -14,4 +14,20 @@ namespace Hmcr.Domain.CsvHelpers
             AutoMap();
         }
     }
+    public class WildlifeReportCsvDtoMap : ClassMap<WildlifeReportCsvDto>
+    {
+        public WildlifeReportCsvDtoMap()
+        {
+            AutoMap();
+        }
+    }
+
+    public class WildlifeReportDtoMap : ClassMap<WildlifeReportDto>
+    {
+        public WildlifeReportDtoMap()
+        {
+            AutoMap();
+            Map(m => m.AccidentDate).TypeConverter<DateTypeConverter>();
+        }
+    }
 }

@@ -4,6 +4,7 @@ using Hmcr.Api.Authentication;
 using Hmcr.Api.Extensions;
 using Hmcr.Bceid;
 using Hmcr.Chris;
+using Hmcr.Data.Repositories;
 using Hmcr.Domain.Hangfire;
 using Hmcr.Domain.Services;
 using Microsoft.AspNetCore.Builder;
@@ -48,7 +49,7 @@ namespace Hmcr.Api
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env, ISubmissionObjectJobService jobService, 
-            IServiceScopeFactory serviceScopeFactory, IServiceAreaService svcAreaService)
+            IServiceScopeFactory serviceScopeFactory, IServiceAreaService svcAreaService, ICodeLookupRepository codeLookupRepo, IFieldValidatorService validator)
         {
             if (env.IsDevelopment())
                 app.UseDeveloperExceptionPage();
@@ -67,6 +68,9 @@ namespace Hmcr.Api
             var serviceAreas = svcAreaService.GetAllServiceAreas();
             var minute = Configuration.GetValue<int>("ReportJobIntervalInMinutes");
             SubmissionObjectJobService.RegisterReportingJobs(serviceAreas, minute);
+
+            //Inject Code Lookup
+            validator.CodeLookup = codeLookupRepo.GetCodeLookupForValidation();
         }
     }
 }

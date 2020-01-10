@@ -2,6 +2,7 @@
 using Hmcr.Data.Database.Entities;
 using Hmcr.Model;
 using Hmcr.Model.Dtos.ActivityCode;
+using Hmcr.Model.Dtos.CodeLookup;
 using Hmcr.Model.Dtos.ContractTerm;
 using Hmcr.Model.Dtos.District;
 using Hmcr.Model.Dtos.MimeType;
@@ -19,6 +20,7 @@ using Hmcr.Model.Dtos.SubmissionStatus;
 using Hmcr.Model.Dtos.SubmissionStream;
 using Hmcr.Model.Dtos.User;
 using Hmcr.Model.Dtos.UserRole;
+using Hmcr.Model.Dtos.WildlifeReport;
 using Hmcr.Model.Dtos.WorkReport;
 
 namespace Hmcr.Data.Mappings
@@ -81,6 +83,10 @@ namespace Hmcr.Data.Mappings
             CreateMap<HmrWorkReport, WorkReportDto>();
 
             CreateMap<HmrRockfallReport, RockfallReportDto>();
+
+            CreateMap<HmrWildlifeReport, WildlifeReportDto>();
+
+            CreateMap<HmrCodeLookup, CodeLookupDto>();
         }
     }
 }
