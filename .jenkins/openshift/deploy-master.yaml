@@ -40,11 +40,9 @@ objects:
 - apiVersion: v1
   kind: PersistentVolumeClaim
   metadata:
-    annotations:
-      volume.beta.kubernetes.io/storage-class: gluster-file
-      volume.beta.kubernetes.io/storage-provisioner: kubernetes.io/glusterfs
     name: ${NAME}${SUFFIX}
   spec:
+    storageClassName: netapp-file-standard
     accessModes:
     - ReadWriteOnce
     resources:
