@@ -22,9 +22,10 @@ namespace Hmcr.Domain.Hangfire
         private ISubmissionStatusRepository _statusRepo;
         private HmcrCurrentUser _user;
         private IRockfallReportJobService _rockfallRptJobService;
+        private IWildlifeReportJobService _wildlifeRptJobService;
 
         public SubmissionObjectJobService(ISubmissionObjectRepository submissionRepo, IServiceAreaService svcAreaService, 
-            IWorkReportJobService workRptJobService, IRockfallReportJobService rockfallRptJobService,
+            IWorkReportJobService workRptJobService, IRockfallReportJobService rockfallRptJobService, IWildlifeReportJobService wildlifeRptJobService,
             IActivityCodeRepository activityRepo, ISubmissionStatusRepository statusRepo,
             HmcrCurrentUser user)
         {
@@ -35,6 +36,7 @@ namespace Hmcr.Domain.Hangfire
             _statusRepo = statusRepo;
             _user = user;
             _rockfallRptJobService = rockfallRptJobService;
+            _wildlifeRptJobService = wildlifeRptJobService;
         }
 
         public static void RegisterReportingJobs(IEnumerable<ServiceAreaNumberDto> serviceAreas, int minutes)
@@ -70,6 +72,7 @@ namespace Hmcr.Domain.Hangfire
                         await _rockfallRptJobService.ProcessSubmission(submission);
                         break;
                     case TableNames.WildlifeReport:
+                        await _wildlifeRptJobService.ProcessSubmission(submission);
                         break;
                     default:
                         throw new NotImplementedException($"Background job for {submission.SubmissionStream.StagingTableName} is not implemented.");

@@ -42,6 +42,8 @@ namespace Hmcr.Domain.Services
             CsvHelperUtils.Config(errors, csv);
             csv.Configuration.RegisterClassMap<WildlifeRptInitCsvDtoMap>();
 
+            int i = 0;
+
             while (csv.Read())
             {
                 WildlifeRptInitCsvDto row = null;
@@ -65,7 +67,7 @@ namespace Hmcr.Domain.Services
 
                 submission.SubmissionRows.Add(new SubmissionRowDto
                 {
-                    RecordNumber = "",
+                    RecordNumber = (i++).ToString(),
                     RowValue = line,
                     RowHash = line.GetSha256Hash(),
                     RowStatusId = await _statusRepo.GetStatusIdByTypeAndCodeAsync(StatusType.Row, RowStatus.RowReceived),
