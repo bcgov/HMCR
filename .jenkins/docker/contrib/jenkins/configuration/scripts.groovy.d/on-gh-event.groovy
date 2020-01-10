@@ -117,7 +117,7 @@ static Map exec(List args, File workingDirectory=null, Appendable stdout=null, A
                 }
             }
         }finally{
-            exec(['rm', '-rf', workDir.getAbsolutePath()])
+            // exec(['rm', '-rf', workDir.getAbsolutePath()])
         }
 
 
