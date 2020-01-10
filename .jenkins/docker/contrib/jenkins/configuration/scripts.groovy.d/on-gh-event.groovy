@@ -61,6 +61,7 @@ static Map exec(List args, File workingDirectory=null, Appendable stdout=null, A
                     String npmwPath = gitWorkDir.getAbsolutePath() + '/.pipeline/npmw'
                     println exec([npmwPath, 'ci'])
                     println exec([npmwPath, 'run', 'clean' ,'--' ,"--pr=${payload.number}", '--env=dev'])
+                    println exec([npmwPath, 'run', 'clean' ,'--' ,"--pr=${payload.number}", '--env=build'])
                 }
             }else if ("issue_comment" == ghEventType){
                 def payload = new JsonSlurper().parseText(ghPayload)
@@ -117,7 +118,7 @@ static Map exec(List args, File workingDirectory=null, Appendable stdout=null, A
                 }
             }
         }finally{
-            // exec(['rm', '-rf', workDir.getAbsolutePath()])
+            exec(['rm', '-rf', workDir.getAbsolutePath()])
         }
 
 
