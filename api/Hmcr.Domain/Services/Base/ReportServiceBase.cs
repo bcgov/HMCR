@@ -31,7 +31,15 @@ namespace Hmcr.Domain.Services.Base
         protected ISubmissionStatusRepository _statusRepo;
 
         protected string TableName;
-        protected bool CheckDuplicate;
+
+        /// <summary>
+        /// Indicate if CSV row has ID column such as RecordNumber in WorkReport
+        /// </summary>
+        protected bool HasRowIdentifier; 
+        
+        /// <summary>
+        /// If CSV row has ID column, set the ID column to this property. For example, in the case of the RockfallReport, it's McrrIncidentNumber. 
+        /// </summary>
         protected string RecordNumberFieldName;
 
         public ReportServiceBase(IUnitOfWork unitOfWork,
@@ -49,7 +57,7 @@ namespace Hmcr.Domain.Services.Base
         {
             var recordNumbers = new List<string>();
 
-            if (!CheckDuplicate)
+            if (!HasRowIdentifier)
                 return (new Dictionary<string, List<string>>(), recordNumbers);
 
             var (errors, submission) = await ValidateAndLogReportErrorAsync(upload);
@@ -65,6 +73,11 @@ namespace Hmcr.Domain.Services.Base
             return (errors, recordNumbers);
         }
 
+        private bool HasDuplicateInFile(IEnumerable<SubmissionRowDto> rows, Dictionary<string, List<string>> errors)
+        {
+            return HasRowIdentifier ? HasDuplicateRecordNumberInFile(rows, errors) : HasIdenticalRowInFile(rows, errors);
+        }
+
         private bool HasDuplicateRecordNumberInFile(IEnumerable<SubmissionRowDto> rows, Dictionary<string, List<string>> errors)
         {
             foreach (var row in rows)
@@ -72,6 +85,23 @@ namespace Hmcr.Domain.Services.Base
                 if (rows.Count(x => x.RecordNumber == row.RecordNumber) > 1)
                 {
                     errors.AddItem($"{RecordNumberFieldName}", $"Submission has multiple records with the same {RecordNumberFieldName.WordToWords()} {row.RecordNumber}.");
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        private bool HasIdenticalRowInFile(IEnumerable<SubmissionRowDto> rows, Dictionary<string, List<string>> errors)
+        {
+            var i = 0;
+            foreach (var row in rows)
+            {
+                i++;
+
+                if (rows.Count(x => x.RowHash == row.RowHash) > 1)
+                {
+                    errors.AddItem($"File", $"The row #{i} has identical row(s) in the file.");
                     return true;
                 }
             }
@@ -138,10 +168,8 @@ namespace Hmcr.Domain.Services.Base
                 return (errors, submission);
             }
 
-            if (CheckDuplicate && HasDuplicateRecordNumberInFile(submission.SubmissionRows, errors))
-            {
+            if (HasDuplicateInFile(submission.SubmissionRows, errors))
                 return (errors, submission);
-            }
 
             var partyId = await _contractRepo.GetContractPartyId(submission.ServiceAreaNumber, submission.SubmissionRows.Max(x => x.EndDate));
 
@@ -154,8 +182,7 @@ namespace Hmcr.Domain.Services.Base
 
             submission.PartyId = partyId;
 
-            if (CheckDuplicate)
-                await MarkDuplicateRowAsync(submission);
+            await MarkDuplicateRowAsync(submission);
 
             submission.DigitalRepresentation = stream.ToBytes();
             submission.SubmissionStatusId = await _statusRepo.GetStatusIdByTypeAndCodeAsync(StatusType.File, FileStatus.FileReceived);
@@ -165,9 +192,19 @@ namespace Hmcr.Domain.Services.Base
 
         private async Task MarkDuplicateRowAsync(SubmissionObjectCreateDto submission)
         {
-            await foreach (var row in _rowRepo.FindDuplicateRowsAsync(submission.SubmissionStreamId, (decimal)submission.PartyId, submission.SubmissionRows))
+            if (HasRowIdentifier)
             {
-                row.RowStatusId = await _statusRepo.GetStatusIdByTypeAndCodeAsync(StatusType.Row, RowStatus.DuplicateRow);
+                await foreach (var row in _rowRepo.FindDuplicateFromLatestRecordsAsync(submission.SubmissionStreamId, (decimal)submission.PartyId, submission.SubmissionRows))
+                {
+                    row.RowStatusId = await _statusRepo.GetStatusIdByTypeAndCodeAsync(StatusType.Row, RowStatus.DuplicateRow);
+                }
+            }
+            else
+            {
+                await foreach (var row in _rowRepo.FindDuplicateFromAllRecordsAsync(submission.SubmissionStreamId, submission.SubmissionRows))
+                {
+                    row.RowStatusId = await _statusRepo.GetStatusIdByTypeAndCodeAsync(StatusType.Row, RowStatus.DuplicateRow);
+                }
             }
         }
 

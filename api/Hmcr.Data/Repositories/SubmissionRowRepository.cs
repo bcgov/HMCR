@@ -11,7 +11,8 @@ namespace Hmcr.Data.Repositories
 {
     public interface ISumbissionRowRepository
     {
-        IAsyncEnumerable<SubmissionRowDto> FindDuplicateRowsAsync(decimal submissionStreamId, decimal partyId, IEnumerable<SubmissionRowDto> rows);
+        IAsyncEnumerable<SubmissionRowDto> FindDuplicateFromLatestRecordsAsync(decimal submissionStreamId, decimal partyId, IEnumerable<SubmissionRowDto> rows);
+        IAsyncEnumerable<SubmissionRowDto> FindDuplicateFromAllRecordsAsync(decimal submissionStreamId, IEnumerable<SubmissionRowDto> rows);
         IAsyncEnumerable<string> FindDuplicateRowsToOverwriteAsync(decimal submissionStreamId, decimal partyId, IEnumerable<SubmissionRowDto> rows);
     }
     public class SubmissionRowRepository : HmcrRepositoryBase<HmrSubmissionRow>, ISumbissionRowRepository
@@ -24,7 +25,7 @@ namespace Hmcr.Data.Repositories
             _statusRepo = statusRepo;
         }
 
-        public async IAsyncEnumerable<SubmissionRowDto> FindDuplicateRowsAsync(decimal submissionStreamId, decimal partyId, IEnumerable<SubmissionRowDto> rows)
+        public async IAsyncEnumerable<SubmissionRowDto> FindDuplicateFromLatestRecordsAsync(decimal submissionStreamId, decimal partyId, IEnumerable<SubmissionRowDto> rows)
         {            
             foreach (var row in rows)
             {
@@ -37,6 +38,21 @@ namespace Hmcr.Data.Repositories
                     .FirstOrDefaultAsync();
 
                 if (latestRow != null && latestRow.RowHash == row.RowHash)
+                    yield return row;
+            }
+        }
+
+        public async IAsyncEnumerable<SubmissionRowDto> FindDuplicateFromAllRecordsAsync(decimal submissionStreamId, IEnumerable<SubmissionRowDto> rows)
+        {
+            foreach (var row in rows)
+            {
+                var duplicate = await DbSet
+                    .Where(x => x.SubmissionObject.SubmissionStreamId == submissionStreamId
+                        && x.RowHash == row.RowHash
+                        && x.SubmissionObject.SubmissionStatus.StatusCode == FileStatus.Success)
+                    .FirstOrDefaultAsync();
+
+                if (duplicate != null)
                     yield return row;
             }
         }

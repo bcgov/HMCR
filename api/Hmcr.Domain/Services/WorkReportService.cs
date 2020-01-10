@@ -32,7 +32,7 @@ namespace Hmcr.Domain.Services
             : base(unitOfWork, streamService, submissionRepo, rowRepo, contractRepo, statusRepo)
         {
             TableName = TableNames.WorkReport;
-            CheckDuplicate = true;
+            HasRowIdentifier = true;
             RecordNumberFieldName = "RecordNumber";
         }
 

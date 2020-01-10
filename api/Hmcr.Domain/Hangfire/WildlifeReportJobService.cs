@@ -52,13 +52,14 @@ namespace Hmcr.Domain.Hangfire
             submission.SubmissionStatusId = inProgressRowStatusId;
             _unitOfWork.Commit();
 
+            var duplicateRowStatusId = statuses.First(x => x.StatusType == StatusType.Row && x.StatusCode == RowStatus.DuplicateRow).StatusId;
             var errorRowStatusId = statuses.First(x => x.StatusType == StatusType.Row && x.StatusCode == RowStatus.RowError).StatusId;
             var successRowStatusId = statuses.First(x => x.StatusType == StatusType.Row && x.StatusCode == RowStatus.Success).StatusId;
 
             var errorFileStatusId = statuses.First(x => x.StatusType == StatusType.File && x.StatusCode == FileStatus.DataError).StatusId;
             var successFileStatusId = statuses.First(x => x.StatusType == StatusType.File && x.StatusCode == FileStatus.Success).StatusId;
 
-            var untypedRows = ParseRowsUnTyped(submission, errors);
+            var (untypedRows, headers) = ParseRowsUnTyped(submission, errors);
 
             if (!CheckCommonMandatoryHeaders(untypedRows, errors))
             {
@@ -71,13 +72,13 @@ namespace Hmcr.Domain.Hangfire
                 }
             }
 
-            var i = 0;
-            foreach(var untypedRow in untypedRows)
-            {
-                untypedRow.RowNumber = ++i;
+            //text after duplicate lines are removed. Will be used for importing to typed DTO.
+            var text = SetRowIdAndRemoveDuplicate(submission, duplicateRowStatusId, untypedRows, headers);
 
+            foreach (var untypedRow in untypedRows)
+            {
                 errors = new Dictionary<string, List<string>>();
-                var submissionRow = submission.HmrSubmissionRows.First(x => x.RecordNumber == untypedRow.RowNumber.ToString());
+                var submissionRow = submission.HmrSubmissionRows.First(x => x.RowId == untypedRow.RowId);
                 submissionRow.RowStatusId = successRowStatusId; //set the initial row status as success 
 
                 var entityName = GetValidationEntityName(untypedRow);
@@ -98,7 +99,7 @@ namespace Hmcr.Domain.Hangfire
 
             if (submission.SubmissionStatusId != errorFileStatusId)
             {
-                typedRows = ParseRowsTyped(submission, errors);
+                typedRows = ParseRowsTyped(text, errors);
                 await PerformAdditionalValidationAsync(submission, typedRows);
             }
 
@@ -176,7 +177,32 @@ namespace Hmcr.Domain.Hangfire
             return errors.Count == 0;
         }
 
-        private List<WildlifeReportCsvDto> ParseRowsUnTyped(HmrSubmissionObject submission, Dictionary<string, List<string>> errors)
+        private string SetRowIdAndRemoveDuplicate(HmrSubmissionObject submission, decimal duplicateStatusId, List<WildlifeReportCsvDto> rows, string headers)
+        {
+            var text = new StringBuilder();
+            text.AppendLine(headers);
+
+            for (int i = rows.Count - 1; i >= 0; i--)
+            {
+                var row = rows[i];
+                row.RowNumber = i + 1;
+
+                var entity = submission.HmrSubmissionRows.First(x => x.RecordNumber == row.RowNumber.ToString());
+
+                if (entity.RowStatusId == duplicateStatusId)
+                {
+                    rows.RemoveAt(i);
+                    continue;
+                }
+
+                text.AppendLine(entity.RowValue);
+                row.RowId = entity.RowId;
+            }
+
+            return text.ToString();
+        }
+
+        private (List<WildlifeReportCsvDto> untypedRows, string headers) ParseRowsUnTyped(HmrSubmissionObject submission, Dictionary<string, List<string>> errors)
         {
             var text = Encoding.UTF8.GetString(submission.DigitalRepresentation);
 
@@ -186,13 +212,22 @@ namespace Hmcr.Domain.Hangfire
             CsvHelperUtils.Config(errors, csv, false);
             csv.Configuration.RegisterClassMap<WildlifeReportCsvDtoMap>();
 
-            return csv.GetRecords<WildlifeReportCsvDto>().ToList();
+            return (csv.GetRecords<WildlifeReportCsvDto>().ToList(), GetHeader(text));
         }
 
-        private List<WildlifeReportDto> ParseRowsTyped(HmrSubmissionObject submission, Dictionary<string, List<string>> errors)
+        private string GetHeader(string text)
         {
-            var text = Encoding.UTF8.GetString(submission.DigitalRepresentation);
+            if (text == null)
+                return "";
 
+            using var reader = new StringReader(text);
+            var header = reader.ReadLine().Replace("\"", "");
+
+            return header ?? "";
+        }
+
+        private List<WildlifeReportDto> ParseRowsTyped(string text, Dictionary<string, List<string>> errors)
+        {
             using var stringReader = new StringReader(text);
             using var csv = new CsvReader(stringReader);
 

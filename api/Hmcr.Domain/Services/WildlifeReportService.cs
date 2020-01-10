@@ -1,5 +1,4 @@
 ﻿using CsvHelper;
-using CsvHelper.Configuration;
 using Hmcr.Data.Database;
 using Hmcr.Data.Repositories;
 using Hmcr.Domain.CsvHelpers;
@@ -11,11 +10,7 @@ using Hmcr.Model.Dtos.WildlifeReport;
 using Hmcr.Model.Utils;
 using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace Hmcr.Domain.Services
@@ -32,7 +27,7 @@ namespace Hmcr.Domain.Services
             : base(unitOfWork, streamService, submissionRepo, rowRepo, contractRepo, statusRepo)
         {
             TableName = TableNames.WildlifeReport;
-            CheckDuplicate = false;
+            HasRowIdentifier = false;
         }
         protected override async Task<bool> ParseRowsAsync(SubmissionObjectCreateDto submission, string text, Dictionary<string, List<string>> errors)
         {
@@ -67,7 +62,7 @@ namespace Hmcr.Domain.Services
 
                 submission.SubmissionRows.Add(new SubmissionRowDto
                 {
-                    RecordNumber = (i++).ToString(),
+                    RecordNumber = (++i).ToString(),
                     RowValue = line,
                     RowHash = line.GetSha256Hash(),
                     RowStatusId = await _statusRepo.GetStatusIdByTypeAndCodeAsync(StatusType.Row, RowStatus.RowReceived),
