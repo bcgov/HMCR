@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { connect } from 'react-redux';
 import { Row, Col } from 'reactstrap';
 import _ from 'lodash';
-// import { Link } from 'react-router-dom';
+import queryString from 'query-string';
 
 import SingleDropdown from './ui/SingleDropdown';
 import MaterialCard from './ui/MaterialCard';
@@ -12,9 +12,15 @@ import Authorize from './fragments/Authorize';
 
 import * as Constants from '../Constants';
 
-const WorkReporting = ({ currentUser }) => {
+const WorkReporting = ({ currentUser, history }) => {
   const [serviceArea, setServiceArea] = useState(null);
   const [triggerRefresh, setTriggerRefresh] = useState(null);
+
+  useEffect(() => {
+    const queryParams = queryString.parse(history.location.search);
+
+    if (queryParams.serviceArea) setServiceArea(queryParams.serviceArea);
+  }, [setServiceArea, history.location.search]);
 
   const handleFileSubmitted = () => {
     setTriggerRefresh(Math.random());
@@ -32,7 +38,10 @@ const WorkReporting = ({ currentUser }) => {
                   items={_.orderBy(currentUser.serviceAreas, ['id'])}
                   defaultTitle="Select Servcie Area"
                   value={serviceArea}
-                  handleOnChange={serviceArea => setServiceArea(serviceArea)}
+                  handleOnChange={serviceArea => {
+                    setServiceArea(serviceArea);
+                    history.push('?' + queryString.stringify({ serviceArea }));
+                  }}
                 />
               </Col>
             </Row>

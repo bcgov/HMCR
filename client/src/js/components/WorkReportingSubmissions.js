@@ -7,6 +7,7 @@ import { DateRangePicker } from 'react-dates';
 
 import DataTableWithPaginaionControl from './ui/DataTableWithPaginaionControl';
 import PageSpinner from './ui/PageSpinner';
+import FontAwesomeButton from './ui/FontAwesomeButton';
 
 import { searchSubmissions, setSingleSubmissionsSeachCriteria } from '../actions';
 
@@ -69,35 +70,49 @@ const WorkReportingSubmissions = ({
     <React.Fragment>
       <Row className="mb-3">
         <Col>
-          <div style={{ display: 'flex', alignItems: 'center' }}>
-            <strong className="mr-2">Report Submit Date</strong>
-            <DateRangePicker
-              startDate={startDate}
-              startDateId="searchStartDate"
-              endDate={endDate}
-              endDateId="searchEndDate"
-              onDatesChange={({ startDate, endDate }) => {
-                setStartDate(startDate);
-                setEndDate(endDate);
-                handleDateChanged(startDate, endDate);
-              }}
-              focusedInput={focusedInput}
-              onFocusChange={focusedInput => setFocusedInput(focusedInput)}
-              showDefaultInputIcon
-              hideKeyboardShortcutsPanel
-              inputIconPosition="after"
-              small
-              displayFormat={Constants.DATE_FORMAT}
-              startDatePlaceholderText="Date From"
-              endDatePlaceholderText="Date To"
-              isOutsideRange={date =>
-                date.isBefore(startDateLimit) ||
-                moment()
-                  .endOf('day')
-                  .isBefore(date)
-              }
-              minimumNights={0}
-            />
+          <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between' }}>
+            <div>
+              <span className="mr-2">Report Submit Date</span>
+              <DateRangePicker
+                startDate={startDate}
+                startDateId="searchStartDate"
+                endDate={endDate}
+                endDateId="searchEndDate"
+                onDatesChange={({ startDate, endDate }) => {
+                  setStartDate(startDate);
+                  setEndDate(endDate);
+                  handleDateChanged(startDate, endDate);
+                }}
+                focusedInput={focusedInput}
+                onFocusChange={focusedInput => setFocusedInput(focusedInput)}
+                showDefaultInputIcon
+                hideKeyboardShortcutsPanel
+                inputIconPosition="after"
+                small
+                displayFormat={Constants.DATE_FORMAT}
+                startDatePlaceholderText="Date From"
+                endDatePlaceholderText="Date To"
+                isOutsideRange={date =>
+                  date.isBefore(startDateLimit) ||
+                  moment()
+                    .endOf('day')
+                    .isBefore(date)
+                }
+                minimumNights={0}
+              />
+            </div>
+            <div>
+              <FontAwesomeButton
+                size="sm"
+                icon="sync"
+                spin={searching}
+                disabled={searching}
+                onClick={() => {
+                  setSearching(true);
+                  searchSubmissions().finally(() => setSearching(false));
+                }}
+              />
+            </div>
           </div>
         </Col>
       </Row>

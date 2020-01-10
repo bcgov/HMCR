@@ -6,9 +6,16 @@ const SingleDropdown = props => {
   const [title, setTitle] = useState(defaultTitle);
 
   useEffect(() => {
-    const item = items.find(o => o.id === value);
+    const item = items.find(o => {
+      // disable strict type checking
+      // eslint-disable-next-line
+      return o.id == value;
+    });
 
     if (item) setTitle(item.name);
+
+    // console.log(items);
+    // console.log(value);
   }, [value, items]);
 
   const handleOnSelect = item => {

@@ -21,39 +21,39 @@ const PaginationControl = ({ currentPage, pageCount, onPageChange, pageSize, pag
   const handlePageSizeChange = e => onPageSizeChange(e.target.value);
 
   if (pageCount <= 1 && pageSize === pageSizeOptions[0]) return <></>;
-  else
-    return (
-      <div>
-        <Pagination size="sm" aria-label="Pagination">
-          <Input
-            bsSize="sm"
-            type="select"
-            name="select"
-            className="mr-2"
-            style={{ width: '100px' }}
-            onChange={handlePageSizeChange}
-            value={pageSize}
-          >
-            {pageSizeOptions.map(count => (
-              <option key={count} value={count}>{`Show ${count}`}</option>
-            ))}
-          </Input>
-          <PaginationItem disabled={currentPage <= 1}>
-            <PaginationLink first onClick={() => onPageChange(1)} />
-          </PaginationItem>
-          <PaginationItem disabled={currentPage <= 1}>
-            <PaginationLink previous onClick={() => onPageChange(currentPage - 1)} />
-          </PaginationItem>
-          {pageItems}
-          <PaginationItem disabled={currentPage >= pageCount}>
-            <PaginationLink next onClick={() => onPageChange(currentPage + 1)} />
-          </PaginationItem>
-          <PaginationItem disabled={currentPage >= pageCount}>
-            <PaginationLink last onClick={() => onPageChange(pageCount)} />
-          </PaginationItem>
-        </Pagination>
-      </div>
-    );
+
+  return (
+    <div>
+      <Pagination size="sm" aria-label="Pagination">
+        <Input
+          bsSize="sm"
+          type="select"
+          name="select"
+          className="mr-2"
+          style={{ width: '100px' }}
+          onChange={handlePageSizeChange}
+          value={pageSize}
+        >
+          {pageSizeOptions.map(count => (
+            <option key={count} value={count}>{`Show ${count}`}</option>
+          ))}
+        </Input>
+        <PaginationItem disabled={currentPage <= 1}>
+          <PaginationLink first onClick={() => onPageChange(1)} />
+        </PaginationItem>
+        <PaginationItem disabled={currentPage <= 1}>
+          <PaginationLink previous onClick={() => onPageChange(currentPage - 1)} />
+        </PaginationItem>
+        {pageItems}
+        <PaginationItem disabled={currentPage >= pageCount}>
+          <PaginationLink next onClick={() => onPageChange(currentPage + 1)} />
+        </PaginationItem>
+        <PaginationItem disabled={currentPage >= pageCount}>
+          <PaginationLink last onClick={() => onPageChange(pageCount)} />
+        </PaginationItem>
+      </Pagination>
+    </div>
+  );
 };
 
 PaginationControl.propTypes = {

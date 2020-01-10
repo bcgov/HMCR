@@ -209,7 +209,15 @@ const AddUserSetupUserSuccess = ({ toggle }) => {
   );
 };
 
-const AddUserWizard = ({ isOpen, toggle, userTypes, serviceAreas, hideErrorDialog, createUser }) => {
+const AddUserWizard = ({
+  isOpen,
+  toggle,
+  userTypes,
+  serviceAreas,
+  showValidationErrorDialog,
+  hideErrorDialog,
+  createUser,
+}) => {
   const [wizardState, setWizardState] = useState(WIZARD_STATE.SEARCH);
   const [submitting, setSubmitting] = useState(false);
   const [bceidAccount, setBceidAccount] = useState(null);
