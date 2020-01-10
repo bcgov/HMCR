@@ -40,11 +40,14 @@ objects:
 - apiVersion: v1
   kind: PersistentVolumeClaim
   metadata:
+    annotations:
+      volume.beta.kubernetes.io/storage-class: netapp-block-standard
+      volume.beta.kubernetes.io/storage-provisioner: netapp.io/trident
     name: ${NAME}${SUFFIX}
   spec:
-    storageClassName: netapp-file-standard
     accessModes:
     - ReadWriteOnce
+    storageClassName: netapp-block-standard
     resources:
       requests:
         storage: 1Gi
