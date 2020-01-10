@@ -72,7 +72,7 @@ namespace Hmcr.Domain.Services
             _rules.Add(new FieldValidationRule(Entities.WorkReportD2, Fields.StartDate, FieldTypes.Date, false, null, null, null, null, new DateTime(1900, 1, 1), new DateTime(9999, 12, 31), null, null));
             _rules.Add(new FieldValidationRule(Entities.WorkReportD2, Fields.EndDate, FieldTypes.Date, true, null, null, null, null, new DateTime(1900, 1, 1), new DateTime(9999, 12, 31), null, null));
             _rules.Add(new FieldValidationRule(Entities.WorkReportD2, Fields.Accomplishment, FieldTypes.String, true, null, null, null, null, null, null, _regex.GetRegexInfo(RegexDefs.D7_2), null));
-            _rules.Add(new FieldValidationRule(Entities.WorkReportD2, Fields.UnitOfMeasure, FieldTypes.String, true, 0, 3, null, null, null, null, null, null)); //todo lookup
+            _rules.Add(new FieldValidationRule(Entities.WorkReportD2, Fields.UnitOfMeasure, FieldTypes.String, true, null, null, null, null, null, null, null, CodeSet.UnitOfMeasure)); 
             _rules.Add(new FieldValidationRule(Entities.WorkReportD2, Fields.PostedDate, FieldTypes.Date, true, null, null, null, null, new DateTime(1900, 1, 1), new DateTime(9999, 12, 31), null, null));
             _rules.Add(new FieldValidationRule(Entities.WorkReportD2, Fields.Comments, FieldTypes.String, false, 0, 1024, null, null, null, null, null, null));
 
@@ -171,8 +171,8 @@ namespace Hmcr.Domain.Services
             _rules.Add(new FieldValidationRule(Entities.RockfallReport, Fields.DirectionFromLandmark, FieldTypes.String, false, null, null, null, null, null, null, _regex.GetRegexInfo(RegexDefs.Direction), null));
 
             _rules.Add(new FieldValidationRule(Entities.RockfallReport, Fields.LocationDescription, FieldTypes.String, false, 0, 4000, null, null, null, null, null, null));
-            _rules.Add(new FieldValidationRule(Entities.RockfallReport, Fields.DitchVolume, FieldTypes.String, true, 0, 30, null, null, null, null, null, null));
-            _rules.Add(new FieldValidationRule(Entities.RockfallReport, Fields.TravelledLanesVolume, FieldTypes.String, true, 0, 30, null, null, null, null, null, null));
+            _rules.Add(new FieldValidationRule(Entities.RockfallReport, Fields.DitchVolume, FieldTypes.String, true, null, null, null, null, null, null, null, CodeSet.VolumeRange));
+            _rules.Add(new FieldValidationRule(Entities.RockfallReport, Fields.TravelledLanesVolume, FieldTypes.String, true, null, null, null, null, null, null, null, CodeSet.VolumeRange));
             _rules.Add(new FieldValidationRule(Entities.RockfallReport, Fields.OtherVolume, FieldTypes.String, true, null, null, null, null, null, null, _regex.GetRegexInfo(RegexDefs.D6_2), null));
             _rules.Add(new FieldValidationRule(Entities.RockfallReport, Fields.HeavyPrecip, FieldTypes.String, true, null, null, null, null, null, null, _regex.GetRegexInfo(RegexDefs.YN), null));
             _rules.Add(new FieldValidationRule(Entities.RockfallReport, Fields.FreezeThaw, FieldTypes.String, true, null, null, null, null, null, null, _regex.GetRegexInfo(RegexDefs.YN), null));
