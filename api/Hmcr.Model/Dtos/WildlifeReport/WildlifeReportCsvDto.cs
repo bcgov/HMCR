@@ -2,6 +2,7 @@
 {
     public class WildlifeReportCsvDto
     {
+        public decimal RowId { get; set; }
         public int RowNumber { get; set; }
 
         public string RecordType { get; set; }
