@@ -1,6 +1,9 @@
 #!/bin/sh
 set +x
 type -t nvm && nvm deactivate
+SCRIPT=$(readlink -f "$0")
+SCRIPTPATH=$(dirname "$SCRIPT")
+cd $SCRIPTPATH
 export NVM_DIR="$(git rev-parse --show-toplevel)/.nvm"
 if [ ! -f "$NVM_DIR/nvm.sh" ]; then
   mkdir -p "${NVM_DIR}"
