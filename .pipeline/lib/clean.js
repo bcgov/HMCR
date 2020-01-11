@@ -2,23 +2,35 @@
 const {OpenShiftClientX} = require('pipeline-cli')
 const KeyCloakClient = require('./keycloak');
 
+const getTargetPhases = (env, phases) => {
+  let target_phase = [];
+  for (const phase in phases) {
+    if (env.match(/^(all|transient)$/) && phases[phase].transient) {
+      target_phase.push(phase);
+    } else if (env === phase) {
+      target_phase.push(phase);
+      break;
+    }
+  }
+
+  return target_phase;
+};
+
 module.exports = (settings)=>{
   const phases = settings.phases
   const options = settings.options
-  const oc=new OpenShiftClientX(Object.assign({'namespace':phases.build.namespace}, options));
-  const target_phase=options.env
-
+  const oc=new OpenShiftClientX(Object.assign({'namespace':phases.build.namespace}, options)); 
+  const target_phases=getTargetPhases(options.env, phases);
   const kc = new KeyCloakClient(settings, oc);  
-  
-  if(target_phase ==='dev')
-    kc.remmoveUris();
 
   for (var k in phases){
     if (phases.hasOwnProperty(k)) {
       const phase=phases[k]
-      if (k == target_phase ){
-        //console.log(`phase=${phase}`)
-        //oc.raw('get', ['bc'], {selector:`app-name=${phase.name},env-id=${phase.changeId},env-name!=prod,!shared,github-repo=${oc.git.repository},github-owner=${oc.git.owner}`, namespace:phase.namespace, 'output':'custom-columns=kind:.spec.output.to.kind,name:.spec.output.to.name', 'no-headers':'true'})
+      if (target_phases.includes(k) ){
+
+        if(k === 'dev')
+          kc.remmoveUris();
+        
         let buildConfigs=oc.get('bc', {selector:`app=${phase.instance},env-id=${phase.changeId},!shared,github-repo=${oc.git.repository},github-owner=${oc.git.owner}`, namespace:phase.namespace})
         buildConfigs.forEach((bc)=>{
           if (bc.spec.output.to.kind == 'ImageStreamTag'){
