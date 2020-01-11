@@ -1,9 +1,13 @@
 #!/bin/sh
 set +x
 type -t nvm && nvm deactivate
+
+# The following 3 lines set the script's absolute path as the working directory
+# This is needed for Groovy script execution in Jenkins
 SCRIPT=$(readlink -f "$0")
 SCRIPTPATH=$(dirname "$SCRIPT")
 cd $SCRIPTPATH
+
 export NVM_DIR="$(git rev-parse --show-toplevel)/.nvm"
 if [ ! -f "$NVM_DIR/nvm.sh" ]; then
   mkdir -p "${NVM_DIR}"

@@ -60,8 +60,7 @@ static Map exec(List args, File workingDirectory=null, Appendable stdout=null, A
 
                     String npmwPath = gitWorkDir.getAbsolutePath() + '/.pipeline/npmw'
                     println exec([npmwPath, 'ci'])
-                    println exec([npmwPath, 'run', 'clean' ,'--' ,"--pr=${payload.number}", '--env=dev'])
-                    println exec([npmwPath, 'run', 'clean' ,'--' ,"--pr=${payload.number}", '--env=build'])
+                    println exec([npmwPath, 'run', 'clean' ,'--' ,"--pr=${payload.number}", '--env=transient'])
                 }
             }else if ("issue_comment" == ghEventType){
                 def payload = new JsonSlurper().parseText(ghPayload)
