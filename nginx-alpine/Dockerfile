@@ -1,4 +1,4 @@
-FROM nginx:1.15.10-alpine
+FROM nginx:1.17-alpine
 LABEL maintainer="neal.li@gov.bc.ca"
 
 RUN mkdir -p /var/run/nginx /var/log/nginx /var/cache/nginx && \
