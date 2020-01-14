@@ -83,7 +83,7 @@ namespace Hmcr.Data.Repositories
                     SubmissionStatusCode = x.SubmissionStatus.StatusCode,
                     Description = x.SubmissionStatus.Description,
                     ErrorDetail = x.ErrorDetail,
-                    SubmissionRows = x.HmrSubmissionRows.Select(y => new SubmissionRowResultDto
+                    SubmissionRows = x.HmrSubmissionRows.Where(y => y.ErrorDetail != null).Select(y => new SubmissionRowResultDto
                     {
                         RowId = y.RowId,
                         SubmissionObjectId = y.SubmissionObjectId,
