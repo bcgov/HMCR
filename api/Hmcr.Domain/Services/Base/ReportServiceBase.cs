@@ -231,7 +231,7 @@ namespace Hmcr.Domain.Services.Base
 
             if (errors.Count > 0)
             {
-                submission.ErrorDetail = errors.GetErrorDetail();
+                submission.ErrorDetail = errors.GetFileErrorDetail();
                 submission.SubmissionRows = new List<SubmissionRowDto>();
                 await _submissionRepo.CreateSubmissionObjectAsync(submission);
                 await _unitOfWork.CommitAsync();
