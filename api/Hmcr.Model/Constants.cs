@@ -194,4 +194,9 @@ namespace Hmcr.Model
         public const string WarsRptRecordType = "WARS_RPT_RECORD_TYPE";
         public const string WarsRptSign = "WARS_RPT_SIGN";
     }
+
+    public static class FileError
+    {
+        public const string ReferToRowErrors = "{ \"fieldMessages\": [ { \"field\": \"File\", \"messages\": [ \"Please refer to row error(s)\" ] } ] }";
+    }
 }

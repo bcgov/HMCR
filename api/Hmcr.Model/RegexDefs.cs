@@ -44,7 +44,7 @@ namespace Hmcr.Model
             _regexInfos.Add(D6_2, new RegexInfo { Regex = @"^\-?\d{1,4}(\.\d{1,2})?$", ErrorMessage = "Value must be a number of less than 5 digits optionally with maximum 2 decimal digits" });
             _regexInfos.Add(D4, new RegexInfo { Regex = @"^\-?\d{1,4}$", ErrorMessage = "Value must be a number of less than 5 digits" });
 
-            _regexInfos.Add(SiteNumber, new RegexInfo { Regex = @"^[ABDLRSTWX]\d{6}$", ErrorMessage = "Value must start with one of these 9 [ABDLRSTWX] letters followed by 6 digit number" });
+            _regexInfos.Add(SiteNumber, new RegexInfo { Regex = @"^[ABDLRSTWX]\d{4}\d{0,2}$", ErrorMessage = "Value must start with one of these 9 [ABDLRSTWX] letters followed by 4 to 6 digits" });
 
             _regexInfos.Add(F, new RegexInfo { Regex = @"^[F]$", ErrorMessage = "Value must be F" });
             _regexInfos.Add(Time, new RegexInfo { Regex = @"^(0[0-9]|1[0-9]|2[0-3]|[0-9]):[0-5][0-9]$", ErrorMessage = "Value must be in time format such as 21:35" });

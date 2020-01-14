@@ -89,7 +89,7 @@ namespace Hmcr.Domain.Hangfire
                 {
                     submissionRow.RowStatusId = errorRowStatusId;
                     submissionRow.ErrorDetail = errors.GetRowErrorDetail(untypedRow.RowNumber);
-                    submission.ErrorDetail = "Please refer to row error";
+                    submission.ErrorDetail = FileError.ReferToRowErrors;
                     submission.SubmissionStatusId = errorFileStatusId;
                 }
             }
@@ -141,7 +141,7 @@ namespace Hmcr.Domain.Hangfire
                 {
                     submissionRow.RowStatusId = errorRowStatusId;
                     submissionRow.ErrorDetail = errors.GetRowErrorDetail(typedRow.RowNumber);
-                    submission.ErrorDetail = "Please refer to row error";
+                    submission.ErrorDetail = FileError.ReferToRowErrors;
                     submission.SubmissionStatusId = errorFileStatusId;
                 }
             }
