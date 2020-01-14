@@ -57,7 +57,7 @@ objects:
         sourceStrategy:
           from:
             kind: ImageStreamTag
-            name: nodejs-8-rhel7:1
+            name: "nodejs-12-rhel8:1"
           env:
             - name: DEPLOY_SUBDIRECTORY
               value: ${DEPLOY_SUBDIRECTORY}

@@ -80,6 +80,10 @@
 }
 
 .DateRangePicker {
+  .DateRangePickerInput__withBorder {
+    height: calc(1.5em + 0.75rem + 2px);
+  }
+
   .DateRangePickerInput_calendarIcon {
     margin-right: 0;
     background-color: theme-color(primary);
@@ -87,6 +91,7 @@
     border-radius: 0;
     border-top-right-radius: $input-border-radius;
     border-bottom-right-radius: $input-border-radius;
+    height: 100%;
 
     .DateRangePickerInput_calendarIcon_svg {
       fill: white;

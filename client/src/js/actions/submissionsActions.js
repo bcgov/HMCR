@@ -5,16 +5,17 @@ import * as Constants from '../Constants';
 
 import { SEARCH_SUBMISSIONS, SET_SINGLE_SUBMISSIONS_SEARCH_CRITERIA } from './types';
 
-export const searchSubmissions = () => (dispatch, getState) => {
-  let params = { ...getState().submissions.searchCriteria };
-  params = {
+export const searchSubmissions = params => (dispatch, getState) => {
+  // let params = { ...getState().submissions.searchCriteria };
+  const searchParams = {
     ...params,
     dateTo: moment(params.dateTo)
       .add(1, 'days')
       .format(Constants.DATE_FORMAT),
+    dateFrom: moment(params.dateFrom).format(Constants.DATE_FORMAT),
   };
 
-  return api.searchSubmissions(params).then(response => {
+  return api.searchSubmissions(searchParams).then(response => {
     const data = response.data;
     dispatch({ type: SEARCH_SUBMISSIONS, payload: data });
   });

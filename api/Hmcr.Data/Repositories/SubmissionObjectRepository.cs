@@ -5,6 +5,7 @@ using Hmcr.Model;
 using Hmcr.Model.Dtos;
 using Hmcr.Model.Dtos.SubmissionObject;
 using Hmcr.Model.Dtos.SubmissionRow;
+using Hmcr.Model.Utils;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -18,7 +19,7 @@ namespace Hmcr.Data.Repositories
     {
         Task<HmrSubmissionObject> CreateSubmissionObjectAsync(SubmissionObjectCreateDto submission);
         Task<SubmissionObjectDto> GetSubmissionObjectAsync(decimal submissionObjectId);
-        Task<PagedDto<SubmissionObjectSearchDto>> GetSubmissionObjectsAsync(decimal serviceAreaNumber, DateTime dateFrom, DateTime dateTo, int pageSize, int pageNumber, string orderBy = "AppCreateTimestamp DESC");
+        Task<PagedDto<SubmissionObjectSearchDto>> GetSubmissionObjectsAsync(decimal serviceAreaNumber, DateTime dateFrom, DateTime dateTo, int pageSize, int pageNumber, string orderBy = "AppCreateTimestamp DESC", string searchText = null);
         Task<bool> IsDuplicateFileAsync(SubmissionObjectCreateDto submission);
         Task<HmrSubmissionObject> GetSubmissionObjectEntityAsync(decimal submissionObjectId);
         Task<HmrSubmissionObject[]> GetSubmissionObjecsForBackgroundJobAsync(decimal serviceAreaNumber);
@@ -99,7 +100,7 @@ namespace Hmcr.Data.Repositories
             return submission;
         }
 
-        public async Task<PagedDto<SubmissionObjectSearchDto>> GetSubmissionObjectsAsync(decimal serviceAreaNumber, DateTime dateFrom, DateTime dateTo, int pageSize, int pageNumber, string orderBy)
+        public async Task<PagedDto<SubmissionObjectSearchDto>> GetSubmissionObjectsAsync(decimal serviceAreaNumber, DateTime dateFrom, DateTime dateTo, int pageSize, int pageNumber, string orderBy, string searchText)
         {
             var query = DbSet.AsNoTracking()
                 .Where(x => x.ServiceAreaNumber == serviceAreaNumber && x.AppCreateTimestamp >= dateFrom && x.AppCreateTimestamp <= dateTo)
@@ -121,6 +122,12 @@ namespace Hmcr.Data.Repositories
                         SubmissionStatusCode = x.SubmissionStatus.StatusCode,
                         Description = x.SubmissionStatus.Description
                     });
+
+            if (searchText.IsNotEmpty())
+            {
+                query = query
+                    .Where(u => u.FirstName.Contains(searchText) || u.LastName.Contains(searchText));
+            }
 
             return await Page<SubmissionObjectSearchDto, SubmissionObjectSearchDto>(query, pageSize, pageNumber, orderBy);
         }

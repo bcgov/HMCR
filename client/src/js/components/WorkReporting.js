@@ -62,7 +62,7 @@ const WorkReporting = ({ currentUser, history }) => {
             </MaterialCard>
           </Authorize>
           <MaterialCard>
-            <WorkReportingSubmissions serviceArea={serviceArea} triggerRefresh={triggerRefresh} />
+            <WorkReportingSubmissions serviceArea={serviceArea} triggerRefresh={triggerRefresh} history={history} />
           </MaterialCard>
         </React.Fragment>
       )}
