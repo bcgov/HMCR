@@ -90,11 +90,12 @@ namespace Hmcr.Domain.Hangfire
 
                 if (activityCode == null)
                 {
+                    errors.AddItem(Fields.ActivityNumber, $"Invalid activity number[{untypedRow.ActivityNumber}]");
+
                     submissionRow.RowStatusId = errorRowStatusId;
-                    submissionRow.ErrorDetail = $"Row[{untypedRow.RowNumber}]: Activity Number[{untypedRow.ActivityNumber}] not found"; 
-                    submission.ErrorDetail = "Please refer to row errors";
+                    submissionRow.ErrorDetail = errors.GetRowErrorDetail(untypedRow.RowNumber);
+                    submission.ErrorDetail = FileError.ReferToRowErrors;
                     submission.SubmissionStatusId = errorFileStatusId;
-                    _logger.LogInformation("Row[{rownumber}]: Activity Number[{ativityNumber}] not found", untypedRow.RowNumber, untypedRow.ActivityNumber);
                     continue;
                 }
 
@@ -106,7 +107,7 @@ namespace Hmcr.Domain.Hangfire
                 {
                     submissionRow.RowStatusId = errorRowStatusId;
                     submissionRow.ErrorDetail = errors.GetRowErrorDetail(untypedRow.RowNumber);
-                    submission.ErrorDetail = "Please refer to row error";
+                    submission.ErrorDetail = FileError.ReferToRowErrors;
                     submission.SubmissionStatusId = errorFileStatusId;
                 }
             }
@@ -170,7 +171,7 @@ namespace Hmcr.Domain.Hangfire
                 {
                     submissionRow.RowStatusId = errorRowStatusId;
                     submissionRow.ErrorDetail = errors.GetRowErrorDetail(typedRow.RowNumber);
-                    submission.ErrorDetail = "Please refer to row error";
+                    submission.ErrorDetail = FileError.ReferToRowErrors;
                     submission.SubmissionStatusId = errorFileStatusId;
                 }
             }
