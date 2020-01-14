@@ -12,6 +12,7 @@ namespace Hmcr.Domain.Services
     {
         Task<SubmissionObjectDto> GetSubmissionObjectAsync(decimal submissionObjectId);
         Task<PagedDto<SubmissionObjectSearchDto>> GetSubmissionObjectsAsync(decimal serviceAreaNumber, DateTime dateFrom, DateTime dateTo, int pageSize, int pageNumber, string orderBy = "AppCreateTimestamp DESC");
+        Task<SubmissionObjectResultDto> GetSubmissionResultAsync(decimal submissionObjectId);
     }
     public class SubmissionObjectService : ISubmissionObjectService
     {
@@ -30,6 +31,11 @@ namespace Hmcr.Domain.Services
         public async Task<PagedDto<SubmissionObjectSearchDto>> GetSubmissionObjectsAsync(decimal serviceAreaNumber, DateTime dateFrom, DateTime dateTo, int pageSize, int pageNumber, string orderBy)
         {
             return await _submissionRepo.GetSubmissionObjectsAsync(serviceAreaNumber, dateFrom, dateTo, pageSize, pageNumber, orderBy);
+        }
+
+        public async Task<SubmissionObjectResultDto> GetSubmissionResultAsync(decimal submissionObjectId)
+        {
+            return await _submissionRepo.GetSubmissionResultAsync(submissionObjectId);
         }
     }
 }

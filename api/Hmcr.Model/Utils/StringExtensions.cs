@@ -76,15 +76,17 @@ namespace Hmcr.Model.Utils
                 dictionary.Add(keyName, new List<string> { item });
             }
         }
-        public static string GetErrorDetail(this Dictionary<string, List<string>> errors)
-        {
-            var errorDetail = new StringBuilder();
-            foreach (var (error, detail) in errors.SelectMany(error => error.Value.Select(detail => (error, detail + Environment.NewLine))))
-            {
-                errorDetail.AppendLine($"{error.Key}: {detail}");
-            }
 
-            return errorDetail.ToString();
+        public static string GetFileErrorDetail(this Dictionary<string, List<string>> errors)
+        {
+            var fileErrorDetail = new FileErrorDetail(errors);
+            return fileErrorDetail.ToString();
+        }
+
+        public static string GetRowErrorDetail(this Dictionary<string, List<string>> errors, int rowNumber)
+        {
+            var rowErrorDetail = new RowErrorDetail(rowNumber, errors);
+            return rowErrorDetail.ToString();
         }
 
         public static bool IsIdirUser(this string str)

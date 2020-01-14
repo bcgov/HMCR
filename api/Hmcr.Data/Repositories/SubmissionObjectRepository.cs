@@ -4,6 +4,7 @@ using Hmcr.Data.Repositories.Base;
 using Hmcr.Model;
 using Hmcr.Model.Dtos;
 using Hmcr.Model.Dtos.SubmissionObject;
+using Hmcr.Model.Dtos.SubmissionRow;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -21,6 +22,7 @@ namespace Hmcr.Data.Repositories
         Task<bool> IsDuplicateFileAsync(SubmissionObjectCreateDto submission);
         Task<HmrSubmissionObject> GetSubmissionObjectEntityAsync(decimal submissionObjectId);
         Task<HmrSubmissionObject[]> GetSubmissionObjecsForBackgroundJobAsync(decimal serviceAreaNumber);
+        Task<SubmissionObjectResultDto> GetSubmissionResultAsync(decimal submissionObjectId);
     }
     public class SubmissionObjectRepository : HmcrRepositoryBase<HmrSubmissionObject>, ISubmissionObjectRepository
     {
@@ -67,41 +69,39 @@ namespace Hmcr.Data.Repositories
             return submissions;
         }
 
-        //public async Task<IEnumerable<SubmissionObjectSearchDto>> GetSubmissionObjectsAsync(decimal serviceAreaNumber, DateTime dateFrom, DateTime dateTo)
-        //{
-        //    var submissions = await DbSet.AsNoTracking()
-        //        .Include(x => x.SubmissionStatus)
-        //        .Include(x => x.SubmissionStream)
-        //        .Where(x => x.ServiceAreaNumber == serviceAreaNumber && x.AppCreateTimestamp >= dateFrom && x.AppCreateTimestamp <= dateTo)
-        //        .Join(DbContext.HmrSystemUsers, 
-        //            x => x.AppCreateUserGuid, 
-        //            y => y.UserGuid, 
-        //            (x, y) => new SubmissionObjectSearchDto
-        //            {
-        //                SubmissionObjectId = x.SubmissionObjectId,
-        //                AppCreateTimestamp = x.AppCreateTimestamp,
-        //                AppCreateUserid = x.AppCreateUserid,
-        //                FileName = x.FileName,
-        //                FirstName = y.FirstName,
-        //                LastName = y.LastName,
-        //                SubmissionStreamId = x.SubmissionStreamId,
-        //                StreamName = x.SubmissionStream.StreamName,
-        //                ServiceAreaNumber = x.ServiceAreaNumber,
-        //                SubmissionStatusId = x.SubmissionStatusId,
-        //                SubmissionStatusCode = x.SubmissionStatus.StatusCode,
-        //                Description = x.SubmissionStatus.Description
-        //            })
-        //        .OrderBy(x => x.AppCreateTimestamp)
-        //        .ToListAsync();
+        public async Task<SubmissionObjectResultDto> GetSubmissionResultAsync(decimal submissionObjectId)
+        {
+            var submission = await DbSet.AsNoTracking()
+                .Select(x => new SubmissionObjectResultDto
+                {
+                    SubmissionObjectId = x.SubmissionObjectId,
+                    FileName = x.FileName,
+                    SubmissionStreamId = x.SubmissionStreamId,
+                    StreamName = x.SubmissionStream.StreamName,
+                    ServiceAreaNumber = x.ServiceAreaNumber,
+                    SubmissionStatusId = x.SubmissionStatusId,
+                    SubmissionStatusCode = x.SubmissionStatus.StatusCode,
+                    Description = x.SubmissionStatus.Description,
+                    ErrorDetail = x.ErrorDetail,
+                    SubmissionRows = x.HmrSubmissionRows.Select(y => new SubmissionRowResultDto
+                    {
+                        RowId = y.RowId,
+                        SubmissionObjectId = y.SubmissionObjectId,
+                        RowStatusId = y.RowStatusId,
+                        Description = y.RowStatus.Description,
+                        RecordNumber = y.RecordNumber,
+                        RowValue = y.RowValue,
+                        ErrorDetail = y.ErrorDetail
+                    })
+                })
+                .FirstOrDefaultAsync(x => x.SubmissionObjectId == submissionObjectId);
 
-        //    return submissions;
-        //}
+            return submission;
+        }
 
         public async Task<PagedDto<SubmissionObjectSearchDto>> GetSubmissionObjectsAsync(decimal serviceAreaNumber, DateTime dateFrom, DateTime dateTo, int pageSize, int pageNumber, string orderBy)
         {
             var query = DbSet.AsNoTracking()
-                .Include(x => x.SubmissionStatus)
-                .Include(x => x.SubmissionStream)
                 .Where(x => x.ServiceAreaNumber == serviceAreaNumber && x.AppCreateTimestamp >= dateFrom && x.AppCreateTimestamp <= dateTo)
                 .Join(DbContext.HmrSystemUsers,
                     x => x.AppCreateUserGuid,

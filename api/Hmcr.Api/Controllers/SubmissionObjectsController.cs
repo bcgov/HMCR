@@ -55,5 +55,23 @@ namespace Hmcr.Api.Controllers
 
             return Ok(await _submissionService.GetSubmissionObjectsAsync(serviceAreaNumber, dateFrom, dateTo, pageSize, pageNumber, orderBy));
         }
+
+        [HttpGet("{id}/result", Name = "GetSubmissionResult")]
+        [RequiresPermission(Permissions.FileUploadRead)]
+        public async Task<ActionResult<SubmissionObjectResultDto>> GetSubmissionResultAsync(decimal id)
+        {
+            var submission = await _submissionService.GetSubmissionResultAsync(id);
+
+            if (submission == null)
+                return NotFound();
+
+            var problem = IsServiceAreaAuthorized(_currentUser, submission.ServiceAreaNumber);
+            if (problem != null)
+            {
+                return Unauthorized(problem);
+            }
+
+            return Ok(submission);
+        }
     }
 }

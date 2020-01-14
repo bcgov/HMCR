@@ -65,7 +65,7 @@ namespace Hmcr.Domain.Hangfire
             {
                 if (errors.Count > 0)
                 {
-                    submission.ErrorDetail = errors.GetErrorDetail();
+                    submission.ErrorDetail = errors.GetFileErrorDetail();
                     submission.SubmissionStatusId = errorFileStatusId;
                     await _unitOfWork.CommitAsync();
                     return;
@@ -88,10 +88,9 @@ namespace Hmcr.Domain.Hangfire
                 if (errors.Count > 0)
                 {
                     submissionRow.RowStatusId = errorRowStatusId;
-                    submissionRow.ErrorDetail = $"Row[{untypedRow.RowNumber}]: {errors.GetErrorDetail()}";
+                    submissionRow.ErrorDetail = errors.GetRowErrorDetail(untypedRow.RowNumber);
                     submission.ErrorDetail = "Please refer to row error";
                     submission.SubmissionStatusId = errorFileStatusId;
-                    _logger.LogInformation("Row[{rownumber}]: {errors}", untypedRow.RowNumber, errors.GetErrorDetail());
                 }
             }
 
@@ -147,10 +146,9 @@ namespace Hmcr.Domain.Hangfire
                 if (errors.Count > 0)
                 {
                     submissionRow.RowStatusId = errorRowStatusId;
-                    submissionRow.ErrorDetail = $"Row[{typedRow.RowNumber}]: {errors.GetErrorDetail()}";
+                    submissionRow.ErrorDetail = errors.GetRowErrorDetail(typedRow.RowNumber);
                     submission.ErrorDetail = "Please refer to row error";
                     submission.SubmissionStatusId = errorFileStatusId;
-                    _logger.LogInformation("Row[{rownumber}]: {errors}", typedRow.RowNumber, errors.GetErrorDetail());
                 }
             }
         }
