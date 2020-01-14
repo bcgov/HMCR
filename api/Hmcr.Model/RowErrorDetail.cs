@@ -9,7 +9,7 @@ namespace Hmcr.Model
 {
     public class RowErrorDetail
     {
-        private static JsonSerializerOptions _jsonOptions = new JsonSerializerOptions { WriteIndented = true, PropertyNamingPolicy = JsonNamingPolicy.CamelCase };
+        private static JsonSerializerOptions _jsonOptions = new JsonSerializerOptions { WriteIndented = false, PropertyNamingPolicy = JsonNamingPolicy.CamelCase };
 
         public int RowNumber { get; set; }
 

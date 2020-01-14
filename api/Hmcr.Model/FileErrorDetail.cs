@@ -6,7 +6,7 @@ namespace Hmcr.Model
 {
     public class FileErrorDetail
     {
-        private static JsonSerializerOptions _jsonOptions = new JsonSerializerOptions { WriteIndented = true, PropertyNamingPolicy = JsonNamingPolicy.CamelCase };
+        private static JsonSerializerOptions _jsonOptions = new JsonSerializerOptions { WriteIndented = false, PropertyNamingPolicy = JsonNamingPolicy.CamelCase };
 
         public List<FieldMessage> FieldMessages { get; set; }
 
