@@ -1,4 +1,5 @@
 // import store from './store';
+import queryString from 'query-string';
 
 // import * as Constants from './Constants';
 
@@ -26,16 +27,8 @@ export const buildApiErrorObject = response => {
   }
 };
 
-// export const isCurrentUserAdmin = () => {
-//   const state = store.getState();
-//   try {
-//     const user = state.users.all[state.users.current.id];
-//     const role = state.roles[user.roleId];
+export const updateQueryParams = (history, newParam) => {
+  const params = queryString.parse(history.location.search);
 
-//     return role.name === Constants.ROLE.ADMIN;
-//   } catch {
-//     console.error('Unable to verify admin status.');
-//   }
-
-//   return false;
-// };
+  return queryString.stringify({ ...params, ...newParam });
+};

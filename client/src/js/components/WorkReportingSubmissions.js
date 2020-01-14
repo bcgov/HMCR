@@ -1,17 +1,20 @@
 import React, { useState, useEffect } from 'react';
 import { connect } from 'react-redux';
 import { Link } from 'react-router-dom';
-import { Row, Col } from 'reactstrap';
+import { Row, Col, Input } from 'reactstrap';
 import moment from 'moment';
 import { DateRangePicker } from 'react-dates';
+import queryString from 'query-string';
+import _ from 'lodash';
 
 import DataTableWithPaginaionControl from './ui/DataTableWithPaginaionControl';
 import PageSpinner from './ui/PageSpinner';
 import FontAwesomeButton from './ui/FontAwesomeButton';
 
-import { searchSubmissions, setSingleSubmissionsSeachCriteria } from '../actions';
+import { searchSubmissions } from '../actions';
 
 import * as Constants from '../Constants';
+import { updateQueryParams } from '../utils';
 
 const startDateLimit = moment('2019-01-01');
 
@@ -24,46 +27,75 @@ const tableColumns = [
   { heading: 'Submission Status', key: 'description', nosort: true },
 ];
 
+const defaultSearchOptions = {
+  dateFrom: moment().subtract(1, 'months'),
+  dateTo: moment(),
+  searchText: '',
+  pageSize: Constants.DEFAULT_PAGE_SIZE,
+  pageNumber: 1,
+};
+
 const WorkReportingSubmissions = ({
   searchSubmissions,
-  setSingleSubmissionsSeachCriteria,
   searchResult,
   searchPagination,
-  searchCriteria,
   serviceArea,
   triggerRefresh,
+  history,
 }) => {
-  const [startDate, setStartDate] = useState(searchCriteria.dateFrom ? moment(searchCriteria.dateFrom) : null);
-  const [endDate, setEndDate] = useState(searchCriteria.dateTo ? moment(searchCriteria.dateTo) : null);
+  const [searchOptions, setSearchOptions] = useState(defaultSearchOptions);
   const [focusedInput, setFocusedInput] = useState(null);
   const [searching, setSearching] = useState(false);
 
+  // Run on load
   useEffect(() => {
-    const search = async () => {
-      setSearching(true);
-      if (searchCriteria.serviceAreaNumber !== serviceArea)
-        setSingleSubmissionsSeachCriteria('serviceAreaNumber', serviceArea);
-      await searchSubmissions();
-      setSearching(false);
+    const params = queryString.parse(history.location.search);
+    const options = {
+      ...defaultSearchOptions,
+      ..._.omit(params, ['dateFrom', 'dateTo']),
+      dateFrom: params.dateFrom ? moment(params.dateFrom) : defaultSearchOptions.dateFrom,
+      dateTo: params.dateFrom ? moment(params.dateTo) : defaultSearchOptions.dateTo,
+      serviceAreaNumber: serviceArea,
     };
 
-    search();
-  }, [searchSubmissions, serviceArea, setSingleSubmissionsSeachCriteria, triggerRefresh, searchCriteria]);
+    setSearchOptions(options);
+    searchSubmissions(options);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [triggerRefresh, serviceArea, searchSubmissions]);
 
-  const handleDateChanged = (startDate, endDate) => {
-    if (!(startDate && endDate && startDate.isSameOrBefore(endDate))) return;
+  // Run search when searchOptions object has changed
+  useEffect(() => {
+    if (searchOptions !== defaultSearchOptions && searchOptions.dateFrom && searchOptions.dateTo) {
+      setSearching(true);
+      updateHistoryLocationSearch(searchOptions);
+      searchSubmissions(searchOptions).finally(() => setSearching(false));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchOptions, searchSubmissions]);
 
-    setSingleSubmissionsSeachCriteria('dateFrom', startDate.format(Constants.DATE_FORMAT));
-    setSingleSubmissionsSeachCriteria('dateTo', endDate.format(Constants.DATE_FORMAT));
+  const updateHistoryLocationSearch = options => {
+    history.push(`?${updateQueryParams(history, _.omit(options, ['dateTo', 'dateFrom', 'serviceAreaNumber']))}`);
+  };
+
+  const handleDateChanged = (dateFrom, dateTo) => {
+    if (!(dateFrom && dateTo && dateFrom.isSameOrBefore(dateTo))) return;
+
+    history.push(
+      `?${updateQueryParams(history, {
+        dateFrom: dateFrom.format(Constants.DATE_FORMAT),
+        dateTo: dateTo.format(Constants.DATE_FORMAT),
+      })}`
+    );
   };
 
   const handleChangePage = newPage => {
-    setSingleSubmissionsSeachCriteria('pageNumber', newPage);
+    const options = { ...searchOptions, pageNumber: newPage };
+    setSearchOptions(options);
   };
 
   const handleChangePageSize = newSize => {
-    setSingleSubmissionsSeachCriteria('pageSize', newSize);
-    setSingleSubmissionsSeachCriteria('pageNumber', 1);
+    const options = { ...searchOptions, pageNumber: 1, pageSize: newSize };
+    setSearchOptions(options);
   };
 
   return (
@@ -74,13 +106,12 @@ const WorkReportingSubmissions = ({
             <div>
               <span className="mr-2">Report Submit Date</span>
               <DateRangePicker
-                startDate={startDate}
+                startDate={searchOptions.dateFrom}
                 startDateId="searchStartDate"
-                endDate={endDate}
+                endDate={searchOptions.dateTo}
                 endDateId="searchEndDate"
                 onDatesChange={({ startDate, endDate }) => {
-                  setStartDate(startDate);
-                  setEndDate(endDate);
+                  setSearchOptions({ ...searchOptions, dateFrom: startDate, dateTo: endDate });
                   handleDateChanged(startDate, endDate);
                 }}
                 focusedInput={focusedInput}
@@ -100,6 +131,18 @@ const WorkReportingSubmissions = ({
                 }
                 minimumNights={0}
               />
+              <div
+                style={{ position: 'relative', display: 'inline-block', height: 'calc(1.5em + 0.75rem + 2px)' }}
+                className="ml-2"
+              >
+                <Input
+                  type="text"
+                  style={{ width: '160px', position: 'absolute', top: '15px' }}
+                  placeholder="Name"
+                  value={searchOptions.searchText}
+                  onChange={e => setSearchOptions({ ...searchOptions, searchText: e.target.value })}
+                />
+              </div>
             </div>
             <div>
               <FontAwesomeButton
@@ -109,7 +152,7 @@ const WorkReportingSubmissions = ({
                 disabled={searching}
                 onClick={() => {
                   setSearching(true);
-                  searchSubmissions().finally(() => setSearching(false));
+                  searchSubmissions(searchOptions).finally(() => setSearching(false));
                 }}
               />
             </div>
@@ -146,10 +189,7 @@ const mapStateToProps = state => {
   return {
     searchResult: Object.values(state.submissions.list),
     searchPagination: state.submissions.searchPagination,
-    searchCriteria: state.submissions.searchCriteria,
   };
 };
 
-export default connect(mapStateToProps, { searchSubmissions, setSingleSubmissionsSeachCriteria })(
-  WorkReportingSubmissions
-);
+export default connect(mapStateToProps, { searchSubmissions })(WorkReportingSubmissions);
