@@ -24,7 +24,14 @@ const defaultState = {
     pageNumber: 1,
     orderBy: null,
   },
-  searchPagination: { currentPage: null, pageSize: null, pageCount: null, hasPreviousPage: null, hasNextPage: null },
+  searchPagination: {
+    currentPage: null,
+    pageSize: null,
+    pageCount: null,
+    hasPreviousPage: null,
+    hasNextPage: null,
+    totalCount: null,
+  },
 };
 
 export default (state = defaultState, action) => {

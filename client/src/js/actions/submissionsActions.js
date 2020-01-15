@@ -5,8 +5,7 @@ import * as Constants from '../Constants';
 
 import { SEARCH_SUBMISSIONS, SET_SINGLE_SUBMISSIONS_SEARCH_CRITERIA } from './types';
 
-export const searchSubmissions = params => (dispatch, getState) => {
-  // let params = { ...getState().submissions.searchCriteria };
+export const searchSubmissions = params => dispatch => {
   const searchParams = {
     ...params,
     dateTo: moment(params.dateTo)

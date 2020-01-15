@@ -196,15 +196,15 @@ const WorkReportingUpload = ({
       });
   };
 
-  const validateFile = (e, setFieldValue, setFieldError, fieldName) => {
+  const validateFile = (e, setFieldValue, setFieldError, fieldName, sizeLimit) => {
     const file = e.currentTarget.files[0];
     if (!isFileCsvType(file)) {
       setFieldError(fieldName, 'The selected file is not a CSV file');
       return;
     }
 
-    if (file.size > 1048576) {
-      setFieldError(fieldName, 'The selected file exceeds the 10MB size limit');
+    if (file.size > sizeLimit * 1024 * 1024) {
+      setFieldError(fieldName, `The selected file exceeds the ${sizeLimit}MB size limit`);
       return;
     }
 
@@ -240,7 +240,15 @@ const WorkReportingUpload = ({
                         name="reportFile"
                         label="Select Report File"
                         accept=".csv"
-                        onChange={e => validateFile(e, setFieldValue, setFieldError, 'reportFile')}
+                        onChange={e =>
+                          validateFile(
+                            e,
+                            setFieldValue,
+                            setFieldError,
+                            'reportFile',
+                            reportTypes.find(o => o.id === values.reportTypeId).fileSizeLimit
+                          )
+                        }
                         key={fileInputKey}
                         invalid={errors.reportFile && errors.reportFile.length > 0}
                       />

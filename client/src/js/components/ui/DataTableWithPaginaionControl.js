@@ -15,6 +15,8 @@ const DataTableWithPaginaionControl = ({ searchPagination, onPageNumberChange, o
         onPageChange={onPageNumberChange}
         pageSize={searchPagination.pageSize}
         onPageSizeChange={onPageSizeChange}
+        totalCount={searchPagination.totalCount}
+        itemCount={props.dataList.length}
       />
     </React.Fragment>
   );
