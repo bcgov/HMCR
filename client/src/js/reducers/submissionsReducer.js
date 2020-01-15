@@ -2,7 +2,14 @@ import { SEARCH_SUBMISSIONS } from '../actions/types';
 
 const defaultState = {
   list: {},
-  searchPagination: { currentPage: null, pageSize: null, pageCount: null, hasPreviousPage: null, hasNextPage: null },
+  searchPagination: {
+    currentPage: null,
+    pageSize: null,
+    pageCount: null,
+    hasPreviousPage: null,
+    hasNextPage: null,
+    totalCount: null,
+  },
 };
 
 export default (state = defaultState, action) => {
