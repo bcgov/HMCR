@@ -91,8 +91,9 @@ namespace Hmcr.Data.Repositories
                         Description = y.RowStatus.Description,
                         RecordNumber = y.RecordNumber,
                         RowValue = y.RowValue,
-                        ErrorDetail = y.ErrorDetail
-                    })
+                        ErrorDetail = y.ErrorDetail,
+                        LineNumber = y.LineNumber
+                    }).OrderBy(y => y.LineNumber)
                 })
                 .FirstOrDefaultAsync(x => x.SubmissionObjectId == submissionObjectId);
 

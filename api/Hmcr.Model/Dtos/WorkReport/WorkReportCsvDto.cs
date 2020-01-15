@@ -7,7 +7,6 @@ namespace Hmcr.Model.Dtos.WorkReport
     public class WorkReportCsvDto
     {
         public decimal RowId { get; set; }
-        public int RowNumber { get; set; }
         public string RecordType { get; set; }
         public string ServiceArea { get; set; }
         public string RecordNumber { get; set; }
@@ -30,5 +29,6 @@ namespace Hmcr.Model.Dtos.WorkReport
         public string SiteNumber { get; set; }
         public string ValueOfWork { get; set; }
         public string Comments { get; set; }
+        public decimal LineNumber { get; set; }
     }
 }

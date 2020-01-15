@@ -18,8 +18,6 @@ namespace Hmcr.Domain.Services
     }
     public class SubmissionObjectService : ISubmissionObjectService
     {
-        const string pattern = "\"rowNumber\"\\s*:\\s*(?<rowNumber>\\d*)";
-
         private ISubmissionObjectRepository _submissionRepo;
 
         public SubmissionObjectService(ISubmissionObjectRepository submissionRepo)
@@ -39,19 +37,7 @@ namespace Hmcr.Domain.Services
 
         public async Task<SubmissionObjectResultDto> GetSubmissionResultAsync(decimal submissionObjectId)
         {
-            var submission = await _submissionRepo.GetSubmissionResultAsync(submissionObjectId);
-
-            //extract row number from error detail
-            foreach(var row in submission.SubmissionRows)
-            {
-                var match = Regex.Match(row.ErrorDetail, pattern);
-                row.RowNumber = match.Success ? Convert.ToInt32(match.Groups["rowNumber"].Value) : 0;
-            }
-
-            //sort by row number
-            submission.SubmissionRows = submission.SubmissionRows.OrderBy(x => x.RowNumber);
-
-            return submission;
+            return await _submissionRepo.GetSubmissionResultAsync(submissionObjectId);
         }
     }
 }

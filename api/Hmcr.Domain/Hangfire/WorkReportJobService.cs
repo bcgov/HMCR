@@ -70,7 +70,7 @@ namespace Hmcr.Domain.Hangfire
             {
                 if (errors.Count > 0)
                 {
-                    submission.ErrorDetail = errors.GetFileErrorDetail();
+                    submission.ErrorDetail = errors.GetErrorDetail();
                     submission.SubmissionStatusId = errorFileStatusId;
                     await _unitOfWork.CommitAsync();
                     return;
@@ -93,7 +93,7 @@ namespace Hmcr.Domain.Hangfire
                     errors.AddItem(Fields.ActivityNumber, $"Invalid activity number[{untypedRow.ActivityNumber}]");
 
                     submissionRow.RowStatusId = errorRowStatusId;
-                    submissionRow.ErrorDetail = errors.GetRowErrorDetail(untypedRow.RowNumber);
+                    submissionRow.ErrorDetail = errors.GetErrorDetail();
                     submission.ErrorDetail = FileError.ReferToRowErrors;
                     submission.SubmissionStatusId = errorFileStatusId;
                     continue;
@@ -106,7 +106,7 @@ namespace Hmcr.Domain.Hangfire
                 if (errors.Count > 0)
                 {
                     submissionRow.RowStatusId = errorRowStatusId;
-                    submissionRow.ErrorDetail = errors.GetRowErrorDetail(untypedRow.RowNumber);
+                    submissionRow.ErrorDetail = errors.GetErrorDetail();
                     submission.ErrorDetail = FileError.ReferToRowErrors;
                     submission.SubmissionStatusId = errorFileStatusId;
                 }
@@ -117,7 +117,7 @@ namespace Hmcr.Domain.Hangfire
             if (submission.SubmissionStatusId != errorFileStatusId)
             {
                 typedRows = ParseRowsTyped(text, errors);
-                await PerformAdditionalValidationAsync(submission, typedRows, untypedRows);
+                await PerformAdditionalValidationAsync(submission, typedRows);
             }
 
             if (submission.SubmissionStatusId == errorFileStatusId)
@@ -138,7 +138,7 @@ namespace Hmcr.Domain.Hangfire
             _logger.LogInformation("[Hangfire] Finishing submission {submissionObjectId}", submission.SubmissionObjectId);
         }
 
-        private async Task PerformAdditionalValidationAsync(HmrSubmissionObject submission, List<WorkReportDto> typedRows, List<WorkReportCsvDto> untypedRows)
+        private async Task PerformAdditionalValidationAsync(HmrSubmissionObject submission, List<WorkReportDto> typedRows)
         {
             var activityCodes = await _activityRepo.GetActiveActivityCodesAsync();
             var statuses = await _statusRepo.GetActiveStatuses();
@@ -148,12 +148,8 @@ namespace Hmcr.Domain.Hangfire
 
             foreach (var typedRow in typedRows)
             {
-                var untypedRow = untypedRows.First(x => x.RecordNumber == typedRow.RecordNumber);
-
-                typedRow.RowNumber = untypedRow.RowNumber;                
-
                 var errors = new Dictionary<string, List<string>>();
-                var submissionRow = submission.HmrSubmissionRows.First(x => x.RecordNumber == typedRow.RecordNumber); 
+                var submissionRow = submission.HmrSubmissionRows.First(x => x.LineNumber == typedRow.LineNumber); 
 
                 if (typedRow.StartDate != null && typedRow.EndDate < typedRow.StartDate)
                 {
@@ -170,7 +166,7 @@ namespace Hmcr.Domain.Hangfire
                 if (errors.Count > 0)
                 {
                     submissionRow.RowStatusId = errorRowStatusId;
-                    submissionRow.ErrorDetail = errors.GetRowErrorDetail(typedRow.RowNumber);
+                    submissionRow.ErrorDetail = errors.GetErrorDetail();
                     submission.ErrorDetail = FileError.ReferToRowErrors;
                     submission.SubmissionStatusId = errorFileStatusId;
                 }
@@ -228,15 +224,14 @@ namespace Hmcr.Domain.Hangfire
 
         private string SetRowIdAndRemoveDuplicate(HmrSubmissionObject submission, decimal duplicateStatusId, List<WorkReportCsvDto> rows, string headers)
         {
+            headers = "linenumber," + headers;
             var text = new StringBuilder();
             text.AppendLine(headers);
 
             for (int i = rows.Count - 1; i >= 0; i--)
             {
                 var row = rows[i];
-                row.RowNumber = i + 1;
-
-                var entity = submission.HmrSubmissionRows.First(x => x.RecordNumber == row.RecordNumber);
+                var entity = submission.HmrSubmissionRows.First(x => x.LineNumber == row.LineNumber);
 
                 if (entity.RowStatusId == duplicateStatusId)
                 {
@@ -244,7 +239,7 @@ namespace Hmcr.Domain.Hangfire
                     continue;
                 }
 
-                text.AppendLine(entity.RowValue);
+                text.AppendLine($"{row.LineNumber},{entity.RowValue}");
                 row.RowId = entity.RowId;
             }
 
@@ -261,7 +256,13 @@ namespace Hmcr.Domain.Hangfire
             CsvHelperUtils.Config(errors, csv, false);
             csv.Configuration.RegisterClassMap<WorkReportCsvDtoMap>();
 
-            return (csv.GetRecords<WorkReportCsvDto>().ToList(), GetHeader(text));
+            var rows = csv.GetRecords<WorkReportCsvDto>().ToList();
+            for(var i = 0; i < rows.Count; i++)
+            {
+                rows[i].LineNumber = i + 1;
+            }
+
+            return (rows, GetHeader(text));
         }
 
         private string GetHeader(string text)
@@ -283,7 +284,8 @@ namespace Hmcr.Domain.Hangfire
             CsvHelperUtils.Config(errors, csv, false);
             csv.Configuration.RegisterClassMap<WorkReportDtoMap>();
 
-            return csv.GetRecords<WorkReportDto>().ToList();            
+            var rows = csv.GetRecords<WorkReportDto>().ToList();
+            return rows;
         }
     }
 }

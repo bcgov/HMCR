@@ -47,6 +47,7 @@ namespace Hmcr.Domain.Services
             CsvHelperUtils.Config(errors, csv);
             csv.Configuration.RegisterClassMap<RockfallRptInitCsvDtoMap>();
 
+            var i = 0;
             while (csv.Read())
             {
                 RockfallRptInitCsvDto row = null;
@@ -68,7 +69,8 @@ namespace Hmcr.Domain.Services
                     RowValue = line,
                     RowHash = line.GetSha256Hash(),
                     RowStatusId = await _statusRepo.GetStatusIdByTypeAndCodeAsync(StatusType.Row, RowStatus.RowReceived),
-                    EndDate = (DateTime)row.ReportDate
+                    EndDate = (DateTime)row.ReportDate,
+                    LineNumber = csv.Context.Row - 1
                 });
             }
 

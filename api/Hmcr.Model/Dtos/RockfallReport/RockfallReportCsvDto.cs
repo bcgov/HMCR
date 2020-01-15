@@ -7,7 +7,6 @@ namespace Hmcr.Model.Dtos.RockfallReport
     public class RockfallReportCsvDto
     {
         public decimal RowId { get; set; }
-        public int RowNumber { get; set; }
         public string MajorIncidentNumber { get; set; }
         public string EstimatedRockfallDate { get; set; }
         public string EstimatedRockfallTime { get; set; }
@@ -34,5 +33,7 @@ namespace Hmcr.Model.Dtos.RockfallReport
         public string ReporterName { get; set; }
         public string McPhoneNumber { get; set; }
         public string ReportDate { get; set; }
+        public decimal LineNumber { get; set; }
+
     }
 }
