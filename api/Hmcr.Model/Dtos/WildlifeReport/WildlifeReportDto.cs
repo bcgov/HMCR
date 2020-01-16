@@ -25,7 +25,7 @@ namespace Hmcr.Model.Dtos.WildlifeReport
         public string Sex { get; set; }
         public string Age { get; set; }
         public string Comment { get; set; }
-        public decimal LineNumber { get; set; }
+        public decimal? RowNum { get; set; }
 
     }
 }

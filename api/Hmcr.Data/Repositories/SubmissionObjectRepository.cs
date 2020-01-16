@@ -93,8 +93,8 @@ namespace Hmcr.Data.Repositories
                         RecordNumber = y.RecordNumber,
                         RowValue = y.RowValue,
                         ErrorDetail = y.ErrorDetail,
-                        LineNumber = y.LineNumber
-                    }).OrderBy(y => y.LineNumber)
+                        RowNum = y.RowNum
+                    }).OrderBy(y => y.RowNum)
                 })
                 .FirstOrDefaultAsync(x => x.SubmissionObjectId == submissionObjectId);
 

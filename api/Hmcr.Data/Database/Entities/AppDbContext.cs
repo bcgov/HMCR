@@ -15,6 +15,9 @@ namespace Hmcr.Data.Database.Entities
         {
         }
 
+        public virtual DbSet<AggregatedCounter> AggregatedCounters { get; set; }
+        public virtual DbSet<Counter> Counters { get; set; }
+        public virtual DbSet<Hash> Hashes { get; set; }
         public virtual DbSet<HmrActivityCode> HmrActivityCodes { get; set; }
         public virtual DbSet<HmrActivityCodeHist> HmrActivityCodeHists { get; set; }
         public virtual DbSet<HmrAllValidationRulesV> HmrAllValidationRulesVs { get; set; }
@@ -62,18 +65,66 @@ namespace Hmcr.Data.Database.Entities
         public virtual DbSet<HmrWildlifeReportHist> HmrWildlifeReportHists { get; set; }
         public virtual DbSet<HmrWorkReport> HmrWorkReports { get; set; }
         public virtual DbSet<HmrWorkReportHist> HmrWorkReportHists { get; set; }
-
-        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        {
-            if (!optionsBuilder.IsConfigured)
-            {
-#warning To protect potentially sensitive information in your connection string, you should move it out of source code. See http://go.microsoft.com/fwlink/?LinkId=723263 for guidance on storing connection strings.
-                optionsBuilder.UseSqlServer("Data Source=localhost;Initial Catalog=HMR_DEV;Trusted_Connection=True;");
-            }
-        }
+        public virtual DbSet<Job> Jobs { get; set; }
+        public virtual DbSet<JobParameter> JobParameters { get; set; }
+        public virtual DbSet<JobQueue> JobQueues { get; set; }
+        public virtual DbSet<List> Lists { get; set; }
+        public virtual DbSet<Schema> Schemas { get; set; }
+        public virtual DbSet<Server> Servers { get; set; }
+        public virtual DbSet<Set> Sets { get; set; }
+        public virtual DbSet<State> States { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            modelBuilder.Entity<AggregatedCounter>(entity =>
+            {
+                entity.HasKey(e => e.Key)
+                    .HasName("PK_HangFire_CounterAggregated");
+
+                entity.ToTable("AggregatedCounter", "HangFire");
+
+                entity.HasIndex(e => e.ExpireAt)
+                    .HasName("IX_HangFire_AggregatedCounter_ExpireAt")
+                    .HasFilter("([ExpireAt] IS NOT NULL)");
+
+                entity.Property(e => e.Key).HasMaxLength(100);
+
+                entity.Property(e => e.ExpireAt).HasColumnType("datetime");
+            });
+
+            modelBuilder.Entity<Counter>(entity =>
+            {
+                entity.HasNoKey();
+
+                entity.ToTable("Counter", "HangFire");
+
+                entity.HasIndex(e => e.Key)
+                    .HasName("CX_HangFire_Counter")
+                    .IsClustered();
+
+                entity.Property(e => e.ExpireAt).HasColumnType("datetime");
+
+                entity.Property(e => e.Key)
+                    .IsRequired()
+                    .HasMaxLength(100);
+            });
+
+            modelBuilder.Entity<Hash>(entity =>
+            {
+                entity.HasKey(e => new { e.Key, e.Field })
+                    .HasName("PK_HangFire_Hash");
+
+                entity.ToTable("Hash", "HangFire");
+
+                entity.HasIndex(e => e.ExpireAt)
+                    .HasName("IX_HangFire_Hash_ExpireAt")
+                    .HasFilter("([ExpireAt] IS NOT NULL)");
+
+                entity.Property(e => e.Key).HasMaxLength(100);
+
+                entity.Property(e => e.Field).HasMaxLength(100);
+            });
+
             modelBuilder.Entity<HmrActivityCode>(entity =>
             {
                 entity.HasKey(e => e.ActivityCodeId)
@@ -1897,253 +1948,199 @@ Either - may be spatially represented in either manner");
 
                 entity.Property(e => e.AppCreateTimestamp)
                     .HasColumnName("APP_CREATE_TIMESTAMP")
-                    .HasColumnType("datetime")
-                    .HasComment("Date and time of record creation");
+                    .HasColumnType("datetime");
 
                 entity.Property(e => e.AppCreateUserDirectory)
                     .IsRequired()
                     .HasColumnName("APP_CREATE_USER_DIRECTORY")
                     .HasMaxLength(12)
-                    .IsUnicode(false)
-                    .HasComment("Active Directory which retains source of truth for user idenifiers.");
+                    .IsUnicode(false);
 
-                entity.Property(e => e.AppCreateUserGuid)
-                    .HasColumnName("APP_CREATE_USER_GUID")
-                    .HasComment("Unique idenifier of user who created record");
+                entity.Property(e => e.AppCreateUserGuid).HasColumnName("APP_CREATE_USER_GUID");
 
                 entity.Property(e => e.AppCreateUserid)
                     .IsRequired()
                     .HasColumnName("APP_CREATE_USERID")
                     .HasMaxLength(30)
-                    .IsUnicode(false)
-                    .HasComment("Unique idenifier of user who created record");
+                    .IsUnicode(false);
 
                 entity.Property(e => e.AppLastUpdateTimestamp)
                     .HasColumnName("APP_LAST_UPDATE_TIMESTAMP")
-                    .HasColumnType("datetime")
-                    .HasComment("Date and time of last record update");
+                    .HasColumnType("datetime");
 
                 entity.Property(e => e.AppLastUpdateUserDirectory)
                     .IsRequired()
                     .HasColumnName("APP_LAST_UPDATE_USER_DIRECTORY")
                     .HasMaxLength(12)
-                    .IsUnicode(false)
-                    .HasComment("Active Directory which retains source of truth for user idenifiers.");
+                    .IsUnicode(false);
 
-                entity.Property(e => e.AppLastUpdateUserGuid)
-                    .HasColumnName("APP_LAST_UPDATE_USER_GUID")
-                    .HasComment("Unique idenifier of user who last updated record");
+                entity.Property(e => e.AppLastUpdateUserGuid).HasColumnName("APP_LAST_UPDATE_USER_GUID");
 
                 entity.Property(e => e.AppLastUpdateUserid)
                     .IsRequired()
                     .HasColumnName("APP_LAST_UPDATE_USERID")
                     .HasMaxLength(30)
-                    .IsUnicode(false)
-                    .HasComment("Unique idenifier of user who last updated record");
+                    .IsUnicode(false);
 
                 entity.Property(e => e.Comments)
                     .HasColumnName("COMMENTS")
                     .HasMaxLength(4000)
-                    .IsUnicode(false)
-                    .HasComment("Comments of occurrence");
+                    .IsUnicode(false);
 
                 entity.Property(e => e.ConcurrencyControlNumber)
                     .HasColumnName("CONCURRENCY_CONTROL_NUMBER")
-                    .HasDefaultValueSql("((1))")
-                    .HasComment("Record under edit indicator used for optomisitc record contention management.  If number differs from start of edit, then user will be prompted to that record has been updated by someone else.");
+                    .HasDefaultValueSql("((1))");
 
                 entity.Property(e => e.DbAuditCreateTimestamp)
                     .HasColumnName("DB_AUDIT_CREATE_TIMESTAMP")
                     .HasColumnType("datetime")
-                    .HasDefaultValueSql("(getutcdate())")
-                    .HasComment("Date and time record created in the database");
+                    .HasDefaultValueSql("(getutcdate())");
 
                 entity.Property(e => e.DbAuditCreateUserid)
                     .IsRequired()
                     .HasColumnName("DB_AUDIT_CREATE_USERID")
                     .HasMaxLength(30)
                     .IsUnicode(false)
-                    .HasDefaultValueSql("(user_name())")
-                    .HasComment("Named database user who created record");
+                    .HasDefaultValueSql("(user_name())");
 
                 entity.Property(e => e.DbAuditLastUpdateTimestamp)
                     .HasColumnName("DB_AUDIT_LAST_UPDATE_TIMESTAMP")
                     .HasColumnType("datetime")
-                    .HasDefaultValueSql("(getutcdate())")
-                    .HasComment("Date and time record was last updated in the database.");
+                    .HasDefaultValueSql("(getutcdate())");
 
                 entity.Property(e => e.DbAuditLastUpdateUserid)
                     .IsRequired()
                     .HasColumnName("DB_AUDIT_LAST_UPDATE_USERID")
                     .HasMaxLength(30)
                     .IsUnicode(false)
-                    .HasDefaultValueSql("(user_name())")
-                    .HasComment("Named database user who last updated record");
+                    .HasDefaultValueSql("(user_name())");
 
                 entity.Property(e => e.DirectionFromLandmark)
                     .HasColumnName("DIRECTION_FROM_LANDMARK")
                     .HasMaxLength(1)
-                    .IsUnicode(false)
-                    .HasComment("Direction of travel from Landmark to START_OFFSET");
+                    .IsUnicode(false);
 
                 entity.Property(e => e.DitchSnowIce)
                     .HasColumnName("DITCH_SNOW_ICE")
                     .HasMaxLength(1)
-                    .IsUnicode(false)
-                    .HasComment("Ditch snow or ice conditions present at rockfall site. Enter “Y” or leave blank.");
+                    .IsUnicode(false);
 
                 entity.Property(e => e.DitchVolume)
                     .HasColumnName("DITCH_VOLUME")
                     .HasMaxLength(30)
-                    .IsUnicode(false)
-                    .HasComment("Range of estimated volume of material in ditch (m cubed). if volume exceeds 5.0 m3 and report value in the other volume field.");
+                    .IsUnicode(false);
 
                 entity.Property(e => e.EndLatitude)
                     .HasColumnName("END_LATITUDE")
-                    .HasColumnType("numeric(11, 6)")
-                    .HasComment(@"The M (northing) portion of the activity end coordinate. Specified as a latitude in decimal degrees with six decimal places of precision.
-Positive numbers are indicative of the Northern Hemisphere. Coordinate is to be reported using the WGS84 datum.
-For point activity if this field is not provided it can be defaulted to same as START LATITUDE");
+                    .HasColumnType("numeric(11, 6)");
 
                 entity.Property(e => e.EndLongitude)
                     .HasColumnName("END_LONGITUDE")
-                    .HasColumnType("numeric(11, 6)")
-                    .HasComment(@"The X (easting) portion of the activity end coordinate. Specified as a longitude in decimal degrees with six decimal places of precision.
-Negative numbers are indicative of the Western Hemisphere. Coordinate is to be reported using the WGS84 datum.
-For point activity if this field is not provided it can be defaulted to same as START LONGITUDE.");
+                    .HasColumnType("numeric(11, 6)");
 
                 entity.Property(e => e.EndOffset)
                     .HasColumnName("END_OFFSET")
-                    .HasColumnType("numeric(7, 3)")
-                    .HasComment(@"This field is needed for linear referencing for location specific reports.
-If the work is less than 30 m, this field is not mandatory
-Offset from beginning of segment");
+                    .HasColumnType("numeric(7, 3)");
 
                 entity.Property(e => e.EstimatedRockfallDate)
                     .HasColumnName("ESTIMATED_ROCKFALL_DATE")
-                    .HasColumnType("date")
-                    .HasComment("Estimated date of occurrence.");
+                    .HasColumnType("date");
 
-                entity.Property(e => e.EstimatedRockfallTime)
-                    .HasColumnName("ESTIMATED_ROCKFALL_TIME")
-                    .HasComment("Estimated time of occurrence using the 24-hour clock");
+                entity.Property(e => e.EstimatedRockfallTime).HasColumnName("ESTIMATED_ROCKFALL_TIME");
 
                 entity.Property(e => e.FreezeThaw)
                     .HasColumnName("FREEZE_THAW")
                     .HasMaxLength(1)
-                    .IsUnicode(false)
-                    .HasComment("Freezing/thawing conditions present at rockfall site. Enter “Y” or leave blank.");
+                    .IsUnicode(false);
 
                 entity.Property(e => e.HeavyPrecip)
                     .HasColumnName("HEAVY_PRECIP")
                     .HasMaxLength(1)
-                    .IsUnicode(false)
-                    .HasComment("Heavy precipitation conditions present at rockfall site. Enter “Y” or leave blank.");
+                    .IsUnicode(false);
 
                 entity.Property(e => e.HighwayUniqueName)
                     .HasColumnName("HIGHWAY_UNIQUE_NAME")
                     .HasMaxLength(255)
-                    .IsUnicode(false)
-                    .HasComment("Road or Highway name sourced from a road network data product (RFI as of Dec 2019)");
+                    .IsUnicode(false);
 
                 entity.Property(e => e.HighwayUniqueNumber)
                     .HasColumnName("HIGHWAY_UNIQUE_NUMBER")
                     .HasMaxLength(16)
-                    .IsUnicode(false)
-                    .HasComment(@"This identifies the section of road on which the activity occurred.  Road or Highway number sourced from a road network data product (RFI as of  2019)
-This is a value in the in the format: [Service Area]-[area manager area]-[subarea]-[highway number]");
+                    .IsUnicode(false);
 
                 entity.Property(e => e.LandMarkName)
                     .HasColumnName("LAND_MARK_NAME")
                     .HasMaxLength(255)
-                    .IsUnicode(false)
-                    .HasComment("Highway reference point (HRP) landmark name or textual description ");
+                    .IsUnicode(false);
 
                 entity.Property(e => e.Landmark)
                     .HasColumnName("LANDMARK")
                     .HasMaxLength(8)
-                    .IsUnicode(false)
-                    .HasComment(@"This field needed for location reference:
-Landmarks provided should be those listed in the CHRIS HRP report for each Highway or road within the Service Area");
-
-                entity.Property(e => e.LineNumber)
-                    .HasColumnName("LINE_NUMBER")
-                    .HasColumnType("numeric(9, 0)");
+                    .IsUnicode(false);
 
                 entity.Property(e => e.LocationDescription)
                     .HasColumnName("LOCATION_DESCRIPTION")
                     .HasMaxLength(4000)
-                    .IsUnicode(false)
-                    .HasComment("Text field for comments and/or notes pertinent to the specified activity.");
-
-                entity.Property(e => e.MajorIncidentNumber)
-                    .HasColumnName("MAJOR_INCIDENT_NUMBER")
-                    .HasMaxLength(12)
-                    .IsUnicode(false)
-                    .HasComment("Rockfall reporting incident number. Unique work report record number from the Contractor maintenance management system.");
+                    .IsUnicode(false);
 
                 entity.Property(e => e.McPhoneNumber)
                     .HasColumnName("MC_PHONE_NUMBER")
                     .HasMaxLength(12)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.McrrIncidentNumber)
+                    .HasColumnName("MCRR_INCIDENT_NUMBER")
+                    .HasMaxLength(12)
                     .IsUnicode(false)
-                    .HasComment("Phone number of person reporting");
+                    .HasComment("Rockfall reporting incident number. Unique work report record number from the Contractor maintenance management system.");
 
                 entity.Property(e => e.OtherVolume)
                     .HasColumnName("OTHER_VOLUME")
-                    .HasColumnType("numeric(6, 2)")
-                    .HasComment("Estimated volume of material.  Should be populated if  ditch and travelled lanes estimated ranges exceed 5.0 m cubed.");
+                    .HasColumnType("numeric(6, 2)");
 
                 entity.Property(e => e.ReportDate)
                     .HasColumnName("REPORT_DATE")
-                    .HasColumnType("date")
-                    .HasComment("Date reported");
+                    .HasColumnType("date");
 
                 entity.Property(e => e.ReporterName)
                     .HasColumnName("REPORTER_NAME")
                     .HasMaxLength(150)
-                    .IsUnicode(false)
-                    .HasComment("Name of person reporting occurrence");
+                    .IsUnicode(false);
+
+                entity.Property(e => e.RowNum)
+                    .HasColumnName("ROW_NUM")
+                    .HasColumnType("numeric(9, 0)")
+                    .HasComment("Relative row number the record was located within a submission.");
 
                 entity.Property(e => e.StartLatitude)
                     .HasColumnName("START_LATITUDE")
-                    .HasColumnType("numeric(11, 6)")
-                    .HasComment(@"The M (northing) portion of the activity start coordinate. Specified as a latitude in decimal degrees with six decimal places of precision.
-Positive numbers are indicative of the Northern Hemisphere. Coordinate is to be reported using the WGS84 datum.
-");
+                    .HasColumnType("numeric(11, 6)");
 
                 entity.Property(e => e.StartLongitude)
                     .HasColumnName("START_LONGITUDE")
-                    .HasColumnType("numeric(11, 6)")
-                    .HasComment(@"The X (easting) portion of the activity start coordinate. Specified as a longitude in decimal degrees with six decimal places of precision.
-Negative numbers are indicative of the Western Hemisphere. Coordinate is to be reported using the WGS84 datum.");
+                    .HasColumnType("numeric(11, 6)");
 
                 entity.Property(e => e.StartOffset)
                     .HasColumnName("START_OFFSET")
-                    .HasColumnType("numeric(7, 3)")
-                    .HasComment(@"This field is needed for linear referencing for location specific reports. 
-Offset from beginning of segment.");
+                    .HasColumnType("numeric(7, 3)");
 
                 entity.Property(e => e.SubmissionObjectId)
                     .HasColumnName("SUBMISSION_OBJECT_ID")
-                    .HasColumnType("numeric(9, 0)")
-                    .HasComment("Unique identifier for SUBMISSION OBJECT.");
+                    .HasColumnType("numeric(9, 0)");
 
                 entity.Property(e => e.TravelledLanesVolume)
                     .HasColumnName("TRAVELLED_LANES_VOLUME")
                     .HasMaxLength(30)
-                    .IsUnicode(false)
-                    .HasComment("Range of estimated volume of material on the road (m cubed).");
+                    .IsUnicode(false);
 
                 entity.Property(e => e.ValidationStatusId)
                     .HasColumnName("VALIDATION_STATUS_ID")
-                    .HasColumnType("numeric(9, 0)")
-                    .HasComment("Unique identifier for validation STATUS.  Indicates the overall status of the submitted row of data.");
+                    .HasColumnType("numeric(9, 0)");
 
                 entity.Property(e => e.VehicleDamage)
                     .HasColumnName("VEHICLE_DAMAGE")
                     .HasMaxLength(1)
-                    .IsUnicode(false)
-                    .HasComment("Vehicle damage present at rockfall site. Enter “Y” or leave blank.");
+                    .IsUnicode(false);
 
                 entity.HasOne(d => d.SubmissionObject)
                     .WithMany(p => p.HmrRockfallReports)
@@ -2307,22 +2304,18 @@ Offset from beginning of segment.");
                     .HasMaxLength(8)
                     .IsUnicode(false);
 
-                entity.Property(e => e.LineNumber)
-                    .HasColumnName("LINE_NUMBER")
-                    .HasColumnType("numeric(9, 0)");
-
                 entity.Property(e => e.LocationDescription)
                     .HasColumnName("LOCATION_DESCRIPTION")
                     .HasMaxLength(4000)
                     .IsUnicode(false);
 
-                entity.Property(e => e.MajorIncidentNumber)
-                    .HasColumnName("MAJOR_INCIDENT_NUMBER")
+                entity.Property(e => e.McPhoneNumber)
+                    .HasColumnName("MC_PHONE_NUMBER")
                     .HasMaxLength(12)
                     .IsUnicode(false);
 
-                entity.Property(e => e.McPhoneNumber)
-                    .HasColumnName("MC_PHONE_NUMBER")
+                entity.Property(e => e.McrrIncidentNumber)
+                    .HasColumnName("MCRR_INCIDENT_NUMBER")
                     .HasMaxLength(12)
                     .IsUnicode(false);
 
@@ -2341,6 +2334,10 @@ Offset from beginning of segment.");
 
                 entity.Property(e => e.RockfallReportId)
                     .HasColumnName("ROCKFALL_REPORT_ID")
+                    .HasColumnType("numeric(18, 0)");
+
+                entity.Property(e => e.RowNum)
+                    .HasColumnName("ROW_NUM")
                     .HasColumnType("numeric(18, 0)");
 
                 entity.Property(e => e.StartLatitude)
@@ -3705,8 +3702,6 @@ Offset from beginning of segment.");
 
                 entity.ToTable("HMR_SUBMISSION_ROW");
 
-                entity.HasComment("Each row of data within a  SUBMISSION OBJECT for each file submission that  passes basic file validation.");
-
                 entity.Property(e => e.RowId)
                     .HasColumnName("ROW_ID")
                     .HasColumnType("numeric(9, 0)")
@@ -3714,106 +3709,93 @@ Offset from beginning of segment.");
 
                 entity.Property(e => e.AppCreateTimestamp)
                     .HasColumnName("APP_CREATE_TIMESTAMP")
-                    .HasColumnType("datetime")
-                    .HasComment("Date and time of record creation");
+                    .HasColumnType("datetime");
 
                 entity.Property(e => e.AppCreateUserDirectory)
                     .IsRequired()
                     .HasColumnName("APP_CREATE_USER_DIRECTORY")
                     .HasMaxLength(12)
-                    .IsUnicode(false)
-                    .HasComment("Active Directory which retains source of truth for user idenifiers.");
+                    .IsUnicode(false);
 
-                entity.Property(e => e.AppCreateUserGuid)
-                    .HasColumnName("APP_CREATE_USER_GUID")
-                    .HasComment("Unique idenifier of user who created record");
+                entity.Property(e => e.AppCreateUserGuid).HasColumnName("APP_CREATE_USER_GUID");
 
                 entity.Property(e => e.AppCreateUserid)
                     .IsRequired()
                     .HasColumnName("APP_CREATE_USERID")
                     .HasMaxLength(30)
-                    .IsUnicode(false)
-                    .HasComment("Unique idenifier of user who created record");
+                    .IsUnicode(false);
 
                 entity.Property(e => e.AppLastUpdateTimestamp)
                     .HasColumnName("APP_LAST_UPDATE_TIMESTAMP")
-                    .HasColumnType("datetime")
-                    .HasComment("Date and time of last record update");
+                    .HasColumnType("datetime");
 
                 entity.Property(e => e.AppLastUpdateUserDirectory)
                     .IsRequired()
                     .HasColumnName("APP_LAST_UPDATE_USER_DIRECTORY")
                     .HasMaxLength(12)
-                    .IsUnicode(false)
-                    .HasComment("Active Directory which retains source of truth for user idenifiers.");
+                    .IsUnicode(false);
 
-                entity.Property(e => e.AppLastUpdateUserGuid)
-                    .HasColumnName("APP_LAST_UPDATE_USER_GUID")
-                    .HasComment("Unique idenifier of user who last updated record");
+                entity.Property(e => e.AppLastUpdateUserGuid).HasColumnName("APP_LAST_UPDATE_USER_GUID");
 
                 entity.Property(e => e.AppLastUpdateUserid)
                     .IsRequired()
                     .HasColumnName("APP_LAST_UPDATE_USERID")
                     .HasMaxLength(30)
-                    .IsUnicode(false)
-                    .HasComment("Unique idenifier of user who last updated record");
+                    .IsUnicode(false);
 
                 entity.Property(e => e.ConcurrencyControlNumber)
                     .HasColumnName("CONCURRENCY_CONTROL_NUMBER")
-                    .HasDefaultValueSql("((1))")
-                    .HasComment("Record under edit indicator used for optomisitc record contention management.  If number differs from start of edit, then user will be prompted to that record has been updated by someone else.");
+                    .HasDefaultValueSql("((1))");
 
                 entity.Property(e => e.DbAuditCreateTimestamp)
                     .HasColumnName("DB_AUDIT_CREATE_TIMESTAMP")
                     .HasColumnType("datetime")
-                    .HasDefaultValueSql("(getutcdate())")
-                    .HasComment("Date and time record created in the database");
+                    .HasDefaultValueSql("(getutcdate())");
 
                 entity.Property(e => e.DbAuditCreateUserid)
                     .IsRequired()
                     .HasColumnName("DB_AUDIT_CREATE_USERID")
                     .HasMaxLength(30)
                     .IsUnicode(false)
-                    .HasDefaultValueSql("(user_name())")
-                    .HasComment("Named database user who created record");
+                    .HasDefaultValueSql("(user_name())");
 
                 entity.Property(e => e.DbAuditLastUpdateTimestamp)
                     .HasColumnName("DB_AUDIT_LAST_UPDATE_TIMESTAMP")
                     .HasColumnType("datetime")
-                    .HasDefaultValueSql("(getutcdate())")
-                    .HasComment("Date and time record was last updated in the database.");
+                    .HasDefaultValueSql("(getutcdate())");
 
                 entity.Property(e => e.DbAuditLastUpdateUserid)
                     .IsRequired()
                     .HasColumnName("DB_AUDIT_LAST_UPDATE_USERID")
                     .HasMaxLength(30)
                     .IsUnicode(false)
-                    .HasDefaultValueSql("(user_name())")
-                    .HasComment("Named database user who last updated record");
+                    .HasDefaultValueSql("(user_name())");
 
                 entity.Property(e => e.ErrorDetail)
                     .HasColumnName("ERROR_DETAIL")
                     .HasMaxLength(4000)
-                    .IsUnicode(false)
-                    .HasComment("Error descriptions applicable to a submission row validation error (eg: submitted value is not within a required range).");
+                    .IsUnicode(false);
 
-                entity.Property(e => e.LineNumber)
-                    .HasColumnName("LINE_NUMBER")
-                    .HasColumnType("numeric(9, 0)");
+                entity.Property(e => e.IsResubmitted)
+                    .HasColumnName("IS_RESUBMITTED")
+                    .HasMaxLength(40)
+                    .IsUnicode(false)
+                    .HasComment("Indicates if the RECORD_NUMBER for the same CONTRACT_TERM and PARTY has been previously processed successfully and is being overwritten by a subsequent submission row.");
 
                 entity.Property(e => e.RecordNumber)
                     .HasColumnName("RECORD_NUMBER")
                     .HasMaxLength(8)
-                    .IsUnicode(false)
-                    .HasComment(@"Unique work report record number from the maintainence contractor.
-This is uniquely identifies each record submission for a contractor.
-<Service Area><Record Number> will uniquely identify each record in the application for a particular contractor.");
+                    .IsUnicode(false);
 
                 entity.Property(e => e.RowHash)
                     .HasColumnName("ROW_HASH")
                     .HasMaxLength(256)
-                    .IsUnicode(false)
-                    .HasComment("Cryptographic hash for each row of data received. The hash total is is used to compared with subsequently submitted data to check for duplicate submissions. If a match exists, newly matched data is not processed further.");
+                    .IsUnicode(false);
+
+                entity.Property(e => e.RowNum)
+                    .HasColumnName("ROW_NUM")
+                    .HasColumnType("numeric(9, 0)")
+                    .HasComment("Relative row number within the SUBMISSION_OBJECT.");
 
                 entity.Property(e => e.RowStatusId)
                     .HasColumnName("ROW_STATUS_ID")
@@ -3822,13 +3804,11 @@ This is uniquely identifies each record submission for a contractor.
                 entity.Property(e => e.RowValue)
                     .HasColumnName("ROW_VALUE")
                     .HasMaxLength(4000)
-                    .IsUnicode(false)
-                    .HasComment("Contains a complete row of submitted data, including delimiters (ie: comma) and text qualifiers (ie: quote).  The row value is used to queue data for validation and loading.  This is staged data used to queue and compare data before loading it within the appropriate tables for reporting.");
+                    .IsUnicode(false);
 
                 entity.Property(e => e.SubmissionObjectId)
                     .HasColumnName("SUBMISSION_OBJECT_ID")
-                    .HasColumnType("numeric(9, 0)")
-                    .HasComment("Unique identifier for a SUBMISSION OBJECT record");
+                    .HasColumnType("numeric(9, 0)");
 
                 entity.HasOne(d => d.RowStatus)
                     .WithMany(p => p.HmrSubmissionRows)
@@ -3929,9 +3909,10 @@ This is uniquely identifies each record submission for a contractor.
                     .HasMaxLength(4000)
                     .IsUnicode(false);
 
-                entity.Property(e => e.LineNumber)
-                    .HasColumnName("LINE_NUMBER")
-                    .HasColumnType("numeric(9, 0)");
+                entity.Property(e => e.IsResubmitted)
+                    .HasColumnName("IS_RESUBMITTED")
+                    .HasMaxLength(40)
+                    .IsUnicode(false);
 
                 entity.Property(e => e.RecordNumber)
                     .HasColumnName("RECORD_NUMBER")
@@ -3945,6 +3926,10 @@ This is uniquely identifies each record submission for a contractor.
 
                 entity.Property(e => e.RowId)
                     .HasColumnName("ROW_ID")
+                    .HasColumnType("numeric(18, 0)");
+
+                entity.Property(e => e.RowNum)
+                    .HasColumnName("ROW_NUM")
                     .HasColumnType("numeric(18, 0)");
 
                 entity.Property(e => e.RowStatusId)
@@ -4957,8 +4942,6 @@ This is uniquely identifies each record submission for a contractor.
 
                 entity.ToTable("HMR_WILDLIFE_REPORT");
 
-                entity.HasComment("Submission data regarding wildlife incidents is ultimately staged in this table after being loaded and validated.  Validation status of the data is also provided here, as it may be desirable for some invalid data to be available and marked accordingly.");
-
                 entity.HasIndex(e => e.ServiceArea)
                     .HasName("WLDLF_RPT_CNT_ARA_FK_I");
 
@@ -4968,196 +4951,157 @@ This is uniquely identifies each record submission for a contractor.
                 entity.Property(e => e.WildlifeRecordId)
                     .HasColumnName("WILDLIFE_RECORD_ID")
                     .HasColumnType("numeric(9, 0)")
-                    .HasDefaultValueSql("(NEXT VALUE FOR [HMR_WLDLF_ID_SEQ])")
-                    .HasComment("Unique identifier for a record");
+                    .HasDefaultValueSql("(NEXT VALUE FOR [HMR_WLDLF_ID_SEQ])");
 
                 entity.Property(e => e.AccidentDate)
                     .HasColumnName("ACCIDENT_DATE")
-                    .HasColumnType("datetime")
-                    .HasComment("Date of accident. ");
+                    .HasColumnType("datetime");
 
                 entity.Property(e => e.Age)
                     .HasColumnName("AGE")
                     .HasMaxLength(1)
-                    .IsUnicode(false)
-                    .HasComment("Unique identifer for age range of involved animal.  (eg: A=Adult, Y=Young,U=unknown) ");
+                    .IsUnicode(false);
 
                 entity.Property(e => e.AppCreateTimestamp)
                     .HasColumnName("APP_CREATE_TIMESTAMP")
-                    .HasColumnType("datetime")
-                    .HasComment("Date and time of record creation");
+                    .HasColumnType("datetime");
 
                 entity.Property(e => e.AppCreateUserDirectory)
                     .IsRequired()
                     .HasColumnName("APP_CREATE_USER_DIRECTORY")
                     .HasMaxLength(12)
-                    .IsUnicode(false)
-                    .HasComment("Active Directory which retains source of truth for user idenifiers.");
+                    .IsUnicode(false);
 
-                entity.Property(e => e.AppCreateUserGuid)
-                    .HasColumnName("APP_CREATE_USER_GUID")
-                    .HasComment("Unique idenifier of user who created record");
+                entity.Property(e => e.AppCreateUserGuid).HasColumnName("APP_CREATE_USER_GUID");
 
                 entity.Property(e => e.AppCreateUserid)
                     .IsRequired()
                     .HasColumnName("APP_CREATE_USERID")
                     .HasMaxLength(30)
-                    .IsUnicode(false)
-                    .HasComment("Unique idenifier of user who created record");
+                    .IsUnicode(false);
 
                 entity.Property(e => e.AppLastUpdateTimestamp)
                     .HasColumnName("APP_LAST_UPDATE_TIMESTAMP")
-                    .HasColumnType("datetime")
-                    .HasComment("Date and time of last record update");
+                    .HasColumnType("datetime");
 
                 entity.Property(e => e.AppLastUpdateUserDirectory)
                     .IsRequired()
                     .HasColumnName("APP_LAST_UPDATE_USER_DIRECTORY")
                     .HasMaxLength(12)
-                    .IsUnicode(false)
-                    .HasComment("Active Directory which retains source of truth for user idenifiers.");
+                    .IsUnicode(false);
 
-                entity.Property(e => e.AppLastUpdateUserGuid)
-                    .HasColumnName("APP_LAST_UPDATE_USER_GUID")
-                    .HasComment("Unique idenifier of user who last updated record");
+                entity.Property(e => e.AppLastUpdateUserGuid).HasColumnName("APP_LAST_UPDATE_USER_GUID");
 
                 entity.Property(e => e.AppLastUpdateUserid)
                     .IsRequired()
                     .HasColumnName("APP_LAST_UPDATE_USERID")
                     .HasMaxLength(30)
-                    .IsUnicode(false)
-                    .HasComment("Unique idenifier of user who last updated record");
+                    .IsUnicode(false);
 
                 entity.Property(e => e.Comment)
                     .HasColumnName("COMMENT")
                     .HasMaxLength(1024)
-                    .IsUnicode(false)
-                    .HasComment("Text field for comments and/or notes pertinent to the specified occurance.");
+                    .IsUnicode(false);
 
                 entity.Property(e => e.ConcurrencyControlNumber)
                     .HasColumnName("CONCURRENCY_CONTROL_NUMBER")
-                    .HasDefaultValueSql("((1))")
-                    .HasComment("Record under edit indicator used for optomisitc record contention management.  If number differs from start of edit, then user will be prompted to that record has been updated by someone else.");
+                    .HasDefaultValueSql("((1))");
 
                 entity.Property(e => e.DbAuditCreateTimestamp)
                     .HasColumnName("DB_AUDIT_CREATE_TIMESTAMP")
                     .HasColumnType("datetime")
-                    .HasDefaultValueSql("(getutcdate())")
-                    .HasComment("Date and time record created in the database");
+                    .HasDefaultValueSql("(getutcdate())");
 
                 entity.Property(e => e.DbAuditCreateUserid)
                     .IsRequired()
                     .HasColumnName("DB_AUDIT_CREATE_USERID")
                     .HasMaxLength(30)
                     .IsUnicode(false)
-                    .HasDefaultValueSql("(user_name())")
-                    .HasComment("Named database user who created record");
+                    .HasDefaultValueSql("(user_name())");
 
                 entity.Property(e => e.DbAuditLastUpdateTimestamp)
                     .HasColumnName("DB_AUDIT_LAST_UPDATE_TIMESTAMP")
                     .HasColumnType("datetime")
-                    .HasDefaultValueSql("(getutcdate())")
-                    .HasComment("Date and time record was last updated in the database.");
+                    .HasDefaultValueSql("(getutcdate())");
 
                 entity.Property(e => e.DbAuditLastUpdateUserid)
                     .IsRequired()
                     .HasColumnName("DB_AUDIT_LAST_UPDATE_USERID")
                     .HasMaxLength(30)
                     .IsUnicode(false)
-                    .HasDefaultValueSql("(user_name())")
-                    .HasComment("Named database user who last updated record");
+                    .HasDefaultValueSql("(user_name())");
 
                 entity.Property(e => e.HighwayUniqueNumber)
                     .HasColumnName("HIGHWAY_UNIQUE_NUMBER")
                     .HasMaxLength(16)
-                    .IsUnicode(false)
-                    .HasComment(@"This identifies the section of road on which the incident occurred.
-This is a value in the in the format:
-[Service Area]-[area manager area]-[subarea]-[highway number]
-This reference number reflects a valid reference in the road network (currenltyRFI within  CHRIS as of 2019)");
+                    .IsUnicode(false);
 
                 entity.Property(e => e.Landmark)
                     .HasColumnName("LANDMARK")
                     .HasMaxLength(8)
-                    .IsUnicode(false)
-                    .HasComment("Highway reference point (HRP) landmark.  This reference number reflects a valid landmark in the asset management system (currenlty CHRIS as of 2019)");
+                    .IsUnicode(false);
 
                 entity.Property(e => e.Latitude)
                     .HasColumnName("LATITUDE")
-                    .HasColumnType("numeric(11, 6)")
-                    .HasComment(@"The Y (northing) portion of the accident coordinate. Coordinate is to be reported using the WGS84 datum.
-");
-
-                entity.Property(e => e.LineNumber)
-                    .HasColumnName("LINE_NUMBER")
-                    .HasColumnType("numeric(9, 0)");
+                    .HasColumnType("numeric(11, 6)");
 
                 entity.Property(e => e.Longitude)
                     .HasColumnName("LONGITUDE")
-                    .HasColumnType("numeric(11, 6)")
-                    .HasComment("The X (easting)  portion of the accident coordinate. Coordinate is to be reported using the WGS84 datum.");
+                    .HasColumnType("numeric(11, 6)");
 
                 entity.Property(e => e.NearestTown)
                     .HasColumnName("NEAREST_TOWN")
                     .HasMaxLength(150)
-                    .IsUnicode(false)
-                    .HasComment("Name of nearest town to wildlife accident");
+                    .IsUnicode(false);
 
                 entity.Property(e => e.Quantity)
                     .HasColumnName("QUANTITY")
-                    .HasColumnType("numeric(4, 0)")
-                    .HasComment("Number of animals injured or killed");
+                    .HasColumnType("numeric(4, 0)");
 
                 entity.Property(e => e.RecordType)
                     .HasColumnName("RECORD_TYPE")
                     .HasMaxLength(1)
-                    .IsUnicode(false)
-                    .HasComment("Identifies the type of record.  WARS = W / Allowed Values: W");
+                    .IsUnicode(false);
+
+                entity.Property(e => e.RowNum)
+                    .HasColumnName("ROW_NUM")
+                    .HasColumnType("numeric(9, 0)")
+                    .HasComment("Relative row number the record was located within a submission.");
 
                 entity.Property(e => e.ServiceArea)
                     .HasColumnName("SERVICE_AREA")
-                    .HasColumnType("numeric(9, 0)")
-                    .HasComment("The Ministry Contract Service Area number in which the incident occured.");
+                    .HasColumnType("numeric(9, 0)");
 
                 entity.Property(e => e.Sex)
                     .HasColumnName("SEX")
                     .HasMaxLength(1)
-                    .IsUnicode(false)
-                    .HasComment("Unique identifer for sex of involved animal.  Allowed values: M, F, U");
+                    .IsUnicode(false);
 
                 entity.Property(e => e.Species)
                     .HasColumnName("SPECIES")
-                    .HasColumnType("numeric(2, 0)")
-                    .HasComment("Unique identifier for animal species. (eg: 2 = Moose)");
+                    .HasColumnType("numeric(2, 0)");
 
                 entity.Property(e => e.StartOffset)
                     .HasColumnName("START_OFFSET")
-                    .HasColumnType("numeric(7, 3)")
-                    .HasComment(@"This field is needed for linear referencing for location specific reports. 
-Offset from beginning of segment.");
+                    .HasColumnType("numeric(7, 3)");
 
                 entity.Property(e => e.SubmissionObjectId)
                     .HasColumnName("SUBMISSION_OBJECT_ID")
-                    .HasColumnType("numeric(9, 0)")
-                    .HasComment("Unique identifier for SUBMISSION OBJECT.");
+                    .HasColumnType("numeric(9, 0)");
 
                 entity.Property(e => e.TimeOfKill)
                     .HasColumnName("TIME_OF_KILL")
                     .HasMaxLength(1)
-                    .IsUnicode(false)
-                    .HasComment(@"General  light conditions at time the incident occured. (eg: 1=Dawn, 2=Dusk)
-");
+                    .IsUnicode(false);
 
                 entity.Property(e => e.ValidationStatusId)
                     .HasColumnName("VALIDATION_STATUS_ID")
-                    .HasColumnType("numeric(9, 0)")
-                    .HasComment("Unique identifier for VALIDATION STATUS.  Indicates the overall status of the submitted row of data.");
+                    .HasColumnType("numeric(9, 0)");
 
                 entity.Property(e => e.WildlifeSign)
                     .HasColumnName("WILDLIFE_SIGN")
                     .HasMaxLength(1)
-                    .IsUnicode(false)
-                    .HasComment("Is Wildlife sign within 100m (Y, N or Unknown)");
+                    .IsUnicode(false);
 
                 entity.HasOne(d => d.ServiceAreaNavigation)
                     .WithMany(p => p.HmrWildlifeReports)
@@ -5287,10 +5231,6 @@ Offset from beginning of segment.");
                     .HasColumnName("LATITUDE")
                     .HasColumnType("numeric(18, 0)");
 
-                entity.Property(e => e.LineNumber)
-                    .HasColumnName("LINE_NUMBER")
-                    .HasColumnType("numeric(9, 0)");
-
                 entity.Property(e => e.Longitude)
                     .HasColumnName("LONGITUDE")
                     .HasColumnType("numeric(18, 0)");
@@ -5308,6 +5248,10 @@ Offset from beginning of segment.");
                     .HasColumnName("RECORD_TYPE")
                     .HasMaxLength(1)
                     .IsUnicode(false);
+
+                entity.Property(e => e.RowNum)
+                    .HasColumnName("ROW_NUM")
+                    .HasColumnType("numeric(18, 0)");
 
                 entity.Property(e => e.ServiceArea)
                     .HasColumnName("SERVICE_AREA")
@@ -5356,265 +5300,188 @@ Offset from beginning of segment.");
 
                 entity.ToTable("HMR_WORK_REPORT");
 
-                entity.HasComment("Submission data regarding maintenance activities is ultimately staged in this table after being loaded and validated.  Validation status of the data is also provided here, as it may be desirable for some invalid data to be available and marked accordingly.");
-
                 entity.HasIndex(e => e.SubmissionObjectId)
                     .HasName("HMR_WRK_RRT_FK_I");
 
                 entity.Property(e => e.WorkReportId)
                     .HasColumnName("WORK_REPORT_ID")
                     .HasColumnType("numeric(9, 0)")
-                    .HasDefaultValueSql("(NEXT VALUE FOR [HMR_WRK_RPT_ID_SEQ])")
-                    .HasComment("Unique identifier for a record");
+                    .HasDefaultValueSql("(NEXT VALUE FOR [HMR_WRK_RPT_ID_SEQ])");
 
                 entity.Property(e => e.Accomplishment)
                     .HasColumnName("ACCOMPLISHMENT")
-                    .HasColumnType("numeric(7, 2)")
-                    .HasComment("The number of units of work completed for the activity corresponding to the activity number.");
+                    .HasColumnType("numeric(7, 2)");
 
                 entity.Property(e => e.ActivityNumber)
                     .HasColumnName("ACTIVITY_NUMBER")
                     .HasMaxLength(6)
-                    .IsUnicode(false)
-                    .HasComment(@"Code which uniquely identifies the activity performed.  The number reflects a a classificaiton hierarchy comprised of three levels: ABBCCC
-
-A - the first digit represents Specification Category (eg:2 - Drainage )
-BB - the second two digits represent Activity Category (eg: 02 - Drainage Appliance Maintenance)
-CCC - the last three digits represent Activity Type and Detail (eg: 310 - Boring, Augering.  300 series reflects Quantified value, which would be linear meters in this case.)");
+                    .IsUnicode(false);
 
                 entity.Property(e => e.AppCreateTimestamp)
                     .HasColumnName("APP_CREATE_TIMESTAMP")
-                    .HasColumnType("datetime")
-                    .HasComment("Date and time of record creation");
+                    .HasColumnType("datetime");
 
                 entity.Property(e => e.AppCreateUserDirectory)
                     .IsRequired()
                     .HasColumnName("APP_CREATE_USER_DIRECTORY")
                     .HasMaxLength(12)
-                    .IsUnicode(false)
-                    .HasComment("Active Directory which retains source of truth for user idenifiers.");
+                    .IsUnicode(false);
 
-                entity.Property(e => e.AppCreateUserGuid)
-                    .HasColumnName("APP_CREATE_USER_GUID")
-                    .HasComment("Unique idenifier of user who created record");
+                entity.Property(e => e.AppCreateUserGuid).HasColumnName("APP_CREATE_USER_GUID");
 
                 entity.Property(e => e.AppCreateUserid)
                     .IsRequired()
                     .HasColumnName("APP_CREATE_USERID")
                     .HasMaxLength(30)
-                    .IsUnicode(false)
-                    .HasComment("Unique idenifier of user who created record");
+                    .IsUnicode(false);
 
                 entity.Property(e => e.AppLastUpdateTimestamp)
                     .HasColumnName("APP_LAST_UPDATE_TIMESTAMP")
-                    .HasColumnType("datetime")
-                    .HasComment("Date and time of last record update");
+                    .HasColumnType("datetime");
 
                 entity.Property(e => e.AppLastUpdateUserDirectory)
                     .IsRequired()
                     .HasColumnName("APP_LAST_UPDATE_USER_DIRECTORY")
                     .HasMaxLength(12)
-                    .IsUnicode(false)
-                    .HasComment("Active Directory which retains source of truth for user idenifiers.");
+                    .IsUnicode(false);
 
-                entity.Property(e => e.AppLastUpdateUserGuid)
-                    .HasColumnName("APP_LAST_UPDATE_USER_GUID")
-                    .HasComment("Unique idenifier of user who last updated record");
+                entity.Property(e => e.AppLastUpdateUserGuid).HasColumnName("APP_LAST_UPDATE_USER_GUID");
 
                 entity.Property(e => e.AppLastUpdateUserid)
                     .IsRequired()
                     .HasColumnName("APP_LAST_UPDATE_USERID")
                     .HasMaxLength(30)
-                    .IsUnicode(false)
-                    .HasComment("Unique idenifier of user who last updated record");
+                    .IsUnicode(false);
 
                 entity.Property(e => e.Comments)
                     .HasColumnName("COMMENTS")
                     .HasMaxLength(1024)
-                    .IsUnicode(false)
-                    .HasComment("Text field for comments and/or notes pertinent to the specified activity.");
+                    .IsUnicode(false);
 
                 entity.Property(e => e.ConcurrencyControlNumber)
                     .HasColumnName("CONCURRENCY_CONTROL_NUMBER")
-                    .HasDefaultValueSql("((1))")
-                    .HasComment("Record under edit indicator used for optomisitc record contention management.  If number differs from start of edit, then user will be prompted to that record has been updated by someone else.");
+                    .HasDefaultValueSql("((1))");
 
                 entity.Property(e => e.DbAuditCreateTimestamp)
                     .HasColumnName("DB_AUDIT_CREATE_TIMESTAMP")
                     .HasColumnType("datetime")
-                    .HasDefaultValueSql("(getutcdate())")
-                    .HasComment("Date and time record created in the database");
+                    .HasDefaultValueSql("(getutcdate())");
 
                 entity.Property(e => e.DbAuditCreateUserid)
                     .IsRequired()
                     .HasColumnName("DB_AUDIT_CREATE_USERID")
                     .HasMaxLength(30)
                     .IsUnicode(false)
-                    .HasDefaultValueSql("(user_name())")
-                    .HasComment("Named database user who created record");
+                    .HasDefaultValueSql("(user_name())");
 
                 entity.Property(e => e.DbAuditLastUpdateTimestamp)
                     .HasColumnName("DB_AUDIT_LAST_UPDATE_TIMESTAMP")
                     .HasColumnType("datetime")
-                    .HasDefaultValueSql("(getutcdate())")
-                    .HasComment("Date and time record was last updated in the database.");
+                    .HasDefaultValueSql("(getutcdate())");
 
                 entity.Property(e => e.DbAuditLastUpdateUserid)
                     .IsRequired()
                     .HasColumnName("DB_AUDIT_LAST_UPDATE_USERID")
                     .HasMaxLength(30)
                     .IsUnicode(false)
-                    .HasDefaultValueSql("(user_name())")
-                    .HasComment("Named database user who last updated record");
+                    .HasDefaultValueSql("(user_name())");
 
                 entity.Property(e => e.EndDate)
                     .HasColumnName("END_DATE")
-                    .HasColumnType("date")
-                    .HasComment("Date when work was completed");
+                    .HasColumnType("date");
 
                 entity.Property(e => e.EndLatitude)
                     .HasColumnName("END_LATITUDE")
-                    .HasColumnType("numeric(11, 6)")
-                    .HasComment(@"The M (northing) portion of the activity end coordinate. Specified as a latitude in decimal degrees with six decimal places of precision.
-Positive numbers are indicative of the Northern Hemisphere. Coordinate is to be reported using the WGS84 datum.
-For point activity if this field is not provided it can be defaulted to same as START LATITUDE");
+                    .HasColumnType("numeric(11, 6)");
 
                 entity.Property(e => e.EndLongitude)
                     .HasColumnName("END_LONGITUDE")
-                    .HasColumnType("numeric(11, 6)")
-                    .HasComment(@"The X (easting) portion of the activity end coordinate. Specified as a longitude in decimal degrees with six decimal places of precision.
-Negative numbers are indicative of the Western Hemisphere. Coordinate is to be reported using the WGS84 datum.
-For point activity if this field is not provided it can be defaulted to same as START LONGITUDE.");
+                    .HasColumnType("numeric(11, 6)");
 
                 entity.Property(e => e.EndOffset)
                     .HasColumnName("END_OFFSET")
-                    .HasColumnType("numeric(7, 3)")
-                    .HasComment(@"This field is needed for linear referencing for location specific reports.
-If the work is less than 30 m, this field is not mandatory
-Offset from beginning of segment");
+                    .HasColumnType("numeric(7, 3)");
 
                 entity.Property(e => e.HighwayUnique)
                     .HasColumnName("HIGHWAY_UNIQUE")
                     .HasMaxLength(16)
-                    .IsUnicode(false)
-                    .HasComment(@"This identifies the section of road on which the activity occurred.
-This is a value in the in the format:
-[Service Area]-[area manager area]-[subarea]-[highway number]
-This should be a value found in RFI (CHRIS)");
+                    .IsUnicode(false);
 
                 entity.Property(e => e.Landmark)
                     .HasColumnName("LANDMARK")
                     .HasMaxLength(8)
-                    .IsUnicode(false)
-                    .HasComment(@"This field needed for location reference:
-Landmarks provided should be those listed in the CHRIS HRP report for each Highway or road within the Service Area");
-
-                entity.Property(e => e.LineNumber)
-                    .HasColumnName("LINE_NUMBER")
-                    .HasColumnType("numeric(9, 0)");
+                    .IsUnicode(false);
 
                 entity.Property(e => e.PostedDate)
                     .HasColumnName("POSTED_DATE")
-                    .HasColumnType("date")
-                    .HasComment("Date the data is posted into the contractor management system");
+                    .HasColumnType("date");
 
                 entity.Property(e => e.RecordNumber)
                     .HasColumnName("RECORD_NUMBER")
                     .HasMaxLength(8)
-                    .IsUnicode(false)
-                    .HasComment(@"Unique work report record number from the maintainence contractor.
-This is uniquely identifies each record submission for a contractor.
-<Service Area><Record Number> will uniquely identify each record in the application for a particular contractor.");
+                    .IsUnicode(false);
 
                 entity.Property(e => e.RecordType)
                     .HasColumnName("RECORD_TYPE")
                     .HasMaxLength(1)
-                    .IsUnicode(false)
-                    .HasComment(@"This field describes the type of work the associated record is reporting on.
-This is restricted to specific set of values -
-Q - Quantified,
-R - Routine,
-E - Major Event,
-A - Additional");
+                    .IsUnicode(false);
+
+                entity.Property(e => e.RowNum)
+                    .HasColumnName("ROW_NUM")
+                    .HasColumnType("numeric(9, 0)")
+                    .HasComment("Relative row number the record was located within a submission.");
 
                 entity.Property(e => e.ServiceArea)
                     .HasColumnName("SERVICE_AREA")
-                    .HasColumnType("numeric(9, 0)")
-                    .HasComment("The Ministry Contract Service Area number in which the activity occured.");
+                    .HasColumnType("numeric(9, 0)");
 
                 entity.Property(e => e.SiteNumber)
                     .HasColumnName("SITE_NUMBER")
                     .HasMaxLength(8)
-                    .IsUnicode(false)
-                    .HasComment(@"Contains a site type code followed by a The Ministry site number. Site types are provided by the Province, are four to six digits preceded by:
-A – Avalanche
-B – Arrestor Bed/Dragnet Barrier
-D – Debris and/or Rockfall
-L – Landscape
-R – Rest Area
-S – Signalized Intersection
-T – Traffic Patrol
-W – Weather Station
-X – Railway Crossing");
+                    .IsUnicode(false);
 
                 entity.Property(e => e.StartDate)
                     .HasColumnName("START_DATE")
-                    .HasColumnType("date")
-                    .HasComment("Date when work commenced");
+                    .HasColumnType("date");
 
                 entity.Property(e => e.StartLatitude)
                     .HasColumnName("START_LATITUDE")
-                    .HasColumnType("numeric(11, 6)")
-                    .HasComment(@"The M (northing) portion of the activity start coordinate. Specified as a latitude in decimal degrees with six decimal places of precision.
-Positive numbers are indicative of the Northern Hemisphere. Coordinate is to be reported using the WGS84 datum.
-");
+                    .HasColumnType("numeric(11, 6)");
 
                 entity.Property(e => e.StartLongitude)
                     .HasColumnName("START_LONGITUDE")
-                    .HasColumnType("numeric(11, 6)")
-                    .HasComment(@"The X (easting) portion of the activity start coordinate. Specified as a longitude in decimal degrees with six decimal places of precision.
-Negative numbers are indicative of the Western Hemisphere. Coordinate is to be reported using the WGS84 datum.");
+                    .HasColumnType("numeric(11, 6)");
 
                 entity.Property(e => e.StartOffset)
                     .HasColumnName("START_OFFSET")
-                    .HasColumnType("numeric(7, 3)")
-                    .HasComment(@"This field is needed for linear referencing for location specific reports. 
-Offset from beginning of segment.");
+                    .HasColumnType("numeric(7, 3)");
 
                 entity.Property(e => e.StructureNumber)
                     .HasColumnName("STRUCTURE_NUMBER")
                     .HasMaxLength(5)
-                    .IsUnicode(false)
-                    .HasComment(@"From list of Bridge Structure Road (BSR) structures provided by the Province.
-Is only applicable at defined BSR structures.  BSR structures include; bridges, culverts over 3m, retaining walls.
-");
+                    .IsUnicode(false);
 
                 entity.Property(e => e.SubmissionObjectId)
                     .HasColumnName("SUBMISSION_OBJECT_ID")
-                    .HasColumnType("numeric(9, 0)")
-                    .HasComment("Unique identifier for SUBMISSION OBJECT.");
+                    .HasColumnType("numeric(9, 0)");
 
                 entity.Property(e => e.TaskNumber)
                     .HasColumnName("TASK_NUMBER")
                     .HasMaxLength(6)
-                    .IsUnicode(false)
-                    .HasComment("Contractor Task Number");
+                    .IsUnicode(false);
 
                 entity.Property(e => e.UnitOfMeasure)
                     .HasColumnName("UNIT_OF_MEASURE")
                     .HasMaxLength(12)
-                    .IsUnicode(false)
-                    .HasComment("The code which represents the unit of measure for the specified activity. ");
+                    .IsUnicode(false);
 
                 entity.Property(e => e.ValidationStatusId)
                     .HasColumnName("VALIDATION_STATUS_ID")
-                    .HasColumnType("numeric(9, 0)")
-                    .HasComment("Unique identifier for VALIDATION STATUS.  Indicates the overall status of the submitted row of data.");
+                    .HasColumnType("numeric(9, 0)");
 
                 entity.Property(e => e.ValueOfWork)
-                    .HasColumnName("VALUE_OF_WORK ")
-                    .HasColumnType("numeric(8, 2)")
-                    .HasComment("Total dollar value of the work activity being reported, for each activity.");
+                    .HasColumnName("VALUE_OF_WORK")
+                    .HasColumnType("numeric(8, 2)");
 
                 entity.HasOne(d => d.ServiceAreaNavigation)
                     .WithMany(p => p.HmrWorkReports)
@@ -5756,10 +5623,6 @@ Is only applicable at defined BSR structures.  BSR structures include; bridges, 
                     .HasMaxLength(8)
                     .IsUnicode(false);
 
-                entity.Property(e => e.LineNumber)
-                    .HasColumnName("LINE_NUMBER")
-                    .HasColumnType("numeric(9, 0)");
-
                 entity.Property(e => e.PostedDate)
                     .HasColumnName("POSTED_DATE")
                     .HasColumnType("date");
@@ -5773,6 +5636,10 @@ Is only applicable at defined BSR structures.  BSR structures include; bridges, 
                     .HasColumnName("RECORD_TYPE")
                     .HasMaxLength(1)
                     .IsUnicode(false);
+
+                entity.Property(e => e.RowNum)
+                    .HasColumnName("ROW_NUM")
+                    .HasColumnType("numeric(18, 0)");
 
                 entity.Property(e => e.ServiceArea)
                     .HasColumnName("SERVICE_AREA")
@@ -5823,12 +5690,148 @@ Is only applicable at defined BSR structures.  BSR structures include; bridges, 
                     .HasColumnType("numeric(18, 0)");
 
                 entity.Property(e => e.ValueOfWork)
-                    .HasColumnName("VALUE_OF_WORK ")
+                    .HasColumnName("VALUE_OF_WORK")
                     .HasColumnType("numeric(18, 0)");
 
                 entity.Property(e => e.WorkReportId)
                     .HasColumnName("WORK_REPORT_ID")
                     .HasColumnType("numeric(18, 0)");
+            });
+
+            modelBuilder.Entity<Job>(entity =>
+            {
+                entity.ToTable("Job", "HangFire");
+
+                entity.HasIndex(e => e.StateName)
+                    .HasName("IX_HangFire_Job_StateName")
+                    .HasFilter("([StateName] IS NOT NULL)");
+
+                entity.HasIndex(e => new { e.StateName, e.ExpireAt })
+                    .HasName("IX_HangFire_Job_ExpireAt")
+                    .HasFilter("([ExpireAt] IS NOT NULL)");
+
+                entity.Property(e => e.Arguments).IsRequired();
+
+                entity.Property(e => e.CreatedAt).HasColumnType("datetime");
+
+                entity.Property(e => e.ExpireAt).HasColumnType("datetime");
+
+                entity.Property(e => e.InvocationData).IsRequired();
+
+                entity.Property(e => e.StateName).HasMaxLength(20);
+            });
+
+            modelBuilder.Entity<JobParameter>(entity =>
+            {
+                entity.HasKey(e => new { e.JobId, e.Name })
+                    .HasName("PK_HangFire_JobParameter");
+
+                entity.ToTable("JobParameter", "HangFire");
+
+                entity.Property(e => e.Name).HasMaxLength(40);
+
+                entity.HasOne(d => d.Job)
+                    .WithMany(p => p.JobParameters)
+                    .HasForeignKey(d => d.JobId)
+                    .HasConstraintName("FK_HangFire_JobParameter_Job");
+            });
+
+            modelBuilder.Entity<JobQueue>(entity =>
+            {
+                entity.HasKey(e => new { e.Queue, e.Id })
+                    .HasName("PK_HangFire_JobQueue");
+
+                entity.ToTable("JobQueue", "HangFire");
+
+                entity.Property(e => e.Queue).HasMaxLength(50);
+
+                entity.Property(e => e.Id).ValueGeneratedOnAdd();
+
+                entity.Property(e => e.FetchedAt).HasColumnType("datetime");
+            });
+
+            modelBuilder.Entity<List>(entity =>
+            {
+                entity.HasKey(e => new { e.Key, e.Id })
+                    .HasName("PK_HangFire_List");
+
+                entity.ToTable("List", "HangFire");
+
+                entity.HasIndex(e => e.ExpireAt)
+                    .HasName("IX_HangFire_List_ExpireAt")
+                    .HasFilter("([ExpireAt] IS NOT NULL)");
+
+                entity.Property(e => e.Key).HasMaxLength(100);
+
+                entity.Property(e => e.Id).ValueGeneratedOnAdd();
+
+                entity.Property(e => e.ExpireAt).HasColumnType("datetime");
+            });
+
+            modelBuilder.Entity<Schema>(entity =>
+            {
+                entity.HasKey(e => e.Version)
+                    .HasName("PK_HangFire_Schema");
+
+                entity.ToTable("Schema", "HangFire");
+
+                entity.Property(e => e.Version).ValueGeneratedNever();
+            });
+
+            modelBuilder.Entity<Server>(entity =>
+            {
+                entity.ToTable("Server", "HangFire");
+
+                entity.HasIndex(e => e.LastHeartbeat)
+                    .HasName("IX_HangFire_Server_LastHeartbeat");
+
+                entity.Property(e => e.Id).HasMaxLength(100);
+
+                entity.Property(e => e.LastHeartbeat).HasColumnType("datetime");
+            });
+
+            modelBuilder.Entity<Set>(entity =>
+            {
+                entity.HasKey(e => new { e.Key, e.Value })
+                    .HasName("PK_HangFire_Set");
+
+                entity.ToTable("Set", "HangFire");
+
+                entity.HasIndex(e => e.ExpireAt)
+                    .HasName("IX_HangFire_Set_ExpireAt")
+                    .HasFilter("([ExpireAt] IS NOT NULL)");
+
+                entity.HasIndex(e => new { e.Key, e.Score })
+                    .HasName("IX_HangFire_Set_Score");
+
+                entity.Property(e => e.Key).HasMaxLength(100);
+
+                entity.Property(e => e.Value).HasMaxLength(256);
+
+                entity.Property(e => e.ExpireAt).HasColumnType("datetime");
+            });
+
+            modelBuilder.Entity<State>(entity =>
+            {
+                entity.HasKey(e => new { e.JobId, e.Id })
+                    .HasName("PK_HangFire_State");
+
+                entity.ToTable("State", "HangFire");
+
+                entity.Property(e => e.Id).ValueGeneratedOnAdd();
+
+                entity.Property(e => e.CreatedAt).HasColumnType("datetime");
+
+                entity.Property(e => e.Name)
+                    .IsRequired()
+                    .HasMaxLength(20);
+
+                entity.Property(e => e.Reason).HasMaxLength(100);
+
+                entity.HasOne(d => d.Job)
+                    .WithMany(p => p.States)
+                    .HasForeignKey(d => d.JobId)
+                    .HasConstraintName("FK_HangFire_State_Job");
             });
 
             modelBuilder.HasSequence("FDBK_MSG_ID_SEQ")

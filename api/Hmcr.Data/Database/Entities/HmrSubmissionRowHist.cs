@@ -11,9 +11,11 @@ namespace Hmcr.Data.Database.Entities
         public decimal RowId { get; set; }
         public decimal SubmissionObjectId { get; set; }
         public decimal? RowStatusId { get; set; }
+        public decimal? RowNum { get; set; }
         public string RecordNumber { get; set; }
         public string RowValue { get; set; }
         public string RowHash { get; set; }
+        public string IsResubmitted { get; set; }
         public string ErrorDetail { get; set; }
         public long ConcurrencyControlNumber { get; set; }
         public string AppCreateUserid { get; set; }
@@ -28,6 +30,5 @@ namespace Hmcr.Data.Database.Entities
         public DateTime DbAuditCreateTimestamp { get; set; }
         public string DbAuditLastUpdateUserid { get; set; }
         public DateTime DbAuditLastUpdateTimestamp { get; set; }
-        public decimal LineNumber { get; set; }
     }
 }

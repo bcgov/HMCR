@@ -150,6 +150,8 @@ namespace Hmcr.Model
         public const string Species = "Species";
         public const string Sex = "Sex";
         public const string Age = "Age";
+
+        public const string RowNum = "RowNum";
     }
 
     public static class WorkReportHeaders

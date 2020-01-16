@@ -7,6 +7,7 @@ namespace Hmcr.Data.Database.Entities
     {
         public decimal WorkReportId { get; set; }
         public decimal SubmissionObjectId { get; set; }
+        public decimal? RowNum { get; set; }
         public decimal? ValidationStatusId { get; set; }
         public string RecordType { get; set; }
         public decimal ServiceArea { get; set; }
@@ -43,7 +44,6 @@ namespace Hmcr.Data.Database.Entities
         public DateTime DbAuditCreateTimestamp { get; set; }
         public string DbAuditLastUpdateUserid { get; set; }
         public DateTime DbAuditLastUpdateTimestamp { get; set; }
-        public decimal LineNumber { get; set; }
 
         public virtual HmrServiceArea ServiceAreaNavigation { get; set; }
         public virtual HmrSubmissionObject SubmissionObject { get; set; }

@@ -27,7 +27,7 @@ namespace Hmcr.Data.Repositories
                 row.SubmissionObjectId = submission.SubmissionObjectId;
 
                 var entity = await DbSet
-                    .Where(x => x.SubmissionObject.PartyId == submission.PartyId && x.MajorIncidentNumber == row.MajorIncidentNumber)
+                    .Where(x => x.SubmissionObject.PartyId == submission.PartyId && x.McrrIncidentNumber == row.McrrIncidentNumber)
                     .FirstOrDefaultAsync();
 
                 if (entity == null)

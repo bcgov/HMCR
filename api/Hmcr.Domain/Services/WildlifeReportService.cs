@@ -65,7 +65,7 @@ namespace Hmcr.Domain.Services
                     RowHash = line.GetSha256Hash(),
                     RowStatusId = await _statusRepo.GetStatusIdByTypeAndCodeAsync(StatusType.Row, RowStatus.RowReceived),
                     EndDate = DateTime.Today,
-                    LineNumber = csv.Context.Row - 1
+                    RowNum = csv.Context.Row - 1
                 });
             }
 
