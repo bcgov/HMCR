@@ -129,11 +129,11 @@ namespace Hmcr.Domain.Hangfire
 
             foreach (var typedRow in typedRows)
             {
-                var untypedRow = untypedRows.First(x => x.LineNumber == typedRow.LineNumber);
-                typedRow.LineNumber = untypedRow.LineNumber;
+                var untypedRow = untypedRows.First(x => x.RowNum == typedRow.RowNum);
+                typedRow.RowNum = untypedRow.RowNum;
 
                 var errors = new Dictionary<string, List<string>>();
-                var submissionRow = submission.HmrSubmissionRows.First(x => x.LineNumber == typedRow.LineNumber);
+                var submissionRow = submission.HmrSubmissionRows.First(x => x.RowNum == typedRow.RowNum);
 
                 if (typedRow.StartOffset != null && typedRow.EndOffset < typedRow.StartOffset)
                 {
@@ -182,14 +182,14 @@ namespace Hmcr.Domain.Hangfire
 
         private string SetRowIdAndRemoveDuplicate(HmrSubmissionObject submission, decimal duplicateStatusId, List<RockfallReportCsvDto> rows, string headers)
         {
-            headers = "linenumber," + headers;
+            headers = $"{Fields.RowNum}," + headers;
             var text = new StringBuilder();
             text.AppendLine(headers);
 
             for (int i = rows.Count - 1; i >= 0; i--)
             {
                 var row = rows[i];
-                var entity = submission.HmrSubmissionRows.First(x => x.LineNumber == row.LineNumber);
+                var entity = submission.HmrSubmissionRows.First(x => x.RowNum == row.RowNum);
 
                 if (entity.RowStatusId == duplicateStatusId)
                 {
@@ -197,7 +197,7 @@ namespace Hmcr.Domain.Hangfire
                     continue;
                 }
 
-                text.AppendLine($"{row.LineNumber},{entity.RowValue}");
+                text.AppendLine($"{row.RowNum},{entity.RowValue}");
                 row.RowId = entity.RowId;
             }
 
@@ -217,7 +217,7 @@ namespace Hmcr.Domain.Hangfire
             var rows = csv.GetRecords<RockfallReportCsvDto>().ToList();
             for (var i = 0; i < rows.Count; i++)
             {
-                rows[i].LineNumber = i + 1;
+                rows[i].RowNum = i + 1;
             }
 
             return (rows, GetHeader(text));

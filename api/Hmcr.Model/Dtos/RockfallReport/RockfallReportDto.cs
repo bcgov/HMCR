@@ -9,7 +9,7 @@ namespace Hmcr.Model.Dtos.RockfallReport
         public decimal RockfallReportId { get; set; }
         public decimal SubmissionObjectId { get; set; }
         public decimal? ValidationStatusId { get; set; }
-        public string MajorIncidentNumber { get; set; }
+        public string McrrIncidentNumber { get; set; }
         public DateTime? EstimatedRockfallDate { get; set; }
         public TimeSpan? EstimatedRockfallTime { get; set; }
         public decimal? StartLatitude { get; set; }
@@ -35,7 +35,7 @@ namespace Hmcr.Model.Dtos.RockfallReport
         public string ReporterName { get; set; }
         public string McPhoneNumber { get; set; }
         public DateTime? ReportDate { get; set; }
-        public decimal LineNumber { get; set; }
+        public decimal? RowNum { get; set; }
 
     }
 }

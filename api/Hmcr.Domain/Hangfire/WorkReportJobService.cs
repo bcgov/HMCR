@@ -149,7 +149,7 @@ namespace Hmcr.Domain.Hangfire
             foreach (var typedRow in typedRows)
             {
                 var errors = new Dictionary<string, List<string>>();
-                var submissionRow = submission.HmrSubmissionRows.First(x => x.LineNumber == typedRow.LineNumber); 
+                var submissionRow = submission.HmrSubmissionRows.First(x => x.RowNum == typedRow.RowNum); 
 
                 if (typedRow.StartDate != null && typedRow.EndDate < typedRow.StartDate)
                 {
@@ -224,14 +224,14 @@ namespace Hmcr.Domain.Hangfire
 
         private string SetRowIdAndRemoveDuplicate(HmrSubmissionObject submission, decimal duplicateStatusId, List<WorkReportCsvDto> rows, string headers)
         {
-            headers = "linenumber," + headers;
+            headers = $"{Fields.RowNum}," + headers;
             var text = new StringBuilder();
             text.AppendLine(headers);
 
             for (int i = rows.Count - 1; i >= 0; i--)
             {
                 var row = rows[i];
-                var entity = submission.HmrSubmissionRows.First(x => x.LineNumber == row.LineNumber);
+                var entity = submission.HmrSubmissionRows.First(x => x.RowNum == row.RowNum);
 
                 if (entity.RowStatusId == duplicateStatusId)
                 {
@@ -239,7 +239,7 @@ namespace Hmcr.Domain.Hangfire
                     continue;
                 }
 
-                text.AppendLine($"{row.LineNumber},{entity.RowValue}");
+                text.AppendLine($"{row.RowNum},{entity.RowValue}");
                 row.RowId = entity.RowId;
             }
 
@@ -259,7 +259,7 @@ namespace Hmcr.Domain.Hangfire
             var rows = csv.GetRecords<WorkReportCsvDto>().ToList();
             for(var i = 0; i < rows.Count; i++)
             {
-                rows[i].LineNumber = i + 1;
+                rows[i].RowNum = i + 1;
             }
 
             return (rows, GetHeader(text));

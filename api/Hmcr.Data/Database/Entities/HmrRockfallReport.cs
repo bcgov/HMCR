@@ -7,8 +7,9 @@ namespace Hmcr.Data.Database.Entities
     {
         public decimal RockfallReportId { get; set; }
         public decimal SubmissionObjectId { get; set; }
+        public decimal? RowNum { get; set; }
         public decimal? ValidationStatusId { get; set; }
-        public string MajorIncidentNumber { get; set; }
+        public string McrrIncidentNumber { get; set; }
         public DateTime? EstimatedRockfallDate { get; set; }
         public TimeSpan? EstimatedRockfallTime { get; set; }
         public decimal? StartLatitude { get; set; }
@@ -47,7 +48,6 @@ namespace Hmcr.Data.Database.Entities
         public DateTime DbAuditCreateTimestamp { get; set; }
         public string DbAuditLastUpdateUserid { get; set; }
         public DateTime DbAuditLastUpdateTimestamp { get; set; }
-        public decimal LineNumber { get; set; }
 
         public virtual HmrSubmissionObject SubmissionObject { get; set; }
         public virtual HmrSubmissionStatu ValidationStatus { get; set; }
