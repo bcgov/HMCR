@@ -2,25 +2,19 @@
 using CsvHelper.Configuration;
 using CsvHelper.TypeConversion;
 using Hmcr.Model.Utils;
-using System;
 
 namespace Hmcr.Domain.CsvHelpers
 {
-    public class DateTypeConverter : ITypeConverter
+    public class DateTypeConverter : DefaultTypeConverter
     {
-        public object ConvertFromString(string date, IReaderRow row, MemberMapData memberMapData)
+        public override object ConvertFromString(string date, IReaderRow row, MemberMapData memberMapData)
         {
             var (parsed, parsedDate) = DateUtils.ParseDate(date);
 
             if (!parsed)
-                throw new Exception($"The value [{date}] cannot be parsed into date.");
+                throw new TypeConverterException(this, memberMapData, date, (ReadingContext)row.Context, $"The value [{date}] cannot be parsed into date.");
 
             return parsedDate;
-        }
-
-        public string ConvertToString(object value, IWriterRow row, MemberMapData memberMapData)
-        {
-            throw new NotImplementedException();
         }
     }
 }
