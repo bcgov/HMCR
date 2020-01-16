@@ -6,7 +6,6 @@ namespace Hmcr.Model.Dtos.RockfallReport
 {
     public class RockfallReportDto
     {
-        public int RowNumber { get; set; }
         public decimal RockfallReportId { get; set; }
         public decimal SubmissionObjectId { get; set; }
         public decimal? ValidationStatusId { get; set; }
@@ -36,5 +35,7 @@ namespace Hmcr.Model.Dtos.RockfallReport
         public string ReporterName { get; set; }
         public string McPhoneNumber { get; set; }
         public DateTime? ReportDate { get; set; }
+        public decimal LineNumber { get; set; }
+
     }
 }

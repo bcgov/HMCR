@@ -65,7 +65,7 @@ namespace Hmcr.Domain.Hangfire
             {
                 if (errors.Count > 0)
                 {
-                    submission.ErrorDetail = errors.GetFileErrorDetail();
+                    submission.ErrorDetail = errors.GetErrorDetail();
                     submission.SubmissionStatusId = errorFileStatusId;
                     await _unitOfWork.CommitAsync();
                     return;
@@ -88,7 +88,7 @@ namespace Hmcr.Domain.Hangfire
                 if (errors.Count > 0)
                 {
                     submissionRow.RowStatusId = errorRowStatusId;
-                    submissionRow.ErrorDetail = errors.GetRowErrorDetail(untypedRow.RowNumber);
+                    submissionRow.ErrorDetail = errors.GetErrorDetail();
                     submission.ErrorDetail = FileError.ReferToRowErrors;
                     submission.SubmissionStatusId = errorFileStatusId;
                 }
@@ -127,20 +127,17 @@ namespace Hmcr.Domain.Hangfire
             var errorRowStatusId = statuses.First(x => x.StatusType == StatusType.Row && x.StatusCode == RowStatus.RowError).StatusId;
             var errorFileStatusId = statuses.First(x => x.StatusType == StatusType.File && x.StatusCode == FileStatus.DataError).StatusId;
 
-            var i = 0;
             foreach (var typedRow in typedRows)
             {
-                typedRow.RowNumber = ++i;
-
                 var errors = new Dictionary<string, List<string>>();
-                var submissionRow = submission.HmrSubmissionRows.First(x => x.RecordNumber == typedRow.RowNumber.ToString());
+                var submissionRow = submission.HmrSubmissionRows.First(x => x.LineNumber == typedRow.LineNumber);
 
                 //Geo-spatial Validation here
 
                 if (errors.Count > 0)
                 {
                     submissionRow.RowStatusId = errorRowStatusId;
-                    submissionRow.ErrorDetail = errors.GetRowErrorDetail(typedRow.RowNumber);
+                    submissionRow.ErrorDetail = errors.GetErrorDetail();
                     submission.ErrorDetail = FileError.ReferToRowErrors;
                     submission.SubmissionStatusId = errorFileStatusId;
                 }
@@ -177,15 +174,14 @@ namespace Hmcr.Domain.Hangfire
 
         private string SetRowIdAndRemoveDuplicate(HmrSubmissionObject submission, decimal duplicateStatusId, List<WildlifeReportCsvDto> rows, string headers)
         {
+            headers = "linenumber," + headers;
             var text = new StringBuilder();
             text.AppendLine(headers);
 
             for (int i = rows.Count - 1; i >= 0; i--)
             {
                 var row = rows[i];
-                row.RowNumber = i + 1;
-
-                var entity = submission.HmrSubmissionRows.First(x => x.RecordNumber == row.RowNumber.ToString());
+                var entity = submission.HmrSubmissionRows.First(x => x.LineNumber == row.LineNumber);
 
                 if (entity.RowStatusId == duplicateStatusId)
                 {
@@ -193,7 +189,7 @@ namespace Hmcr.Domain.Hangfire
                     continue;
                 }
 
-                text.AppendLine(entity.RowValue);
+                text.AppendLine($"{row.LineNumber},{entity.RowValue}");
                 row.RowId = entity.RowId;
             }
 
@@ -210,7 +206,13 @@ namespace Hmcr.Domain.Hangfire
             CsvHelperUtils.Config(errors, csv, false);
             csv.Configuration.RegisterClassMap<WildlifeReportCsvDtoMap>();
 
-            return (csv.GetRecords<WildlifeReportCsvDto>().ToList(), GetHeader(text));
+            var rows = csv.GetRecords<WildlifeReportCsvDto>().ToList();
+            for (var i = 0; i < rows.Count; i++)
+            {
+                rows[i].LineNumber = i + 1;
+            }
+
+            return (rows, GetHeader(text));
         }
 
         private string GetHeader(string text)
@@ -232,7 +234,8 @@ namespace Hmcr.Domain.Hangfire
             CsvHelperUtils.Config(errors, csv, false);
             csv.Configuration.RegisterClassMap<WildlifeReportDtoMap>();
 
-            return csv.GetRecords<WildlifeReportDto>().ToList();
+            var rows = csv.GetRecords<WildlifeReportDto>().ToList();
+            return rows;
         }
     }
 }

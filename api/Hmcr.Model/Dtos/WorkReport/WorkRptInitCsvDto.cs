@@ -9,5 +9,6 @@ namespace Hmcr.Model.Dtos.WorkReport
         public string ServiceArea { get; set; }
         public string RecordNumber { get; set; }
         public DateTime EndDate { get; set; }
+
     }
 }

@@ -77,16 +77,10 @@ namespace Hmcr.Model.Utils
             }
         }
 
-        public static string GetFileErrorDetail(this Dictionary<string, List<string>> errors)
+        public static string GetErrorDetail(this Dictionary<string, List<string>> errors)
         {
-            var fileErrorDetail = new FileErrorDetail(errors);
+            var fileErrorDetail = new ErrorDetail(errors);
             return fileErrorDetail.ToString();
-        }
-
-        public static string GetRowErrorDetail(this Dictionary<string, List<string>> errors, int rowNumber)
-        {
-            var rowErrorDetail = new RowErrorDetail(rowNumber, errors);
-            return rowErrorDetail.ToString();
         }
 
         public static bool IsIdirUser(this string str)

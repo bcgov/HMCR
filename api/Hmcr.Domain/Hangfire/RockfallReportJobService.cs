@@ -65,7 +65,7 @@ namespace Hmcr.Domain.Hangfire
             {
                 if (errors.Count > 0)
                 {
-                    submission.ErrorDetail = errors.GetFileErrorDetail();
+                    submission.ErrorDetail = errors.GetErrorDetail();
                     submission.SubmissionStatusId = errorFileStatusId;
                     await _unitOfWork.CommitAsync();
                     return;
@@ -88,7 +88,7 @@ namespace Hmcr.Domain.Hangfire
                 if (errors.Count > 0)
                 {
                     submissionRow.RowStatusId = errorRowStatusId;
-                    submissionRow.ErrorDetail = errors.GetRowErrorDetail(untypedRow.RowNumber);
+                    submissionRow.ErrorDetail = errors.GetErrorDetail();
                     submission.ErrorDetail = FileError.ReferToRowErrors;
                     submission.SubmissionStatusId = errorFileStatusId;
                 }
@@ -129,12 +129,11 @@ namespace Hmcr.Domain.Hangfire
 
             foreach (var typedRow in typedRows)
             {
-                var untypedRow = untypedRows.First(x => x.MajorIncidentNumber == typedRow.MajorIncidentNumber);
-
-                typedRow.RowNumber = untypedRow.RowNumber;
+                var untypedRow = untypedRows.First(x => x.LineNumber == typedRow.LineNumber);
+                typedRow.LineNumber = untypedRow.LineNumber;
 
                 var errors = new Dictionary<string, List<string>>();
-                var submissionRow = submission.HmrSubmissionRows.First(x => x.RecordNumber == typedRow.MajorIncidentNumber);
+                var submissionRow = submission.HmrSubmissionRows.First(x => x.LineNumber == typedRow.LineNumber);
 
                 if (typedRow.StartOffset != null && typedRow.EndOffset < typedRow.StartOffset)
                 {
@@ -146,7 +145,7 @@ namespace Hmcr.Domain.Hangfire
                 if (errors.Count > 0)
                 {
                     submissionRow.RowStatusId = errorRowStatusId;
-                    submissionRow.ErrorDetail = errors.GetRowErrorDetail(typedRow.RowNumber);
+                    submissionRow.ErrorDetail = errors.GetErrorDetail();
                     submission.ErrorDetail = FileError.ReferToRowErrors;
                     submission.SubmissionStatusId = errorFileStatusId;
                 }
@@ -183,15 +182,14 @@ namespace Hmcr.Domain.Hangfire
 
         private string SetRowIdAndRemoveDuplicate(HmrSubmissionObject submission, decimal duplicateStatusId, List<RockfallReportCsvDto> rows, string headers)
         {
+            headers = "linenumber," + headers;
             var text = new StringBuilder();
             text.AppendLine(headers);
 
             for (int i = rows.Count - 1; i >= 0; i--)
             {
                 var row = rows[i];
-                row.RowNumber = i + 1;
-
-                var entity = submission.HmrSubmissionRows.First(x => x.RecordNumber == row.MajorIncidentNumber);
+                var entity = submission.HmrSubmissionRows.First(x => x.LineNumber == row.LineNumber);
 
                 if (entity.RowStatusId == duplicateStatusId)
                 {
@@ -199,7 +197,7 @@ namespace Hmcr.Domain.Hangfire
                     continue;
                 }
 
-                text.AppendLine(entity.RowValue);
+                text.AppendLine($"{row.LineNumber},{entity.RowValue}");
                 row.RowId = entity.RowId;
             }
 
@@ -216,7 +214,13 @@ namespace Hmcr.Domain.Hangfire
             CsvHelperUtils.Config(errors, csv, false);
             csv.Configuration.RegisterClassMap<RockfallReportCsvDtoMap>();
 
-            return (csv.GetRecords<RockfallReportCsvDto>().ToList(), GetHeader(text));
+            var rows = csv.GetRecords<RockfallReportCsvDto>().ToList();
+            for (var i = 0; i < rows.Count; i++)
+            {
+                rows[i].LineNumber = i + 1;
+            }
+
+            return (rows, GetHeader(text));
         }
 
         private string GetHeader(string text)
@@ -238,7 +242,8 @@ namespace Hmcr.Domain.Hangfire
             CsvHelperUtils.Config(errors, csv, false);
             csv.Configuration.RegisterClassMap<RockfallReportDtoMap>();
 
-            return csv.GetRecords<RockfallReportDto>().ToList();
+            var rows = csv.GetRecords<RockfallReportDto>().ToList();
+            return rows;
         }
     }
 }

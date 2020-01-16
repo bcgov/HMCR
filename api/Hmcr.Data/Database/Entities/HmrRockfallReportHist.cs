@@ -50,5 +50,6 @@ namespace Hmcr.Data.Database.Entities
         public DateTime DbAuditCreateTimestamp { get; set; }
         public string DbAuditLastUpdateUserid { get; set; }
         public DateTime DbAuditLastUpdateTimestamp { get; set; }
+        public decimal LineNumber { get; set; }
     }
 }

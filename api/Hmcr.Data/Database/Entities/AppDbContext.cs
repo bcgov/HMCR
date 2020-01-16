@@ -63,6 +63,15 @@ namespace Hmcr.Data.Database.Entities
         public virtual DbSet<HmrWorkReport> HmrWorkReports { get; set; }
         public virtual DbSet<HmrWorkReportHist> HmrWorkReportHists { get; set; }
 
+        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        {
+            if (!optionsBuilder.IsConfigured)
+            {
+#warning To protect potentially sensitive information in your connection string, you should move it out of source code. See http://go.microsoft.com/fwlink/?LinkId=723263 for guidance on storing connection strings.
+                optionsBuilder.UseSqlServer("Data Source=localhost;Initial Catalog=HMR_DEV;Trusted_Connection=True;");
+            }
+        }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<HmrActivityCode>(entity =>
@@ -2057,6 +2066,10 @@ This is a value in the in the format: [Service Area]-[area manager area]-[subare
                     .HasComment(@"This field needed for location reference:
 Landmarks provided should be those listed in the CHRIS HRP report for each Highway or road within the Service Area");
 
+                entity.Property(e => e.LineNumber)
+                    .HasColumnName("LINE_NUMBER")
+                    .HasColumnType("numeric(9, 0)");
+
                 entity.Property(e => e.LocationDescription)
                     .HasColumnName("LOCATION_DESCRIPTION")
                     .HasMaxLength(4000)
@@ -2293,6 +2306,10 @@ Offset from beginning of segment.");
                     .HasColumnName("LANDMARK")
                     .HasMaxLength(8)
                     .IsUnicode(false);
+
+                entity.Property(e => e.LineNumber)
+                    .HasColumnName("LINE_NUMBER")
+                    .HasColumnType("numeric(9, 0)");
 
                 entity.Property(e => e.LocationDescription)
                     .HasColumnName("LOCATION_DESCRIPTION")
@@ -3780,6 +3797,10 @@ Offset from beginning of segment.");
                     .IsUnicode(false)
                     .HasComment("Error descriptions applicable to a submission row validation error (eg: submitted value is not within a required range).");
 
+                entity.Property(e => e.LineNumber)
+                    .HasColumnName("LINE_NUMBER")
+                    .HasColumnType("numeric(9, 0)");
+
                 entity.Property(e => e.RecordNumber)
                     .HasColumnName("RECORD_NUMBER")
                     .HasMaxLength(8)
@@ -3907,6 +3928,10 @@ This is uniquely identifies each record submission for a contractor.
                     .HasColumnName("ERROR_DETAIL")
                     .HasMaxLength(4000)
                     .IsUnicode(false);
+
+                entity.Property(e => e.LineNumber)
+                    .HasColumnName("LINE_NUMBER")
+                    .HasColumnType("numeric(9, 0)");
 
                 entity.Property(e => e.RecordNumber)
                     .HasColumnName("RECORD_NUMBER")
@@ -5063,6 +5088,10 @@ This reference number reflects a valid reference in the road network (currenltyR
                     .HasComment(@"The Y (northing) portion of the accident coordinate. Coordinate is to be reported using the WGS84 datum.
 ");
 
+                entity.Property(e => e.LineNumber)
+                    .HasColumnName("LINE_NUMBER")
+                    .HasColumnType("numeric(9, 0)");
+
                 entity.Property(e => e.Longitude)
                     .HasColumnName("LONGITUDE")
                     .HasColumnType("numeric(11, 6)")
@@ -5257,6 +5286,10 @@ Offset from beginning of segment.");
                 entity.Property(e => e.Latitude)
                     .HasColumnName("LATITUDE")
                     .HasColumnType("numeric(18, 0)");
+
+                entity.Property(e => e.LineNumber)
+                    .HasColumnName("LINE_NUMBER")
+                    .HasColumnType("numeric(9, 0)");
 
                 entity.Property(e => e.Longitude)
                     .HasColumnName("LONGITUDE")
@@ -5475,6 +5508,10 @@ This should be a value found in RFI (CHRIS)");
                     .IsUnicode(false)
                     .HasComment(@"This field needed for location reference:
 Landmarks provided should be those listed in the CHRIS HRP report for each Highway or road within the Service Area");
+
+                entity.Property(e => e.LineNumber)
+                    .HasColumnName("LINE_NUMBER")
+                    .HasColumnType("numeric(9, 0)");
 
                 entity.Property(e => e.PostedDate)
                     .HasColumnName("POSTED_DATE")
@@ -5718,6 +5755,10 @@ Is only applicable at defined BSR structures.  BSR structures include; bridges, 
                     .HasColumnName("LANDMARK")
                     .HasMaxLength(8)
                     .IsUnicode(false);
+
+                entity.Property(e => e.LineNumber)
+                    .HasColumnName("LINE_NUMBER")
+                    .HasColumnType("numeric(9, 0)");
 
                 entity.Property(e => e.PostedDate)
                     .HasColumnName("POSTED_DATE")

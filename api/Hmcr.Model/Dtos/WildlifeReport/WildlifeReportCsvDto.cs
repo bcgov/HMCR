@@ -3,8 +3,6 @@
     public class WildlifeReportCsvDto
     {
         public decimal RowId { get; set; }
-        public int RowNumber { get; set; }
-
         public string RecordType { get; set; }
         public string ServiceArea { get; set; }
         public string AccidentDate { get; set; }
@@ -21,6 +19,7 @@
         public string Sex { get; set; }
         public string Age { get; set; }
         public string Comment { get; set; }
+        public decimal LineNumber { get; set; }
 
     }
 }

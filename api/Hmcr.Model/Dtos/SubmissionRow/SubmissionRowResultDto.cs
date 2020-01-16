@@ -14,7 +14,8 @@ namespace Hmcr.Model.Dtos.SubmissionRow
         public string Description { get; set; }
         public string RecordNumber { get; set; }
         public string RowValue { get; set; }
-        public string ErrorDetail { get; set; }  
-        public int RowNumber { get; set; }
+        public string ErrorDetail { get; set; }
+        public decimal LineNumber { get; set; }
+
     }
 }
