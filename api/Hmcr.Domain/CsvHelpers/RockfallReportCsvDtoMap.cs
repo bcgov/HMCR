@@ -10,7 +10,6 @@ namespace Hmcr.Domain.CsvHelpers
         {
             AutoMap();
             Map(m => m.ReportDate).TypeConverter<DateTypeConverter>();
-            Map(m => m.MajorIncidentNumber).Name(Fields.McrrIncidentNumber.ToLower());
         }
     }
 
@@ -19,7 +18,6 @@ namespace Hmcr.Domain.CsvHelpers
         public RockfallReportCsvDtoMap()
         {
             AutoMap();
-            Map(m => m.MajorIncidentNumber).Name(Fields.McrrIncidentNumber.ToLower());
         }
     }
 
@@ -31,7 +29,6 @@ namespace Hmcr.Domain.CsvHelpers
             Map(m => m.ReportDate).TypeConverter<DateTypeConverter>();
             Map(m => m.EstimatedRockfallDate).TypeConverter<DateTypeConverter>();
             Map(m => m.McPhoneNumber).TypeConverter<PhoneNumberConverter>();
-            Map(m => m.MajorIncidentNumber).Name(Fields.McrrIncidentNumber.ToLower());
             Map(m => m.ReporterName).Name(Fields.Name.ToLower());
         }
     }

@@ -36,7 +36,7 @@ namespace Hmcr.Domain.Services
         {
             TableName = TableNames.RockfallReport;
             HasRowIdentifier = true;
-            RecordNumberFieldName = "MajorIncidentNumber";
+            RecordNumberFieldName = Fields.McrrIncidentNumber;
         }
 
         protected override async Task<bool> ParseRowsAsync(SubmissionObjectCreateDto submission, string text, Dictionary<string, List<string>> errors)
@@ -65,12 +65,12 @@ namespace Hmcr.Domain.Services
 
                 submission.SubmissionRows.Add(new SubmissionRowDto
                 {
-                    RecordNumber = row.MajorIncidentNumber,
+                    RecordNumber = row.McrrIncidentNumber,
                     RowValue = line,
                     RowHash = line.GetSha256Hash(),
                     RowStatusId = await _statusRepo.GetStatusIdByTypeAndCodeAsync(StatusType.Row, RowStatus.RowReceived),
                     EndDate = (DateTime)row.ReportDate,
-                    LineNumber = csv.Context.Row - 1
+                    RowNum = csv.Context.Row - 1
                 });
             }
 
