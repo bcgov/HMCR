@@ -1,4 +1,5 @@
 ﻿using CsvHelper;
+using CsvHelper.TypeConversion;
 using Hmcr.Data.Database;
 using Hmcr.Data.Database.Entities;
 using Hmcr.Data.Repositories;
@@ -10,6 +11,7 @@ using Hmcr.Model.Dtos.SubmissionObject;
 using Hmcr.Model.Dtos.SubmissionRow;
 using Hmcr.Model.Dtos.WorkReport;
 using Hmcr.Model.Utils;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -26,14 +28,17 @@ namespace Hmcr.Domain.Services
     }
     public class WorkReportService : ReportServiceBase, IWorkReportService
     {
+        private ILogger<WorkReportService> _logger;
+
         public WorkReportService(IUnitOfWork unitOfWork, 
             ISubmissionStreamService streamService, ISubmissionObjectRepository submissionRepo, ISumbissionRowRepository rowRepo, 
-            IContractTermRepository contractRepo, ISubmissionStatusRepository statusRepo) 
+            IContractTermRepository contractRepo, ISubmissionStatusRepository statusRepo, ILogger<WorkReportService> logger) 
             : base(unitOfWork, streamService, submissionRepo, rowRepo, contractRepo, statusRepo)
         {
             TableName = TableNames.WorkReport;
             HasRowIdentifier = true;
             RecordNumberFieldName = "RecordNumber";
+            _logger = logger;
         }
 
         protected override async Task<bool> ParseRowsAsync(SubmissionObjectCreateDto submission, string text, Dictionary<string, List<string>> errors)
@@ -52,9 +57,19 @@ namespace Hmcr.Domain.Services
                 {
                     row = csv.GetRecord<WorkRptInitCsvDto>();
                 }
-                catch (CsvHelperException)
+                catch (TypeConverterException ex)
+                {
+                    errors.AddItem(ex.MemberMapData.Member.Name, ex.Message);
+                    break;
+                }
+                catch (CsvHelperException ex)
                 {
                     break;
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex.ToString());
+                    throw;
                 }
 
                 if (row.ServiceArea != submission.ServiceAreaNumber.ToString())

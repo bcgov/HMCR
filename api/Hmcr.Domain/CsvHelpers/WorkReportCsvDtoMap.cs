@@ -1,5 +1,7 @@
 ﻿using CsvHelper.Configuration;
+using CsvHelper.TypeConversion;
 using Hmcr.Model.Dtos.WorkReport;
+using Hmcr.Model.Utils;
 
 namespace Hmcr.Domain.CsvHelpers
 {
@@ -8,7 +10,8 @@ namespace Hmcr.Domain.CsvHelpers
         public WorkRptInitCsvDtoMap()
         {
             AutoMap();
-            Map(m => m.EndDate).TypeConverter<DateTypeConverter>();
+            Map(m => m.EndDate)
+                .TypeConverter<DateTypeConverter>();
         }
     }
 

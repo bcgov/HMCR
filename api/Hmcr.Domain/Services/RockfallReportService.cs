@@ -1,5 +1,6 @@
 ﻿using CsvHelper;
 using CsvHelper.Configuration;
+using CsvHelper.TypeConversion;
 using Hmcr.Data.Database;
 using Hmcr.Data.Repositories;
 using Hmcr.Domain.CsvHelpers;
@@ -9,6 +10,7 @@ using Hmcr.Model.Dtos.RockfallReport;
 using Hmcr.Model.Dtos.SubmissionObject;
 using Hmcr.Model.Dtos.SubmissionRow;
 using Hmcr.Model.Utils;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -28,15 +30,17 @@ namespace Hmcr.Domain.Services
     }
     public class RockfallReportService : ReportServiceBase, IRockfallReportService
     {
+        private ILogger<RockfallReportService> _logger;
 
         public RockfallReportService(IUnitOfWork unitOfWork, 
             ISubmissionStreamService streamService, ISubmissionObjectRepository submissionRepo, ISumbissionRowRepository rowRepo,
-            IContractTermRepository contractRepo, ISubmissionStatusRepository statusRepo)
+            IContractTermRepository contractRepo, ISubmissionStatusRepository statusRepo, ILogger<RockfallReportService> logger)
             : base(unitOfWork, streamService, submissionRepo, rowRepo, contractRepo, statusRepo)
         {
             TableName = TableNames.RockfallReport;
             HasRowIdentifier = true;
             RecordNumberFieldName = Fields.McrrIncidentNumber;
+            _logger = logger;
         }
 
         protected override async Task<bool> ParseRowsAsync(SubmissionObjectCreateDto submission, string text, Dictionary<string, List<string>> errors)
@@ -56,9 +60,19 @@ namespace Hmcr.Domain.Services
                 {
                     row = csv.GetRecord<RockfallRptInitCsvDto>();
                 }
-                catch (CsvHelperException)
+                catch (TypeConverterException ex)
+                {
+                    errors.AddItem(ex.MemberMapData.Member.Name, ex.Message);
+                    break;
+                }
+                catch (CsvHelperException ex)
                 {
                     break;
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex.ToString());
+                    throw;
                 }
 
                 var line = csv.Context.RawRecord.RemoveLineBreak();
