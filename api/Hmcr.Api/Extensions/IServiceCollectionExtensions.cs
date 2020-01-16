@@ -191,7 +191,7 @@ namespace Hmcr.Api.Extensions
 
             services.AddHangfireServer(options =>
             {
-                options.WorkerCount = Environment.ProcessorCount * 3;
+                options.WorkerCount = 3;
             });
         }
     }

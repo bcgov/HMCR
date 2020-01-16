@@ -288,3 +288,5 @@ __pycache__/
 
 # Ignore Serilog files
 log*.txt
+
+.env.local
