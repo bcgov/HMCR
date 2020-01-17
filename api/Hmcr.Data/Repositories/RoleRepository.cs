@@ -21,6 +21,7 @@ namespace Hmcr.Data.Repositories
         Task UpdateRoleAsync(RoleUpdateDto role);
         Task DeleteRoleAsync(RoleDeleteDto role);
         Task<bool> DoesNameExistAsync(string name);
+        IAsyncEnumerable<RoleDto> FindInternalOnlyRolesAsync(IEnumerable<decimal> roleIds);
     }
     public class RoleRepository : HmcrRepositoryBase<HmrRole>, IRoleRepository
     {
@@ -159,5 +160,15 @@ namespace Hmcr.Data.Repositories
             return await DbSet.AnyAsync(x => x.Name == name);
         }
 
+        public async IAsyncEnumerable<RoleDto> FindInternalOnlyRolesAsync(IEnumerable<decimal> roleIds)
+        {
+            foreach (var roleId in roleIds)
+            {
+                var role = await GetByIdAsync<RoleDto>(roleId);
+
+                if (role.IsInternal == "Y")
+                    yield return role;
+            }
+        }
     }
 }

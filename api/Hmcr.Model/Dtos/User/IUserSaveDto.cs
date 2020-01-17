@@ -6,6 +6,7 @@ namespace Hmcr.Model.Dtos.User
 {
     public interface IUserSaveDto
     {
+        public string UserType { get; set; }
         IList<decimal> ServiceAreaNumbers { get; set; }
         IList<decimal> UserRoleIds { get; set; }
     }
