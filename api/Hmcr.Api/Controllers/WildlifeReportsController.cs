@@ -44,7 +44,7 @@ namespace Hmcr.Api.Controllers
             return CreatedAtRoute("GetSubmissionObject", new { id = SubmissionObjectId }, await _submissionService.GetSubmissionObjectAsync(SubmissionObjectId));
         }
 
-        [HttpPost("duplicates")]
+        [HttpPost("resubmissions")]
         [RequiresPermission(Permissions.FileUploadWrite)]
         public ActionResult<List<string>> CheckResubmit([FromForm] FileUploadDto upload)
         {
