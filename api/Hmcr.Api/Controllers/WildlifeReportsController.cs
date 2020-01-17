@@ -46,7 +46,7 @@ namespace Hmcr.Api.Controllers
 
         [HttpPost("duplicates")]
         [RequiresPermission(Permissions.FileUploadWrite)]
-        public ActionResult<List<string>> CheckDuplicate([FromForm] FileUploadDto upload)
+        public ActionResult<List<string>> CheckResubmit([FromForm] FileUploadDto upload)
         {
             var problem = IsServiceAreaAuthorized(_currentUser, upload.ServiceAreaNumber);
             if (problem != null)

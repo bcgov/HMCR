@@ -14,6 +14,7 @@ namespace Hmcr.Model.Dtos.SubmissionRow
         public string RowHash { get; set; }
         public string ErrorDetail { get; set; }
         public decimal? RowNum { get; set; }
+        public string IsResubmitted { get; set; }
 
         //this filed doesn't exist in the entity.
         public DateTime EndDate { get; set; }
