@@ -51,7 +51,6 @@ namespace Hmcr.Domain.Services
             CsvHelperUtils.Config(errors, csv);
             csv.Configuration.RegisterClassMap<RockfallRptInitCsvDtoMap>();
 
-            var i = 0;
             while (csv.Read())
             {
                 RockfallRptInitCsvDto row = null;
@@ -65,7 +64,7 @@ namespace Hmcr.Domain.Services
                     errors.AddItem(ex.MemberMapData.Member.Name, ex.Message);
                     break;
                 }
-                catch (CsvHelperException ex)
+                catch (CsvHelperException)
                 {
                     break;
                 }

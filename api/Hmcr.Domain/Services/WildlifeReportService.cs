@@ -55,7 +55,7 @@ namespace Hmcr.Domain.Services
                     errors.AddItem(ex.MemberMapData.Member.Name, ex.Message);
                     break;
                 }
-                catch (CsvHelperException ex)
+                catch (CsvHelperException)
                 {
                     break;
                 }

@@ -21,14 +21,14 @@ namespace Hmcr.Data.Repositories
     public interface IUserRepository : IHmcrRepositoryBase<HmrSystemUser>
     {
         Task<UserCurrentDto> GetCurrentUserAsync();
-        Task<HmrSystemUser> GetCurrentActiveUserEntityAsync();
-        void ProcessFirstUserLogin(BceidAccount account);
         Task<PagedDto<UserSearchDto>> GetUsersAsync(decimal[]? serviceAreas, string[]? userTypes, string searchText, bool? isActive, int pageSize, int pageNumber, string orderBy);
         Task<UserDto> GetUserAsync(decimal systemUserId);
-        Task<HmrSystemUser> CreateUserAsync(UserCreateDto user);
+        Task<HmrSystemUser> CreateUserAsync(UserCreateDto user, BceidAccount account);
         Task<bool> DoesUsernameExistAsync(string username, string userType);
         Task UpdateUserAsync(UserUpdateDto userDto);
         Task DeleteUserAsync(UserDeleteDto user);
+        Task<HmrSystemUser> GetActiveUserEntityAsync(Guid userGuid);
+        void SaveUsernameChange(Guid userGuid, string newUserId, string oldUserId);
     }
 
     public class UserRepository : HmcrRepositoryBase<HmrSystemUser>, IUserRepository
@@ -80,57 +80,15 @@ namespace Hmcr.Data.Repositories
             return currentUser;
         }
 
-        public async Task<HmrSystemUser> GetCurrentActiveUserEntityAsync()
+        public async Task<HmrSystemUser> GetActiveUserEntityAsync(Guid userGuid)
         {
-            return await DbSet.FirstOrDefaultAsync(u => u.Username == _currentUser.UserName && (u.EndDate == null || u.EndDate > DateTime.Today)); //todo: change username to userguid
+            return await DbSet.Include(x => x.Party).FirstOrDefaultAsync(u => u.UserGuid == userGuid && (u.EndDate == null || u.EndDate > DateTime.Today));
         }
 
-        /// <summary>
-        /// This method is self-committing
-        /// </summary>
-        public void ProcessFirstUserLogin(BceidAccount account)
+        public void SaveUsernameChange(Guid userGuid, string newUserId, string oldUserId)
         {
-            using var transaction = DbContext.Database.BeginTransaction(IsolationLevel.Serializable);
-
-            DbContext.Database.ExecuteSqlInterpolated($"SELECT 1 FROM HMR_SYSTEM_USER WITH(XLOCK, ROWLOCK) WHERE USERNAME = {account.Username}");
-
-            var userEntity = DbSet.First(u => u.Username == account.Username); //todo: replace it with guid after user managment workflow has changed
-
-            if (userEntity.UserGuid == null)
-            {
-                userEntity.Username = account.Username;
-                userEntity.UserGuid = account.UserGuid;
-                userEntity.BusinessGuid = account.BusinessGuid;
-                userEntity.BusinessLegalName = account.BusinessLegalName;
-                userEntity.UserType = account.UserType;
-                userEntity.FirstName = account.FirstName;
-                userEntity.LastName = account.LastName;
-                userEntity.Email = account.Email;
-
-                if (account.UserType == UserTypeDto.INTERNAL)
-                {
-                    DbContext.SaveChanges();
-                    transaction.Commit();
-                    return;
-                }
-
-                var partyEntity = _partyRepo.GetPartyEntityByGuid(account.BusinessGuid);
-
-                if (partyEntity == null)
-                {
-                    userEntity.Party = new HmrParty
-                    {
-                        BusinessGuid = account.BusinessGuid,
-                        BusinessLegalName = account.BusinessLegalName.Trim(),
-                        BusinessNumber = account.BusinessNumber,
-                        DisplayName = account.BusinessLegalName.Trim()
-                    };
-                }
-
-                DbContext.SaveChanges();
-            }
-
-            transaction.Commit();
+            DbContext.Database.ExecuteSqlInterpolated(
+                $"UPDATE HMR_SYSTEM_USER SET USERNAME = {newUserId}, CONCURRENCY_CONTROL_NUMBER = CONCURRENCY_CONTROL_NUMBER + 1 WHERE USER_GUID = {userGuid} AND USERNAME = {oldUserId} ");
         }
 
         public async Task<PagedDto<UserSearchDto>> GetUsersAsync(decimal[]? serviceAreas, string[]? userTypes, string searchText, bool? isActive, int pageSize, int pageNumber, string orderBy)
@@ -197,8 +155,6 @@ namespace Hmcr.Data.Repositories
 
             var user = Mapper.Map<UserDto>(userEntity);
 
-            user.HasLogInHistory = userEntity.UserGuid != null;
-
             var roleIds =
                 userEntity
                 .HmrUserRoles
@@ -224,9 +180,37 @@ namespace Hmcr.Data.Repositories
             return await DbSet.AnyAsync(u => u.Username == username && u.UserType == userType);
         }
 
-        public async Task<HmrSystemUser> CreateUserAsync(UserCreateDto user)
+        public async Task<HmrSystemUser> CreateUserAsync(UserCreateDto user, BceidAccount account)
         {
-            var userEntity = await AddAsync(user);
+            var userEntity = new HmrSystemUser
+            {
+                Username = account.Username.ToUpperInvariant(),
+                UserGuid = account.UserGuid,
+                BusinessGuid = account.BusinessGuid,
+                BusinessLegalName = account.BusinessLegalName,
+                UserType = account.UserType,
+                FirstName = account.FirstName,
+                LastName = account.LastName,
+                Email = account.Email,
+                EndDate = user.EndDate,
+                UserDirectory = user.UserDirectory
+            };
+
+            if (account.UserType != UserTypeDto.INTERNAL)
+            {
+                var partyEntity = _partyRepo.GetPartyEntityByGuid(account.BusinessGuid);
+
+                if (partyEntity == null)
+                {
+                    userEntity.Party = new HmrParty
+                    {
+                        BusinessGuid = account.BusinessGuid,
+                        BusinessLegalName = account.BusinessLegalName.Trim(),
+                        BusinessNumber = account.BusinessNumber,
+                        DisplayName = account.BusinessLegalName.Trim()
+                    };
+                }
+            }
 
             foreach (var areaNumber in user.ServiceAreaNumbers)
             {
@@ -245,6 +229,8 @@ namespace Hmcr.Data.Repositories
                         RoleId = roleId
                     }); ;
             }
+
+            await DbSet.AddAsync(userEntity);
 
             return userEntity;
         }

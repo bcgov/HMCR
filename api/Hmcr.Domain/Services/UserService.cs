@@ -18,13 +18,14 @@ namespace Hmcr.Domain.Services
     public interface IUserService
     {
         Task<UserCurrentDto> GetCurrentUserAsync();
-        Task<bool> ValidateUserLoginAsync();
         Task<PagedDto<UserSearchDto>> GetUsersAsync(decimal[]? serviceAreas, string[]? userTypes, string searchText, bool? isActive, int pageSize, int pageNumber, string orderBy);
         Task<UserDto> GetUserAsync(decimal systemUserId);
         Task<UserBceidAccountDto> GetBceidAccountAsync(string username, string userType);
         Task<(decimal SystemUserId, Dictionary<string, List<string>> Errors)> CreateUserAsync(UserCreateDto user);
         Task<(bool NotFound, Dictionary<string, List<string>> Errors)> UpdateUserAsync(UserUpdateDto user);
         Task<(bool NotFound, Dictionary<string, List<string>> Errors)> DeleteUserAsync(UserDeleteDto user);
+        Task<HmrSystemUser> GetActiveUserEntityAsync(Guid userGuid);
+        void SaveUsernameChange(Guid userGuid, string newUserId, string oldUserId);
     }
     public class UserService : IUserService
     {
@@ -57,38 +58,9 @@ namespace Hmcr.Domain.Services
             return await _userRepo.GetCurrentUserAsync();
         }
 
-        //todo: allow same username for different userType
-        public async Task<bool> ValidateUserLoginAsync()
+        public async Task<HmrSystemUser> GetActiveUserEntityAsync(Guid userGuid)
         {
-            var userEntity = await _userRepo.GetCurrentActiveUserEntityAsync();
-
-            if (userEntity == null)
-            {
-                return false;
-            }
-
-            if (userEntity.UserGuid == null)
-            {
-                if (userEntity.UserType == _currentUser.UserType)
-                {
-                    var (error, account) = await _bceid.GetBceidAccountCachedAsync(_currentUser.UserName, _currentUser.UserType);
-
-                    if (string.IsNullOrEmpty(error))
-                    {
-                        _userRepo.ProcessFirstUserLogin(account);
-                    }
-                }
-                else if(userEntity.UserType != _currentUser.UserType)
-                {
-                    throw new HmcrException($"User[{_currentUser.UniversalId}] exists in the user table with a wrong user type [{_currentUser.UserType}].");
-                }
-            }
-            else if (userEntity.UserGuid != _currentUser.UserGuid)
-            {
-                throw new HmcrException($"User[{_currentUser.UniversalId}] exists in the user table with a wrong User Guid. Login UserGuid: [{_currentUser.UserGuid}] Registered UserGuid: [{userEntity.UserGuid}].");
-            }
-
-            return true;
+            return await _userRepo.GetActiveUserEntityAsync(userGuid);
         }
 
         public async Task<PagedDto<UserSearchDto>> GetUsersAsync(decimal[]? serviceAreas, string[]? userTypes, string searchText, bool? isActive, int pageSize, int pageNumber, string orderBy)
@@ -117,12 +89,9 @@ namespace Hmcr.Domain.Services
         {
             var errors = await ValidateUserDtoAsync(user);
 
-            if (user.Username.IsNotEmpty())
+            if (await _userRepo.DoesUsernameExistAsync(user.Username, user.UserType))
             {
-                if (await _userRepo.DoesUsernameExistAsync(user.Username, user.UserType))
-                {
-                    errors.AddItem(Fields.Username, $"Username [{user.Username} ({user.UserType})] already exists.");
-                }
+                errors.AddItem(Fields.Username, $"Username [{user.Username} ({user.UserType})] already exists.");
             }
 
             if (errors.Count > 0)
@@ -130,20 +99,15 @@ namespace Hmcr.Domain.Services
                 return (0, errors);
             }
 
-            var userEntity = await _userRepo.CreateUserAsync(user);
-
-            await _unitOfWork.CommitAsync();
-
             var (error, account) = await _bceid.GetBceidAccountCachedAsync(user.Username, user.UserType);
 
-            if (string.IsNullOrEmpty(error))
-            {
-                _userRepo.ProcessFirstUserLogin(account);
-            }
-            else
+            if (error.IsNotEmpty())
             {
                 throw new HmcrException($"Unable to retrieve User[{user.Username} ({user.UserType})] from BCeID Service.");
             }
+
+            var userEntity = await _userRepo.CreateUserAsync(user, account);
+            await _unitOfWork.CommitAsync();
 
             return (userEntity.SystemUserId, errors);
         }
@@ -159,26 +123,12 @@ namespace Hmcr.Domain.Services
 
             var errors = await ValidateUserDtoAsync(user);
 
-            if (userFromDb.HasLogInHistory)
-            {
-                ValidateUserWithLoginHistory(user, userFromDb, errors);
-            }
-
-            if (user.Username != userFromDb.Username)
-            {
-                if (await _userRepo.DoesUsernameExistAsync(user.Username, user.UserType))
-                {
-                    errors.AddItem(Fields.Username, $"Username [{user.Username} ({user.UserType})] already exists.");
-                }
-            }
-
             if (errors.Count > 0)
             {
                 return (false, errors);
             }
 
             await _userRepo.UpdateUserAsync(user);
-
             await _unitOfWork.CommitAsync();
 
             return (false, errors);
@@ -203,35 +153,15 @@ namespace Hmcr.Domain.Services
                 errors.AddItem(Fields.RoleId, $"Some of the user's role IDs are invalid or inactive.");
             }
 
+            if (user.UserType != UserTypeDto.INTERNAL)
+            {
+                await foreach(var role in _roleRepo.FindInternalOnlyRolesAsync(user.UserRoleIds))
+                {
+                    errors.AddItem(Fields.RoleId, $"{role.Description} cannot be assigned to business user");
+                }
+            }
+
             return errors;
-        }
-
-        private void ValidateUserWithLoginHistory(UserUpdateDto user, UserDto userFromDb, Dictionary<string, List<string>> errors)
-        {
-            if (user.UserType != userFromDb.UserType)
-            {
-                errors.AddItem(Fields.UserType, $"The {Fields.UserType} field cannot be changed because the user has log-in history.");
-            }
-
-            if (user.UserDirectory != userFromDb.UserDirectory)
-            {
-                errors.AddItem(Fields.UserDirectory, $"The {Fields.UserDirectory} field cannot be changed because the user has log-in history.");
-            }
-
-            if (user.Username != userFromDb.Username)
-            {
-                errors.AddItem(Fields.Username, $"The {Fields.Username} field cannot be changed because the user has log-in history.");
-            }
-
-            if (user.FirstName != userFromDb.FirstName)
-            {
-                errors.AddItem(Fields.FirstName, $"The {Fields.FirstName} field cannot be changed because the user has log-in history.");
-            }
-
-            if (user.LastName != userFromDb.LastName)
-            {
-                errors.AddItem(Fields.LastName, $"The {Fields.LastName} field cannot be changed because the user has log-in history.");
-            }
         }
 
         public async Task<(bool NotFound, Dictionary<string, List<string>> Errors)> DeleteUserAsync(UserDeleteDto user)
@@ -258,6 +188,11 @@ namespace Hmcr.Domain.Services
             await _unitOfWork.CommitAsync();
 
             return (false, errors);
+        }
+
+        public void SaveUsernameChange(Guid userGuid, string newUserId, string oldUserId)
+        {
+            _userRepo.SaveUsernameChange(userGuid, newUserId, oldUserId);
         }
     }
 }
