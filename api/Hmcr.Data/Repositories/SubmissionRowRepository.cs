@@ -13,7 +13,7 @@ namespace Hmcr.Data.Repositories
     {
         IAsyncEnumerable<SubmissionRowDto> FindDuplicateFromLatestRecordsAsync(decimal submissionStreamId, decimal partyId, IEnumerable<SubmissionRowDto> rows);
         IAsyncEnumerable<SubmissionRowDto> FindDuplicateFromAllRecordsAsync(decimal submissionStreamId, IEnumerable<SubmissionRowDto> rows);
-        IAsyncEnumerable<string> FindDuplicateRowsToOverwriteAsync(decimal submissionStreamId, decimal partyId, IEnumerable<SubmissionRowDto> rows);
+        IAsyncEnumerable<string> UpdateIsResubmitAsync(decimal submissionStreamId, decimal partyId, IEnumerable<SubmissionRowDto> rows);
     }
     public class SubmissionRowRepository : HmcrRepositoryBase<HmrSubmissionRow>, ISumbissionRowRepository
     {
@@ -57,7 +57,7 @@ namespace Hmcr.Data.Repositories
             }
         }
 
-        public async IAsyncEnumerable<string> FindDuplicateRowsToOverwriteAsync(decimal submissionStreamId, decimal partyId, IEnumerable<SubmissionRowDto> rows)
+        public async IAsyncEnumerable<string> UpdateIsResubmitAsync(decimal submissionStreamId, decimal partyId, IEnumerable<SubmissionRowDto> rows)
         {
             var duplicate = await _statusRepo.GetStatusIdByTypeAndCodeAsync(StatusType.Row, RowStatus.DuplicateRow);
 
@@ -72,7 +72,10 @@ namespace Hmcr.Data.Repositories
                     .FirstOrDefaultAsync();
                 
                 if (latestRow != null && latestRow.RowHash != row.RowHash)
+                {
+                    row.IsResubmitted = "Y";
                     yield return row.RecordNumber;
+                }
             }
         }
     }

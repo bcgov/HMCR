@@ -44,9 +44,9 @@ namespace Hmcr.Api.Controllers
             return CreatedAtRoute("GetSubmissionObject", new { id = SubmissionObjectId }, await _submissionService.GetSubmissionObjectAsync(SubmissionObjectId));
         }
 
-        [HttpPost("duplicates")]
+        [HttpPost("resubmissions")]
         [RequiresPermission(Permissions.FileUploadWrite)]
-        public ActionResult<List<string>> CheckDuplicate([FromForm] FileUploadDto upload)
+        public ActionResult<List<string>> CheckResubmit([FromForm] FileUploadDto upload)
         {
             var problem = IsServiceAreaAuthorized(_currentUser, upload.ServiceAreaNumber);
             if (problem != null)

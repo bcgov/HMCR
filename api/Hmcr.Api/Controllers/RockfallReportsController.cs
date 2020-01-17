@@ -44,9 +44,9 @@ namespace Hmcr.Api.Controllers
             return CreatedAtRoute("GetSubmissionObject", new { id = SubmissionObjectId }, await _submissionService.GetSubmissionObjectAsync(SubmissionObjectId));
         }
 
-        [HttpPost("duplicates")]
+        [HttpPost("resubmissions")]
         [RequiresPermission(Permissions.FileUploadWrite)]
-        public async Task<ActionResult<List<string>>> CheckDuplicateAsync([FromForm] FileUploadDto upload)
+        public async Task<ActionResult<List<string>>> CheckResubmitAsync([FromForm] FileUploadDto upload)
         {
             var problem = IsServiceAreaAuthorized(_currentUser, upload.ServiceAreaNumber);
             if (problem != null)
@@ -54,7 +54,7 @@ namespace Hmcr.Api.Controllers
                 return Unauthorized(problem);
             }
 
-            var (Errors, DuplicateRecordNumbers) = await _rockfallRptSerivce.CheckDuplicatesAsync(upload);
+            var (Errors, DuplicateRecordNumbers) = await _rockfallRptSerivce.CheckResubmitAsync(upload);
 
             if (Errors.Count > 0)
             {

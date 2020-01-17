@@ -47,8 +47,8 @@ const updateUploadStatusIcon = status => {
 
 const updateUploadStatusMessage = (state, status) => {
   switch (state) {
-    case Constants.UPLOAD_STATE.DUP_CHECK:
-      return <div>Checking for duplicates... {updateUploadStatusIcon(status)}</div>;
+    case Constants.UPLOAD_STATE.RESUB_CHECK:
+      return <div>Checking for re-submitted rows... {updateUploadStatusIcon(status)}</div>;
     case Constants.UPLOAD_STATE.SAVING:
       return <div>Saving report data... {updateUploadStatusIcon(status)}</div>;
     default:
@@ -66,7 +66,7 @@ const WorkReportingUpload = ({
   const [fileInputKey, setFileInputKey] = useState(Math.random());
   const [submitting, setSubmitting] = useState(false);
   const [showStatusModal, setShowStatusModal] = useState(false);
-  const [dupCheckStatus, setDupCheckStatus] = useState(null);
+  const [resubCheckStatus, setResubCheckStatus] = useState(null);
   const [savingStatus, setSavingStatus] = useState(null);
   const [errorMessages, setErrorMessages] = useState(null);
   const [completeMessage, setCompleteMessage] = useState(null);
@@ -86,7 +86,7 @@ const WorkReportingUpload = ({
   };
 
   const resetMessages = () => {
-    setDupCheckStatus(null);
+    setResubCheckStatus(null);
     setSavingStatus(null);
     setErrorMessages(null);
     setCompleteMessage(null);
@@ -108,18 +108,20 @@ const WorkReportingUpload = ({
     setSubmitting(true);
     setShowStatusModal(true);
 
-    handleCheckDuplicates(apiPath, formData, reset);
+    handleCheckResubmissions(apiPath, formData, reset);
   };
 
-  const handleCheckDuplicates = (apiPath, data, resetCallback) => {
-    setDupCheckStatus(updateUploadStatusMessage(Constants.UPLOAD_STATE.DUP_CHECK, Constants.UPLOAD_STATE_STATUS.START));
+  const handleCheckResubmissions = (apiPath, data, resetCallback) => {
+    setResubCheckStatus(
+      updateUploadStatusMessage(Constants.UPLOAD_STATE.RESUB_CHECK, Constants.UPLOAD_STATE_STATUS.START)
+    );
     api.instance
-      .post(`${apiPath}/duplicates`, data)
+      .post(`${apiPath}/resubmissions`, data)
       .then(response => {
         if (response.data && response.data.length > 0) {
-          setDupCheckStatus(
+          setResubCheckStatus(
             <React.Fragment>
-              {updateUploadStatusMessage(Constants.UPLOAD_STATE.DUP_CHECK, Constants.UPLOAD_STATE_STATUS.WARNING)}
+              {updateUploadStatusMessage(Constants.UPLOAD_STATE.RESUB_CHECK, Constants.UPLOAD_STATE_STATUS.WARNING)}
               <Alert color="warning">
                 <p>The following rows are different from the existing data in the database:</p>
                 <ul>
@@ -134,9 +136,9 @@ const WorkReportingUpload = ({
                     size="sm"
                     className="mr-2"
                     onClick={() => {
-                      setDupCheckStatus(
+                      setResubCheckStatus(
                         updateUploadStatusMessage(
-                          Constants.UPLOAD_STATE.DUP_CHECK,
+                          Constants.UPLOAD_STATE.RESUB_CHECK,
                           Constants.UPLOAD_STATE_STATUS.COMPLETE
                         )
                       );
@@ -159,15 +161,15 @@ const WorkReportingUpload = ({
             </React.Fragment>
           );
         } else {
-          setDupCheckStatus(
-            updateUploadStatusMessage(Constants.UPLOAD_STATE.DUP_CHECK, Constants.UPLOAD_STATE_STATUS.COMPLETE)
+          setResubCheckStatus(
+            updateUploadStatusMessage(Constants.UPLOAD_STATE.RESUB_CHECK, Constants.UPLOAD_STATE_STATUS.COMPLETE)
           );
           handleUploadFile(apiPath, data, resetCallback);
         }
       })
       .catch(error => {
-        setDupCheckStatus(
-          updateUploadStatusMessage(Constants.UPLOAD_STATE.DUP_CHECK, Constants.UPLOAD_STATE_STATUS.ERROR)
+        setResubCheckStatus(
+          updateUploadStatusMessage(Constants.UPLOAD_STATE.RESUB_CHECK, Constants.UPLOAD_STATE_STATUS.ERROR)
         );
         setErrorMessages(Object.values(error.response.data.errors));
         resetCallback();
@@ -284,7 +286,7 @@ const WorkReportingUpload = ({
         disableClose={submitting}
         onComplete={resetMessages}
       >
-        {dupCheckStatus}
+        {resubCheckStatus}
         {savingStatus}
         {errorMessages && errorMessages.length > 0 && (
           <Alert color="danger">

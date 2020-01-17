@@ -53,60 +53,50 @@ namespace Hmcr.Domain.Services.Base
             _contractRepo = contractRepo;
             _statusRepo = statusRepo;
         }
-        public async Task<(Dictionary<string, List<string>> errors, List<string> duplicateRecordNumbers)> CheckDuplicatesAsync(FileUploadDto upload)
+        public async Task<(Dictionary<string, List<string>> errors, List<string> resubmittedRecordNumbers)> CheckResubmitAsync(FileUploadDto upload)
         {
-            var recordNumbers = new List<string>();
-
             if (!HasRowIdentifier)
-                return (new Dictionary<string, List<string>>(), recordNumbers);
+                return (new Dictionary<string, List<string>>(), null);
 
             var (errors, submission) = await ValidateAndLogReportErrorAsync(upload);
 
+            //if there are any errors, just log it and report them to the user.
             if (errors.Count > 0)
-                return (errors, recordNumbers);
+                return (errors, null);
 
-            await foreach (var recordNumber in _rowRepo.FindDuplicateRowsToOverwriteAsync(submission.SubmissionStreamId, (decimal)submission.PartyId, submission.SubmissionRows))
-            {
-                recordNumbers.Add(recordNumber);
-            }
+            var resubmittedRecordNumbers = submission.SubmissionRows.Where(x => x.IsResubmitted == "Y").Select(x => x.RecordNumber).ToList();
 
-            return (errors, recordNumbers);
+            return (errors, resubmittedRecordNumbers);
         }
 
-        private bool HasDuplicateInFile(IEnumerable<SubmissionRowDto> rows, Dictionary<string, List<string>> errors)
+        public async Task<(decimal submissionObjectId, Dictionary<string, List<string>> errors)> CreateReportAsync(FileUploadDto upload)
         {
-            return HasRowIdentifier ? HasDuplicateRecordNumberInFile(rows, errors) : HasIdenticalRowInFile(rows, errors);
-        }
+            var (errors, submission) = await ValidateAndLogReportErrorAsync(upload);
 
-        private bool HasDuplicateRecordNumberInFile(IEnumerable<SubmissionRowDto> rows, Dictionary<string, List<string>> errors)
-        {
-            foreach (var row in rows)
+            if (errors.Count > 0)
             {
-                if (rows.Count(x => x.RecordNumber == row.RecordNumber) > 1)
-                {
-                    errors.AddItem($"{RecordNumberFieldName}", $"Submission has multiple records with the same {RecordNumberFieldName.WordToWords()} {row.RecordNumber}.");
-                    return true;
-                }
+                return (0, errors);
             }
 
-            return false;
+            var submissionEntity = await _submissionRepo.CreateSubmissionObjectAsync(submission);
+            await _unitOfWork.CommitAsync();
+
+            return (submissionEntity.SubmissionObjectId, errors);
         }
 
-        private bool HasIdenticalRowInFile(IEnumerable<SubmissionRowDto> rows, Dictionary<string, List<string>> errors)
+        private async Task<(Dictionary<string, List<string>> errors, SubmissionObjectCreateDto submission)> ValidateAndLogReportErrorAsync(FileUploadDto upload)
         {
-            var i = 0;
-            foreach (var row in rows)
-            {
-                i++;
+            var (errors, submission) = await ValidateAndParseUploadFileAsync(upload);
 
-                if (rows.Count(x => x.RowHash == row.RowHash) > 1)
-                {
-                    errors.AddItem($"File", $"The row #{i} has identical row(s) in the file.");
-                    return true;
-                }
+            if (errors.Count > 0) //save only when there are any errors
+            {
+                submission.ErrorDetail = errors.GetErrorDetail();
+                submission.SubmissionRows = new List<SubmissionRowDto>();
+                await _submissionRepo.CreateSubmissionObjectAsync(submission);
+                await _unitOfWork.CommitAsync();
             }
 
-            return false;
+            return (errors, submission);
         }
 
         private async Task<(Dictionary<string, List<string>> errors, SubmissionObjectCreateDto submission)> ValidateAndParseUploadFileAsync(FileUploadDto upload)
@@ -184,10 +174,49 @@ namespace Hmcr.Domain.Services.Base
 
             await MarkDuplicateRowAsync(submission);
 
+            //set IsResubmitted
+            await foreach (var resubmittedRecordNumber in _rowRepo.UpdateIsResubmitAsync(submission.SubmissionStreamId, (decimal)submission.PartyId, submission.SubmissionRows)) { }
+
             submission.DigitalRepresentation = stream.ToBytes();
             submission.SubmissionStatusId = await _statusRepo.GetStatusIdByTypeAndCodeAsync(StatusType.File, FileStatus.FileReceived);
 
             return (errors, submission);
+        }
+
+        private bool HasDuplicateInFile(IEnumerable<SubmissionRowDto> rows, Dictionary<string, List<string>> errors)
+        {
+            return HasRowIdentifier ? HasDuplicateRecordNumberInFile(rows, errors) : HasIdenticalRowInFile(rows, errors);
+        }
+
+        private bool HasDuplicateRecordNumberInFile(IEnumerable<SubmissionRowDto> rows, Dictionary<string, List<string>> errors)
+        {
+            foreach (var row in rows)
+            {
+                if (rows.Count(x => x.RecordNumber == row.RecordNumber) > 1)
+                {
+                    errors.AddItem($"{RecordNumberFieldName}", $"Submission has multiple records with the same {RecordNumberFieldName.WordToWords()} {row.RecordNumber}.");
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        private bool HasIdenticalRowInFile(IEnumerable<SubmissionRowDto> rows, Dictionary<string, List<string>> errors)
+        {
+            var i = 0;
+            foreach (var row in rows)
+            {
+                i++;
+
+                if (rows.Count(x => x.RowHash == row.RowHash) > 1)
+                {
+                    errors.AddItem($"File", $"The row #{i} has identical row(s) in the file.");
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         private async Task MarkDuplicateRowAsync(SubmissionObjectCreateDto submission)
@@ -223,36 +252,6 @@ namespace Hmcr.Domain.Services.Base
         protected virtual Task<bool> ParseRowsAsync(SubmissionObjectCreateDto submission, string text, Dictionary<string, List<string>> errors)
         {
             throw new NotImplementedException();
-        }
-
-        private async Task<(Dictionary<string, List<string>> errors, SubmissionObjectCreateDto submission)> ValidateAndLogReportErrorAsync(FileUploadDto upload)
-        {
-            var (errors, submission) = await ValidateAndParseUploadFileAsync(upload);
-
-            if (errors.Count > 0)
-            {
-                submission.ErrorDetail = errors.GetErrorDetail();
-                submission.SubmissionRows = new List<SubmissionRowDto>();
-                await _submissionRepo.CreateSubmissionObjectAsync(submission);
-                await _unitOfWork.CommitAsync();
-            }
-
-            return (errors, submission);
-        }
-
-        public async Task<(decimal submissionObjectId, Dictionary<string, List<string>> errors)> CreateReportAsync(FileUploadDto upload)
-        {
-            var (errors, submission) = await ValidateAndLogReportErrorAsync(upload);
-
-            if (errors.Count > 0)
-            {
-                return (0, errors);
-            }
-
-            var submissionEntity = await _submissionRepo.CreateSubmissionObjectAsync(submission);
-            await _unitOfWork.CommitAsync();
-
-            return (submissionEntity.SubmissionObjectId, errors);
         }
     }
 }
