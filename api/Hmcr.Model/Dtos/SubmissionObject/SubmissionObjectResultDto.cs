@@ -1,6 +1,7 @@
 ﻿using Hmcr.Model.Dtos.SubmissionRow;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using System.Text.Json.Serialization;
 
@@ -18,6 +19,7 @@ namespace Hmcr.Model.Dtos.SubmissionObject
         public string SubmissionStatusCode { get; set; }
         public string Description { get; set; }
         public string ErrorDetail { get; set; }
+        public int NumResubmitRows { get { return SubmissionRows.Count(x => x.IsResubmitted == "Y"); } }
 
         public IEnumerable<SubmissionRowResultDto> SubmissionRows { get; set; }
     }
