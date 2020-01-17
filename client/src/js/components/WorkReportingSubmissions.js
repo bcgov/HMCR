@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { connect } from 'react-redux';
-import { Link } from 'react-router-dom';
-import { Row, Col, Input } from 'reactstrap';
+import { Button, Row, Col, Input } from 'reactstrap';
 import moment from 'moment';
 import { DateRangePicker } from 'react-dates';
 import queryString from 'query-string';
@@ -12,6 +11,7 @@ import PageSpinner from './ui/PageSpinner';
 import FontAwesomeButton from './ui/FontAwesomeButton';
 
 import { searchSubmissions } from '../actions';
+import WorkReportingSubmissionDetail from './WorkReportingSubmissionDetail';
 
 import * as Constants from '../Constants';
 import { updateQueryParams } from '../utils';
@@ -46,8 +46,9 @@ const WorkReportingSubmissions = ({
   const [searchOptions, setSearchOptions] = useState(defaultSearchOptions);
   const [focusedInput, setFocusedInput] = useState(null);
   const [searching, setSearching] = useState(false);
+  const [showResultScreen, setShowResultScreen] = useState({ isOpen: false, submission: null });
 
-  // Run on load
+  // Run on load and trigger refresh
   useEffect(() => {
     const params = queryString.parse(history.location.search);
     const options = {
@@ -169,7 +170,15 @@ const WorkReportingSubmissions = ({
                   ...item,
                   name: `${item.firstName} ${item.lastName}`,
                   date: moment(item.appCreateTimestamp).format(Constants.DATE_FORMAT),
-                  id: <Link to="#">{item.id}</Link>,
+                  id: (
+                    <Button
+                      color="link"
+                      size="sm"
+                      onClick={() => setShowResultScreen({ isOpen: true, submission: item.id })}
+                    >
+                      {item.id}
+                    </Button>
+                  ),
                 }))}
                 tableColumns={tableColumns}
                 searchPagination={searchPagination}
@@ -180,6 +189,12 @@ const WorkReportingSubmissions = ({
             {searchResult.length <= 0 && <div>No submissions found</div>}
           </Col>
         </Row>
+      )}
+      {showResultScreen.isOpen && showResultScreen.submission && (
+        <WorkReportingSubmissionDetail
+          submission={showResultScreen.submission}
+          toggle={() => setShowResultScreen({ isOpen: false })}
+        />
       )}
     </React.Fragment>
   );

@@ -49,3 +49,12 @@ body {
 .fa-color-warning {
   color: theme-color(warning);
 }
+
+.modal-dialog.modal-xl {
+  max-width: 1140px;
+}
+
+ul.no-bullet {
+  list-style-type: none;
+  padding-inline-start: 0;
+}
