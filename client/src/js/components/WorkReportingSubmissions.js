@@ -14,7 +14,7 @@ import { searchSubmissions } from '../actions';
 import WorkReportingSubmissionDetail from './WorkReportingSubmissionDetail';
 
 import * as Constants from '../Constants';
-import { updateQueryParams } from '../utils';
+import { updateQueryParamsFromHistory, stringifyQueryParams } from '../utils';
 
 const startDateLimit = moment('2019-01-01');
 
@@ -59,6 +59,10 @@ const WorkReportingSubmissions = ({
       serviceAreaNumber: serviceArea,
     };
 
+    if (params.showResult) {
+      setShowResultScreen({ isOpen: true, submission: params.showResult });
+    }
+
     setSearchOptions(options);
     searchSubmissions(options);
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -75,14 +79,16 @@ const WorkReportingSubmissions = ({
   }, [searchOptions, searchSubmissions]);
 
   const updateHistoryLocationSearch = options => {
-    history.push(`?${updateQueryParams(history, _.omit(options, ['dateTo', 'dateFrom', 'serviceAreaNumber']))}`);
+    history.push(
+      `?${updateQueryParamsFromHistory(history, _.omit(options, ['dateTo', 'dateFrom', 'serviceAreaNumber']))}`
+    );
   };
 
   const handleDateChanged = (dateFrom, dateTo) => {
     if (!(dateFrom && dateTo && dateFrom.isSameOrBefore(dateTo))) return;
 
     history.push(
-      `?${updateQueryParams(history, {
+      `?${updateQueryParamsFromHistory(history, {
         dateFrom: dateFrom.format(Constants.DATE_FORMAT),
         dateTo: dateTo.format(Constants.DATE_FORMAT),
       })}`
@@ -193,7 +199,11 @@ const WorkReportingSubmissions = ({
       {showResultScreen.isOpen && showResultScreen.submission && (
         <WorkReportingSubmissionDetail
           submission={showResultScreen.submission}
-          toggle={() => setShowResultScreen({ isOpen: false })}
+          toggle={() => {
+            setShowResultScreen({ isOpen: false });
+            const params = queryString.parse(history.location.search);
+            if (params.showResult) history.push(`?${stringifyQueryParams(_.omit(params, ['showResult']))}`);
+          }}
         />
       )}
     </React.Fragment>
