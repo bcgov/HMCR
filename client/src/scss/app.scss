@@ -58,3 +58,19 @@ ul.no-bullet {
   list-style-type: none;
   padding-inline-start: 0;
 }
+
+.Toastify__toast--info {
+  background-color: theme-color(primary);
+}
+
+.Toastify__toast--success {
+  background-color: theme-color(success);
+}
+
+.Toastify__toast--warning {
+  background-color: theme-color(warning);
+}
+
+.Toastify__toast--error {
+  background-color: theme-color(danger);
+}

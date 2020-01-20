@@ -73,5 +73,23 @@ namespace Hmcr.Api.Controllers
 
             return Ok(submission);
         }
+
+        [HttpGet("{id}/file", Name = "GetSubmissionFile")]
+        [RequiresPermission(Permissions.FileUploadRead)]
+        public async Task<IActionResult> GetSubmissionFileAsync(decimal id)
+        {
+            var submission = await _submissionService.GetSubmissionFileAsync(id);
+
+            if (submission == null)
+                return NotFound();
+
+            var problem = IsServiceAreaAuthorized(_currentUser, submission.ServiceAreaNumber);
+            if (problem != null)
+            {
+                return Unauthorized(problem);
+            }
+
+            return File(submission.DigitalRepresentation, submission.MimeTypeCode, submission.FileName);
+        }
     }
 }

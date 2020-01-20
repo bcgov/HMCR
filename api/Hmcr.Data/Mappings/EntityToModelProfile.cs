@@ -23,6 +23,8 @@ using Hmcr.Model.Dtos.UserRole;
 using Hmcr.Model.Dtos.WildlifeReport;
 using Hmcr.Model.Dtos.WorkReport;
 
+using System.Linq;
+
 namespace Hmcr.Data.Mappings
 {
     public class EntityToModelProfile : Profile
@@ -59,6 +61,8 @@ namespace Hmcr.Data.Mappings
 
             CreateMap<HmrSubmissionObject, SubmissionObjectDto>();
             CreateMap<HmrSubmissionObject, SubmissionObjectCreateDto>();
+            CreateMap<HmrSubmissionObject, SubmissionObjectFileDto>()
+                .ForMember(dst => dst.MimeTypeCode, opt => opt.MapFrom(src => src.MimeType.MimeTypeCode));
 
             CreateMap<HmrSubmissionRow, SubmissionRowDto>();
 

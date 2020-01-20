@@ -1,18 +1,23 @@
 import React, { useEffect, useState } from 'react';
-import { Modal, ModalBody, ModalHeader } from 'reactstrap';
+import { Button, Modal, ModalBody, ModalHeader } from 'reactstrap';
 import moment from 'moment';
 import _ from 'lodash';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import FileSaver from 'file-saver';
+import Clipboard from 'react-clipboard.js';
+import { toast } from 'react-toastify';
 
 import PageSpinner from './ui/PageSpinner';
 
 import * as Constants from '../Constants';
-import * as Api from '../Api';
+import * as api from '../Api';
 import DataTableControl from './ui/DataTableControl';
 
 const tableColumns = [
   { heading: 'Row #', key: 'rowNum', nosort: true },
   { heading: 'Service Area', key: 'serviceArea', nosort: true },
   { heading: 'Record Number', key: 'recordNumber', nosort: true },
+  { heading: 'Field', key: 'fieldName', nosort: true },
   { heading: 'Error', key: 'errors', nosort: true },
 ];
 
@@ -20,30 +25,70 @@ const parseErrorDetailJson = json => JSON.parse(json).fieldMessages;
 
 const submissionRowErrors = (rowNum, errorDetail) => {
   return (
-    <ul>
+    <ul style={{ paddingInlineStart: '20px' }}>
       {parseErrorDetailJson(errorDetail).map(error => (
         <li key={`${rowNum}_${error.field}`}>
           <strong className="mr-1">{error.field}:</strong>
-          {error.messages.map((msg, k) => (
-            <span key={`${rowNum}_${error.field}_${k}`}>{msg}</span>
-          ))}
+          <ul>
+            {error.messages.map((msg, k) => (
+              <li key={`${rowNum}_${error.field}_${k}`}>{`${msg} `}</li>
+            ))}
+          </ul>
         </li>
       ))}
     </ul>
   );
 };
 
+const createClipboardText = data => {
+  let clipboardData = '';
+
+  clipboardData += 'submission #,submission date,service area\n';
+  clipboardData += `${data.id},${moment(data.appCreateTimestamp).format(Constants.DATE_FORMAT)},${
+    data.serviceAreaNumber
+  }\n`;
+
+  clipboardData += 'file name,report type,status\n';
+  clipboardData += `${data.fileName}, ${data.streamName}, ${data.description}\n`;
+
+  clipboardData += '\nstatus detail\n';
+
+  clipboardData += parseErrorDetailJson(data.errorDetail)
+    .map(field => field.messages.map(msg => `${field.field}, ${msg}`))
+    .join('\n');
+
+  if (data.submissionRows.length <= 0) return clipboardData;
+
+  clipboardData += '\n\nrow errors\n';
+
+  clipboardData += 'row,service area,record number,field,message\n';
+
+  data.submissionRows.forEach(row => {
+    const errors = parseErrorDetailJson(row.errorDetail);
+
+    clipboardData += errors
+      .map(field =>
+        field.messages.map(msg => `${row.rowNum},${data.serviceAreaNumber},${row.recordNumber},${field.field},"${msg}"`)
+      )
+      .join('\n');
+    clipboardData += '\n';
+  });
+
+  return clipboardData;
+};
+
 const WorkReportingSubmissionDetail = ({ toggle, submission }) => {
   const [submissionResultData, setSubmissionResultData] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [modalSize, setModalSize] = useState('modal-sm');
+  const [modalSize, setModalSize] = useState('modal-lg');
 
   useEffect(() => {
-    Api.getSubmissionResult(submission)
+    api
+      .getSubmissionResult(submission)
       .then(response => {
         setSubmissionResultData(response.data);
 
-        setModalSize('modal-xl');
+        if (response.data.submissionRows.length > 0) setModalSize('modal-xl');
       })
       .finally(() => setLoading(false));
   }, [submission]);
@@ -71,9 +116,11 @@ const WorkReportingSubmissionDetail = ({ toggle, submission }) => {
             <li>
               <strong>Report Type:</strong> {submissionResultData.streamName}
             </li>
-            <li>
-              <strong>Re-submitted Records:</strong> {submissionResultData.resubmissionCount}
-            </li>
+            {submissionResultData.numResubmitRows && submissionResultData.numResubmitRows > 0 && (
+              <li>
+                <strong>Re-submitted Records:</strong> {submissionResultData.numResubmitRows}
+              </li>
+            )}
             <li>
               <strong>Status:</strong> {submissionResultData.description}
             </li>
@@ -84,7 +131,35 @@ const WorkReportingSubmissionDetail = ({ toggle, submission }) => {
             )}
           </ul>
         </div>
-        <div>Buttons go here</div>
+        <div style={{ whiteSpace: 'nowrap' }}>
+          <Button
+            size="sm"
+            color="primary"
+            className="mr-2"
+            onClick={() =>
+              api.getSubmissionFile(submissionResultData.id).then(response => {
+                const filename = response.headers['content-disposition']
+                  .split(';')
+                  .find(token => token.trim().startsWith('filename='))
+                  .replace('filename=', '')
+                  .trim();
+
+                FileSaver.saveAs(new Blob([response.data]), filename);
+              })
+            }
+          >
+            <FontAwesomeIcon icon="download" /> Original
+          </Button>
+          <Clipboard
+            className="btn btn-primary btn-sm"
+            data-clipboard-text={createClipboardText(submissionResultData)}
+            onSuccess={() => {
+              toast.info(<div className="text-center">Text copied</div>);
+            }}
+          >
+            <FontAwesomeIcon icon="copy" /> Copy
+          </Clipboard>
+        </div>
       </div>
     );
   };
@@ -92,15 +167,25 @@ const WorkReportingSubmissionDetail = ({ toggle, submission }) => {
   const submissionRows = () => {
     if (submissionResultData.submissionRows.length <= 0) return;
 
-    const tableRowData = submissionResultData.submissionRows.map(row => {
-      return {
-        ..._.pick(row, ['rowNum', 'recordNumber']),
-        errors: submissionRowErrors(row.rowNum, row.errorDetail),
-        serviceArea: submissionResultData.serviceAreaNumber,
-      };
-    });
+    const tableRowData = [];
 
-    return <DataTableControl dataList={tableRowData} tableColumns={tableColumns} />;
+    submissionResultData.submissionRows.forEach(row =>
+      parseErrorDetailJson(row.errorDetail).forEach(field =>
+        tableRowData.push({
+          ..._.pick(row, ['rowNum', 'recordNumber']),
+          serviceArea: submissionResultData.serviceAreaNumber,
+          fieldName: field.field,
+          errors: field.messages.map((msg, k) => <div key={`${row.rowNum}_${field.field}_${k}`}>{msg}</div>),
+        })
+      )
+    );
+
+    return (
+      <React.Fragment>
+        <strong>Row Errors:</strong>
+        <DataTableControl dataList={tableRowData} tableColumns={tableColumns} />
+      </React.Fragment>
+    );
   };
 
   return (

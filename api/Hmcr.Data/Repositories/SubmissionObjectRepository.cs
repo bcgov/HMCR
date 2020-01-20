@@ -24,6 +24,7 @@ namespace Hmcr.Data.Repositories
         Task<HmrSubmissionObject> GetSubmissionObjectEntityAsync(decimal submissionObjectId);
         Task<HmrSubmissionObject[]> GetSubmissionObjecsForBackgroundJobAsync(decimal serviceAreaNumber);
         Task<SubmissionObjectResultDto> GetSubmissionResultAsync(decimal submissionObjectId);
+        Task<SubmissionObjectFileDto> GetSubmissionFileAsync(decimal submissionObjectId);
     }
     public class SubmissionObjectRepository : HmcrRepositoryBase<HmrSubmissionObject>, ISubmissionObjectRepository
     {
@@ -99,6 +100,17 @@ namespace Hmcr.Data.Repositories
                     }).OrderBy(y => y.RowNum)
                 })
                 .FirstOrDefaultAsync(x => x.SubmissionObjectId == submissionObjectId);
+
+            return submission;
+        }
+
+        public async Task<SubmissionObjectFileDto> GetSubmissionFileAsync(decimal submissionObjectId)
+        {
+            var submissionEntity = await DbSet.AsNoTracking()
+                .Include(x => x.MimeType)
+                .FirstOrDefaultAsync(x => x.SubmissionObjectId == submissionObjectId);
+
+            var submission = Mapper.Map<SubmissionObjectFileDto>(submissionEntity);
 
             return submission;
         }
