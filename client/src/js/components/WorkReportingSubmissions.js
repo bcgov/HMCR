@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { connect } from 'react-redux';
-import { Link } from 'react-router-dom';
-import { Row, Col, Input } from 'reactstrap';
+import { Button, Row, Col, Input } from 'reactstrap';
 import moment from 'moment';
 import { DateRangePicker } from 'react-dates';
 import queryString from 'query-string';
@@ -12,9 +11,10 @@ import PageSpinner from './ui/PageSpinner';
 import FontAwesomeButton from './ui/FontAwesomeButton';
 
 import { searchSubmissions } from '../actions';
+import WorkReportingSubmissionDetail from './WorkReportingSubmissionDetail';
 
 import * as Constants from '../Constants';
-import { updateQueryParams } from '../utils';
+import { updateQueryParamsFromHistory, stringifyQueryParams } from '../utils';
 
 const startDateLimit = moment('2019-01-01');
 
@@ -46,8 +46,9 @@ const WorkReportingSubmissions = ({
   const [searchOptions, setSearchOptions] = useState(defaultSearchOptions);
   const [focusedInput, setFocusedInput] = useState(null);
   const [searching, setSearching] = useState(false);
+  const [showResultScreen, setShowResultScreen] = useState({ isOpen: false, submission: null });
 
-  // Run on load
+  // Run on load and trigger refresh
   useEffect(() => {
     const params = queryString.parse(history.location.search);
     const options = {
@@ -57,6 +58,10 @@ const WorkReportingSubmissions = ({
       dateTo: params.dateFrom ? moment(params.dateTo) : defaultSearchOptions.dateTo,
       serviceAreaNumber: serviceArea,
     };
+
+    if (params.showResult) {
+      setShowResultScreen({ isOpen: true, submission: params.showResult });
+    }
 
     setSearchOptions(options);
     searchSubmissions(options);
@@ -74,14 +79,16 @@ const WorkReportingSubmissions = ({
   }, [searchOptions, searchSubmissions]);
 
   const updateHistoryLocationSearch = options => {
-    history.push(`?${updateQueryParams(history, _.omit(options, ['dateTo', 'dateFrom', 'serviceAreaNumber']))}`);
+    history.push(
+      `?${updateQueryParamsFromHistory(history, _.omit(options, ['dateTo', 'dateFrom', 'serviceAreaNumber']))}`
+    );
   };
 
   const handleDateChanged = (dateFrom, dateTo) => {
     if (!(dateFrom && dateTo && dateFrom.isSameOrBefore(dateTo))) return;
 
     history.push(
-      `?${updateQueryParams(history, {
+      `?${updateQueryParamsFromHistory(history, {
         dateFrom: dateFrom.format(Constants.DATE_FORMAT),
         dateTo: dateTo.format(Constants.DATE_FORMAT),
       })}`
@@ -169,7 +176,15 @@ const WorkReportingSubmissions = ({
                   ...item,
                   name: `${item.firstName} ${item.lastName}`,
                   date: moment(item.appCreateTimestamp).format(Constants.DATE_FORMAT),
-                  id: <Link to="#">{item.id}</Link>,
+                  id: (
+                    <Button
+                      color="link"
+                      size="sm"
+                      onClick={() => setShowResultScreen({ isOpen: true, submission: item.id })}
+                    >
+                      {item.id}
+                    </Button>
+                  ),
                 }))}
                 tableColumns={tableColumns}
                 searchPagination={searchPagination}
@@ -180,6 +195,16 @@ const WorkReportingSubmissions = ({
             {searchResult.length <= 0 && <div>No submissions found</div>}
           </Col>
         </Row>
+      )}
+      {showResultScreen.isOpen && showResultScreen.submission && (
+        <WorkReportingSubmissionDetail
+          submission={showResultScreen.submission}
+          toggle={() => {
+            setShowResultScreen({ isOpen: false });
+            const params = queryString.parse(history.location.search);
+            if (params.showResult) history.push(`?${stringifyQueryParams(_.omit(params, ['showResult']))}`);
+          }}
+        />
       )}
     </React.Fragment>
   );

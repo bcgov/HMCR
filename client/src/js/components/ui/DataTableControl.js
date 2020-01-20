@@ -14,6 +14,7 @@ const DataTableControl = ({
   onEditClicked,
   onDeleteClicked,
   onHeadingSortClicked,
+  hover,
 }) => {
   const handleEditClicked = id => {
     if (onEditClicked) onEditClicked(id);
@@ -21,11 +22,11 @@ const DataTableControl = ({
 
   return (
     <React.Fragment>
-      <Table size="sm" responsive>
+      <Table size="sm" responsive hover>
         <thead className="thead-dark">
           <tr>
             {tableColumns.map(column => (
-              <th key={column.heading}>
+              <th key={column.heading} style={{ whiteSpace: 'nowrap' }}>
                 {column.heading}
                 {!column.nosort && <FontAwesomeButton icon="sort" onClick={() => onHeadingSortClicked(column.key)} />}
               </th>

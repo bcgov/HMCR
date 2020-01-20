@@ -1,7 +1,4 @@
-// import store from './store';
 import queryString from 'query-string';
-
-// import * as Constants from './Constants';
 
 export const buildActionWithParam = (action, param) => {
   return { action, param };
@@ -27,8 +24,12 @@ export const buildApiErrorObject = response => {
   }
 };
 
-export const updateQueryParams = (history, newParam) => {
+export const updateQueryParamsFromHistory = (history, newParam) => {
   const params = queryString.parse(history.location.search);
 
   return queryString.stringify({ ...params, ...newParam });
+};
+
+export const stringifyQueryParams = newParam => {
+  return queryString.stringify(newParam);
 };

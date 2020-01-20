@@ -14,7 +14,8 @@ namespace Hmcr.Api.Extensions
             app.UseCors(builder => builder
                 .AllowAnyOrigin()
                 .AllowAnyMethod()
-                .AllowAnyHeader());
+                .AllowAnyHeader()
+                .WithExposedHeaders("Content-Disposition"));
         }
 
         public static void UseExceptionMiddleware(this IApplicationBuilder app)
