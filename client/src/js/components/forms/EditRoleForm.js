@@ -6,7 +6,7 @@ import moment from 'moment';
 import MultiSelect from '../ui/MultiSelect';
 import SingleDateField from '../ui/SingleDateField';
 import PageSpinner from '../ui/PageSpinner';
-import { FormRow, FormInput } from './FormInputs';
+import { FormRow, FormInput, FormSwitchInput } from './FormInputs';
 import FormModal from './FormModal';
 
 import { showValidationErrorDialog } from '../../actions';
@@ -38,17 +38,17 @@ const EditRoleFormFields = ({ permissionIds, disableEdit }) => {
   return (
     <React.Fragment>
       <FormRow name="name" label="Role Name*">
-        <FormInput type="text" name="name" placeholder="Role Name" disabled={disableEdit} />
+        <FormInput type="text" name="name" placeholder="Role Name" />
       </FormRow>
       <FormRow name="description" label="Role Description*">
-        <FormInput type="text" name="description" placeholder="Role Description" disabled={disableEdit} />
+        <FormInput type="text" name="description" placeholder="Role Description" />
       </FormRow>
       <FormRow name="permissions" label="Permissions*">
         <MultiSelect items={permissionIds} name="permissions" />
       </FormRow>
-      {/* <FormRow name="internal" label="Internal">
-        <FormSwitchInput name="internal" />
-      </FormRow> */}
+      <FormRow name="internal" label="Internal">
+        <FormSwitchInput name="internal" disabled={disableEdit} />
+      </FormRow>
       <FormRow name="endDate" label="End Date">
         <SingleDateField name="endDate" placeholder="End Date" />
       </FormRow>
@@ -121,7 +121,11 @@ const EditRoleForm = ({ toggle, isOpen, formType, roleId, showValidationErrorDia
       onSubmit={handleFormSubmit}
       submitting={submitting}
     >
-      {loading ? <PageSpinner /> : <EditRoleFormFields permissionIds={permissionIds} />}
+      {loading ? (
+        <PageSpinner />
+      ) : (
+        <EditRoleFormFields permissionIds={permissionIds} disableEdit={initialValues.inUse} />
+      )}
     </FormModal>
   );
 };

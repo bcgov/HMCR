@@ -88,6 +88,7 @@ namespace Hmcr.Data.Repositories
         {
             var roleEntity = await DbSet.AsNoTracking()
                     .Include(x => x.HmrRolePermissions)
+                    .Include(x => x.HmrUserRoles)
                     .FirstOrDefaultAsync(x => x.RoleId == roleId);
 
             if (roleEntity == null)
@@ -103,6 +104,8 @@ namespace Hmcr.Data.Repositories
                 .ToList();
 
             role.Permissions = permissionIds;
+
+            role.InUse = roleEntity.HmrUserRoles.Count > 0;
 
             return role;
         }
