@@ -60,7 +60,7 @@ const createClipboardText = data => {
   }
 
   if (data.submissionRows.length > 0) {
-    clipboardData += '\n\nrow errors\n';
+    clipboardData += '\n\ndata errors\n';
 
     clipboardData += 'row\tservice area\trecord number\tfield\tmessage\n';
 
@@ -188,7 +188,7 @@ const WorkReportingSubmissionDetail = ({ toggle, submission }) => {
 
     return (
       <React.Fragment>
-        <strong>Row Errors:</strong>
+        <strong>Data Errors:</strong>
         <DataTableControl dataList={tableRowData} tableColumns={tableColumns} />
       </React.Fragment>
     );
