@@ -20,6 +20,7 @@ namespace Hmcr.Model.Dtos.Role
         public DateTime? EndDate { get; set; }
         public string IsInternal { get; set; }
         public bool Internal => IsInternal == "Y";
+        public bool InUse { get; set; }
         public IList<decimal> Permissions { get; set; }
     }
 }

@@ -14,7 +14,6 @@ const DataTableControl = ({
   onEditClicked,
   onDeleteClicked,
   onHeadingSortClicked,
-  hover,
 }) => {
   const handleEditClicked = id => {
     if (onEditClicked) onEditClicked(id);
