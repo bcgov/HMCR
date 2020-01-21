@@ -64,16 +64,15 @@ const WorkReportingSubmissions = ({
     }
 
     setSearchOptions(options);
-    searchSubmissions(options);
+
+    startSearch(options);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [triggerRefresh, serviceArea, searchSubmissions]);
 
   // Run search when searchOptions object has changed
   useEffect(() => {
     if (searchOptions !== defaultSearchOptions && searchOptions.dateFrom && searchOptions.dateTo) {
-      setSearching(true);
       updateHistoryLocationSearch(searchOptions);
-      searchSubmissions(searchOptions).finally(() => setSearching(false));
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchOptions, searchSubmissions]);
@@ -82,6 +81,11 @@ const WorkReportingSubmissions = ({
     history.push(
       `?${updateQueryParamsFromHistory(history, _.omit(options, ['dateTo', 'dateFrom', 'serviceAreaNumber']))}`
     );
+  };
+
+  const startSearch = options => {
+    setSearching(true);
+    searchSubmissions(options).finally(() => setSearching(false));
   };
 
   const handleDateChanged = (dateFrom, dateTo) => {
@@ -148,6 +152,9 @@ const WorkReportingSubmissions = ({
                   placeholder="Name"
                   value={searchOptions.searchText}
                   onChange={e => setSearchOptions({ ...searchOptions, searchText: e.target.value })}
+                  onKeyDown={e => {
+                    if (e.key === 'Enter') startSearch(searchOptions);
+                  }}
                 />
               </div>
             </div>
@@ -157,10 +164,7 @@ const WorkReportingSubmissions = ({
                 icon="sync"
                 spin={searching}
                 disabled={searching}
-                onClick={() => {
-                  setSearching(true);
-                  searchSubmissions(searchOptions).finally(() => setSearching(false));
-                }}
+                onClick={() => startSearch(searchOptions)}
               />
             </div>
           </div>

@@ -43,32 +43,34 @@ const submissionRowErrors = (rowNum, errorDetail) => {
 const createClipboardText = data => {
   let clipboardData = '';
 
-  clipboardData += 'submission #,submission date,service area\n';
-  clipboardData += `${data.id},${moment(data.appCreateTimestamp).format(Constants.DATE_FORMAT)},${
+  clipboardData += 'submission #\tsubmission date\tservice area\n';
+  clipboardData += `${data.id}\t${moment(data.appCreateTimestamp).format(Constants.DATE_FORMAT)}\t${
     data.serviceAreaNumber
   }\n`;
 
-  clipboardData += 'file name,report type,status\n';
-  clipboardData += `${data.fileName}, ${data.streamName}, ${data.description}\n`;
+  clipboardData += 'file name\treport type\tstatus\n';
+  clipboardData += `${data.fileName}\t${data.streamName}\t${data.description}\n`;
 
   clipboardData += '\nstatus detail\n';
 
   clipboardData += parseErrorDetailJson(data.errorDetail)
-    .map(field => field.messages.map(msg => `${field.field}, ${msg}`))
+    .map(field => field.messages.map(msg => `${field.field}\t${msg}`))
     .join('\n');
 
   if (data.submissionRows.length <= 0) return clipboardData;
 
   clipboardData += '\n\nrow errors\n';
 
-  clipboardData += 'row,service area,record number,field,message\n';
+  clipboardData += 'row\tservice area\trecord number\tfield\tmessage\n';
 
   data.submissionRows.forEach(row => {
     const errors = parseErrorDetailJson(row.errorDetail);
 
     clipboardData += errors
       .map(field =>
-        field.messages.map(msg => `${row.rowNum},${data.serviceAreaNumber},${row.recordNumber},${field.field},"${msg}"`)
+        field.messages.map(
+          msg => `${row.rowNum}\t${data.serviceAreaNumber}\t${row.recordNumber}\t${field.field}\t"${msg}"`
+        )
       )
       .join('\n');
     clipboardData += '\n';
