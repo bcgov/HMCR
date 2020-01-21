@@ -69,9 +69,9 @@ namespace Hmcr.Api.Authentication
         private async Task<bool> PopulateCurrentUserFromDb(ClaimsPrincipal principal)
         {
             _curentUser.UserName = principal.FindFirstValue(HmcrClaimTypes.KcUsername);
-            var username = _curentUser.UserName.Split("@");
-            var userId = username[0].ToUpperInvariant();
-            var directory = username[1].ToUpperInvariant();
+            var usernames = _curentUser.UserName.Split("@");
+            var username = usernames[0].ToUpperInvariant();
+            var directory = usernames[1].ToUpperInvariant();
 
             var userGuidClaim = directory.ToUpperInvariant() == UserTypeDto.IDIR ? HmcrClaimTypes.KcIdirGuid : HmcrClaimTypes.KcBceidGuid;
             var userGuid = new Guid(principal.FindFirstValue(userGuidClaim));
@@ -80,14 +80,15 @@ namespace Hmcr.Api.Authentication
 
             if (user == null)
             {
-                _logger.LogWarning($"Access Denied - User[{userId}/{userGuid}] does not exist");
+                _logger.LogWarning($"Access Denied - User[{username}/{userGuid}] does not exist");
                 return false;
             }
 
-            if (user.Username != userId)
+            var email = principal.FindFirstValue(ClaimTypes.Email).ToUpperInvariant();
+            if (user.Username.ToUpperInvariant() != username || user.Email.ToUpperInvariant() != email)
             {
-                _logger.LogWarning($"User ID changed from {user.Username} to {userId}.");
-                _userService.SaveUsernameChange(userGuid, userId, user.Username);
+                _logger.LogWarning($"Username/Email changed from {user.Username}/{user.Email} to {user.Email}/{email}.");
+                await _userService.UpdateUserFromBceidAsync(username, user.UserType, user.ConcurrencyControlNumber);
             }
 
             if (directory == "IDIR")
@@ -104,10 +105,10 @@ namespace Hmcr.Api.Authentication
                 _curentUser.UserType = UserTypeDto.BUSINESS;
             }
 
-            _curentUser.UniversalId = userId;
+            _curentUser.UniversalId = username;
             _curentUser.AuthDirName = directory;
             _curentUser.Email = user.Email;
-            _curentUser.UserName = userId;
+            _curentUser.UserName = username;
             _curentUser.FirstName = user.FirstName;
             _curentUser.LastName = user.LastName;
 

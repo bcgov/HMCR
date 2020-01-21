@@ -14,6 +14,7 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace Hmcr.Data.Repositories
@@ -28,7 +29,7 @@ namespace Hmcr.Data.Repositories
         Task UpdateUserAsync(UserUpdateDto userDto);
         Task DeleteUserAsync(UserDeleteDto user);
         Task<HmrSystemUser> GetActiveUserEntityAsync(Guid userGuid);
-        void SaveUsernameChange(Guid userGuid, string newUserId, string oldUserId);
+        Task UpdateUserFromBceidAsync(BceidAccount user, long concurrencyControlNumber);
     }
 
     public class UserRepository : HmcrRepositoryBase<HmrSystemUser>, IUserRepository
@@ -85,10 +86,25 @@ namespace Hmcr.Data.Repositories
             return await DbSet.Include(x => x.Party).FirstOrDefaultAsync(u => u.UserGuid == userGuid && (u.EndDate == null || u.EndDate > DateTime.Today));
         }
 
-        public void SaveUsernameChange(Guid userGuid, string newUserId, string oldUserId)
+        /// <summary>
+        /// This method can be called concurrently by a typical clinet.
+        /// In order to unecessary multiple updates and avoid concurrency control number exception,
+        /// it uses SQL with optimistic concurrency control.
+        /// </summary>
+        /// <param name="user"></param>
+        /// <param name="concurrencyControlNumber"></param>
+        /// <returns></returns>
+        public async Task UpdateUserFromBceidAsync(BceidAccount user, long concurrencyControlNumber)
         {
-            DbContext.Database.ExecuteSqlInterpolated(
-                $"UPDATE HMR_SYSTEM_USER SET USERNAME = {newUserId}, CONCURRENCY_CONTROL_NUMBER = CONCURRENCY_CONTROL_NUMBER + 1 WHERE USER_GUID = {userGuid} AND USERNAME = {oldUserId} ");
+            var sql = new StringBuilder("UPDATE HMR_SYSTEM_USER SET ");
+            sql.Append("USERNAME = {0}, ");
+            sql.Append("FIRST_NAME = {1}, ");
+            sql.Append("LAST_NAME = {2}, ");
+            sql.Append("EMAIL = {3}, ");
+            sql.Append("CONCURRENCY_CONTROL_NUMBER = CONCURRENCY_CONTROL_NUMBER + 1 ");
+            sql.Append("WHERE USER_GUID = {4} AND CONCURRENCY_CONTROL_NUMBER = {5} ");
+
+            await DbContext.Database.ExecuteSqlRawAsync(sql.ToString(), user.Username, user.FirstName, user.LastName, user.Email, user.UserGuid, concurrencyControlNumber);
         }
 
         public async Task<PagedDto<UserSearchDto>> GetUsersAsync(decimal[]? serviceAreas, string[]? userTypes, string searchText, bool? isActive, int pageSize, int pageNumber, string orderBy)

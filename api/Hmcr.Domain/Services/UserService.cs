@@ -5,12 +5,10 @@ using Hmcr.Data.Database.Entities;
 using Hmcr.Data.Repositories;
 using Hmcr.Model;
 using Hmcr.Model.Dtos;
-using Hmcr.Model.Dtos.Party;
 using Hmcr.Model.Dtos.User;
 using Hmcr.Model.Utils;
 using System;
 using System.Collections.Generic;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace Hmcr.Domain.Services
@@ -25,7 +23,7 @@ namespace Hmcr.Domain.Services
         Task<(bool NotFound, Dictionary<string, List<string>> Errors)> UpdateUserAsync(UserUpdateDto user);
         Task<(bool NotFound, Dictionary<string, List<string>> Errors)> DeleteUserAsync(UserDeleteDto user);
         Task<HmrSystemUser> GetActiveUserEntityAsync(Guid userGuid);
-        void SaveUsernameChange(Guid userGuid, string newUserId, string oldUserId);
+        Task UpdateUserFromBceidAsync(string username, string userType, long concurrencyControlNumber);
     }
     public class UserService : IUserService
     {
@@ -190,9 +188,16 @@ namespace Hmcr.Domain.Services
             return (false, errors);
         }
 
-        public void SaveUsernameChange(Guid userGuid, string newUserId, string oldUserId)
+        public async Task UpdateUserFromBceidAsync(string username, string userType, long concurrencyControlNumber)
         {
-            _userRepo.SaveUsernameChange(userGuid, newUserId, oldUserId);
+            var (error, account) = await _bceid.GetBceidAccountCachedAsync(username, userType);
+
+            if (error.IsNotEmpty())
+            {
+                throw new HmcrException($"Unable to retrieve User[{username} ({userType})] from BCeID Service.");
+            }
+
+            await _userRepo.UpdateUserFromBceidAsync(account, concurrencyControlNumber);
         }
     }
 }
