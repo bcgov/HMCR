@@ -18,6 +18,7 @@ const defaultValues = {
   name: '',
   description: '',
   permissions: [],
+  internal: false,
   endDate: null,
 };
 
@@ -45,6 +46,9 @@ const EditRoleFormFields = ({ permissionIds, disableEdit }) => {
       <FormRow name="permissions" label="Permissions*">
         <MultiSelect items={permissionIds} name="permissions" />
       </FormRow>
+      {/* <FormRow name="internal" label="Internal">
+        <FormSwitchInput name="internal" />
+      </FormRow> */}
       <FormRow name="endDate" label="End Date">
         <SingleDateField name="endDate" placeholder="End Date" />
       </FormRow>
