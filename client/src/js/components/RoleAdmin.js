@@ -66,7 +66,7 @@ const RoleAdmin = ({ roleStatuses, setSingleRoleSeachCriteria, searchRoles, sear
   };
 
   const handleEditUserFormClose = refresh => {
-    if (refresh) {
+    if (refresh === true) {
       startSearch();
     }
     setEditRoleForm({ isOpen: false });
