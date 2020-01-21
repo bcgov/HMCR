@@ -62,9 +62,16 @@ namespace Hmcr.Data.Repositories
                     : query.Where(x => x.EndDate != null || x.EndDate <= DateTime.Today.AddDays(1));
             }
 
+            query = query.Include(x => x.HmrUserRoles);
+
             var pagedEntity = await Page<HmrRole, HmrRole>(query, pageSize, pageNumber, orderBy);
 
             var roles = Mapper.Map<IEnumerable<RoleSearchDto>>(pagedEntity.SourceList);
+
+            foreach (var role in roles)
+            {
+                role.InUse = pagedEntity.SourceList.Any(r => r.RoleId == role.RoleId && r.HmrUserRoles.Count > 0);
+            }
 
             var pagedDTO = new PagedDto<RoleSearchDto>
             {
