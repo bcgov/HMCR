@@ -51,30 +51,32 @@ const createClipboardText = data => {
   clipboardData += 'file name\treport type\tstatus\n';
   clipboardData += `${data.fileName}\t${data.streamName}\t${data.description}\n`;
 
-  clipboardData += '\nstatus detail\n';
+  if (data.errorDetail) {
+    clipboardData += '\nstatus detail\n';
 
-  clipboardData += parseErrorDetailJson(data.errorDetail)
-    .map(field => field.messages.map(msg => `${field.field}\t${msg}`))
-    .join('\n');
-
-  if (data.submissionRows.length <= 0) return clipboardData;
-
-  clipboardData += '\n\nrow errors\n';
-
-  clipboardData += 'row\tservice area\trecord number\tfield\tmessage\n';
-
-  data.submissionRows.forEach(row => {
-    const errors = parseErrorDetailJson(row.errorDetail);
-
-    clipboardData += errors
-      .map(field =>
-        field.messages.map(
-          msg => `${row.rowNum}\t${data.serviceAreaNumber}\t${row.recordNumber}\t${field.field}\t"${msg}"`
-        )
-      )
+    clipboardData += parseErrorDetailJson(data.errorDetail)
+      .map(field => field.messages.map(msg => `${field.field}\t${msg}`))
       .join('\n');
-    clipboardData += '\n';
-  });
+  }
+
+  if (data.submissionRows.length > 0) {
+    clipboardData += '\n\nrow errors\n';
+
+    clipboardData += 'row\tservice area\trecord number\tfield\tmessage\n';
+
+    data.submissionRows.forEach(row => {
+      const errors = parseErrorDetailJson(row.errorDetail);
+
+      clipboardData += errors
+        .map(field =>
+          field.messages.map(
+            msg => `${row.rowNum}\t${data.serviceAreaNumber}\t${row.recordNumber}\t${field.field}\t"${msg}"`
+          )
+        )
+        .join('\n');
+      clipboardData += '\n';
+    });
+  }
 
   return clipboardData;
 };
@@ -149,6 +151,7 @@ const WorkReportingSubmissionDetail = ({ toggle, submission }) => {
                 FileSaver.saveAs(new Blob([response.data]), filename);
               })
             }
+            title="Download original submission"
           >
             <FontAwesomeIcon icon="download" /> Original
           </Button>
@@ -156,8 +159,9 @@ const WorkReportingSubmissionDetail = ({ toggle, submission }) => {
             className="btn btn-primary btn-sm"
             data-clipboard-text={createClipboardText(submissionResultData)}
             onSuccess={() => {
-              toast.info(<div className="text-center">Text copied</div>);
+              toast.info(<div className="text-center">Error details copied to clipboard.</div>);
             }}
+            title="Copy errors to clipboard, with tab delimiter"
           >
             <FontAwesomeIcon icon="copy" /> Copy
           </Clipboard>
