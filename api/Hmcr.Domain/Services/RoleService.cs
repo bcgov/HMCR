@@ -1,6 +1,7 @@
 ﻿using Hmcr.Data.Database;
 using Hmcr.Data.Repositories;
 using Hmcr.Model;
+using Hmcr.Model.Dtos;
 using Hmcr.Model.Dtos.Role;
 using Hmcr.Model.Utils;
 using System.Collections.Generic;
@@ -12,7 +13,7 @@ namespace Hmcr.Domain.Services
     {
         Task<IEnumerable<RoleDto>> GetActiveRolesAsync();
         Task<int> CountActiveRoleIdsAsync(IEnumerable<decimal> roles);
-        Task<IEnumerable<RoleSearchDto>> GetRolesAync(string searchText, bool? isActive = null);
+        Task<PagedDto<RoleSearchDto>> GetRolesAync(string searchText, bool? isActive, int pageSize, int pageNumber, string orderBy);
         Task<RoleDto> GetRoleAsync(decimal roleId);
         Task<(decimal RoleId, Dictionary<string, List<string>> Errors)> CreateRoleAsync(RoleCreateDto role);
         Task<(bool NotFound, Dictionary<string, List<string>> Errors)> UpdateRoleAsync(RoleUpdateDto role);
@@ -112,9 +113,9 @@ namespace Hmcr.Domain.Services
             return await _roleRepo.GetRoleAsync(roleId);
         }
 
-        public async Task<IEnumerable<RoleSearchDto>> GetRolesAync(string searchText, bool? isActive = null)
+        public async Task<PagedDto<RoleSearchDto>> GetRolesAync(string searchText, bool? isActive, int pageSize, int pageNumber, string orderBy)
         {
-            return await _roleRepo.GetRolesAync(searchText, isActive);
+            return await _roleRepo.GetRolesAync(searchText, isActive, pageSize, pageNumber, orderBy);
         }
 
         public async Task<(bool NotFound, Dictionary<string, List<string>> Errors)> UpdateRoleAsync(RoleUpdateDto role)

@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using Hmcr.Data.Database.Entities;
 using Hmcr.Data.Repositories.Base;
+using Hmcr.Model.Dtos;
 using Hmcr.Model.Dtos.Role;
 using Hmcr.Model.Utils;
 using Microsoft.EntityFrameworkCore;
@@ -15,7 +16,7 @@ namespace Hmcr.Data.Repositories
     {
         Task<int> CountActiveRoleIdsAsync(IEnumerable<decimal> roles);
         Task<IEnumerable<RoleDto>> GetActiveRolesAsync();
-        Task<IEnumerable<RoleSearchDto>> GetRolesAync(string searchText, bool? isActive = null);
+        Task<PagedDto<RoleSearchDto>> GetRolesAync(string searchText, bool? isActive, int pageSize, int pageNumber, string orderBy);
         Task<RoleDto> GetRoleAsync(decimal roleId);
         Task<HmrRole> CreateRoleAsync(RoleCreateDto role);
         Task UpdateRoleAsync(RoleUpdateDto role);
@@ -44,7 +45,7 @@ namespace Hmcr.Data.Repositories
             return Mapper.Map<IEnumerable<RoleDto>>(roleEntity);
         } 
 
-        public async Task<IEnumerable<RoleSearchDto>> GetRolesAync(string searchText, bool? isActive = null)
+        public async Task<PagedDto<RoleSearchDto>> GetRolesAync(string searchText, bool? isActive, int pageSize, int pageNumber, string orderBy)
         {
             var query = DbSet.AsNoTracking();
 
@@ -61,9 +62,19 @@ namespace Hmcr.Data.Repositories
                     : query.Where(x => x.EndDate != null || x.EndDate <= DateTime.Today.AddDays(1));
             }
 
-            var roles = Mapper.Map<IEnumerable<RoleSearchDto>>(await query.ToListAsync());
+            var pagedEntity = await Page<HmrRole, HmrRole>(query, pageSize, pageNumber, orderBy);
 
-            return roles;
+            var roles = Mapper.Map<IEnumerable<RoleSearchDto>>(pagedEntity.SourceList);
+
+            var pagedDTO = new PagedDto<RoleSearchDto>
+            {
+                PageNumber = pageNumber,
+                PageSize = pageSize,
+                TotalCount = pagedEntity.TotalCount,
+                SourceList = roles
+            };
+
+            return pagedDTO;
         }
 
         public async Task<RoleDto> GetRoleAsync(decimal roleId)

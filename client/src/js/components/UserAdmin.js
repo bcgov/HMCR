@@ -143,7 +143,7 @@ const UserAdmin = ({
                     <SubmitButton className="mr-2" disabled={searching} submitting={searching}>
                       Search
                     </SubmitButton>
-                    <Button type="reset">Clear</Button>
+                    <Button type="reset">Reset</Button>
                   </div>
                 </Col>
               </Row>
