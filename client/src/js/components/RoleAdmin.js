@@ -5,9 +5,9 @@ import { Formik, Form, Field } from 'formik';
 
 import Authorize from './fragments/Authorize';
 import MaterialCard from './ui/MaterialCard';
-import SingleDropdownField from './ui/SingleDropdownField';
+import MultiDropdown from './ui/MultiDropdown';
 import EditRoleForm from './forms/EditRoleForm';
-import DataTableControl from './ui/DataTableControl';
+import DataTableWithPaginaionControl from './ui/DataTableWithPaginaionControl';
 import SubmitButton from './ui/SubmitButton';
 import PageSpinner from './ui/PageSpinner';
 
@@ -16,15 +16,15 @@ import { setSingleRoleSeachCriteria, searchRoles } from '../actions';
 import * as Constants from '../Constants';
 import * as api from '../Api';
 
-const defaultSearchFormValues = { searchText: '', isActive: 'ACTIVE' };
+const defaultSearchFormValues = { searchText: '', roleStatusId: ['ACTIVE'] };
 
 const tableColumns = [
-  { heading: 'Role Name', key: 'name', nosort: true },
-  { heading: 'Role Description', key: 'description', nosort: true },
+  { heading: 'Role Name', key: 'name' },
+  { heading: 'Role Description', key: 'description' },
   { heading: 'Active', key: 'isActive', nosort: true },
 ];
 
-const RoleAdmin = ({ roleStatuses, setSingleRoleSeachCriteria, searchRoles, searchResult }) => {
+const RoleAdmin = ({ roleStatuses, setSingleRoleSeachCriteria, searchRoles, searchResult, searchPagination }) => {
   const [editRoleForm, setEditRoleForm] = useState({ isOpen: false });
   const [searching, setSearching] = useState(false);
 
@@ -48,7 +48,11 @@ const RoleAdmin = ({ roleStatuses, setSingleRoleSeachCriteria, searchRoles, sear
     const searchText = values.searchText.trim() || null;
     setSingleRoleSeachCriteria('searchText', searchText);
 
-    setSingleRoleSeachCriteria('isActive', values.isActive === 'ACTIVE');
+    let isActive = null;
+    if (values.roleStatusId.length === 1) {
+      isActive = values.roleStatusId[0] === 'ACTIVE';
+    }
+    setSingleRoleSeachCriteria('isActive', isActive);
 
     startSearch();
   };
@@ -68,6 +72,23 @@ const RoleAdmin = ({ roleStatuses, setSingleRoleSeachCriteria, searchRoles, sear
     setEditRoleForm({ isOpen: false });
   };
 
+  const handleChangePage = newPage => {
+    setSingleRoleSeachCriteria('pageNumber', newPage);
+    startSearch();
+  };
+
+  const handleChangePageSize = newSize => {
+    setSingleRoleSeachCriteria('pageSize', newSize);
+    setSingleRoleSeachCriteria('pageNumber', 1);
+    startSearch();
+  };
+
+  const handleHeadingSortClicked = headingKey => {
+    setSingleRoleSeachCriteria('pageNumber', 1);
+    setSingleRoleSeachCriteria('orderBy', headingKey);
+    startSearch();
+  };
+
   return (
     <React.Fragment>
       <MaterialCard>
@@ -84,12 +105,7 @@ const RoleAdmin = ({ roleStatuses, setSingleRoleSeachCriteria, searchRoles, sear
                   <Field type="text" name="searchText" placeholder="Role/Description" className="form-control" />
                 </Col>
                 <Col>
-                  <SingleDropdownField
-                    {...formikProps}
-                    defaultTitle="Select Status"
-                    items={roleStatuses}
-                    name="isActive"
-                  />
+                  <MultiDropdown {...formikProps} title="Role Status" items={roleStatuses} name="roleStatusId" />
                 </Col>
                 <Col />
                 <Col />
@@ -98,7 +114,7 @@ const RoleAdmin = ({ roleStatuses, setSingleRoleSeachCriteria, searchRoles, sear
                     <SubmitButton className="mr-2" disabled={searching} submitting={searching}>
                       Search
                     </SubmitButton>
-                    <Button type="reset">Clear</Button>
+                    <Button type="reset">Reset</Button>
                   </div>
                 </Col>
               </Row>
@@ -123,13 +139,17 @@ const RoleAdmin = ({ roleStatuses, setSingleRoleSeachCriteria, searchRoles, sear
       {searching && <PageSpinner />}
       {!searching && searchResult.length > 0 && (
         <MaterialCard>
-          <DataTableControl
+          <DataTableWithPaginaionControl
             dataList={searchResult}
             tableColumns={tableColumns}
+            searchPagination={searchPagination}
+            onPageNumberChange={handleChangePage}
+            onPageSizeChange={handleChangePageSize}
             editable
             editPermissionName={Constants.PERMISSIONS.ROLE_W}
             onEditClicked={onEditClicked}
             onDeleteClicked={onDeleteClicked}
+            onHeadingSortClicked={handleHeadingSortClicked}
           />
         </MaterialCard>
       )}
@@ -142,6 +162,7 @@ const mapStateToProps = state => {
   return {
     roleStatuses: Object.values(state.roles.statuses),
     searchResult: Object.values(state.roles.list),
+    searchPagination: state.roles.searchPagination,
   };
 };
 
