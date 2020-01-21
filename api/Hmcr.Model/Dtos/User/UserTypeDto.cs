@@ -9,8 +9,8 @@ namespace Hmcr.Model.Dtos.User
     {
         public const string INTERNAL = "INTERNAL";
         public const string BUSINESS = "BUSINESS";
-        public const string IDIR = "IDIR";
-        public const string BCeId = "BCeID";
+        public const string IDIR = "IDIR"; //user directory which is used as description of user type internal
+        public const string BCeId = "BCeID"; //user directory which is used as description of user type business
 
         [JsonPropertyName("id")]
         public string UserTypeId { get; set; }
