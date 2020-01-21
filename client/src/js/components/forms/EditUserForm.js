@@ -71,7 +71,7 @@ const EditUserForm = ({ toggle, isOpen, userTypes, serviceAreas, editUser, userI
     api
       .getRoles()
       .then(response => {
-        setRoles(response.data);
+        setRoles(response.data.sourceList);
 
         return api.getUser(userId).then(response => {
           setInitialValues({

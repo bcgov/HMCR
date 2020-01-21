@@ -150,7 +150,7 @@ const AddUserSetupUser = ({ serviceAreas, values, submitting, setWizardState }) 
     api
       .getRoles()
       .then(response => {
-        setRoles(response.data);
+        setRoles(response.data.sourceList);
       })
       .finally(() => setLoading(false));
   }, []);
