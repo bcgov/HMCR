@@ -13,6 +13,7 @@ import SubmitButton from '../ui/SubmitButton';
 
 import { createUser, editUser, showValidationErrorDialog, hideErrorDialog } from '../../actions';
 
+import * as Constants from '../../Constants';
 import * as api from '../../Api';
 
 const WIZARD_STATE = {
@@ -150,10 +151,12 @@ const AddUserSetupUser = ({ serviceAreas, values, submitting, setWizardState }) 
     api
       .getRoles()
       .then(response => {
-        setRoles(response.data.sourceList);
+        if (values.userType === Constants.USER_TYPE.BUSINESS)
+          setRoles(response.data.sourceList.filter(r => r.internal === false));
+        else setRoles(response.data.sourceList);
       })
       .finally(() => setLoading(false));
-  }, []);
+  }, [values.userType]);
 
   return (
     <React.Fragment>

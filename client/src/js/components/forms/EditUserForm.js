@@ -12,6 +12,7 @@ import FormModal from './FormModal';
 
 import { editUser, showValidationErrorDialog } from '../../actions';
 
+import * as Constants from '../../Constants';
 import * as api from '../../Api';
 
 const defaultValues = {
@@ -69,15 +70,19 @@ const EditUserForm = ({ toggle, isOpen, userTypes, serviceAreas, editUser, userI
 
   useEffect(() => {
     api
-      .getRoles()
+      .getUser(userId)
       .then(response => {
-        setRoles(response.data.sourceList);
+        setInitialValues({
+          ...response.data,
+          endDate: response.data.endDate ? moment(response.data.endDate) : null,
+        });
 
-        return api.getUser(userId).then(response => {
-          setInitialValues({
-            ...response.data,
-            endDate: response.data.endDate ? moment(response.data.endDate) : null,
-          });
+        const userType = response.data.userType;
+
+        return api.getRoles().then(response => {
+          if (userType === Constants.USER_TYPE.BUSINESS)
+            setRoles(response.data.sourceList.filter(r => r.internal === false));
+          else setRoles(response.data.sourceList);
         });
       })
       .then(() => setLoading(false));
