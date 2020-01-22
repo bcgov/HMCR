@@ -1,6 +1,8 @@
 apiVersion: v1
 kind: Template
 metadata:
+  annotations:
+    haproxy.router.openshift.io/timeout: 1h
   creationTimestamp: null
   name: ${PROJECT_NAME}
 labels:
