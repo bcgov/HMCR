@@ -109,7 +109,7 @@ const EditRoleForm = ({ toggle, isOpen, formType, roleId, showValidationErrorDia
     }
   };
 
-  const title = formType === Constants.FORM_TYPE.ADD ? 'Add User' : 'Edit User';
+  const title = formType === Constants.FORM_TYPE.ADD ? 'Add Role' : 'Edit Role';
 
   return (
     <FormModal
