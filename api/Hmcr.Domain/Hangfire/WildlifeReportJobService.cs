@@ -5,7 +5,7 @@ using Hmcr.Data.Repositories;
 using Hmcr.Domain.CsvHelpers;
 using Hmcr.Domain.Services;
 using Hmcr.Model;
-using Hmcr.Model.Dtos.RockfallReport;
+using Hmcr.Model.Dtos.SubmissionObject;
 using Hmcr.Model.Dtos.WildlifeReport;
 using Hmcr.Model.Utils;
 using Microsoft.Extensions.Logging;
@@ -19,7 +19,7 @@ namespace Hmcr.Domain.Hangfire
 {
     public interface IWildlifeReportJobService
     {
-        Task ProcessSubmission(HmrSubmissionObject submission);
+        Task ProcessSubmission(SubmissionDto submission);
     }
 
     public class WildlifeReportJobService : IWildlifeReportJobService
@@ -28,26 +28,31 @@ namespace Hmcr.Domain.Hangfire
         private ILogger _logger;
         protected IFieldValidatorService _validator;
         protected ISubmissionStatusRepository _statusRepo;
+        private ISubmissionObjectRepository _submissionRepo;
+        private ISumbissionRowRepository _submissionRowRepo;
         private IWildlifeReportRepository _wildlifeReportRepo;
 
         public WildlifeReportJobService(IUnitOfWork unitOfWork, ILogger<IWildlifeReportJobService> logger,
-            ISubmissionStatusRepository statusRepo,
-            IWildlifeReportRepository wildlifeReportRepo, IFieldValidatorService validator)
+            ISubmissionStatusRepository statusRepo, ISubmissionObjectRepository submissionRepo,
+            ISumbissionRowRepository submissionRowRepo, IWildlifeReportRepository wildlifeReportRepo, IFieldValidatorService validator)
         {
             _unitOfWork = unitOfWork;
             _logger = logger;
             _statusRepo = statusRepo;
+            _submissionRepo = submissionRepo;
+            _submissionRowRepo = submissionRowRepo;
             _wildlifeReportRepo = wildlifeReportRepo;
             _validator = validator;
         }
 
-        public async Task ProcessSubmission(HmrSubmissionObject submission)
+        public async Task ProcessSubmission(SubmissionDto submissionDto)
         {
-            _logger.LogInformation("[Hangfire] Starting submission {submissionObjectId}", submission.SubmissionObjectId);
+            _logger.LogInformation("[Hangfire] Starting submission {submissionObjectId}", submissionDto.SubmissionObjectId);
             var errors = new Dictionary<string, List<string>>();
 
-            var statuses = await _statusRepo.GetActiveStatuses();
+            var submission = await _submissionRepo.GetSubmissionObjecForBackgroundJobAsync(submissionDto.SubmissionObjectId);
 
+            var statuses = await _statusRepo.GetActiveStatuses();
             var inProgressRowStatusId = statuses.First(x => x.StatusType == StatusType.File && x.StatusCode == FileStatus.InProgress).StatusId;
             submission.SubmissionStatusId = inProgressRowStatusId;
             _unitOfWork.Commit();
@@ -73,12 +78,12 @@ namespace Hmcr.Domain.Hangfire
             }
 
             //text after duplicate lines are removed. Will be used for importing to typed DTO.
-            var text = SetRowIdAndRemoveDuplicate(submission, duplicateRowStatusId, untypedRows, headers);
+            var text = await SetRowIdAndRemoveDuplicate(submission, duplicateRowStatusId, untypedRows, headers);
 
             foreach (var untypedRow in untypedRows)
             {
                 errors = new Dictionary<string, List<string>>();
-                var submissionRow = submission.HmrSubmissionRows.First(x => x.RowId == untypedRow.RowId);
+                var submissionRow = await _submissionRowRepo.GetSubmissionRowByRowId(untypedRow.RowId);
                 submissionRow.RowStatusId = successRowStatusId; //set the initial row status as success 
 
                 var entityName = GetValidationEntityName(untypedRow);
@@ -130,7 +135,7 @@ namespace Hmcr.Domain.Hangfire
             foreach (var typedRow in typedRows)
             {
                 var errors = new Dictionary<string, List<string>>();
-                var submissionRow = submission.HmrSubmissionRows.First(x => x.RowNum == typedRow.RowNum);
+                var submissionRow = await _submissionRowRepo.GetSubmissionRowByRowNum(submission.SubmissionObjectId, (decimal)typedRow.RowNum);
 
                 //Geo-spatial Validation here
 
@@ -172,7 +177,7 @@ namespace Hmcr.Domain.Hangfire
             return errors.Count == 0;
         }
 
-        private string SetRowIdAndRemoveDuplicate(HmrSubmissionObject submission, decimal duplicateStatusId, List<WildlifeReportCsvDto> rows, string headers)
+        private async Task<string> SetRowIdAndRemoveDuplicate(HmrSubmissionObject submission, decimal duplicateStatusId, List<WildlifeReportCsvDto> rows, string headers)
         {
             headers = $"{Fields.RowNum}," + headers;
             var text = new StringBuilder();
@@ -181,7 +186,7 @@ namespace Hmcr.Domain.Hangfire
             for (int i = rows.Count - 1; i >= 0; i--)
             {
                 var row = rows[i];
-                var entity = submission.HmrSubmissionRows.First(x => x.RowNum == row.RowNum);
+                var entity = await _submissionRowRepo.GetSubmissionRowByRowNum(submission.SubmissionObjectId, (decimal)row.RowNum);
 
                 if (entity.RowStatusId == duplicateStatusId)
                 {
