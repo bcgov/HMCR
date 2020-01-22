@@ -6,6 +6,7 @@ using Hmcr.Model.Dtos.SubmissionRow;
 using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace Hmcr.Data.Repositories
 {
@@ -14,6 +15,8 @@ namespace Hmcr.Data.Repositories
         IAsyncEnumerable<SubmissionRowDto> FindDuplicateFromLatestRecordsAsync(decimal submissionStreamId, decimal partyId, IEnumerable<SubmissionRowDto> rows);
         IAsyncEnumerable<SubmissionRowDto> FindDuplicateFromAllRecordsAsync(decimal submissionStreamId, IEnumerable<SubmissionRowDto> rows);
         IAsyncEnumerable<string> UpdateIsResubmitAsync(decimal submissionStreamId, decimal partyId, IEnumerable<SubmissionRowDto> rows);
+        Task<HmrSubmissionRow> GetSubmissionRowByRowNum(decimal submissionObjectId, decimal rowNum);
+        Task<HmrSubmissionRow> GetSubmissionRowByRowId(decimal rowId);
     }
     public class SubmissionRowRepository : HmcrRepositoryBase<HmrSubmissionRow>, ISumbissionRowRepository
     {
@@ -77,6 +80,16 @@ namespace Hmcr.Data.Repositories
                     yield return row.RecordNumber;
                 }
             }
+        }
+
+        public async Task<HmrSubmissionRow> GetSubmissionRowByRowNum(decimal submissionObjectId, decimal rowNum)
+        {
+            return await DbSet.FirstAsync(x => x.SubmissionObjectId == submissionObjectId && x.RowNum == rowNum);
+        }
+
+        public async Task<HmrSubmissionRow> GetSubmissionRowByRowId(decimal rowId)
+        {
+            return await DbSet.FirstAsync(x => x.RowId == rowId);
         }
     }
 }

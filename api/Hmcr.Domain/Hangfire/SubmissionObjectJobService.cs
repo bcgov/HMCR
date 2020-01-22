@@ -63,7 +63,7 @@ namespace Hmcr.Domain.Hangfire
 
             foreach (var submission in submissions)
             {
-                switch (submission.SubmissionStream.StagingTableName)
+                switch (submission.StagingTableName)
                 {
                     case TableNames.WorkReport:
                         await _workRptJobService.ProcessSubmission(submission);
@@ -75,7 +75,7 @@ namespace Hmcr.Domain.Hangfire
                         await _wildlifeRptJobService.ProcessSubmission(submission);
                         break;
                     default:
-                        throw new NotImplementedException($"Background job for {submission.SubmissionStream.StagingTableName} is not implemented.");
+                        throw new NotImplementedException($"Background job for {submission.StagingTableName} is not implemented.");
                 }
             }
         }
