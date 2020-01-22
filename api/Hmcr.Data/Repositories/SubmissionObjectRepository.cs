@@ -22,7 +22,7 @@ namespace Hmcr.Data.Repositories
         Task<PagedDto<SubmissionObjectSearchDto>> GetSubmissionObjectsAsync(decimal serviceAreaNumber, DateTime dateFrom, DateTime dateTo, int pageSize, int pageNumber, string orderBy = "AppCreateTimestamp DESC", string searchText = null);
         Task<bool> IsDuplicateFileAsync(SubmissionObjectCreateDto submission);
         Task<HmrSubmissionObject> GetSubmissionObjectEntityAsync(decimal submissionObjectId);
-        Task<SubmissionDto[]> GetSubmissionObjecsForBackgroundJobAsync(decimal serviceAreaNumber);
+        SubmissionDto[] GetSubmissionObjecsForBackgroundJob(decimal serviceAreaNumber);
         Task<SubmissionObjectResultDto> GetSubmissionResultAsync(decimal submissionObjectId);
         Task<SubmissionObjectFileDto> GetSubmissionFileAsync(decimal submissionObjectId);
         Task<HmrSubmissionObject> GetSubmissionObjecForBackgroundJobAsync(decimal submissionObjectId);
@@ -57,11 +57,11 @@ namespace Hmcr.Data.Repositories
             return await DbSet.Include(x => x.HmrSubmissionRows).FirstAsync(x => x.SubmissionObjectId == submissionObjectId);
         }
 
-        public async Task<SubmissionDto[]> GetSubmissionObjecsForBackgroundJobAsync(decimal serviceAreaNumber)
+        public SubmissionDto[] GetSubmissionObjecsForBackgroundJob(decimal serviceAreaNumber)
         {
-            var acceptedStatus = await DbContext.HmrSubmissionStatus.FirstAsync(x => (x.StatusCode == FileStatus.FileReceived || x.StatusCode == FileStatus.InProgress) && x.StatusType == StatusType.File);
+            var acceptedStatus = DbContext.HmrSubmissionStatus.First(x => (x.StatusCode == FileStatus.FileReceived || x.StatusCode == FileStatus.InProgress) && x.StatusType == StatusType.File);
 
-            var submissions = await DbSet.AsNoTracking()
+            var submissions = DbSet.AsNoTracking()
                 .Where(x => x.ServiceAreaNumber == serviceAreaNumber && x.SubmissionStatus.StatusType == StatusType.File &&
                     (x.SubmissionStatus.StatusCode == FileStatus.FileReceived || x.SubmissionStatus.StatusCode == FileStatus.InProgress))
                 .Select(x => new SubmissionDto
@@ -70,7 +70,7 @@ namespace Hmcr.Data.Repositories
                     StagingTableName = x.SubmissionStream.StagingTableName
                 })
                 .OrderBy(x => x.SubmissionObjectId) //must be ascending order
-                .ToArrayAsync();                
+                .ToArray();               
 
             return submissions;
         }
