@@ -59,7 +59,7 @@ namespace Hmcr.Domain.Hangfire
             _user.UserGuid = new Guid();
 
             //Jobs must be processed chronologically. GetSubmissionObjecsForBackgroundJobAsync returns submissions by ascending order
-            var submissions = await _submissionRepo.GetSubmissionObjecsForBackgroundJobAsync(serviceAreaNumber); //todo: get staged rows too
+            var submissions = _submissionRepo.GetSubmissionObjecsForBackgroundJob(serviceAreaNumber); //todo: get staged rows too
 
             foreach (var submission in submissions)
             {
