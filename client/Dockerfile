@@ -7,7 +7,7 @@ RUN cd ./src && npm install --production && \
     npm run build
 
 
-FROM nginx-116-rhel8
+FROM docker-registry.default.svc:5000/txkggj-tools/nginx-116-rhel8
 
 COPY --from=builder /src/build/. /tmp/src
 COPY --from=builder /src/nginx-start/. /tmp/src/nginx-start
