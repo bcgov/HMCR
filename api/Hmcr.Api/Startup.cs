@@ -66,8 +66,14 @@ namespace Hmcr.Api
 
             //Register Hangfire Recurring Jobs 
             var serviceAreas = svcAreaService.GetAllServiceAreas();
-            var minute = Configuration.GetValue<int>("ReportJobIntervalInMinutes");
-            SubmissionObjectJobService.RegisterReportingJobs(serviceAreas, minute);
+
+            var minutes = Configuration.GetValue<int>("ReportJobIntervalInMinutes");
+            minutes = minutes < 1 ? 5 : minutes;
+
+            foreach (var serviceArea in serviceAreas)
+            {
+                RecurringJob.AddOrUpdate<SubmissionObjectJobService>($"SA{serviceArea.ServiceAreaNumber}", x => x.RunReportingJob(serviceArea.ServiceAreaNumber), $"*/{minutes} * * * *");
+            }
 
             //Inject Code Lookup
             validator.CodeLookup = codeLookupRepo.GetCodeLookupForValidation();

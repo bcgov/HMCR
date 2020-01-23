@@ -11,6 +11,7 @@ namespace Hmcr.Domain.Hangfire
 {
     public interface ISubmissionObjectJobService
     {
+        Task RunReportingJob(decimal serviceAreaNumber);
     }
 
     public class SubmissionObjectJobService : ISubmissionObjectJobService
@@ -37,17 +38,6 @@ namespace Hmcr.Domain.Hangfire
             _user = user;
             _rockfallRptJobService = rockfallRptJobService;
             _wildlifeRptJobService = wildlifeRptJobService;
-        }
-
-        public static void RegisterReportingJobs(IEnumerable<ServiceAreaNumberDto> serviceAreas, int minutes)
-        {
-            if (minutes < 1)
-                minutes = 5;
-
-            foreach (var serviceArea in serviceAreas)
-            {
-                RecurringJob.AddOrUpdate<SubmissionObjectJobService>($"SA{serviceArea.ServiceAreaNumber}", x => x.RunReportingJob(serviceArea.ServiceAreaNumber), $"*/{minutes} * * * *");
-            }
         }
 
         [SkipSameJob]
