@@ -4,6 +4,7 @@ using Hmcr.Domain.Services;
 using Hmcr.Model;
 using Hmcr.Model.Dtos.ServiceArea;
 using Hmcr.Model.Dtos.User;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -17,33 +18,30 @@ namespace Hmcr.Domain.Hangfire
     public class SubmissionObjectJobService : ISubmissionObjectJobService
     {
         private ISubmissionObjectRepository _submissionRepo;
-        private IServiceAreaService _svcAreaService;
         private IWorkReportJobService _workRptJobService;
-        private IActivityCodeRepository _activityRepo;
-        private ISubmissionStatusRepository _statusRepo;
-        private HmcrCurrentUser _user;
         private IRockfallReportJobService _rockfallRptJobService;
         private IWildlifeReportJobService _wildlifeRptJobService;
+        private HmcrCurrentUser _user;
+        private ILogger<SubmissionObjectJobService> _logger;
 
-        public SubmissionObjectJobService(ISubmissionObjectRepository submissionRepo, IServiceAreaService svcAreaService, 
+        public SubmissionObjectJobService(ISubmissionObjectRepository submissionRepo, 
             IWorkReportJobService workRptJobService, IRockfallReportJobService rockfallRptJobService, IWildlifeReportJobService wildlifeRptJobService,
-            IActivityCodeRepository activityRepo, ISubmissionStatusRepository statusRepo,
-            HmcrCurrentUser user)
+            HmcrCurrentUser user, ILogger<SubmissionObjectJobService> logger)
         {
             _submissionRepo = submissionRepo;
-            _svcAreaService = svcAreaService;
             _workRptJobService = workRptJobService;
-            _activityRepo = activityRepo;
-            _statusRepo = statusRepo;
-            _user = user;
             _rockfallRptJobService = rockfallRptJobService;
             _wildlifeRptJobService = wildlifeRptJobService;
+            _user = user;
+            _logger = logger;
         }
 
         [SkipSameJob]
         [AutomaticRetry(Attempts = 0)]
         public async Task RunReportingJob(decimal serviceAreaNumber)
         {
+            _logger.LogInformation($"[Hangfire] Starting RunReportingJob for service area {serviceAreaNumber}.");
+
             _user.AuthDirName = UserTypeDto.IDIR;
             _user.UniversalId = "hangfire";
             _user.UserGuid = new Guid();
@@ -68,6 +66,8 @@ namespace Hmcr.Domain.Hangfire
                         throw new NotImplementedException($"Background job for {submission.StagingTableName} is not implemented.");
                 }
             }
+
+            _logger.LogInformation($"[Hangfire] Finishing RunReportingJob for service area {serviceAreaNumber}.");
         }
     }
 }
