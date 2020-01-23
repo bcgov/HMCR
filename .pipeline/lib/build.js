@@ -14,22 +14,6 @@ module.exports = (settings)=>{
 
   kc.addUris();
 
-  // The building of your cool app goes here ▼▼▼
-  objects.push(
-    ...oc.processDeploymentTemplate(
-      `${templatesLocalBaseUrl}/nginx-build-config.yaml`,
-      {
-        param: {
-          NAME: `${settings.phases[phase].name}-nginx`,
-          SUFFIX: settings.phases[phase].suffix,
-          VERSION: settings.phases[phase].tag,
-          SOURCE_REPOSITORY_URL: `${oc.git.uri}`,
-          SOURCE_REPOSITORY_REF: `${oc.git.branch_ref}`
-        }
-      }
-    )
-  );
-
   objects.push(
     ...oc.processDeploymentTemplate(
       `${templatesLocalBaseUrl}/client-build-config.yaml`,
