@@ -80,9 +80,10 @@ const EditUserForm = ({ toggle, isOpen, userTypes, serviceAreas, editUser, userI
         const userType = response.data.userType;
 
         return api.getRoles().then(response => {
-          if (userType === Constants.USER_TYPE.BUSINESS)
-            setRoles(response.data.sourceList.filter(r => r.internal === false));
-          else setRoles(response.data.sourceList);
+          const data = response.data.sourceList.map(r => ({ ...r, description: r.name }));
+
+          if (userType === Constants.USER_TYPE.BUSINESS) setRoles(data.filter(r => r.internal === false));
+          else setRoles(data);
         });
       })
       .then(() => setLoading(false));
