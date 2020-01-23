@@ -1,12 +1,11 @@
 ﻿using Hangfire;
 using Hmcr.Data.Repositories;
-using Hmcr.Domain.Services;
 using Hmcr.Model;
-using Hmcr.Model.Dtos.ServiceArea;
+using Hmcr.Model.Dtos.SubmissionObject;
 using Hmcr.Model.Dtos.User;
+using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Logging;
 using System;
-using System.Collections.Generic;
 using System.Threading.Tasks;
 namespace Hmcr.Domain.Hangfire
 {
@@ -46,8 +45,17 @@ namespace Hmcr.Domain.Hangfire
             _user.UniversalId = "hangfire";
             _user.UserGuid = new Guid();
 
-            //Jobs must be processed chronologically. GetSubmissionObjecsForBackgroundJobAsync returns submissions by ascending order
-            var submissions = _submissionRepo.GetSubmissionObjecsForBackgroundJob(serviceAreaNumber); //todo: get staged rows too
+            var submissions = Array.Empty<SubmissionDto>();
+
+            try
+            {
+                //Jobs must be processed chronologically. GetSubmissionObjecsForBackgroundJobAsync returns submissions by ascending order
+                submissions = _submissionRepo.GetSubmissionObjecsForBackgroundJob(serviceAreaNumber); //todo: get staged rows too
+            }
+            catch (SqlException) //connection timeout happens when a long transaction is running but the issue gets resolved as the transaction finishes. looks like a Hangfire issue
+            {
+                _logger.LogWarning($"[Hangfire] RunReportingJob for service area {serviceAreaNumber} - connection timeout.");
+            }
 
             foreach (var submission in submissions)
             {
