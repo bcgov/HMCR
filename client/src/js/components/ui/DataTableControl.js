@@ -24,12 +24,18 @@ const DataTableControl = ({
       <Table size="sm" responsive hover>
         <thead className="thead-dark">
           <tr>
-            {tableColumns.map(column => (
-              <th key={column.heading} style={{ whiteSpace: 'nowrap' }}>
-                {column.heading}
-                {!column.nosort && <FontAwesomeButton icon="sort" onClick={() => onHeadingSortClicked(column.key)} />}
-              </th>
-            ))}
+            {tableColumns.map(column => {
+              let style = { whiteSpace: 'nowrap' };
+
+              if (column.maxWidth) style.maxWidth = column.maxWidth;
+
+              return (
+                <th key={column.heading} style={style}>
+                  {column.heading}
+                  {!column.nosort && <FontAwesomeButton icon="sort" onClick={() => onHeadingSortClicked(column.key)} />}
+                </th>
+              );
+            })}
             {editable && (
               <Authorize requires={editPermissionName}>
                 <th></th>
@@ -41,19 +47,29 @@ const DataTableControl = ({
           {dataList.map((item, index) => {
             return (
               <tr key={index}>
-                {tableColumns.map(column =>
-                  column.key === 'isActive' ? (
-                    <td key={column.key}>
-                      {item[column.key] ? (
-                        <Badge color="success">Active</Badge>
-                      ) : (
-                        <Badge color="danger">Inactive</Badge>
-                      )}
+                {tableColumns.map(column => {
+                  if (column.key === 'isActive')
+                    return (
+                      <td key={column.key}>
+                        {item[column.key] ? (
+                          <Badge color="success">Active</Badge>
+                        ) : (
+                          <Badge color="danger">Inactive</Badge>
+                        )}
+                      </td>
+                    );
+
+                  let style = {};
+                  if (column.maxWidth) {
+                    style.maxWidth = column.maxWidth;
+                  }
+
+                  return (
+                    <td key={column.key} className={column.maxWidth ? 'text-overflow-hiden' : ''} style={style}>
+                      {item[column.key]}
                     </td>
-                  ) : (
-                    <td key={column.key}>{item[column.key]}</td>
-                  )
-                )}
+                  );
+                })}
                 {editable && (
                   <Authorize requires={editPermissionName}>
                     <td style={{ width: '1%', whiteSpace: 'nowrap' }}>

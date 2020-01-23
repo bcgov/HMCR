@@ -23,7 +23,7 @@ const tableColumns = [
   { heading: 'Last Name', key: 'lastName' },
   { heading: 'User ID', key: 'username' },
   { heading: 'Organization', key: 'businessLegalName' },
-  { heading: 'Service Areas', key: 'serviceAreas', nosort: true },
+  { heading: 'Service Areas', key: 'serviceAreas', nosort: true, maxWidth: '100px' },
   { heading: 'Active', key: 'isActive', nosort: true },
 ];
 

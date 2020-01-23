@@ -19,6 +19,16 @@ body {
   padding: 0.1rem 0.3rem;
 }
 
+.text-overflow-hiden {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.text-overflow-hiden:hover {
+  overflow: visible;
+  word-wrap: break-word;
+}
+
 .btn-xs {
   padding: 0.125rem 0.25rem;
   font-size: 0.75rem;
