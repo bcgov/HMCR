@@ -139,7 +139,7 @@ namespace Hmcr.Domain.Hangfire
 
                 await _unitOfWork.CommitAsync();
 
-                _logger.LogInformation("Report Saved");
+                _logger.LogInformation($"[Hangfire] Submission {submission.SubmissionObjectId} processed successfully.");
             }
 
             _logger.LogInformation("[Hangfire] Finishing submission {submissionObjectId}", submission.SubmissionObjectId);
