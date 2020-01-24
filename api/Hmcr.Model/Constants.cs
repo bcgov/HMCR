@@ -154,18 +154,24 @@ namespace Hmcr.Model
         public const string RowNum = "RowNum";
     }
 
-    public static class WorkReportHeaders
+    public interface IReportHeaders
     {
-        public static string[] CommonMandatoryFields = new string[] 
+        string[] CommonMandatoryFields { get; }
+    }
+    public class WorkReportHeaders : IReportHeaders
+    {
+
+        public static string[] MandatoryFields = new string[]
         {
-            Fields.RecordType, Fields.ServiceArea, Fields.RecordNumber, Fields.ActivityNumber, 
-            Fields.EndDate, Fields.Accomplishment, Fields.UnitOfMeasure, Fields.PostedDate 
+            Fields.RecordType, Fields.ServiceArea, Fields.RecordNumber, Fields.ActivityNumber,
+            Fields.EndDate, Fields.Accomplishment, Fields.UnitOfMeasure, Fields.PostedDate
         };
+        public string[] CommonMandatoryFields => MandatoryFields;
     }
 
-    public static class RockfallReportHeaders
+    public class RockfallReportHeaders : IReportHeaders
     {
-        public static string[] CommonMandatoryFields = new string[]
+        public static string[] MandatoryFields = new string[]
         {
             Fields.RecordType, Fields.ServiceArea, Fields.McrrIncidentNumber, Fields.EstimatedRockfallDate, Fields.EstimatedRockfallTime,
             Fields.StartLatitude, Fields.StartLongitude, Fields.HighwayUniqueNumber, Fields.HighwayUniqueName, Fields.Landmark,
@@ -173,15 +179,17 @@ namespace Hmcr.Model
             Fields.HeavyPrecip, Fields.FreezeThaw, Fields.DitchSnowIce, Fields.VehicleDamage, Fields.Name,
             Fields.McPhoneNumber, Fields.McName, Fields.ReportDate
         };
+        public string[] CommonMandatoryFields => MandatoryFields;
     }
 
-    public static class WildlifeReportHeaders
+    public class WildlifeReportHeaders : IReportHeaders
     {
-        public static string[] CommonMandatoryFields = new string[]
+        public static string[] MandatoryFields = new string[]
         {
             Fields.RecordType, Fields.ServiceArea, Fields.AccidentDate, Fields.TimeOfKill, 
             Fields.WildlifeSign, Fields.Quantity, Fields.Species, Fields.Sex, Fields.Age
         };
+        public string[] CommonMandatoryFields => MandatoryFields;
     }
 
     public static class CodeSet

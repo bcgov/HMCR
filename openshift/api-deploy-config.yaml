@@ -113,6 +113,31 @@ objects:
                     secretKeyRef:
                       name: bceid-service
                       key: BCEID_GUID
+                - name: SMTP_SENDER_NAME
+                  valueFrom:
+                    secretKeyRef:
+                      name: email-service
+                      key: SMTP_SENDER_NAME
+                - name: SMTP_SENDER_ADDRESS
+                  valueFrom:
+                    secretKeyRef:
+                      name: email-service
+                      key: SMTP_SENDER_ADDRESS
+                - name: SMTP_THUMBPRINT
+                  valueFrom:
+                    secretKeyRef:
+                      name: email-service
+                      key: SMTP_THUMBPRINT
+                - name: SMTP_SERVER
+                  valueFrom:
+                    secretKeyRef:
+                      name: email-service
+                      key: SMTP_SERVER
+                - name: SMTP_PORT
+                  valueFrom:
+                    secretKeyRef:
+                      name: email-service
+                      key: SMTP_PORT
                 - name: ASPNETCORE_ENVIRONMENT
                   value: ${ASPNETCORE_ENVIRONMENT}
       test: false
