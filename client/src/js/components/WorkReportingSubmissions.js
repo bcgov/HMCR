@@ -32,25 +32,10 @@ const defaultSearchOptions = {
   pageSize: Constants.DEFAULT_PAGE_SIZE,
   pageNumber: 1,
   dataPath: Constants.API_PATHS.SUBMISSIONS,
-  serviceAreaNumber: 10,
 };
 
 const WorkReportingSubmissions = ({ serviceArea, history }, ref) => {
-  const [refreshTrigger, setRefreshTrigger] = useState(null);
-
-  const {
-    data,
-    pagination,
-    loading,
-    searchOptions,
-    setSearchOptions,
-    handleChangePage,
-    handleChangePageSize,
-  } = useSearchData({
-    defaultSearchOptions: null,
-    refreshTrigger,
-    history,
-  });
+  const searchData = useSearchData(null, history);
   const [searchText, setSearchText] = useState(defaultSearchOptions.searchText);
 
   const [showResultScreen, setShowResultScreen] = useState({ isOpen: false, submission: null });
@@ -62,7 +47,7 @@ const WorkReportingSubmissions = ({ serviceArea, history }, ref) => {
 
   useImperativeHandle(ref, () => ({
     refresh() {
-      setRefreshTrigger(Math.random());
+      searchData.refresh();
     },
   }));
 
@@ -82,7 +67,7 @@ const WorkReportingSubmissions = ({ serviceArea, history }, ref) => {
       setShowResultScreen({ isOpen: true, submission: params.showResult });
     }
 
-    setSearchOptions(options);
+    searchData.setSearchOptions(options);
     setSearchText(options.searchText);
     setDateFrom(options.dateFrom);
     setDateTo(options.dateTo);
@@ -93,7 +78,7 @@ const WorkReportingSubmissions = ({ serviceArea, history }, ref) => {
   const handleDateChanged = (dateFrom, dateTo) => {
     if (!(dateFrom && dateTo && dateFrom.isSameOrBefore(dateTo))) return;
 
-    setSearchOptions({ ...searchOptions, dateFrom, dateTo });
+    searchData.setSearchOptions({ ...searchData.searchOptions, dateFrom, dateTo });
   };
 
   return (
@@ -142,7 +127,7 @@ const WorkReportingSubmissions = ({ serviceArea, history }, ref) => {
                   onChange={e => setSearchText(e.target.value)}
                   onKeyDown={e => {
                     if (e.key === 'Enter') {
-                      setSearchOptions({ ...searchOptions, searchText });
+                      searchData.setSearchOptions({ ...searchData.searchOptions, searchText });
                     }
                   }}
                 />
@@ -152,21 +137,21 @@ const WorkReportingSubmissions = ({ serviceArea, history }, ref) => {
               <FontAwesomeButton
                 size="sm"
                 icon="sync"
-                spin={loading}
-                disabled={loading}
-                onClick={() => setRefreshTrigger(Math.random())}
+                spin={searchData.loading}
+                disabled={searchData.loading}
+                onClick={() => searchData.refresh()}
               />
             </div>
           </div>
         </Col>
       </Row>
-      {loading && <PageSpinner />}
-      {!loading && (
+      {searchData.loading && <PageSpinner />}
+      {!searchData.loading && (
         <Row>
           <Col>
-            {data.length > 0 && (
+            {searchData.data.length > 0 && (
               <DataTableWithPaginaionControl
-                dataList={data.map(item => ({
+                dataList={searchData.data.map(item => ({
                   ...item,
                   name: `${item.firstName} ${item.lastName}`,
                   date: moment(item.appCreateTimestamp).format(Constants.DATE_DISPLAY_FORMAT),
@@ -181,12 +166,12 @@ const WorkReportingSubmissions = ({ serviceArea, history }, ref) => {
                   ),
                 }))}
                 tableColumns={tableColumns}
-                searchPagination={pagination}
-                onPageNumberChange={handleChangePage}
-                onPageSizeChange={handleChangePageSize}
+                searchPagination={searchData.pagination}
+                onPageNumberChange={searchData.handleChangePage}
+                onPageSizeChange={searchData.handleChangePageSize}
               />
             )}
-            {data.length <= 0 && <div>No submissions found</div>}
+            {searchData.data.length <= 0 && <div>No submissions found</div>}
           </Col>
         </Row>
       )}

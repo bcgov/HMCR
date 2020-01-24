@@ -7,7 +7,7 @@ import { updateQueryParamsFromHistory } from '../../utils';
 import * as api from '../../Api';
 import * as Constants from '../../Constants';
 
-const useSearchData = ({ defaultSearchOptions, refreshTrigger, history }) => {
+const useSearchData = (defaultSearchOptions, history) => {
   const [data, setData] = useState([]);
   const [pagination, setPagination] = useState({
     currentPage: null,
@@ -19,6 +19,7 @@ const useSearchData = ({ defaultSearchOptions, refreshTrigger, history }) => {
   });
   const [loading, setLoading] = useState(false);
   const [searchOptions, setSearchOptions] = useState(defaultSearchOptions);
+  const [refreshTrigger, setRefreshTrigger] = useState(null);
 
   const handleChangePage = newPage => {
     const options = { ...searchOptions, pageNumber: newPage };
@@ -30,8 +31,20 @@ const useSearchData = ({ defaultSearchOptions, refreshTrigger, history }) => {
     setSearchOptions(options);
   };
 
+  const handleHeadingSortClicked = headingKey => {
+    const options = { ...searchOptions, pageNumber: 1, orderBy: headingKey };
+    setSearchOptions(options);
+  };
+
+  const refresh = () => setRefreshTrigger(Math.random());
+
   useEffect(() => {
     const updateHistoryLocationSearch = () => {
+      if (!history) {
+        console.warn('userSearchData: history object is null, skipping updating query params');
+        return;
+      }
+
       history.push(
         `?${updateQueryParamsFromHistory(history, _.omit(searchOptions, ['serviceAreaNumber', 'dataPath']))}`
       );
@@ -85,7 +98,17 @@ const useSearchData = ({ defaultSearchOptions, refreshTrigger, history }) => {
     updateHistoryLocationSearch();
   }, [searchOptions, refreshTrigger, history]);
 
-  return { data, pagination, loading, searchOptions, setSearchOptions, handleChangePage, handleChangePageSize };
+  return {
+    data,
+    pagination,
+    loading,
+    searchOptions,
+    setSearchOptions,
+    handleChangePage,
+    handleChangePageSize,
+    handleHeadingSortClicked,
+    refresh,
+  };
 };
 
 export default useSearchData;
