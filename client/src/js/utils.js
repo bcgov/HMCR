@@ -44,9 +44,9 @@ export const stringifyQueryParams = newParam => {
 };
 
 export const buildStatusIdArray = isActive => {
-  if (isActive === true) return [Constants.ACTIVE_STATUS.ACTIVE];
+  if (isActive === true || isActive === 'true') return [Constants.ACTIVE_STATUS.ACTIVE];
 
-  if (isActive === false) return [Constants.ACTIVE_STATUS.INACTIVE];
+  if (isActive === false || isActive === 'false') return [Constants.ACTIVE_STATUS.INACTIVE];
 
   return [Constants.ACTIVE_STATUS.ACTIVE, Constants.ACTIVE_STATUS.INACTIVE];
 };

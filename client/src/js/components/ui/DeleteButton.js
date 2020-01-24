@@ -55,7 +55,7 @@ const DeleteButton = ({ buttonId, children, itemId, defaultEndDate, onDeleteClic
           <div className="text-right mt-3">
             <ButtonGroup>
               <Button color="danger" size="sm" onClick={handleConfirmDelete}>
-                Delete
+                {date ? 'Update' : 'Delete'}
               </Button>
               <Button color="secondary" size="sm" onClick={togglePopover}>
                 Cancel
