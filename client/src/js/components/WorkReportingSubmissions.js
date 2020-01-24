@@ -35,7 +35,7 @@ const defaultSearchOptions = {
   serviceAreaNumber: 10,
 };
 
-const WorkReportingSubmissions = forwardRef(({ serviceArea, history }, ref) => {
+const WorkReportingSubmissions = ({ serviceArea, history }, ref) => {
   const [refreshTrigger, setRefreshTrigger] = useState(null);
 
   const {
@@ -202,6 +202,6 @@ const WorkReportingSubmissions = forwardRef(({ serviceArea, history }, ref) => {
       )}
     </React.Fragment>
   );
-});
+};
 
-export default WorkReportingSubmissions;
+export default forwardRef(WorkReportingSubmissions);
