@@ -15,8 +15,9 @@ import useSearchData from './hooks/useSearchData';
 
 import * as Constants from '../Constants';
 import * as api from '../Api';
+import { buildStatusIdArray } from '../utils';
 
-const defaultSearchFormValues = { searchText: '', roleStatusId: ['ACTIVE'] };
+const defaultSearchFormValues = { searchText: '', statusId: [Constants.ACTIVE_STATUS.ACTIVE] };
 
 const defaultSearchOptions = {
   searchText: '',
@@ -47,19 +48,9 @@ const RoleAdmin = ({ roleStatuses, history }) => {
     };
 
     const searchText = options.searchText || '';
-    const roleStatusId = [];
-
-    if (options.isActive === null) {
-      roleStatusId.push('ACTIVE');
-      roleStatusId.push('INACTIVE');
-    } else if (options.isActive === 'true') {
-      roleStatusId.push('ACTIVE');
-    } else if (options.isActive === 'false') {
-      roleStatusId.push('INACTIVE');
-    }
 
     searchData.setSearchOptions(options);
-    setSearchInitialValues({ ...searchInitialValues, searchText, roleStatusId });
+    setSearchInitialValues({ ...searchInitialValues, searchText, statusId: buildStatusIdArray(options.isActive) });
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -68,8 +59,8 @@ const RoleAdmin = ({ roleStatuses, history }) => {
     const searchText = values.searchText.trim() || null;
 
     let isActive = null;
-    if (values.roleStatusId.length === 1) {
-      isActive = values.roleStatusId[0] === 'ACTIVE';
+    if (values.statusId.length === 1) {
+      isActive = values.statusId[0] === 'ACTIVE';
     }
 
     const options = { ...searchData.searchOptions, isActive, searchText };
@@ -112,7 +103,7 @@ const RoleAdmin = ({ roleStatuses, history }) => {
                   <Field type="text" name="searchText" placeholder="Role/Description" className="form-control" />
                 </Col>
                 <Col>
-                  <MultiDropdown {...formikProps} title="Role Status" items={roleStatuses} name="roleStatusId" />
+                  <MultiDropdown {...formikProps} title="Role Status" items={roleStatuses} name="statusId" />
                 </Col>
                 <Col />
                 <Col />

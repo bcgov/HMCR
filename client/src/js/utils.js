@@ -42,3 +42,11 @@ export const updateQueryParamsFromHistory = (history, newParam) => {
 export const stringifyQueryParams = newParam => {
   return queryString.stringify(newParam);
 };
+
+export const buildStatusIdArray = isActive => {
+  if (isActive === true) return [Constants.ACTIVE_STATUS.ACTIVE];
+
+  if (isActive === false) return [Constants.ACTIVE_STATUS.INACTIVE];
+
+  return [Constants.ACTIVE_STATUS.ACTIVE, Constants.ACTIVE_STATUS.INACTIVE];
+};

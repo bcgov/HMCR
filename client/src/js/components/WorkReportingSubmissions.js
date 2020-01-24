@@ -171,7 +171,7 @@ const WorkReportingSubmissions = ({ serviceArea, history }, ref) => {
                 onPageSizeChange={searchData.handleChangePageSize}
               />
             )}
-            {searchData.data.length <= 0 && <div>No submissions found</div>}
+            {searchData.data.length <= 0 && <div>No records found</div>}
           </Col>
         </Row>
       )}

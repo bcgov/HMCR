@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { connect } from 'react-redux';
 import { Row, Col, Button } from 'reactstrap';
 import { Formik, Form, Field } from 'formik';
+import queryString from 'query-string';
 
 import Authorize from './fragments/Authorize';
 import MaterialCard from './ui/MaterialCard';
@@ -11,12 +12,29 @@ import AddUserWizard from './forms/AddUserWizard';
 import DataTableWithPaginaionControl from './ui/DataTableWithPaginaionControl';
 import SubmitButton from './ui/SubmitButton';
 import PageSpinner from './ui/PageSpinner';
-
-import { setSingleUserSeachCriteria, searchUsers, deleteUser } from '../actions';
+import useSearchData from './hooks/useSearchData';
 
 import * as Constants from '../Constants';
+import * as api from '../Api';
+import { buildStatusIdArray } from '../utils';
 
-const defaultSearchFormValues = { serviceAreaIds: [], userTypeIds: [], searchText: '', userStatusIds: ['ACTIVE'] };
+const defaultSearchFormValues = {
+  serviceAreaIds: [],
+  userTypeIds: [],
+  searchText: '',
+  statusId: [Constants.ACTIVE_STATUS.ACTIVE],
+};
+
+const defaultSearchOptions = {
+  searchText: '',
+  isActive: true,
+  serviceAreas: '',
+  userTypes: '',
+  pageSize: Constants.DEFAULT_PAGE_SIZE,
+  pageNumber: 1,
+  dataPath: Constants.API_PATHS.USER,
+};
+
 const tableColumns = [
   { heading: 'User Type', key: 'userType' },
   { heading: 'First Name', key: 'firstName' },
@@ -27,53 +45,58 @@ const tableColumns = [
   { heading: 'Active', key: 'isActive', nosort: true },
 ];
 
-const UserAdmin = ({
-  serviceAreas,
-  userStatuses,
-  userTypes,
-  setSingleUserSeachCriteria,
-  searchUsers,
-  searchResult,
-  searchPagination,
-  deleteUser,
-}) => {
+const UserAdmin = ({ serviceAreas, userStatuses, userTypes, history }) => {
+  const searchData = useSearchData(null, history);
+  const [searchInitialValues, setSearchInitialValues] = useState(defaultSearchFormValues);
+
   const [editUserForm, setEditUserForm] = useState({ isOpen: false });
   const [addUserWizardIsOpen, setAddUserWizardIsOpen] = useState(false);
-  const [searching, setSearching] = useState(false);
 
+  // Run on load, parse URL query params
   useEffect(() => {
-    const search = async () => {
-      setSearching(true);
-      await searchUsers();
-      setSearching(false);
+    const params = queryString.parse(history.location.search);
+
+    const options = {
+      ...defaultSearchOptions,
+      ...params,
     };
 
-    search();
-  }, [searchUsers]);
+    searchData.setSearchOptions(options);
 
-  const startSearch = async () => {
-    setSearching(true);
-    await searchUsers();
-    setSearching(false);
-  };
+    const searchText = options.searchText || '';
+    const serviceAreaIds = options.serviceAreas
+      ? options.serviceAreas.split(',').map(id => parseInt(id))
+      : defaultSearchFormValues.serviceAreaIds;
+    const userTypeIds = options.userTypes ? options.userTypes.split(',') : defaultSearchFormValues.userTypeIds;
+
+    setSearchInitialValues({
+      ...searchInitialValues,
+      searchText,
+      statusId: buildStatusIdArray(options.isActive),
+      serviceAreaIds,
+      userTypeIds,
+    });
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const handleSearchFormSubmit = values => {
     const serviceAreas = values.serviceAreaIds.join(',') || null;
-    setSingleUserSeachCriteria('serviceAreas', serviceAreas);
-
     const userTypeIds = values.userTypeIds.join(',') || null;
-    setSingleUserSeachCriteria('userTypes', userTypeIds);
-
     const searchText = values.searchText.trim() || null;
-    setSingleUserSeachCriteria('searchText', searchText);
 
     let isActive = null;
-    if (values.userStatusIds.length === 1) {
-      isActive = values.userStatusIds[0] === 'ACTIVE';
+    if (values.statusId.length === 1) {
+      isActive = values.statusId[0] === 'ACTIVE';
     }
-    setSingleUserSeachCriteria('isActive', isActive);
 
-    startSearch();
+    const options = { ...searchData.searchOptions, isActive, searchText, serviceAreas, userTypes: userTypeIds };
+    searchData.setSearchOptions(options);
+  };
+
+  const handleSearchFormReset = () => {
+    setSearchInitialValues(defaultSearchFormValues);
+    searchData.setSearchOptions(defaultSearchOptions);
   };
 
   const onEditClicked = userId => {
@@ -81,42 +104,30 @@ const UserAdmin = ({
   };
 
   const onDeleteClicked = (userId, endDate) => {
-    deleteUser(userId, endDate).then(() => searchUsers());
+    api.deleteUser(userId, endDate).then(() => searchData.refresh());
   };
 
   const handleEditUserFormClose = refresh => {
     if (refresh === true) {
-      startSearch();
+      searchData.refresh();
     }
     setEditUserForm({ isOpen: false });
     setAddUserWizardIsOpen(false);
   };
 
-  const handleChangePage = newPage => {
-    setSingleUserSeachCriteria('pageNumber', newPage);
-    startSearch();
-  };
-
-  const handleChangePageSize = newSize => {
-    setSingleUserSeachCriteria('pageSize', newSize);
-    setSingleUserSeachCriteria('pageNumber', 1);
-    startSearch();
-  };
-
-  const handleHeadingSortClicked = headingKey => {
-    setSingleUserSeachCriteria('pageNumber', 1);
-    setSingleUserSeachCriteria('orderBy', headingKey);
-    startSearch();
-  };
+  const data = Object.values(searchData.data).map(user => ({
+    ...user,
+    userType: userTypes.find(type => type.id === user.userType).name,
+  }));
 
   return (
     <React.Fragment>
       <MaterialCard>
         <Formik
-          initialValues={defaultSearchFormValues}
-          onSubmit={values => {
-            handleSearchFormSubmit(values);
-          }}
+          initialValues={searchInitialValues}
+          enableReinitialize={true}
+          onSubmit={values => handleSearchFormSubmit(values)}
+          onReset={handleSearchFormReset}
         >
           {formikProps => (
             <Form>
@@ -136,11 +147,11 @@ const UserAdmin = ({
                   <MultiDropdown {...formikProps} items={userTypes} name="userTypeIds" title="User Type" />
                 </Col>
                 <Col>
-                  <MultiDropdown {...formikProps} items={userStatuses} name="userStatusIds" title="User Status" />
+                  <MultiDropdown {...formikProps} items={userStatuses} name="statusId" title="User Status" />
                 </Col>
                 <Col>
                   <div className="float-right">
-                    <SubmitButton className="mr-2" disabled={searching} submitting={searching}>
+                    <SubmitButton className="mr-2" disabled={searchData.loading} submitting={searchData.loading}>
                       Search
                     </SubmitButton>
                     <Button type="reset">Reset</Button>
@@ -160,21 +171,24 @@ const UserAdmin = ({
           </Col>
         </Row>
       </Authorize>
-      {searching && <PageSpinner />}
-      {!searching && searchResult.length > 0 && (
+      {searchData.loading && <PageSpinner />}
+      {!searchData.loading && (
         <MaterialCard>
-          <DataTableWithPaginaionControl
-            dataList={searchResult}
-            tableColumns={tableColumns}
-            searchPagination={searchPagination}
-            onPageNumberChange={handleChangePage}
-            onPageSizeChange={handleChangePageSize}
-            editable
-            editPermissionName={Constants.PERMISSIONS.USER_W}
-            onEditClicked={onEditClicked}
-            onDeleteClicked={onDeleteClicked}
-            onHeadingSortClicked={handleHeadingSortClicked}
-          />
+          {data.length > 0 && (
+            <DataTableWithPaginaionControl
+              dataList={data}
+              tableColumns={tableColumns}
+              searchPagination={searchData.pagination}
+              onPageNumberChange={searchData.handleChangePage}
+              onPageSizeChange={searchData.handleChangePageSize}
+              editable
+              editPermissionName={Constants.PERMISSIONS.USER_W}
+              onEditClicked={onEditClicked}
+              onDeleteClicked={onDeleteClicked}
+              onHeadingSortClicked={searchData.handleHeadingSortClicked}
+            />
+          )}
+          {searchData.data.length <= 0 && <div>No records found</div>}
         </MaterialCard>
       )}
       {editUserForm.isOpen && <EditUserForm {...editUserForm} toggle={handleEditUserFormClose} />}
@@ -185,17 +199,11 @@ const UserAdmin = ({
 
 const mapStateToProps = state => {
   const userTypes = Object.values(state.user.types);
-  const userList = Object.values(state.user.list).map(user => ({
-    ...user,
-    userType: state.user.types[user.userType].name,
-  }));
   return {
     serviceAreas: Object.values(state.serviceAreas),
     userStatuses: Object.values(state.user.statuses),
     userTypes,
-    searchResult: userList,
-    searchPagination: state.user.searchPagination,
   };
 };
 
-export default connect(mapStateToProps, { setSingleUserSeachCriteria, searchUsers, deleteUser })(UserAdmin);
+export default connect(mapStateToProps)(UserAdmin);

@@ -65,6 +65,11 @@ export const UPLOAD_STATE_STATUS = {
   WARNING: 'WARNING',
 };
 
+export const ACTIVE_STATUS = {
+  ACTIVE: 'ACTIVE',
+  INACTIVE: 'INACTIVE',
+};
+
 export const DEFAULT_PAGE_SIZE_OPTIONS = process.env.REACT_APP_DEFAULT_PAGE_SIZE_OPTIONS.split(',').map(o =>
   parseInt(o)
 );
