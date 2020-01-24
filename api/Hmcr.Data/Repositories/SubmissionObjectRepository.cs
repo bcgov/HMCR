@@ -125,7 +125,7 @@ namespace Hmcr.Data.Repositories
         public async Task<PagedDto<SubmissionObjectSearchDto>> GetSubmissionObjectsAsync(decimal serviceAreaNumber, DateTime dateFrom, DateTime dateTo, int pageSize, int pageNumber, string orderBy, string searchText)
         {
             var query = DbSet.AsNoTracking()
-                .Where(x => x.ServiceAreaNumber == serviceAreaNumber && x.AppCreateTimestamp >= dateFrom && x.AppCreateTimestamp <= dateTo)
+                .Where(x => x.ServiceAreaNumber == serviceAreaNumber && x.AppCreateTimestamp >= dateFrom && x.AppCreateTimestamp < dateTo.AddDays(1).Date)
                 .Join(DbContext.HmrSystemUsers,
                     x => x.AppCreateUserGuid,
                     y => y.UserGuid,
