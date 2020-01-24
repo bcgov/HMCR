@@ -12,7 +12,7 @@ import WorkReportingSubmissionDetail from './WorkReportingSubmissionDetail';
 import useSearchData from './hooks/useSearchData';
 
 import * as Constants from '../Constants';
-import { updateQueryParamsFromHistory, stringifyQueryParams } from '../utils';
+import { stringifyQueryParams } from '../utils';
 
 const startDateLimit = moment('2019-01-01');
 
@@ -35,12 +35,21 @@ const defaultSearchOptions = {
   serviceAreaNumber: 10,
 };
 
-const WorkReportingSubmissions = ({ searchSubmissions, serviceArea, triggerRefresh, history }) => {
+const WorkReportingSubmissions = ({ serviceArea, triggerRefresh, history }) => {
   const [refreshTrigger, setRefreshTrigger] = useState(null);
 
-  const { data, pagination, loading, searchOptions, setSearchOptions } = useSearchData({
-    defaultSearchOptions,
+  const {
+    data,
+    pagination,
+    loading,
+    searchOptions,
+    setSearchOptions,
+    handleChangePage,
+    handleChangePageSize,
+  } = useSearchData({
+    defaultSearchOptions: null,
     refreshTrigger,
+    history,
   });
   const [searchText, setSearchText] = useState(defaultSearchOptions.searchText);
 
@@ -51,61 +60,34 @@ const WorkReportingSubmissions = ({ searchSubmissions, serviceArea, triggerRefre
   const [dateFrom, setDateFrom] = useState(defaultSearchOptions.dateFrom);
   const [dateTo, setDateTo] = useState(defaultSearchOptions.dateTo);
 
-  // Run on load and trigger refresh
+  // Run on load, parse URL query params
   useEffect(() => {
     const params = queryString.parse(history.location.search);
-    // const options = {
-    //   ...defaultSearchOptions,
-    //   ..._.omit(params, ['dateFrom', 'dateTo']),
-    //   dateFrom: params.dateFrom ? moment(params.dateFrom) : defaultSearchOptions.dateFrom,
-    //   dateTo: params.dateFrom ? moment(params.dateTo) : defaultSearchOptions.dateTo,
-    //   serviceAreaNumber: serviceArea,
-    // };
+
+    const options = {
+      ...defaultSearchOptions,
+      ..._.omit(params, ['dateFrom', 'dateTo']),
+      dateFrom: params.dateFrom ? moment(params.dateFrom) : defaultSearchOptions.dateFrom,
+      dateTo: params.dateFrom ? moment(params.dateTo) : defaultSearchOptions.dateTo,
+      serviceAreaNumber: serviceArea,
+    };
 
     if (params.showResult) {
       setShowResultScreen({ isOpen: true, submission: params.showResult });
     }
 
-    // setSearchOptionsOld(options);
+    setSearchOptions(options);
+    setSearchText(options.searchText);
+    setDateFrom(options.dateFrom);
+    setDateTo(options.dateTo);
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [triggerRefresh, serviceArea, searchSubmissions]);
-
-  // Run search when searchOptions object has changed
-  useEffect(() => {
-    if (searchOptions !== defaultSearchOptions && searchOptions.dateFrom && searchOptions.dateTo) {
-      updateHistoryLocationSearch(searchOptions);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [searchOptions, searchSubmissions]);
-
-  const updateHistoryLocationSearch = options => {
-    history.push(
-      `?${updateQueryParamsFromHistory(history, _.omit(options, ['dateTo', 'dateFrom', 'serviceAreaNumber']))}`
-    );
-  };
+  }, []);
 
   const handleDateChanged = (dateFrom, dateTo) => {
     if (!(dateFrom && dateTo && dateFrom.isSameOrBefore(dateTo))) return;
 
     setSearchOptions({ ...searchOptions, dateFrom, dateTo });
-
-    history.push(
-      `?${updateQueryParamsFromHistory(history, {
-        dateFrom: dateFrom.format(Constants.DATE_FORMAT),
-        dateTo: dateTo.format(Constants.DATE_FORMAT),
-      })}`
-    );
-  };
-
-  const handleChangePage = newPage => {
-    // const options = { ...searchOptions, pageNumber: newPage };
-    // setSearchOptionsOld(options);
-  };
-
-  const handleChangePageSize = newSize => {
-    // const options = { ...searchOptions, pageNumber: 1, pageSize: newSize };
-    // setSearchOptionsOld(options);
   };
 
   return (
@@ -131,7 +113,7 @@ const WorkReportingSubmissions = ({ searchSubmissions, serviceArea, triggerRefre
                 hideKeyboardShortcutsPanel
                 inputIconPosition="after"
                 small
-                displayFormat={Constants.DATE_FORMAT}
+                displayFormat={Constants.DATE_DISPLAY_FORMAT}
                 startDatePlaceholderText="Date From"
                 endDatePlaceholderText="Date To"
                 isOutsideRange={date =>
@@ -181,7 +163,7 @@ const WorkReportingSubmissions = ({ searchSubmissions, serviceArea, triggerRefre
                 dataList={data.map(item => ({
                   ...item,
                   name: `${item.firstName} ${item.lastName}`,
-                  date: moment(item.appCreateTimestamp).format(Constants.DATE_FORMAT),
+                  date: moment(item.appCreateTimestamp).format(Constants.DATE_DISPLAY_FORMAT),
                   id: (
                     <Button
                       color="link"

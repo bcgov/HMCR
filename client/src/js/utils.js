@@ -1,4 +1,7 @@
 import queryString from 'query-string';
+import moment from 'moment';
+
+import * as Constants from './Constants';
 
 export const buildActionWithParam = (action, param) => {
   return { action, param };
@@ -27,7 +30,13 @@ export const buildApiErrorObject = response => {
 export const updateQueryParamsFromHistory = (history, newParam) => {
   const params = queryString.parse(history.location.search);
 
-  return queryString.stringify({ ...params, ...newParam });
+  const processedParams = { ...newParam };
+  Object.keys(processedParams).forEach(key => {
+    if (moment.isMoment(processedParams[key]))
+      processedParams[key] = processedParams[key].format(Constants.DATE_UTC_FORMAT);
+  });
+
+  return queryString.stringify({ ...params, ...processedParams });
 };
 
 export const stringifyQueryParams = newParam => {

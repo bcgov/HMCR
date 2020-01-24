@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react';
 import _ from 'lodash';
 import moment from 'moment';
 
+import { updateQueryParamsFromHistory } from '../../utils';
+
 import * as api from '../../Api';
 import * as Constants from '../../Constants';
 
@@ -18,14 +20,32 @@ const useSearchData = ({ defaultSearchOptions, refreshTrigger, history }) => {
   const [loading, setLoading] = useState(false);
   const [searchOptions, setSearchOptions] = useState(defaultSearchOptions);
 
+  const handleChangePage = newPage => {
+    const options = { ...searchOptions, pageNumber: newPage };
+    setSearchOptions(options);
+  };
+
+  const handleChangePageSize = newSize => {
+    const options = { ...searchOptions, pageNumber: 1, pageSize: newSize };
+    setSearchOptions(options);
+  };
+
   useEffect(() => {
+    const updateHistoryLocationSearch = () => {
+      history.push(
+        `?${updateQueryParamsFromHistory(history, _.omit(searchOptions, ['serviceAreaNumber', 'dataPath']))}`
+      );
+    };
+
     const loadData = () => {
+      if (searchOptions === null) return;
+
       const dataPath = searchOptions.dataPath;
       const options = { ...searchOptions };
 
       // convert moment objects to string
       Object.keys(options).forEach(key => {
-        if (moment.isMoment(options[key])) options[key] = options[key].format(Constants.DATE_FORMAT);
+        if (moment.isMoment(options[key])) options[key] = options[key].utc().format(Constants.DATE_UTC_FORMAT);
       });
 
       setLoading(true);
@@ -46,9 +66,10 @@ const useSearchData = ({ defaultSearchOptions, refreshTrigger, history }) => {
     };
 
     loadData();
-  }, [searchOptions, refreshTrigger]);
+    updateHistoryLocationSearch();
+  }, [searchOptions, refreshTrigger, history]);
 
-  return { data, pagination, loading, searchOptions, setSearchOptions };
+  return { data, pagination, loading, searchOptions, setSearchOptions, handleChangePage, handleChangePageSize };
 };
 
 export default useSearchData;

@@ -10,8 +10,8 @@ export const searchSubmissions = params => dispatch => {
     ...params,
     dateTo: moment(params.dateTo)
       .add(1, 'days')
-      .format(Constants.DATE_FORMAT),
-    dateFrom: moment(params.dateFrom).format(Constants.DATE_FORMAT),
+      .format(Constants.DATE_DISPLAY_FORMAT),
+    dateFrom: moment(params.dateFrom).format(Constants.DATE_DISPLAY_FORMAT),
   };
 
   return api.searchSubmissions(searchParams).then(response => {

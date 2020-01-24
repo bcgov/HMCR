@@ -44,7 +44,7 @@ const createClipboardText = data => {
   let clipboardData = '';
 
   clipboardData += 'submission #\tsubmission date\tservice area\n';
-  clipboardData += `${data.id}\t${moment(data.appCreateTimestamp).format(Constants.DATE_FORMAT)}\t${
+  clipboardData += `${data.id}\t${moment(data.appCreateTimestamp).format(Constants.DATE_DISPLAY_FORMAT)}\t${
     data.serviceAreaNumber
   }\n`;
 
@@ -102,7 +102,7 @@ const WorkReportingSubmissionDetail = ({ toggle, submission }) => {
       <React.Fragment>
         <span>Submission #: {submissionResultData.id}</span>
         <span className="ml-3 mr-3">
-          Submission Date: {moment(submissionResultData.appCreateTimestamp).format(Constants.DATE_FORMAT)}
+          Submission Date: {moment(submissionResultData.appCreateTimestamp).format(Constants.DATE_DISPLAY_FORMAT)}
         </span>
         <span>Serivce Area: {submissionResultData.serviceAreaNumber}</span>
       </React.Fragment>

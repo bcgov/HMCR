@@ -32,7 +32,9 @@ export const PATHS = {
 
 export const MESSAGE_DATE_FORMAT = 'YYYY-MM-DD hh:mmA';
 
-export const DATE_FORMAT = 'YYYY-MM-DD';
+export const DATE_DISPLAY_FORMAT = 'YYYY-MM-DD';
+
+export const DATE_UTC_FORMAT = 'YYYY-MM-DDTHH:mm';
 
 export const FORM_TYPE = { ADD: 'ADD_FORM', EDIT: 'EDIT_FORM' };
 

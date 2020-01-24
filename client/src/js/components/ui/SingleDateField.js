@@ -33,7 +33,7 @@ const SingleDatePickerWithFormik = ({ field: { name }, placeholder, style, isOut
         inputIconPosition="after"
         placeholder={placeholder}
         isOutsideRange={isOutsideRange}
-        displayFormat={Constants.DATE_FORMAT}
+        displayFormat={Constants.DATE_DISPLAY_FORMAT}
       />
     </div>
   );
