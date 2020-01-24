@@ -26,11 +26,9 @@ namespace Hmcr.Api.Controllers
         [RequiresPermission(Permissions.RoleRead)]
         public async Task<ActionResult<IEnumerable<RoleSearchDto>>> GetRolesAsync(
             [FromQuery]string searchText, [FromQuery]bool? isActive,
-            [FromQuery]int pageSize, [FromQuery]int pageNumber, [FromQuery]string orderBy)
+            [FromQuery]int pageSize, [FromQuery]int pageNumber, [FromQuery]string orderBy = "name", [FromQuery]string direction = "")
         {
-            orderBy ??= "name";
-
-            return Ok(await _roleSvc.GetRolesAync(searchText, isActive, pageSize, pageNumber, orderBy));
+            return Ok(await _roleSvc.GetRolesAync(searchText, isActive, pageSize, pageNumber, orderBy, direction));
         }
 
         [HttpGet("{id}", Name = "GetRole")]

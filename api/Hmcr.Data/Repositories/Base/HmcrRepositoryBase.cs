@@ -27,7 +27,7 @@ namespace Hmcr.Data.Repositories.Base
         Task<IEnumerable<TDto>> GetAllAsync<TDto>();
         Task<IEnumerable<TDto>> GetAllAsync<TDto>(Expression<Func<TEntity, bool>> where);
         Task<TDto> GetFirstOrDefaultAsync<TDto>(Expression<Func<TEntity, bool>> where);
-        Task<PagedDto<TOutput>> Page<TInput, TOutput>(IQueryable<TInput> list, int pageSize, int pageNumber, string orderBy);
+        Task<PagedDto<TOutput>> Page<TInput, TOutput>(IQueryable<TInput> list, int pageSize, int pageNumber, string orderBy,string orderDir);
         Task<bool> ExistsAsync(object id);
     }
 
@@ -137,13 +137,13 @@ namespace Hmcr.Data.Repositories.Base
             return await DbSet.FindAsync(id) != null;
         }
 
-        public async Task<PagedDto<TOutput>> Page<TInput, TOutput>(IQueryable<TInput> list, int pageSize, int pageNumber, string orderBy)
+        public async Task<PagedDto<TOutput>> Page<TInput, TOutput>(IQueryable<TInput> list, int pageSize, int pageNumber, string orderBy, string direction = "")
         {
             var totalRecords = list.Count();
 
             if (pageNumber <= 0) pageNumber = 1;
 
-            var pagedList = list.DynamicOrderBy(orderBy) as IQueryable<TInput>;
+            var pagedList = list.DynamicOrderBy($"{orderBy} {direction}") as IQueryable<TInput>;
 
             if (pageSize > 0)
             {
@@ -166,7 +166,9 @@ namespace Hmcr.Data.Repositories.Base
                 PageNumber = pageNumber,
                 PageSize = pageSize,
                 TotalCount = totalRecords,
-                SourceList = outputList
+                SourceList = outputList,
+                OrderBy = orderBy,
+                Direction = direction
             };
 
             return pagedDTO;

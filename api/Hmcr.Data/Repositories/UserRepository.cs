@@ -22,7 +22,7 @@ namespace Hmcr.Data.Repositories
     public interface IUserRepository : IHmcrRepositoryBase<HmrSystemUser>
     {
         Task<UserCurrentDto> GetCurrentUserAsync();
-        Task<PagedDto<UserSearchDto>> GetUsersAsync(decimal[]? serviceAreas, string[]? userTypes, string searchText, bool? isActive, int pageSize, int pageNumber, string orderBy);
+        Task<PagedDto<UserSearchDto>> GetUsersAsync(decimal[]? serviceAreas, string[]? userTypes, string searchText, bool? isActive, int pageSize, int pageNumber, string orderBy, string direction);
         Task<UserDto> GetUserAsync(decimal systemUserId);
         Task<HmrSystemUser> CreateUserAsync(UserCreateDto user, BceidAccount account);
         Task<bool> DoesUsernameExistAsync(string username, string userType);
@@ -107,7 +107,7 @@ namespace Hmcr.Data.Repositories
             await DbContext.Database.ExecuteSqlRawAsync(sql.ToString(), user.Username, user.FirstName, user.LastName, user.Email, user.UserGuid, concurrencyControlNumber);
         }
 
-        public async Task<PagedDto<UserSearchDto>> GetUsersAsync(decimal[]? serviceAreas, string[]? userTypes, string searchText, bool? isActive, int pageSize, int pageNumber, string orderBy)
+        public async Task<PagedDto<UserSearchDto>> GetUsersAsync(decimal[]? serviceAreas, string[]? userTypes, string searchText, bool? isActive, int pageSize, int pageNumber, string orderBy, string direction)
         {
             var query = DbSet.AsNoTracking();
 
@@ -136,7 +136,7 @@ namespace Hmcr.Data.Repositories
 
             query = query.Include(u => u.HmrServiceAreaUsers);
 
-            var pagedEntity = await Page<HmrSystemUser, HmrSystemUser>(query, pageSize, pageNumber, orderBy);
+            var pagedEntity = await Page<HmrSystemUser, HmrSystemUser>(query, pageSize, pageNumber, orderBy, direction);
 
             var users = Mapper.Map<IEnumerable<UserSearchDto>>(pagedEntity.SourceList);
 
@@ -153,7 +153,9 @@ namespace Hmcr.Data.Repositories
                 PageNumber = pageNumber,
                 PageSize = pageSize,
                 TotalCount = pagedEntity.TotalCount,
-                SourceList = users
+                SourceList = users,
+                OrderBy = orderBy,
+                Direction = direction
             };
 
             return pagedDTO;

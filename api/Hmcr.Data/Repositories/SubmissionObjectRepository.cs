@@ -19,7 +19,7 @@ namespace Hmcr.Data.Repositories
     {
         Task<HmrSubmissionObject> CreateSubmissionObjectAsync(SubmissionObjectCreateDto submission);
         Task<SubmissionObjectDto> GetSubmissionObjectAsync(decimal submissionObjectId);
-        Task<PagedDto<SubmissionObjectSearchDto>> GetSubmissionObjectsAsync(decimal serviceAreaNumber, DateTime dateFrom, DateTime dateTo, int pageSize, int pageNumber, string orderBy = "AppCreateTimestamp DESC", string searchText = null);
+        Task<PagedDto<SubmissionObjectSearchDto>> GetSubmissionObjectsAsync(decimal serviceAreaNumber, DateTime dateFrom, DateTime dateTo, int pageSize, int pageNumber, string searchText, string orderBy, string direction);
         Task<bool> IsDuplicateFileAsync(SubmissionObjectCreateDto submission);
         Task<HmrSubmissionObject> GetSubmissionObjectEntityAsync(decimal submissionObjectId);
         SubmissionDto[] GetSubmissionObjecsForBackgroundJob(decimal serviceAreaNumber);
@@ -122,7 +122,7 @@ namespace Hmcr.Data.Repositories
             return submission;
         }
 
-        public async Task<PagedDto<SubmissionObjectSearchDto>> GetSubmissionObjectsAsync(decimal serviceAreaNumber, DateTime dateFrom, DateTime dateTo, int pageSize, int pageNumber, string orderBy, string searchText)
+        public async Task<PagedDto<SubmissionObjectSearchDto>> GetSubmissionObjectsAsync(decimal serviceAreaNumber, DateTime dateFrom, DateTime dateTo, int pageSize, int pageNumber, string searchText, string orderBy, string direction)
         {
             var query = DbSet.AsNoTracking()
                 .Where(x => x.ServiceAreaNumber == serviceAreaNumber && x.AppCreateTimestamp >= dateFrom && x.AppCreateTimestamp <= dateTo)
@@ -151,7 +151,7 @@ namespace Hmcr.Data.Repositories
                     .Where(u => u.FirstName.Contains(searchText) || u.LastName.Contains(searchText));
             }
 
-            return await Page<SubmissionObjectSearchDto, SubmissionObjectSearchDto>(query, pageSize, pageNumber, orderBy);
+            return await Page<SubmissionObjectSearchDto, SubmissionObjectSearchDto>(query, pageSize, pageNumber, orderBy, direction);
         }
 
         public async Task<bool> IsDuplicateFileAsync(SubmissionObjectCreateDto submission)

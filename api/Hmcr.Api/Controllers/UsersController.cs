@@ -88,11 +88,9 @@ namespace Hmcr.Api.Controllers
         [RequiresPermission(Permissions.UserRead)]
         public async Task<ActionResult<PagedDto<UserSearchDto>>> GetUsersAsync(
             [FromQuery]string? serviceAreas, [FromQuery]string? userTypes, [FromQuery]string searchText, [FromQuery]bool? isActive,
-            [FromQuery]int pageSize, [FromQuery]int pageNumber, [FromQuery]string orderBy)
+            [FromQuery]int pageSize, [FromQuery]int pageNumber, [FromQuery]string orderBy = "username", [FromQuery]string direction = "")
         {
-            orderBy ??= "Username";
-
-            return Ok(await _userService.GetUsersAsync(serviceAreas.ToDecimalArray(), userTypes.ToStringArray(), searchText, isActive, pageSize, pageNumber, orderBy));
+            return Ok(await _userService.GetUsersAsync(serviceAreas.ToDecimalArray(), userTypes.ToStringArray(), searchText, isActive, pageSize, pageNumber, orderBy, direction));
         }
 
         [HttpGet("{id}", Name = "GetUser")]
