@@ -23,7 +23,6 @@ const useSearchData = (defaultSearchOptions, history) => {
 
   const updateSearchOptions = options => {
     if (!options.pageNumber) options.pageNumber = 1;
-
     if (!options.pageSize) options.pageSize = Constants.DEFAULT_PAGE_SIZE;
 
     setSearchOptions(options);
@@ -40,7 +39,12 @@ const useSearchData = (defaultSearchOptions, history) => {
   };
 
   const handleHeadingSortClicked = headingKey => {
-    const options = { ...searchOptions, pageNumber: 1, orderBy: headingKey };
+    const direction =
+      !searchOptions.direction || searchOptions.direction === Constants.SORT_DIRECTION.ASCENDING
+        ? Constants.SORT_DIRECTION.DESCENDING
+        : Constants.SORT_DIRECTION.ASCENDING;
+
+    const options = { ...searchOptions, pageNumber: 1, orderBy: headingKey, direction };
     setSearchOptions(options);
   };
 

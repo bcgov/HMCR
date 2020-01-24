@@ -29,6 +29,7 @@ const defaultSearchOptions = {
   dateFrom: moment().subtract(1, 'months'),
   dateTo: moment(),
   searchText: '',
+  direction: Constants.SORT_DIRECTION.DESCENDING,
   dataPath: Constants.API_PATHS.SUBMISSIONS,
 };
 
