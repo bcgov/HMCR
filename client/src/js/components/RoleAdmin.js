@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { connect } from 'react-redux';
 import { Row, Col, Button } from 'reactstrap';
 import { Formik, Form, Field } from 'formik';
+import queryString from 'query-string';
 
 import Authorize from './fragments/Authorize';
 import MaterialCard from './ui/MaterialCard';
@@ -10,13 +11,21 @@ import EditRoleForm from './forms/EditRoleForm';
 import DataTableWithPaginaionControl from './ui/DataTableWithPaginaionControl';
 import SubmitButton from './ui/SubmitButton';
 import PageSpinner from './ui/PageSpinner';
-
-import { setSingleRoleSeachCriteria, searchRoles } from '../actions';
+import useSearchData from './hooks/useSearchData';
 
 import * as Constants from '../Constants';
 import * as api from '../Api';
+import { buildStatusIdArray } from '../utils';
 
-const defaultSearchFormValues = { searchText: '', roleStatusId: ['ACTIVE'] };
+const defaultSearchFormValues = { searchText: '', statusId: [Constants.ACTIVE_STATUS.ACTIVE] };
+
+const defaultSearchOptions = {
+  searchText: '',
+  isActive: true,
+  pageSize: Constants.DEFAULT_PAGE_SIZE,
+  pageNumber: 1,
+  dataPath: Constants.API_PATHS.ROLE,
+};
 
 const tableColumns = [
   { heading: 'Role Name', key: 'name' },
@@ -24,37 +33,43 @@ const tableColumns = [
   { heading: 'Active', key: 'isActive', nosort: true },
 ];
 
-const RoleAdmin = ({ roleStatuses, setSingleRoleSeachCriteria, searchRoles, searchResult, searchPagination }) => {
+const RoleAdmin = ({ roleStatuses, history }) => {
+  const searchData = useSearchData(null, history);
   const [editRoleForm, setEditRoleForm] = useState({ isOpen: false });
-  const [searching, setSearching] = useState(false);
+  const [searchInitialValues, setSearchInitialValues] = useState(defaultSearchFormValues);
 
+  // Run on load, parse URL query params
   useEffect(() => {
-    const search = async () => {
-      setSearching(true);
-      await searchRoles();
-      setSearching(false);
+    const params = queryString.parse(history.location.search);
+
+    const options = {
+      ...defaultSearchOptions,
+      ...params,
     };
 
-    search();
-  }, [searchRoles]);
+    const searchText = options.searchText || '';
 
-  const startSearch = async () => {
-    setSearching(true);
-    await searchRoles();
-    setSearching(false);
-  };
+    searchData.setSearchOptions(options);
+    setSearchInitialValues({ ...searchInitialValues, searchText, statusId: buildStatusIdArray(options.isActive) });
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const handleSearchFormSubmit = values => {
     const searchText = values.searchText.trim() || null;
-    setSingleRoleSeachCriteria('searchText', searchText);
 
     let isActive = null;
-    if (values.roleStatusId.length === 1) {
-      isActive = values.roleStatusId[0] === 'ACTIVE';
+    if (values.statusId.length === 1) {
+      isActive = values.statusId[0] === 'ACTIVE';
     }
-    setSingleRoleSeachCriteria('isActive', isActive);
 
-    startSearch();
+    const options = { ...searchData.searchOptions, isActive, searchText };
+    searchData.setSearchOptions(options);
+  };
+
+  const handleSearchFormReset = () => {
+    setSearchInitialValues(defaultSearchFormValues);
+    searchData.setSearchOptions(defaultSearchOptions);
   };
 
   const onEditClicked = roleId => {
@@ -62,41 +77,24 @@ const RoleAdmin = ({ roleStatuses, setSingleRoleSeachCriteria, searchRoles, sear
   };
 
   const onDeleteClicked = (roleId, endDate) => {
-    api.deleteRole(roleId, endDate).then(() => startSearch());
+    api.deleteRole(roleId, endDate).then(() => searchData.refresh());
   };
 
-  const handleEditUserFormClose = refresh => {
+  const handleEditRoleFormClose = refresh => {
     if (refresh === true) {
-      startSearch();
+      searchData.refresh();
     }
     setEditRoleForm({ isOpen: false });
-  };
-
-  const handleChangePage = newPage => {
-    setSingleRoleSeachCriteria('pageNumber', newPage);
-    startSearch();
-  };
-
-  const handleChangePageSize = newSize => {
-    setSingleRoleSeachCriteria('pageSize', newSize);
-    setSingleRoleSeachCriteria('pageNumber', 1);
-    startSearch();
-  };
-
-  const handleHeadingSortClicked = headingKey => {
-    setSingleRoleSeachCriteria('pageNumber', 1);
-    setSingleRoleSeachCriteria('orderBy', headingKey);
-    startSearch();
   };
 
   return (
     <React.Fragment>
       <MaterialCard>
         <Formik
-          initialValues={defaultSearchFormValues}
-          onSubmit={values => {
-            handleSearchFormSubmit(values);
-          }}
+          initialValues={searchInitialValues}
+          enableReinitialize={true}
+          onSubmit={values => handleSearchFormSubmit(values)}
+          onReset={handleSearchFormReset}
         >
           {formikProps => (
             <Form>
@@ -105,13 +103,13 @@ const RoleAdmin = ({ roleStatuses, setSingleRoleSeachCriteria, searchRoles, sear
                   <Field type="text" name="searchText" placeholder="Role/Description" className="form-control" />
                 </Col>
                 <Col>
-                  <MultiDropdown {...formikProps} title="Role Status" items={roleStatuses} name="roleStatusId" />
+                  <MultiDropdown {...formikProps} title="Role Status" items={roleStatuses} name="statusId" />
                 </Col>
                 <Col />
                 <Col />
                 <Col>
                   <div className="float-right">
-                    <SubmitButton className="mr-2" disabled={searching} submitting={searching}>
+                    <SubmitButton className="mr-2" disabled={searchData.loading} submitting={searchData.loading}>
                       Search
                     </SubmitButton>
                     <Button type="reset">Reset</Button>
@@ -136,24 +134,27 @@ const RoleAdmin = ({ roleStatuses, setSingleRoleSeachCriteria, searchRoles, sear
           </Col>
         </Row>
       </Authorize>
-      {searching && <PageSpinner />}
-      {!searching && searchResult.length > 0 && (
+      {searchData.loading && <PageSpinner />}
+      {!searchData.loading && (
         <MaterialCard>
-          <DataTableWithPaginaionControl
-            dataList={searchResult}
-            tableColumns={tableColumns}
-            searchPagination={searchPagination}
-            onPageNumberChange={handleChangePage}
-            onPageSizeChange={handleChangePageSize}
-            editable
-            editPermissionName={Constants.PERMISSIONS.ROLE_W}
-            onEditClicked={onEditClicked}
-            onDeleteClicked={onDeleteClicked}
-            onHeadingSortClicked={handleHeadingSortClicked}
-          />
+          {searchData.data.length > 0 && (
+            <DataTableWithPaginaionControl
+              dataList={searchData.data}
+              tableColumns={tableColumns}
+              searchPagination={searchData.pagination}
+              onPageNumberChange={searchData.handleChangePage}
+              onPageSizeChange={searchData.handleChangePageSize}
+              editable
+              editPermissionName={Constants.PERMISSIONS.ROLE_W}
+              onEditClicked={onEditClicked}
+              onDeleteClicked={onDeleteClicked}
+              onHeadingSortClicked={searchData.handleHeadingSortClicked}
+            />
+          )}
+          {searchData.data.length <= 0 && <div>No records found</div>}
         </MaterialCard>
       )}
-      {editRoleForm.isOpen && <EditRoleForm {...editRoleForm} toggle={handleEditUserFormClose} />}
+      {editRoleForm.isOpen && <EditRoleForm {...editRoleForm} toggle={handleEditRoleFormClose} />}
     </React.Fragment>
   );
 };
@@ -161,9 +162,7 @@ const RoleAdmin = ({ roleStatuses, setSingleRoleSeachCriteria, searchRoles, sear
 const mapStateToProps = state => {
   return {
     roleStatuses: Object.values(state.roles.statuses),
-    searchResult: Object.values(state.roles.list),
-    searchPagination: state.roles.searchPagination,
   };
 };
 
-export default connect(mapStateToProps, { setSingleRoleSeachCriteria, searchRoles })(RoleAdmin);
+export default connect(mapStateToProps)(RoleAdmin);
