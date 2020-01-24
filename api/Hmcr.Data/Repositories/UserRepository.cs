@@ -1,14 +1,11 @@
 ﻿using AutoMapper;
-using Hmcr.Data.Database;
 using Hmcr.Data.Database.Entities;
 using Hmcr.Data.Repositories.Base;
 using Hmcr.Model;
 using Hmcr.Model.Dtos;
-using Hmcr.Model.Dtos.Party;
 using Hmcr.Model.Dtos.ServiceArea;
 using Hmcr.Model.Dtos.User;
 using Hmcr.Model.Utils;
-using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -30,6 +27,7 @@ namespace Hmcr.Data.Repositories
         Task DeleteUserAsync(UserDeleteDto user);
         Task<HmrSystemUser> GetActiveUserEntityAsync(Guid userGuid);
         Task UpdateUserFromBceidAsync(BceidAccount user, long concurrencyControlNumber);
+        IEnumerable<UserDto> GetActiveUsersByServiceAreaNumber(decimal serviceAreaNumber);
     }
 
     public class UserRepository : HmcrRepositoryBase<HmrSystemUser>, IUserRepository
@@ -327,6 +325,12 @@ namespace Hmcr.Data.Repositories
                 .FirstAsync(u => u.SystemUserId == user.SystemUserId);
 
             Mapper.Map(user, userEntity);
+        }
+
+
+        public IEnumerable<UserDto> GetActiveUsersByServiceAreaNumber(decimal serviceAreaNumber)
+        {
+            return GetAll<UserDto>(x => (x.EndDate == null || x.EndDate > DateTime.Today) && x.HmrServiceAreaUsers.Any(y => y.ServiceAreaNumber == serviceAreaNumber));
         }
     }
 }
