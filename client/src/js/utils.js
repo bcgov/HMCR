@@ -33,7 +33,7 @@ export const updateQueryParamsFromHistory = (history, newParam) => {
   const processedParams = { ...newParam };
   Object.keys(processedParams).forEach(key => {
     if (moment.isMoment(processedParams[key]))
-      processedParams[key] = processedParams[key].format(Constants.DATE_UTC_FORMAT);
+      processedParams[key] = processedParams[key].format(Constants.DATE_DISPLAY_FORMAT);
   });
 
   return queryString.stringify({ ...params, ...processedParams });

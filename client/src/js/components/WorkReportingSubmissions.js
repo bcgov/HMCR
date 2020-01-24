@@ -67,8 +67,8 @@ const WorkReportingSubmissions = ({ serviceArea, triggerRefresh, history }) => {
     const options = {
       ...defaultSearchOptions,
       ..._.omit(params, ['dateFrom', 'dateTo']),
-      dateFrom: params.dateFrom ? moment.utc(params.dateFrom) : defaultSearchOptions.dateFrom,
-      dateTo: params.dateFrom ? moment.utc(params.dateTo) : defaultSearchOptions.dateTo,
+      dateFrom: params.dateFrom ? moment(params.dateFrom) : defaultSearchOptions.dateFrom,
+      dateTo: params.dateFrom ? moment(params.dateTo) : defaultSearchOptions.dateTo,
       serviceAreaNumber: serviceArea,
     };
 
