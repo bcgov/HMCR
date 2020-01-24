@@ -21,6 +21,14 @@ const useSearchData = (defaultSearchOptions, history) => {
   const [searchOptions, setSearchOptions] = useState(defaultSearchOptions);
   const [refreshTrigger, setRefreshTrigger] = useState(null);
 
+  const updateSearchOptions = options => {
+    if (!options.pageNumber) options.pageNumber = 1;
+
+    if (!options.pageSize) options.pageSize = Constants.DEFAULT_PAGE_SIZE;
+
+    setSearchOptions(options);
+  };
+
   const handleChangePage = newPage => {
     const options = { ...searchOptions, pageNumber: newPage };
     setSearchOptions(options);
@@ -77,6 +85,10 @@ const useSearchData = (defaultSearchOptions, history) => {
         }
       });
 
+      if (!options.pageSize) options.pageSize = Constants.DEFAULT_PAGE_SIZE;
+
+      if (!options.pageNumber) options.pageNumber = 1;
+
       setLoading(true);
       api.instance
         .get(dataPath, { params: { ..._.omit(options, ['dataPath']) } })
@@ -103,7 +115,7 @@ const useSearchData = (defaultSearchOptions, history) => {
     pagination,
     loading,
     searchOptions,
-    setSearchOptions,
+    updateSearchOptions,
     handleChangePage,
     handleChangePageSize,
     handleHeadingSortClicked,

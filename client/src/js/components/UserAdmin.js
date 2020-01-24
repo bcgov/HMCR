@@ -30,8 +30,6 @@ const defaultSearchOptions = {
   isActive: true,
   serviceAreas: '',
   userTypes: '',
-  pageSize: Constants.DEFAULT_PAGE_SIZE,
-  pageNumber: 1,
   dataPath: Constants.API_PATHS.USER,
 };
 
@@ -61,7 +59,7 @@ const UserAdmin = ({ serviceAreas, userStatuses, userTypes, history }) => {
       ...params,
     };
 
-    searchData.setSearchOptions(options);
+    searchData.updateSearchOptions(options);
 
     const searchText = options.searchText || '';
     const serviceAreaIds = options.serviceAreas
@@ -91,12 +89,12 @@ const UserAdmin = ({ serviceAreas, userStatuses, userTypes, history }) => {
     }
 
     const options = { ...searchData.searchOptions, isActive, searchText, serviceAreas, userTypes: userTypeIds };
-    searchData.setSearchOptions(options);
+    searchData.updateSearchOptions(options);
   };
 
   const handleSearchFormReset = () => {
     setSearchInitialValues(defaultSearchFormValues);
-    searchData.setSearchOptions(defaultSearchOptions);
+    searchData.updateSearchOptions(defaultSearchOptions);
   };
 
   const onEditClicked = userId => {

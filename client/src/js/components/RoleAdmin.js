@@ -22,8 +22,6 @@ const defaultSearchFormValues = { searchText: '', statusId: [Constants.ACTIVE_ST
 const defaultSearchOptions = {
   searchText: '',
   isActive: true,
-  pageSize: Constants.DEFAULT_PAGE_SIZE,
-  pageNumber: 1,
   dataPath: Constants.API_PATHS.ROLE,
 };
 
@@ -49,7 +47,7 @@ const RoleAdmin = ({ roleStatuses, history }) => {
 
     const searchText = options.searchText || '';
 
-    searchData.setSearchOptions(options);
+    searchData.updateSearchOptions(options);
     setSearchInitialValues({ ...searchInitialValues, searchText, statusId: buildStatusIdArray(options.isActive) });
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -64,12 +62,12 @@ const RoleAdmin = ({ roleStatuses, history }) => {
     }
 
     const options = { ...searchData.searchOptions, isActive, searchText };
-    searchData.setSearchOptions(options);
+    searchData.updateSearchOptions(options);
   };
 
   const handleSearchFormReset = () => {
     setSearchInitialValues(defaultSearchFormValues);
-    searchData.setSearchOptions(defaultSearchOptions);
+    searchData.updateSearchOptions(defaultSearchOptions);
   };
 
   const onEditClicked = roleId => {
