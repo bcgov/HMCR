@@ -31,7 +31,7 @@ const WorkReporting = ({ currentUser, history }) => {
     <React.Fragment>
       <MaterialCard>
         <Row>
-          <Col>
+          <Col lg="8">
             <Row>
               <Col sm={3}>Service Area</Col>
               <Col sm={9}>
@@ -47,7 +47,7 @@ const WorkReporting = ({ currentUser, history }) => {
               </Col>
             </Row>
           </Col>
-          <Col></Col>
+          <Col lg="4" />
         </Row>
       </MaterialCard>
       {serviceArea && (
@@ -55,10 +55,10 @@ const WorkReporting = ({ currentUser, history }) => {
           <Authorize requires={Constants.PERMISSIONS.FILE_W}>
             <MaterialCard>
               <Row>
-                <Col>
+                <Col lg="8">
                   <WorkReportingUpload serviceArea={serviceArea} handleFileSubmitted={handleFileSubmitted} />
                 </Col>
-                <Col></Col>
+                <Col lg="4" />
               </Row>
             </MaterialCard>
           </Authorize>
