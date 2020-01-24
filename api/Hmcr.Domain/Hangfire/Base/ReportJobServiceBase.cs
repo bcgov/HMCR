@@ -1,16 +1,11 @@
-﻿using CsvHelper;
-using Hmcr.Data.Database;
+﻿using Hmcr.Data.Database;
 using Hmcr.Data.Database.Entities;
 using Hmcr.Data.Repositories;
-using Hmcr.Domain.CsvHelpers;
 using Hmcr.Domain.Services;
 using Hmcr.Model;
 using Hmcr.Model.Dtos;
-using Hmcr.Model.Dtos.ActivityCode;
 using Hmcr.Model.Dtos.SubmissionObject;
-using Hmcr.Model.Dtos.WorkReport;
 using Hmcr.Model.Utils;
-using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -26,7 +21,7 @@ namespace Hmcr.Domain.Hangfire.Base
         protected ISubmissionStatusRepository _statusRepo;
         protected ISubmissionObjectRepository _submissionRepo;
         protected ISumbissionRowRepository _submissionRowRepo;
-
+        private IEmailService _emailService;
         protected decimal _duplicateRowStatusId;
         protected decimal _errorRowStatusId;
         protected decimal _successRowStatusId;
@@ -38,12 +33,13 @@ namespace Hmcr.Domain.Hangfire.Base
 
         public ReportJobServiceBase(IUnitOfWork unitOfWork,
             ISubmissionStatusRepository statusRepo, ISubmissionObjectRepository submissionRepo,
-            ISumbissionRowRepository submissionRowRepo)
+            ISumbissionRowRepository submissionRowRepo, IEmailService emailService)
         {
             _unitOfWork = unitOfWork;
             _statusRepo = statusRepo;
             _submissionRepo = submissionRepo;
             _submissionRowRepo = submissionRowRepo;
+            _emailService = emailService;
         }
 
         protected async Task SetStatusesAsync()
@@ -130,6 +126,16 @@ namespace Hmcr.Domain.Hangfire.Base
             var header = reader.ReadLine().Replace("\"", "");
 
             return header ?? "";
+        }
+
+        protected async Task CommitAndSendEmail()
+        {
+            await _unitOfWork.CommitAsync();
+
+            var subject = $"HMR report submission result";
+            var body = $"Please click the link to see the report submission result. {_submission.SubmissionObjectId}";
+
+            _emailService.SendEmailToUsersInServiceArea(_submission.ServiceAreaNumber, subject, body, body);
         }
     }
 }

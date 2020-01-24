@@ -34,8 +34,8 @@ namespace Hmcr.Domain.Hangfire
 
         public WorkReportJobService(IUnitOfWork unitOfWork, ILogger<IWorkReportJobService> logger,
             IActivityCodeRepository activityRepo, ISubmissionStatusRepository statusRepo, ISubmissionObjectRepository submissionRepo,
-            ISumbissionRowRepository submissionRowRepo, IWorkReportRepository workReportRepo, IFieldValidatorService validator)
-            : base(unitOfWork, statusRepo, submissionRepo, submissionRowRepo)
+            ISumbissionRowRepository submissionRowRepo, IWorkReportRepository workReportRepo, IFieldValidatorService validator, IEmailService emailService)
+            : base(unitOfWork, statusRepo, submissionRepo, submissionRowRepo, emailService)
         {
             _logger = logger;
             _activityRepo = activityRepo;
@@ -61,7 +61,7 @@ namespace Hmcr.Domain.Hangfire
                 {
                     _submission.ErrorDetail = errors.GetErrorDetail();
                     _submission.SubmissionStatusId = _errorFileStatusId;
-                    await _unitOfWork.CommitAsync();
+                    await CommitAndSendEmail();
                     return;
                 }
             }
@@ -105,7 +105,7 @@ namespace Hmcr.Domain.Hangfire
 
             if (_submission.SubmissionStatusId == _errorFileStatusId)
             {
-                await _unitOfWork.CommitAsync();
+                await CommitAndSendEmail();
             }
             else
             {
@@ -113,7 +113,7 @@ namespace Hmcr.Domain.Hangfire
 
                 await foreach (var entity in _workReportRepo.SaveWorkReportAsnyc(_submission, typedRows)) { }
 
-                await _unitOfWork.CommitAsync();
+                await CommitAndSendEmail();
 
                 _logger.LogInformation($"[Hangfire] Submission {_submission.SubmissionObjectId} processed successfully.");
             }

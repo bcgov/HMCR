@@ -31,8 +31,8 @@ namespace Hmcr.Domain.Hangfire
 
         public RockfallReportJobService(IUnitOfWork unitOfWork, ILogger<IRockfallReportJobService> logger, 
             ISubmissionStatusRepository statusRepo, ISubmissionObjectRepository submissionRepo,
-            ISumbissionRowRepository submissionRowRepo, IRockfallReportRepository rockfallReportRepo, IFieldValidatorService validator)
-            : base(unitOfWork, statusRepo, submissionRepo, submissionRowRepo)
+            ISumbissionRowRepository submissionRowRepo, IRockfallReportRepository rockfallReportRepo, IFieldValidatorService validator, IEmailService emailService)
+            : base(unitOfWork, statusRepo, submissionRepo, submissionRowRepo, emailService)
         {
             _logger = logger;
             _rockfallReportRepo = rockfallReportRepo;
@@ -55,7 +55,7 @@ namespace Hmcr.Domain.Hangfire
                 {
                     _submission.ErrorDetail = errors.GetErrorDetail();
                     _submission.SubmissionStatusId = _errorFileStatusId;
-                    await _unitOfWork.CommitAsync();
+                    await CommitAndSendEmail();
                     return;
                 }
             }
@@ -89,7 +89,7 @@ namespace Hmcr.Domain.Hangfire
 
             if (_submission.SubmissionStatusId == _errorFileStatusId)
             {
-                await _unitOfWork.CommitAsync();
+                await CommitAndSendEmail();
             }
             else
 
@@ -98,7 +98,7 @@ namespace Hmcr.Domain.Hangfire
 
                 await foreach (var entity in _rockfallReportRepo.SaveRockfallReportAsnyc(_submission, typedRows)) { }
 
-                await _unitOfWork.CommitAsync();
+                await CommitAndSendEmail();
 
                 _logger.LogInformation($"[Hangfire] Submission {_submission.SubmissionObjectId} processed successfully.");
             }
