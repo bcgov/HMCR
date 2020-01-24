@@ -29,8 +29,8 @@ namespace Hmcr.Domain.Hangfire
 
         public WildlifeReportJobService(IUnitOfWork unitOfWork, ILogger<IWildlifeReportJobService> logger,
             ISubmissionStatusRepository statusRepo, ISubmissionObjectRepository submissionRepo,
-            ISumbissionRowRepository submissionRowRepo, IWildlifeReportRepository wildlifeReportRepo, IFieldValidatorService validator)
-             : base(unitOfWork, statusRepo, submissionRepo, submissionRowRepo)
+            ISumbissionRowRepository submissionRowRepo, IWildlifeReportRepository wildlifeReportRepo, IFieldValidatorService validator, IEmailService emailService)
+             : base(unitOfWork, statusRepo, submissionRepo, submissionRowRepo, emailService)
         {
             _logger = logger;
             _wildlifeReportRepo = wildlifeReportRepo;
@@ -54,7 +54,7 @@ namespace Hmcr.Domain.Hangfire
                 {
                     _submission.ErrorDetail = errors.GetErrorDetail();
                     _submission.SubmissionStatusId = _errorFileStatusId;
-                    await _unitOfWork.CommitAsync();
+                    await CommitAndSendEmail();
                     return;
                 }
             }
@@ -88,7 +88,7 @@ namespace Hmcr.Domain.Hangfire
 
             if (_submission.SubmissionStatusId == _errorFileStatusId)
             {
-                await _unitOfWork.CommitAsync();
+                await CommitAndSendEmail();
             }
             else
             {
@@ -96,7 +96,7 @@ namespace Hmcr.Domain.Hangfire
 
                 _wildlifeReportRepo.SaveWildlifeReport(_submission, typedRows);
 
-                await _unitOfWork.CommitAsync();
+                await CommitAndSendEmail();
 
                 _logger.LogInformation($"[Hangfire] Submission {_submission.SubmissionObjectId} processed successfully.");
             }
