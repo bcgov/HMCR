@@ -1,15 +1,14 @@
 ﻿using CsvHelper;
 using Hmcr.Data.Database;
-using Hmcr.Data.Database.Entities;
 using Hmcr.Data.Repositories;
 using Hmcr.Domain.CsvHelpers;
+using Hmcr.Domain.Hangfire.Base;
 using Hmcr.Domain.Services;
 using Hmcr.Model;
 using Hmcr.Model.Dtos.RockfallReport;
 using Hmcr.Model.Dtos.SubmissionObject;
 using Hmcr.Model.Utils;
 using Microsoft.Extensions.Logging;
-using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -23,25 +22,19 @@ namespace Hmcr.Domain.Hangfire
         Task ProcessSubmission(SubmissionDto submission);
     }
 
-    public class RockfallReportJobService : IRockfallReportJobService
+    public class RockfallReportJobService : ReportJobServiceBase, IRockfallReportJobService
     {
-        protected IUnitOfWork _unitOfWork;
-        private ILogger _logger;
-        protected IFieldValidatorService _validator;
-        protected ISubmissionStatusRepository _statusRepo;
-        private ISubmissionObjectRepository _submissionRepo;
-        private ISumbissionRowRepository _submissionRowRepo;
+        
+        private IFieldValidatorService _validator;
         private IRockfallReportRepository _rockfallReportRepo;
+        private ILogger<IRockfallReportJobService> _logger;
 
         public RockfallReportJobService(IUnitOfWork unitOfWork, ILogger<IRockfallReportJobService> logger, 
             ISubmissionStatusRepository statusRepo, ISubmissionObjectRepository submissionRepo,
             ISumbissionRowRepository submissionRowRepo, IRockfallReportRepository rockfallReportRepo, IFieldValidatorService validator)
+            : base(unitOfWork, statusRepo, submissionRepo, submissionRowRepo)
         {
-            _unitOfWork = unitOfWork;
             _logger = logger;
-            _statusRepo = statusRepo;
-            _submissionRepo = submissionRepo;
-            _submissionRowRepo = submissionRowRepo;
             _rockfallReportRepo = rockfallReportRepo;
             _validator = validator;
         }
@@ -51,42 +44,30 @@ namespace Hmcr.Domain.Hangfire
             _logger.LogInformation("[Hangfire] Starting submission {submissionObjectId}", submissionDto.SubmissionObjectId);
             var errors = new Dictionary<string, List<string>>();
 
-            var submission = await _submissionRepo.GetSubmissionObjecForBackgroundJobAsync(submissionDto.SubmissionObjectId);
+            await SetStatusesAsync();
+            await SetSubmissionAsync(submissionDto);
 
-            var statuses = await _statusRepo.GetActiveStatuses();
+            var (untypedRows, headers) = ParseRowsUnTyped(errors);
 
-            var inProgressRowStatusId = statuses.First(x => x.StatusType == StatusType.File && x.StatusCode == FileStatus.InProgress).StatusId;
-            submission.SubmissionStatusId = inProgressRowStatusId;
-            _unitOfWork.Commit();
-
-            var duplicateRowStatusId = statuses.First(x => x.StatusType == StatusType.Row && x.StatusCode == RowStatus.DuplicateRow).StatusId;
-            var errorRowStatusId = statuses.First(x => x.StatusType == StatusType.Row && x.StatusCode == RowStatus.RowError).StatusId;
-            var successRowStatusId = statuses.First(x => x.StatusType == StatusType.Row && x.StatusCode == RowStatus.Success).StatusId;
-
-            var errorFileStatusId = statuses.First(x => x.StatusType == StatusType.File && x.StatusCode == FileStatus.DataError).StatusId;
-            var successFileStatusId = statuses.First(x => x.StatusType == StatusType.File && x.StatusCode == FileStatus.Success).StatusId;
-
-            var (untypedRows, headers) = ParseRowsUnTyped(submission, errors);
-
-            if (!CheckCommonMandatoryHeaders(untypedRows, errors))
+            if (!CheckCommonMandatoryHeaders(untypedRows, new RockfallReportHeaders(), errors))
             {
                 if (errors.Count > 0)
                 {
-                    submission.ErrorDetail = errors.GetErrorDetail();
-                    submission.SubmissionStatusId = errorFileStatusId;
+                    _submission.ErrorDetail = errors.GetErrorDetail();
+                    _submission.SubmissionStatusId = _errorFileStatusId;
                     await _unitOfWork.CommitAsync();
                     return;
                 }
             }
 
             //text after duplicate lines are removed. Will be used for importing to typed DTO.
-            var text = await SetRowIdAndRemoveDuplicate(submission, duplicateRowStatusId, untypedRows, headers);
+            var text = await SetRowIdAndRemoveDuplicate(untypedRows, headers);
 
             foreach (var untypedRow in untypedRows)
             {
                 errors = new Dictionary<string, List<string>>();
                 var submissionRow = await _submissionRowRepo.GetSubmissionRowByRowId(untypedRow.RowId);
-                submissionRow.RowStatusId = successRowStatusId; //set the initial row status as success 
+                submissionRow.RowStatusId = _successRowStatusId; //set the initial row status as success 
 
                 var entityName = GetValidationEntityName(untypedRow);
 
@@ -94,53 +75,43 @@ namespace Hmcr.Domain.Hangfire
 
                 if (errors.Count > 0)
                 {
-                    submissionRow.RowStatusId = errorRowStatusId;
-                    submissionRow.ErrorDetail = errors.GetErrorDetail();
-                    submission.ErrorDetail = FileError.ReferToRowErrors;
-                    submission.SubmissionStatusId = errorFileStatusId;
+                    SetErrorDetail(submissionRow, errors);
                 }
             }
 
             var typedRows = new List<RockfallReportDto>();
 
-            if (submission.SubmissionStatusId != errorFileStatusId)
+            if (_submission.SubmissionStatusId != _errorFileStatusId)
             {
                 typedRows = ParseRowsTyped(text, errors);
-                await PerformAdditionalValidationAsync(submission, typedRows, untypedRows);
+                await PerformAdditionalValidationAsync(typedRows);
             }
 
-            if (submission.SubmissionStatusId == errorFileStatusId)
+            if (_submission.SubmissionStatusId == _errorFileStatusId)
             {
                 await _unitOfWork.CommitAsync();
             }
             else
-            {
-                submission.SubmissionStatusId = successFileStatusId;
 
-                await foreach (var entity in _rockfallReportRepo.SaveRockfallReportAsnyc(submission, typedRows)) { }
+            {
+                _submission.SubmissionStatusId = _successFileStatusId;
+
+                await foreach (var entity in _rockfallReportRepo.SaveRockfallReportAsnyc(_submission, typedRows)) { }
 
                 await _unitOfWork.CommitAsync();
 
-                _logger.LogInformation($"[Hangfire] Submission {submission.SubmissionObjectId} processed successfully.");
+                _logger.LogInformation($"[Hangfire] Submission {_submission.SubmissionObjectId} processed successfully.");
             }
 
-            _logger.LogInformation("[Hangfire] Finishing submission {submissionObjectId}", submission.SubmissionObjectId);
+            _logger.LogInformation("[Hangfire] Finishing submission {submissionObjectId}", _submission.SubmissionObjectId);
         }
 
-        private async Task PerformAdditionalValidationAsync(HmrSubmissionObject submission, List<RockfallReportDto> typedRows, List<RockfallReportCsvDto> untypedRows)
+        private async Task PerformAdditionalValidationAsync(List<RockfallReportDto> typedRows)
         {
-            var statuses = await _statusRepo.GetActiveStatuses();
-
-            var errorRowStatusId = statuses.First(x => x.StatusType == StatusType.Row && x.StatusCode == RowStatus.RowError).StatusId;
-            var errorFileStatusId = statuses.First(x => x.StatusType == StatusType.File && x.StatusCode == FileStatus.DataError).StatusId;
-
             foreach (var typedRow in typedRows)
             {
-                var untypedRow = untypedRows.First(x => x.RowNum == typedRow.RowNum);
-                typedRow.RowNum = untypedRow.RowNum;
-
                 var errors = new Dictionary<string, List<string>>();
-                var submissionRow = await _submissionRowRepo.GetSubmissionRowByRowNum(submission.SubmissionObjectId, (decimal)typedRow.RowNum);
+                var submissionRow = await _submissionRowRepo.GetSubmissionRowByRowNum(_submission.SubmissionObjectId, (decimal)typedRow.RowNum);
 
                 if (typedRow.StartOffset != null && typedRow.EndOffset < typedRow.StartOffset)
                 {
@@ -151,69 +122,19 @@ namespace Hmcr.Domain.Hangfire
 
                 if (errors.Count > 0)
                 {
-                    submissionRow.RowStatusId = errorRowStatusId;
-                    submissionRow.ErrorDetail = errors.GetErrorDetail();
-                    submission.ErrorDetail = FileError.ReferToRowErrors;
-                    submission.SubmissionStatusId = errorFileStatusId;
+                    SetErrorDetail(submissionRow, errors);
                 }
             }
         }
 
-        private string GetValidationEntityName(RockfallReportCsvDto row)
+        private string GetValidationEntityName(RockfallReportCsvDto untypedRow)
         {
-            return row.StartLatitude.IsEmpty() ? Entities.RockfallReportLrs : Entities.RockfallReportGps;
+            return untypedRow.StartLatitude.IsEmpty() ? Entities.RockfallReportLrs : Entities.RockfallReportGps;
         }
 
-        private bool CheckCommonMandatoryHeaders(List<RockfallReportCsvDto> rows, Dictionary<string, List<string>> errors)
+        private (List<RockfallReportCsvDto> untypedRows, string headers) ParseRowsUnTyped(Dictionary<string, List<string>> errors)
         {
-            if (rows.Count == 0) //not possible since it's already validated in the ReportServiceBase.
-                throw new Exception("File has no rows.");
-
-            var row = rows[0];
-
-            var fields = typeof(RockfallReportCsvDto).GetProperties();
-
-            foreach (var field in fields)
-            {
-                if (!RockfallReportHeaders.CommonMandatoryFields.Any(x => x == field.Name))
-                    continue;
-
-                if (field.GetValue(row) == null)
-                {
-                    errors.AddItem("File", $"Header [{field.Name.WordToWords()}] is missing");
-                }
-            }
-
-            return errors.Count == 0;
-        }
-
-        private async Task<string> SetRowIdAndRemoveDuplicate(HmrSubmissionObject submission, decimal duplicateStatusId, List<RockfallReportCsvDto> rows, string headers)
-        {
-            headers = $"{Fields.RowNum}," + headers;
-            var text = new StringBuilder();
-            text.AppendLine(headers);
-
-            for (int i = rows.Count - 1; i >= 0; i--)
-            {
-                var row = rows[i];
-                var entity = await _submissionRowRepo.GetSubmissionRowByRowNum(submission.SubmissionObjectId, (decimal)row.RowNum);
-
-                if (entity.RowStatusId == duplicateStatusId)
-                {
-                    rows.RemoveAt(i);
-                    continue;
-                }
-
-                text.AppendLine($"{row.RowNum},{entity.RowValue}");
-                row.RowId = entity.RowId;
-            }
-
-            return text.ToString();
-        }
-
-        private (List<RockfallReportCsvDto> untypedRows, string headers) ParseRowsUnTyped(HmrSubmissionObject submission, Dictionary<string, List<string>> errors)
-        {
-            var text = Encoding.UTF8.GetString(submission.DigitalRepresentation);
+            var text = Encoding.UTF8.GetString(_submission.DigitalRepresentation);
 
             using var stringReader = new StringReader(text);
             using var csv = new CsvReader(stringReader);
@@ -228,17 +149,6 @@ namespace Hmcr.Domain.Hangfire
             }
 
             return (rows, GetHeader(text));
-        }
-
-        private string GetHeader(string text)
-        {
-            if (text == null)
-                return "";
-
-            using var reader = new StringReader(text);
-            var header = reader.ReadLine().Replace("\"", "");
-
-            return header ?? "";
         }
 
         private List<RockfallReportDto> ParseRowsTyped(string text, Dictionary<string, List<string>> errors)

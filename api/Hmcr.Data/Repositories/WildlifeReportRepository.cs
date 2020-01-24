@@ -10,7 +10,7 @@ namespace Hmcr.Data.Repositories
 {
     public interface IWildlifeReportRepository
     {
-        void SaveWildlifeReportAsnyc(HmrSubmissionObject submission, List<WildlifeReportDto> rows);
+        void SaveWildlifeReport(HmrSubmissionObject submission, List<WildlifeReportDto> rows);
     }
     public class WildlifeReportRepository : HmcrRepositoryBase<HmrWildlifeReport>, IWildlifeReportRepository
     {
@@ -19,7 +19,7 @@ namespace Hmcr.Data.Repositories
         {
         }
 
-        public void SaveWildlifeReportAsnyc(HmrSubmissionObject submission, List<WildlifeReportDto> rows)
+        public void SaveWildlifeReport(HmrSubmissionObject submission, List<WildlifeReportDto> rows)
         {
             foreach (var row in rows)
             {

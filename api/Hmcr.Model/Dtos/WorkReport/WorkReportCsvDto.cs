@@ -1,10 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace Hmcr.Model.Dtos.WorkReport
+﻿namespace Hmcr.Model.Dtos.WorkReport
 {
-    public class WorkReportCsvDto
+    public class WorkReportCsvDto : IReportCsvDto
     {
         public decimal RowId { get; set; }
         public string RecordType { get; set; }

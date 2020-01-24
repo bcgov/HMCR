@@ -1,10 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace Hmcr.Model.Dtos.RockfallReport
+﻿namespace Hmcr.Model.Dtos.RockfallReport
 {
-    public class RockfallReportCsvDto
+    public class RockfallReportCsvDto : IReportCsvDto
     {
         public decimal RowId { get; set; }
         public string McrrIncidentNumber { get; set; }

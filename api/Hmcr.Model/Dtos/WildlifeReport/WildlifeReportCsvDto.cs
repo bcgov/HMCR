@@ -1,6 +1,6 @@
 ﻿namespace Hmcr.Model.Dtos.WildlifeReport
 {
-    public class WildlifeReportCsvDto
+    public class WildlifeReportCsvDto : IReportCsvDto
     {
         public decimal RowId { get; set; }
         public string RecordType { get; set; }
