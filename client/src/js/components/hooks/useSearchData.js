@@ -45,7 +45,23 @@ const useSearchData = ({ defaultSearchOptions, refreshTrigger, history }) => {
 
       // convert moment objects to string
       Object.keys(options).forEach(key => {
-        if (moment.isMoment(options[key])) options[key] = options[key].utc().format(Constants.DATE_UTC_FORMAT);
+        if (moment.isMoment(options[key])) {
+          if (key === 'dateTo') {
+            options[key] = moment(options[key])
+              .endOf('day')
+              .format(Constants.DATE_UTC_FORMAT);
+
+            return;
+          } else if (key === 'dateFrom') {
+            options[key] = moment(options[key])
+              .startOf('day')
+              .format(Constants.DATE_UTC_FORMAT);
+
+            return;
+          }
+
+          options[key] = moment(options[key]).format(Constants.DATE_UTC_FORMAT);
+        }
       });
 
       setLoading(true);

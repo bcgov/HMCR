@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, forwardRef, useImperativeHandle } from 'react';
 import { Button, Row, Col, Input } from 'reactstrap';
 import moment from 'moment';
 import { DateRangePicker } from 'react-dates';
@@ -35,7 +35,7 @@ const defaultSearchOptions = {
   serviceAreaNumber: 10,
 };
 
-const WorkReportingSubmissions = ({ serviceArea, triggerRefresh, history }) => {
+const WorkReportingSubmissions = forwardRef(({ serviceArea, history }, ref) => {
   const [refreshTrigger, setRefreshTrigger] = useState(null);
 
   const {
@@ -59,6 +59,12 @@ const WorkReportingSubmissions = ({ serviceArea, triggerRefresh, history }) => {
   const [focusedInput, setFocusedInput] = useState(null);
   const [dateFrom, setDateFrom] = useState(defaultSearchOptions.dateFrom);
   const [dateTo, setDateTo] = useState(defaultSearchOptions.dateTo);
+
+  useImperativeHandle(ref, () => ({
+    refresh() {
+      setRefreshTrigger(Math.random());
+    },
+  }));
 
   // Run on load, parse URL query params
   useEffect(() => {
@@ -196,6 +202,6 @@ const WorkReportingSubmissions = ({ serviceArea, triggerRefresh, history }) => {
       )}
     </React.Fragment>
   );
-};
+});
 
 export default WorkReportingSubmissions;

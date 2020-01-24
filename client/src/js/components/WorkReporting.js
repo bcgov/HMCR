@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { connect } from 'react-redux';
 import { Row, Col } from 'reactstrap';
 import _ from 'lodash';
@@ -14,7 +14,8 @@ import * as Constants from '../Constants';
 
 const WorkReporting = ({ currentUser, history }) => {
   const [serviceArea, setServiceArea] = useState(null);
-  const [triggerRefresh, setTriggerRefresh] = useState(null);
+
+  const submissionsRef = useRef();
 
   useEffect(() => {
     const queryParams = queryString.parse(history.location.search);
@@ -23,7 +24,7 @@ const WorkReporting = ({ currentUser, history }) => {
   }, [setServiceArea, history.location.search]);
 
   const handleFileSubmitted = () => {
-    setTriggerRefresh(Math.random());
+    submissionsRef.current.refresh();
   };
 
   return (
@@ -62,7 +63,7 @@ const WorkReporting = ({ currentUser, history }) => {
             </MaterialCard>
           </Authorize>
           <MaterialCard>
-            <WorkReportingSubmissions serviceArea={serviceArea} triggerRefresh={triggerRefresh} history={history} />
+            <WorkReportingSubmissions serviceArea={serviceArea} history={history} ref={submissionsRef} />
           </MaterialCard>
         </React.Fragment>
       )}
