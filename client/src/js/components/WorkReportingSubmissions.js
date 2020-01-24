@@ -1,5 +1,4 @@
-import React, { useState, useEffect } from 'react';
-import { connect } from 'react-redux';
+import React, { useState, useEffect, forwardRef, useImperativeHandle } from 'react';
 import { Button, Row, Col, Input } from 'reactstrap';
 import moment from 'moment';
 import { DateRangePicker } from 'react-dates';
@@ -9,12 +8,11 @@ import _ from 'lodash';
 import DataTableWithPaginaionControl from './ui/DataTableWithPaginaionControl';
 import PageSpinner from './ui/PageSpinner';
 import FontAwesomeButton from './ui/FontAwesomeButton';
-
-import { searchSubmissions } from '../actions';
 import WorkReportingSubmissionDetail from './WorkReportingSubmissionDetail';
+import useSearchData from './hooks/useSearchData';
 
 import * as Constants from '../Constants';
-import { updateQueryParamsFromHistory, stringifyQueryParams } from '../utils';
+import { stringifyQueryParams } from '../utils';
 
 const startDateLimit = moment('2019-01-01');
 
@@ -33,24 +31,45 @@ const defaultSearchOptions = {
   searchText: '',
   pageSize: Constants.DEFAULT_PAGE_SIZE,
   pageNumber: 1,
+  dataPath: Constants.API_PATHS.SUBMISSIONS,
+  serviceAreaNumber: 10,
 };
 
-const WorkReportingSubmissions = ({
-  searchSubmissions,
-  searchResult,
-  searchPagination,
-  serviceArea,
-  triggerRefresh,
-  history,
-}) => {
-  const [searchOptions, setSearchOptions] = useState(defaultSearchOptions);
-  const [focusedInput, setFocusedInput] = useState(null);
-  const [searching, setSearching] = useState(false);
+const WorkReportingSubmissions = forwardRef(({ serviceArea, history }, ref) => {
+  const [refreshTrigger, setRefreshTrigger] = useState(null);
+
+  const {
+    data,
+    pagination,
+    loading,
+    searchOptions,
+    setSearchOptions,
+    handleChangePage,
+    handleChangePageSize,
+  } = useSearchData({
+    defaultSearchOptions: null,
+    refreshTrigger,
+    history,
+  });
+  const [searchText, setSearchText] = useState(defaultSearchOptions.searchText);
+
   const [showResultScreen, setShowResultScreen] = useState({ isOpen: false, submission: null });
 
-  // Run on load and trigger refresh
+  // Date picker
+  const [focusedInput, setFocusedInput] = useState(null);
+  const [dateFrom, setDateFrom] = useState(defaultSearchOptions.dateFrom);
+  const [dateTo, setDateTo] = useState(defaultSearchOptions.dateTo);
+
+  useImperativeHandle(ref, () => ({
+    refresh() {
+      setRefreshTrigger(Math.random());
+    },
+  }));
+
+  // Run on load, parse URL query params
   useEffect(() => {
     const params = queryString.parse(history.location.search);
+
     const options = {
       ...defaultSearchOptions,
       ..._.omit(params, ['dateFrom', 'dateTo']),
@@ -64,49 +83,17 @@ const WorkReportingSubmissions = ({
     }
 
     setSearchOptions(options);
+    setSearchText(options.searchText);
+    setDateFrom(options.dateFrom);
+    setDateTo(options.dateTo);
 
-    startSearch(options);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [triggerRefresh, serviceArea, searchSubmissions]);
-
-  // Run search when searchOptions object has changed
-  useEffect(() => {
-    if (searchOptions !== defaultSearchOptions && searchOptions.dateFrom && searchOptions.dateTo) {
-      updateHistoryLocationSearch(searchOptions);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [searchOptions, searchSubmissions]);
-
-  const updateHistoryLocationSearch = options => {
-    history.push(
-      `?${updateQueryParamsFromHistory(history, _.omit(options, ['dateTo', 'dateFrom', 'serviceAreaNumber']))}`
-    );
-  };
-
-  const startSearch = options => {
-    setSearching(true);
-    searchSubmissions(options).finally(() => setSearching(false));
-  };
+  }, []);
 
   const handleDateChanged = (dateFrom, dateTo) => {
     if (!(dateFrom && dateTo && dateFrom.isSameOrBefore(dateTo))) return;
 
-    history.push(
-      `?${updateQueryParamsFromHistory(history, {
-        dateFrom: dateFrom.format(Constants.DATE_FORMAT),
-        dateTo: dateTo.format(Constants.DATE_FORMAT),
-      })}`
-    );
-  };
-
-  const handleChangePage = newPage => {
-    const options = { ...searchOptions, pageNumber: newPage };
-    setSearchOptions(options);
-  };
-
-  const handleChangePageSize = newSize => {
-    const options = { ...searchOptions, pageNumber: 1, pageSize: newSize };
-    setSearchOptions(options);
+    setSearchOptions({ ...searchOptions, dateFrom, dateTo });
   };
 
   return (
@@ -117,12 +104,13 @@ const WorkReportingSubmissions = ({
             <div>
               <span className="mr-2">Report Submit Date</span>
               <DateRangePicker
-                startDate={searchOptions.dateFrom}
+                startDate={dateFrom}
                 startDateId="searchStartDate"
-                endDate={searchOptions.dateTo}
+                endDate={dateTo}
                 endDateId="searchEndDate"
                 onDatesChange={({ startDate, endDate }) => {
-                  setSearchOptions({ ...searchOptions, dateFrom: startDate, dateTo: endDate });
+                  setDateFrom(startDate);
+                  setDateTo(endDate);
                   handleDateChanged(startDate, endDate);
                 }}
                 focusedInput={focusedInput}
@@ -131,7 +119,7 @@ const WorkReportingSubmissions = ({
                 hideKeyboardShortcutsPanel
                 inputIconPosition="after"
                 small
-                displayFormat={Constants.DATE_FORMAT}
+                displayFormat={Constants.DATE_DISPLAY_FORMAT}
                 startDatePlaceholderText="Date From"
                 endDatePlaceholderText="Date To"
                 isOutsideRange={date =>
@@ -150,10 +138,12 @@ const WorkReportingSubmissions = ({
                   type="text"
                   style={{ width: '160px', position: 'absolute', top: '15px' }}
                   placeholder="Name"
-                  value={searchOptions.searchText}
-                  onChange={e => setSearchOptions({ ...searchOptions, searchText: e.target.value })}
+                  value={searchText}
+                  onChange={e => setSearchText(e.target.value)}
                   onKeyDown={e => {
-                    if (e.key === 'Enter') startSearch(searchOptions);
+                    if (e.key === 'Enter') {
+                      setSearchOptions({ ...searchOptions, searchText });
+                    }
                   }}
                 />
               </div>
@@ -162,24 +152,24 @@ const WorkReportingSubmissions = ({
               <FontAwesomeButton
                 size="sm"
                 icon="sync"
-                spin={searching}
-                disabled={searching}
-                onClick={() => startSearch(searchOptions)}
+                spin={loading}
+                disabled={loading}
+                onClick={() => setRefreshTrigger(Math.random())}
               />
             </div>
           </div>
         </Col>
       </Row>
-      {searching && <PageSpinner />}
-      {!searching && (
+      {loading && <PageSpinner />}
+      {!loading && (
         <Row>
           <Col>
-            {searchResult.length > 0 && (
+            {data.length > 0 && (
               <DataTableWithPaginaionControl
-                dataList={searchResult.map(item => ({
+                dataList={data.map(item => ({
                   ...item,
                   name: `${item.firstName} ${item.lastName}`,
-                  date: moment(item.appCreateTimestamp).format(Constants.DATE_FORMAT),
+                  date: moment(item.appCreateTimestamp).format(Constants.DATE_DISPLAY_FORMAT),
                   id: (
                     <Button
                       color="link"
@@ -191,12 +181,12 @@ const WorkReportingSubmissions = ({
                   ),
                 }))}
                 tableColumns={tableColumns}
-                searchPagination={searchPagination}
+                searchPagination={pagination}
                 onPageNumberChange={handleChangePage}
                 onPageSizeChange={handleChangePageSize}
               />
             )}
-            {searchResult.length <= 0 && <div>No submissions found</div>}
+            {data.length <= 0 && <div>No submissions found</div>}
           </Col>
         </Row>
       )}
@@ -212,13 +202,6 @@ const WorkReportingSubmissions = ({
       )}
     </React.Fragment>
   );
-};
+});
 
-const mapStateToProps = state => {
-  return {
-    searchResult: Object.values(state.submissions.list),
-    searchPagination: state.submissions.searchPagination,
-  };
-};
-
-export default connect(mapStateToProps, { searchSubmissions })(WorkReportingSubmissions);
+export default WorkReportingSubmissions;
