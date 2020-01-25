@@ -34,7 +34,7 @@ const defaultSearchOptions = {
 };
 
 const WorkReportingSubmissions = ({ serviceArea, history }, ref) => {
-  const searchData = useSearchData(null, history);
+  const searchData = useSearchData(defaultSearchOptions, history);
   const [searchText, setSearchText] = useState(defaultSearchOptions.searchText);
 
   const [showResultScreen, setShowResultScreen] = useState({ isOpen: false, submission: null });

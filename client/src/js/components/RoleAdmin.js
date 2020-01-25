@@ -32,7 +32,7 @@ const tableColumns = [
 ];
 
 const RoleAdmin = ({ roleStatuses, history }) => {
-  const searchData = useSearchData(null, history);
+  const searchData = useSearchData(defaultSearchOptions, history);
   const [editRoleForm, setEditRoleForm] = useState({ isOpen: false });
   const [searchInitialValues, setSearchInitialValues] = useState(defaultSearchFormValues);
 
@@ -67,7 +67,7 @@ const RoleAdmin = ({ roleStatuses, history }) => {
 
   const handleSearchFormReset = () => {
     setSearchInitialValues(defaultSearchFormValues);
-    searchData.updateSearchOptions(defaultSearchOptions);
+    searchData.refresh(true);
   };
 
   const onEditClicked = roleId => {

@@ -18,7 +18,7 @@ const useSearchData = (defaultSearchOptions, history) => {
     totalCount: null,
   });
   const [loading, setLoading] = useState(false);
-  const [searchOptions, setSearchOptions] = useState(defaultSearchOptions);
+  const [searchOptions, setSearchOptions] = useState(null);
   const [refreshTrigger, setRefreshTrigger] = useState(null);
 
   const updateSearchOptions = options => {
@@ -48,7 +48,23 @@ const useSearchData = (defaultSearchOptions, history) => {
     setSearchOptions(options);
   };
 
-  const refresh = () => setRefreshTrigger(Math.random());
+  const refresh = reset => {
+    if (reset === true) {
+      updateSearchOptions(defaultSearchOptions);
+
+      if (history) {
+        history.push(
+          `?${updateQueryParamsFromHistory(
+            history,
+            _.omit(defaultSearchOptions, ['serviceAreaNumber', 'dataPath']),
+            true
+          )}`
+        );
+      }
+    } else {
+      setRefreshTrigger(Math.random());
+    }
+  };
 
   useEffect(() => {
     const updateHistoryLocationSearch = () => {

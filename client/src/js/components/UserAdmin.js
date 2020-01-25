@@ -44,7 +44,7 @@ const tableColumns = [
 ];
 
 const UserAdmin = ({ serviceAreas, userStatuses, userTypes, history }) => {
-  const searchData = useSearchData(null, history);
+  const searchData = useSearchData(defaultSearchOptions, history);
   const [searchInitialValues, setSearchInitialValues] = useState(defaultSearchFormValues);
 
   const [editUserForm, setEditUserForm] = useState({ isOpen: false });
@@ -94,7 +94,7 @@ const UserAdmin = ({ serviceAreas, userStatuses, userTypes, history }) => {
 
   const handleSearchFormReset = () => {
     setSearchInitialValues(defaultSearchFormValues);
-    searchData.updateSearchOptions(defaultSearchOptions);
+    searchData.refresh(true);
   };
 
   const onEditClicked = userId => {
