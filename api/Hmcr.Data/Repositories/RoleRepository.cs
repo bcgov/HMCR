@@ -16,7 +16,7 @@ namespace Hmcr.Data.Repositories
     {
         Task<int> CountActiveRoleIdsAsync(IEnumerable<decimal> roles);
         Task<IEnumerable<RoleDto>> GetActiveRolesAsync();
-        Task<PagedDto<RoleSearchDto>> GetRolesAync(string searchText, bool? isActive, int pageSize, int pageNumber, string orderBy);
+        Task<PagedDto<RoleSearchDto>> GetRolesAync(string searchText, bool? isActive, int pageSize, int pageNumber, string orderBy, string direction);
         Task<RoleDto> GetRoleAsync(decimal roleId);
         Task<HmrRole> CreateRoleAsync(RoleCreateDto role);
         Task UpdateRoleAsync(RoleUpdateDto role);
@@ -45,7 +45,7 @@ namespace Hmcr.Data.Repositories
             return Mapper.Map<IEnumerable<RoleDto>>(roleEntity);
         } 
 
-        public async Task<PagedDto<RoleSearchDto>> GetRolesAync(string searchText, bool? isActive, int pageSize, int pageNumber, string orderBy)
+        public async Task<PagedDto<RoleSearchDto>> GetRolesAync(string searchText, bool? isActive, int pageSize, int pageNumber, string orderBy, string direction)
         {
             var query = DbSet.AsNoTracking();
 
@@ -64,7 +64,7 @@ namespace Hmcr.Data.Repositories
 
             query = query.Include(x => x.HmrUserRoles);
 
-            var pagedEntity = await Page<HmrRole, HmrRole>(query, pageSize, pageNumber, orderBy);
+            var pagedEntity = await Page<HmrRole, HmrRole>(query, pageSize, pageNumber, orderBy, direction);
 
             var roles = Mapper.Map<IEnumerable<RoleSearchDto>>(pagedEntity.SourceList);
 
@@ -78,7 +78,9 @@ namespace Hmcr.Data.Repositories
                 PageNumber = pageNumber,
                 PageSize = pageSize,
                 TotalCount = pagedEntity.TotalCount,
-                SourceList = roles
+                SourceList = roles,
+                OrderBy = orderBy,
+                Direction = direction
             };
 
             return pagedDTO;

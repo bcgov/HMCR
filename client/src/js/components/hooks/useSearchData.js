@@ -18,8 +18,15 @@ const useSearchData = (defaultSearchOptions, history) => {
     totalCount: null,
   });
   const [loading, setLoading] = useState(false);
-  const [searchOptions, setSearchOptions] = useState(defaultSearchOptions);
+  const [searchOptions, setSearchOptions] = useState(null);
   const [refreshTrigger, setRefreshTrigger] = useState(null);
+
+  const updateSearchOptions = options => {
+    if (!options.pageNumber) options.pageNumber = 1;
+    if (!options.pageSize) options.pageSize = Constants.DEFAULT_PAGE_SIZE;
+
+    setSearchOptions(options);
+  };
 
   const handleChangePage = newPage => {
     const options = { ...searchOptions, pageNumber: newPage };
@@ -32,11 +39,32 @@ const useSearchData = (defaultSearchOptions, history) => {
   };
 
   const handleHeadingSortClicked = headingKey => {
-    const options = { ...searchOptions, pageNumber: 1, orderBy: headingKey };
+    const direction =
+      !searchOptions.direction || searchOptions.direction === Constants.SORT_DIRECTION.ASCENDING
+        ? Constants.SORT_DIRECTION.DESCENDING
+        : Constants.SORT_DIRECTION.ASCENDING;
+
+    const options = { ...searchOptions, pageNumber: 1, orderBy: headingKey, direction };
     setSearchOptions(options);
   };
 
-  const refresh = () => setRefreshTrigger(Math.random());
+  const refresh = reset => {
+    if (reset === true) {
+      updateSearchOptions(defaultSearchOptions);
+
+      if (history) {
+        history.push(
+          `?${updateQueryParamsFromHistory(
+            history,
+            _.omit(defaultSearchOptions, ['serviceAreaNumber', 'dataPath']),
+            true
+          )}`
+        );
+      }
+    } else {
+      setRefreshTrigger(Math.random());
+    }
+  };
 
   useEffect(() => {
     const updateHistoryLocationSearch = () => {
@@ -77,6 +105,10 @@ const useSearchData = (defaultSearchOptions, history) => {
         }
       });
 
+      if (!options.pageSize) options.pageSize = Constants.DEFAULT_PAGE_SIZE;
+
+      if (!options.pageNumber) options.pageNumber = 1;
+
       setLoading(true);
       api.instance
         .get(dataPath, { params: { ..._.omit(options, ['dataPath']) } })
@@ -103,7 +135,7 @@ const useSearchData = (defaultSearchOptions, history) => {
     pagination,
     loading,
     searchOptions,
-    setSearchOptions,
+    updateSearchOptions,
     handleChangePage,
     handleChangePageSize,
     handleHeadingSortClicked,

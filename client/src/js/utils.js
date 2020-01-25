@@ -1,5 +1,6 @@
 import queryString from 'query-string';
 import moment from 'moment';
+import _ from 'lodash';
 
 import * as Constants from './Constants';
 
@@ -27,14 +28,16 @@ export const buildApiErrorObject = response => {
   }
 };
 
-export const updateQueryParamsFromHistory = (history, newParam) => {
+export const updateQueryParamsFromHistory = (history, newParam, overwrite) => {
   const params = queryString.parse(history.location.search);
 
-  const processedParams = { ...newParam };
+  const processedParams = { ..._.pickBy(newParam, _.identity) };
   Object.keys(processedParams).forEach(key => {
     if (moment.isMoment(processedParams[key]))
       processedParams[key] = processedParams[key].format(Constants.DATE_DISPLAY_FORMAT);
   });
+
+  if (overwrite) return queryString.stringify({ ...processedParams });
 
   return queryString.stringify({ ...params, ...processedParams });
 };
@@ -44,9 +47,9 @@ export const stringifyQueryParams = newParam => {
 };
 
 export const buildStatusIdArray = isActive => {
-  if (isActive === true) return [Constants.ACTIVE_STATUS.ACTIVE];
+  if (isActive === true || isActive === 'true') return [Constants.ACTIVE_STATUS.ACTIVE];
 
-  if (isActive === false) return [Constants.ACTIVE_STATUS.INACTIVE];
+  if (isActive === false || isActive === 'false') return [Constants.ACTIVE_STATUS.INACTIVE];
 
   return [Constants.ACTIVE_STATUS.ACTIVE, Constants.ACTIVE_STATUS.INACTIVE];
 };

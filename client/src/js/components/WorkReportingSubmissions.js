@@ -29,13 +29,12 @@ const defaultSearchOptions = {
   dateFrom: moment().subtract(1, 'months'),
   dateTo: moment(),
   searchText: '',
-  pageSize: Constants.DEFAULT_PAGE_SIZE,
-  pageNumber: 1,
+  direction: Constants.SORT_DIRECTION.DESCENDING,
   dataPath: Constants.API_PATHS.SUBMISSIONS,
 };
 
 const WorkReportingSubmissions = ({ serviceArea, history }, ref) => {
-  const searchData = useSearchData(null, history);
+  const searchData = useSearchData(defaultSearchOptions, history);
   const [searchText, setSearchText] = useState(defaultSearchOptions.searchText);
 
   const [showResultScreen, setShowResultScreen] = useState({ isOpen: false, submission: null });
@@ -67,7 +66,7 @@ const WorkReportingSubmissions = ({ serviceArea, history }, ref) => {
       setShowResultScreen({ isOpen: true, submission: params.showResult });
     }
 
-    searchData.setSearchOptions(options);
+    searchData.updateSearchOptions(options);
     setSearchText(options.searchText);
     setDateFrom(options.dateFrom);
     setDateTo(options.dateTo);
@@ -78,7 +77,7 @@ const WorkReportingSubmissions = ({ serviceArea, history }, ref) => {
   const handleDateChanged = (dateFrom, dateTo) => {
     if (!(dateFrom && dateTo && dateFrom.isSameOrBefore(dateTo))) return;
 
-    searchData.setSearchOptions({ ...searchData.searchOptions, dateFrom, dateTo });
+    searchData.updateSearchOptions({ ...searchData.searchOptions, dateFrom, dateTo });
   };
 
   return (
@@ -127,7 +126,7 @@ const WorkReportingSubmissions = ({ serviceArea, history }, ref) => {
                   onChange={e => setSearchText(e.target.value)}
                   onKeyDown={e => {
                     if (e.key === 'Enter') {
-                      searchData.setSearchOptions({ ...searchData.searchOptions, searchText });
+                      searchData.updateSearchOptions({ ...searchData.searchOptions, searchText });
                     }
                   }}
                 />

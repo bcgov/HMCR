@@ -13,7 +13,7 @@ namespace Hmcr.Domain.Services
     public interface ISubmissionObjectService
     {
         Task<SubmissionObjectDto> GetSubmissionObjectAsync(decimal submissionObjectId);
-        Task<PagedDto<SubmissionObjectSearchDto>> GetSubmissionObjectsAsync(decimal serviceAreaNumber, DateTime dateFrom, DateTime dateTo, int pageSize, int pageNumber, string orderBy = "AppCreateTimestamp DESC", string searchText = null);
+        Task<PagedDto<SubmissionObjectSearchDto>> GetSubmissionObjectsAsync(decimal serviceAreaNumber, DateTime dateFrom, DateTime dateTo, int pageSize, int pageNumber, string searchText, string orderBy, string direction);
         Task<SubmissionObjectResultDto> GetSubmissionResultAsync(decimal submissionObjectId);
         Task<SubmissionObjectFileDto> GetSubmissionFileAsync(decimal submissionObjectId);
     }
@@ -31,9 +31,9 @@ namespace Hmcr.Domain.Services
             return await _submissionRepo.GetSubmissionObjectAsync(submissionObjectId);
         }
 
-        public async Task<PagedDto<SubmissionObjectSearchDto>> GetSubmissionObjectsAsync(decimal serviceAreaNumber, DateTime dateFrom, DateTime dateTo, int pageSize, int pageNumber, string orderBy, string searchText)
+        public async Task<PagedDto<SubmissionObjectSearchDto>> GetSubmissionObjectsAsync(decimal serviceAreaNumber, DateTime dateFrom, DateTime dateTo, int pageSize, int pageNumber, string searchText, string orderBy, string direction)
         {
-            return await _submissionRepo.GetSubmissionObjectsAsync(serviceAreaNumber, dateFrom, dateTo, pageSize, pageNumber, orderBy, searchText);
+            return await _submissionRepo.GetSubmissionObjectsAsync(serviceAreaNumber, dateFrom, dateTo, pageSize, pageNumber, searchText, orderBy, direction);
         }
 
         public async Task<SubmissionObjectResultDto> GetSubmissionResultAsync(decimal submissionObjectId)

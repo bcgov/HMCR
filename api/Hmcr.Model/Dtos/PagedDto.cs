@@ -38,5 +38,7 @@ namespace Hmcr.Model.Dtos
         public int PageCount => PageSize == 0 ? 1 : ((int)(TotalCount / PageSize) + (TotalCount % PageSize == 0 ? 0 : 1));
         public bool HasPreviousPage => PageNumber != 1;
         public bool HasNextPage => PageNumber < PageCount;
+        public string OrderBy { get; set; }
+        public string Direction { get; set; }
     }
 }

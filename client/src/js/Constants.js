@@ -70,6 +70,11 @@ export const ACTIVE_STATUS = {
   INACTIVE: 'INACTIVE',
 };
 
+export const SORT_DIRECTION = {
+  ASCENDING: 'asc',
+  DESCENDING: 'desc',
+};
+
 export const DEFAULT_PAGE_SIZE_OPTIONS = process.env.REACT_APP_DEFAULT_PAGE_SIZE_OPTIONS.split(',').map(o =>
   parseInt(o)
 );
