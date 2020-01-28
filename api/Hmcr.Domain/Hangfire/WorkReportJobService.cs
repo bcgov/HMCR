@@ -27,7 +27,6 @@ namespace Hmcr.Domain.Hangfire
 
     public class WorkReportJobService : ReportJobServiceBase, IWorkReportJobService
     {
-        private ILogger _logger;
         private IFieldValidatorService _validator;
         private IActivityCodeRepository _activityRepo;
         private IWorkReportRepository _workReportRepo;
@@ -35,7 +34,7 @@ namespace Hmcr.Domain.Hangfire
         public WorkReportJobService(IUnitOfWork unitOfWork, ILogger<IWorkReportJobService> logger,
             IActivityCodeRepository activityRepo, ISubmissionStatusRepository statusRepo, ISubmissionObjectRepository submissionRepo,
             ISumbissionRowRepository submissionRowRepo, IWorkReportRepository workReportRepo, IFieldValidatorService validator, IEmailService emailService)
-            : base(unitOfWork, statusRepo, submissionRepo, submissionRowRepo, emailService)
+            : base(unitOfWork, statusRepo, submissionRepo, submissionRowRepo, emailService, logger)
         {
             _logger = logger;
             _activityRepo = activityRepo;
@@ -45,7 +44,6 @@ namespace Hmcr.Domain.Hangfire
 
         public async Task ProcessSubmission(SubmissionDto submissionDto)
         {
-            _logger.LogInformation("[Hangfire] Starting submission {submissionObjectId}", submissionDto.SubmissionObjectId);
             var errors = new Dictionary<string, List<string>>();
 
             await SetStatusesAsync();
@@ -114,11 +112,7 @@ namespace Hmcr.Domain.Hangfire
                 await foreach (var entity in _workReportRepo.SaveWorkReportAsnyc(_submission, typedRows)) { }
 
                 await CommitAndSendEmail();
-
-                _logger.LogInformation($"[Hangfire] Submission {_submission.SubmissionObjectId} processed successfully.");
             }
-
-            _logger.LogInformation("[Hangfire] Finishing submission {submissionObjectId}", _submission.SubmissionObjectId);
         }
 
         private async Task PerformAdditionalValidationAsync(List<WorkReportDto> typedRows)

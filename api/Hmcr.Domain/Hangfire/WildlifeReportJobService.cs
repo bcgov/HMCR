@@ -23,14 +23,13 @@ namespace Hmcr.Domain.Hangfire
 
     public class WildlifeReportJobService : ReportJobServiceBase, IWildlifeReportJobService
     {
-        private ILogger _logger;
         protected IFieldValidatorService _validator;
         private IWildlifeReportRepository _wildlifeReportRepo;
 
         public WildlifeReportJobService(IUnitOfWork unitOfWork, ILogger<IWildlifeReportJobService> logger,
             ISubmissionStatusRepository statusRepo, ISubmissionObjectRepository submissionRepo,
             ISumbissionRowRepository submissionRowRepo, IWildlifeReportRepository wildlifeReportRepo, IFieldValidatorService validator, IEmailService emailService)
-             : base(unitOfWork, statusRepo, submissionRepo, submissionRowRepo, emailService)
+             : base(unitOfWork, statusRepo, submissionRepo, submissionRowRepo, emailService, logger)
         {
             _logger = logger;
             _wildlifeReportRepo = wildlifeReportRepo;
@@ -39,7 +38,6 @@ namespace Hmcr.Domain.Hangfire
 
         public async Task ProcessSubmission(SubmissionDto submissionDto)
         {
-            _logger.LogInformation("[Hangfire] Starting submission {submissionObjectId}", submissionDto.SubmissionObjectId);
             var errors = new Dictionary<string, List<string>>();
 
             await SetStatusesAsync();
@@ -97,11 +95,7 @@ namespace Hmcr.Domain.Hangfire
                 _wildlifeReportRepo.SaveWildlifeReport(_submission, typedRows);
 
                 await CommitAndSendEmail();
-
-                _logger.LogInformation($"[Hangfire] Submission {_submission.SubmissionObjectId} processed successfully.");
             }
-
-            _logger.LogInformation("[Hangfire] Finishing submission {submissionObjectId}", _submission.SubmissionObjectId);
         }
 
         private async Task PerformAdditionalValidationAsync(List<WildlifeReportDto> typedRows)

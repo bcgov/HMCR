@@ -6,6 +6,7 @@ using Hmcr.Model;
 using Hmcr.Model.Dtos;
 using Hmcr.Model.Dtos.SubmissionObject;
 using Hmcr.Model.Utils;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -22,6 +23,7 @@ namespace Hmcr.Domain.Hangfire.Base
         protected ISubmissionObjectRepository _submissionRepo;
         protected ISumbissionRowRepository _submissionRowRepo;
         private IEmailService _emailService;
+        protected ILogger _logger;
         protected decimal _duplicateRowStatusId;
         protected decimal _errorRowStatusId;
         protected decimal _successRowStatusId;
@@ -33,13 +35,14 @@ namespace Hmcr.Domain.Hangfire.Base
 
         public ReportJobServiceBase(IUnitOfWork unitOfWork,
             ISubmissionStatusRepository statusRepo, ISubmissionObjectRepository submissionRepo,
-            ISumbissionRowRepository submissionRowRepo, IEmailService emailService)
+            ISumbissionRowRepository submissionRowRepo, IEmailService emailService, ILogger logger)
         {
             _unitOfWork = unitOfWork;
             _statusRepo = statusRepo;
             _submissionRepo = submissionRepo;
             _submissionRowRepo = submissionRowRepo;
             _emailService = emailService;
+            _logger = logger;
         }
 
         protected async Task SetStatusesAsync()
@@ -58,6 +61,8 @@ namespace Hmcr.Domain.Hangfire.Base
 
         protected async Task SetSubmissionAsync(SubmissionDto submissionDto)
         {
+            _logger.LogInformation("[Hangfire] Starting submission {submissionObjectId}", submissionDto.SubmissionObjectId);
+
             _submission = await _submissionRepo.GetSubmissionObjecForBackgroundJobAsync(submissionDto.SubmissionObjectId);
             _submission.SubmissionStatusId = _inProgressRowStatusId;
             _unitOfWork.Commit();
@@ -136,6 +141,8 @@ namespace Hmcr.Domain.Hangfire.Base
             var body = $"Please click the link to see the report submission result. {_submission.SubmissionObjectId}";
 
             _emailService.SendEmailToUsersInServiceArea(_submission.ServiceAreaNumber, subject, body, body);
+
+            _logger.LogInformation("[Hangfire] Finishing submission {submissionObjectId}", _submission.SubmissionObjectId);
         }
     }
 }
