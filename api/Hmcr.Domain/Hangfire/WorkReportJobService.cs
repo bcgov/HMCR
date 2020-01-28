@@ -1,6 +1,5 @@
 ﻿using CsvHelper;
 using Hmcr.Data.Database;
-using Hmcr.Data.Database.Entities;
 using Hmcr.Data.Repositories;
 using Hmcr.Domain.CsvHelpers;
 using Hmcr.Domain.Hangfire.Base;
@@ -10,8 +9,8 @@ using Hmcr.Model.Dtos.ActivityCode;
 using Hmcr.Model.Dtos.SubmissionObject;
 using Hmcr.Model.Dtos.WorkReport;
 using Hmcr.Model.Utils;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
-using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -33,8 +32,9 @@ namespace Hmcr.Domain.Hangfire
 
         public WorkReportJobService(IUnitOfWork unitOfWork, ILogger<IWorkReportJobService> logger,
             IActivityCodeRepository activityRepo, ISubmissionStatusRepository statusRepo, ISubmissionObjectRepository submissionRepo,
-            ISumbissionRowRepository submissionRowRepo, IWorkReportRepository workReportRepo, IFieldValidatorService validator, IEmailService emailService)
-            : base(unitOfWork, statusRepo, submissionRepo, submissionRowRepo, emailService, logger)
+            ISumbissionRowRepository submissionRowRepo, IWorkReportRepository workReportRepo, IFieldValidatorService validator, 
+            IEmailService emailService, IConfiguration config, EmailBody emailBody)
+            : base(unitOfWork, statusRepo, submissionRepo, submissionRowRepo, emailService, logger, config, emailBody)
         {
             _logger = logger;
             _activityRepo = activityRepo;

@@ -138,6 +138,11 @@ objects:
                     secretKeyRef:
                       name: email-service
                       key: SMTP_PORT
+                - name: SUBMISSION_RESULT
+                  valueFrom:
+                    secretKeyRef:
+                      name: urls-${ENV}
+                      key: SUBMISSION_RESULT
                 - name: ASPNETCORE_ENVIRONMENT
                   value: ${ASPNETCORE_ENVIRONMENT}
       test: false

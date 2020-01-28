@@ -170,6 +170,8 @@ namespace Hmcr.Api.Extensions
 
             //Jwt Bearer Handler
             services.AddScoped<HmcrJwtBearerEvents>();
+
+            services.AddSingleton<EmailBody>();
         }
 
         public static void AddHmcrHangfire(this IServiceCollection services, string connectionString)
