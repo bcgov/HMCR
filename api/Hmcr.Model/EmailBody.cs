@@ -30,7 +30,7 @@ namespace Hmcr.Model
             textBody.AppendLine("Please DO NOT REPLY to this email. If you have questions please contact the appropriate district office.");
             textBody.AppendLine("");
             textBody.AppendLine("Sincerely,");
-            textBody.AppendLine("Maintenance Contract Reporting System");
+            textBody.AppendLine("Highway Maintenance Contract Reporting System");
             textBody.AppendLine("Ministry of Transportation and Infrastructure");
 
             TextBody = textBody.ToString();
@@ -46,7 +46,7 @@ namespace Hmcr.Model
             htmlBody.AppendLine("<p>Kindly correct and re-submit the erroneous records only, to avoid over-writing records that are error free.</p>");
             htmlBody.AppendLine("<p>Please <b>DO NOT REPLY</b> to this email. If you have questions please contact the appropriate district office.</p>");
             htmlBody.AppendLine("Sincerely,<br/>");
-            htmlBody.AppendLine("Maintenance Contract Reporting System<br/>");
+            htmlBody.AppendLine("Highway Maintenance Contract Reporting System<br/>");
             htmlBody.AppendLine("Ministry of Transportation and Infrastructure");
 
             HtmlBody = htmlBody.ToString();

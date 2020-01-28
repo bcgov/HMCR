@@ -4,8 +4,8 @@ using Microsoft.Extensions.Configuration;
 using System.Reflection;
 using System.Runtime.Versioning;
 using Hmcr.Model;
-using Microsoft.Extensions.Hosting;
 using Hmcr.Api.Controllers.Base;
+using Hmcr.Model.Utils;
 
 namespace Hmcr.Api.Controllers
 {
@@ -31,28 +31,6 @@ namespace Hmcr.Api.Controllers
             var assembly = Assembly.GetExecutingAssembly();
 
             var creationTime = System.IO.File.GetLastWriteTimeUtc(assembly.Location);
-            var environment = "";
-
-            if (_env.IsProduction())
-            {
-                environment = "Production";
-            }
-            else if (_env.IsStaging())
-            {
-                environment = "Test";
-            }
-            else if (_env.IsDevelopment() || _env.IsEnvironment("Local"))
-            {
-                environment = "Development";
-            }
-            else if (_env.IsEnvironment("Training"))
-            {
-                environment = "Training";
-            }
-            else if (_env.IsEnvironment("UAT"))
-            {
-                environment = "UAT";
-            }
 
             var versionInfo = new VersionInfo()
             {
@@ -66,7 +44,7 @@ namespace Hmcr.Api.Controllers
                 TargetFramework = assembly.GetCustomAttribute<TargetFrameworkAttribute>().FrameworkName,
                 ImageRuntimeVersion = assembly.ImageRuntimeVersion,
                 Commit = _config[CommitKey],
-                Environment = environment
+                Environment = _config.GetEnvironment()
             };
 
             return Ok(versionInfo);

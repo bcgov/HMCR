@@ -145,7 +145,10 @@ namespace Hmcr.Domain.Hangfire.Base
             var submissionId = (long)_submission.SubmissionObjectId;
             var resultUrl = string.Format(_config.GetValue<string>("SUBMISSION_RESULT"), (int)_submission.ServiceAreaNumber, submissionId);
 
-            var subject = $"HMCR report submission({submissionId}) result";
+            var env = _config.GetEnvironment();
+            var environment = env == HmcrEnvironments.Prod ? "" : $"[{env}]";
+
+            var subject = $"HMCR {environment} report submission({submissionId}) result";
             var htmlBody = string.Format(_emailBody.HtmlBody, submissionId, resultUrl);
             var textBody = string.Format(_emailBody.TextBody, submissionId, resultUrl);
 

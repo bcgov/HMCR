@@ -25,7 +25,6 @@ using Microsoft.Extensions.Configuration;
 using Hangfire;
 using Hangfire.SqlServer;
 using System;
-using Hangfire.AspNetCore;
 
 namespace Hmcr.Api.Extensions
 {
