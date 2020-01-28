@@ -151,7 +151,9 @@ const AddUserSetupUser = ({ serviceAreas, values, submitting, setWizardState }) 
     api
       .getRoles()
       .then(response => {
-        const data = response.data.sourceList.map(r => ({ ...r, description: r.name }));
+        const data = response.data.sourceList
+          .filter(r => r.isActive === true)
+          .map(r => ({ ...r, description: r.name }));
 
         if (values.userType === Constants.USER_TYPE.BUSINESS) setRoles(data.filter(r => r.internal === false));
         else setRoles(data);
