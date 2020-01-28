@@ -209,4 +209,24 @@ namespace Hmcr.Model
     {
         public const string ReferToRowErrors = "{ \"fieldMessages\": [ { \"field\": \"File\", \"messages\": [ \"Please refer to row error(s)\" ] } ] }";
     }
+
+    public static class HmcrEnvironments
+    {
+        public const string Dev = "DEV";
+        public const string Test = "TST";
+        public const string Train = "TRN";
+        public const string Uat = "UAT";
+        public const string Prod = "PRD";
+        public const string Unknown = "UNKNOWN";
+    }
+
+    public static class DotNetEnvironments
+    {
+        public const string Dev = "DEVELOPMENT";
+        public const string Test = "STAGING";
+        public const string Train = "TRAINING";
+        public const string Uat = "UAT";
+        public const string Prod = "PRODUCTION";
+        public const string Unknown = "UNKNOWN";
+    }
 }

@@ -8,6 +8,7 @@ using Hmcr.Model;
 using Hmcr.Model.Dtos.RockfallReport;
 using Hmcr.Model.Dtos.SubmissionObject;
 using Hmcr.Model.Utils;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using System.Collections.Generic;
 using System.IO;
@@ -30,8 +31,9 @@ namespace Hmcr.Domain.Hangfire
 
         public RockfallReportJobService(IUnitOfWork unitOfWork, ILogger<IRockfallReportJobService> logger, 
             ISubmissionStatusRepository statusRepo, ISubmissionObjectRepository submissionRepo,
-            ISumbissionRowRepository submissionRowRepo, IRockfallReportRepository rockfallReportRepo, IFieldValidatorService validator, IEmailService emailService)
-            : base(unitOfWork, statusRepo, submissionRepo, submissionRowRepo, emailService, logger)
+            ISumbissionRowRepository submissionRowRepo, IRockfallReportRepository rockfallReportRepo, IFieldValidatorService validator, 
+            IEmailService emailService, IConfiguration config, EmailBody emailBody)
+            : base(unitOfWork, statusRepo, submissionRepo, submissionRowRepo, emailService, logger, config, emailBody)
         {
             _logger = logger;
             _rockfallReportRepo = rockfallReportRepo;

@@ -8,6 +8,7 @@ using Hmcr.Model;
 using Hmcr.Model.Dtos.SubmissionObject;
 using Hmcr.Model.Dtos.WildlifeReport;
 using Hmcr.Model.Utils;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using System.Collections.Generic;
 using System.IO;
@@ -28,8 +29,9 @@ namespace Hmcr.Domain.Hangfire
 
         public WildlifeReportJobService(IUnitOfWork unitOfWork, ILogger<IWildlifeReportJobService> logger,
             ISubmissionStatusRepository statusRepo, ISubmissionObjectRepository submissionRepo,
-            ISumbissionRowRepository submissionRowRepo, IWildlifeReportRepository wildlifeReportRepo, IFieldValidatorService validator, IEmailService emailService)
-             : base(unitOfWork, statusRepo, submissionRepo, submissionRowRepo, emailService, logger)
+            ISumbissionRowRepository submissionRowRepo, IWildlifeReportRepository wildlifeReportRepo, IFieldValidatorService validator, 
+            IEmailService emailService, IConfiguration config, EmailBody emailBody)
+             : base(unitOfWork, statusRepo, submissionRepo, submissionRowRepo, emailService, logger, config, emailBody)
         {
             _logger = logger;
             _wildlifeReportRepo = wildlifeReportRepo;

@@ -25,7 +25,6 @@ using Microsoft.Extensions.Configuration;
 using Hangfire;
 using Hangfire.SqlServer;
 using System;
-using Hangfire.AspNetCore;
 
 namespace Hmcr.Api.Extensions
 {
@@ -170,6 +169,8 @@ namespace Hmcr.Api.Extensions
 
             //Jwt Bearer Handler
             services.AddScoped<HmcrJwtBearerEvents>();
+
+            services.AddSingleton<EmailBody>();
         }
 
         public static void AddHmcrHangfire(this IServiceCollection services, string connectionString)

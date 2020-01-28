@@ -6,6 +6,7 @@ using Hmcr.Model;
 using Hmcr.Model.Dtos;
 using Hmcr.Model.Dtos.SubmissionObject;
 using Hmcr.Model.Utils;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
@@ -24,6 +25,8 @@ namespace Hmcr.Domain.Hangfire.Base
         protected ISumbissionRowRepository _submissionRowRepo;
         private IEmailService _emailService;
         protected ILogger _logger;
+        private IConfiguration _config;
+        private EmailBody _emailBody;
         protected decimal _duplicateRowStatusId;
         protected decimal _errorRowStatusId;
         protected decimal _successRowStatusId;
@@ -35,7 +38,7 @@ namespace Hmcr.Domain.Hangfire.Base
 
         public ReportJobServiceBase(IUnitOfWork unitOfWork,
             ISubmissionStatusRepository statusRepo, ISubmissionObjectRepository submissionRepo,
-            ISumbissionRowRepository submissionRowRepo, IEmailService emailService, ILogger logger)
+            ISumbissionRowRepository submissionRowRepo, IEmailService emailService, ILogger logger, IConfiguration config, EmailBody emailBody)
         {
             _unitOfWork = unitOfWork;
             _statusRepo = statusRepo;
@@ -43,6 +46,8 @@ namespace Hmcr.Domain.Hangfire.Base
             _submissionRowRepo = submissionRowRepo;
             _emailService = emailService;
             _logger = logger;
+            _config = config;
+            _emailBody = emailBody;
         }
 
         protected async Task SetStatusesAsync()
@@ -61,7 +66,7 @@ namespace Hmcr.Domain.Hangfire.Base
 
         protected async Task SetSubmissionAsync(SubmissionDto submissionDto)
         {
-            _logger.LogInformation("[Hangfire] Starting submission {submissionObjectId}", submissionDto.SubmissionObjectId);
+            _logger.LogInformation("[Hangfire] Starting submission {submissionObjectId}", (long)submissionDto.SubmissionObjectId);
 
             _submission = await _submissionRepo.GetSubmissionObjecForBackgroundJobAsync(submissionDto.SubmissionObjectId);
             _submission.SubmissionStatusId = _inProgressRowStatusId;
@@ -137,12 +142,19 @@ namespace Hmcr.Domain.Hangfire.Base
         {
             await _unitOfWork.CommitAsync();
 
-            var subject = $"HMR report submission result";
-            var body = $"Please click the link to see the report submission result. {_submission.SubmissionObjectId}";
+            var submissionId = (long)_submission.SubmissionObjectId;
+            var resultUrl = string.Format(_config.GetValue<string>("SUBMISSION_RESULT"), (int)_submission.ServiceAreaNumber, submissionId);
 
-            _emailService.SendEmailToUsersInServiceArea(_submission.ServiceAreaNumber, subject, body, body);
+            var env = _config.GetEnvironment();
+            var environment = env == HmcrEnvironments.Prod ? "" : $"[{env}]";
 
-            _logger.LogInformation("[Hangfire] Finishing submission {submissionObjectId}", _submission.SubmissionObjectId);
+            var subject = $"HMCR {environment} report submission({submissionId}) result";
+            var htmlBody = string.Format(_emailBody.HtmlBody, submissionId, resultUrl);
+            var textBody = string.Format(_emailBody.TextBody, submissionId, resultUrl);
+
+            _emailService.SendEmailToUsersInServiceArea(_submission.ServiceAreaNumber, subject, htmlBody, textBody);
+
+            _logger.LogInformation("[Hangfire] Finishing submission {submissionObjectId}", submissionId);
         }
     }
 }
