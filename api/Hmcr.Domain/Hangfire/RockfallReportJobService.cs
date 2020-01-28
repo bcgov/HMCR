@@ -27,12 +27,11 @@ namespace Hmcr.Domain.Hangfire
         
         private IFieldValidatorService _validator;
         private IRockfallReportRepository _rockfallReportRepo;
-        private ILogger<IRockfallReportJobService> _logger;
 
         public RockfallReportJobService(IUnitOfWork unitOfWork, ILogger<IRockfallReportJobService> logger, 
             ISubmissionStatusRepository statusRepo, ISubmissionObjectRepository submissionRepo,
             ISumbissionRowRepository submissionRowRepo, IRockfallReportRepository rockfallReportRepo, IFieldValidatorService validator, IEmailService emailService)
-            : base(unitOfWork, statusRepo, submissionRepo, submissionRowRepo, emailService)
+            : base(unitOfWork, statusRepo, submissionRepo, submissionRowRepo, emailService, logger)
         {
             _logger = logger;
             _rockfallReportRepo = rockfallReportRepo;
@@ -41,7 +40,6 @@ namespace Hmcr.Domain.Hangfire
 
         public async Task ProcessSubmission(SubmissionDto submissionDto)
         {
-            _logger.LogInformation("[Hangfire] Starting submission {submissionObjectId}", submissionDto.SubmissionObjectId);
             var errors = new Dictionary<string, List<string>>();
 
             await SetStatusesAsync();
@@ -99,11 +97,7 @@ namespace Hmcr.Domain.Hangfire
                 await foreach (var entity in _rockfallReportRepo.SaveRockfallReportAsnyc(_submission, typedRows)) { }
 
                 await CommitAndSendEmail();
-
-                _logger.LogInformation($"[Hangfire] Submission {_submission.SubmissionObjectId} processed successfully.");
             }
-
-            _logger.LogInformation("[Hangfire] Finishing submission {submissionObjectId}", _submission.SubmissionObjectId);
         }
 
         private async Task PerformAdditionalValidationAsync(List<RockfallReportDto> typedRows)
