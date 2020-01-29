@@ -21,7 +21,9 @@ const WorkReporting = ({ currentUser, history }) => {
     const queryParams = queryString.parse(history.location.search);
 
     if (queryParams.serviceArea) setServiceArea(queryParams.serviceArea);
-  }, [setServiceArea, history.location.search]);
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [setServiceArea]);
 
   const handleFileSubmitted = () => {
     submissionsRef.current.refresh();
