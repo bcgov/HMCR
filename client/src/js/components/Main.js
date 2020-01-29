@@ -5,12 +5,9 @@ import PageSpinner from './ui/PageSpinner';
 import ErrorDialogModal from './ui/ErrorDialogModal';
 
 import { fetchCurrentUser, fetchServiceAreas, fetchUserStatuses, fetchUserTypes } from '../actions';
-import { ErrorDialogContext } from '../contexts';
 
 const Main = ({ errorDialog, children, fetchCurrentUser, fetchServiceAreas, fetchUserStatuses, fetchUserTypes }) => {
   const [loading, setLoading] = useState(true);
-
-  const showLocalErrorDialog = error => {};
 
   useEffect(() => {
     Promise.all([fetchServiceAreas(), fetchCurrentUser(), fetchUserStatuses(), fetchUserTypes()]).then(() =>
@@ -20,10 +17,10 @@ const Main = ({ errorDialog, children, fetchCurrentUser, fetchServiceAreas, fetc
   }, []);
 
   return (
-    <ErrorDialogContext.Provider value={showLocalErrorDialog}>
+    <React.Fragment>
       {loading ? <PageSpinner /> : children}
       {errorDialog.show && <ErrorDialogModal isOpen={errorDialog.show} {...errorDialog} />}
-    </ErrorDialogContext.Provider>
+    </React.Fragment>
   );
 };
 
