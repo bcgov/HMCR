@@ -73,12 +73,18 @@ const DataTableControl = ({
                 {editable && (
                   <Authorize requires={editPermissionName}>
                     <td style={{ width: '1%', whiteSpace: 'nowrap' }}>
-                      <FontAwesomeButton icon="edit" className="mr-1" onClick={() => handleEditClicked(item.id)} />
+                      <FontAwesomeButton
+                        icon="edit"
+                        className="mr-1"
+                        onClick={() => handleEditClicked(item.id)}
+                        title="Edit Record"
+                      />
                       <DeleteButton
                         itemId={item.id}
                         buttonId={`item_${item.id}_delete`}
                         defaultEndDate={item.endDate}
                         onDeleteClicked={onDeleteClicked}
+                        title="Delete Record"
                       ></DeleteButton>
                     </td>
                   </Authorize>

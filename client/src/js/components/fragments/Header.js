@@ -72,9 +72,9 @@ const Header = ({ currentUser }) => {
             <Nav className="navbar-nav">
               {currentUser.userType === Constants.USER_TYPE.INTERNAL && (
                 <React.Fragment>
-                  {/* <Authorize requires={Constants.PERMISSIONS.FILE_R}>
+                  <Authorize requires={Constants.PERMISSIONS.CODE_R}>
                     <NavLinkWithMatch hideNavbar={hideNavbar} to={Constants.PATHS.ADMIN_ACTIVITIES} text="Activities" />
-                  </Authorize> */}
+                  </Authorize>
                   <Authorize requires={Constants.PERMISSIONS.USER_R}>
                     <NavLinkWithMatch hideNavbar={hideNavbar} to={Constants.PATHS.ADMIN_USERS} text="Users" />
                   </Authorize>

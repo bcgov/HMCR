@@ -30,11 +30,12 @@
   @include main-nav-colors(theme-color(secondary-nav));
 }
 
-.main-nav.development {
+.main-nav.dev,
+.main-nav.unknown {
   @include main-nav-colors(#ef6c00);
 }
 
-.main-nav.test {
+.main-nav.tst {
   @include main-nav-colors(#4527a0);
 }
 

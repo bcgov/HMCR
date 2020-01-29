@@ -18,7 +18,7 @@ import UserAdmin from './components/UserAdmin';
 import RoleAdmin from './components/RoleAdmin';
 import WorkReporting from './components/WorkReporting';
 import WorkReportingSubmissionDetail from './components/WorkReportingSubmissionDetail';
-// import Home from './components/Home';
+import ErrorBoundary from './components/ErrorBoundary';
 
 import addIconsToLibrary from './fontAwesome';
 import * as Constants from './Constants';
@@ -43,11 +43,13 @@ const App = ({ currentUser }) => {
         <React.Fragment>
           <Header />
           <Container>
-            <Switch>
-              {Routes(currentUser.userType)}
-              <Route path={Constants.PATHS.UNAUTHORIZED} exact component={Unauthorized} />
-              <Route path="*" component={NoMatch} />
-            </Switch>
+            <ErrorBoundary>
+              <Switch>
+                {Routes(currentUser.userType)}
+                <Route path={Constants.PATHS.UNAUTHORIZED} exact component={Unauthorized} />
+                <Route path="*" component={NoMatch} />
+              </Switch>
+            </ErrorBoundary>
           </Container>
           <Footer />
         </React.Fragment>
