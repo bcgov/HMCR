@@ -42,6 +42,11 @@ namespace Hmcr.Domain.Services.Base
         /// </summary>
         protected string RecordNumberFieldName;
 
+        /// <summary>
+        /// Date for finding the contract term
+        /// </summary>
+        protected string DateFieldName;
+
         public ReportServiceBase(IUnitOfWork unitOfWork,
             ISubmissionStreamService streamService, ISubmissionObjectRepository submissionRepo, ISumbissionRowRepository rowRepo,
             IContractTermRepository contractRepo, ISubmissionStatusRepository statusRepo)
@@ -166,7 +171,7 @@ namespace Hmcr.Domain.Services.Base
             if (partyId == 0)
             {
                 submission.FileHash = null; //it's an error outside of the file; user can submit the same file again and the system should be able to accept it.
-                errors.AddItem("EndDate", $"Cannot find the contract term for this file");
+                errors.AddItem(DateFieldName, $"Cannot find the contract term for this file");
                 return (errors, submission);
             }
 

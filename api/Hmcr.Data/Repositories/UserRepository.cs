@@ -226,6 +226,10 @@ namespace Hmcr.Data.Repositories
                         DisplayName = account.BusinessLegalName.Trim()
                     };
                 }
+                else
+                {
+                    userEntity.PartyId = partyEntity.PartyId;
+                }
             }
 
             foreach (var areaNumber in user.ServiceAreaNumbers)
