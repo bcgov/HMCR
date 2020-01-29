@@ -11,6 +11,7 @@ const FontAwesomeButton = props => {
       onClick={props.onClick}
       id={props.id}
       disabled={props.disabled}
+      title={props.title}
     >
       <FontAwesomeIcon icon={props.icon} spin={props.spin} />
     </Button>
