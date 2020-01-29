@@ -4,6 +4,7 @@ using Hmcr.Model.Dtos.ActivityCode;
 using Hmcr.Model.Dtos.CodeLookup;
 using Hmcr.Model.Dtos.ContractTerm;
 using Hmcr.Model.Dtos.District;
+using Hmcr.Model.Dtos.FeedbackMessage;
 using Hmcr.Model.Dtos.MimeType;
 using Hmcr.Model.Dtos.Party;
 using Hmcr.Model.Dtos.Permission;
@@ -87,6 +88,8 @@ namespace Hmcr.Data.Mappings
             CreateMap<WildlifeReportDto, HmrWildlifeReport>();
 
             CreateMap<CodeLookupDto, HmrCodeLookup>();
+
+            CreateMap<FeedbackMessageDto, HmrFeedbackMessage>();
         }
     }
 }
