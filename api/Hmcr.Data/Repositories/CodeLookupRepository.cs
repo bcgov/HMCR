@@ -31,7 +31,8 @@ namespace Hmcr.Data.Repositories
                     new CodeLookupForValidation
                     {
                         CodeSet = x.CodeSet,
-                        CodeValue = x.CodeValueFormat == "NUMBER" ? x.CodeValueNum.ToString() : x.CodeValueText
+                        CodeValue = x.CodeValueFormat == "NUMBER" ? x.CodeValueNum.ToString() : x.CodeValueText,
+                        CodeName = x.CodeName
                     }
                 )
                 .ToArray();
