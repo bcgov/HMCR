@@ -4,6 +4,7 @@ using Hmcr.Data.Repositories;
 using Hmcr.Domain.Services;
 using Hmcr.Model;
 using Hmcr.Model.Dtos;
+using Hmcr.Model.Dtos.FeedbackMessage;
 using Hmcr.Model.Dtos.SubmissionObject;
 using Hmcr.Model.Utils;
 using Microsoft.Extensions.Configuration;
@@ -27,6 +28,7 @@ namespace Hmcr.Domain.Hangfire.Base
         protected ILogger _logger;
         private IConfiguration _config;
         private EmailBody _emailBody;
+        private IFeebackMessageRepository _feedbackRepo;
         protected decimal _duplicateRowStatusId;
         protected decimal _errorRowStatusId;
         protected decimal _successRowStatusId;
@@ -38,7 +40,8 @@ namespace Hmcr.Domain.Hangfire.Base
 
         public ReportJobServiceBase(IUnitOfWork unitOfWork,
             ISubmissionStatusRepository statusRepo, ISubmissionObjectRepository submissionRepo,
-            ISumbissionRowRepository submissionRowRepo, IEmailService emailService, ILogger logger, IConfiguration config, EmailBody emailBody)
+            ISumbissionRowRepository submissionRowRepo, IEmailService emailService, ILogger logger, IConfiguration config,
+            EmailBody emailBody, IFeebackMessageRepository feedbackRepo)
         {
             _unitOfWork = unitOfWork;
             _statusRepo = statusRepo;
@@ -48,6 +51,7 @@ namespace Hmcr.Domain.Hangfire.Base
             _logger = logger;
             _config = config;
             _emailBody = emailBody;
+            _feedbackRepo = feedbackRepo;
         }
 
         protected async Task SetStatusesAsync()
@@ -152,7 +156,36 @@ namespace Hmcr.Domain.Hangfire.Base
             var htmlBody = string.Format(_emailBody.HtmlBody, submissionId, resultUrl);
             var textBody = string.Format(_emailBody.TextBody, submissionId, resultUrl);
 
-            _emailService.SendEmailToUsersInServiceArea(_submission.ServiceAreaNumber, subject, htmlBody, textBody);
+            var isSent = true;
+            var isError = false;
+            var errorText = "";
+
+            try
+            {
+                _emailService.SendEmailToUsersInServiceArea(_submission.ServiceAreaNumber, subject, htmlBody, textBody);
+            }
+            catch (Exception ex)
+            {
+                isSent = false;
+                isError = true;
+                errorText = ex.Message;
+
+                _logger.LogError(ex.ToString());
+            }
+
+            var feedback = new FeedbackMessageDto
+            {
+                SubmissionObjectId = _submission.SubmissionObjectId,
+                CommunicationSubject = subject,
+                CommunicationText = htmlBody,
+                CommunicationDate = DateTime.UtcNow,
+                IsSent = isSent ? "Y" : "N",
+                IsError = isError ? "Y" : "N",
+                SendErrorText = errorText
+            };
+
+            await _feedbackRepo.CreateFeedbackMessage(feedback);
+            await _unitOfWork.CommitAsync();
 
             _logger.LogInformation("[Hangfire] Finishing submission {submissionObjectId}", submissionId);
         }

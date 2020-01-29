@@ -30,8 +30,8 @@ namespace Hmcr.Domain.Hangfire
         public WildlifeReportJobService(IUnitOfWork unitOfWork, ILogger<IWildlifeReportJobService> logger,
             ISubmissionStatusRepository statusRepo, ISubmissionObjectRepository submissionRepo,
             ISumbissionRowRepository submissionRowRepo, IWildlifeReportRepository wildlifeReportRepo, IFieldValidatorService validator, 
-            IEmailService emailService, IConfiguration config, EmailBody emailBody)
-             : base(unitOfWork, statusRepo, submissionRepo, submissionRowRepo, emailService, logger, config, emailBody)
+            IEmailService emailService, IConfiguration config, EmailBody emailBody, IFeebackMessageRepository feedbackRepo)
+             : base(unitOfWork, statusRepo, submissionRepo, submissionRowRepo, emailService, logger, config, emailBody, feedbackRepo)
         {
             _logger = logger;
             _wildlifeReportRepo = wildlifeReportRepo;

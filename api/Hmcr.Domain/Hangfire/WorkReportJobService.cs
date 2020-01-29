@@ -33,8 +33,8 @@ namespace Hmcr.Domain.Hangfire
         public WorkReportJobService(IUnitOfWork unitOfWork, ILogger<IWorkReportJobService> logger,
             IActivityCodeRepository activityRepo, ISubmissionStatusRepository statusRepo, ISubmissionObjectRepository submissionRepo,
             ISumbissionRowRepository submissionRowRepo, IWorkReportRepository workReportRepo, IFieldValidatorService validator, 
-            IEmailService emailService, IConfiguration config, EmailBody emailBody)
-            : base(unitOfWork, statusRepo, submissionRepo, submissionRowRepo, emailService, logger, config, emailBody)
+            IEmailService emailService, IConfiguration config, EmailBody emailBody, IFeebackMessageRepository feedbackRepo)
+            : base(unitOfWork, statusRepo, submissionRepo, submissionRowRepo, emailService, logger, config, emailBody, feedbackRepo)
         {
             _logger = logger;
             _activityRepo = activityRepo;
