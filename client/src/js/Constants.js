@@ -3,6 +3,7 @@ export const API_URL = window.RUNTIME_REACT_APP_API_HOST
   : process.env.REACT_APP_API_HOST;
 
 export const API_PATHS = {
+  ACTIVITY: '/activities',
   PERMISSIONS: '/permissions',
   ROLE: '/roles',
   SERVICE_AREAS: '/serviceareas',
