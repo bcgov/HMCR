@@ -1,10 +1,8 @@
 ﻿using CsvHelper;
 using CsvHelper.TypeConversion;
 using Hmcr.Data.Database;
-using Hmcr.Data.Database.Entities;
 using Hmcr.Data.Repositories;
 using Hmcr.Domain.CsvHelpers;
-using Hmcr.Domain.Hangfire;
 using Hmcr.Domain.Services.Base;
 using Hmcr.Model;
 using Hmcr.Model.Dtos.SubmissionObject;
@@ -15,8 +13,6 @@ using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace Hmcr.Domain.Services
@@ -37,7 +33,8 @@ namespace Hmcr.Domain.Services
         {
             TableName = TableNames.WorkReport;
             HasRowIdentifier = true;
-            RecordNumberFieldName = "RecordNumber";
+            RecordNumberFieldName = Fields.RecordNumber;
+            DateFieldName = Fields.EndDate;
             _logger = logger;
         }
 

@@ -32,6 +32,7 @@ namespace Hmcr.Domain.Services
         {
             TableName = TableNames.WildlifeReport;
             HasRowIdentifier = false;
+            DateFieldName = "Today";
             _logger = logger;
         }
         protected override async Task<bool> ParseRowsAsync(SubmissionObjectCreateDto submission, string text, Dictionary<string, List<string>> errors)

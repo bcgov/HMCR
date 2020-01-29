@@ -1,5 +1,4 @@
 ﻿using CsvHelper;
-using CsvHelper.Configuration;
 using CsvHelper.TypeConversion;
 using Hmcr.Data.Database;
 using Hmcr.Data.Repositories;
@@ -13,11 +12,7 @@ using Hmcr.Model.Utils;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace Hmcr.Domain.Services
@@ -40,6 +35,7 @@ namespace Hmcr.Domain.Services
             TableName = TableNames.RockfallReport;
             HasRowIdentifier = true;
             RecordNumberFieldName = Fields.McrrIncidentNumber;
+            DateFieldName = Fields.ReportDate;
             _logger = logger;
         }
 
