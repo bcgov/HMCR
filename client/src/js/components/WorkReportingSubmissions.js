@@ -74,6 +74,15 @@ const WorkReportingSubmissions = ({ serviceArea, history }, ref) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // Update the service area search options when serviceArea is changed
+  useEffect(() => {
+    if (searchData.searchOptions) {
+      if (searchData.searchOptions.serviceAreaNumber !== serviceArea) {
+        searchData.updateSearchOptions({ ...searchData.searchOptions, serviceAreaNumber: serviceArea, serviceArea });
+      }
+    }
+  }, [serviceArea, searchData]);
+
   const handleDateChanged = (dateFrom, dateTo) => {
     if (!(dateFrom && dateTo && dateFrom.isSameOrBefore(dateTo))) return;
 
