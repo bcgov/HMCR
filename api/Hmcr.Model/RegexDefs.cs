@@ -15,7 +15,7 @@ namespace Hmcr.Model
         public const string Email = "Email";
         public const string QREA = "QREA";
         public const string D7_2 = "D7_2";
-        public const string D11_6 = "D11_6";
+        public const string D14_9 = "D14_9";
         public const string D7_3 = "D7_3";
         public const string D8_2 = "D8_2";
         public const string D6_2 = "D6_2";
@@ -38,7 +38,7 @@ namespace Hmcr.Model
             _regexInfos.Add(QREA, new RegexInfo { Regex = @"^[QREA]$", ErrorMessage = "Value must be one of these 4 [QREA] letters" });
 
             _regexInfos.Add(D7_2, new RegexInfo { Regex = @"^\-?\d{1,5}(\.\d{1,2})?$", ErrorMessage = "Value must be a number of less than 6 digits optionally with maximum 2 decimal digits" });
-            _regexInfos.Add(D11_6, new RegexInfo { Regex = @"^\-?\d{1,5}(\.\d{1,6})?$", ErrorMessage = "Value must be a number of less than 6 digits optionally with maximum 6 decimal digits" });
+            _regexInfos.Add(D14_9, new RegexInfo { Regex = @"^\-?\d{1,5}(\.\d{1,9})?$", ErrorMessage = "Value must be a number of less than 6 digits optionally with maximum 9 decimal digits" });
             _regexInfos.Add(D7_3, new RegexInfo { Regex = @"^\-?\d{1,4}(\.\d{1,3})?$", ErrorMessage = "Value must be a number of less than 5 digits optionally with maximum 3 decimal digits" });
             _regexInfos.Add(D8_2, new RegexInfo { Regex = @"^\-?\d{1,6}(\.\d{1,2})?$", ErrorMessage = "Value must be a number of less than 7 digits optionally with maximum 2 decimal digits" });
             _regexInfos.Add(D6_2, new RegexInfo { Regex = @"^\-?\d{1,4}(\.\d{1,2})?$", ErrorMessage = "Value must be a number of less than 5 digits optionally with maximum 2 decimal digits" });

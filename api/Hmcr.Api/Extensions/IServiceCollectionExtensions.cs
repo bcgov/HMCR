@@ -109,16 +109,6 @@ namespace Hmcr.Api.Extensions
             });
         }
 
-        //public static void AddHmcrAuthentication(this IServiceCollection services, IConfiguration config = null)
-        //{
-        //    services.AddAuthentication(options =>
-        //    {
-        //        options.DefaultAuthenticateScheme = SmAuthenticationOptions.Scheme;
-        //        options.DefaultChallengeScheme = SmAuthenticationOptions.Scheme;
-        //    })
-        //    .AddScheme<SmAuthenticationOptions, SmAuthenticationHandler>(SmAuthenticationOptions.Scheme, null);
-        //}
-
         public static void AddHmcrSwagger(this IServiceCollection services, IWebHostEnvironment env)
         {
             if (env.IsDevelopment())

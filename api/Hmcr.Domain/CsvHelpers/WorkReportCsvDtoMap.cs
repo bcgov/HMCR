@@ -1,7 +1,5 @@
 ﻿using CsvHelper.Configuration;
-using CsvHelper.TypeConversion;
 using Hmcr.Model.Dtos.WorkReport;
-using Hmcr.Model.Utils;
 
 namespace Hmcr.Domain.CsvHelpers
 {
@@ -33,6 +31,14 @@ namespace Hmcr.Domain.CsvHelpers
             Map(m => m.EndDate).TypeConverter<DateTypeConverter>();
             Map(m => m.PostedDate).TypeConverter<DateTypeConverter>();
             Map(m => m.ValueOfWork).TypeConverter<DollarValueConverter>();
+            Map(m => m.StartLatitude).TypeConverter<NullableDecimalConverter>();
+            Map(m => m.StartLongitude).TypeConverter<NullableDecimalConverter>();
+            Map(m => m.EndLatitude).TypeConverter<NullableDecimalConverter>();
+            Map(m => m.EndLongitude).TypeConverter<NullableDecimalConverter>();
+            Map(m => m.StartOffset).TypeConverter<NullableDecimalConverter>();
+            Map(m => m.EndOffset).TypeConverter<NullableDecimalConverter>();
+            Map(m => m.Accomplishment).TypeConverter<NullableDecimalConverter>();
+            Map(m => m.ValueOfWork).TypeConverter<NullableDecimalConverter>();
         }
     }
 }
