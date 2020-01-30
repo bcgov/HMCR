@@ -28,6 +28,11 @@ namespace Hmcr.Domain.CsvHelpers
         {
             AutoMap();
             Map(m => m.AccidentDate).TypeConverter<DateTypeConverter>();
+            Map(m => m.Latitude).TypeConverter<NullableDecimalConverter>();
+            Map(m => m.Longitude).TypeConverter<NullableDecimalConverter>();
+            Map(m => m.StartOffset).TypeConverter<NullableDecimalConverter>();
+            Map(m => m.Quantity).TypeConverter<NullableDecimalConverter>();
+            Map(m => m.Species).TypeConverter<NullableDecimalConverter>();
         }
     }
 }

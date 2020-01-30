@@ -10,6 +10,7 @@ using Hmcr.Model.Dtos.SubmissionObject;
 using Hmcr.Model.Utils;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -83,9 +84,20 @@ namespace Hmcr.Domain.Hangfire
 
             if (_submission.SubmissionStatusId != _errorFileStatusId)
             {
-                typedRows = ParseRowsTyped(text, errors);
+                var (rowNum, rows) = ParseRowsTyped(text, errors);
+
+                if (rowNum != 0)
+                {
+                    var submissionRow = await _submissionRowRepo.GetSubmissionRowByRowNum(_submission.SubmissionObjectId, rowNum);
+                    SetErrorDetail(submissionRow, errors);
+                    await CommitAndSendEmail();
+                    return;
+                }
+
+                typedRows = rows;
                 await PerformAdditionalValidationAsync(typedRows);
             }
+
 
             if (_submission.SubmissionStatusId == _errorFileStatusId)
             {
@@ -147,7 +159,7 @@ namespace Hmcr.Domain.Hangfire
             return (rows, GetHeader(text));
         }
 
-        private List<RockfallReportDto> ParseRowsTyped(string text, Dictionary<string, List<string>> errors)
+        private (decimal rowNum, List<RockfallReportDto> rows) ParseRowsTyped(string text, Dictionary<string, List<string>> errors)
         {
             using var stringReader = new StringReader(text);
             using var csv = new CsvReader(stringReader);
@@ -155,8 +167,27 @@ namespace Hmcr.Domain.Hangfire
             CsvHelperUtils.Config(errors, csv, false);
             csv.Configuration.RegisterClassMap<RockfallReportDtoMap>();
 
-            var rows = csv.GetRecords<RockfallReportDto>().ToList();
-            return rows;
+            var rows = new List<RockfallReportDto>();
+            var rowNum = 0M;
+
+            while (csv.Read())
+            {
+                try
+                {
+                    var row = csv.GetRecord<RockfallReportDto>();
+                    rows.Add(row);
+                    rowNum = (decimal)row.RowNum;
+                }
+                catch (Exception ex)
+                {
+                    rowNum = GetRowNum(csv.Context.RawRecord);
+                    LogRowParseException(rowNum, ex.ToString(), csv.Context);
+                    errors.AddItem("Parse Error", "Exception while parsing");
+                    return (rowNum, null);
+                }
+            }
+
+            return (0, rows);
         }
     }
 }

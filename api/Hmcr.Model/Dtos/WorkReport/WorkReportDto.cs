@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace Hmcr.Model.Dtos.WorkReport
 {
@@ -31,6 +29,6 @@ namespace Hmcr.Model.Dtos.WorkReport
         public decimal? ValueOfWork { get; set; }
         public string Comments { get; set; }
         public decimal? RowNum { get; set; }
-
+        public string PointLineFeature { get; set; }
     }
 }

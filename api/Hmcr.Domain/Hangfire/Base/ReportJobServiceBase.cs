@@ -1,4 +1,5 @@
-﻿using Hmcr.Data.Database;
+﻿using CsvHelper;
+using Hmcr.Data.Database;
 using Hmcr.Data.Database.Entities;
 using Hmcr.Data.Repositories;
 using Hmcr.Domain.Services;
@@ -188,6 +189,19 @@ namespace Hmcr.Domain.Hangfire.Base
             await _unitOfWork.CommitAsync();
 
             _logger.LogInformation("[Hangfire] Finishing submission {submissionObjectId}", submissionId);
+        }
+
+        protected void LogRowParseException(decimal rowNum, string exception, ReadingContext context)
+        {
+            _logger.LogError($"Exception while parsing the line [{rowNum}]");
+            _logger.LogError(string.Join(',', context.HeaderRecord));
+            _logger.LogError(context.RawRecord);
+        }
+
+        protected decimal GetRowNum(string row)
+        {
+            var cols = row.Split(',');
+            return Convert.ToDecimal(cols[0]);
         }
     }
 }

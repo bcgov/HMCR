@@ -12,6 +12,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Hmcr.Bceid\Hmcr.Bceid.csproj" />
+    <ProjectReference Include="..\Hmcr.Chris\Hmcr.Chris.csproj" />
     <ProjectReference Include="..\Hmcr.Data\Hmcr.Data.csproj" />
     <ProjectReference Include="..\Hmcr.Model\Hmcr.Model.csproj" />
   </ItemGroup>

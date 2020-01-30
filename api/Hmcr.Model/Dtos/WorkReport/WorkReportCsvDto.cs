@@ -26,5 +26,6 @@
         public string ValueOfWork { get; set; }
         public string Comments { get; set; }
         public decimal? RowNum { get; set; }
+        public string PointLineFeature { get; set; }
     }
 }
