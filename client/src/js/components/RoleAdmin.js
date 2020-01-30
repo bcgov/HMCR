@@ -7,11 +7,15 @@ import queryString from 'query-string';
 import Authorize from './fragments/Authorize';
 import MaterialCard from './ui/MaterialCard';
 import MultiDropdown from './ui/MultiDropdown';
-import EditRoleForm from './forms/EditRoleForm';
+// import EditRoleForm from './forms/EditRoleForm';
 import DataTableWithPaginaionControl from './ui/DataTableWithPaginaionControl';
 import SubmitButton from './ui/SubmitButton';
 import PageSpinner from './ui/PageSpinner';
 import useSearchData from './hooks/useSearchData';
+import useFormModal from './hooks/useFormModal';
+import EditRoleFormFields from './forms/EditRoleFormFields';
+
+import { showValidationErrorDialog } from '../actions';
 
 import * as Constants from '../Constants';
 import * as api from '../Api';
@@ -31,9 +35,9 @@ const tableColumns = [
   { heading: 'Active', key: 'isActive', nosort: true },
 ];
 
-const RoleAdmin = ({ roleStatuses, history }) => {
+const RoleAdmin = ({ roleStatuses, history, showValidationErrorDialog }) => {
   const searchData = useSearchData(defaultSearchOptions, history);
-  const [editRoleForm, setEditRoleForm] = useState({ isOpen: false });
+  // const [editRoleForm, setEditRoleForm] = useState({ isOpen: false });
   const [searchInitialValues, setSearchInitialValues] = useState(defaultSearchFormValues);
 
   // Run on load, parse URL query params
@@ -71,19 +75,48 @@ const RoleAdmin = ({ roleStatuses, history }) => {
   };
 
   const onEditClicked = roleId => {
-    setEditRoleForm({ isOpen: true, formType: Constants.FORM_TYPE.EDIT, roleId });
+    // setEditRoleForm({ isOpen: true, formType: Constants.FORM_TYPE.EDIT, roleId });
+    formModal.openForm(Constants.FORM_TYPE.EDIT, { roleId });
   };
 
   const onDeleteClicked = (roleId, endDate) => {
     api.deleteRole(roleId, endDate).then(() => searchData.refresh());
   };
 
-  const handleEditRoleFormClose = refresh => {
-    if (refresh === true) {
-      searchData.refresh();
+  const handleEditFormSubmit = (values, formType) => {
+    if (!formModal.submitting) {
+      formModal.setSubmitting(true);
+
+      if (formType === Constants.FORM_TYPE.ADD) {
+        api
+          .postRole(values)
+          .then(() => {
+            formModal.closeForm();
+            searchData.refresh();
+          })
+          .catch(error => showValidationErrorDialog(error.response.data.errors))
+          .finally(() => formModal.setSubmitting(false));
+      } else {
+        api
+          .putRole(values.id, values)
+          .then(() => {
+            formModal.closeForm();
+            searchData.refresh();
+          })
+          .catch(error => showValidationErrorDialog(error.response.data.errors))
+          .finally(() => formModal.setSubmitting(false));
+      }
     }
-    setEditRoleForm({ isOpen: false });
   };
+  // const handleEditFormClose = refresh => {
+  //   if (refresh === true) {
+  //     searchData.refresh();
+  //   }
+
+  //   formModal.closeForm();
+  // };
+
+  const formModal = useFormModal('Role', <EditRoleFormFields />, handleEditFormSubmit);
 
   return (
     <React.Fragment>
@@ -125,7 +158,7 @@ const RoleAdmin = ({ roleStatuses, history }) => {
               size="sm"
               color="primary"
               className="float-right mb-3"
-              onClick={() => setEditRoleForm({ isOpen: true, formType: Constants.FORM_TYPE.ADD })}
+              onClick={() => formModal.openForm(Constants.FORM_TYPE.ADD)}
             >
               Add Role
             </Button>
@@ -152,7 +185,8 @@ const RoleAdmin = ({ roleStatuses, history }) => {
           {searchData.data.length <= 0 && <div>No records found</div>}
         </MaterialCard>
       )}
-      {editRoleForm.isOpen && <EditRoleForm {...editRoleForm} toggle={handleEditRoleFormClose} />}
+      {formModal.formElement}
+      {/* {editRoleForm.isOpen && <EditRoleForm {...editRoleForm} formTitle="Role" toggle={handleEditRoleFormClose} />} */}
     </React.Fragment>
   );
 };
@@ -163,4 +197,4 @@ const mapStateToProps = state => {
   };
 };
 
-export default connect(mapStateToProps)(RoleAdmin);
+export default connect(mapStateToProps, { showValidationErrorDialog })(RoleAdmin);
