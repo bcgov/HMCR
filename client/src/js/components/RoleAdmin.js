@@ -7,7 +7,6 @@ import queryString from 'query-string';
 import Authorize from './fragments/Authorize';
 import MaterialCard from './ui/MaterialCard';
 import MultiDropdown from './ui/MultiDropdown';
-// import EditRoleForm from './forms/EditRoleForm';
 import DataTableWithPaginaionControl from './ui/DataTableWithPaginaionControl';
 import SubmitButton from './ui/SubmitButton';
 import PageSpinner from './ui/PageSpinner';
@@ -37,7 +36,6 @@ const tableColumns = [
 
 const RoleAdmin = ({ roleStatuses, history, showValidationErrorDialog }) => {
   const searchData = useSearchData(defaultSearchOptions, history);
-  // const [editRoleForm, setEditRoleForm] = useState({ isOpen: false });
   const [searchInitialValues, setSearchInitialValues] = useState(defaultSearchFormValues);
 
   // Run on load, parse URL query params
@@ -75,7 +73,6 @@ const RoleAdmin = ({ roleStatuses, history, showValidationErrorDialog }) => {
   };
 
   const onEditClicked = roleId => {
-    // setEditRoleForm({ isOpen: true, formType: Constants.FORM_TYPE.EDIT, roleId });
     formModal.openForm(Constants.FORM_TYPE.EDIT, { roleId });
   };
 
@@ -108,13 +105,6 @@ const RoleAdmin = ({ roleStatuses, history, showValidationErrorDialog }) => {
       }
     }
   };
-  // const handleEditFormClose = refresh => {
-  //   if (refresh === true) {
-  //     searchData.refresh();
-  //   }
-
-  //   formModal.closeForm();
-  // };
 
   const formModal = useFormModal('Role', <EditRoleFormFields />, handleEditFormSubmit);
 
@@ -186,7 +176,6 @@ const RoleAdmin = ({ roleStatuses, history, showValidationErrorDialog }) => {
         </MaterialCard>
       )}
       {formModal.formElement}
-      {/* {editRoleForm.isOpen && <EditRoleForm {...editRoleForm} formTitle="Role" toggle={handleEditRoleFormClose} />} */}
     </React.Fragment>
   );
 };
