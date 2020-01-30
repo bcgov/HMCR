@@ -10,9 +10,13 @@ const DeleteButton = ({ buttonId, children, itemId, defaultEndDate, onDeleteClic
   const [date, setDate] = useState(null);
   const [focusedInput, setFocusedInput] = useState(false);
   const [focusClassName, setFocusClassName] = useState('');
+  const [buttonText, setButtonText] = useState('Delete');
 
   useEffect(() => {
-    if (defaultEndDate) setDate(moment(defaultEndDate));
+    if (defaultEndDate) {
+      setDate(moment(defaultEndDate));
+      setButtonText('Update');
+    }
   }, [defaultEndDate]);
 
   const togglePopover = () => setPopoverOpen(!popoverOpen);
@@ -55,7 +59,7 @@ const DeleteButton = ({ buttonId, children, itemId, defaultEndDate, onDeleteClic
           <div className="text-right mt-3">
             <ButtonGroup>
               <Button color="danger" size="sm" onClick={handleConfirmDelete}>
-                {date ? 'Update' : 'Delete'}
+                {buttonText}
               </Button>
               <Button color="secondary" size="sm" onClick={togglePopover}>
                 Cancel
