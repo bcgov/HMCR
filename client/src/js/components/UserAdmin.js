@@ -7,12 +7,15 @@ import queryString from 'query-string';
 import Authorize from './fragments/Authorize';
 import MaterialCard from './ui/MaterialCard';
 import MultiDropdown from './ui/MultiDropdown';
-import EditUserForm from './forms/EditUserForm';
 import AddUserWizard from './forms/AddUserWizard';
 import DataTableWithPaginaionControl from './ui/DataTableWithPaginaionControl';
 import SubmitButton from './ui/SubmitButton';
 import PageSpinner from './ui/PageSpinner';
 import useSearchData from './hooks/useSearchData';
+import useFormModal from './hooks/useFormModal';
+import EditUserFormFields from './forms/EditUserFormFields';
+
+import { showValidationErrorDialog } from '../actions';
 
 import * as Constants from '../Constants';
 import * as api from '../Api';
@@ -43,11 +46,9 @@ const tableColumns = [
   { heading: 'Active', key: 'isActive', nosort: true },
 ];
 
-const UserAdmin = ({ serviceAreas, userStatuses, userTypes, history }) => {
+const UserAdmin = ({ serviceAreas, userStatuses, userTypes, history, showValidationErrorDialog }) => {
   const searchData = useSearchData(defaultSearchOptions, history);
   const [searchInitialValues, setSearchInitialValues] = useState(defaultSearchFormValues);
-
-  const [editUserForm, setEditUserForm] = useState({ isOpen: false });
   const [addUserWizardIsOpen, setAddUserWizardIsOpen] = useState(false);
 
   // Run on load, parse URL query params
@@ -98,20 +99,37 @@ const UserAdmin = ({ serviceAreas, userStatuses, userTypes, history }) => {
   };
 
   const onEditClicked = userId => {
-    setEditUserForm({ isOpen: true, userId });
+    formModal.openForm(Constants.FORM_TYPE.EDIT, { userId });
   };
 
   const onDeleteClicked = (userId, endDate) => {
     api.deleteUser(userId, endDate).then(() => searchData.refresh());
   };
 
-  const handleEditUserFormClose = refresh => {
+  const handleAddUserWizardClose = refresh => {
     if (refresh === true) {
       searchData.refresh();
     }
-    setEditUserForm({ isOpen: false });
+
     setAddUserWizardIsOpen(false);
   };
+
+  const handleEditFormSubmit = values => {
+    if (!formModal.submitting) {
+      formModal.setSubmitting(true);
+
+      api
+        .putUser(values.id, values)
+        .then(() => {
+          formModal.closeForm();
+          searchData.refresh();
+        })
+        .catch(error => showValidationErrorDialog(error.response.data.errors))
+        .finally(() => formModal.setSubmitting(false));
+    }
+  };
+
+  const formModal = useFormModal('Role', <EditUserFormFields />, handleEditFormSubmit);
 
   const data = Object.values(searchData.data).map(user => ({
     ...user,
@@ -189,8 +207,8 @@ const UserAdmin = ({ serviceAreas, userStatuses, userTypes, history }) => {
           {searchData.data.length <= 0 && <div>No records found</div>}
         </MaterialCard>
       )}
-      {editUserForm.isOpen && <EditUserForm {...editUserForm} toggle={handleEditUserFormClose} />}
-      {addUserWizardIsOpen && <AddUserWizard isOpen={addUserWizardIsOpen} toggle={handleEditUserFormClose} />}
+      {formModal.formElement}
+      {addUserWizardIsOpen && <AddUserWizard isOpen={addUserWizardIsOpen} toggle={handleAddUserWizardClose} />}
     </React.Fragment>
   );
 };
@@ -204,4 +222,4 @@ const mapStateToProps = state => {
   };
 };
 
-export default connect(mapStateToProps)(UserAdmin);
+export default connect(mapStateToProps, { showValidationErrorDialog })(UserAdmin);

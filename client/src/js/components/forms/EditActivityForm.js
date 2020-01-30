@@ -34,7 +34,7 @@ const validationSchema = Yup.object({
   permissions: Yup.array().required('Require at least one permission'),
 });
 
-const EditRoleFormFields = ({ permissionIds, disableEdit }) => {
+const EditActivityFormFields = ({ permissionIds, disableEdit }) => {
   return (
     <React.Fragment>
       <FormRow name="name" label="Role Name*">
@@ -56,7 +56,7 @@ const EditRoleFormFields = ({ permissionIds, disableEdit }) => {
   );
 };
 
-const EditRoleForm = ({ toggle, isOpen, formType, roleId, showValidationErrorDialog }) => {
+const EditAcivityForm = ({ toggle, isOpen, formType, roleId, showValidationErrorDialog }) => {
   // This is needed until Formik fixes its own setSubmitting function
   const [submitting, setSubmitting] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -109,7 +109,7 @@ const EditRoleForm = ({ toggle, isOpen, formType, roleId, showValidationErrorDia
     }
   };
 
-  const title = formType === Constants.FORM_TYPE.ADD ? 'Add Role' : 'Edit Role';
+  const title = formType === Constants.FORM_TYPE.ADD ? 'Add Activity' : 'Edit Activity';
 
   return (
     <FormModal
@@ -124,10 +124,10 @@ const EditRoleForm = ({ toggle, isOpen, formType, roleId, showValidationErrorDia
       {loading ? (
         <PageSpinner />
       ) : (
-        <EditRoleFormFields permissionIds={permissionIds} disableEdit={initialValues.inUse} />
+        <EditActivityFormFields permissionIds={permissionIds} disableEdit={initialValues.inUse} />
       )}
     </FormModal>
   );
 };
 
-export default connect(null, { showValidationErrorDialog })(EditRoleForm);
+export default connect(null, { showValidationErrorDialog })(EditAcivityForm);
