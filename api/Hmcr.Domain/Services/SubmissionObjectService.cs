@@ -1,4 +1,5 @@
 ﻿using Hmcr.Data.Repositories;
+using Hmcr.Model;
 using Hmcr.Model.Dtos;
 using Hmcr.Model.Dtos.SubmissionObject;
 using System;
@@ -16,14 +17,17 @@ namespace Hmcr.Domain.Services
         Task<PagedDto<SubmissionObjectSearchDto>> GetSubmissionObjectsAsync(decimal serviceAreaNumber, DateTime dateFrom, DateTime dateTo, int pageSize, int pageNumber, string searchText, string orderBy, string direction);
         Task<SubmissionObjectResultDto> GetSubmissionResultAsync(decimal submissionObjectId);
         Task<SubmissionObjectFileDto> GetSubmissionFileAsync(decimal submissionObjectId);
+        Task<(SubmissionDto submission, byte[] file)> ExportSubmissionCsvAsync(decimal submissionObjectId);
     }
     public class SubmissionObjectService : ISubmissionObjectService
     {
         private ISubmissionObjectRepository _submissionRepo;
+        private IWorkReportService _workRptService;
 
-        public SubmissionObjectService(ISubmissionObjectRepository submissionRepo)
+        public SubmissionObjectService(ISubmissionObjectRepository submissionRepo, IWorkReportService workRptService)
         {
             _submissionRepo = submissionRepo;
+            _workRptService = workRptService;
         }
 
         public async Task<SubmissionObjectDto> GetSubmissionObjectAsync(decimal submissionObjectId)
@@ -44,6 +48,19 @@ namespace Hmcr.Domain.Services
         public async Task<SubmissionObjectFileDto> GetSubmissionFileAsync(decimal submissionObjectId)
         {
             return await _submissionRepo.GetSubmissionFileAsync(submissionObjectId);
+        }
+
+        public async Task<(SubmissionDto submission, byte[] file)> ExportSubmissionCsvAsync(decimal submissionObjectId)
+        {
+            var submission = await _submissionRepo.GetSubmissionInfoForExportAsync(submissionObjectId);
+
+            switch (submission.StagingTableName)
+            {
+                case TableNames.WorkReport:
+                    return (submission, await _workRptService.ExportToCsv(submissionObjectId));
+                default:
+                    throw new NotImplementedException($"Background job for {submission.StagingTableName} is not implemented.");
+            }
         }
     }
 }

@@ -127,6 +127,11 @@ namespace Hmcr.Data.Repositories.Base
             return Mapper.Map<IEnumerable<TDto>>(await DbSet.Where(where).ToListAsync());
         }
 
+        public virtual async Task<IEnumerable<TDto>> GetAllNoTrackAsync<TDto>(Expression<Func<TEntity, bool>> where)
+        {
+            return Mapper.Map<IEnumerable<TDto>>(await DbSet.AsNoTracking().Where(where).ToListAsync());
+        }
+
         public async Task<TDto> GetFirstOrDefaultAsync<TDto>(Expression<Func<TEntity, bool>> where)
         {
             return Mapper.Map<TDto>(await DbSet.Where(where).FirstOrDefaultAsync<TEntity>());

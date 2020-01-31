@@ -13,6 +13,8 @@ using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace Hmcr.Domain.Services
@@ -20,21 +22,25 @@ namespace Hmcr.Domain.Services
     public interface IWorkReportService
     {
         Task<(Dictionary<string, List<string>> errors, List<string> resubmittedRecordNumbers)> CheckResubmitAsync(FileUploadDto upload);
-        Task<(decimal submissionObjectId, Dictionary<string, List<string>> errors)> CreateReportAsync(FileUploadDto upload);        
+        Task<(decimal submissionObjectId, Dictionary<string, List<string>> errors)> CreateReportAsync(FileUploadDto upload);
+        Task<byte[]> ExportToCsv(decimal submissionObjectId);
     }
     public class WorkReportService : ReportServiceBase, IWorkReportService
     {
+        private IWorkReportRepository _workRptRepo;
         private ILogger<WorkReportService> _logger;
 
         public WorkReportService(IUnitOfWork unitOfWork, 
             ISubmissionStreamService streamService, ISubmissionObjectRepository submissionRepo, ISumbissionRowRepository rowRepo, 
-            IContractTermRepository contractRepo, ISubmissionStatusRepository statusRepo, ILogger<WorkReportService> logger) 
+            IContractTermRepository contractRepo, ISubmissionStatusRepository statusRepo, IWorkReportRepository workRptRepo,
+            ILogger<WorkReportService> logger) 
             : base(unitOfWork, streamService, submissionRepo, rowRepo, contractRepo, statusRepo)
         {
             TableName = TableNames.WorkReport;
             HasRowIdentifier = true;
             RecordNumberFieldName = Fields.RecordNumber;
             DateFieldName = Fields.EndDate;
+            _workRptRepo = workRptRepo;
             _logger = logger;
         }
 
@@ -90,5 +96,21 @@ namespace Hmcr.Domain.Services
 
             return errors.Count == 0;
         }
+
+        public async Task<byte[]> ExportToCsv(decimal submissionObjectId)
+        {
+            var workRpt = await _workRptRepo.ExportWorkReportAsync(submissionObjectId);
+
+            if (workRpt.Count() == 0)
+            {
+                return null;
+            }
+
+            var workRptCsv = string.Join(Environment.NewLine, workRpt.Select(x => x.ToCsv()));
+            workRptCsv = $"{CsvUtils.GetCsvHeader<WorkReportExportDto>()}{Environment.NewLine}{workRptCsv}";
+
+            var encoding = new UTF8Encoding();
+            return encoding.GetBytes(workRptCsv);
+        } 
     }
 }
