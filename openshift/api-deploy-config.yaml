@@ -81,13 +81,13 @@ objects:
                 - name: CHRIS_USER
                   valueFrom:
                     secretKeyRef:
-                      name: chris-service
-                      key: CHRIS_USER
+                      name: bceid-service
+                      key: BCEID_USER
                 - name: CHRIS_PASSWORD
                   valueFrom:
                     secretKeyRef:
-                      name: chris-service
-                      key: CHRIS_PASSWORD
+                      name: bceid-service
+                      key: BCEID_PASSWORD
                 - name: BCEID_USER
                   valueFrom:
                     secretKeyRef:
