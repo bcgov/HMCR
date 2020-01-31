@@ -119,6 +119,8 @@ namespace Hmcr.Domain.Hangfire
                 }
 
                 typedRows = rows;
+                CopyCalculatedFieldsFormUntypedRow(typedRows, untypedRows);
+
                 await PerformAdditionalValidationAsync(typedRows);
             }
 
@@ -138,12 +140,13 @@ namespace Hmcr.Domain.Hangfire
 
         }
 
-        private void CopyPointLineFeatureFormUntypedRow(List<WorkReportDto> typedRows, List<WorkReportCsvDto> untypedRows)
+        private void CopyCalculatedFieldsFormUntypedRow(List<WorkReportDto> typedRows, List<WorkReportCsvDto> untypedRows)
         {
             foreach(var typedRow in typedRows)
             {
                 var untypedRow = untypedRows.First(x => x.RowNum == typedRow.RowNum);
                 typedRow.PointLineFeature = untypedRow.PointLineFeature;
+                typedRow.RowType = untypedRow.RowType;
             }
         }
 
@@ -290,13 +293,19 @@ namespace Hmcr.Domain.Hangfire
                     errors.AddItem("StartDate", "Start Date cannot be greater than End Date");
                 }
 
-                PerformGpsPointValidation(typedRow, submissionRow);
-                PerformGpsLineValidation(typedRow, submissionRow);
-                PerformGpsEitherLineOrPointValidation(typedRow);
+                if (typedRow.RowType == RowTypes.D3)
+                {
+                    PerformGpsPointValidation(typedRow, submissionRow);
+                    PerformGpsLineValidation(typedRow, submissionRow);
+                    PerformGpsEitherLineOrPointValidation(typedRow);
+                }
 
-                PerformOffsetPointValidation(typedRow, submissionRow);
-                PerformOffsetLineValidation(typedRow, submissionRow);
-                PerformOffsetEitherLineOrPointValidation(typedRow);
+                if (typedRow.RowType == RowTypes.D4)
+                {
+                    PerformOffsetPointValidation(typedRow, submissionRow);
+                    PerformOffsetLineValidation(typedRow, submissionRow);
+                    PerformOffsetEitherLineOrPointValidation(typedRow);
+                }
 
                 if (errors.Count > 0)
                 {
@@ -317,15 +326,18 @@ namespace Hmcr.Domain.Hangfire
                 if (untypedRow.EndLatitude.IsEmpty())
                 {
                     entityName = isSite ? Entities.WorkReportD4Site : Entities.WorkReportD4;
+                    untypedRow.RowType = RowTypes.D4;
                 }
                 else
                 {
                     entityName = isSite ? Entities.WorkReportD3Site : Entities.WorkReportD3;
+                    untypedRow.RowType = RowTypes.D3;
                 }
             }
             else
             {
                 entityName = (locationCode.LocationCode == "B") ? Entities.WorkReportD2B : Entities.WorkReportD2;
+                untypedRow.RowType = RowTypes.D2;
             }
 
             return entityName;

@@ -25,7 +25,20 @@
         public string SiteNumber { get; set; }
         public string ValueOfWork { get; set; }
         public string Comments { get; set; }
+
+        /// <summary>
+        /// Line number of the record in the CSV file
+        /// </summary>
         public decimal? RowNum { get; set; }
+
+        /// <summary>
+        /// Point Line Feature derived from activity code
+        /// </summary>
         public string PointLineFeature { get; set; }
+
+        /// <summary>
+        /// D2, D3, D4 report type
+        /// </summary>
+        public RowTypes RowType { get; set; }
     }
 }
