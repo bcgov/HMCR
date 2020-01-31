@@ -26,6 +26,7 @@ namespace Hmcr.Data.Repositories
         Task<SubmissionObjectResultDto> GetSubmissionResultAsync(decimal submissionObjectId);
         Task<SubmissionObjectFileDto> GetSubmissionFileAsync(decimal submissionObjectId);
         Task<HmrSubmissionObject> GetSubmissionObjecForBackgroundJobAsync(decimal submissionObjectId);
+        Task<SubmissionDto> GetSubmissionInfoForExportAsync(decimal submissionObjectId);
     }
     public class SubmissionObjectRepository : HmcrRepositoryBase<HmrSubmissionObject>, ISubmissionObjectRepository
     {
@@ -62,15 +63,22 @@ namespace Hmcr.Data.Repositories
             var submissions = DbSet.AsNoTracking()
                 .Where(x => x.ServiceAreaNumber == serviceAreaNumber && x.SubmissionStatus.StatusType == StatusType.File &&
                     (x.SubmissionStatus.StatusCode == FileStatus.FileReceived || x.SubmissionStatus.StatusCode == FileStatus.InProgress))
-                .Select(x => new SubmissionDto
-                {
-                    SubmissionObjectId = x.SubmissionObjectId,
-                    StagingTableName = x.SubmissionStream.StagingTableName
-                })
+                .Include(x => x.MimeType)
+                .Include(x => x.SubmissionStream)
                 .OrderBy(x => x.SubmissionObjectId) //must be ascending order
-                .ToArray();               
+                .ToArray();
 
-            return submissions;
+            return Mapper.Map<SubmissionDto[]>(submissions);
+        }
+
+        public async Task<SubmissionDto> GetSubmissionInfoForExportAsync(decimal submissionObjectId)
+        {
+            var submission = await DbSet.AsNoTracking()
+                .Include(x => x.MimeType)
+                .Include(x => x.SubmissionStream)
+                .FirstOrDefaultAsync(x => x.SubmissionObjectId == submissionObjectId);
+
+            return Mapper.Map<SubmissionDto>(submission);
         }
 
         public async Task<HmrSubmissionObject> GetSubmissionObjecForBackgroundJobAsync(decimal submissionObjectId)

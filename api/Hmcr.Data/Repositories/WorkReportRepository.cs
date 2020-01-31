@@ -12,6 +12,7 @@ namespace Hmcr.Data.Repositories
     public interface IWorkReportRepository
     {
         IAsyncEnumerable<HmrWorkReport> SaveWorkReportAsnyc(HmrSubmissionObject submission, List<WorkReportDto> rows);
+        Task<IEnumerable<WorkReportExportDto>> ExportWorkReportAsync(decimal submissionObjectId);
     }
     public class WorkReportRepository : HmcrRepositoryBase<HmrWorkReport>, IWorkReportRepository
     {
@@ -43,6 +44,12 @@ namespace Hmcr.Data.Repositories
 
                 yield return entity;
             }
+        }
+
+        public async Task<IEnumerable<WorkReportExportDto>> ExportWorkReportAsync(decimal submissionObjectId)
+        {
+            return (await GetAllNoTrackAsync<WorkReportExportDto>(x => x.SubmissionObjectId == submissionObjectId))
+                        .OrderBy(x => x.RowNum);
         }
     }
 }

@@ -64,6 +64,9 @@ namespace Hmcr.Data.Mappings
             CreateMap<HmrSubmissionObject, SubmissionObjectCreateDto>();
             CreateMap<HmrSubmissionObject, SubmissionObjectFileDto>()
                 .ForMember(dst => dst.MimeTypeCode, opt => opt.MapFrom(src => src.MimeType.MimeTypeCode));
+            CreateMap<HmrSubmissionObject, SubmissionDto>()
+                .ForMember(dst => dst.StagingTableName, opt => opt.MapFrom(src => src.SubmissionStream.StagingTableName))
+                .ForMember(dst => dst.MimeTypeCode, opt => opt.MapFrom(src => src.MimeType.MimeTypeCode));
 
             CreateMap<HmrSubmissionRow, SubmissionRowDto>();
 
@@ -86,6 +89,7 @@ namespace Hmcr.Data.Mappings
             CreateMap<HmrLocationCode, LocationCodeDto>();
 
             CreateMap<HmrWorkReport, WorkReportDto>();
+            CreateMap<HmrWorkReport, WorkReportExportDto>();
 
             CreateMap<HmrRockfallReport, RockfallReportDto>();
 
@@ -94,6 +98,7 @@ namespace Hmcr.Data.Mappings
             CreateMap<HmrCodeLookup, CodeLookupDto>();
 
             CreateMap<HmrFeedbackMessage, FeedbackMessageDto>();
+
         }
     }
 }

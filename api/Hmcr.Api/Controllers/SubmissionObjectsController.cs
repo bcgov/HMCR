@@ -92,5 +92,23 @@ namespace Hmcr.Api.Controllers
 
             return File(submission.DigitalRepresentation, submission.MimeTypeCode, submission.FileName);
         }
+
+        [HttpGet("{id}/exportcsv", Name = "ExportCsv")]
+        [RequiresPermission(Permissions.FileUploadRead)]
+        public async Task<IActionResult> ExportCsvAsync(decimal id)
+        {
+            var (submission, file) = await _submissionService.ExportSubmissionCsvAsync(id);
+
+            if (submission == null || file == null)
+                return NotFound();
+
+            var problem = IsServiceAreaAuthorized(_currentUser, submission.ServiceAreaNumber);
+            if (problem != null)
+            {
+                return Unauthorized(problem);
+            }
+
+            return File(file, submission.MimeTypeCode, submission.FileName);
+        }
     }
 }

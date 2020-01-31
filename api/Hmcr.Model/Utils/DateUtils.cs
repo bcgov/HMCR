@@ -23,5 +23,10 @@ namespace Hmcr.Model.Utils
 
             return (DateTime.TryParseExact(dateStr, formats, CultureInfo.InvariantCulture, DateTimeStyles.None, out DateTime parsedDate), parsedDate);
         }
+
+        public static string CovertToString(DateTime date)
+        {
+            return date == null ? "" : date.ToString("yyyy-MM-dd");
+        }
     }
 }

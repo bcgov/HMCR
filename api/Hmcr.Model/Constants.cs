@@ -152,6 +152,10 @@ namespace Hmcr.Model
         public const string Age = "Age";
 
         public const string RowNum = "RowNum";
+
+        public const string WorkReportId = "WorkReportId";
+        public const string SubmissionObjectId = "SubmissionObjectId";
+
     }
 
     public interface IReportHeaders
