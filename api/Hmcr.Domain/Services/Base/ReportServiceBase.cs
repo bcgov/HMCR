@@ -259,21 +259,5 @@ namespace Hmcr.Domain.Services.Base
         {
             throw new NotImplementedException();
         }
-
-        public async Task<byte[]> ExportToCsvAsync<T>(decimal submissionObjectId, IReportExportRepository<T> repo) where T : IReportExportDto
-        {
-            var report = await repo.ExporReportAsync(submissionObjectId);
-
-            if (report.Count() == 0)
-            {
-                return null;
-            }
-
-            var rptCsv = string.Join(Environment.NewLine, report.Select(x => x.ToCsv()));
-            rptCsv = $"{CsvUtils.GetCsvHeader<T>()}{Environment.NewLine}{rptCsv}";
-
-            var encoding = new UTF8Encoding();
-            return encoding.GetBytes(rptCsv);
-        }
     }
 }
