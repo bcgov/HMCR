@@ -30,7 +30,6 @@ namespace Hmcr.Domain.CsvHelpers
             Map(m => m.StartDate).TypeConverter<DateTypeConverter>();
             Map(m => m.EndDate).TypeConverter<DateTypeConverter>();
             Map(m => m.PostedDate).TypeConverter<DateTypeConverter>();
-            Map(m => m.ValueOfWork).TypeConverter<DollarValueConverter>();
             Map(m => m.StartLatitude).TypeConverter<NullableDecimalConverter>();
             Map(m => m.StartLongitude).TypeConverter<NullableDecimalConverter>();
             Map(m => m.EndLatitude).TypeConverter<NullableDecimalConverter>();
