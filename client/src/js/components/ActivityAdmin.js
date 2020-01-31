@@ -7,11 +7,14 @@ import queryString from 'query-string';
 import Authorize from './fragments/Authorize';
 import MaterialCard from './ui/MaterialCard';
 import MultiDropdown from './ui/MultiDropdown';
-import EditActivityForm from './forms/EditActivityForm';
 import DataTableWithPaginaionControl from './ui/DataTableWithPaginaionControl';
 import SubmitButton from './ui/SubmitButton';
 import PageSpinner from './ui/PageSpinner';
 import useSearchData from './hooks/useSearchData';
+import useFormModal from './hooks/useFormModal';
+import EditActivityFormFields from './forms/EditActivityFormFields';
+
+import { showValidationErrorDialog } from '../actions';
 
 import * as Constants from '../Constants';
 import * as api from '../Api';
@@ -27,14 +30,17 @@ const defaultSearchOptions = {
 };
 
 const tableColumns = [
-  { heading: 'Role Name', key: 'name' },
-  { heading: 'Role Description', key: 'description' },
+  { heading: 'Activity Number', key: 'name' },
+  { heading: 'Name', key: 'description' },
+  { heading: 'Unit', key: 'description' },
+  { heading: 'Maintenance Type', key: 'description' },
+  { heading: 'Location Code', key: 'description' },
+  { heading: 'Point Line Feature', key: 'description' },
   { heading: 'Active', key: 'isActive', nosort: true },
 ];
 
-const ActivityAdmin = ({ roleStatuses, history }) => {
+const ActivityAdmin = ({ history, showValidationErrorDialog }) => {
   const searchData = useSearchData(defaultSearchOptions, history);
-  const [editActivityForm, setEditActivityForm] = useState({ isOpen: false });
   const [searchInitialValues, setSearchInitialValues] = useState(defaultSearchFormValues);
 
   // Run on load, parse URL query params
@@ -48,7 +54,7 @@ const ActivityAdmin = ({ roleStatuses, history }) => {
 
     const searchText = options.searchText || '';
 
-    searchData.updateSearchOptions(options);
+    // searchData.updateSearchOptions(options);
     setSearchInitialValues({ ...searchInitialValues, searchText, statusId: buildStatusIdArray(options.isActive) });
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -71,20 +77,48 @@ const ActivityAdmin = ({ roleStatuses, history }) => {
     searchData.refresh(true);
   };
 
-  const onEditClicked = roleId => {
-    setEditActivityForm({ isOpen: true, formType: Constants.FORM_TYPE.EDIT, roleId });
+  const onEditClicked = activityId => {
+    // setEditActivityForm({ isOpen: true, formType: Constants.FORM_TYPE.EDIT, roleId });
   };
 
   const onDeleteClicked = (roleId, endDate) => {
     api.deleteRole(roleId, endDate).then(() => searchData.refresh());
   };
 
-  const handleEditRoleFormClose = refresh => {
-    if (refresh === true) {
-      searchData.refresh();
+  const handleEditFormSubmit = (values, formType) => {
+    if (!formModal.submitting) {
+      formModal.setSubmitting(true);
+
+      if (formType === Constants.FORM_TYPE.ADD) {
+        api
+          .postRole(values)
+          .then(() => {
+            formModal.closeForm();
+            searchData.refresh();
+          })
+          .catch(error => showValidationErrorDialog(error.response.data.errors))
+          .finally(() => formModal.setSubmitting(false));
+      } else {
+        api
+          .putRole(values.id, values)
+          .then(() => {
+            formModal.closeForm();
+            searchData.refresh();
+          })
+          .catch(error => showValidationErrorDialog(error.response.data.errors))
+          .finally(() => formModal.setSubmitting(false));
+      }
     }
-    setEditActivityForm({ isOpen: false });
   };
+
+  const formModal = useFormModal('Activity', <EditActivityFormFields />, handleEditFormSubmit);
+
+  const mTypes = [
+    { id: 'Q', name: 'Quantified' },
+    { id: 'R', name: 'Routine' },
+    { id: 'E', name: 'Major Event' },
+    { id: 'A', name: 'Additional' },
+  ];
 
   return (
     <React.Fragment>
@@ -99,12 +133,19 @@ const ActivityAdmin = ({ roleStatuses, history }) => {
             <Form>
               <Row form>
                 <Col>
-                  <Field type="text" name="searchText" placeholder="Role/Description" className="form-control" />
+                  <Field type="text" name="searchText" placeholder="Activity Number/Name" className="form-control" />
                 </Col>
                 <Col>
-                  <MultiDropdown {...formikProps} title="Role Status" items={roleStatuses} name="statusId" />
+                  <MultiDropdown {...formikProps} title="Maintenance Type" items={mTypes} name="maintenanceTypeIds" />
                 </Col>
-                <Col />
+                <Col>
+                  <MultiDropdown
+                    {...formikProps}
+                    title="Activity Status"
+                    items={Constants.ACTIVE_STATUS_ARRAY}
+                    name="statusId"
+                  />
+                </Col>
                 <Col />
                 <Col>
                   <div className="float-right">
@@ -119,16 +160,16 @@ const ActivityAdmin = ({ roleStatuses, history }) => {
           )}
         </Formik>
       </MaterialCard>
-      <Authorize requires={Constants.PERMISSIONS.ROLE_W}>
+      <Authorize requires={Constants.PERMISSIONS.CODE_W}>
         <Row>
           <Col>
             <Button
               size="sm"
               color="primary"
               className="float-right mb-3"
-              onClick={() => setEditActivityForm({ isOpen: true, formType: Constants.FORM_TYPE.ADD })}
+              onClick={() => formModal.openForm(Constants.FORM_TYPE.ADD)}
             >
-              Add Role
+              Add Activity
             </Button>
           </Col>
         </Row>
@@ -144,7 +185,7 @@ const ActivityAdmin = ({ roleStatuses, history }) => {
               onPageNumberChange={searchData.handleChangePage}
               onPageSizeChange={searchData.handleChangePageSize}
               editable
-              editPermissionName={Constants.PERMISSIONS.ROLE_W}
+              editPermissionName={Constants.PERMISSIONS.CODE_W}
               onEditClicked={onEditClicked}
               onDeleteClicked={onDeleteClicked}
               onHeadingSortClicked={searchData.handleHeadingSortClicked}
@@ -153,15 +194,9 @@ const ActivityAdmin = ({ roleStatuses, history }) => {
           {searchData.data.length <= 0 && <div>No records found</div>}
         </MaterialCard>
       )}
-      {editActivityForm.isOpen && <EditActivityForm {...editActivityForm} toggle={handleEditRoleFormClose} />}
+      {formModal.formElement}
     </React.Fragment>
   );
 };
 
-const mapStateToProps = state => {
-  return {
-    roleStatuses: Object.values(state.roles.statuses),
-  };
-};
-
-export default connect(mapStateToProps)(ActivityAdmin);
+export default connect(null, { showValidationErrorDialog })(ActivityAdmin);

@@ -24,7 +24,7 @@ const validationSchema = Yup.object({
   userRoleIds: Yup.array().required('Require at least one role'),
 });
 
-const EditUserFormFields = ({ setInitialValues, setValidationSchema, userId, serviceAreas, userTypes }) => {
+const EditUserFormFields = ({ setInitialValues, formValues, setValidationSchema, userId, serviceAreas, userTypes }) => {
   const [loading, setLoading] = useState(true);
   const [roles, setRoles] = useState([]);
 
@@ -55,7 +55,7 @@ const EditUserFormFields = ({ setInitialValues, setValidationSchema, userId, ser
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  if (loading) return <PageSpinner />;
+  if (loading || formValues === null) return <PageSpinner />;
 
   return (
     <React.Fragment>

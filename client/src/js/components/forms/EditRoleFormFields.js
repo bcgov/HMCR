@@ -30,7 +30,7 @@ const validationSchema = Yup.object({
   permissions: Yup.array().required('Require at least one permission'),
 });
 
-const EditRoleFormFields = ({ disableEdit, setInitialValues, setValidationSchema, formType, roleId }) => {
+const EditRoleFormFields = ({ setInitialValues, formValues, setValidationSchema, formType, roleId }) => {
   const [permissionIds, setPermissionIds] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -56,7 +56,7 @@ const EditRoleFormFields = ({ disableEdit, setInitialValues, setValidationSchema
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  if (loading) return <PageSpinner />;
+  if (loading || formValues === null) return <PageSpinner />;
 
   return (
     <React.Fragment>
@@ -70,7 +70,7 @@ const EditRoleFormFields = ({ disableEdit, setInitialValues, setValidationSchema
         <MultiSelect items={permissionIds} name="permissions" />
       </FormRow>
       <FormRow name="internal" label="Internal">
-        <FormSwitchInput name="internal" disabled={disableEdit} />
+        <FormSwitchInput name="internal" disabled />
       </FormRow>
       <FormRow name="endDate" label="End Date">
         <SingleDateField name="endDate" placeholder="End Date" />

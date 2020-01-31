@@ -71,6 +71,11 @@ export const ACTIVE_STATUS = {
   INACTIVE: 'INACTIVE',
 };
 
+export const ACTIVE_STATUS_ARRAY = Object.keys(ACTIVE_STATUS).map(key => ({
+  id: ACTIVE_STATUS[key],
+  name: ACTIVE_STATUS[key],
+}));
+
 export const SORT_DIRECTION = {
   ASCENDING: 'asc',
   DESCENDING: 'desc',
