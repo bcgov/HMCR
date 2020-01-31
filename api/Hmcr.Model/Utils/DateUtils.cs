@@ -1,16 +1,12 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Globalization;
-using System.Text;
 
 namespace Hmcr.Model.Utils
 {
-    public class DateUtils
+    public static class DateUtils
     {
         public static (bool parsed, DateTime? parsedDate) ParseDate(object val)
         {
-            var parsedDate = new DateTime();
-
             if (val == null)
                 return (true, null);
 
@@ -25,7 +21,7 @@ namespace Hmcr.Model.Utils
             if (dateStr.IsEmpty())
                 return (true, null);
 
-            return (DateTime.TryParseExact(dateStr, formats, CultureInfo.InvariantCulture, DateTimeStyles.None, out parsedDate), parsedDate);
+            return (DateTime.TryParseExact(dateStr, formats, CultureInfo.InvariantCulture, DateTimeStyles.None, out DateTime parsedDate), parsedDate);
         }
     }
 }

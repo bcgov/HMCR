@@ -1,5 +1,4 @@
 ﻿using CsvHelper;
-using CsvHelper.TypeConversion;
 using Hmcr.Chris;
 using Hmcr.Data.Database;
 using Hmcr.Data.Database.Entities;
@@ -183,7 +182,7 @@ namespace Hmcr.Domain.Hangfire
                 if (typedRow.EndLatitude != typedRow.StartLatitude || typedRow.EndLongitude != typedRow.StartLongitude)
                 {
                     var errors = new Dictionary<string, List<string>>();
-                    errors.AddItem($"{Fields.EndLatitude},{Fields.EndLongitude}", "Start GPS coordinate must be the same as end GPS coordinate");
+                    errors.AddItem($"{Fields.EndLatitude},{Fields.EndLongitude}", "Start GPS coordinates must be the same as end GPS coordinate");
                     SetErrorDetail(submissionRow, errors);
                 }
             }
@@ -204,14 +203,14 @@ namespace Hmcr.Domain.Hangfire
                 if (typedRow.EndLatitude == typedRow.StartLatitude || typedRow.EndLongitude == typedRow.StartLongitude)
                 {
                     var errors = new Dictionary<string, List<string>>();
-                    errors.AddItem($"{Fields.EndLatitude},{Fields.EndLongitude}", "The start GPS coordinate must not be the same as the end GPS coordinate");
+                    errors.AddItem($"{Fields.EndLatitude},{Fields.EndLongitude}", "The start GPS coordinates must not be the same as the end GPS coordinate");
                     SetErrorDetail(submissionRow, errors);
                 }
             }
             else
             {
                 var errors = new Dictionary<string, List<string>>();
-                errors.AddItem($"{Fields.EndLatitude},{Fields.EndLongitude}", "The end GPS coordinate must not be provided");
+                errors.AddItem($"{Fields.EndLatitude},{Fields.EndLongitude}", "The end GPS coordinates must not be provided");
                 SetErrorDetail(submissionRow, errors);
             }
         }

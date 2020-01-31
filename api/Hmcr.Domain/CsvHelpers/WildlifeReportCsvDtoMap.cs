@@ -1,9 +1,5 @@
 ﻿using CsvHelper.Configuration;
-using Hmcr.Model.Dtos.RockfallReport;
 using Hmcr.Model.Dtos.WildlifeReport;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace Hmcr.Domain.CsvHelpers
 {
@@ -28,11 +24,6 @@ namespace Hmcr.Domain.CsvHelpers
         {
             AutoMap();
             Map(m => m.AccidentDate).TypeConverter<DateTypeConverter>();
-            Map(m => m.Latitude).TypeConverter<NullableDecimalConverter>();
-            Map(m => m.Longitude).TypeConverter<NullableDecimalConverter>();
-            Map(m => m.StartOffset).TypeConverter<NullableDecimalConverter>();
-            Map(m => m.Quantity).TypeConverter<NullableDecimalConverter>();
-            Map(m => m.Species).TypeConverter<NullableDecimalConverter>();
         }
     }
 }
