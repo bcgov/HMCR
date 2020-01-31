@@ -23,7 +23,6 @@ namespace Hmcr.Domain.Services
     {
         Task<(Dictionary<string, List<string>> errors, List<string> resubmittedRecordNumbers)> CheckResubmitAsync(FileUploadDto upload);
         Task<(decimal submissionObjectId, Dictionary<string, List<string>> errors)> CreateReportAsync(FileUploadDto upload);
-        Task<byte[]> ExportToCsvAsync(decimal submissionObjectId);
     }
     public class WorkReportService : ReportServiceBase, IWorkReportService
     {
@@ -96,10 +95,5 @@ namespace Hmcr.Domain.Services
 
             return errors.Count == 0;
         }
-
-        public async Task<byte[]> ExportToCsvAsync(decimal submissionObjectId)
-        {
-            return await ExportToCsvAsync(submissionObjectId, (IReportExportRepository<WorkReportExportDto>)_workRptRepo);
-        } 
     }
 }

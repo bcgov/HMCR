@@ -22,7 +22,6 @@ namespace Hmcr.Domain.Services
     public interface IWildlifeReportService
     {
         Task<(decimal submissionObjectId, Dictionary<string, List<string>> errors)> CreateReportAsync(FileUploadDto upload);
-        Task<byte[]> ExportToCsvAsync(decimal submissionObjectId);
     }
     public class WildlifeReportService : ReportServiceBase, IWildlifeReportService
     {
@@ -92,10 +91,6 @@ namespace Hmcr.Domain.Services
             }
 
             return errors.Count == 0;
-        }
-        public async Task<byte[]> ExportToCsvAsync(decimal submissionObjectId)
-        {
-            return await ExportToCsvAsync(submissionObjectId, (IReportExportRepository<WildlifeReportExportDto>)_wildlifeRepo);
         }
     }
 }

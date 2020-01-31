@@ -1,7 +1,11 @@
 ﻿using Hmcr.Data.Repositories;
 using Hmcr.Model;
 using Hmcr.Model.Dtos;
+using Hmcr.Model.Dtos.RockfallReport;
 using Hmcr.Model.Dtos.SubmissionObject;
+using Hmcr.Model.Dtos.WildlifeReport;
+using Hmcr.Model.Dtos.WorkReport;
+using Hmcr.Model.Utils;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -22,17 +26,17 @@ namespace Hmcr.Domain.Services
     public class SubmissionObjectService : ISubmissionObjectService
     {
         private ISubmissionObjectRepository _submissionRepo;
-        private IWorkReportService _workRptService;
-        private IRockfallReportService _rockfallRptService;
-        private IWildlifeReportService _wildlifeRptService;
+        private IWorkReportRepository _workRptRepo;
+        private IRockfallReportRepository _rockfallRptRepo;
+        private IWildlifeReportRepository _wildlifeRptRepo;
 
-        public SubmissionObjectService(ISubmissionObjectRepository submissionRepo, 
-            IWorkReportService workRptService, IRockfallReportService rockfallRptService, IWildlifeReportService wildlifeRptService)
+        public SubmissionObjectService(ISubmissionObjectRepository submissionRepo,
+            IWorkReportRepository workRptRepo, IRockfallReportRepository rockfallRptRepo, IWildlifeReportRepository wildlifeRptRepo)
         {
             _submissionRepo = submissionRepo;
-            _workRptService = workRptService;
-            _rockfallRptService = rockfallRptService;
-            _wildlifeRptService = wildlifeRptService;
+            _workRptRepo = workRptRepo;
+            _rockfallRptRepo = rockfallRptRepo;
+            _wildlifeRptRepo = wildlifeRptRepo;
         }
 
         public async Task<SubmissionObjectDto> GetSubmissionObjectAsync(decimal submissionObjectId)
@@ -65,14 +69,30 @@ namespace Hmcr.Domain.Services
             switch (submission.StagingTableName)
             {
                 case TableNames.WorkReport:
-                    return (submission, await _workRptService.ExportToCsvAsync(submissionObjectId));
+                    return (submission, await ExportToCsvAsync(submissionObjectId, (IReportExportRepository<WorkReportExportDto>)_workRptRepo));
                 case TableNames.RockfallReport:
-                    return (submission, await _rockfallRptService.ExportToCsvAsync(submissionObjectId));
+                    return (submission, await ExportToCsvAsync(submissionObjectId, (IReportExportRepository<RockfallReportExportDto>)_rockfallRptRepo));
                 case TableNames.WildlifeReport:
-                    return (submission, await _wildlifeRptService.ExportToCsvAsync(submissionObjectId));
+                    return (submission, await ExportToCsvAsync(submissionObjectId, (IReportExportRepository<WildlifeReportExportDto>)_wildlifeRptRepo));
                 default:
                     throw new NotImplementedException($"Background job for {submission.StagingTableName} is not implemented.");
             }
+        }
+
+        private async Task<byte[]> ExportToCsvAsync<T>(decimal submissionObjectId, IReportExportRepository<T> repo) where T : IReportExportDto
+        {
+            var report = await repo.ExporReportAsync(submissionObjectId);
+
+            if (report.Count() == 0)
+            {
+                return null;
+            }
+
+            var rptCsv = string.Join(Environment.NewLine, report.Select(x => x.ToCsv()));
+            rptCsv = $"{CsvUtils.GetCsvHeader<T>()}{Environment.NewLine}{rptCsv}";
+
+            var encoding = new UTF8Encoding();
+            return encoding.GetBytes(rptCsv);
         }
     }
 }
