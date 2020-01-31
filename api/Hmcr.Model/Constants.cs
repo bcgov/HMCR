@@ -237,4 +237,15 @@ namespace Hmcr.Model
         public const string Line = "Line";
         public const string Either = "Either";
     }
+
+    /// <summary>
+    /// Work Report Row Types
+    /// D2 - Non-Location specific reporting Fields
+    /// D3 - Location specific reporting fields(GPS)
+    /// D4 - Location specific reporting(without GPS)
+    /// </summary>
+    public enum RowTypes
+    {
+        D2, D3, D4
+    }
 }
