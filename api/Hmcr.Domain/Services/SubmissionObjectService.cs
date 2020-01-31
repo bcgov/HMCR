@@ -23,11 +23,16 @@ namespace Hmcr.Domain.Services
     {
         private ISubmissionObjectRepository _submissionRepo;
         private IWorkReportService _workRptService;
+        private IRockfallReportService _rockfallRptService;
+        private IWildlifeReportService _wildlifeRptService;
 
-        public SubmissionObjectService(ISubmissionObjectRepository submissionRepo, IWorkReportService workRptService)
+        public SubmissionObjectService(ISubmissionObjectRepository submissionRepo, 
+            IWorkReportService workRptService, IRockfallReportService rockfallRptService, IWildlifeReportService wildlifeRptService)
         {
             _submissionRepo = submissionRepo;
             _workRptService = workRptService;
+            _rockfallRptService = rockfallRptService;
+            _wildlifeRptService = wildlifeRptService;
         }
 
         public async Task<SubmissionObjectDto> GetSubmissionObjectAsync(decimal submissionObjectId)
@@ -54,10 +59,17 @@ namespace Hmcr.Domain.Services
         {
             var submission = await _submissionRepo.GetSubmissionInfoForExportAsync(submissionObjectId);
 
+            if (submission == null)
+                return (null, null);
+
             switch (submission.StagingTableName)
             {
                 case TableNames.WorkReport:
-                    return (submission, await _workRptService.ExportToCsv(submissionObjectId));
+                    return (submission, await _workRptService.ExportToCsvAsync(submissionObjectId));
+                case TableNames.RockfallReport:
+                    return (submission, await _rockfallRptService.ExportToCsvAsync(submissionObjectId));
+                case TableNames.WildlifeReport:
+                    return (submission, await _wildlifeRptService.ExportToCsvAsync(submissionObjectId));
                 default:
                     throw new NotImplementedException($"Background job for {submission.StagingTableName} is not implemented.");
             }

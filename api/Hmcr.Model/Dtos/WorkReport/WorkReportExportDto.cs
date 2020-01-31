@@ -3,7 +3,7 @@ using System;
 
 namespace Hmcr.Model.Dtos.WorkReport
 {
-    public class WorkReportExportDto
+    public class WorkReportExportDto : IReportExportDto
     {
         public decimal WorkReportId { get; set; }
         public decimal SubmissionObjectId { get; set; }

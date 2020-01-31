@@ -2,10 +2,10 @@
 using Hmcr.Data.Database.Entities;
 using Hmcr.Data.Repositories.Base;
 using Hmcr.Model.Dtos.RockfallReport;
-using Hmcr.Model.Dtos.WorkReport;
 using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace Hmcr.Data.Repositories
 {
@@ -13,7 +13,7 @@ namespace Hmcr.Data.Repositories
     {
         IAsyncEnumerable<HmrRockfallReport> SaveRockfallReportAsnyc(HmrSubmissionObject submission, List<RockfallReportDto> rows);
     }
-    public class RockfallReportRepository : HmcrRepositoryBase<HmrRockfallReport>, IRockfallReportRepository
+    public class RockfallReportRepository : HmcrRepositoryBase<HmrRockfallReport>, IRockfallReportRepository, IReportExportRepository<RockfallReportExportDto>
     {
         public RockfallReportRepository(AppDbContext dbContext, IMapper mapper)
             : base(dbContext, mapper)
@@ -43,6 +43,18 @@ namespace Hmcr.Data.Repositories
 
                 yield return entity;
             }
+        }
+
+        public async Task<IEnumerable<RockfallReportExportDto>> ExporReportAsync(decimal submissionObjectId)
+        {
+            var entities = await DbSet.AsNoTracking()
+                .Include(x => x.SubmissionObject)
+                    .ThenInclude(x => x.Party)
+                .Where(x => x.SubmissionObjectId == submissionObjectId)
+                .OrderBy(x => x.RowNum)
+                .ToListAsync();
+
+            return Mapper.Map<IEnumerable<RockfallReportExportDto>>(entities);
         }
     }
 }

@@ -13,6 +13,8 @@ using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace Hmcr.Domain.Services
@@ -20,19 +22,23 @@ namespace Hmcr.Domain.Services
     public interface IWildlifeReportService
     {
         Task<(decimal submissionObjectId, Dictionary<string, List<string>> errors)> CreateReportAsync(FileUploadDto upload);
+        Task<byte[]> ExportToCsvAsync(decimal submissionObjectId);
     }
     public class WildlifeReportService : ReportServiceBase, IWildlifeReportService
     {
+        private IWildlifeReportRepository _wildlifeRepo;
         private ILogger<WildlifeReportService> _logger;
 
         public WildlifeReportService(IUnitOfWork unitOfWork,
             ISubmissionStreamService streamService, ISubmissionObjectRepository submissionRepo, ISumbissionRowRepository rowRepo,
-            IContractTermRepository contractRepo, ISubmissionStatusRepository statusRepo, ILogger<WildlifeReportService> logger)
+            IContractTermRepository contractRepo, ISubmissionStatusRepository statusRepo, IWildlifeReportRepository wildlifeRepo,
+            ILogger<WildlifeReportService> logger)
             : base(unitOfWork, streamService, submissionRepo, rowRepo, contractRepo, statusRepo)
         {
             TableName = TableNames.WildlifeReport;
             HasRowIdentifier = false;
             DateFieldName = "Today";
+            _wildlifeRepo = wildlifeRepo;
             _logger = logger;
         }
         protected override async Task<bool> ParseRowsAsync(SubmissionObjectCreateDto submission, string text, Dictionary<string, List<string>> errors)
@@ -86,6 +92,10 @@ namespace Hmcr.Domain.Services
             }
 
             return errors.Count == 0;
+        }
+        public async Task<byte[]> ExportToCsvAsync(decimal submissionObjectId)
+        {
+            return await ExportToCsvAsync(submissionObjectId, (IReportExportRepository<WildlifeReportExportDto>)_wildlifeRepo);
         }
     }
 }
