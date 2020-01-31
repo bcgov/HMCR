@@ -12,9 +12,9 @@ namespace Hmcr.Data.Repositories
     public interface IWorkReportRepository
     {
         IAsyncEnumerable<HmrWorkReport> SaveWorkReportAsnyc(HmrSubmissionObject submission, List<WorkReportDto> rows);
-        Task<IEnumerable<WorkReportExportDto>> ExportWorkReportAsync(decimal submissionObjectId);
+        Task<IEnumerable<WorkReportExportDto>> ExporReportAsync(decimal submissionObjectId);
     }
-    public class WorkReportRepository : HmcrRepositoryBase<HmrWorkReport>, IWorkReportRepository
+    public class WorkReportRepository : HmcrRepositoryBase<HmrWorkReport>, IWorkReportRepository, IReportExportRepository<WorkReportExportDto>
     {
         public WorkReportRepository(AppDbContext dbContext, IMapper mapper)
             : base(dbContext, mapper)
@@ -45,11 +45,17 @@ namespace Hmcr.Data.Repositories
                 yield return entity;
             }
         }
-
-        public async Task<IEnumerable<WorkReportExportDto>> ExportWorkReportAsync(decimal submissionObjectId)
+        
+        public async Task<IEnumerable<WorkReportExportDto>> ExporReportAsync(decimal submissionObjectId)
         {
-            return (await GetAllNoTrackAsync<WorkReportExportDto>(x => x.SubmissionObjectId == submissionObjectId))
-                        .OrderBy(x => x.RowNum);
+            var entities = await DbSet.AsNoTracking()
+                .Include(x => x.SubmissionObject)
+                    .ThenInclude(x => x.Party)
+                .Where(x => x.SubmissionObjectId == submissionObjectId)
+                .OrderBy(x => x.RowNum)
+                .ToListAsync();
+
+            return Mapper.Map<IEnumerable<WorkReportExportDto>>(entities);
         }
     }
 }

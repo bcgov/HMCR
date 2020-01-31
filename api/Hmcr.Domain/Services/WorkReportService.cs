@@ -23,7 +23,7 @@ namespace Hmcr.Domain.Services
     {
         Task<(Dictionary<string, List<string>> errors, List<string> resubmittedRecordNumbers)> CheckResubmitAsync(FileUploadDto upload);
         Task<(decimal submissionObjectId, Dictionary<string, List<string>> errors)> CreateReportAsync(FileUploadDto upload);
-        Task<byte[]> ExportToCsv(decimal submissionObjectId);
+        Task<byte[]> ExportToCsvAsync(decimal submissionObjectId);
     }
     public class WorkReportService : ReportServiceBase, IWorkReportService
     {
@@ -32,7 +32,7 @@ namespace Hmcr.Domain.Services
 
         public WorkReportService(IUnitOfWork unitOfWork, 
             ISubmissionStreamService streamService, ISubmissionObjectRepository submissionRepo, ISumbissionRowRepository rowRepo, 
-            IContractTermRepository contractRepo, ISubmissionStatusRepository statusRepo, IWorkReportRepository workRptRepo,
+            IContractTermRepository contractRepo, ISubmissionStatusRepository statusRepo, IWorkReportRepository workRptRepo, 
             ILogger<WorkReportService> logger) 
             : base(unitOfWork, streamService, submissionRepo, rowRepo, contractRepo, statusRepo)
         {
@@ -97,20 +97,9 @@ namespace Hmcr.Domain.Services
             return errors.Count == 0;
         }
 
-        public async Task<byte[]> ExportToCsv(decimal submissionObjectId)
+        public async Task<byte[]> ExportToCsvAsync(decimal submissionObjectId)
         {
-            var workRpt = await _workRptRepo.ExportWorkReportAsync(submissionObjectId);
-
-            if (workRpt.Count() == 0)
-            {
-                return null;
-            }
-
-            var workRptCsv = string.Join(Environment.NewLine, workRpt.Select(x => x.ToCsv()));
-            workRptCsv = $"{CsvUtils.GetCsvHeader<WorkReportExportDto>()}{Environment.NewLine}{workRptCsv}";
-
-            var encoding = new UTF8Encoding();
-            return encoding.GetBytes(workRptCsv);
+            return await ExportToCsvAsync(submissionObjectId, (IReportExportRepository<WorkReportExportDto>)_workRptRepo);
         } 
     }
 }

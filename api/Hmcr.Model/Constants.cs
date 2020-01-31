@@ -156,6 +156,8 @@ namespace Hmcr.Model
         public const string WorkReportId = "WorkReportId";
         public const string SubmissionObjectId = "SubmissionObjectId";
 
+        public const string WildlifeRecordId = "WildlifeRecordId";
+        public const string RockfallReportId = "RockfallReportId";
     }
 
     public interface IReportHeaders

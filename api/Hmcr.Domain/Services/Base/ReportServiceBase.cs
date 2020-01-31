@@ -4,6 +4,7 @@ using Hmcr.Data.Database;
 using Hmcr.Data.Repositories;
 using Hmcr.Domain.CsvHelpers;
 using Hmcr.Model;
+using Hmcr.Model.Dtos;
 using Hmcr.Model.Dtos.SubmissionObject;
 using Hmcr.Model.Dtos.SubmissionRow;
 using Hmcr.Model.Dtos.SubmissionStream;
@@ -257,6 +258,22 @@ namespace Hmcr.Domain.Services.Base
         protected virtual Task<bool> ParseRowsAsync(SubmissionObjectCreateDto submission, string text, Dictionary<string, List<string>> errors)
         {
             throw new NotImplementedException();
+        }
+
+        public async Task<byte[]> ExportToCsvAsync<T>(decimal submissionObjectId, IReportExportRepository<T> repo) where T : IReportExportDto
+        {
+            var report = await repo.ExporReportAsync(submissionObjectId);
+
+            if (report.Count() == 0)
+            {
+                return null;
+            }
+
+            var rptCsv = string.Join(Environment.NewLine, report.Select(x => x.ToCsv()));
+            rptCsv = $"{CsvUtils.GetCsvHeader<T>()}{Environment.NewLine}{rptCsv}";
+
+            var encoding = new UTF8Encoding();
+            return encoding.GetBytes(rptCsv);
         }
     }
 }

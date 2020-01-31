@@ -21,21 +21,25 @@ namespace Hmcr.Domain.Services
     {
         Task<(Dictionary<string, List<string>> errors, List<string> resubmittedRecordNumbers)> CheckResubmitAsync(FileUploadDto upload);
         Task<(decimal submissionObjectId, Dictionary<string, List<string>> errors)> CreateReportAsync(FileUploadDto upload);
+        Task<byte[]> ExportToCsvAsync(decimal submissionObjectId);
 
     }
     public class RockfallReportService : ReportServiceBase, IRockfallReportService
     {
+        private IRockfallReportRepository _rockfallRepo;
         private ILogger<RockfallReportService> _logger;
 
         public RockfallReportService(IUnitOfWork unitOfWork, 
             ISubmissionStreamService streamService, ISubmissionObjectRepository submissionRepo, ISumbissionRowRepository rowRepo,
-            IContractTermRepository contractRepo, ISubmissionStatusRepository statusRepo, ILogger<RockfallReportService> logger)
+            IContractTermRepository contractRepo, ISubmissionStatusRepository statusRepo, IRockfallReportRepository rockfallRepo,
+            ILogger<RockfallReportService> logger)
             : base(unitOfWork, streamService, submissionRepo, rowRepo, contractRepo, statusRepo)
         {
             TableName = TableNames.RockfallReport;
             HasRowIdentifier = true;
             RecordNumberFieldName = Fields.McrrIncidentNumber;
             DateFieldName = Fields.ReportDate;
+            _rockfallRepo = rockfallRepo;
             _logger = logger;
         }
 
@@ -85,6 +89,9 @@ namespace Hmcr.Domain.Services
 
             return errors.Count == 0;
         }
-
+        public async Task<byte[]> ExportToCsvAsync(decimal submissionObjectId)
+        {
+            return await ExportToCsvAsync(submissionObjectId, (IReportExportRepository<RockfallReportExportDto>)_rockfallRepo);
+        }
     }
 }
