@@ -180,6 +180,7 @@ namespace Hmcr.Domain.Hangfire
                 }
                 catch (Exception ex)
                 {
+                    _logger.LogError(ex.ToString());
                     rowNum = GetRowNum(csv.Context.RawRecord);
                     LogRowParseException(rowNum, ex.ToString(), csv.Context);
                     errors.AddItem("Parse Error", "Exception while parsing");
