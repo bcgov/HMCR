@@ -52,6 +52,7 @@ const DeleteButton = ({ buttonId, children, itemId, defaultEndDate, onDeleteClic
               block
               noBorder
               showDefaultInputIcon={true}
+              showClearDate={true}
               inputIconPosition="after"
               placeholder="End Date"
             />
