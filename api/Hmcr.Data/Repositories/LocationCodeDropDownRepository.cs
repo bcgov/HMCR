@@ -27,13 +27,6 @@ namespace Hmcr.Data.Repositories
         public async Task<IEnumerable<LocationCodeDropDownDto>> GetLocationCodes()
         {
             var entity = await DbSet.AsNoTracking()
-                .Select(x =>
-                    new LocationCodeDropDownDto
-                    {
-                        LocationCode = x.LocationCode,
-                        LocationCodeId = x.LocationCodeId
-                    }
-                )
                 .ToListAsync();
 
             return Mapper.Map<IEnumerable<LocationCodeDropDownDto>>(entity);
