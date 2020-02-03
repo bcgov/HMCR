@@ -10,7 +10,7 @@ namespace Hmcr.Model.Dtos.CodeLookup
         public string CodeSet { get; set; }
         [JsonPropertyName("id")]
         public string CodeValue { get; set; }
-        [JsonPropertyName("desc")]
+        [JsonPropertyName("name")]
         public string CodeName { get; set; }
     }
 }

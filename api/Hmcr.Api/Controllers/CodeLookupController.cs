@@ -28,7 +28,7 @@ namespace Hmcr.Api.Controllers
            return Ok(_validator.CodeLookup.Where(x => x.CodeSet == "WRK_RPT_MAINT_TYPE"));
         }
 
-        [HttpGet ("unitofmeasure")]
+        [HttpGet ("unitofmeasures")]
         public ActionResult<IEnumerable<CodeLookupForValidation>> GetUnitOfMeasures()
         {
             return Ok(_validator.CodeLookup.Where(x => x.CodeSet == "UOM"));
