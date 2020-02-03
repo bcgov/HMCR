@@ -38,6 +38,7 @@ namespace Hmcr.Domain.Services
             LoadRockfallReportRules();
             LoadRockfallReportGpsRules();
             LoadRockfallReportLrsRules();
+            LoadRockfallOtherVolumeRules();
 
             LoadWildlifeReportRules();
             LoadWildlifeReportGpsRules();
@@ -170,7 +171,7 @@ namespace Hmcr.Domain.Services
             _rules.Add(new FieldValidationRule(Entities.RockfallReport, Fields.LocationDescription, FieldTypes.String, false, 0, 4000, null, null, null, null, null, null));
             _rules.Add(new FieldValidationRule(Entities.RockfallReport, Fields.DitchVolume, FieldTypes.String, true, null, null, null, null, null, null, null, CodeSet.VolumeRange));
             _rules.Add(new FieldValidationRule(Entities.RockfallReport, Fields.TravelledLanesVolume, FieldTypes.String, true, null, null, null, null, null, null, null, CodeSet.VolumeRange));
-            _rules.Add(new FieldValidationRule(Entities.RockfallReport, Fields.OtherVolume, FieldTypes.String, true, null, null, null, null, null, null, _regex.GetRegexInfo(RegexDefs.D6_2), null));
+            _rules.Add(new FieldValidationRule(Entities.RockfallReport, Fields.OtherVolume, FieldTypes.String, false, null, null, null, null, null, null, _regex.GetRegexInfo(RegexDefs.D6_2), null));
             _rules.Add(new FieldValidationRule(Entities.RockfallReport, Fields.HeavyPrecip, FieldTypes.String, true, null, null, null, null, null, null, _regex.GetRegexInfo(RegexDefs.YN), null));
             _rules.Add(new FieldValidationRule(Entities.RockfallReport, Fields.FreezeThaw, FieldTypes.String, true, null, null, null, null, null, null, _regex.GetRegexInfo(RegexDefs.YN), null));
             _rules.Add(new FieldValidationRule(Entities.RockfallReport, Fields.DitchSnowIce, FieldTypes.String, true, null, null, null, null, null, null, _regex.GetRegexInfo(RegexDefs.YN), null));
@@ -206,6 +207,11 @@ namespace Hmcr.Domain.Services
             _rules.First(x => x.EntityName == Entities.RockfallReport && x.FieldName == Fields.StartOffset).Required = true;
             _rules.First(x => x.EntityName == Entities.RockfallReport && x.FieldName == Fields.EndOffset).Required = true;
             _rules.First(x => x.EntityName == Entities.RockfallReport && x.FieldName == Fields.DirectionFromLandmark).Required = true;
+        }
+
+        public void LoadRockfallOtherVolumeRules()
+        {
+            _rules.Add(new FieldValidationRule(Entities.RockfallReportOtherVolume, Fields.OtherVolume, FieldTypes.String, true, null, null, null, null, null, null, _regex.GetRegexInfo(RegexDefs.D6_2), null));
         }
 
         public void LoadWildlifeReportRules()
@@ -284,7 +290,12 @@ namespace Hmcr.Domain.Services
             }
 
             if (messages.Count > 0)
-                errors.Add(rule.FieldName, messages);
+            {
+                foreach(var message in messages)
+                {
+                    errors.AddItem(rule.FieldName, message);
+                }
+            }
         }
 
         private List<string> ValidateStringField<T>(FieldValidationRule rule, T val)
