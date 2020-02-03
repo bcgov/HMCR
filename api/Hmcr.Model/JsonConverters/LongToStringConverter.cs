@@ -25,7 +25,7 @@ namespace Hmcr.Model.JsonConverters
 
         public override void Write(Utf8JsonWriter writer, long value, JsonSerializerOptions options)
         {
-            writer.WriteStringValue(value.ToString());
+            writer.WriteNumberValue(value);
         }
     }
 }

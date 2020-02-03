@@ -126,6 +126,11 @@ namespace Hmcr.Domain.Hangfire
                     errors.AddItem("StartOffset", "Start Offset cannot be greater than End Offset");
                 }
 
+                if (typedRow.DitchVolume == DitchVolume.Threshold || typedRow.TravelledLanesVolume == DitchVolume.Threshold)
+                {
+                    _validator.Validate(Entities.RockfallReportOtherVolume, Fields.OtherVolume, typedRow.OtherVolume, errors);
+                }
+
                 //Geo-spatial Validation here
 
                 if (errors.Count > 0)

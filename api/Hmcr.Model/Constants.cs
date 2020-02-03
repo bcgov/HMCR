@@ -38,6 +38,8 @@ namespace Hmcr.Model
         public const string RockfallReportGps = "rockfallgps";
         public const string RockfallReportLrs = "rockfalllrs";
 
+        public const string RockfallReportOtherVolume = "rockfallothervolume";
+
         public const string WildlifeReport = "wildlife";
         public const string WildlifeReportGps = "wildlifegps";
         public const string WildlifeReportLrs = "wildlifelrs";
@@ -253,5 +255,10 @@ namespace Hmcr.Model
     public enum RowTypes
     {
         D2, D3, D4
+    }
+
+    public static class DitchVolume
+    {
+        public const string Threshold = ">5.0";
     }
 }
