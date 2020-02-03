@@ -30,16 +30,37 @@ const defaultSearchOptions = {
 };
 
 const tableColumns = [
-  { heading: 'Activity Number', key: 'name' },
-  { heading: 'Name', key: 'description' },
-  { heading: 'Unit', key: 'description' },
-  { heading: 'Maintenance Type', key: 'description' },
-  { heading: 'Location Code', key: 'description' },
-  { heading: 'Point Line Feature', key: 'description' },
+  { heading: 'Activity Number', key: 'activityNumber' },
+  { heading: 'Name', key: 'activityName' },
+  { heading: 'Unit', key: 'unit' },
+  { heading: 'Maintenance Type', key: 'maintenanceType' },
+  { heading: 'Location Code', key: 'locationCode' },
+  { heading: 'Point Line Feature', key: 'pointLineFeature' },
   { heading: 'Active', key: 'isActive', nosort: true },
 ];
 
-const ActivityAdmin = ({ history, showValidationErrorDialog }) => {
+const mockData = [
+  {
+    activityNumber: '101200',
+    activityName: 'Temporary Patching',
+    unit: 'num',
+    maintenanceType: 'Routine',
+    locationCode: 'A',
+    pointLineFeature: null,
+    isActive: true,
+  },
+  {
+    activityNumber: '101300',
+    activityName: 'Overlay Patch',
+    unit: 'tonne',
+    maintenanceType: 'Quantified',
+    locationCode: 'A',
+    pointLineFeature: 'Either',
+    isActive: true,
+  },
+];
+
+const ActivityAdmin = ({ maintenanceTypes, history, showValidationErrorDialog }) => {
   const searchData = useSearchData(defaultSearchOptions, history);
   const [searchInitialValues, setSearchInitialValues] = useState(defaultSearchFormValues);
 
@@ -113,13 +134,6 @@ const ActivityAdmin = ({ history, showValidationErrorDialog }) => {
 
   const formModal = useFormModal('Activity', <EditActivityFormFields />, handleEditFormSubmit);
 
-  const mTypes = [
-    { id: 'Q', name: 'Quantified' },
-    { id: 'R', name: 'Routine' },
-    { id: 'E', name: 'Major Event' },
-    { id: 'A', name: 'Additional' },
-  ];
-
   return (
     <React.Fragment>
       <MaterialCard>
@@ -136,7 +150,12 @@ const ActivityAdmin = ({ history, showValidationErrorDialog }) => {
                   <Field type="text" name="searchText" placeholder="Activity Number/Name" className="form-control" />
                 </Col>
                 <Col>
-                  <MultiDropdown {...formikProps} title="Maintenance Type" items={mTypes} name="maintenanceTypeIds" />
+                  <MultiDropdown
+                    {...formikProps}
+                    title="Maintenance Type"
+                    items={maintenanceTypes}
+                    name="maintenanceTypeIds"
+                  />
                 </Col>
                 <Col>
                   <MultiDropdown
@@ -177,9 +196,9 @@ const ActivityAdmin = ({ history, showValidationErrorDialog }) => {
       {searchData.loading && <PageSpinner />}
       {!searchData.loading && (
         <MaterialCard>
-          {searchData.data.length > 0 && (
+          {mockData.length > 0 && (
             <DataTableWithPaginaionControl
-              dataList={searchData.data}
+              dataList={mockData}
               tableColumns={tableColumns}
               searchPagination={searchData.pagination}
               onPageNumberChange={searchData.handleChangePage}
@@ -191,7 +210,7 @@ const ActivityAdmin = ({ history, showValidationErrorDialog }) => {
               onHeadingSortClicked={searchData.handleHeadingSortClicked}
             />
           )}
-          {searchData.data.length <= 0 && <div>No records found</div>}
+          {mockData.length <= 0 && <div>No records found</div>}
         </MaterialCard>
       )}
       {formModal.formElement}
@@ -199,4 +218,10 @@ const ActivityAdmin = ({ history, showValidationErrorDialog }) => {
   );
 };
 
-export default connect(null, { showValidationErrorDialog })(ActivityAdmin);
+const mapStateToProps = state => {
+  return {
+    maintenanceTypes: state.codeLookups.maintenanceTypes,
+  };
+};
+
+export default connect(mapStateToProps, { showValidationErrorDialog })(ActivityAdmin);

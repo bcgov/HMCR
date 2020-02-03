@@ -1,13 +1,14 @@
 import React, { useEffect, useState } from 'react';
+import { connect } from 'react-redux';
 import * as Yup from 'yup';
-import moment from 'moment';
+// import moment from 'moment';
 
 import SingleDateField from '../ui/SingleDateField';
 import SingleDropdownField from '../ui/SingleDropdownField';
 import PageSpinner from '../ui/PageSpinner';
 import { FormRow, FormInput } from './FormInputs';
 
-import * as api from '../../Api';
+// import * as api from '../../Api';
 import * as Constants from '../../Constants';
 
 // Activity Number - Mandatory, Text input, alpha-numeric
@@ -52,7 +53,15 @@ const validationSchema = Yup.object({
   pointLineFeature: Yup.string(12).when('locationCode', { is: 'C', then: Yup.string(12).required('Required') }),
 });
 
-const EditActivityFormFields = ({ setInitialValues, formValues, setValidationSchema, formType, activityId }) => {
+const EditActivityFormFields = ({
+  setInitialValues,
+  formValues,
+  setValidationSchema,
+  formType,
+  activityId,
+  maintenanceTypes,
+  unitOfMeasures,
+}) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -80,10 +89,10 @@ const EditActivityFormFields = ({ setInitialValues, formValues, setValidationSch
         <FormInput type="text" name="activityName" placeholder="Activity Name" />
       </FormRow>
       <FormRow name="unit" label="Unit*">
-        <SingleDropdownField defaultTitle="Select Unit" items={[]} name="unit" />
+        <SingleDropdownField defaultTitle="Select Unit" items={unitOfMeasures} name="unit" />
       </FormRow>
       <FormRow name="maintenanceType" label="Maintenance Type*">
-        <SingleDropdownField defaultTitle="Select Maintenance Type" items={[]} name="maintenanceType" />
+        <SingleDropdownField defaultTitle="Select Maintenance Type" items={maintenanceTypes} name="maintenanceType" />
       </FormRow>
       <FormRow name="locationCode" label="Location Code*">
         <SingleDropdownField defaultTitle="Select Location Code" items={[]} name="locationCode" />
@@ -98,4 +107,11 @@ const EditActivityFormFields = ({ setInitialValues, formValues, setValidationSch
   );
 };
 
-export default EditActivityFormFields;
+const mapStateToProps = state => {
+  return {
+    maintenanceTypes: state.codeLookups.maintenanceTypes,
+    unitOfMeasures: state.codeLookups.unitOfMeasures,
+  };
+};
+
+export default connect(mapStateToProps)(EditActivityFormFields);

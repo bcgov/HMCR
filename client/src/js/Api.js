@@ -51,4 +51,9 @@ export const getSubmissionResult = id => instance.get(`${Constants.API_PATHS.SUB
 export const getSubmissionFile = id =>
   instance.get(`${Constants.API_PATHS.SUBMISSIONS}/${id}/file`, { responseType: 'blob' });
 
+export const getMaintenanceTypes = () => instance.get(Constants.API_PATHS.MAINTENANCE_TYPES);
+export const getUnitOfMeasures = () => instance.get(Constants.API_PATHS.UNIT_OF_MEASURES);
+export const getPointLineFeatures = () => instance.get(Constants.API_PATHS.POINT_LINE_FEATURES);
+export const getLocationCodes = () => instance.get(Constants.API_PATHS.LOCATION_CODE);
+
 export const getVersion = () => instance.get(Constants.API_PATHS.VERSION);

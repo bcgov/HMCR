@@ -120,7 +120,7 @@ const WorkReportingSubmissionDetail = ({ toggle, submission }) => {
             <li>
               <strong>Report Type:</strong> {submissionResultData.streamName}
             </li>
-            {submissionResultData.numResubmitRows && submissionResultData.numResubmitRows > 0 && (
+            {submissionResultData.numResubmitRows > 0 && (
               <li>
                 <strong>Re-submitted Records:</strong> {submissionResultData.numResubmitRows}
               </li>
