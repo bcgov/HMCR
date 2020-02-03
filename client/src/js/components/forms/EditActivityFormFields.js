@@ -61,6 +61,7 @@ const EditActivityFormFields = ({
   activityId,
   maintenanceTypes,
   unitOfMeasures,
+  locationCodes,
 }) => {
   const [loading, setLoading] = useState(true);
 
@@ -95,7 +96,7 @@ const EditActivityFormFields = ({
         <SingleDropdownField defaultTitle="Select Maintenance Type" items={maintenanceTypes} name="maintenanceType" />
       </FormRow>
       <FormRow name="locationCode" label="Location Code*">
-        <SingleDropdownField defaultTitle="Select Location Code" items={[]} name="locationCode" />
+        <SingleDropdownField defaultTitle="Select Location Code" items={locationCodes} name="locationCode" />
       </FormRow>
       <FormRow name="pointLineFeature" label="Point Line Feature*">
         <SingleDropdownField defaultTitle="Select Point Line Feature" items={[]} name="pointLineFeature" />
@@ -111,6 +112,7 @@ const mapStateToProps = state => {
   return {
     maintenanceTypes: state.codeLookups.maintenanceTypes,
     unitOfMeasures: state.codeLookups.unitOfMeasures,
+    locationCodes: state.codeLookups.locationCodes,
   };
 };
 

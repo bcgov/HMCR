@@ -11,6 +11,7 @@ import {
   fetchUserTypes,
   fetchMaintenanceTypes,
   fetchUnitOfMeasures,
+  fetchLocationCodes,
 } from '../actions';
 
 const Main = ({
@@ -22,6 +23,7 @@ const Main = ({
   fetchUserTypes,
   fetchMaintenanceTypes,
   fetchUnitOfMeasures,
+  fetchLocationCodes,
 }) => {
   const [loading, setLoading] = useState(true);
 
@@ -33,6 +35,7 @@ const Main = ({
       fetchUserTypes(),
       fetchMaintenanceTypes(),
       fetchUnitOfMeasures(),
+      fetchLocationCodes(),
     ]).then(() => setLoading(false));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -58,4 +61,5 @@ export default connect(mapStateToProps, {
   fetchUserTypes,
   fetchMaintenanceTypes,
   fetchUnitOfMeasures,
+  fetchLocationCodes,
 })(Main);
