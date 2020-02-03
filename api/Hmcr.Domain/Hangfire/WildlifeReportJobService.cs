@@ -119,6 +119,10 @@ namespace Hmcr.Domain.Hangfire
                 var submissionRow = await _submissionRowRepo.GetSubmissionRowByRowNum(_submission.SubmissionObjectId, (decimal)typedRow.RowNum);
 
                 //Geo-spatial Validation here
+                if (typedRow.AccidentDate != null && typedRow.AccidentDate > DateTime.Now)
+                {
+                    errors.AddItem(Fields.AccidentDate, "Cannot be a future date.");
+                }
 
                 if (errors.Count > 0)
                 {

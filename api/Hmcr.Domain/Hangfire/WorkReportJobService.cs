@@ -292,6 +292,16 @@ namespace Hmcr.Domain.Hangfire
                     errors.AddItem("StartDate", "Start Date cannot be greater than End Date");
                 }
 
+                if (typedRow.StartDate != null && typedRow.StartDate > DateTime.Now)
+                {
+                    errors.AddItem(Fields.StartDate, "Cannot be a future date.");
+                }
+
+                if (typedRow.EndDate != null && typedRow.EndDate > DateTime.Now)
+                {
+                    errors.AddItem(Fields.EndDate, "Cannot be a future date.");
+                }
+
                 if (typedRow.RowType == RowTypes.D3)
                 {
                     PerformGpsPointValidation(typedRow, submissionRow);

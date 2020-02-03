@@ -123,12 +123,22 @@ namespace Hmcr.Domain.Hangfire
 
                 if (typedRow.StartOffset != null && typedRow.EndOffset < typedRow.StartOffset)
                 {
-                    errors.AddItem("StartOffset", "Start Offset cannot be greater than End Offset");
+                    errors.AddItem(Fields.StartOffset, "Start Offset cannot be greater than End Offset");
                 }
 
                 if (typedRow.DitchVolume == DitchVolume.Threshold || typedRow.TravelledLanesVolume == DitchVolume.Threshold)
                 {
                     _validator.Validate(Entities.RockfallReportOtherVolume, Fields.OtherVolume, typedRow.OtherVolume, errors);
+                }
+
+                if (typedRow.ReportDate != null && typedRow.ReportDate > DateTime.Now)
+                {
+                    errors.AddItem(Fields.ReportDate, "Cannot be a future date.");
+                }
+
+                if (typedRow.EstimatedRockfallDate != null && typedRow.EstimatedRockfallDate > DateTime.Now)
+                {
+                    errors.AddItem(Fields.EstimatedRockfallDate, "Report Date cannot be a future date.");
                 }
 
                 //Geo-spatial Validation here
