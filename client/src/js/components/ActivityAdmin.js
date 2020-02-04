@@ -26,44 +26,20 @@ const defaultSearchOptions = {
   searchText: '',
   maintenanceTypes: '',
   isActive: true,
-  dataPath: Constants.API_PATHS.ACTIVITY,
+  dataPath: Constants.API_PATHS.ACTIVITY_CODES,
 };
 
 const tableColumns = [
   { heading: 'Activity Number', key: 'activityNumber' },
   { heading: 'Name', key: 'activityName' },
-  { heading: 'Unit', key: 'unit' },
+  { heading: 'Unit', key: 'unitOfMeasure' },
   { heading: 'Maintenance Type', key: 'maintenanceType' },
   { heading: 'Location Code', key: 'locationCode' },
   { heading: 'Point Line Feature', key: 'pointLineFeature' },
   { heading: 'Active', key: 'isActive', nosort: true },
 ];
 
-const mockData = [
-  {
-    id: 1,
-    activityNumber: '101200',
-    activityName: 'Temporary Patching',
-    unit: 'num',
-    maintenanceType: 'Routine',
-    locationCode: 'A',
-    pointLineFeature: null,
-    isActive: true,
-    canDelete: true,
-  },
-  {
-    id: 2,
-    activityNumber: '101300',
-    activityName: 'Overlay Patch',
-    unit: 'tonne',
-    maintenanceType: 'Quantified',
-    locationCode: 'A',
-    pointLineFeature: 'Either',
-    isActive: true,
-  },
-];
-
-const ActivityAdmin = ({ maintenanceTypes, history, showValidationErrorDialog }) => {
+const ActivityAdmin = ({ maintenanceTypes, locationCodes, history, showValidationErrorDialog }) => {
   const searchData = useSearchData(defaultSearchOptions, history);
   const [searchInitialValues, setSearchInitialValues] = useState(defaultSearchFormValues);
 
@@ -78,7 +54,7 @@ const ActivityAdmin = ({ maintenanceTypes, history, showValidationErrorDialog })
 
     const searchText = options.searchText || '';
 
-    // searchData.updateSearchOptions(options);
+    searchData.updateSearchOptions(options);
     setSearchInitialValues({ ...searchInitialValues, searchText, statusId: buildStatusIdArray(options.isActive) });
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -102,7 +78,7 @@ const ActivityAdmin = ({ maintenanceTypes, history, showValidationErrorDialog })
   };
 
   const onEditClicked = activityId => {
-    // setEditActivityForm({ isOpen: true, formType: Constants.FORM_TYPE.EDIT, roleId });
+    formModal.openForm(Constants.FORM_TYPE.EDIT, { activityId });
   };
 
   const onDeleteClicked = (roleId, endDate, permanentDelete) => {
@@ -136,6 +112,11 @@ const ActivityAdmin = ({ maintenanceTypes, history, showValidationErrorDialog })
   };
 
   const formModal = useFormModal('Activity', <EditActivityFormFields />, handleEditFormSubmit);
+
+  const data = searchData.data.map(item => ({
+    ...item,
+    locationCode: locationCodes.find(code => code.id === item.locationCodeId).name,
+  }));
 
   return (
     <React.Fragment>
@@ -199,9 +180,9 @@ const ActivityAdmin = ({ maintenanceTypes, history, showValidationErrorDialog })
       {searchData.loading && <PageSpinner />}
       {!searchData.loading && (
         <MaterialCard>
-          {mockData.length > 0 && (
+          {data.length > 0 && (
             <DataTableWithPaginaionControl
-              dataList={mockData}
+              dataList={data}
               tableColumns={tableColumns}
               searchPagination={searchData.pagination}
               onPageNumberChange={searchData.handleChangePage}
@@ -213,7 +194,7 @@ const ActivityAdmin = ({ maintenanceTypes, history, showValidationErrorDialog })
               onHeadingSortClicked={searchData.handleHeadingSortClicked}
             />
           )}
-          {mockData.length <= 0 && <div>No records found</div>}
+          {data.length <= 0 && <div>No records found</div>}
         </MaterialCard>
       )}
       {formModal.formElement}
@@ -224,6 +205,7 @@ const ActivityAdmin = ({ maintenanceTypes, history, showValidationErrorDialog })
 const mapStateToProps = state => {
   return {
     maintenanceTypes: state.codeLookups.maintenanceTypes,
+    locationCodes: state.codeLookups.locationCodes,
   };
 };
 
