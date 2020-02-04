@@ -26,9 +26,12 @@ namespace Hmcr.Data.Repositories
     }
     public class RoleRepository : HmcrRepositoryBase<HmrRole>, IRoleRepository
     {
-        public RoleRepository(AppDbContext dbContext, IMapper mapper)
+        private IUserRoleRepository _userRoleRepo;
+
+        public RoleRepository(AppDbContext dbContext, IMapper mapper, IUserRoleRepository userRoleRepo)
             : base(dbContext, mapper)
         {
+            _userRoleRepo = userRoleRepo;
         }
 
         public async Task<int> CountActiveRoleIdsAsync(IEnumerable<decimal> roles)
@@ -68,9 +71,9 @@ namespace Hmcr.Data.Repositories
 
             var roles = Mapper.Map<IEnumerable<RoleSearchDto>>(pagedEntity.SourceList);
 
-            foreach (var role in roles)
-            {
-                role.InUse = pagedEntity.SourceList.Any(r => r.RoleId == role.RoleId && r.HmrUserRoles.Count > 0);
+
+            await foreach (var roleId in FindRolesInUseAync(roles.Select(x => x.RoleId))){
+                roles.FirstOrDefault(x => x.RoleId == roleId).InUse = true;
             }
 
             var pagedDTO = new PagedDto<RoleSearchDto>
@@ -181,6 +184,15 @@ namespace Hmcr.Data.Repositories
         public async Task<bool> DoesNameExistAsync(string name)
         {
             return await DbSet.AnyAsync(x => x.Name == name);
+        }
+        
+        private async IAsyncEnumerable<decimal> FindRolesInUseAync(IEnumerable<decimal> roleIds)
+        {
+            foreach (var roleId in roleIds)
+            {
+                if (await _userRoleRepo.IsRoleInUseAsync(roleId))
+                    yield return roleId;
+            }
         }
 
         public async IAsyncEnumerable<RoleDto> FindInternalOnlyRolesAsync(IEnumerable<decimal> roleIds)
