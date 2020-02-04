@@ -34,7 +34,16 @@ namespace Hmcr.Api.Controllers
             return Ok(_validator.CodeLookup.Where(x => x.CodeSet == "UOM"));
         }
 
-        //[HttpGet ("locationcode")]
-        
+        [HttpGet("pointlinefeatures")]
+        public ActionResult<IEnumerable<CodeLookupForValidation>> GetPointlineFeatures()
+        {
+            //Test Data
+            CodeLookupForValidation[] clfv = new CodeLookupForValidation[2] {
+                new CodeLookupForValidation{CodeValue = "1", CodeName = "Point", CodeSet = "PointLine" },
+                new CodeLookupForValidation{CodeValue = "2", CodeName = "Line", CodeSet = "PointLine" },
+            };
+
+            return Ok(clfv);
+        }
     }
 }
