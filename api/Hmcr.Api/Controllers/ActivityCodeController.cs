@@ -32,9 +32,9 @@ namespace Hmcr.Api.Controllers
         {
             ActivityCodeSearchDto[] acd = new ActivityCodeSearchDto[3]
             {
-                new ActivityCodeSearchDto{ ActivityCodeId = 1, ActivityNumber = "101200", ActivityName = "Temporary Patching", UnitOfMeasure = "num", MaintenanceType = "Routine", LocationCodeId = 3, PointLineFeature = null, EndDate = null, IsActive = true },
-                new ActivityCodeSearchDto{ ActivityCodeId = 2, ActivityNumber = "101300", ActivityName = "Overlay Patch", UnitOfMeasure = "tonne", MaintenanceType = "Quantified", LocationCodeId = 1, PointLineFeature = "Either", EndDate = null, IsActive = true },
-                new ActivityCodeSearchDto{ ActivityCodeId = 3, ActivityNumber = "101301", ActivityName = "Overlay Patch Isolated", UnitOfMeasure = "tonne", MaintenanceType = "Quantified", LocationCodeId = 1, PointLineFeature = "Either", EndDate = DateTime.Today.AddDays(-2), IsActive = false },
+                new ActivityCodeSearchDto{ ActivityCodeId = 1, ActivityNumber = "101200", ActivityName = "Temporary Patching", UnitOfMeasure = "num", MaintenanceType = "Routine", LocationCodeId = 3, PointLineFeature = null, EndDate = null, IsActive = true, CanDelete = true },
+                new ActivityCodeSearchDto{ ActivityCodeId = 2, ActivityNumber = "101300", ActivityName = "Overlay Patch", UnitOfMeasure = "tonne", MaintenanceType = "Quantified", LocationCodeId = 1, PointLineFeature = "Either", EndDate = null, IsActive = true , CanDelete = false},
+                new ActivityCodeSearchDto{ ActivityCodeId = 3, ActivityNumber = "101301", ActivityName = "Overlay Patch Isolated", UnitOfMeasure = "tonne", MaintenanceType = "Quantified", LocationCodeId = 1, PointLineFeature = "Either", EndDate = DateTime.Today.AddDays(-2), IsActive = false , CanDelete = false},
             };
             
             var pagedDTO = new PagedDto<ActivityCodeSearchDto>
@@ -59,9 +59,9 @@ namespace Hmcr.Api.Controllers
                 ActivityNumber = "101200", 
                 ActivityName = "Temporary Patching", 
                 UnitOfMeasure = "num", 
-                MaintenanceType = "Routine", 
-                LocationCodeId = 3, 
-                PointLineFeature = "Line", 
+                MaintenanceType = "R", 
+                LocationCodeId = 1, 
+                PointLineFeature = "L", 
             };
 
             return acd;

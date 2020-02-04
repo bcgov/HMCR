@@ -18,6 +18,7 @@ namespace Hmcr.Model.Dtos.ActivityCode
         public string ActivityApplication { get; set; }
         public DateTime? EndDate { get; set; }
         public bool IsActive { get; set; }  //=> EndDate == null || EndDate > DateTime.Today;
+        public bool CanDelete { get; set; }
 
     }
 }

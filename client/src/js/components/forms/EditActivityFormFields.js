@@ -1,14 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import { connect } from 'react-redux';
 import * as Yup from 'yup';
-// import moment from 'moment';
+import moment from 'moment';
 
 import SingleDateField from '../ui/SingleDateField';
 import SingleDropdownField from '../ui/SingleDropdownField';
 import PageSpinner from '../ui/PageSpinner';
 import { FormRow, FormInput } from './FormInputs';
 
-// import * as api from '../../Api';
+import * as api from '../../Api';
 import * as Constants from '../../Constants';
 
 // Activity Number - Mandatory, Text input, alpha-numeric
@@ -27,9 +27,9 @@ import * as Constants from '../../Constants';
 const defaultValues = {
   activityNumber: '',
   activityName: '',
-  unit: '',
+  unitOfMeasure: '',
   maintenanceType: '',
-  locationCode: '',
+  locationCodeId: '',
   pointLineFeature: '',
   endDate: null,
 };
@@ -43,14 +43,20 @@ const validationSchema = Yup.object({
     .required('Required')
     .max(150)
     .trim(),
-  unit: Yup.string()
+  unitOfMeasure: Yup.string()
     .required('Required')
     .max(12),
   maintenanceType: Yup.string()
     .required('Required')
     .max(12),
-  locationCode: Yup.number().required('Required'),
+  locationCodeId: Yup.number().required('Required'),
 });
+
+const pointLineFeatures = [
+  { id: 'L', name: 'Line' },
+  { id: 'P', name: 'Point' },
+  { id: 'E', name: 'Either' },
+];
 
 const EditActivityFormFields = ({
   setInitialValues,
@@ -83,6 +89,13 @@ const EditActivityFormFields = ({
       setInitialValues(defaultValues);
       setLoading(false);
     } else {
+      api.getActivityCode(activityId).then(response => {
+        setInitialValues({
+          ...response.data,
+          endDate: response.data.endDate ? moment(response.data.endDate) : null,
+        });
+        setLoading(false);
+      });
     }
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -98,18 +111,22 @@ const EditActivityFormFields = ({
       <FormRow name="activityName" label="Activity Name*">
         <FormInput type="text" name="activityName" placeholder="Activity Name" />
       </FormRow>
-      <FormRow name="unit" label="Unit*">
-        <SingleDropdownField defaultTitle="Select Unit" items={unitOfMeasures} name="unit" />
+      <FormRow name="unitOfMeasure" label="Unit*">
+        <SingleDropdownField defaultTitle="Select Unit" items={unitOfMeasures} name="unitOfMeasure" />
       </FormRow>
       <FormRow name="maintenanceType" label="Maintenance Type*">
         <SingleDropdownField defaultTitle="Select Maintenance Type" items={maintenanceTypes} name="maintenanceType" />
       </FormRow>
-      <FormRow name="locationCode" label="Location Code*">
-        <SingleDropdownField defaultTitle="Select Location Code" items={locationCodes} name="locationCode" />
+      <FormRow name="locationCodeId" label="Location Code*">
+        <SingleDropdownField defaultTitle="Select Location Code" items={locationCodes} name="locationCodeId" />
       </FormRow>
-      {formValues.locationCode === locationCodeCId && (
+      {formValues.locationCodeId === locationCodeCId && (
         <FormRow name="pointLineFeature" label="Point Line Feature*">
-          <SingleDropdownField defaultTitle="Select Point Line Feature" items={[]} name="pointLineFeature" />
+          <SingleDropdownField
+            defaultTitle="Select Point Line Feature"
+            items={pointLineFeatures}
+            name="pointLineFeature"
+          />
         </FormRow>
       )}
       <FormRow name="endDate" label="End Date">
