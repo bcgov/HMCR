@@ -84,6 +84,7 @@ const DataTableControl = ({
                         buttonId={`item_${item.id}_delete`}
                         defaultEndDate={item.endDate}
                         onDeleteClicked={onDeleteClicked}
+                        permanentDelete={item.canDelete}
                         title="Delete Record"
                       ></DeleteButton>
                     </td>

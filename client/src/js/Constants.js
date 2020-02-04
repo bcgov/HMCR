@@ -5,7 +5,7 @@ export const API_URL = window.RUNTIME_REACT_APP_API_HOST
 const CODE_LOOKUP = '/codelookup';
 
 export const API_PATHS = {
-  ACTIVITY: '/activitycodes',
+  ACTIVITY_CODES: '/activitycodes',
   CODE_LOOKUP: CODE_LOOKUP,
   MAINTENANCE_TYPES: `${CODE_LOOKUP}/maintenancetypes`,
   UNIT_OF_MEASURES: `${CODE_LOOKUP}/unitofmeasures`,

@@ -50,7 +50,6 @@ const validationSchema = Yup.object({
     .required('Required')
     .max(12),
   locationCode: Yup.number().required('Required'),
-  pointLineFeature: Yup.string(12).when('locationCode', { is: 'C', then: Yup.string(12).required('Required') }),
 });
 
 const EditActivityFormFields = ({
@@ -64,9 +63,19 @@ const EditActivityFormFields = ({
   locationCodes,
 }) => {
   const [loading, setLoading] = useState(true);
+  const locationCodeCId = locationCodes.find(code => code.name === 'C').id;
 
   useEffect(() => {
-    setValidationSchema(validationSchema);
+    // Add validation for point line feature when location code is C.
+    // Need to get the id value of location code C
+    const defaultValidationSchema = validationSchema.shape({
+      pointLineFeature: Yup.string(12).when('locationCode', {
+        is: locationCodeCId,
+        then: Yup.string(12).required('Required'),
+      }),
+    });
+
+    setValidationSchema(defaultValidationSchema);
 
     setLoading(true);
 
@@ -98,9 +107,11 @@ const EditActivityFormFields = ({
       <FormRow name="locationCode" label="Location Code*">
         <SingleDropdownField defaultTitle="Select Location Code" items={locationCodes} name="locationCode" />
       </FormRow>
-      <FormRow name="pointLineFeature" label="Point Line Feature*">
-        <SingleDropdownField defaultTitle="Select Point Line Feature" items={[]} name="pointLineFeature" />
-      </FormRow>
+      {formValues.locationCode === locationCodeCId && (
+        <FormRow name="pointLineFeature" label="Point Line Feature*">
+          <SingleDropdownField defaultTitle="Select Point Line Feature" items={[]} name="pointLineFeature" />
+        </FormRow>
+      )}
       <FormRow name="endDate" label="End Date">
         <SingleDateField name="endDate" placeholder="End Date" />
       </FormRow>

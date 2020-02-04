@@ -41,6 +41,7 @@ const tableColumns = [
 
 const mockData = [
   {
+    id: 1,
     activityNumber: '101200',
     activityName: 'Temporary Patching',
     unit: 'num',
@@ -48,8 +49,10 @@ const mockData = [
     locationCode: 'A',
     pointLineFeature: null,
     isActive: true,
+    canDelete: true,
   },
   {
+    id: 2,
     activityNumber: '101300',
     activityName: 'Overlay Patch',
     unit: 'tonne',
@@ -102,8 +105,8 @@ const ActivityAdmin = ({ maintenanceTypes, history, showValidationErrorDialog })
     // setEditActivityForm({ isOpen: true, formType: Constants.FORM_TYPE.EDIT, roleId });
   };
 
-  const onDeleteClicked = (roleId, endDate) => {
-    api.deleteRole(roleId, endDate).then(() => searchData.refresh());
+  const onDeleteClicked = (roleId, endDate, permanentDelete) => {
+    api.deleteActivityCode(roleId, endDate, permanentDelete).then(() => searchData.refresh());
   };
 
   const handleEditFormSubmit = (values, formType) => {
@@ -112,7 +115,7 @@ const ActivityAdmin = ({ maintenanceTypes, history, showValidationErrorDialog })
 
       if (formType === Constants.FORM_TYPE.ADD) {
         api
-          .postRole(values)
+          .postActivityCode(values)
           .then(() => {
             formModal.closeForm();
             searchData.refresh();
@@ -121,7 +124,7 @@ const ActivityAdmin = ({ maintenanceTypes, history, showValidationErrorDialog })
           .finally(() => formModal.setSubmitting(false));
       } else {
         api
-          .putRole(values.id, values)
+          .putActivityCode(values.id, values)
           .then(() => {
             formModal.closeForm();
             searchData.refresh();
