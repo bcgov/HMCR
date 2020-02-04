@@ -30,6 +30,7 @@ const SingleDatePickerWithFormik = ({ field: { name }, placeholder, style, isOut
         block
         noBorder
         showDefaultInputIcon={true}
+        showClearDate={true}
         inputIconPosition="after"
         placeholder={placeholder}
         isOutsideRange={isOutsideRange}

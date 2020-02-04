@@ -5,12 +5,21 @@ import moment from 'moment';
 
 import FontAwesomeButton from './FontAwesomeButton';
 
-const DeleteButton = ({ buttonId, children, itemId, defaultEndDate, onDeleteClicked, onComplete, ...props }) => {
+const DeleteButton = ({
+  buttonId,
+  children,
+  itemId,
+  defaultEndDate,
+  onDeleteClicked,
+  onComplete,
+  permanentDelete,
+  ...props
+}) => {
   const [popoverOpen, setPopoverOpen] = useState(false);
   const [date, setDate] = useState(null);
   const [focusedInput, setFocusedInput] = useState(false);
   const [focusClassName, setFocusClassName] = useState('');
-  const [buttonText, setButtonText] = useState('Delete');
+  const [buttonText, setButtonText] = useState('Disable');
 
   useEffect(() => {
     if (defaultEndDate) {
@@ -29,7 +38,7 @@ const DeleteButton = ({ buttonId, children, itemId, defaultEndDate, onDeleteClic
 
   const handleConfirmDelete = () => {
     togglePopover();
-    onDeleteClicked(itemId, date);
+    onDeleteClicked(itemId, date, permanentDelete);
   };
 
   return (
@@ -38,28 +47,36 @@ const DeleteButton = ({ buttonId, children, itemId, defaultEndDate, onDeleteClic
       <Popover placement="bottom" isOpen={popoverOpen} target={buttonId} toggle={togglePopover}>
         <PopoverHeader>Are you sure?</PopoverHeader>
         <PopoverBody>
-          <div className={`DatePickerWrapper ${focusClassName}`}>
-            <SingleDatePicker
-              id={`${buttonId}_endDate`}
-              date={date}
-              onDateChange={date => setDate(date)}
-              focused={focusedInput}
-              onFocusChange={({ focused }) => handleDatePickerFocusChange(focused)}
-              hideKeyboardShortcutsPanel={true}
-              numberOfMonths={1}
-              transitionDuration={0}
-              small
-              block
-              noBorder
-              showDefaultInputIcon={true}
-              inputIconPosition="after"
-              placeholder="End Date"
-            />
-          </div>
+          {permanentDelete ? (
+            <div>
+              This will <strong>permanently</strong> delete the record.
+            </div>
+          ) : (
+            <div className={`DatePickerWrapper ${focusClassName}`}>
+              <SingleDatePicker
+                id={`${buttonId}_endDate`}
+                date={date}
+                onDateChange={date => setDate(date)}
+                focused={focusedInput}
+                onFocusChange={({ focused }) => handleDatePickerFocusChange(focused)}
+                hideKeyboardShortcutsPanel={true}
+                numberOfMonths={1}
+                transitionDuration={0}
+                small
+                block
+                noBorder
+                showDefaultInputIcon={true}
+                showClearDate={true}
+                inputIconPosition="after"
+                placeholder="End Date"
+              />
+            </div>
+          )}
+
           <div className="text-right mt-3">
             <ButtonGroup>
               <Button color="danger" size="sm" onClick={handleConfirmDelete}>
-                {buttonText}
+                {permanentDelete ? 'Delete' : buttonText}
               </Button>
               <Button color="secondary" size="sm" onClick={togglePopover}>
                 Cancel

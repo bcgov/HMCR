@@ -76,6 +76,14 @@
         border: 1px double theme-color(primary);
       }
     }
+
+    .SingleDatePickerInput__showClearDate {
+      padding-right: 0;
+
+      .SingleDatePickerInput_clearDate {
+        right: 30px;
+      }
+    }
   }
 }
 

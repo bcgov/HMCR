@@ -34,7 +34,7 @@ const tableColumns = [
   { heading: 'Active', key: 'isActive', nosort: true },
 ];
 
-const RoleAdmin = ({ roleStatuses, history, showValidationErrorDialog }) => {
+const RoleAdmin = ({ history, showValidationErrorDialog }) => {
   const searchData = useSearchData(defaultSearchOptions, history);
   const [searchInitialValues, setSearchInitialValues] = useState(defaultSearchFormValues);
 
@@ -124,7 +124,12 @@ const RoleAdmin = ({ roleStatuses, history, showValidationErrorDialog }) => {
                   <Field type="text" name="searchText" placeholder="Role/Description" className="form-control" />
                 </Col>
                 <Col>
-                  <MultiDropdown {...formikProps} title="Role Status" items={roleStatuses} name="statusId" />
+                  <MultiDropdown
+                    {...formikProps}
+                    title="Role Status"
+                    items={Constants.ACTIVE_STATUS_ARRAY}
+                    name="statusId"
+                  />
                 </Col>
                 <Col />
                 <Col />
@@ -180,10 +185,4 @@ const RoleAdmin = ({ roleStatuses, history, showValidationErrorDialog }) => {
   );
 };
 
-const mapStateToProps = state => {
-  return {
-    roleStatuses: Object.values(state.roles.statuses),
-  };
-};
-
-export default connect(mapStateToProps, { showValidationErrorDialog })(RoleAdmin);
+export default connect(null, { showValidationErrorDialog })(RoleAdmin);

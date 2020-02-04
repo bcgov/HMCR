@@ -2,8 +2,15 @@ export const API_URL = window.RUNTIME_REACT_APP_API_HOST
   ? `${window.location.protocol}//${window.RUNTIME_REACT_APP_API_HOST}/api`
   : process.env.REACT_APP_API_HOST;
 
+const CODE_LOOKUP = '/codelookup';
+
 export const API_PATHS = {
-  ACTIVITY: '/activities',
+  ACTIVITY_CODES: '/activitycodes',
+  CODE_LOOKUP: CODE_LOOKUP,
+  MAINTENANCE_TYPES: `${CODE_LOOKUP}/maintenancetypes`,
+  UNIT_OF_MEASURES: `${CODE_LOOKUP}/unitofmeasures`,
+  POINT_LINE_FEATURES: `${CODE_LOOKUP}/pointlinefeatures`,
+  LOCATION_CODE: '/locationcodes',
   PERMISSIONS: '/permissions',
   ROLE: '/roles',
   SERVICE_AREAS: '/serviceareas',
@@ -13,10 +20,10 @@ export const API_PATHS = {
   USER_STATUSES: '/users/userstatus',
   USER_BCEID_ACCOUNT: '/users/bceidaccount',
   ROCKFALL_REPORT: '/rockfallreports',
-  SUBMISSIONS: '/submissionobjects',
-  SUBMISSION_STREAMS: '/submissionstreams',
   WILDLIFE_REPORT: '/wildlifereports',
   WORK_REPORT: '/workreports',
+  SUBMISSIONS: '/submissionobjects',
+  SUBMISSION_STREAMS: '/submissionstreams',
   VERSION: '/version',
 };
 
@@ -70,6 +77,11 @@ export const ACTIVE_STATUS = {
   ACTIVE: 'ACTIVE',
   INACTIVE: 'INACTIVE',
 };
+
+export const ACTIVE_STATUS_ARRAY = Object.keys(ACTIVE_STATUS).map(key => ({
+  id: ACTIVE_STATUS[key],
+  name: ACTIVE_STATUS[key],
+}));
 
 export const SORT_DIRECTION = {
   ASCENDING: 'asc',
