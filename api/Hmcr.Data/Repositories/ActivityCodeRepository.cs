@@ -13,7 +13,7 @@ namespace Hmcr.Data.Repositories
     {
         Task<IEnumerable<ActivityCodeDto>> GetActiveActivityCodesAsync();
     }
-    
+
     public class ActivityCodeRepository : HmcrRepositoryBase<HmrActivityCode>, IActivityCodeRepository
     {
         public ActivityCodeRepository(AppDbContext dbContext, IMapper mapper)

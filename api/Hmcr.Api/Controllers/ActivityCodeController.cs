@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Hmcr.Api.Authorization;
 using Hmcr.Api.Controllers.Base;
+using Hmcr.Domain.Services;
 using Hmcr.Model;
 using Hmcr.Model.Dtos;
 using Hmcr.Model.Dtos.ActivityCode;
@@ -17,11 +18,11 @@ namespace Hmcr.Api.Controllers
     [ApiController]
     public class ActivityCodeController : HmcrControllerBase
     {
-        //private IActivityCodeService _activityCodeSvc;
+        private IActivityCodeService _activityCodeSvc;
 
-        public ActivityCodeController() //(IActivityCodeService activityCodeSvc)
+        public ActivityCodeController(IActivityCodeService activityCodeSvc)
         {
-            //_activityCodeSvc = activityCodeSvc;
+            _activityCodeSvc = activityCodeSvc;
         }
 
         [HttpGet]
