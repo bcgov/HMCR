@@ -50,7 +50,7 @@ namespace Hmcr.Domain.Services.Base
 
         public ReportServiceBase(IUnitOfWork unitOfWork,
             ISubmissionStreamService streamService, ISubmissionObjectRepository submissionRepo, ISumbissionRowRepository rowRepo,
-            IContractTermRepository contractRepo, ISubmissionStatusRepository statusRepo)
+            IContractTermRepository contractRepo, ISubmissionStatusRepository statusRepo, IFieldValidatorService validator)
         {
             _unitOfWork = unitOfWork;
             _streamService = streamService;
@@ -58,6 +58,7 @@ namespace Hmcr.Domain.Services.Base
             _rowRepo = rowRepo;
             _contractRepo = contractRepo;
             _statusRepo = statusRepo;
+            _validator = validator;
         }
         public async Task<(Dictionary<string, List<string>> errors, List<string> resubmittedRecordNumbers)> CheckResubmitAsync(FileUploadDto upload)
         {
@@ -258,6 +259,20 @@ namespace Hmcr.Domain.Services.Base
         protected virtual Task<bool> ParseRowsAsync(SubmissionObjectCreateDto submission, string text, Dictionary<string, List<string>> errors)
         {
             throw new NotImplementedException();
+        }
+
+        protected void Validate<T>(IEnumerable<T> rows, string entityName, Dictionary<string, List<string>> errors)
+        {
+            foreach(var row in rows)
+            {
+                _validator.Validate<T>(entityName, row, errors);
+
+                if (errors.Count > 10)
+                {
+                    errors.AddItem("File", "File validation stopped after 10 errors were found. There can be more errors.");
+                    break;
+                }
+            }
         }
     }
 }
