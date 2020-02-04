@@ -29,9 +29,9 @@ namespace Hmcr.Domain.Services
 
         public RockfallReportService(IUnitOfWork unitOfWork, 
             ISubmissionStreamService streamService, ISubmissionObjectRepository submissionRepo, ISumbissionRowRepository rowRepo,
-            IContractTermRepository contractRepo, ISubmissionStatusRepository statusRepo, IRockfallReportRepository rockfallRepo,
+            IContractTermRepository contractRepo, ISubmissionStatusRepository statusRepo, IRockfallReportRepository rockfallRepo, IFieldValidatorService validator,
             ILogger<RockfallReportService> logger)
-            : base(unitOfWork, streamService, submissionRepo, rowRepo, contractRepo, statusRepo)
+            : base(unitOfWork, streamService, submissionRepo, rowRepo, contractRepo, statusRepo, validator)
         {
             TableName = TableNames.RockfallReport;
             HasRowIdentifier = true;
@@ -49,6 +49,7 @@ namespace Hmcr.Domain.Services
             CsvHelperUtils.Config(errors, csv);
             csv.Configuration.RegisterClassMap<RockfallRptInitCsvDtoMap>();
 
+            var rows = new List<RockfallRptInitCsvDto>();
             while (csv.Read())
             {
                 RockfallRptInitCsvDto row = null;
@@ -56,6 +57,7 @@ namespace Hmcr.Domain.Services
                 try
                 {
                     row = csv.GetRecord<RockfallRptInitCsvDto>();
+                    rows.Add(row);
                 }
                 catch (TypeConverterException ex)
                 {
@@ -83,6 +85,11 @@ namespace Hmcr.Domain.Services
                     EndDate = (DateTime)row.ReportDate,
                     RowNum = csv.Context.Row - 1
                 });
+            }
+
+            if (errors.Count == 0)
+            {
+                Validate(rows, Entities.RockfallReportInit, errors);
             }
 
             return errors.Count == 0;

@@ -27,6 +27,7 @@ namespace Hmcr.Model
         public const string User = "user";
         public const string Role = "role";
 
+        public const string WorkReportInit = "worki";
         public const string WorkReportD2 = "workd2";
         public const string WorkReportD2B = "workd2b";
         public const string WorkReportD3 = "workd3";
@@ -34,12 +35,14 @@ namespace Hmcr.Model
         public const string WorkReportD4 = "workd4";
         public const string WorkReportD4Site = "workd4site";
 
+        public const string RockfallReportInit = "rockfalli";
         public const string RockfallReport = "rockfall";
         public const string RockfallReportGps = "rockfallgps";
         public const string RockfallReportLrs = "rockfalllrs";
 
         public const string RockfallReportOtherVolume = "rockfallothervolume";
 
+        public const string WildlifeReportInit = "wildlifei";
         public const string WildlifeReport = "wildlife";
         public const string WildlifeReportGps = "wildlifegps";
         public const string WildlifeReportLrs = "wildlifelrs";

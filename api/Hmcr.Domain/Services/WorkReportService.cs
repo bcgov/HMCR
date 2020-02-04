@@ -31,9 +31,9 @@ namespace Hmcr.Domain.Services
 
         public WorkReportService(IUnitOfWork unitOfWork, 
             ISubmissionStreamService streamService, ISubmissionObjectRepository submissionRepo, ISumbissionRowRepository rowRepo, 
-            IContractTermRepository contractRepo, ISubmissionStatusRepository statusRepo, IWorkReportRepository workRptRepo, 
+            IContractTermRepository contractRepo, ISubmissionStatusRepository statusRepo, IWorkReportRepository workRptRepo, IFieldValidatorService validator,
             ILogger<WorkReportService> logger) 
-            : base(unitOfWork, streamService, submissionRepo, rowRepo, contractRepo, statusRepo)
+            : base(unitOfWork, streamService, submissionRepo, rowRepo, contractRepo, statusRepo, validator)
         {
             TableName = TableNames.WorkReport;
             HasRowIdentifier = true;
@@ -50,7 +50,8 @@ namespace Hmcr.Domain.Services
 
             CsvHelperUtils.Config(errors, csv);
             csv.Configuration.RegisterClassMap<WorkRptInitCsvDtoMap>();
-
+            
+            var rows = new List<WorkRptInitCsvDto>();
             while (csv.Read())
             {
                 WorkRptInitCsvDto row = null;
@@ -58,6 +59,7 @@ namespace Hmcr.Domain.Services
                 try
                 {
                     row = csv.GetRecord<WorkRptInitCsvDto>();
+                    rows.Add(row);
                 }
                 catch (TypeConverterException ex)
                 {
@@ -91,6 +93,11 @@ namespace Hmcr.Domain.Services
                     EndDate = row.EndDate,
                     RowNum = csv.Context.Row - 1
                 });
+            }
+
+            if (errors.Count == 0)
+            {
+                Validate(rows, Entities.WorkReportInit, errors);
             }
 
             return errors.Count == 0;

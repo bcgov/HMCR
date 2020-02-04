@@ -30,9 +30,9 @@ namespace Hmcr.Domain.Services
 
         public WildlifeReportService(IUnitOfWork unitOfWork,
             ISubmissionStreamService streamService, ISubmissionObjectRepository submissionRepo, ISumbissionRowRepository rowRepo,
-            IContractTermRepository contractRepo, ISubmissionStatusRepository statusRepo, IWildlifeReportRepository wildlifeRepo,
+            IContractTermRepository contractRepo, ISubmissionStatusRepository statusRepo, IWildlifeReportRepository wildlifeRepo, IFieldValidatorService validator,
             ILogger<WildlifeReportService> logger)
-            : base(unitOfWork, streamService, submissionRepo, rowRepo, contractRepo, statusRepo)
+            : base(unitOfWork, streamService, submissionRepo, rowRepo, contractRepo, statusRepo, validator)
         {
             TableName = TableNames.WildlifeReport;
             HasRowIdentifier = false;
@@ -48,6 +48,7 @@ namespace Hmcr.Domain.Services
             CsvHelperUtils.Config(errors, csv);
             csv.Configuration.RegisterClassMap<WildlifeRptInitCsvDtoMap>();
 
+            var rows = new List<WildlifeRptInitCsvDto>();
             while (csv.Read())
             {
                 WildlifeRptInitCsvDto row = null;
@@ -55,6 +56,7 @@ namespace Hmcr.Domain.Services
                 try
                 {
                     row = csv.GetRecord<WildlifeRptInitCsvDto>();
+                    rows.Add(row);
                 }
                 catch (TypeConverterException ex)
                 {
@@ -88,6 +90,11 @@ namespace Hmcr.Domain.Services
                     EndDate = DateTime.Today,
                     RowNum = csv.Context.Row - 1
                 });
+            }
+
+            if (errors.Count == 0)
+            {
+                Validate(rows, Entities.WildlifeReportInit, errors);
             }
 
             return errors.Count == 0;

@@ -1,11 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace Hmcr.Model.Dtos.WildlifeReport
+﻿namespace Hmcr.Model.Dtos.WildlifeReport
 {
     public class WildlifeRptInitCsvDto
     {
         public string ServiceArea { get; set; }
+        public string RecordType { get; set; }
+        public string AccidentDate { get; set; }
     }
 }
