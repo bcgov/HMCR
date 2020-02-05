@@ -147,15 +147,23 @@ namespace Hmcr.Domain.Hangfire.Base
         {
             await _unitOfWork.CommitAsync();
 
-            var submissionId = (long)_submission.SubmissionObjectId;
-            var resultUrl = string.Format(_config.GetValue<string>("SUBMISSION_RESULT"), (int)_submission.ServiceAreaNumber, submissionId);
+            var submissionInfo = await _submissionRepo.GetSubmissionInfoForEmail(_submission.SubmissionObjectId);
+            submissionInfo.SubmissionDate = submissionInfo.SubmissionDate.ToLocalTime();
+
+            var submissionId = _submission.SubmissionObjectId;
+            var resultUrl = string.Format(_config.GetValue<string>("SUBMISSION_RESULT"), _submission.ServiceAreaNumber, submissionId);
 
             var env = _config.GetEnvironment();
-            var environment = env == HmcrEnvironments.Prod ? "" : $"[{env}]";
+            var environment = env == HmcrEnvironments.Prod ? " " : $" [{env}] ";
+            var result = submissionInfo.Success ? "SUCCESS" : "ERROR";
+            var subject = $"HMCR{environment}report submission({submissionId}) result - {result}";
 
-            var subject = $"HMCR {environment} report submission({submissionId}) result";
-            var htmlBody = string.Format(_emailBody.HtmlBody, submissionId, resultUrl);
-            var textBody = string.Format(_emailBody.TextBody, submissionId, resultUrl);
+            var htmlBodyTemplate = submissionInfo.Success ? _emailBody.SuccessHtmlBody : _emailBody.ErrorHtmlBody;
+            var htmlBody = string.Format(htmlBodyTemplate, 
+                submissionInfo.FileName, submissionInfo.FileType, submissionInfo.ServiceAreaNumber, submissionInfo.SubmissionDate, 
+                submissionId, submissionInfo.NumOfRecords, submissionInfo.NumOfErrorRecords, resultUrl);
+
+            var textBody = htmlBody.HtmlToPlainText();
 
             var isSent = true;
             var isError = false;
