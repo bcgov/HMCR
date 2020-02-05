@@ -1,55 +1,66 @@
 ﻿using System;
-using System.Collections.Generic;
+using System.Net;
 using System.Text;
+using System.Text.RegularExpressions;
 
 namespace Hmcr.Model
 {
     public class EmailBody
     {
-        public string TextBody { get; set; }
-        public string HtmlBody { get; set; }
+        public string SuccessHtmlBody { get; private set; }
+        public string ErrorHtmlBody { get; private set; }
 
         public EmailBody()
         {
-            SetTextBody();
-            SetHtmlBody();
+            SuccessHtmlBody = SetHtmlBody(true);
+            ErrorHtmlBody = SetHtmlBody(false);
         }
 
-        private void SetTextBody()
+        private string SetHtmlBody(bool success)
         {
-            var textBody = new StringBuilder();
-
-            textBody.AppendLine("Hello,");
-            textBody.AppendLine("");
-            textBody.AppendLine("A submission (Submission# {0}) was made for maintenance contract reporting.");
-            textBody.AppendLine("");
-            textBody.AppendLine("Please check the status of the submission at {1} to see if there are errors within the submission. Records that do not pass data validation are not accepted.");
-            textBody.AppendLine("");
-            textBody.AppendLine("Kindly correct and re-submit the erroneous records only, to avoid over-writing records that are error free.");
-            textBody.AppendLine("");
-            textBody.AppendLine("Please DO NOT REPLY to this email. If you have questions please contact the appropriate district office.");
-            textBody.AppendLine("");
-            textBody.AppendLine("Sincerely,");
-            textBody.AppendLine("Highway Maintenance Contract Reporting System");
-            textBody.AppendLine("Ministry of Transportation and Infrastructure");
-
-            TextBody = textBody.ToString();
-        }
-
-        private void SetHtmlBody()
-        {
+            var correctionMessage = success ? "" : " Kindly correct the identified errors and re-submit the file (with all the records) again.";
             var htmlBody = new StringBuilder();
 
-            htmlBody.AppendLine("<p>Hello,</p>");
-            htmlBody.AppendLine("<p>A submission (Submission# {0}) was made for maintenance contract reporting.</P>");
-            htmlBody.AppendLine("<p>Please check the status of the submission at {1} to see if there are errors within the submission. Records that do not pass data validation are not accepted.</p>");
-            htmlBody.AppendLine("<p>Kindly correct and re-submit the erroneous records only, to avoid over-writing records that are error free.</p>");
-            htmlBody.AppendLine("<p>Please <b>DO NOT REPLY</b> to this email. If you have questions please contact the appropriate district office.</p>");
-            htmlBody.AppendLine("Sincerely,<br/>");
-            htmlBody.AppendLine("Highway Maintenance Contract Reporting System<br/>");
-            htmlBody.AppendLine("Ministry of Transportation and Infrastructure");
+            htmlBody.Append("Hello,");
+            htmlBody.Append("<br/>");
 
-            HtmlBody = htmlBody.ToString();
+            htmlBody.Append("<br/>");
+
+            htmlBody.Append("The following submission was received for maintenance contract reporting:");
+            htmlBody.Append("<br/>");
+
+            htmlBody.Append("<br/>");
+
+            htmlBody.Append("<ul>");
+            htmlBody.Append("<li>File Name: {0}");
+            htmlBody.Append("<li>File Type: {1}");
+            htmlBody.Append("<li>Service Area: {2}");
+            htmlBody.Append("<li>Submission Date: {3}");
+            htmlBody.Append("<li>Submission #: {4}");
+            htmlBody.Append("<li>Total Number of Records: {5}");
+            htmlBody.Append("<li>Number of Records with Errors: {6}");
+            htmlBody.Append("</ul>");
+
+            htmlBody.Append("<br/>");
+
+            htmlBody.Append("Please check the status of the submission at {7}.");
+            htmlBody.Append(correctionMessage);
+            htmlBody.Append("<br/>");
+
+            htmlBody.Append("<br/>");
+
+            htmlBody.Append("Please <b>DO NOT REPLY</b> to this email. If you have questions please contact the appropriate district office.");
+            htmlBody.Append("<br/>");
+
+            htmlBody.Append("<br/>");
+
+            htmlBody.Append("Sincerely,");
+            htmlBody.Append("<br/>");
+            htmlBody.Append("Highway Maintenance Contract Reporting System");
+            htmlBody.Append("<br/>");
+            htmlBody.Append("Ministry of Transportation and Infrastructure");
+
+            return htmlBody.ToString();
         }
     }
 }

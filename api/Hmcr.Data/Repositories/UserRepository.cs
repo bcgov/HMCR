@@ -85,9 +85,9 @@ namespace Hmcr.Data.Repositories
         }
 
         /// <summary>
-        /// This method can be called concurrently by a typical clinet.
-        /// In order to unecessary multiple updates and avoid concurrency control number exception,
-        /// it uses SQL with optimistic concurrency control.
+        /// This method can be called concurrently by a typical client which asynchronously calls APIs
+        /// In order to avoid unecessary multiple updates and the concurrency control number exception,
+        /// it runs SQL with optimistic concurrency control.
         /// </summary>
         /// <param name="user"></param>
         /// <param name="concurrencyControlNumber"></param>

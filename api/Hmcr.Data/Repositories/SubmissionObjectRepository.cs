@@ -10,7 +10,6 @@ using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace Hmcr.Data.Repositories
@@ -27,6 +26,7 @@ namespace Hmcr.Data.Repositories
         Task<SubmissionObjectFileDto> GetSubmissionFileAsync(decimal submissionObjectId);
         Task<HmrSubmissionObject> GetSubmissionObjecForBackgroundJobAsync(decimal submissionObjectId);
         Task<SubmissionDto> GetSubmissionInfoForExportAsync(decimal submissionObjectId);
+        Task<SubmissionInfoForEmailDto> GetSubmissionInfoForEmail(decimal submissionObjectId);
     }
     public class SubmissionObjectRepository : HmcrRepositoryBase<HmrSubmissionObject>, ISubmissionObjectRepository
     {
@@ -160,6 +160,25 @@ namespace Hmcr.Data.Repositories
             }
 
             return await Page<SubmissionObjectSearchDto, SubmissionObjectSearchDto>(query, pageSize, pageNumber, orderBy, direction);
+        }
+
+        public async Task<SubmissionInfoForEmailDto> GetSubmissionInfoForEmail(decimal submissionObjectId)
+        {
+            var query = await DbSet.AsNoTracking()
+                 .Select(x => new SubmissionInfoForEmailDto
+                 {
+                     SubmissionObjectId = (long)x.SubmissionObjectId,
+                     FileName = x.FileName,
+                     FileType = x.SubmissionStream.StreamName,
+                     SubmissionDate = x.AppCreateTimestamp,
+                     ServiceAreaNumber = (int)x.ServiceAreaNumber,
+                     NumOfRecords = x.HmrSubmissionRows.Count(),
+                     NumOfErrorRecords = x.HmrSubmissionRows.Count(y => y.ErrorDetail != null),
+                     Success = x.ErrorDetail == null
+                 })
+                 .FirstAsync(x => x.SubmissionObjectId == submissionObjectId);
+
+            return query;
         }
 
         public async Task<bool> IsDuplicateFileAsync(SubmissionObjectCreateDto submission)
