@@ -1,4 +1,6 @@
-﻿using Hmcr.Model.Dtos;
+﻿using Hmcr.Data.Repositories;
+using Hmcr.Model;
+using Hmcr.Model.Dtos;
 using Hmcr.Model.Dtos.ActivityCode;
 using System;
 using System.Collections.Generic;
@@ -9,7 +11,7 @@ namespace Hmcr.Domain.Services
 {
     public interface IActivityCodeService
     {
-        Task<PagedDto<ActivityCodeSearchDto>> GetActivityCodesAsync(string[]? maintenanceTypes, string[]? locationCodes, string[]? status, string searchText, int pageSize, int pageNumber, string orderBy, string direction);
+        Task<PagedDto<ActivityCodeSearchDto>> GetActivityCodesAsync(string[]? maintenanceTypes, decimal[]? locationCodes, bool? isActive, string searchText, int pageSize, int pageNumber, string orderBy, string direction);
         Task<ActivityCodeSearchDto> GetActivityCodeAsync(decimal id);
         Task<(bool NotFound, Dictionary<string, List<string>> Errors)> UpdateActivityCodeAsync(ActivityCodeUpdateDto activityCode);
         Task<(decimal id, Dictionary<string, List<string>> Errors)> CreateActivityCodeAsync(ActivityCodeCreateDto activityCode);
@@ -17,203 +19,77 @@ namespace Hmcr.Domain.Services
 
     public class ActivityCodeService : IActivityCodeService
     {
-        public Task<(decimal id, Dictionary<string, List<string>> Errors)> CreateActivityCodeAsync(ActivityCodeCreateDto activityCode)
+        private IActivityCodeRepository _activityCodeRepo;
+        private IFieldValidatorService _validatorService;
+
+        public ActivityCodeService(IActivityCodeRepository activityCodeRepo, IFieldValidatorService validatorService)
         {
-            throw new NotImplementedException();
+            _activityCodeRepo = activityCodeRepo;
+            _validatorService = validatorService;
         }
 
-        public Task<ActivityCodeSearchDto> GetActivityCodeAsync(decimal id)
+        public async Task<(decimal id, Dictionary<string, List<string>> Errors)> CreateActivityCodeAsync(ActivityCodeCreateDto activityCode)
         {
-            throw new NotImplementedException();
-        }
+            var errors = new Dictionary<string, List<string>>();
+            /* TODO: validation required?? see HMCR-234
+             * - Need a new ActivityCode Entities Const 
+             * - Rules added to FieldValidationRules
+            var entityName = Entities.ActivityCode;
+            var errors = new Dictionary<string, List<string>>();
 
-        public Task<PagedDto<ActivityCodeSearchDto>> GetActivityCodesAsync(string[] maintenanceTypes, string[] locationCodes, string[] status, string searchText, int pageSize, int pageNumber, string orderBy, string direction)
-        {
-            throw new NotImplementedException();
-        }
+            _validatorService.Validate(entityName, activityCode, errors);
+            */
 
-        public Task<(bool NotFound, Dictionary<string, List<string>> Errors)> UpdateActivityCodeAsync(ActivityCodeUpdateDto activityCode)
-        {
-            throw new NotImplementedException();
-        }
-    }
-
-    /*
-
-    public class UserService : IUserService
-    {
-        private IUserRepository _userRepo;
-        private IPartyRepository _partyRepo;
-        private IServiceAreaRepository _serviceAreaRepo;
-        private IRoleRepository _roleRepo;
-        private IUnitOfWork _unitOfWork;
-        private HmcrCurrentUser _currentUser;
-        private IFieldValidatorService _validator;
-        private IBceidApi _bceid;
-        private IMapper _mapper;
-
-        public UserService(IUserRepository userRepo, IPartyRepository partyRepo, IServiceAreaRepository serviceAreaRepo, IRoleRepository roleRepo,
-            IUnitOfWork unitOfWork, HmcrCurrentUser currentUser, IFieldValidatorService validator, IBceidApi bceid, IMapper mapper)
-        {
-            _userRepo = userRepo;
-            _partyRepo = partyRepo;
-            _serviceAreaRepo = serviceAreaRepo;
-            _roleRepo = roleRepo;
-            _unitOfWork = unitOfWork;
-            _currentUser = currentUser;
-            _validator = validator;
-            _bceid = bceid;
-            _mapper = mapper;
-        }
-
-        public async Task<UserCurrentDto> GetCurrentUserAsync()
-        {
-            return await _userRepo.GetCurrentUserAsync();
-        }
-
-        public async Task<HmrSystemUser> GetActiveUserEntityAsync(Guid userGuid)
-        {
-            return await _userRepo.GetActiveUserEntityAsync(userGuid);
-        }
-
-        public async Task<PagedDto<UserSearchDto>> GetUsersAsync(decimal[]? serviceAreas, string[]? userTypes, string searchText, bool? isActive, int pageSize, int pageNumber, string orderBy, string direction)
-        {
-            return await _userRepo.GetUsersAsync(serviceAreas, userTypes, searchText, isActive, pageSize, pageNumber, orderBy, direction);
-        }
-
-        public async Task<UserDto> GetUserAsync(decimal systemUserId)
-        {
-            return await _userRepo.GetUserAsync(systemUserId);
-        }
-
-        public async Task<UserBceidAccountDto> GetBceidAccountAsync(string username, string userType)
-        {
-            var (error, account) = await _bceid.GetBceidAccountCachedAsync(username, userType);
-
-            if (string.IsNullOrEmpty(error))
-            {
-                return _mapper.Map<UserBceidAccountDto>(account);
-            }
-
-            return null;
-        }
-
-        public async Task<(decimal SystemUserId, Dictionary<string, List<string>> Errors)> CreateUserAsync(UserCreateDto user)
-        {
-            var errors = await ValidateUserDtoAsync(user);
-
-            if (await _userRepo.DoesUsernameExistAsync(user.Username, user.UserType))
-            {
-                errors.AddItem(Fields.Username, $"Username [{user.Username} ({user.UserType})] already exists.");
-            }
+            /* TODO: Check for ActivityNumber existence */
 
             if (errors.Count > 0)
             {
                 return (0, errors);
             }
 
-            var (error, account) = await _bceid.GetBceidAccountCachedAsync(user.Username, user.UserType);
-
-            if (error.IsNotEmpty())
-            {
-                throw new HmcrException($"Unable to retrieve User[{user.Username} ({user.UserType})] from BCeID Service.");
-            }
-
-            var userEntity = await _userRepo.CreateUserAsync(user, account);
-            await _unitOfWork.CommitAsync();
-
-            return (userEntity.SystemUserId, errors);
+            var activityCodeEntity = await _activityCodeRepo.CreateActivityCodeAsync(activityCode);
+            return (activityCodeEntity.ActivityCodeId, errors);
         }
 
-        public async Task<(bool NotFound, Dictionary<string, List<string>> Errors)> UpdateUserAsync(UserUpdateDto user)
+        public async Task<ActivityCodeSearchDto> GetActivityCodeAsync(decimal id)
         {
-            var userFromDb = await GetUserAsync(user.SystemUserId);
+            return await _activityCodeRepo.GetActivityCodeAsync(id);
+        }
 
-            if (userFromDb == null)
+        public async Task<PagedDto<ActivityCodeSearchDto>> GetActivityCodesAsync(string[]? maintenanceTypes, decimal[]? locationCodes, bool? isActive, string searchText, int pageSize, int pageNumber, string orderBy, string direction)
+        {
+            return await _activityCodeRepo.GetActivityCodesAsync(maintenanceTypes, locationCodes, isActive, searchText, pageSize, pageNumber, orderBy, direction);
+        }
+
+        public async Task<(bool NotFound, Dictionary<string, List<string>> Errors)> UpdateActivityCodeAsync(ActivityCodeUpdateDto activityCode)
+        {
+            var activityCodeFromDb = await GetActivityCodeAsync(activityCode.ActivityCodeId);
+
+            if (activityCodeFromDb == null)
             {
                 return (true, null);
             }
 
-            var errors = await ValidateUserDtoAsync(user);
+            var errors = new Dictionary<string, List<string>>();
+            /* TODO: validation required?? see HMCR-236 
+             * - Field rules added to FieldValidationRules?
+             * - Point-Line rules
+             * - Location Code rules
+             * - Disable/Delete rules
+            var entityName = Entities.ActivityCode;
+            var errors = new Dictionary<string, List<string>>();
+
+            _validatorService.Validate(entityName, activityCode, errors);
+            */
 
             if (errors.Count > 0)
             {
                 return (false, errors);
             }
 
-            await _userRepo.UpdateUserAsync(user);
-            await _unitOfWork.CommitAsync();
-
+            await _activityCodeRepo.UpdateActivityCodeAsync(activityCode);
+            
             return (false, errors);
         }
-
-        private async Task<Dictionary<string, List<string>>> ValidateUserDtoAsync<T>(T user) where T : IUserSaveDto
-        {
-            var entityName = Entities.User;
-            var errors = new Dictionary<string, List<string>>();
-
-            _validator.Validate(entityName, user, errors);
-
-            var serviceAreaCount = await _serviceAreaRepo.CountServiceAreaNumbersAsync(user.ServiceAreaNumbers);
-            if (serviceAreaCount != user.ServiceAreaNumbers.Count)
-            {
-                errors.AddItem(Fields.ServiceAreaNumber, $"Some of the user's service areas are invalid.");
-            }
-
-            var roleCount = await _roleRepo.CountActiveRoleIdsAsync(user.UserRoleIds);
-            if (roleCount != user.UserRoleIds.Count)
-            {
-                errors.AddItem(Fields.RoleId, $"Some of the user's role IDs are invalid or inactive.");
-            }
-
-            if (user.UserType != UserTypeDto.INTERNAL)
-            {
-                await foreach(var role in _roleRepo.FindInternalOnlyRolesAsync(user.UserRoleIds))
-                {
-                    errors.AddItem(Fields.RoleId, $"{role.Description} cannot be assigned to business user");
-                }
-            }
-
-            return errors;
-        }
-
-        public async Task<(bool NotFound, Dictionary<string, List<string>> Errors)> DeleteUserAsync(UserDeleteDto user)
-        {
-            //todo: if user has no log-in history, we can delete user instead of deactivating it. 
-            var userFromDb = await GetUserAsync(user.SystemUserId);
-
-            if (userFromDb == null)
-            {
-                return (true, null);
-            }
-
-            var errors = new Dictionary<string, List<string>>();
-
-            _validator.Validate(Entities.User, user, errors);
-
-            if (errors.Count > 0)
-            {
-                return (false, errors);
-            }
-
-            await _userRepo.DeleteUserAsync(user);
-
-            await _unitOfWork.CommitAsync();
-
-            return (false, errors);
-        }
-
-        public async Task UpdateUserFromBceidAsync(string username, string userType, long concurrencyControlNumber)
-        {
-            var (error, account) = await _bceid.GetBceidAccountCachedAsync(username, userType);
-
-            if (error.IsNotEmpty())
-            {
-                throw new HmcrException($"Unable to retrieve User[{username} ({userType})] from BCeID Service.");
-            }
-
-            await _userRepo.UpdateUserFromBceidAsync(account, concurrencyControlNumber);
-        }
-    }*/
-
+    }
 }

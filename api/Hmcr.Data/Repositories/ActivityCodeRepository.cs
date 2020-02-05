@@ -17,8 +17,8 @@ namespace Hmcr.Data.Repositories
         Task<IEnumerable<ActivityCodeDto>> GetActiveActivityCodesAsync();
         Task<PagedDto<ActivityCodeSearchDto>> GetActivityCodesAsync(string[]? maintenanceTypes, decimal[]? locationCodes, bool? isActive, string searchText, int pageSize, int pageNumber, string orderBy, string direction);
         Task<ActivityCodeSearchDto> GetActivityCodeAsync(decimal id);
-        Task<(bool NotFound, Dictionary<string, List<string>> Errors)> UpdateActivityCodeAsync(ActivityCodeUpdateDto activityCode);
-        Task<(decimal id, Dictionary<string, List<string>> Errors)> CreateActivityCodeAsync(ActivityCodeCreateDto activityCode);
+        Task<HmrActivityCode> CreateActivityCodeAsync(ActivityCodeCreateDto activityCode);
+        Task UpdateActivityCodeAsync(ActivityCodeUpdateDto activityCode);
     }
 
     public class ActivityCodeRepository : HmcrRepositoryBase<HmrActivityCode>, IActivityCodeRepository
@@ -37,17 +37,39 @@ namespace Hmcr.Data.Repositories
             return Mapper.Map<IEnumerable<ActivityCodeDto>>(activities).Where(x => x.IsActive);
         }
 
-        public Task<(decimal id, Dictionary<string, List<string>> Errors)> CreateActivityCodeAsync(ActivityCodeCreateDto activityCode)
+        public async Task<HmrActivityCode> CreateActivityCodeAsync(ActivityCodeCreateDto activityCode)
         {
-            throw new System.NotImplementedException();
+            var activityCodeEntity = new HmrActivityCode
+            {
+                ActivityNumber = activityCode.ActivityNumber,
+                ActivityName = activityCode.ActivityName,
+                UnitOfMeasure = activityCode.UnitOfMeasure,
+                MaintenanceType = activityCode.MaintenanceType,
+                LocationCodeId = activityCode.LocationCodeId,
+                PointLineFeature = activityCode.PointLineFeature,
+                //ActivityApplication = activityCode.ActivityApplication,   /*this wasn't mentioned and it's not in the screen?*/
+            };
+
+            
+            await DbSet.AddAsync(activityCodeEntity);
+            
+            return activityCodeEntity;
         }
         
-        public Task<ActivityCodeSearchDto> GetActivityCodeAsync(decimal id)
+        public async Task<ActivityCodeSearchDto> GetActivityCodeAsync(decimal id)
         {
-            throw new System.NotImplementedException();
+            var activityCodeEntity = await DbSet.AsNoTracking()
+                .FirstOrDefaultAsync(ac => ac.ActivityCodeId == id);
+
+            if (activityCodeEntity == null)
+                return null;
+
+            var activityCode = Mapper.Map<ActivityCodeSearchDto>(activityCodeEntity);
+
+            return activityCode;
         }
 
-        public Task<PagedDto<ActivityCodeSearchDto>> GetActivityCodesAsync(string[]? maintenanceTypes, decimal[]? locationCodes, bool? isActive, string searchText, int pageSize, int pageNumber, string orderBy, string direction)
+        public async Task<PagedDto<ActivityCodeSearchDto>> GetActivityCodesAsync(string[]? maintenanceTypes, decimal[]? locationCodes, bool? isActive, string searchText, int pageSize, int pageNumber, string orderBy, string direction)
         {
             var query = DbSet.AsNoTracking();
             
@@ -74,12 +96,31 @@ namespace Hmcr.Data.Repositories
                     .Where(ac => ac.ActivityName.Contains(searchText) || ac.ActivityNumber.Contains(searchText));
             }
 
-            throw new System.NotImplementedException();
+            var pagedEntity = await Page<HmrActivityCode, HmrActivityCode>(query, pageSize, pageNumber, orderBy, direction);
+
+            var activityCodes = Mapper.Map<IEnumerable<ActivityCodeSearchDto>>(pagedEntity.SourceList);
+
+            var pagedDTO = new PagedDto<ActivityCodeSearchDto>
+            {
+                PageNumber = pageNumber,
+                PageSize = pageSize,
+                TotalCount = pagedEntity.TotalCount,
+                SourceList = activityCodes,
+                OrderBy = orderBy,
+                Direction = direction
+            };
+
+            return pagedDTO;
         }
 
-        public Task<(bool NotFound, Dictionary<string, List<string>> Errors)> UpdateActivityCodeAsync(ActivityCodeUpdateDto activityCode)
+        public async Task UpdateActivityCodeAsync(ActivityCodeUpdateDto activityCode)
         {
-            throw new System.NotImplementedException();
+            var activityCodeEntity = await DbSet
+                    .FirstAsync(ac => ac.ActivityCodeId == activityCode.ActivityCodeId);
+
+            Mapper.Map(activityCode, activityCodeEntity);
         }
+
+        
     }
 }
