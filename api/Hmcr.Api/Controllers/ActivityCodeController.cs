@@ -28,7 +28,7 @@ namespace Hmcr.Api.Controllers
         [HttpGet]
         //does this require read permissions?
         public async Task<ActionResult<PagedDto<ActivityCodeSearchDto>>> GetActivityCodesAsync(
-            [FromQuery]string? maintenanceTypes, [FromQuery]string? locationCodes, [FromQuery]string? status, [FromQuery]string searchText,
+            [FromQuery]string? maintenanceTypes, [FromQuery]decimal? locationCodes, [FromQuery]bool? isActive, [FromQuery]string? searchText,
             [FromQuery]int pageSize, [FromQuery]int pageNumber, [FromQuery]string orderBy = "activitynumber", [FromQuery]string direction = "desc")
         {
             ActivityCodeSearchDto[] acd = new ActivityCodeSearchDto[3]
