@@ -3,6 +3,7 @@ import { connect } from 'react-redux';
 import { Row, Col, Button } from 'reactstrap';
 import { Formik, Form, Field } from 'formik';
 import queryString from 'query-string';
+import * as Yup from 'yup';
 
 import Authorize from './fragments/Authorize';
 import MaterialCard from './ui/MaterialCard';
@@ -45,6 +46,22 @@ const tableColumns = [
   { heading: 'Service Areas', key: 'serviceAreas', nosort: true, maxWidth: '100px' },
   { heading: 'Active', key: 'isActive', nosort: true },
 ];
+
+const validationSchema = Yup.object({
+  userType: Yup.string()
+    .required('Required')
+    .max(30)
+    .trim(),
+  username: Yup.string()
+    .required('Required')
+    .max(32)
+    .trim(),
+  userRoleIds: Yup.array().required('Require at least one role'),
+  serviceAreaNumbers: Yup.array().when('userType', {
+    is: Constants.USER_TYPE.BUSINESS,
+    then: Yup.array().required('Required'),
+  }),
+});
 
 const UserAdmin = ({ serviceAreas, userStatuses, userTypes, history, showValidationErrorDialog }) => {
   const searchData = useSearchData(defaultSearchOptions, history);
@@ -129,7 +146,11 @@ const UserAdmin = ({ serviceAreas, userStatuses, userTypes, history, showValidat
     }
   };
 
-  const formModal = useFormModal('Role', <EditUserFormFields />, handleEditFormSubmit);
+  const formModal = useFormModal(
+    'Role',
+    <EditUserFormFields validationSchema={validationSchema} />,
+    handleEditFormSubmit
+  );
 
   const data = Object.values(searchData.data).map(user => ({
     ...user,
@@ -208,7 +229,13 @@ const UserAdmin = ({ serviceAreas, userStatuses, userTypes, history, showValidat
         </MaterialCard>
       )}
       {formModal.formElement}
-      {addUserWizardIsOpen && <AddUserWizard isOpen={addUserWizardIsOpen} toggle={handleAddUserWizardClose} />}
+      {addUserWizardIsOpen && (
+        <AddUserWizard
+          isOpen={addUserWizardIsOpen}
+          toggle={handleAddUserWizardClose}
+          validationSchema={validationSchema}
+        />
+      )}
     </React.Fragment>
   );
 };

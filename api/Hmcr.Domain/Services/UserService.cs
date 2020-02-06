@@ -145,6 +145,11 @@ namespace Hmcr.Domain.Services
                 errors.AddItem(Fields.ServiceAreaNumber, $"Some of the user's service areas are invalid.");
             }
 
+            if(user.UserType != UserTypeDto.INTERNAL && serviceAreaCount == 0)
+            {
+                errors.AddItem(Fields.ServiceAreaNumber, $"Service area must be set for the BCeID user.");
+            }
+
             var roleCount = await _roleRepo.CountActiveRoleIdsAsync(user.UserRoleIds);
             if (roleCount != user.UserRoleIds.Count)
             {

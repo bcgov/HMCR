@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
 import { connect } from 'react-redux';
-import * as Yup from 'yup';
 import moment from 'moment';
 
 import MultiSelect from '../ui/MultiSelect';
@@ -12,19 +11,15 @@ import { FormRow, FormInput } from './FormInputs';
 import * as api from '../../Api';
 import * as Constants from '../../Constants';
 
-const validationSchema = Yup.object({
-  userType: Yup.string()
-    .required('Required')
-    .max(30)
-    .trim(),
-  username: Yup.string()
-    .required('Required')
-    .max(32)
-    .trim(),
-  userRoleIds: Yup.array().required('Require at least one role'),
-});
-
-const EditUserFormFields = ({ setInitialValues, formValues, setValidationSchema, userId, serviceAreas, userTypes }) => {
+const EditUserFormFields = ({
+  setInitialValues,
+  formValues,
+  setValidationSchema,
+  userId,
+  serviceAreas,
+  userTypes,
+  validationSchema,
+}) => {
   const [loading, setLoading] = useState(true);
   const [roles, setRoles] = useState([]);
 

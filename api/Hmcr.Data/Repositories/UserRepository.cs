@@ -129,7 +129,7 @@ namespace Hmcr.Data.Repositories
             {
                 query = (bool)isActive
                     ? query.Where(u => u.EndDate == null || u.EndDate > DateTime.Today)
-                    : query.Where(u => u.EndDate != null || u.EndDate <= DateTime.Today.AddDays(1));
+                    : query.Where(u => u.EndDate != null && u.EndDate <= DateTime.Today);
             }
 
             query = query.Include(u => u.HmrServiceAreaUsers);
