@@ -52,8 +52,8 @@ namespace Hmcr.Domain.Hangfire
 
         /// <summary>
         /// Returns if it can continue to the next submission or not. 
-        /// When it encounters a concurrency issue - when there are more than one job for the same submission, 
-        /// one of them must stop and the return value indicates whether to stop or not.
+        /// When it encounters a concurrency issue - when there are more than one job for the same service area, 
+        /// one of them must stop and the return value indicates whether to continue or not.
         /// </summary>
         /// <param name="submissionDto"></param>
         /// <returns></returns>

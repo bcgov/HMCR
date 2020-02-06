@@ -216,7 +216,13 @@ namespace Hmcr.Domain.Hangfire.Base
         protected decimal GetRowNum(string row)
         {
             var cols = row.Split(',');
-            return Convert.ToDecimal(cols[0]);
+            if (decimal.TryParse(cols[0], out decimal rowNum))
+            {
+                _logger.LogError($"Parsing cols[0] to rowNum failed. Using rowNum 1 instead for logging.");
+                rowNum = 1M;
+            }
+
+            return rowNum;
         }
     }
 }
