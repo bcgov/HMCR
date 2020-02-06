@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react';
 import { connect } from 'react-redux';
 import { Alert, Button, Modal, ModalHeader, ModalBody, ModalFooter, Row, Col, FormGroup, Label } from 'reactstrap';
 import { Formik, Form } from 'formik';
-import * as Yup from 'yup';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 import PageSpinner from '../ui/PageSpinner';
@@ -32,18 +31,6 @@ const defaultValues = {
   active: true,
   endDate: null,
 };
-
-const validationSchema = Yup.object({
-  userType: Yup.string()
-    .required('Required')
-    .max(30)
-    .trim(),
-  username: Yup.string()
-    .required('Required')
-    .max(32)
-    .trim(),
-  userRoleIds: Yup.array().required('Require at least one role'),
-});
 
 const AddUserSearch = ({ userTypes, submitting, toggle, values, handleSubmit }) => {
   return (
@@ -223,6 +210,7 @@ const AddUserWizard = ({
   showValidationErrorDialog,
   hideErrorDialog,
   createUser,
+  validationSchema,
 }) => {
   const [wizardState, setWizardState] = useState(WIZARD_STATE.SEARCH);
   const [submitting, setSubmitting] = useState(false);
