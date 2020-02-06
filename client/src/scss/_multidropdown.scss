@@ -89,3 +89,8 @@
     border: unset;
   }
 }
+
+.form-control.multi-select.is-invalid,
+.form-control.form-input.dropdown.is-invalid {
+  background-position: right 22px center;
+}

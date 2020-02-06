@@ -11,19 +11,6 @@ import { FormRow, FormInput } from './FormInputs';
 import * as api from '../../Api';
 import * as Constants from '../../Constants';
 
-// Activity Number - Mandatory, Text input, alpha-numeric
-// Activity Name - Mandatory, Text input, alpha-numeric
-// Unit - Mandatory, Drop down, single selection
-// Maintenance Type - Mandatory, Drop down, single selection
-// Location Code - Mandatory, Drop down, single selection
-// A
-// B
-// C
-// Point-Line Feature - Mandatory for location code C, Drop down, single selection, not required on the UI for Location Codes A and B
-// Point
-// Line
-// Point or Line
-
 const defaultValues = {
   activityNumber: '',
   activityName: '',
