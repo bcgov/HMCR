@@ -75,7 +75,7 @@ const EditActivityFormFields = ({
     // Add validation for point line feature when location code is C.
     // Need to get the id value of location code C
     const defaultValidationSchema = validationSchema.shape({
-      pointLineFeature: Yup.string(12).when('locationCode', {
+      pointLineFeature: Yup.string(12).when('locationCodeId', {
         is: locationCodeCId,
         then: Yup.string(12).required('Required'),
       }),
