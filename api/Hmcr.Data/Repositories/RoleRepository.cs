@@ -65,13 +65,11 @@ namespace Hmcr.Data.Repositories
                     : query.Where(x => x.EndDate != null || x.EndDate <= DateTime.Today.AddDays(1));
             }
 
-            query = query.Include(x => x.HmrUserRoles);
-
             var pagedEntity = await Page<HmrRole, HmrRole>(query, pageSize, pageNumber, orderBy, direction);
 
             var roles = Mapper.Map<IEnumerable<RoleSearchDto>>(pagedEntity.SourceList);
 
-
+            // Find out which roles are in use
             await foreach (var roleId in FindRolesInUseAync(roles.Select(x => x.RoleId))){
                 roles.FirstOrDefault(x => x.RoleId == roleId).InUse = true;
             }
@@ -110,7 +108,7 @@ namespace Hmcr.Data.Repositories
 
             role.Permissions = permissionIds;
 
-            role.InUse = roleEntity.HmrUserRoles.Count > 0;
+            role.InUse = await _userRoleRepo.IsRoleInUseAsync(role.RoleId);
 
             return role;
         }
