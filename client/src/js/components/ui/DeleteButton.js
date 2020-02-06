@@ -41,9 +41,11 @@ const DeleteButton = ({
     onDeleteClicked(itemId, date, permanentDelete);
   };
 
+  const iconName = permanentDelete ? 'trash-alt' : 'ban';
+
   return (
     <React.Fragment>
-      <FontAwesomeButton color="danger" icon="trash-alt" id={buttonId} {...props} />
+      <FontAwesomeButton color="danger" icon={iconName} id={buttonId} {...props} />
       <Popover placement="bottom" isOpen={popoverOpen} target={buttonId} toggle={togglePopover}>
         <PopoverHeader>Are you sure?</PopoverHeader>
         <PopoverBody>
