@@ -47,10 +47,8 @@ namespace Hmcr.Data.Repositories
                 MaintenanceType = activityCode.MaintenanceType,
                 LocationCodeId = activityCode.LocationCodeId,
                 PointLineFeature = activityCode.PointLineFeature,
-                //ActivityApplication = activityCode.ActivityApplication,   /*this wasn't mentioned and it's not in the screen?*/
             };
 
-            
             await DbSet.AddAsync(activityCodeEntity);
             
             return activityCodeEntity;
@@ -120,7 +118,5 @@ namespace Hmcr.Data.Repositories
 
             Mapper.Map(activityCode, activityCodeEntity);
         }
-
-        
     }
 }

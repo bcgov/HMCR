@@ -1,4 +1,5 @@
-﻿using Hmcr.Data.Repositories;
+﻿using Hmcr.Data.Database;
+using Hmcr.Data.Repositories;
 using Hmcr.Model;
 using Hmcr.Model.Dtos;
 using Hmcr.Model.Dtos.ActivityCode;
@@ -21,11 +22,13 @@ namespace Hmcr.Domain.Services
     {
         private IActivityCodeRepository _activityCodeRepo;
         private IFieldValidatorService _validatorService;
+        private IUnitOfWork _unitOfWork;
 
-        public ActivityCodeService(IActivityCodeRepository activityCodeRepo, IFieldValidatorService validatorService)
+        public ActivityCodeService(IActivityCodeRepository activityCodeRepo, IFieldValidatorService validatorService, IUnitOfWork unitOfWork)
         {
             _activityCodeRepo = activityCodeRepo;
             _validatorService = validatorService;
+            _unitOfWork = unitOfWork;
         }
 
         public async Task<(decimal id, Dictionary<string, List<string>> Errors)> CreateActivityCodeAsync(ActivityCodeCreateDto activityCode)
@@ -48,6 +51,8 @@ namespace Hmcr.Domain.Services
             }
 
             var activityCodeEntity = await _activityCodeRepo.CreateActivityCodeAsync(activityCode);
+            await _unitOfWork.CommitAsync();
+
             return (activityCodeEntity.ActivityCodeId, errors);
         }
 
@@ -88,7 +93,8 @@ namespace Hmcr.Domain.Services
             }
 
             await _activityCodeRepo.UpdateActivityCodeAsync(activityCode);
-            
+            await _unitOfWork.CommitAsync();
+
             return (false, errors);
         }
     }

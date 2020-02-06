@@ -14,8 +14,5 @@ namespace Hmcr.Model.Dtos.ActivityCode
         public string PointLineFeature { get; set; }
         public string ActivityApplication { get; set; }
         public DateTime? EndDate { get; set; }
-
-        public long ConcurrencyControlNumber => 1;
-        /*CONCURRENCY_CONTROL_NUMBER ??*/
     }
 }
