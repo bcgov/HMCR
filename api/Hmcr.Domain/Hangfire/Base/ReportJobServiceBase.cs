@@ -148,6 +148,8 @@ namespace Hmcr.Domain.Hangfire.Base
             await _unitOfWork.CommitAsync();
 
             var submissionInfo = await _submissionRepo.GetSubmissionInfoForEmail(_submission.SubmissionObjectId);
+
+            DateTime.SpecifyKind(submissionInfo.SubmissionDate, DateTimeKind.Utc);
             submissionInfo.SubmissionDate = submissionInfo.SubmissionDate.ToLocalTime();
 
             var submissionId = _submission.SubmissionObjectId;
@@ -160,7 +162,7 @@ namespace Hmcr.Domain.Hangfire.Base
 
             var htmlBodyTemplate = submissionInfo.Success ? _emailBody.SuccessHtmlBody : _emailBody.ErrorHtmlBody;
             var htmlBody = string.Format(htmlBodyTemplate, 
-                submissionInfo.FileName, submissionInfo.FileType, submissionInfo.ServiceAreaNumber, submissionInfo.SubmissionDate, 
+                submissionInfo.FileName, submissionInfo.FileType, submissionInfo.ServiceAreaNumber, submissionInfo.SubmissionDate.ToString("yyyy-MM-dd h:mm:ss"), 
                 submissionId, submissionInfo.NumOfRecords, submissionInfo.NumOfErrorRecords, resultUrl);
 
             var textBody = htmlBody.HtmlToPlainText();
