@@ -4,6 +4,7 @@ using Hmcr.Model.Utils;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 
@@ -32,6 +33,8 @@ namespace Hmcr.Domain.CsvHelpers
                 csv.Configuration.MissingFieldFound = null;
                 csv.Configuration.HeaderValidated = null;
             }
+
+            csv.Configuration.ShouldSkipRecord = records => records.All(record => record.IsEmpty());
         }
     }
 }
