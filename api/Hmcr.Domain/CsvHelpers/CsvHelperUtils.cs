@@ -34,7 +34,7 @@ namespace Hmcr.Domain.CsvHelpers
                 csv.Configuration.HeaderValidated = null;
             }
 
-            csv.Configuration.ShouldSkipRecord = records => records.All(record => record.IsEmpty());
+            csv.Configuration.IgnoreBlankLines = true;
         }
     }
 }
