@@ -18,7 +18,7 @@ namespace Hmcr.Model
 
         private string SetHtmlBody(bool success)
         {
-            var correctionMessage = success ? "" : " Kindly correct the identified errors and re-submit the file (with all the records) again.";
+            var correctionMessage = success ? "" : " None of the records from this submission have been uploaded to the database because errors were identified in the data. A summary of the errors is included on the submission status page linked above. Kindly correct the identified errors and re-submit the file (with all the records) again.";
             var htmlBody = new StringBuilder();
 
             htmlBody.Append("Hello,");
