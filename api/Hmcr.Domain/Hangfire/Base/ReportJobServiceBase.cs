@@ -55,7 +55,7 @@ namespace Hmcr.Domain.Hangfire.Base
             _feedbackRepo = feedbackRepo;
         }
 
-        protected async Task SetStatusesAsync()
+        protected async Task SetMemberVariablesAsync()
         {
             var statuses = await _statusRepo.GetActiveStatuses();
 
@@ -69,13 +69,18 @@ namespace Hmcr.Domain.Hangfire.Base
             _inProgressRowStatusId = statuses.First(x => x.StatusType == StatusType.File && x.StatusCode == FileStatus.InProgress).StatusId;
         }
 
-        protected async Task SetSubmissionAsync(SubmissionDto submissionDto)
+        protected async Task<bool> SetSubmissionAsync(SubmissionDto submissionDto)
         {
             _logger.LogInformation("[Hangfire] Starting submission {submissionObjectId}", (long)submissionDto.SubmissionObjectId);
 
+            var success = await _submissionRepo.UpdateSubmissionStatusAsync(submissionDto.SubmissionObjectId, _inProgressRowStatusId, submissionDto.ConcurrencyControlNumber);
+
+            if (!success)
+                return false;
+
             _submission = await _submissionRepo.GetSubmissionObjecForBackgroundJobAsync(submissionDto.SubmissionObjectId);
-            _submission.SubmissionStatusId = _inProgressRowStatusId;
-            _unitOfWork.Commit();
+
+            return true;
         }
 
         protected bool CheckCommonMandatoryHeaders<T1, T2>(List<T1> rows, T2 headers, Dictionary<string, List<string>> errors) where T2 : IReportHeaders
