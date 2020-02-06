@@ -24,7 +24,7 @@ namespace Hmcr.Domain.Hangfire
 {
     public interface IWorkReportJobService
     {
-        Task ProcessSubmission(SubmissionDto submission);
+        Task<bool> ProcessSubmission(SubmissionDto submission);
     }
 
     public class WorkReportJobService : ReportJobServiceBase, IWorkReportJobService
@@ -50,12 +50,21 @@ namespace Hmcr.Domain.Hangfire
             _oasApi = oasApi;
         }
 
-        public async Task ProcessSubmission(SubmissionDto submissionDto)
+        /// <summary>
+        /// Returns if it can continue to the next submission or not. 
+        /// When it encounters a concurrency issue - when there are more than one job for the same submission, 
+        /// one of them must stop and the return value indicates whether to stop or not.
+        /// </summary>
+        /// <param name="submissionDto"></param>
+        /// <returns></returns>
+        public async Task<bool> ProcessSubmission(SubmissionDto submissionDto)
         {
             var errors = new Dictionary<string, List<string>>();
 
-            await SetStatusesAsync();
-            await SetSubmissionAsync(submissionDto);
+            await SetMemberVariablesAsync();
+
+            if (!await SetSubmissionAsync(submissionDto))
+                return false;
 
             var activityCodes = await _activityRepo.GetActiveActivityCodesAsync();
 
@@ -68,7 +77,7 @@ namespace Hmcr.Domain.Hangfire
                     _submission.ErrorDetail = errors.GetErrorDetail();
                     _submission.SubmissionStatusId = _errorFileStatusId;
                     await CommitAndSendEmail();
-                    return;
+                    return true;
                 }
             }
 
@@ -114,7 +123,7 @@ namespace Hmcr.Domain.Hangfire
                     var submissionRow = await _submissionRowRepo.GetSubmissionRowByRowNum(_submission.SubmissionObjectId, rowNum);
                     SetErrorDetail(submissionRow, errors);
                     await CommitAndSendEmail();
-                    return;
+                    return true;
                 }
 
                 typedRows = rows;
@@ -126,7 +135,7 @@ namespace Hmcr.Domain.Hangfire
             if (_submission.SubmissionStatusId == _errorFileStatusId)
             {
                 await CommitAndSendEmail();
-                return;
+                return true;
             }
 
             //Spatial Validation and Conversion
@@ -137,6 +146,7 @@ namespace Hmcr.Domain.Hangfire
 
             await CommitAndSendEmail();
 
+            return true;
         }
 
         private void CopyCalculatedFieldsFormUntypedRow(List<WorkReportDto> typedRows, List<WorkReportCsvDto> untypedRows)

@@ -10,6 +10,7 @@ using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace Hmcr.Data.Repositories
@@ -27,6 +28,7 @@ namespace Hmcr.Data.Repositories
         Task<HmrSubmissionObject> GetSubmissionObjecForBackgroundJobAsync(decimal submissionObjectId);
         Task<SubmissionDto> GetSubmissionInfoForExportAsync(decimal submissionObjectId);
         Task<SubmissionInfoForEmailDto> GetSubmissionInfoForEmail(decimal submissionObjectId);
+        Task<bool> UpdateSubmissionStatusAsync(decimal submissionObjectId, decimal submissionStatusId, long concurrencyControlNumber);
     }
     public class SubmissionObjectRepository : HmcrRepositoryBase<HmrSubmissionObject>, ISubmissionObjectRepository
     {
@@ -206,6 +208,18 @@ namespace Hmcr.Data.Repositories
                 return false;
 
             return latestFile.FileHash == submission.FileHash;
+        }
+
+        public async Task<bool> UpdateSubmissionStatusAsync(decimal submissionObjectId, decimal submissionStatusId, long concurrencyControlNumber)
+        {
+            var sql = new StringBuilder("UPDATE HMR_SUBMISSION_OBJECT SET ");
+            sql.Append("SUBMISSION_STATUS_ID = {0}, ");
+            sql.Append("CONCURRENCY_CONTROL_NUMBER = CONCURRENCY_CONTROL_NUMBER + 1 ");
+            sql.Append("WHERE SUBMISSION_OBJECT_ID = {1} AND CONCURRENCY_CONTROL_NUMBER = {2} ");
+
+            var rowcount = await DbContext.Database.ExecuteSqlRawAsync(sql.ToString(), submissionStatusId, submissionObjectId, concurrencyControlNumber);
+
+            return rowcount == 1;
         }
     }
 }

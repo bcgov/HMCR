@@ -7,5 +7,6 @@
         public decimal ServiceAreaNumber { get; set; }
         public string FileName { get; set; }
         public string MimeTypeCode { get; set; }
+        public long ConcurrencyControlNumber { get; set; }
     }
 }

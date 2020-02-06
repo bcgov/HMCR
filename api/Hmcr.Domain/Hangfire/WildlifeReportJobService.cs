@@ -20,7 +20,7 @@ namespace Hmcr.Domain.Hangfire
 {
     public interface IWildlifeReportJobService
     {
-        Task ProcessSubmission(SubmissionDto submission);
+        Task<bool> ProcessSubmission(SubmissionDto submission);
     }
 
     public class WildlifeReportJobService : ReportJobServiceBase, IWildlifeReportJobService
@@ -39,13 +39,21 @@ namespace Hmcr.Domain.Hangfire
             _validator = validator;
         }
 
-        public async Task ProcessSubmission(SubmissionDto submissionDto)
+        /// <summary>
+        /// Returns if it can continue to the next submission or not. 
+        /// When it encounters a concurrency issue - when there are more than one job for the same submission, 
+        /// one of them must stop and the return value indicates whether to stop or not.
+        /// </summary>
+        /// <param name="submissionDto"></param>
+        /// <returns></returns>
+        public async Task<bool> ProcessSubmission(SubmissionDto submissionDto)
         {
             var errors = new Dictionary<string, List<string>>();
 
-            await SetStatusesAsync();
+            await SetMemberVariablesAsync();
 
-            await SetSubmissionAsync(submissionDto);
+            if (!await SetSubmissionAsync(submissionDto))
+                return false;
 
             var (untypedRows, headers) = ParseRowsUnTyped(errors);
 
@@ -56,7 +64,7 @@ namespace Hmcr.Domain.Hangfire
                     _submission.ErrorDetail = errors.GetErrorDetail();
                     _submission.SubmissionStatusId = _errorFileStatusId;
                     await CommitAndSendEmail();
-                    return;
+                    return true;
                 }
             }
 
@@ -90,7 +98,7 @@ namespace Hmcr.Domain.Hangfire
                     var submissionRow = await _submissionRowRepo.GetSubmissionRowByRowNum(_submission.SubmissionObjectId, rowNum);
                     SetErrorDetail(submissionRow, errors);
                     await CommitAndSendEmail();
-                    return;
+                    return true;
                 }
 
                 typedRows = rows;
@@ -109,6 +117,8 @@ namespace Hmcr.Domain.Hangfire
 
                 await CommitAndSendEmail();
             }
+
+            return true;
         }
 
         private async Task PerformAdditionalValidationAsync(List<WildlifeReportDto> typedRows)

@@ -43,33 +43,32 @@ namespace Hmcr.Domain.Hangfire
             _user.UniversalId = "hangfire";
             _user.UserGuid = new Guid();
 
-            var submissions = Array.Empty<SubmissionDto>();
-
-            try
-            {
-                //Jobs must be processed chronologically. GetSubmissionObjecsForBackgroundJobAsync returns submissions by ascending order
-                submissions = _submissionRepo.GetSubmissionObjecsForBackgroundJob(serviceAreaNumber); //todo: get staged rows too
-            }
-            catch (SqlException) 
-            {
-                //connection timeout happens when a long transaction is running but the issue gets resolved as the transaction finishes. 
-                //Can be fixed by enabling Read Committed Snapshot
-                //After enabling it, need to rethrow the exception in order to help troubleshooting of the exception.
-                _logger.LogWarning($"[Hangfire] RunReportingJob for service area {serviceAreaNumber} - connection timeout.");
-            }
+            var submissions = _submissionRepo.GetSubmissionObjecsForBackgroundJob(serviceAreaNumber);
 
             foreach (var submission in submissions)
             {
                 switch (submission.StagingTableName)
                 {
                     case TableNames.WorkReport:
-                        await _workRptJobService.ProcessSubmission(submission);
+                        if (!await _workRptJobService.ProcessSubmission(submission))
+                        {
+                            _logger.LogWarning($"[Hangfire] Detected other instance of the job. Cancelling the current job {submission.ServiceAreaNumber} for the submission {submission.SubmissionObjectId}.");
+                            return;
+                        }
                         break;
                     case TableNames.RockfallReport:
-                        await _rockfallRptJobService.ProcessSubmission(submission);
+                        if (!await _rockfallRptJobService.ProcessSubmission(submission))
+                        {
+                            _logger.LogWarning($"[Hangfire] Detected other instance of the job. Cancelling the current job {submission.ServiceAreaNumber} for the submission {submission.SubmissionObjectId}.");
+                            return;
+                        }
                         break;
                     case TableNames.WildlifeReport:
-                        await _wildlifeRptJobService.ProcessSubmission(submission);
+                        if (!await _wildlifeRptJobService.ProcessSubmission(submission))
+                        {
+                            _logger.LogWarning($"[Hangfire] Detected other instance of the job. Cancelling the current job {submission.ServiceAreaNumber} for the submission {submission.SubmissionObjectId}.");
+                            return;
+                        }
                         break;
                     default:
                         throw new NotImplementedException($"Background job for {submission.StagingTableName} is not implemented.");
