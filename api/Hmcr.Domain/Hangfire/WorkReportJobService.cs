@@ -391,11 +391,12 @@ namespace Hmcr.Domain.Hangfire
 
             var rows = new List<WorkReportDto>();
             var rowNum = 0M;
-
+            var i = 0;
             while (csv.Read())
             {
                 try
                 {
+                    _logger.LogInformation($"[Hangfire] ParseRowsTyped {i++}");
                     var row = csv.GetRecord<WorkReportDto>();
                     rows.Add(row);
                     rowNum = (decimal)row.RowNum;
