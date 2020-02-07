@@ -82,9 +82,18 @@ namespace Hmcr.Domain.Hangfire
             }
 
             //text after duplicate lines are removed. Will be used for importing to typed DTO.
-            var text = await SetRowIdAndRemoveDuplicate(untypedRows, headers);
+            var (rowCount, text) = await SetRowIdAndRemoveDuplicate(untypedRows, headers);
 
-            foreach(var untypedRow in untypedRows)
+            if (rowCount == 0)
+            {
+                errors.AddItem("File", "No new records were found in the file; all records were already processed in the past submission.");
+                _submission.ErrorDetail = errors.GetErrorDetail();
+                _submission.SubmissionStatusId = _duplicateFileStatusId;
+                await CommitAndSendEmail();
+                return true;
+            }
+
+            foreach (var untypedRow in untypedRows)
             {
                 errors = new Dictionary<string, List<string>>();
 
@@ -127,6 +136,7 @@ namespace Hmcr.Domain.Hangfire
                 }
 
                 typedRows = rows;
+
                 CopyCalculatedFieldsFormUntypedRow(typedRows, untypedRows);
 
                 await PerformAdditionalValidationAsync(typedRows);
@@ -151,7 +161,9 @@ namespace Hmcr.Domain.Hangfire
 
         private void CopyCalculatedFieldsFormUntypedRow(List<WorkReportDto> typedRows, List<WorkReportCsvDto> untypedRows)
         {
-            foreach(var typedRow in typedRows)
+            MethodLogger.LogEntry(_logger, _enableMethodLog, _methodLogHeader);
+
+            foreach (var typedRow in typedRows)
             {
                 var untypedRow = untypedRows.First(x => x.RowNum == typedRow.RowNum);
                 typedRow.PointLineFeature = untypedRow.PointLineFeature;
@@ -161,6 +173,8 @@ namespace Hmcr.Domain.Hangfire
 
         private async IAsyncEnumerable<WorkReportDto> PerformSpatialValidationAndConversionAsync(List<WorkReportDto> typedRows)
         {
+            MethodLogger.LogEntry(_logger, _enableMethodLog, _methodLogHeader);
+
             foreach (var typedRow in typedRows)
             {
                 if (typedRow.PointLineFeature == PointLineFeature.None)
@@ -184,6 +198,8 @@ namespace Hmcr.Domain.Hangfire
 
         private void PerformGpsPointValidation(WorkReportDto typedRow, HmrSubmissionRow submissionRow)
         {
+            MethodLogger.LogEntry(_logger, _enableMethodLog, _methodLogHeader);
+
             if (typedRow.StartLatitude == null || typedRow.PointLineFeature != PointLineFeature.Point)
                 return;
 
@@ -205,6 +221,8 @@ namespace Hmcr.Domain.Hangfire
 
         private void PerformGpsLineValidation(WorkReportDto typedRow, HmrSubmissionRow submissionRow)
         {
+            MethodLogger.LogEntry(_logger, _enableMethodLog, _methodLogHeader);
+
             if (typedRow.StartLatitude == null || typedRow.PointLineFeature != PointLineFeature.Line)
                 return;
 
@@ -227,6 +245,8 @@ namespace Hmcr.Domain.Hangfire
 
         private void PerformGpsEitherLineOrPointValidation(WorkReportDto typedRow)
         {
+            MethodLogger.LogEntry(_logger, _enableMethodLog, _methodLogHeader);
+
             if (typedRow.StartLatitude == null || typedRow.PointLineFeature != PointLineFeature.Either)
                 return;
 
@@ -239,6 +259,8 @@ namespace Hmcr.Domain.Hangfire
 
         private void PerformOffsetPointValidation(WorkReportDto typedRow, HmrSubmissionRow submissionRow)
         {
+            MethodLogger.LogEntry(_logger, _enableMethodLog, _methodLogHeader);
+
             if (typedRow.StartOffset == null || typedRow.PointLineFeature != PointLineFeature.Point)
                 return;
 
@@ -259,6 +281,8 @@ namespace Hmcr.Domain.Hangfire
 
         private void PerformOffsetLineValidation(WorkReportDto typedRow, HmrSubmissionRow submissionRow)
         {
+            MethodLogger.LogEntry(_logger, _enableMethodLog, _methodLogHeader);
+
             if (typedRow.StartOffset == null || typedRow.PointLineFeature != PointLineFeature.Line)
                 return;
 
@@ -281,6 +305,8 @@ namespace Hmcr.Domain.Hangfire
 
         private void PerformOffsetEitherLineOrPointValidation(WorkReportDto typedRow)
         {
+            MethodLogger.LogEntry(_logger, _enableMethodLog, _methodLogHeader);
+
             if (typedRow.StartOffset == null || typedRow.PointLineFeature != PointLineFeature.Either)
                 return;
 
@@ -292,6 +318,8 @@ namespace Hmcr.Domain.Hangfire
 
         private async Task PerformAdditionalValidationAsync(List<WorkReportDto> typedRows)
         {
+            MethodLogger.LogEntry(_logger, _enableMethodLog, _methodLogHeader);
+
             foreach (var typedRow in typedRows)
             {
                 var errors = new Dictionary<string, List<string>>();
@@ -335,6 +363,8 @@ namespace Hmcr.Domain.Hangfire
 
         private string GetValidationEntityName(WorkReportCsvDto untypedRow, ActivityCodeDto activityCode)
         {
+            MethodLogger.LogEntry(_logger, _enableMethodLog, _methodLogHeader, $"RowNum: {untypedRow.RowNum}");
+
             var isSite = activityCode.ActivityNumber.Substring(0, 1) == "6";
 
             var locationCode = activityCode.LocationCode;
@@ -364,6 +394,8 @@ namespace Hmcr.Domain.Hangfire
 
         private (List<WorkReportCsvDto> untypedRows, string headers) ParseRowsUnTyped(Dictionary<string, List<string>> errors)
         {
+            MethodLogger.LogEntry(_logger, _enableMethodLog, _methodLogHeader);
+
             var text = Encoding.UTF8.GetString(_submission.DigitalRepresentation);
 
             using var stringReader = new StringReader(text);
@@ -383,6 +415,8 @@ namespace Hmcr.Domain.Hangfire
 
         private (decimal rowNum, List<WorkReportDto> rows) ParseRowsTyped(string text, Dictionary<string, List<string>> errors)
         {
+            MethodLogger.LogEntry(_logger, _enableMethodLog, _methodLogHeader);
+
             using var stringReader = new StringReader(text);
             using var csv = new CsvReader(stringReader);
 
@@ -391,7 +425,6 @@ namespace Hmcr.Domain.Hangfire
 
             var rows = new List<WorkReportDto>();
             var rowNum = 0M;
-
             while (csv.Read())
             {
                 try

@@ -6,6 +6,7 @@ using Hmcr.Model.Dtos.User;
 using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Logging;
 using System;
+using System.Linq;
 using System.Threading.Tasks;
 namespace Hmcr.Domain.Hangfire
 {
@@ -43,7 +44,12 @@ namespace Hmcr.Domain.Hangfire
             _user.UniversalId = "hangfire";
             _user.UserGuid = new Guid();
 
+            _logger.LogInformation($"[Hangfire] Starting a job for the service area {serviceAreaNumber}.");
+
             var submissions = _submissionRepo.GetSubmissionObjecsForBackgroundJob(serviceAreaNumber);
+            var submissionIds = string.Join(",", submissions.Select(x => x.SubmissionObjectId).ToArray());
+            
+            _logger.LogInformation($"[Hangfire] The job for the service area {serviceAreaNumber} will process {submissionIds}");
 
             foreach (var submission in submissions)
             {

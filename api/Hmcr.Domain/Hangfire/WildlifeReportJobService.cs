@@ -69,7 +69,16 @@ namespace Hmcr.Domain.Hangfire
             }
 
             //text after duplicate lines are removed. Will be used for importing to typed DTO.
-            var text = await SetRowIdAndRemoveDuplicate(untypedRows, headers);
+            var (rowCount, text) = await SetRowIdAndRemoveDuplicate(untypedRows, headers);
+
+            if (rowCount == 0)
+            {
+                errors.AddItem("File", "No new records were found in the file; all records were already processed in the past submission.");
+                _submission.ErrorDetail = errors.GetErrorDetail();
+                _submission.SubmissionStatusId = _duplicateFileStatusId;
+                await CommitAndSendEmail();
+                return true;
+            }
 
             foreach (var untypedRow in untypedRows)
             {
@@ -123,6 +132,8 @@ namespace Hmcr.Domain.Hangfire
 
         private async Task PerformAdditionalValidationAsync(List<WildlifeReportDto> typedRows)
         {
+            MethodLogger.LogEntry(_logger, _enableMethodLog, _methodLogHeader);
+
             foreach (var typedRow in typedRows)
             {
                 var errors = new Dictionary<string, List<string>>();
@@ -143,11 +154,15 @@ namespace Hmcr.Domain.Hangfire
 
         private string GetValidationEntityName(WildlifeReportCsvDto untypedRow)
         {
+            MethodLogger.LogEntry(_logger, _enableMethodLog, _methodLogHeader, $"RowNum: {untypedRow.RowNum}");
+
             return untypedRow.Latitude.IsEmpty() ? Entities.WildlifeReportLrs : Entities.WildlifeReportGps;
         }
 
         private (List<WildlifeReportCsvDto> untypedRows, string headers) ParseRowsUnTyped(Dictionary<string, List<string>> errors)
         {
+            MethodLogger.LogEntry(_logger, _enableMethodLog, _methodLogHeader);
+
             var text = Encoding.UTF8.GetString(_submission.DigitalRepresentation);
 
             using var stringReader = new StringReader(text);
@@ -167,6 +182,8 @@ namespace Hmcr.Domain.Hangfire
 
         private (decimal rowNum, List<WildlifeReportDto> rows) ParseRowsTyped(string text, Dictionary<string, List<string>> errors)
         {
+            MethodLogger.LogEntry(_logger, _enableMethodLog, _methodLogHeader);
+
             using var stringReader = new StringReader(text);
             using var csv = new CsvReader(stringReader);
 
