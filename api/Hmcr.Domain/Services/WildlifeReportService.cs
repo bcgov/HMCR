@@ -48,6 +48,8 @@ namespace Hmcr.Domain.Services
             CsvHelperUtils.Config(errors, csv);
             csv.Configuration.RegisterClassMap<WildlifeRptInitCsvDtoMap>();
 
+            var serviceArea = (long)submission.ServiceAreaNumber;
+
             var rows = new List<WildlifeRptInitCsvDto>();
             while (csv.Read())
             {
@@ -73,7 +75,7 @@ namespace Hmcr.Domain.Services
                     throw;
                 }
 
-                if (row.ServiceArea != submission.ServiceAreaNumber.ToString())
+                if (row.ServiceArea != serviceArea.ToString())
                 {
                     errors.AddItem("ServiceArea", $"The file contains service area which is not {submission.ServiceAreaNumber}.");
                     return false;

@@ -44,12 +44,14 @@ namespace Hmcr.Domain.Hangfire
             _user.UniversalId = "hangfire";
             _user.UserGuid = new Guid();
 
-            _logger.LogInformation($"[Hangfire] Starting a job for the service area {serviceAreaNumber}.");
-
             var submissions = _submissionRepo.GetSubmissionObjecsForBackgroundJob(serviceAreaNumber);
-            var submissionIds = string.Join(",", submissions.Select(x => x.SubmissionObjectId).ToArray());
-            
-            _logger.LogInformation($"[Hangfire] The job for the service area {serviceAreaNumber} will process {submissionIds}");
+
+            if (submissions.Length == 0)
+                return;
+
+            var submissionIds = string.Join(",", submissions.Select(x => (long)x.SubmissionObjectId).ToArray());
+
+            _logger.LogInformation($"[Hangfire] The job for the service area {serviceAreaNumber} is starting to process the submissions {submissionIds}");
 
             foreach (var submission in submissions)
             {
