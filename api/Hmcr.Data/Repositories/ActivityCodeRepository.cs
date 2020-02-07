@@ -19,6 +19,7 @@ namespace Hmcr.Data.Repositories
         Task<ActivityCodeSearchDto> GetActivityCodeAsync(decimal id);
         Task<HmrActivityCode> CreateActivityCodeAsync(ActivityCodeCreateDto activityCode);
         Task UpdateActivityCodeAsync(ActivityCodeUpdateDto activityCode);
+        Task<bool> DoesActivityNumberExistAsync(string activityNumber);
     }
 
     public class ActivityCodeRepository : HmcrRepositoryBase<HmrActivityCode>, IActivityCodeRepository
@@ -117,6 +118,11 @@ namespace Hmcr.Data.Repositories
                     .FirstAsync(ac => ac.ActivityCodeId == activityCode.ActivityCodeId);
 
             Mapper.Map(activityCode, activityCodeEntity);
+        }
+
+        public async Task<bool> DoesActivityNumberExistAsync(string activityNumber)
+        {
+            return await DbSet.AnyAsync(ac => ac.ActivityNumber == activityNumber);
         }
     }
 }
