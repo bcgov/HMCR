@@ -3,6 +3,7 @@ using Hmcr.Data.Repositories;
 using Hmcr.Model;
 using Hmcr.Model.Dtos;
 using Hmcr.Model.Dtos.ActivityCode;
+using Hmcr.Model.Utils;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -44,6 +45,10 @@ namespace Hmcr.Domain.Services
             */
 
             /* TODO: Check for ActivityNumber existence */
+            if (await _activityCodeRepo.DoesActivityNumberExistAsync(activityCode.ActivityNumber))
+            {
+                errors.AddItem(Fields.ActivityNumber, $"ActivityNumber [{activityCode.ActivityNumber})] already exists.");
+            }
 
             if (errors.Count > 0)
             {
