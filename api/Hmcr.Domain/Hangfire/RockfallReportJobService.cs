@@ -77,7 +77,7 @@ namespace Hmcr.Domain.Hangfire
             {
                 errors.AddItem("File", "No new records were found in the file; all records were already processed in the past submission.");
                 _submission.ErrorDetail = errors.GetErrorDetail();
-                _submission.SubmissionStatusId = _errorFileStatusId;
+                _submission.SubmissionStatusId = _duplicateFileStatusId;
                 await CommitAndSendEmail();
                 return true;
             }
@@ -136,6 +136,8 @@ namespace Hmcr.Domain.Hangfire
 
         private async Task PerformAdditionalValidationAsync(List<RockfallReportDto> typedRows)
         {
+            MethodLogger.LogEntry(_logger, _enableMethodLog, _methodLogHeader);
+
             foreach (var typedRow in typedRows)
             {
                 var errors = new Dictionary<string, List<string>>();
@@ -172,11 +174,15 @@ namespace Hmcr.Domain.Hangfire
 
         private string GetValidationEntityName(RockfallReportCsvDto untypedRow)
         {
+            MethodLogger.LogEntry(_logger, _enableMethodLog, _methodLogHeader, $"RowNum: {untypedRow.RowNum}");
+
             return untypedRow.StartLatitude.IsEmpty() ? Entities.RockfallReportLrs : Entities.RockfallReportGps;
         }
 
         private (List<RockfallReportCsvDto> untypedRows, string headers) ParseRowsUnTyped(Dictionary<string, List<string>> errors)
         {
+            MethodLogger.LogEntry(_logger, _enableMethodLog, _methodLogHeader);
+
             var text = Encoding.UTF8.GetString(_submission.DigitalRepresentation);
 
             using var stringReader = new StringReader(text);
@@ -196,6 +202,8 @@ namespace Hmcr.Domain.Hangfire
 
         private (decimal rowNum, List<RockfallReportDto> rows) ParseRowsTyped(string text, Dictionary<string, List<string>> errors)
         {
+            MethodLogger.LogEntry(_logger, _enableMethodLog, _methodLogHeader);
+
             using var stringReader = new StringReader(text);
             using var csv = new CsvReader(stringReader);
 

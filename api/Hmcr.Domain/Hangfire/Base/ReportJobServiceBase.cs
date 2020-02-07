@@ -36,8 +36,12 @@ namespace Hmcr.Domain.Hangfire.Base
         protected decimal _errorFileStatusId;
         protected decimal _successFileStatusId;
         protected decimal _inProgressRowStatusId;
+        protected decimal _duplicateFileStatusId;
 
         protected HmrSubmissionObject _submission;
+
+        protected bool _enableMethodLog;
+        protected string _methodLogHeader;
 
         public ReportJobServiceBase(IUnitOfWork unitOfWork,
             ISubmissionStatusRepository statusRepo, ISubmissionObjectRepository submissionRepo,
@@ -65,6 +69,7 @@ namespace Hmcr.Domain.Hangfire.Base
 
             _errorFileStatusId = statuses.First(x => x.StatusType == StatusType.File && x.StatusCode == FileStatus.DataError).StatusId;
             _successFileStatusId = statuses.First(x => x.StatusType == StatusType.File && x.StatusCode == FileStatus.Success).StatusId;
+            _duplicateFileStatusId = statuses.First(x => x.StatusType == StatusType.File && x.StatusCode == FileStatus.DuplicateSubmission).StatusId;
 
             _inProgressRowStatusId = statuses.First(x => x.StatusType == StatusType.File && x.StatusCode == FileStatus.InProgress).StatusId;
         }
@@ -80,11 +85,16 @@ namespace Hmcr.Domain.Hangfire.Base
 
             _submission = await _submissionRepo.GetSubmissionObjecForBackgroundJobAsync(submissionDto.SubmissionObjectId);
 
+            _methodLogHeader = $"[Hangfire] Submission ({_submission.SubmissionObjectId}): ";
+            _enableMethodLog = _config.GetValue<string>("DISABLE_METHOD_LOGGER") != "Y"; //enabled by default
+
             return true;
         }
 
         protected bool CheckCommonMandatoryHeaders<T1, T2>(List<T1> rows, T2 headers, Dictionary<string, List<string>> errors) where T2 : IReportHeaders
         {
+            MethodLogger.LogEntry(_logger, _enableMethodLog, _methodLogHeader);
+
             if (rows.Count == 0) //not possible since it's already validated in the ReportServiceBase.
                 throw new Exception("File has no rows.");
 
@@ -108,6 +118,8 @@ namespace Hmcr.Domain.Hangfire.Base
 
         protected async Task<(int rowCount, string text)> SetRowIdAndRemoveDuplicate<T>(List<T> untypedRows, string headers) where T : IReportCsvDto
         {
+            MethodLogger.LogEntry(_logger, _enableMethodLog, _methodLogHeader);
+
             headers = $"{Fields.RowNum}," + headers;
             var text = new StringBuilder();
             text.AppendLine(headers);
@@ -134,6 +146,8 @@ namespace Hmcr.Domain.Hangfire.Base
 
         protected void SetErrorDetail(HmrSubmissionRow submissionRow, Dictionary<string, List<string>> errors)
         {
+            MethodLogger.LogEntry(_logger, _enableMethodLog, _methodLogHeader);
+
             submissionRow.RowStatusId = _errorRowStatusId;
             submissionRow.ErrorDetail = errors.GetErrorDetail();
             _submission.ErrorDetail = FileError.ReferToRowErrors;
@@ -141,6 +155,8 @@ namespace Hmcr.Domain.Hangfire.Base
         }
         protected string GetHeader(string text)
         {
+            MethodLogger.LogEntry(_logger, _enableMethodLog, _methodLogHeader);
+
             if (text == null)
                 return "";
 
@@ -152,6 +168,8 @@ namespace Hmcr.Domain.Hangfire.Base
 
         protected async Task CommitAndSendEmail()
         {
+            MethodLogger.LogEntry(_logger, _enableMethodLog, _methodLogHeader);
+
             await _unitOfWork.CommitAsync();
 
             var submissionInfo = await _submissionRepo.GetSubmissionInfoForEmail(_submission.SubmissionObjectId);
@@ -210,6 +228,8 @@ namespace Hmcr.Domain.Hangfire.Base
 
         protected void LogRowParseException(decimal rowNum, string exception, ReadingContext context)
         {
+            MethodLogger.LogEntry(_logger, _enableMethodLog, _methodLogHeader);
+
             _logger.LogError($"Exception while parsing the line [{rowNum}]");
             _logger.LogError(string.Join(',', context.HeaderRecord));
             _logger.LogError(context.RawRecord);
@@ -217,6 +237,8 @@ namespace Hmcr.Domain.Hangfire.Base
 
         protected decimal GetRowNum(string row)
         {
+            MethodLogger.LogEntry(_logger, _enableMethodLog, _methodLogHeader);
+
             var cols = row.Split(',');
             if (decimal.TryParse(cols[0], out decimal rowNum))
             {

@@ -50,6 +50,8 @@ namespace Hmcr.Domain.Services
 
             CsvHelperUtils.Config(errors, csv);
             csv.Configuration.RegisterClassMap<WorkRptInitCsvDtoMap>();
+
+            var serviceArea = (long)submission.ServiceAreaNumber;
             
             var rows = new List<WorkRptInitCsvDto>();
             while (csv.Read())
@@ -76,9 +78,9 @@ namespace Hmcr.Domain.Services
                     throw;
                 }
 
-                if (row.ServiceArea != submission.ServiceAreaNumber.ToString())
+                if (row.ServiceArea != serviceArea.ToString())
                 {
-                    errors.AddItem("ServiceArea", $"The file contains service area which is not {submission.ServiceAreaNumber}.");
+                    errors.AddItem("ServiceArea", $"The file contains service area which is not {serviceArea}.");
                     return false;
                 }
 
