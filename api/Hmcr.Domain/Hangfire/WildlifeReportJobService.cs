@@ -69,7 +69,16 @@ namespace Hmcr.Domain.Hangfire
             }
 
             //text after duplicate lines are removed. Will be used for importing to typed DTO.
-            var text = await SetRowIdAndRemoveDuplicate(untypedRows, headers);
+            var (rowCount, text) = await SetRowIdAndRemoveDuplicate(untypedRows, headers);
+
+            if (rowCount == 0)
+            {
+                errors.AddItem("File", "No new records were found in the file; all records were already processed in the past submission.");
+                _submission.ErrorDetail = errors.GetErrorDetail();
+                _submission.SubmissionStatusId = _errorFileStatusId;
+                await CommitAndSendEmail();
+                return true;
+            }
 
             foreach (var untypedRow in untypedRows)
             {

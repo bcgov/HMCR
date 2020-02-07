@@ -106,12 +106,13 @@ namespace Hmcr.Domain.Hangfire.Base
             return errors.Count == 0;
         }
 
-        protected async Task<string> SetRowIdAndRemoveDuplicate<T>(List<T> untypedRows, string headers) where T : IReportCsvDto
+        protected async Task<(int rowCount, string text)> SetRowIdAndRemoveDuplicate<T>(List<T> untypedRows, string headers) where T : IReportCsvDto
         {
             headers = $"{Fields.RowNum}," + headers;
             var text = new StringBuilder();
             text.AppendLine(headers);
 
+            var rowCount = 0;
             for (int i = untypedRows.Count - 1; i >= 0; i--)
             {
                 var untypedRow = untypedRows[i];
@@ -123,11 +124,12 @@ namespace Hmcr.Domain.Hangfire.Base
                     continue;
                 }
 
+                rowCount++;
                 text.AppendLine($"{untypedRow.RowNum},{entity.RowValue}");
                 untypedRow.RowId = entity.RowId;
             }
 
-            return text.ToString();
+            return (rowCount, text.ToString());
         }
 
         protected void SetErrorDetail(HmrSubmissionRow submissionRow, Dictionary<string, List<string>> errors)
