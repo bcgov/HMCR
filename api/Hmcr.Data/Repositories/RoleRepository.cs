@@ -62,7 +62,7 @@ namespace Hmcr.Data.Repositories
             {
                 query = (bool)isActive
                     ? query.Where(x => x.EndDate == null || x.EndDate > DateTime.Today)
-                    : query.Where(x => x.EndDate != null || x.EndDate <= DateTime.Today.AddDays(1));
+                    : query.Where(x => x.EndDate != null && x.EndDate <= DateTime.Today);
             }
 
             var pagedEntity = await Page<HmrRole, HmrRole>(query, pageSize, pageNumber, orderBy, direction);
