@@ -170,7 +170,7 @@ namespace Hmcr.Domain.Hangfire.Base
         {
             MethodLogger.LogEntry(_logger, _enableMethodLog, _methodLogHeader);
 
-            await _unitOfWork.CommitAsync();
+            _unitOfWork.Commit();
 
             var submissionInfo = await _submissionRepo.GetSubmissionInfoForEmail(_submission.SubmissionObjectId);
 

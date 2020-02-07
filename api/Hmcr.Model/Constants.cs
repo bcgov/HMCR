@@ -197,7 +197,7 @@ namespace Hmcr.Model
     {
         public static string[] MandatoryFields = new string[]
         {
-            Fields.RecordType, Fields.ServiceArea, Fields.AccidentDate, Fields.TimeOfKill, 
+            Fields.RecordType, Fields.ServiceArea, Fields.AccidentDate, Fields.TimeOfKill, Fields.HighwayUniqueNumber,
             Fields.WildlifeSign, Fields.Quantity, Fields.Species, Fields.Sex, Fields.Age
         };
         public string[] CommonMandatoryFields => MandatoryFields;
