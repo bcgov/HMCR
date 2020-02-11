@@ -8,6 +8,8 @@ namespace Hmcr.Model.Dtos.RockfallReport
         public decimal RockfallReportId { get; set; }
         public decimal SubmissionObjectId { get; set; }
         public string McrrIncidentNumber { get; set; }
+        public string RecordType { get; set; }
+        public decimal ServiceArea { get; set; }
         public DateTime? EstimatedRockfallDate { get; set; }
         public TimeSpan? EstimatedRockfallTime { get; set; }
         public decimal? StartLatitude { get; set; }
@@ -17,7 +19,7 @@ namespace Hmcr.Model.Dtos.RockfallReport
         public string HighwayUnique { get; set; }
         public string HighwayUniqueName { get; set; }
         public string Landmark { get; set; }
-        public string LandMarkName { get; set; }
+        public string LandmarkName { get; set; }
         public decimal? StartOffset { get; set; }
         public decimal? EndOffset { get; set; }
         public string DirectionFromLandmark { get; set; }

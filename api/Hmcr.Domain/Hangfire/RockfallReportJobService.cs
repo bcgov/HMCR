@@ -150,12 +150,12 @@ namespace Hmcr.Domain.Hangfire
 
                 if (typedRow.DitchVolume == DitchVolume.Threshold)
                 {
-                    _validator.Validate(Entities.RockfallReportOtherVolume, Fields.OtherVolume, typedRow.OtherDitchVolume, errors);
+                    _validator.Validate(Entities.RockfallReportOtherDitchVolume, Fields.OtherDitchVolume, typedRow.OtherDitchVolume, errors);
                 }
 
                 if (typedRow.TravelledLanesVolume == DitchVolume.Threshold)
                 {
-                    _validator.Validate(Entities.RockfallReportOtherVolume, Fields.OtherVolume, typedRow.OtherTravelledLanesVolume, errors);
+                    _validator.Validate(Entities.RockfallReportOtherTravelledLanesVolume, Fields.OtherTravelledLanesVolume, typedRow.OtherTravelledLanesVolume, errors);
                 }
 
                 if (typedRow.ReportDate != null && typedRow.ReportDate > DateTime.Now)

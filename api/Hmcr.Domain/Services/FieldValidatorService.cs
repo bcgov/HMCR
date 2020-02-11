@@ -40,7 +40,8 @@ namespace Hmcr.Domain.Services
             LoadRockfallReportRules();
             LoadRockfallReportGpsRules();
             LoadRockfallReportLrsRules();
-            LoadRockfallOtherVolumeRules();
+            LoadRockfallOtherDitchVolumeRules();
+            LoadRockfallOtherTravelledLanesVolumeRules();
 
             LoadWildlifeReportInitRules();
             LoadWildlifeReportRules();
@@ -72,7 +73,7 @@ namespace Hmcr.Domain.Services
         {
             //Common for all work reports
             _rules.Add(new FieldValidationRule(Entities.WorkReportInit, Fields.RecordType, FieldTypes.String, true, null, null, null, null, null, null, null, CodeSet.WrkRptMaintType));
-            _rules.Add(new FieldValidationRule(Entities.WorkReportInit, Fields.RecordNumber, FieldTypes.String, true, 0, 8, null, null, null, null, null, null));
+            _rules.Add(new FieldValidationRule(Entities.WorkReportInit, Fields.RecordNumber, FieldTypes.String, true, 0, 12, null, null, null, null, null, null));
             _rules.Add(new FieldValidationRule(Entities.WorkReportInit, Fields.EndDate, FieldTypes.Date, true, null, null, null, null, new DateTime(1900, 1, 1), new DateTime(9999, 12, 31), null, null));
         }
 
@@ -80,12 +81,12 @@ namespace Hmcr.Domain.Services
         {
             //Common for all work reports
             _rules.Add(new FieldValidationRule(Entities.WorkReportD2, Fields.RecordType, FieldTypes.String, true, null, null, null, null, null, null, null, CodeSet.WrkRptMaintType));
-            _rules.Add(new FieldValidationRule(Entities.WorkReportD2, Fields.RecordNumber, FieldTypes.String, true, 0, 8, null, null, null, null, null, null));
-            _rules.Add(new FieldValidationRule(Entities.WorkReportD2, Fields.TaskNumber, FieldTypes.String, false, 0, 6, null, null, null, null, null, null));
+            _rules.Add(new FieldValidationRule(Entities.WorkReportD2, Fields.RecordNumber, FieldTypes.String, true, 0, 12, null, null, null, null, null, null));
+            _rules.Add(new FieldValidationRule(Entities.WorkReportD2, Fields.TaskNumber, FieldTypes.String, false, 0, 12, null, null, null, null, null, null));
             _rules.Add(new FieldValidationRule(Entities.WorkReportD2, Fields.ActivityNumber, FieldTypes.String, true, 6, 6, null, null, null, null, null, null));
             _rules.Add(new FieldValidationRule(Entities.WorkReportD2, Fields.StartDate, FieldTypes.Date, false, null, null, null, null, new DateTime(1900, 1, 1), new DateTime(9999, 12, 31), null, null));
             _rules.Add(new FieldValidationRule(Entities.WorkReportD2, Fields.EndDate, FieldTypes.Date, true, null, null, null, null, new DateTime(1900, 1, 1), new DateTime(9999, 12, 31), null, null));
-            _rules.Add(new FieldValidationRule(Entities.WorkReportD2, Fields.Accomplishment, FieldTypes.String, true, null, null, null, null, null, null, _regex.GetRegexInfo(RegexDefs.D7_2), null));
+            _rules.Add(new FieldValidationRule(Entities.WorkReportD2, Fields.Accomplishment, FieldTypes.String, true, null, null, null, null, null, null, _regex.GetRegexInfo(RegexDefs.DollarValue), null));
             _rules.Add(new FieldValidationRule(Entities.WorkReportD2, Fields.UnitOfMeasure, FieldTypes.String, true, null, null, null, null, null, null, null, CodeSet.UnitOfMeasure)); 
             _rules.Add(new FieldValidationRule(Entities.WorkReportD2, Fields.PostedDate, FieldTypes.Date, true, null, null, null, null, new DateTime(1900, 1, 1), new DateTime(9999, 12, 31), null, null));
             _rules.Add(new FieldValidationRule(Entities.WorkReportD2, Fields.Comments, FieldTypes.String, false, 0, 1024, null, null, null, null, null, null));
@@ -94,22 +95,22 @@ namespace Hmcr.Domain.Services
             _rules.Add(new FieldValidationRule(Entities.WorkReportD2, Fields.HighwayUnique, FieldTypes.String, false, 0, 16, null, null, null, null, null, null));
 
             //GPS info is not required
-            _rules.Add(new FieldValidationRule(Entities.WorkReportD2, Fields.StartLatitude, FieldTypes.String, false, null, null, null, null, null, null, _regex.GetRegexInfo(RegexDefs.D14_9), null));
-            _rules.Add(new FieldValidationRule(Entities.WorkReportD2, Fields.StartLongitude, FieldTypes.String, false, null, null, null, null, null, null, _regex.GetRegexInfo(RegexDefs.D14_9), null));
-            _rules.Add(new FieldValidationRule(Entities.WorkReportD2, Fields.EndLatitude, FieldTypes.String, false, null, null, null, null, null, null, _regex.GetRegexInfo(RegexDefs.D14_9), null));
-            _rules.Add(new FieldValidationRule(Entities.WorkReportD2, Fields.EndLongitude, FieldTypes.String, false, null, null, null, null, null, null, _regex.GetRegexInfo(RegexDefs.D14_9), null));
+            _rules.Add(new FieldValidationRule(Entities.WorkReportD2, Fields.StartLatitude, FieldTypes.String, false, null, null, null, null, null, null, _regex.GetRegexInfo(RegexDefs.GpsCoords), null));
+            _rules.Add(new FieldValidationRule(Entities.WorkReportD2, Fields.StartLongitude, FieldTypes.String, false, null, null, null, null, null, null, _regex.GetRegexInfo(RegexDefs.GpsCoords), null));
+            _rules.Add(new FieldValidationRule(Entities.WorkReportD2, Fields.EndLatitude, FieldTypes.String, false, null, null, null, null, null, null, _regex.GetRegexInfo(RegexDefs.GpsCoords), null));
+            _rules.Add(new FieldValidationRule(Entities.WorkReportD2, Fields.EndLongitude, FieldTypes.String, false, null, null, null, null, null, null, _regex.GetRegexInfo(RegexDefs.GpsCoords), null));
 
             //LRS info is not required
             _rules.Add(new FieldValidationRule(Entities.WorkReportD2, Fields.Landmark, FieldTypes.String, false, 0, 8, null, null, null, null, null, null));
-            _rules.Add(new FieldValidationRule(Entities.WorkReportD2, Fields.StartOffset, FieldTypes.String, false, null, null, null, null, null, null, _regex.GetRegexInfo(RegexDefs.D7_3), null));
-            _rules.Add(new FieldValidationRule(Entities.WorkReportD2, Fields.EndOffset, FieldTypes.String, false, null, null, null, null, null, null, _regex.GetRegexInfo(RegexDefs.D7_3), null));
+            _rules.Add(new FieldValidationRule(Entities.WorkReportD2, Fields.StartOffset, FieldTypes.String, false, null, null, null, null, null, null, _regex.GetRegexInfo(RegexDefs.Offset), null));
+            _rules.Add(new FieldValidationRule(Entities.WorkReportD2, Fields.EndOffset, FieldTypes.String, false, null, null, null, null, null, null, _regex.GetRegexInfo(RegexDefs.Offset), null));
 
             //Structure and Site info are not required
             _rules.Add(new FieldValidationRule(Entities.WorkReportD2, Fields.StructureNumber, FieldTypes.String, false, 0, 5, null, null, null, null, null, null));
             _rules.Add(new FieldValidationRule(Entities.WorkReportD2, Fields.SiteNumber, FieldTypes.String, false, 0, 8, null, null, null, null, _regex.GetRegexInfo(RegexDefs.SiteNumber), null));
 
             //Value of work is not required
-            _rules.Add(new FieldValidationRule(Entities.WorkReportD2, Fields.ValueOfWork, FieldTypes.String, false, null, null, null, null, null, null, _regex.GetRegexInfo(RegexDefs.D8_2), null));
+            _rules.Add(new FieldValidationRule(Entities.WorkReportD2, Fields.ValueOfWork, FieldTypes.String, false, null, null, null, null, null, null, _regex.GetRegexInfo(RegexDefs.DollarValue), null));
         }
 
         private void LoadWorkReportD2BRules()
@@ -162,34 +163,37 @@ namespace Hmcr.Domain.Services
 
         private void LoadRockfallReportInitRules()
         {
+            _rules.Add(new FieldValidationRule(Entities.RockfallReportInit, Fields.RecordType, FieldTypes.String, true, null, null, null, null, null, null, null, CodeSet.RkflRptRecordType));
             _rules.Add(new FieldValidationRule(Entities.RockfallReportInit, Fields.McrrIncidentNumber, FieldTypes.String, true, 0, 12, null, null, null, null, null, null));
             _rules.Add(new FieldValidationRule(Entities.RockfallReportInit, Fields.ReportDate, FieldTypes.Date, true, null, null, null, null, new DateTime(1900, 1, 1), new DateTime(9999, 12, 31), null, null));
         }
 
         public void LoadRockfallReportRules()
         {
+            _rules.Add(new FieldValidationRule(Entities.RockfallReport, Fields.RecordType, FieldTypes.String, true, null, null, null, null, null, null, null, CodeSet.RkflRptRecordType));
             _rules.Add(new FieldValidationRule(Entities.RockfallReport, Fields.McrrIncidentNumber, FieldTypes.String, true, 0, 12, null, null, null, null, null, null));
             _rules.Add(new FieldValidationRule(Entities.RockfallReport, Fields.EstimatedRockfallDate, FieldTypes.Date, true, null, null, null, null, new DateTime(1900, 1, 1), new DateTime(9999, 12, 31), null, null));
             _rules.Add(new FieldValidationRule(Entities.RockfallReport, Fields.EstimatedRockfallTime, FieldTypes.String, true, null, null, null, null, null, null, _regex.GetRegexInfo(RegexDefs.Time), null));
 
-            _rules.Add(new FieldValidationRule(Entities.RockfallReport, Fields.StartLatitude, FieldTypes.String, false, null, null, null, null, null, null, _regex.GetRegexInfo(RegexDefs.D14_9), null));
-            _rules.Add(new FieldValidationRule(Entities.RockfallReport, Fields.StartLongitude, FieldTypes.String, false, null, null, null, null, null, null, _regex.GetRegexInfo(RegexDefs.D14_9), null));
-            _rules.Add(new FieldValidationRule(Entities.RockfallReport, Fields.EndLatitude, FieldTypes.String, false, null, null, null, null, null, null, _regex.GetRegexInfo(RegexDefs.D14_9), null));
-            _rules.Add(new FieldValidationRule(Entities.RockfallReport, Fields.EndLongitude, FieldTypes.String, false, null, null, null, null, null, null, _regex.GetRegexInfo(RegexDefs.D14_9), null));
+            _rules.Add(new FieldValidationRule(Entities.RockfallReport, Fields.StartLatitude, FieldTypes.String, false, null, null, null, null, null, null, _regex.GetRegexInfo(RegexDefs.GpsCoords), null));
+            _rules.Add(new FieldValidationRule(Entities.RockfallReport, Fields.StartLongitude, FieldTypes.String, false, null, null, null, null, null, null, _regex.GetRegexInfo(RegexDefs.GpsCoords), null));
+            _rules.Add(new FieldValidationRule(Entities.RockfallReport, Fields.EndLatitude, FieldTypes.String, false, null, null, null, null, null, null, _regex.GetRegexInfo(RegexDefs.GpsCoords), null));
+            _rules.Add(new FieldValidationRule(Entities.RockfallReport, Fields.EndLongitude, FieldTypes.String, false, null, null, null, null, null, null, _regex.GetRegexInfo(RegexDefs.GpsCoords), null));
 
-            _rules.Add(new FieldValidationRule(Entities.RockfallReport, Fields.HighwayUniqueNumber, FieldTypes.String, true, 0, 16, null, null, null, null, null, null));
+            _rules.Add(new FieldValidationRule(Entities.RockfallReport, Fields.HighwayUnique, FieldTypes.String, true, 0, 16, null, null, null, null, null, null));
             _rules.Add(new FieldValidationRule(Entities.RockfallReport, Fields.HighwayUniqueName, FieldTypes.String, true, 0, 255, null, null, null, null, null, null));
 
             _rules.Add(new FieldValidationRule(Entities.RockfallReport, Fields.Landmark, FieldTypes.String, false, 0, 8, null, null, null, null, null, null));
-            _rules.Add(new FieldValidationRule(Entities.RockfallReport, Fields.LandMarkName, FieldTypes.String, false, 0, 255, null, null, null, null, null, null));
-            _rules.Add(new FieldValidationRule(Entities.RockfallReport, Fields.StartOffset, FieldTypes.String, false, null, null, null, null, null, null, _regex.GetRegexInfo(RegexDefs.D7_3), null));
-            _rules.Add(new FieldValidationRule(Entities.RockfallReport, Fields.EndOffset, FieldTypes.String, false, null, null, null, null, null, null, _regex.GetRegexInfo(RegexDefs.D7_3), null));
+            _rules.Add(new FieldValidationRule(Entities.RockfallReport, Fields.LandmarkName, FieldTypes.String, false, 0, 255, null, null, null, null, null, null));
+            _rules.Add(new FieldValidationRule(Entities.RockfallReport, Fields.StartOffset, FieldTypes.String, false, null, null, null, null, null, null, _regex.GetRegexInfo(RegexDefs.Offset), null));
+            _rules.Add(new FieldValidationRule(Entities.RockfallReport, Fields.EndOffset, FieldTypes.String, false, null, null, null, null, null, null, _regex.GetRegexInfo(RegexDefs.Offset), null));
             _rules.Add(new FieldValidationRule(Entities.RockfallReport, Fields.DirectionFromLandmark, FieldTypes.String, false, null, null, null, null, null, null, _regex.GetRegexInfo(RegexDefs.Direction), null));
 
             _rules.Add(new FieldValidationRule(Entities.RockfallReport, Fields.LocationDescription, FieldTypes.String, false, 0, 4000, null, null, null, null, null, null));
             _rules.Add(new FieldValidationRule(Entities.RockfallReport, Fields.DitchVolume, FieldTypes.String, true, null, null, null, null, null, null, null, CodeSet.VolumeRange));
             _rules.Add(new FieldValidationRule(Entities.RockfallReport, Fields.TravelledLanesVolume, FieldTypes.String, true, null, null, null, null, null, null, null, CodeSet.VolumeRange));
-            _rules.Add(new FieldValidationRule(Entities.RockfallReport, Fields.OtherVolume, FieldTypes.String, false, null, null, null, null, null, null, _regex.GetRegexInfo(RegexDefs.D6_2), null));
+            _rules.Add(new FieldValidationRule(Entities.RockfallReport, Fields.OtherDitchVolume, FieldTypes.String, false, null, null, null, null, null, null, _regex.GetRegexInfo(RegexDefs.Volume), null));
+            _rules.Add(new FieldValidationRule(Entities.RockfallReport, Fields.OtherTravelledLanesVolume, FieldTypes.String, false, null, null, null, null, null, null, _regex.GetRegexInfo(RegexDefs.Volume), null));
             _rules.Add(new FieldValidationRule(Entities.RockfallReport, Fields.HeavyPrecip, FieldTypes.String, true, null, null, null, null, null, null, _regex.GetRegexInfo(RegexDefs.YN), null));
             _rules.Add(new FieldValidationRule(Entities.RockfallReport, Fields.FreezeThaw, FieldTypes.String, true, null, null, null, null, null, null, _regex.GetRegexInfo(RegexDefs.YN), null));
             _rules.Add(new FieldValidationRule(Entities.RockfallReport, Fields.DitchSnowIce, FieldTypes.String, true, null, null, null, null, null, null, _regex.GetRegexInfo(RegexDefs.YN), null));
@@ -221,15 +225,20 @@ namespace Hmcr.Domain.Services
             _rules.AddRange(_rules.Where(x => x.EntityName == Entities.RockfallReport).Select(x => x.ShallowCopy(Entities.RockfallReportLrs)).ToArray());
 
             _rules.First(x => x.EntityName == Entities.RockfallReport && x.FieldName == Fields.Landmark).Required = true;
-            _rules.First(x => x.EntityName == Entities.RockfallReport && x.FieldName == Fields.LandMarkName).Required = true;
+            _rules.First(x => x.EntityName == Entities.RockfallReport && x.FieldName == Fields.LandmarkName).Required = true;
             _rules.First(x => x.EntityName == Entities.RockfallReport && x.FieldName == Fields.StartOffset).Required = true;
             _rules.First(x => x.EntityName == Entities.RockfallReport && x.FieldName == Fields.EndOffset).Required = true;
             _rules.First(x => x.EntityName == Entities.RockfallReport && x.FieldName == Fields.DirectionFromLandmark).Required = true;
         }
 
-        public void LoadRockfallOtherVolumeRules()
+        public void LoadRockfallOtherDitchVolumeRules()
         {
-            _rules.Add(new FieldValidationRule(Entities.RockfallReportOtherVolume, Fields.OtherVolume, FieldTypes.String, true, null, null, null, null, null, null, _regex.GetRegexInfo(RegexDefs.D6_2), null));
+            _rules.Add(new FieldValidationRule(Entities.RockfallReportOtherDitchVolume, Fields.OtherDitchVolume, FieldTypes.String, true, null, null, null, null, null, null, _regex.GetRegexInfo(RegexDefs.Volume), null));
+        }
+
+        public void LoadRockfallOtherTravelledLanesVolumeRules()
+        {
+            _rules.Add(new FieldValidationRule(Entities.RockfallReportOtherTravelledLanesVolume, Fields.OtherTravelledLanesVolume, FieldTypes.String, true, null, null, null, null, null, null, _regex.GetRegexInfo(RegexDefs.Volume), null));
         }
 
         public void LoadWildlifeReportInitRules()
@@ -244,17 +253,17 @@ namespace Hmcr.Domain.Services
             _rules.Add(new FieldValidationRule(Entities.WildlifeReport, Fields.AccidentDate, FieldTypes.Date, true, null, null, null, null, new DateTime(1900, 1, 1), new DateTime(9999, 12, 31), null, null));
             _rules.Add(new FieldValidationRule(Entities.WildlifeReport, Fields.TimeOfKill, FieldTypes.String, true, null, null, null, null, null, null, null, CodeSet.WarsTime));
 
-            _rules.Add(new FieldValidationRule(Entities.WildlifeReport, Fields.Latitude, FieldTypes.String, false, null, null, null, null, null, null, _regex.GetRegexInfo(RegexDefs.D14_9), null));
-            _rules.Add(new FieldValidationRule(Entities.WildlifeReport, Fields.Longitude, FieldTypes.String, false, null, null, null, null, null, null, _regex.GetRegexInfo(RegexDefs.D14_9), null));
+            _rules.Add(new FieldValidationRule(Entities.WildlifeReport, Fields.Latitude, FieldTypes.String, false, null, null, null, null, null, null, _regex.GetRegexInfo(RegexDefs.GpsCoords), null));
+            _rules.Add(new FieldValidationRule(Entities.WildlifeReport, Fields.Longitude, FieldTypes.String, false, null, null, null, null, null, null, _regex.GetRegexInfo(RegexDefs.GpsCoords), null));
 
-            _rules.Add(new FieldValidationRule(Entities.WildlifeReport, Fields.HighwayUniqueNumber, FieldTypes.String, true, 0, 16, null, null, null, null, null, null));
+            _rules.Add(new FieldValidationRule(Entities.WildlifeReport, Fields.HighwayUnique, FieldTypes.String, true, 0, 16, null, null, null, null, null, null));
 
             _rules.Add(new FieldValidationRule(Entities.WildlifeReport, Fields.Landmark, FieldTypes.String, false, 0, 8, null, null, null, null, null, null));
-            _rules.Add(new FieldValidationRule(Entities.WildlifeReport, Fields.StartOffset, FieldTypes.String, false, null, null, null, null, null, null, _regex.GetRegexInfo(RegexDefs.D7_3), null));
+            _rules.Add(new FieldValidationRule(Entities.WildlifeReport, Fields.Offset, FieldTypes.String, false, null, null, null, null, null, null, _regex.GetRegexInfo(RegexDefs.Offset), null));
             _rules.Add(new FieldValidationRule(Entities.WildlifeReport, Fields.NearestTown, FieldTypes.String, false, 0, 150, null, null, null, null, null, null));
 
             _rules.Add(new FieldValidationRule(Entities.WildlifeReport, Fields.WildlifeSign, FieldTypes.String, true, null, null, null, null, null, null, null, CodeSet.WarsRptSign)); //LOV
-            _rules.Add(new FieldValidationRule(Entities.WildlifeReport, Fields.Quantity, FieldTypes.String, true, null, null, null, null, null, null, _regex.GetRegexInfo(RegexDefs.D4), null));
+            _rules.Add(new FieldValidationRule(Entities.WildlifeReport, Fields.Quantity, FieldTypes.String, true, null, null, null, null, null, null, _regex.GetRegexInfo(RegexDefs.Quantity), null));
 
             _rules.Add(new FieldValidationRule(Entities.WildlifeReport, Fields.Species, FieldTypes.String, true, null, null, null, null, null, null, null, CodeSet.WarSpecies)); //LOV
             _rules.Add(new FieldValidationRule(Entities.WildlifeReport, Fields.Sex, FieldTypes.String, true, null, null, null, null, null, null, null, CodeSet.WarsSex)); //LOV
@@ -275,7 +284,7 @@ namespace Hmcr.Domain.Services
             _rules.AddRange(_rules.Where(x => x.EntityName == Entities.WildlifeReport).Select(x => x.ShallowCopy(Entities.WildlifeReportLrs)).ToArray());
 
             _rules.First(x => x.EntityName == Entities.WildlifeReport && x.FieldName == Fields.Landmark).Required = true;
-            _rules.First(x => x.EntityName == Entities.WildlifeReport && x.FieldName == Fields.StartOffset).Required = true;
+            _rules.First(x => x.EntityName == Entities.WildlifeReport && x.FieldName == Fields.Offset).Required = true;
             _rules.First(x => x.EntityName == Entities.WildlifeReport && x.FieldName == Fields.NearestTown).Required = true;
         }
 

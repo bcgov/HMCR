@@ -11,7 +11,7 @@
         public string Longitude { get; set; }
         public string HighwayUniqueNumber { get; set; }
         public string Landmark { get; set; }
-        public string StartOffset { get; set; }
+        public string Offset { get; set; }
         public string NearestTown { get; set; }
         public string WildlifeSign { get; set; }
         public string Quantity { get; set; }
