@@ -86,7 +86,7 @@ const WorkReportingSubmissions = ({ serviceArea, history }, ref) => {
   const handleDateChanged = (dateFrom, dateTo) => {
     if (!(dateFrom && dateTo && dateFrom.isSameOrBefore(dateTo))) return;
 
-    searchData.updateSearchOptions({ ...searchData.searchOptions, dateFrom, dateTo });
+    searchData.updateSearchOptions({ ...searchData.searchOptions, dateFrom, dateTo, pageNumber: 1 });
   };
 
   return (
@@ -135,7 +135,7 @@ const WorkReportingSubmissions = ({ serviceArea, history }, ref) => {
                   onChange={e => setSearchText(e.target.value)}
                   onKeyDown={e => {
                     if (e.key === 'Enter') {
-                      searchData.updateSearchOptions({ ...searchData.searchOptions, searchText });
+                      searchData.updateSearchOptions({ ...searchData.searchOptions, searchText, pageNumber: 1 });
                     }
                   }}
                 />

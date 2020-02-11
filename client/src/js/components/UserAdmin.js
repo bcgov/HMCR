@@ -106,7 +106,14 @@ const UserAdmin = ({ serviceAreas, userStatuses, userTypes, history, showValidat
       isActive = values.statusId[0] === 'ACTIVE';
     }
 
-    const options = { ...searchData.searchOptions, isActive, searchText, serviceAreas, userTypes: userTypeIds };
+    const options = {
+      ...searchData.searchOptions,
+      isActive,
+      searchText,
+      serviceAreas,
+      userTypes: userTypeIds,
+      pageNumber: 1,
+    };
     searchData.updateSearchOptions(options);
   };
 
