@@ -26,6 +26,12 @@ EXEC sp_addextendedproperty 'MS_Description' , 'Unique identifier for validation
 GO
 
 
+
+EXEC sp_addextendedproperty 'MS_Description' , 'Rockfall reporting incident number. Unique work report record number from the Contractor maintenance management system.' , 'USER' , 'dbo' , 'TABLE' , 'HMR_ROCKFALL_REPORT' , 'COLUMN' , 'MCRR_INCIDENT_NUMBER' 
+GO
+
+
+
 EXEC sp_addextendedproperty 'MS_Description' , 'Estimated date of occurrence.' , 'USER' , 'dbo' , 'TABLE' , 'HMR_ROCKFALL_REPORT' , 'COLUMN' , 'ESTIMATED_ROCKFALL_DATE' 
 GO
 
