@@ -10,6 +10,8 @@ namespace Hmcr.Model.Dtos.RockfallReport
         public decimal SubmissionObjectId { get; set; }
         public decimal? ValidationStatusId { get; set; }
         public string McrrIncidentNumber { get; set; }
+        public string RecordType { get; set; }
+        public decimal ServiceArea { get; set; }
         public DateTime? EstimatedRockfallDate { get; set; }
         public TimeSpan? EstimatedRockfallTime { get; set; }
         public decimal? StartLatitude { get; set; }
