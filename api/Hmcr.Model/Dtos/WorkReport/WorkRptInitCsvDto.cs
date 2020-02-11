@@ -7,8 +7,9 @@ namespace Hmcr.Model.Dtos.WorkReport
     public class WorkRptInitCsvDto
     {
         public string ServiceArea { get; set; }
+        public string RecordType { get; set; }
         public string RecordNumber { get; set; }
         public DateTime EndDate { get; set; }
-
+        
     }
 }

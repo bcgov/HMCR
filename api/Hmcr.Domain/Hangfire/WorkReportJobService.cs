@@ -198,7 +198,7 @@ namespace Hmcr.Domain.Hangfire
 
         private void PerformGpsPointValidation(WorkReportDto typedRow, HmrSubmissionRow submissionRow)
         {
-            MethodLogger.LogEntry(_logger, _enableMethodLog, _methodLogHeader);
+            //MethodLogger.LogEntry(_logger, _enableMethodLog, _methodLogHeader);
 
             if (typedRow.StartLatitude == null || typedRow.PointLineFeature != PointLineFeature.Point)
                 return;
@@ -221,7 +221,7 @@ namespace Hmcr.Domain.Hangfire
 
         private void PerformGpsLineValidation(WorkReportDto typedRow, HmrSubmissionRow submissionRow)
         {
-            MethodLogger.LogEntry(_logger, _enableMethodLog, _methodLogHeader);
+            //MethodLogger.LogEntry(_logger, _enableMethodLog, _methodLogHeader);
 
             if (typedRow.StartLatitude == null || typedRow.PointLineFeature != PointLineFeature.Line)
                 return;
@@ -245,7 +245,7 @@ namespace Hmcr.Domain.Hangfire
 
         private void PerformGpsEitherLineOrPointValidation(WorkReportDto typedRow)
         {
-            MethodLogger.LogEntry(_logger, _enableMethodLog, _methodLogHeader);
+            //MethodLogger.LogEntry(_logger, _enableMethodLog, _methodLogHeader);
 
             if (typedRow.StartLatitude == null || typedRow.PointLineFeature != PointLineFeature.Either)
                 return;
@@ -259,7 +259,7 @@ namespace Hmcr.Domain.Hangfire
 
         private void PerformOffsetPointValidation(WorkReportDto typedRow, HmrSubmissionRow submissionRow)
         {
-            MethodLogger.LogEntry(_logger, _enableMethodLog, _methodLogHeader);
+            //MethodLogger.LogEntry(_logger, _enableMethodLog, _methodLogHeader);
 
             if (typedRow.StartOffset == null || typedRow.PointLineFeature != PointLineFeature.Point)
                 return;
@@ -281,7 +281,7 @@ namespace Hmcr.Domain.Hangfire
 
         private void PerformOffsetLineValidation(WorkReportDto typedRow, HmrSubmissionRow submissionRow)
         {
-            MethodLogger.LogEntry(_logger, _enableMethodLog, _methodLogHeader);
+            //MethodLogger.LogEntry(_logger, _enableMethodLog, _methodLogHeader);
 
             if (typedRow.StartOffset == null || typedRow.PointLineFeature != PointLineFeature.Line)
                 return;
@@ -305,7 +305,7 @@ namespace Hmcr.Domain.Hangfire
 
         private void PerformOffsetEitherLineOrPointValidation(WorkReportDto typedRow)
         {
-            MethodLogger.LogEntry(_logger, _enableMethodLog, _methodLogHeader);
+            //MethodLogger.LogEntry(_logger, _enableMethodLog, _methodLogHeader);
 
             if (typedRow.StartOffset == null || typedRow.PointLineFeature != PointLineFeature.Either)
                 return;

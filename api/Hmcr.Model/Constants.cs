@@ -40,7 +40,8 @@ namespace Hmcr.Model
         public const string RockfallReportGps = "rockfallgps";
         public const string RockfallReportLrs = "rockfalllrs";
 
-        public const string RockfallReportOtherVolume = "rockfallothervolume";
+        public const string RockfallReportOtherDitchVolume = "rockfallotherditchvolume";
+        public const string RockfallReportOtherTravelledLanesVolume = "rockfallothertravelledlanesvolume";
 
         public const string WildlifeReportInit = "wildlifei";
         public const string WildlifeReport = "wildlife";
@@ -129,9 +130,8 @@ namespace Hmcr.Model
         public const string McrrIncidentNumber = "McrrIncidentNumber";
         public const string EstimatedRockfallDate = "EstimatedRockfallDate";
         public const string EstimatedRockfallTime = "EstimatedRockfallTime";
-        public const string HighwayUniqueNumber = "HighwayUniqueNumber";
         public const string HighwayUniqueName = "HighwayUniqueName";
-        public const string LandMarkName = "LandMarkName";
+        public const string LandmarkName = "LandmarkName";
         public const string DirectionFromLandmark = "DirectionFromLandmark";
         public const string DitchVolume = "DitchVolume";
         public const string TravelledLanesVolume = "TravelledLanesVolume";
@@ -143,12 +143,14 @@ namespace Hmcr.Model
         public const string McName = "McName";
         public const string ReportDate = "ReportDate";
         public const string LocationDescription = "LocationDescription";
-        public const string OtherVolume = "OtherVolume";
+        public const string OtherTravelledLanesVolume = "OtherTravelledLanesVolume";
+        public const string OtherDitchVolume = "OtherDitchVolume";
 
         public const string AccidentDate = "AccidentDate";
         public const string TimeOfKill = "TimeOfKill";
         public const string Latitude = "Latitude";
         public const string Longitude = "Longitude";
+        public const string Offset = "Offset";
         public const string NearestTown = "NearestTown";
         public const string WildlifeSign = "WildlifeSign";
         public const string Quantity = "Quantity";
@@ -185,8 +187,8 @@ namespace Hmcr.Model
         public static string[] MandatoryFields = new string[]
         {
             Fields.RecordType, Fields.ServiceArea, Fields.McrrIncidentNumber, Fields.EstimatedRockfallDate, Fields.EstimatedRockfallTime,
-            Fields.StartLatitude, Fields.StartLongitude, Fields.EndLatitude, Fields.EndLongitude, Fields.HighwayUniqueNumber, Fields.HighwayUniqueName, Fields.Landmark,
-            Fields.LandMarkName, Fields.StartOffset, Fields.DirectionFromLandmark, Fields.DitchVolume, Fields.TravelledLanesVolume,
+            Fields.StartLatitude, Fields.StartLongitude, Fields.EndLatitude, Fields.EndLongitude, Fields.HighwayUnique, Fields.HighwayUniqueName, Fields.Landmark,
+            Fields.LandmarkName, Fields.StartOffset, Fields.DirectionFromLandmark, Fields.DitchVolume, Fields.TravelledLanesVolume,
             Fields.HeavyPrecip, Fields.FreezeThaw, Fields.DitchSnowIce, Fields.VehicleDamage, Fields.Name,
             Fields.McPhoneNumber, Fields.McName, Fields.ReportDate
         };
@@ -197,7 +199,7 @@ namespace Hmcr.Model
     {
         public static string[] MandatoryFields = new string[]
         {
-            Fields.RecordType, Fields.ServiceArea, Fields.AccidentDate, Fields.TimeOfKill, Fields.HighwayUniqueNumber,
+            Fields.RecordType, Fields.ServiceArea, Fields.AccidentDate, Fields.TimeOfKill, Fields.HighwayUnique,
             Fields.WildlifeSign, Fields.Quantity, Fields.Species, Fields.Sex, Fields.Age
         };
         public string[] CommonMandatoryFields => MandatoryFields;
@@ -214,6 +216,7 @@ namespace Hmcr.Model
         public const string VolumeRange = "VOLUME_RANGE1";
         public const string WarsRptRecordType = "WARS_RPT_RECORD_TYPE";
         public const string WarsRptSign = "WARS_RPT_SIGN";
+        public const string RkflRptRecordType = "RKFL_RPT_RECORD_TYPE";
     }
 
     public static class FileError
