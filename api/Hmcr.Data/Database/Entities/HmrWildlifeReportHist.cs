@@ -18,9 +18,9 @@ namespace Hmcr.Data.Database.Entities
         public string TimeOfKill { get; set; }
         public decimal? Latitude { get; set; }
         public decimal? Longitude { get; set; }
-        public string HighwayUniqueNumber { get; set; }
+        public string HighwayUnique { get; set; }
         public string Landmark { get; set; }
-        public decimal? StartOffset { get; set; }
+        public decimal? Offset { get; set; }
         public string NearestTown { get; set; }
         public string WildlifeSign { get; set; }
         public decimal? Quantity { get; set; }

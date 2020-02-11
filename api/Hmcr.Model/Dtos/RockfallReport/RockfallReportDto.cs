@@ -16,17 +16,18 @@ namespace Hmcr.Model.Dtos.RockfallReport
         public decimal? StartLongitude { get; set; }
         public decimal? EndLatitude { get; set; }
         public decimal? EndLongitude { get; set; }
-        public string HighwayUniqueNumber { get; set; }
+        public string HighwayUnique { get; set; }
         public string HighwayUniqueName { get; set; }
         public string Landmark { get; set; }
-        public string LandMarkName { get; set; }
+        public string LandmarkName { get; set; }
         public decimal? StartOffset { get; set; }
         public decimal? EndOffset { get; set; }
         public string DirectionFromLandmark { get; set; }
         public string LocationDescription { get; set; }
         public string DitchVolume { get; set; }
         public string TravelledLanesVolume { get; set; }
-        public decimal? OtherVolume { get; set; }
+        public decimal? OtherTravelledLanesVolume { get; set; }
+        public decimal? OtherDitchVolume { get; set; }
         public string HeavyPrecip { get; set; }
         public string FreezeThaw { get; set; }
         public string DitchSnowIce { get; set; }

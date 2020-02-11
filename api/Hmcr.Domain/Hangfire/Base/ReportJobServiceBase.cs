@@ -215,8 +215,8 @@ namespace Hmcr.Domain.Hangfire.Base
                 CommunicationSubject = subject,
                 CommunicationText = htmlBody,
                 CommunicationDate = DateTime.UtcNow,
-                IsSent = isSent ? "Y" : "N",
-                IsError = isError ? "Y" : "N",
+                IsSent = isSent,
+                IsError = isError,
                 SendErrorText = errorText
             };
 
