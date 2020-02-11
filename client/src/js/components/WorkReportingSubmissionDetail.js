@@ -159,7 +159,7 @@ const WorkReportingSubmissionDetail = ({ toggle, submission }) => {
             className="btn btn-primary btn-sm"
             data-clipboard-text={createClipboardText(submissionResultData)}
             onSuccess={() => {
-              toast.info(<div className="text-center">Error details copied to clipboard.</div>);
+              toast.info(<div className="text-center">Copied to clipboard.</div>);
             }}
             title="Copy errors to clipboard, with tab delimiter"
           >

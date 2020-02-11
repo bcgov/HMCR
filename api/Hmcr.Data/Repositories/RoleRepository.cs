@@ -71,7 +71,7 @@ namespace Hmcr.Data.Repositories
 
             // Find out which roles are in use
             await foreach (var roleId in FindRolesInUseAync(roles.Select(x => x.RoleId))){
-                roles.FirstOrDefault(x => x.RoleId == roleId).InUse = true;
+                roles.FirstOrDefault(x => x.RoleId == roleId).IsReferenced = true;
             }
 
             var pagedDTO = new PagedDto<RoleSearchDto>
@@ -108,7 +108,7 @@ namespace Hmcr.Data.Repositories
 
             role.Permissions = permissionIds;
 
-            role.InUse = await _userRoleRepo.IsRoleInUseAsync(role.RoleId);
+            role.IsReferenced = await _userRoleRepo.IsRoleInUseAsync(role.RoleId);
 
             return role;
         }
@@ -199,7 +199,7 @@ namespace Hmcr.Data.Repositories
             {
                 var role = await GetByIdAsync<RoleDto>(roleId);
 
-                if (role.IsInternal == "Y")
+                if (role.IsInternal)
                     yield return role;
             }
         }

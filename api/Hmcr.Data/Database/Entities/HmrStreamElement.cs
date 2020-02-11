@@ -10,7 +10,7 @@ namespace Hmcr.Data.Database.Entities
         public string ElementName { get; set; }
         public string ElementType { get; set; }
         public string StagingColumnName { get; set; }
-        public string IsRequired { get; set; }
+        public bool? IsRequired { get; set; }
         public decimal? MaxLength { get; set; }
         public decimal? MinLength { get; set; }
         public decimal? MaxValue { get; set; }

@@ -20,12 +20,8 @@ namespace Hmcr.Data.Database.Entities
         public virtual DbSet<Hash> Hashes { get; set; }
         public virtual DbSet<HmrActivityCode> HmrActivityCodes { get; set; }
         public virtual DbSet<HmrActivityCodeHist> HmrActivityCodeHists { get; set; }
-        public virtual DbSet<HmrAllValidationRulesV> HmrAllValidationRulesVs { get; set; }
         public virtual DbSet<HmrCodeLookup> HmrCodeLookups { get; set; }
         public virtual DbSet<HmrCodeLookupHist> HmrCodeLookupHists { get; set; }
-        public virtual DbSet<HmrCodeMaintenanceTypeV> HmrCodeMaintenanceTypeVs { get; set; }
-        public virtual DbSet<HmrCodeTimeOfDayV> HmrCodeTimeOfDayVs { get; set; }
-        public virtual DbSet<HmrCodeUnitOfMeasureV> HmrCodeUnitOfMeasureVs { get; set; }
         public virtual DbSet<HmrContractTerm> HmrContractTerms { get; set; }
         public virtual DbSet<HmrContractTermHist> HmrContractTermHists { get; set; }
         public virtual DbSet<HmrDistrict> HmrDistricts { get; set; }
@@ -73,6 +69,14 @@ namespace Hmcr.Data.Database.Entities
         public virtual DbSet<Server> Servers { get; set; }
         public virtual DbSet<Set> Sets { get; set; }
         public virtual DbSet<State> States { get; set; }
+
+        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        {
+            if (!optionsBuilder.IsConfigured)
+            {
+                optionsBuilder.UseSqlServer("Data Source=(localdb)\\MSSQLLocalDB;Initial Catalog=aspnet-hmcr");
+            }
+        }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -159,7 +163,8 @@ Reporting criteria varies based on location requirements, record frequency and r
                     .IsRequired()
                     .HasColumnName("ACTIVITY_NAME")
                     .HasMaxLength(150)
-                    .IsUnicode(false);
+                    .IsUnicode(false)
+                    .HasComment("Descriptive name of the activity.");
 
                 entity.Property(e => e.ActivityNumber)
                     .IsRequired()
@@ -426,94 +431,6 @@ Either - may be spatially represented in either manner");
                     .IsUnicode(false);
             });
 
-            modelBuilder.Entity<HmrAllValidationRulesV>(entity =>
-            {
-                entity.HasNoKey();
-
-                entity.ToView("HMR_ALL_VALIDATION_RULES_V");
-
-                entity.Property(e => e.CodeSet)
-                    .HasColumnName("CODE_SET")
-                    .HasMaxLength(20)
-                    .IsUnicode(false);
-
-                entity.Property(e => e.ColumnName)
-                    .HasColumnName("COLUMN_NAME")
-                    .HasMaxLength(50)
-                    .IsUnicode(false);
-
-                entity.Property(e => e.ElementAttributeEndDate)
-                    .HasColumnName("ELEMENT_ATTRIBUTE_END_DATE")
-                    .HasColumnType("datetime");
-
-                entity.Property(e => e.EntityName)
-                    .HasColumnName("ENTITY_NAME")
-                    .HasMaxLength(30)
-                    .IsUnicode(false);
-
-                entity.Property(e => e.Id)
-                    .HasColumnName("ID")
-                    .HasColumnType("numeric(9, 0)");
-
-                entity.Property(e => e.IsRequired)
-                    .HasColumnName("IS_REQUIRED")
-                    .HasMaxLength(1)
-                    .IsUnicode(false);
-
-                entity.Property(e => e.MaxDate)
-                    .HasColumnName("MAX_DATE")
-                    .HasColumnType("datetime");
-
-                entity.Property(e => e.MaxLength)
-                    .HasColumnName("MAX_LENGTH")
-                    .HasColumnType("numeric(9, 0)");
-
-                entity.Property(e => e.MaxValue)
-                    .HasColumnName("MAX_VALUE")
-                    .HasColumnType("numeric(9, 0)");
-
-                entity.Property(e => e.MinDate)
-                    .HasColumnName("MIN_DATE")
-                    .HasColumnType("datetime");
-
-                entity.Property(e => e.MinLength)
-                    .HasColumnName("MIN_LENGTH")
-                    .HasColumnType("numeric(9, 2)");
-
-                entity.Property(e => e.MinValue)
-                    .HasColumnName("MIN_VALUE")
-                    .HasColumnType("numeric(9, 2)");
-
-                entity.Property(e => e.Name)
-                    .HasColumnName("NAME")
-                    .HasMaxLength(30)
-                    .IsUnicode(false);
-
-                entity.Property(e => e.RegExp)
-                    .HasColumnName("REG_EXP")
-                    .HasMaxLength(4000)
-                    .IsUnicode(false);
-
-                entity.Property(e => e.StreamEndDate)
-                    .HasColumnName("STREAM_END_DATE")
-                    .HasColumnType("datetime");
-
-                entity.Property(e => e.SubmissionStreamId)
-                    .HasColumnName("SUBMISSION_STREAM_ID")
-                    .HasColumnType("numeric(9, 0)");
-
-                entity.Property(e => e.Type)
-                    .HasColumnName("TYPE")
-                    .HasMaxLength(30)
-                    .IsUnicode(false);
-
-                entity.Property(e => e.ValidationSource)
-                    .IsRequired()
-                    .HasColumnName("VALIDATION_SOURCE")
-                    .HasMaxLength(18)
-                    .IsUnicode(false);
-            });
-
             modelBuilder.Entity<HmrCodeLookup>(entity =>
             {
                 entity.HasKey(e => e.CodeLookupId)
@@ -691,68 +608,6 @@ Either - may be spatially represented in either manner");
                 entity.Property(e => e.EndDateHist)
                     .HasColumnName("END_DATE_HIST")
                     .HasColumnType("datetime");
-            });
-
-            modelBuilder.Entity<HmrCodeMaintenanceTypeV>(entity =>
-            {
-                entity.HasNoKey();
-
-                entity.ToView("HMR_CODE_MAINTENANCE_TYPE_V");
-
-                entity.Property(e => e.CodeLookupId)
-                    .HasColumnName("CODE_LOOKUP_ID")
-                    .HasColumnType("numeric(9, 0)");
-
-                entity.Property(e => e.MaintenanceTypeCode)
-                    .HasColumnName("MAINTENANCE_TYPE_CODE")
-                    .HasMaxLength(20)
-                    .IsUnicode(false);
-
-                entity.Property(e => e.MaintenanceTypeDescription)
-                    .HasColumnName("MAINTENANCE_TYPE_DESCRIPTION")
-                    .HasMaxLength(20)
-                    .IsUnicode(false);
-            });
-
-            modelBuilder.Entity<HmrCodeTimeOfDayV>(entity =>
-            {
-                entity.HasNoKey();
-
-                entity.ToView("HMR_CODE_TIME_OF_DAY_V");
-
-                entity.Property(e => e.CodeLookupId)
-                    .HasColumnName("CODE_LOOKUP_ID")
-                    .HasColumnType("numeric(9, 0)");
-
-                entity.Property(e => e.TimeOfDayDescription)
-                    .HasColumnName("TIME_OF_DAY_DESCRIPTION")
-                    .HasMaxLength(20)
-                    .IsUnicode(false);
-
-                entity.Property(e => e.TimeOfKillCode)
-                    .HasColumnName("TIME_OF_KILL_CODE")
-                    .HasColumnType("numeric(9, 0)");
-            });
-
-            modelBuilder.Entity<HmrCodeUnitOfMeasureV>(entity =>
-            {
-                entity.HasNoKey();
-
-                entity.ToView("HMR_CODE_UNIT_OF_MEASURE_V");
-
-                entity.Property(e => e.CodeLookupId)
-                    .HasColumnName("CODE_LOOKUP_ID")
-                    .HasColumnType("numeric(9, 0)");
-
-                entity.Property(e => e.UomCode)
-                    .HasColumnName("UOM_CODE")
-                    .HasMaxLength(20)
-                    .IsUnicode(false);
-
-                entity.Property(e => e.UomDescription)
-                    .HasColumnName("UOM_DESCRIPTION")
-                    .HasMaxLength(20)
-                    .IsUnicode(false);
             });
 
             modelBuilder.Entity<HmrContractTerm>(entity =>
@@ -1151,14 +1006,10 @@ Either - may be spatially represented in either manner");
 
                 entity.Property(e => e.IsError)
                     .HasColumnName("IS_ERROR")
-                    .HasMaxLength(1)
-                    .IsUnicode(false)
                     .HasComment("Indicates if the message encountered an error during generation.  This indicator reflects a processing error when generating the email from the applicaiton server, but does not factor in any subsequent email bounces or rejections from a receiving mail server.");
 
                 entity.Property(e => e.IsSent)
                     .HasColumnName("IS_SENT")
-                    .HasMaxLength(1)
-                    .IsUnicode(false)
                     .HasComment("Indicates if the message was sent from the application.  This flag is used to queue messages to be sent.  If an error is encountered during email processing it will be indicated by the IS_ERROR flag.");
 
                 entity.Property(e => e.SendErrorText)
@@ -1938,155 +1789,191 @@ Either - may be spatially represented in either manner");
 
                 entity.ToTable("HMR_ROCKFALL_REPORT");
 
+                entity.HasComment("Submission data regarding rockfall incidents is ultimately staged in this table after being loaded and validated.  Validation status of the data is also provided here, as it may be desirable for some invalid data to be available and marked accordingly.");
+
                 entity.HasIndex(e => e.SubmissionObjectId)
                     .HasName("HMR_RCKFL_RPT_FK_I");
 
                 entity.Property(e => e.RockfallReportId)
                     .HasColumnName("ROCKFALL_REPORT_ID")
                     .HasColumnType("numeric(9, 0)")
-                    .HasDefaultValueSql("(NEXT VALUE FOR [HMR_RCKF_ID_SEQ])");
+                    .HasDefaultValueSql("(NEXT VALUE FOR [HMR_RCKF_ID_SEQ])")
+                    .HasComment("A system generated unique identifier.");
 
                 entity.Property(e => e.AppCreateTimestamp)
                     .HasColumnName("APP_CREATE_TIMESTAMP")
-                    .HasColumnType("datetime");
+                    .HasColumnType("datetime")
+                    .HasComment("Date and time of record creation");
 
                 entity.Property(e => e.AppCreateUserDirectory)
                     .IsRequired()
                     .HasColumnName("APP_CREATE_USER_DIRECTORY")
                     .HasMaxLength(12)
-                    .IsUnicode(false);
+                    .IsUnicode(false)
+                    .HasComment("Active Directory which retains source of truth for user idenifiers.");
 
-                entity.Property(e => e.AppCreateUserGuid).HasColumnName("APP_CREATE_USER_GUID");
+                entity.Property(e => e.AppCreateUserGuid)
+                    .HasColumnName("APP_CREATE_USER_GUID")
+                    .HasComment("Unique idenifier of user who created record");
 
                 entity.Property(e => e.AppCreateUserid)
                     .IsRequired()
                     .HasColumnName("APP_CREATE_USERID")
                     .HasMaxLength(30)
-                    .IsUnicode(false);
+                    .IsUnicode(false)
+                    .HasComment("Unique idenifier of user who created record");
 
                 entity.Property(e => e.AppLastUpdateTimestamp)
                     .HasColumnName("APP_LAST_UPDATE_TIMESTAMP")
-                    .HasColumnType("datetime");
+                    .HasColumnType("datetime")
+                    .HasComment("Date and time of last record update");
 
                 entity.Property(e => e.AppLastUpdateUserDirectory)
                     .IsRequired()
                     .HasColumnName("APP_LAST_UPDATE_USER_DIRECTORY")
                     .HasMaxLength(12)
-                    .IsUnicode(false);
+                    .IsUnicode(false)
+                    .HasComment("Active Directory which retains source of truth for user idenifiers.");
 
-                entity.Property(e => e.AppLastUpdateUserGuid).HasColumnName("APP_LAST_UPDATE_USER_GUID");
+                entity.Property(e => e.AppLastUpdateUserGuid)
+                    .HasColumnName("APP_LAST_UPDATE_USER_GUID")
+                    .HasComment("Unique idenifier of user who last updated record");
 
                 entity.Property(e => e.AppLastUpdateUserid)
                     .IsRequired()
                     .HasColumnName("APP_LAST_UPDATE_USERID")
                     .HasMaxLength(30)
-                    .IsUnicode(false);
+                    .IsUnicode(false)
+                    .HasComment("Unique idenifier of user who last updated record");
 
                 entity.Property(e => e.Comments)
                     .HasColumnName("COMMENTS")
                     .HasMaxLength(4000)
-                    .IsUnicode(false);
+                    .IsUnicode(false)
+                    .HasComment("Comments of occurrence");
 
                 entity.Property(e => e.ConcurrencyControlNumber)
                     .HasColumnName("CONCURRENCY_CONTROL_NUMBER")
-                    .HasDefaultValueSql("((1))");
+                    .HasDefaultValueSql("((1))")
+                    .HasComment("Record under edit indicator used for optomisitc record contention management.  If number differs from start of edit, then user will be prompted to that record has been updated by someone else.");
 
                 entity.Property(e => e.DbAuditCreateTimestamp)
                     .HasColumnName("DB_AUDIT_CREATE_TIMESTAMP")
                     .HasColumnType("datetime")
-                    .HasDefaultValueSql("(getutcdate())");
+                    .HasDefaultValueSql("(getutcdate())")
+                    .HasComment("Date and time record created in the database");
 
                 entity.Property(e => e.DbAuditCreateUserid)
                     .IsRequired()
                     .HasColumnName("DB_AUDIT_CREATE_USERID")
                     .HasMaxLength(30)
                     .IsUnicode(false)
-                    .HasDefaultValueSql("(user_name())");
+                    .HasDefaultValueSql("(user_name())")
+                    .HasComment("Named database user who created record");
 
                 entity.Property(e => e.DbAuditLastUpdateTimestamp)
                     .HasColumnName("DB_AUDIT_LAST_UPDATE_TIMESTAMP")
                     .HasColumnType("datetime")
-                    .HasDefaultValueSql("(getutcdate())");
+                    .HasDefaultValueSql("(getutcdate())")
+                    .HasComment("Date and time record was last updated in the database.");
 
                 entity.Property(e => e.DbAuditLastUpdateUserid)
                     .IsRequired()
                     .HasColumnName("DB_AUDIT_LAST_UPDATE_USERID")
                     .HasMaxLength(30)
                     .IsUnicode(false)
-                    .HasDefaultValueSql("(user_name())");
+                    .HasDefaultValueSql("(user_name())")
+                    .HasComment("Named database user who last updated record");
 
                 entity.Property(e => e.DirectionFromLandmark)
                     .HasColumnName("DIRECTION_FROM_LANDMARK")
                     .HasMaxLength(1)
-                    .IsUnicode(false);
+                    .IsUnicode(false)
+                    .HasComment("Direction of travel from Landmark to START_OFFSET");
 
                 entity.Property(e => e.DitchSnowIce)
                     .HasColumnName("DITCH_SNOW_ICE")
                     .HasMaxLength(1)
-                    .IsUnicode(false);
+                    .IsUnicode(false)
+                    .HasComment("Ditch snow or ice conditions present at rockfall site. Enter �Y� or leave blank.");
 
                 entity.Property(e => e.DitchVolume)
                     .HasColumnName("DITCH_VOLUME")
                     .HasMaxLength(30)
-                    .IsUnicode(false);
+                    .IsUnicode(false)
+                    .HasComment("Range of estimated volume of material in ditch (m cubed). if volume exceeds 5.0 m3 and report value in the other volume field.");
 
                 entity.Property(e => e.EndLatitude)
                     .HasColumnName("END_LATITUDE")
-                    .HasColumnType("numeric(11, 6)");
+                    .HasColumnType("numeric(16, 8)")
+                    .HasComment("The M (northing) portion of the activity end coordinate. Specified as a latitude in decimal degrees with six decimal places of precision. Positive numbers are indicative of the Northern Hemisphere. Coordinate is to be reported using the WGS84 datum. For point activity if this field is not provided it can be defaulted to same as START LATITUDE");
 
                 entity.Property(e => e.EndLongitude)
                     .HasColumnName("END_LONGITUDE")
-                    .HasColumnType("numeric(11, 6)");
+                    .HasColumnType("numeric(16, 8)")
+                    .HasComment("The X (easting) portion of the activity end coordinate. Specified as a longitude in decimal degrees with six decimal places of precision. Negative numbers are indicative of the Western Hemisphere. Coordinate is to be reported using the WGS84 datum. For point activity if this field is not provided it can be defaulted to same as START LONGITUDE.");
 
                 entity.Property(e => e.EndOffset)
                     .HasColumnName("END_OFFSET")
-                    .HasColumnType("numeric(7, 3)");
+                    .HasColumnType("numeric(7, 3)")
+                    .HasComment("This field is needed for linear referencing for location specific reports. If the work is less than 30 m, this field is not mandatory Offset from beginning of segment");
 
                 entity.Property(e => e.EstimatedRockfallDate)
                     .HasColumnName("ESTIMATED_ROCKFALL_DATE")
-                    .HasColumnType("date");
+                    .HasColumnType("date")
+                    .HasComment("Estimated date of occurrence.");
 
-                entity.Property(e => e.EstimatedRockfallTime).HasColumnName("ESTIMATED_ROCKFALL_TIME");
+                entity.Property(e => e.EstimatedRockfallTime)
+                    .HasColumnName("ESTIMATED_ROCKFALL_TIME")
+                    .HasComment("Estimated time of occurrence using the 24-hour clock");
 
                 entity.Property(e => e.FreezeThaw)
                     .HasColumnName("FREEZE_THAW")
                     .HasMaxLength(1)
-                    .IsUnicode(false);
+                    .IsUnicode(false)
+                    .HasComment("Freezing/thawing conditions present at rockfall site. Enter �Y� or leave blank.");
 
                 entity.Property(e => e.HeavyPrecip)
                     .HasColumnName("HEAVY_PRECIP")
                     .HasMaxLength(1)
-                    .IsUnicode(false);
+                    .IsUnicode(false)
+                    .HasComment("Heavy precipitation conditions present at rockfall site. Enter �Y� or leave blank.");
+
+                entity.Property(e => e.HighwayUnique)
+                    .HasColumnName("HIGHWAY_UNIQUE")
+                    .HasMaxLength(16)
+                    .IsUnicode(false)
+                    .HasComment("This identifies the section of road on which the activity occurred.  Road or Highway number sourced from a road network data product (RFI as of  2019) This is a value in the in the format: [Service Area]-[area manager area]-[subarea]-[highway number]");
 
                 entity.Property(e => e.HighwayUniqueName)
                     .HasColumnName("HIGHWAY_UNIQUE_NAME")
                     .HasMaxLength(255)
-                    .IsUnicode(false);
-
-                entity.Property(e => e.HighwayUniqueNumber)
-                    .HasColumnName("HIGHWAY_UNIQUE_NUMBER")
-                    .HasMaxLength(16)
-                    .IsUnicode(false);
-
-                entity.Property(e => e.LandMarkName)
-                    .HasColumnName("LAND_MARK_NAME")
-                    .HasMaxLength(255)
-                    .IsUnicode(false);
+                    .IsUnicode(false)
+                    .HasComment("Road or Highway name sourced from a road network data product (RFI as of Dec 2019)");
 
                 entity.Property(e => e.Landmark)
                     .HasColumnName("LANDMARK")
                     .HasMaxLength(8)
-                    .IsUnicode(false);
+                    .IsUnicode(false)
+                    .HasComment("This field needed for location reference: Landmarks provided should be those listed in the CHRIS HRP report for each Highway or road within the Service Area");
+
+                entity.Property(e => e.LandmarkName)
+                    .HasColumnName("LANDMARK_NAME")
+                    .HasMaxLength(255)
+                    .IsUnicode(false)
+                    .HasComment("Highway reference point (HRP) landmark.  This reference name reflects a valid landmark in the infrastructure asset management system (currenlty CHRIS as of 2019)");
 
                 entity.Property(e => e.LocationDescription)
                     .HasColumnName("LOCATION_DESCRIPTION")
                     .HasMaxLength(4000)
-                    .IsUnicode(false);
+                    .IsUnicode(false)
+                    .HasComment("Text field for comments and/or notes pertinent to the specified activity.");
 
                 entity.Property(e => e.McPhoneNumber)
                     .HasColumnName("MC_PHONE_NUMBER")
-                    .HasMaxLength(12)
-                    .IsUnicode(false);
+                    .HasMaxLength(30)
+                    .IsUnicode(false)
+                    .HasComment("Phone number of person reporting");
 
                 entity.Property(e => e.McrrIncidentNumber)
                     .HasColumnName("MCRR_INCIDENT_NUMBER")
@@ -2094,53 +1981,85 @@ Either - may be spatially represented in either manner");
                     .IsUnicode(false)
                     .HasComment("Rockfall reporting incident number. Unique work report record number from the Contractor maintenance management system.");
 
-                entity.Property(e => e.OtherVolume)
-                    .HasColumnName("OTHER_VOLUME")
-                    .HasColumnType("numeric(6, 2)");
+                entity.Property(e => e.OtherDitchVolume)
+                    .HasColumnName("OTHER_DITCH_VOLUME")
+                    .HasColumnType("numeric(6, 2)")
+                    .HasComment("Ditch volume total when the estimated volume in the ditch exceeds 5.0 m3.");
+
+                entity.Property(e => e.OtherTravelledLanesVolume)
+                    .HasColumnName("OTHER_TRAVELLED_LANES_VOLUME")
+                    .HasColumnType("numeric(6, 2)")
+                    .HasComment("Travelled lanes volume total when the estimated volume in traveled lanes exceeds 5.0 m3.");
+
+                entity.Property(e => e.RecordType)
+                    .IsRequired()
+                    .HasColumnName("RECORD_TYPE")
+                    .HasMaxLength(1)
+                    .IsUnicode(false)
+                    .HasComment("Alpha identifier for a Rockfall report submission.");
 
                 entity.Property(e => e.ReportDate)
                     .HasColumnName("REPORT_DATE")
-                    .HasColumnType("date");
+                    .HasColumnType("date")
+                    .HasComment("Date reported");
 
                 entity.Property(e => e.ReporterName)
                     .HasColumnName("REPORTER_NAME")
-                    .HasMaxLength(150)
-                    .IsUnicode(false);
+                    .HasMaxLength(1024)
+                    .IsUnicode(false)
+                    .HasComment("Name of person reporting occurrence");
 
                 entity.Property(e => e.RowNum)
                     .HasColumnName("ROW_NUM")
                     .HasColumnType("numeric(9, 0)")
                     .HasComment("Relative row number the record was located within a submission.");
 
+                entity.Property(e => e.ServiceArea)
+                    .HasColumnName("SERVICE_AREA")
+                    .HasColumnType("numeric(9, 0)")
+                    .HasComment("The Ministry Contract Service Area number in which the incident occured.");
+
                 entity.Property(e => e.StartLatitude)
                     .HasColumnName("START_LATITUDE")
-                    .HasColumnType("numeric(11, 6)");
+                    .HasColumnType("numeric(16, 8)")
+                    .HasComment("The M (northing) portion of the activity start coordinate. Specified as a latitude in decimal degrees with six decimal places of precision. Positive numbers are indicative of the Northern Hemisphere. Coordinate is to be reported using the WGS84 datum.");
 
                 entity.Property(e => e.StartLongitude)
                     .HasColumnName("START_LONGITUDE")
-                    .HasColumnType("numeric(11, 6)");
+                    .HasColumnType("numeric(16, 8)")
+                    .HasComment("The X (easting) portion of the activity start coordinate. Specified as a longitude in decimal degrees with six decimal places of precision. Negative numbers are indicative of the Western Hemisphere. Coordinate is to be reported using the WGS84 datum.");
 
                 entity.Property(e => e.StartOffset)
                     .HasColumnName("START_OFFSET")
-                    .HasColumnType("numeric(7, 3)");
+                    .HasColumnType("numeric(7, 3)")
+                    .HasComment("This field is needed for linear referencing for location specific reports.  Offset from beginning of segment.");
 
                 entity.Property(e => e.SubmissionObjectId)
                     .HasColumnName("SUBMISSION_OBJECT_ID")
-                    .HasColumnType("numeric(9, 0)");
+                    .HasColumnType("numeric(9, 0)")
+                    .HasComment("Unique identifier for SUBMISSION OBJECT.");
 
                 entity.Property(e => e.TravelledLanesVolume)
                     .HasColumnName("TRAVELLED_LANES_VOLUME")
                     .HasMaxLength(30)
-                    .IsUnicode(false);
+                    .IsUnicode(false)
+                    .HasComment("Range of estimated volume of material on the road (m cubed).");
 
                 entity.Property(e => e.ValidationStatusId)
                     .HasColumnName("VALIDATION_STATUS_ID")
-                    .HasColumnType("numeric(9, 0)");
+                    .HasColumnType("numeric(9, 0)")
+                    .HasComment("Unique identifier for validation STATUS.  Indicates the overall status of the submitted row of data.");
 
                 entity.Property(e => e.VehicleDamage)
                     .HasColumnName("VEHICLE_DAMAGE")
                     .HasMaxLength(1)
-                    .IsUnicode(false);
+                    .IsUnicode(false)
+                    .HasComment("Vehicle damage present at rockfall site. Enter �Y� or leave blank.");
+
+                entity.HasOne(d => d.ServiceAreaNavigation)
+                    .WithMany(p => p.HmrRockfallReports)
+                    .HasForeignKey(d => d.ServiceArea)
+                    .HasConstraintName("HMR_RCKFL_RPT_HMR_SRV_ARA_FK");
 
                 entity.HasOne(d => d.SubmissionObject)
                     .WithMany(p => p.HmrRockfallReports)
@@ -2258,15 +2177,15 @@ Either - may be spatially represented in either manner");
 
                 entity.Property(e => e.EndLatitude)
                     .HasColumnName("END_LATITUDE")
-                    .HasColumnType("numeric(18, 0)");
+                    .HasColumnType("numeric(16, 8)");
 
                 entity.Property(e => e.EndLongitude)
                     .HasColumnName("END_LONGITUDE")
-                    .HasColumnType("numeric(18, 0)");
+                    .HasColumnType("numeric(16, 8)");
 
                 entity.Property(e => e.EndOffset)
                     .HasColumnName("END_OFFSET")
-                    .HasColumnType("numeric(18, 0)");
+                    .HasColumnType("numeric(7, 3)");
 
                 entity.Property(e => e.EstimatedRockfallDate)
                     .HasColumnName("ESTIMATED_ROCKFALL_DATE")
@@ -2284,24 +2203,24 @@ Either - may be spatially represented in either manner");
                     .HasMaxLength(1)
                     .IsUnicode(false);
 
-                entity.Property(e => e.HighwayUniqueName)
-                    .HasColumnName("HIGHWAY_UNIQUE_NAME")
-                    .HasMaxLength(255)
-                    .IsUnicode(false);
-
-                entity.Property(e => e.HighwayUniqueNumber)
-                    .HasColumnName("HIGHWAY_UNIQUE_NUMBER")
+                entity.Property(e => e.HighwayUnique)
+                    .HasColumnName("HIGHWAY_UNIQUE")
                     .HasMaxLength(16)
                     .IsUnicode(false);
 
-                entity.Property(e => e.LandMarkName)
-                    .HasColumnName("LAND_MARK_NAME")
+                entity.Property(e => e.HighwayUniqueName)
+                    .HasColumnName("HIGHWAY_UNIQUE_NAME")
                     .HasMaxLength(255)
                     .IsUnicode(false);
 
                 entity.Property(e => e.Landmark)
                     .HasColumnName("LANDMARK")
                     .HasMaxLength(8)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.LandmarkName)
+                    .HasColumnName("LANDMARK_NAME")
+                    .HasMaxLength(255)
                     .IsUnicode(false);
 
                 entity.Property(e => e.LocationDescription)
@@ -2311,7 +2230,7 @@ Either - may be spatially represented in either manner");
 
                 entity.Property(e => e.McPhoneNumber)
                     .HasColumnName("MC_PHONE_NUMBER")
-                    .HasMaxLength(12)
+                    .HasMaxLength(30)
                     .IsUnicode(false);
 
                 entity.Property(e => e.McrrIncidentNumber)
@@ -2319,9 +2238,18 @@ Either - may be spatially represented in either manner");
                     .HasMaxLength(12)
                     .IsUnicode(false);
 
-                entity.Property(e => e.OtherVolume)
-                    .HasColumnName("OTHER_VOLUME")
+                entity.Property(e => e.OtherDitchVolume)
+                    .HasColumnName("OTHER_DITCH_VOLUME")
                     .HasColumnType("numeric(18, 0)");
+
+                entity.Property(e => e.OtherTravelledLanesVolume)
+                    .HasColumnName("OTHER_TRAVELLED_LANES_VOLUME")
+                    .HasColumnType("numeric(18, 0)");
+
+                entity.Property(e => e.RecordType)
+                    .HasColumnName("RECORD_TYPE")
+                    .HasMaxLength(1)
+                    .IsUnicode(false);
 
                 entity.Property(e => e.ReportDate)
                     .HasColumnName("REPORT_DATE")
@@ -2329,7 +2257,7 @@ Either - may be spatially represented in either manner");
 
                 entity.Property(e => e.ReporterName)
                     .HasColumnName("REPORTER_NAME")
-                    .HasMaxLength(150)
+                    .HasMaxLength(1024)
                     .IsUnicode(false);
 
                 entity.Property(e => e.RockfallReportId)
@@ -2340,17 +2268,21 @@ Either - may be spatially represented in either manner");
                     .HasColumnName("ROW_NUM")
                     .HasColumnType("numeric(18, 0)");
 
+                entity.Property(e => e.ServiceArea)
+                    .HasColumnName("SERVICE_AREA")
+                    .HasColumnType("numeric(9, 0)");
+
                 entity.Property(e => e.StartLatitude)
                     .HasColumnName("START_LATITUDE")
-                    .HasColumnType("numeric(18, 0)");
+                    .HasColumnType("numeric(16, 8)");
 
                 entity.Property(e => e.StartLongitude)
                     .HasColumnName("START_LONGITUDE")
-                    .HasColumnType("numeric(18, 0)");
+                    .HasColumnType("numeric(16, 8)");
 
                 entity.Property(e => e.StartOffset)
                     .HasColumnName("START_OFFSET")
-                    .HasColumnType("numeric(18, 0)");
+                    .HasColumnType("numeric(7, 3)");
 
                 entity.Property(e => e.SubmissionObjectId)
                     .HasColumnName("SUBMISSION_OBJECT_ID")
@@ -2478,8 +2410,6 @@ Either - may be spatially represented in either manner");
 
                 entity.Property(e => e.IsInternal)
                     .HasColumnName("IS_INTERNAL")
-                    .HasMaxLength(1)
-                    .IsUnicode(false)
                     .HasComment("Indicates if the role is only appropriate for users in a contract management position.");
 
                 entity.Property(e => e.Name)
@@ -2581,10 +2511,7 @@ Either - may be spatially represented in either manner");
                     .HasColumnName("END_DATE_HIST")
                     .HasColumnType("datetime");
 
-                entity.Property(e => e.IsInternal)
-                    .HasColumnName("IS_INTERNAL")
-                    .HasMaxLength(1)
-                    .IsUnicode(false);
+                entity.Property(e => e.IsInternal).HasColumnName("IS_INTERNAL");
 
                 entity.Property(e => e.Name)
                     .IsRequired()
@@ -3312,8 +3239,6 @@ Either - may be spatially represented in either manner");
 
                 entity.Property(e => e.IsRequired)
                     .HasColumnName("IS_REQUIRED")
-                    .HasMaxLength(1)
-                    .IsUnicode(false)
                     .HasComment("Indicates the value must be populated in all submissions.");
 
                 entity.Property(e => e.MaxDate)
@@ -3360,7 +3285,8 @@ Either - may be spatially represented in either manner");
 
                 entity.Property(e => e.SubmissionStreamId)
                     .HasColumnName("SUBMISSION_STREAM_ID")
-                    .HasColumnType("numeric(9, 0)");
+                    .HasColumnType("numeric(9, 0)")
+                    .HasComment("A system generated unique identifier.");
 
                 entity.HasOne(d => d.SubmissionStream)
                     .WithMany(p => p.HmrStreamElements)
@@ -3470,10 +3396,7 @@ Either - may be spatially represented in either manner");
                     .HasColumnName("END_DATE_HIST")
                     .HasColumnType("datetime");
 
-                entity.Property(e => e.IsRequired)
-                    .HasColumnName("IS_REQUIRED")
-                    .HasMaxLength(1)
-                    .IsUnicode(false);
+                entity.Property(e => e.IsRequired).HasColumnName("IS_REQUIRED");
 
                 entity.Property(e => e.MaxDate)
                     .HasColumnName("MAX_DATE")
@@ -3618,7 +3541,6 @@ Either - may be spatially represented in either manner");
                 entity.Property(e => e.DigitalRepresentation)
                     .IsRequired()
                     .HasColumnName("DIGITAL_REPRESENTATION")
-                    .HasColumnType("image")
                     .HasComment("Raw file storage within the database.");
 
                 entity.Property(e => e.ErrorDetail)
@@ -3702,79 +3624,98 @@ Either - may be spatially represented in either manner");
 
                 entity.ToTable("HMR_SUBMISSION_ROW");
 
+                entity.HasComment("Each row of data within a  SUBMISSION OBJECT for each file submission that  passes basic file validation.");
+
                 entity.Property(e => e.RowId)
                     .HasColumnName("ROW_ID")
                     .HasColumnType("numeric(9, 0)")
-                    .HasDefaultValueSql("(NEXT VALUE FOR [HMR_SUBM_RW_ID_SEQ])");
+                    .HasDefaultValueSql("(NEXT VALUE FOR [HMR_SUBM_RW_ID_SEQ])")
+                    .HasComment("A system generated unique identifier.");
 
                 entity.Property(e => e.AppCreateTimestamp)
                     .HasColumnName("APP_CREATE_TIMESTAMP")
-                    .HasColumnType("datetime");
+                    .HasColumnType("datetime")
+                    .HasComment("Date and time of record creation");
 
                 entity.Property(e => e.AppCreateUserDirectory)
                     .IsRequired()
                     .HasColumnName("APP_CREATE_USER_DIRECTORY")
                     .HasMaxLength(12)
-                    .IsUnicode(false);
+                    .IsUnicode(false)
+                    .HasComment("Active Directory which retains source of truth for user idenifiers.");
 
-                entity.Property(e => e.AppCreateUserGuid).HasColumnName("APP_CREATE_USER_GUID");
+                entity.Property(e => e.AppCreateUserGuid)
+                    .HasColumnName("APP_CREATE_USER_GUID")
+                    .HasComment("Unique idenifier of user who created record");
 
                 entity.Property(e => e.AppCreateUserid)
                     .IsRequired()
                     .HasColumnName("APP_CREATE_USERID")
                     .HasMaxLength(30)
-                    .IsUnicode(false);
+                    .IsUnicode(false)
+                    .HasComment("Unique idenifier of user who created record");
 
                 entity.Property(e => e.AppLastUpdateTimestamp)
                     .HasColumnName("APP_LAST_UPDATE_TIMESTAMP")
-                    .HasColumnType("datetime");
+                    .HasColumnType("datetime")
+                    .HasComment("Date and time of last record update");
 
                 entity.Property(e => e.AppLastUpdateUserDirectory)
                     .IsRequired()
                     .HasColumnName("APP_LAST_UPDATE_USER_DIRECTORY")
                     .HasMaxLength(12)
-                    .IsUnicode(false);
+                    .IsUnicode(false)
+                    .HasComment("Active Directory which retains source of truth for user idenifiers.");
 
-                entity.Property(e => e.AppLastUpdateUserGuid).HasColumnName("APP_LAST_UPDATE_USER_GUID");
+                entity.Property(e => e.AppLastUpdateUserGuid)
+                    .HasColumnName("APP_LAST_UPDATE_USER_GUID")
+                    .HasComment("Unique idenifier of user who last updated record");
 
                 entity.Property(e => e.AppLastUpdateUserid)
                     .IsRequired()
                     .HasColumnName("APP_LAST_UPDATE_USERID")
                     .HasMaxLength(30)
-                    .IsUnicode(false);
+                    .IsUnicode(false)
+                    .HasComment("Unique idenifier of user who last updated record");
 
                 entity.Property(e => e.ConcurrencyControlNumber)
                     .HasColumnName("CONCURRENCY_CONTROL_NUMBER")
-                    .HasDefaultValueSql("((1))");
+                    .HasDefaultValueSql("((1))")
+                    .HasComment("Record under edit indicator used for optomisitc record contention management.  If number differs from start of edit, then user will be prompted to that record has been updated by someone else.");
 
                 entity.Property(e => e.DbAuditCreateTimestamp)
                     .HasColumnName("DB_AUDIT_CREATE_TIMESTAMP")
                     .HasColumnType("datetime")
-                    .HasDefaultValueSql("(getutcdate())");
+                    .HasDefaultValueSql("(getutcdate())")
+                    .HasComment("Date and time record created in the database");
 
                 entity.Property(e => e.DbAuditCreateUserid)
                     .IsRequired()
                     .HasColumnName("DB_AUDIT_CREATE_USERID")
                     .HasMaxLength(30)
                     .IsUnicode(false)
-                    .HasDefaultValueSql("(user_name())");
+                    .HasDefaultValueSql("(user_name())")
+                    .HasComment("Named database user who created record");
 
                 entity.Property(e => e.DbAuditLastUpdateTimestamp)
                     .HasColumnName("DB_AUDIT_LAST_UPDATE_TIMESTAMP")
                     .HasColumnType("datetime")
-                    .HasDefaultValueSql("(getutcdate())");
+                    .HasDefaultValueSql("(getutcdate())")
+                    .HasComment("Date and time record was last updated in the database.");
 
                 entity.Property(e => e.DbAuditLastUpdateUserid)
                     .IsRequired()
                     .HasColumnName("DB_AUDIT_LAST_UPDATE_USERID")
                     .HasMaxLength(30)
                     .IsUnicode(false)
-                    .HasDefaultValueSql("(user_name())");
+                    .HasDefaultValueSql("(user_name())")
+                    .HasComment("Named database user who last updated record");
 
                 entity.Property(e => e.ErrorDetail)
                     .HasColumnName("ERROR_DETAIL")
                     .HasMaxLength(4000)
-                    .IsUnicode(false);
+                    .IsUnicode(false)
+                    .HasComment("Full listing of validation errors in JSON format for the submitted row.");
 
                 entity.Property(e => e.IsResubmitted)
                     .HasColumnName("IS_RESUBMITTED")
@@ -3785,12 +3726,16 @@ Either - may be spatially represented in either manner");
                 entity.Property(e => e.RecordNumber)
                     .HasColumnName("RECORD_NUMBER")
                     .HasMaxLength(8)
-                    .IsUnicode(false);
+                    .IsUnicode(false)
+                    .HasComment(@"Unique work report record number from the maintainence contractor.
+This is uniquely identifies each record submission for a contractor.
+<Service Area><Record Number> will uniquely identify each record in the application for a particular contractor.");
 
                 entity.Property(e => e.RowHash)
                     .HasColumnName("ROW_HASH")
                     .HasMaxLength(256)
-                    .IsUnicode(false);
+                    .IsUnicode(false)
+                    .HasComment("Cryptographic hash for each row of data received. The hash total is is used to compared with subsequently submitted data to check for duplicate submissions. If a match exists, newly matched data is not processed further.");
 
                 entity.Property(e => e.RowNum)
                     .HasColumnName("ROW_NUM")
@@ -3799,16 +3744,19 @@ Either - may be spatially represented in either manner");
 
                 entity.Property(e => e.RowStatusId)
                     .HasColumnName("ROW_STATUS_ID")
-                    .HasColumnType("numeric(9, 0)");
+                    .HasColumnType("numeric(9, 0)")
+                    .HasComment("Unique identifier relecting the current status of the submission row.");
 
                 entity.Property(e => e.RowValue)
                     .HasColumnName("ROW_VALUE")
                     .HasMaxLength(4000)
-                    .IsUnicode(false);
+                    .IsUnicode(false)
+                    .HasComment("Contains a complete row of submitted data, including delimiters (ie: comma) and text qualifiers (ie: quote).  The row value is used to queue data for validation and loading.  This is staged data used to queue and compare data before loading it within the appropriate tables for reporting.");
 
                 entity.Property(e => e.SubmissionObjectId)
                     .HasColumnName("SUBMISSION_OBJECT_ID")
-                    .HasColumnType("numeric(9, 0)");
+                    .HasColumnType("numeric(9, 0)")
+                    .HasComment("Unique identifier for a SUBMISSION OBJECT record");
 
                 entity.HasOne(d => d.RowStatus)
                     .WithMany(p => p.HmrSubmissionRows)
@@ -3953,113 +3901,98 @@ Either - may be spatially represented in either manner");
 
                 entity.ToTable("HMR_SUBMISSION_STATUS");
 
-                entity.HasComment("Indicates the statues a SUBMISSION_OBJECT can be assigned during ingestion (ie:  Received, Invalid, Valid)");
-
                 entity.Property(e => e.StatusId)
                     .HasColumnName("STATUS_ID")
                     .HasColumnType("numeric(9, 0)")
-                    .HasDefaultValueSql("(NEXT VALUE FOR [HMR_SUBM_STAT_ID_SEQ])")
-                    .HasComment("Unique identifier for a record.");
+                    .HasDefaultValueSql("(NEXT VALUE FOR [HMR_SUBM_STAT_ID_SEQ])");
 
                 entity.Property(e => e.AppCreateTimestamp)
                     .HasColumnName("APP_CREATE_TIMESTAMP")
-                    .HasColumnType("datetime")
-                    .HasComment("Date and time of record creation");
+                    .HasColumnType("datetime");
 
                 entity.Property(e => e.AppCreateUserDirectory)
                     .IsRequired()
                     .HasColumnName("APP_CREATE_USER_DIRECTORY")
                     .HasMaxLength(12)
-                    .IsUnicode(false)
-                    .HasComment("Active Directory which retains source of truth for user idenifiers.");
+                    .IsUnicode(false);
 
-                entity.Property(e => e.AppCreateUserGuid)
-                    .HasColumnName("APP_CREATE_USER_GUID")
-                    .HasComment("Unique idenifier of user who created record");
+                entity.Property(e => e.AppCreateUserGuid).HasColumnName("APP_CREATE_USER_GUID");
 
                 entity.Property(e => e.AppCreateUserid)
                     .IsRequired()
                     .HasColumnName("APP_CREATE_USERID")
                     .HasMaxLength(30)
-                    .IsUnicode(false)
-                    .HasComment("Unique idenifier of user who created record");
+                    .IsUnicode(false);
 
                 entity.Property(e => e.AppLastUpdateTimestamp)
                     .HasColumnName("APP_LAST_UPDATE_TIMESTAMP")
-                    .HasColumnType("datetime")
-                    .HasComment("Date and time of last record update");
+                    .HasColumnType("datetime");
 
                 entity.Property(e => e.AppLastUpdateUserDirectory)
                     .IsRequired()
                     .HasColumnName("APP_LAST_UPDATE_USER_DIRECTORY")
                     .HasMaxLength(12)
-                    .IsUnicode(false)
-                    .HasComment("Active Directory which retains source of truth for user idenifiers.");
+                    .IsUnicode(false);
 
-                entity.Property(e => e.AppLastUpdateUserGuid)
-                    .HasColumnName("APP_LAST_UPDATE_USER_GUID")
-                    .HasComment("Unique idenifier of user who last updated record");
+                entity.Property(e => e.AppLastUpdateUserGuid).HasColumnName("APP_LAST_UPDATE_USER_GUID");
 
                 entity.Property(e => e.AppLastUpdateUserid)
                     .IsRequired()
                     .HasColumnName("APP_LAST_UPDATE_USERID")
                     .HasMaxLength(30)
-                    .IsUnicode(false)
-                    .HasComment("Unique idenifier of user who last updated record");
+                    .IsUnicode(false);
 
                 entity.Property(e => e.ConcurrencyControlNumber)
                     .HasColumnName("CONCURRENCY_CONTROL_NUMBER")
-                    .HasDefaultValueSql("((1))")
-                    .HasComment("Record under edit indicator used for optomisitc record contention management.  If number differs from start of edit, then user will be prompted to that record has been updated by someone else.");
+                    .HasDefaultValueSql("((1))");
 
                 entity.Property(e => e.DbAuditCreateTimestamp)
                     .HasColumnName("DB_AUDIT_CREATE_TIMESTAMP")
                     .HasColumnType("datetime")
-                    .HasDefaultValueSql("(getutcdate())")
-                    .HasComment("Date and time record created in the database");
+                    .HasDefaultValueSql("(getutcdate())");
 
                 entity.Property(e => e.DbAuditCreateUserid)
                     .IsRequired()
                     .HasColumnName("DB_AUDIT_CREATE_USERID")
                     .HasMaxLength(30)
                     .IsUnicode(false)
-                    .HasDefaultValueSql("(user_name())")
-                    .HasComment("Named database user who created record");
+                    .HasDefaultValueSql("(user_name())");
 
                 entity.Property(e => e.DbAuditLastUpdateTimestamp)
                     .HasColumnName("DB_AUDIT_LAST_UPDATE_TIMESTAMP")
                     .HasColumnType("datetime")
-                    .HasDefaultValueSql("(getutcdate())")
-                    .HasComment("Date and time record was last updated in the database.");
+                    .HasDefaultValueSql("(getutcdate())");
 
                 entity.Property(e => e.DbAuditLastUpdateUserid)
                     .IsRequired()
                     .HasColumnName("DB_AUDIT_LAST_UPDATE_USERID")
                     .HasMaxLength(30)
                     .IsUnicode(false)
-                    .HasDefaultValueSql("(user_name())")
-                    .HasComment("Named database user who last updated record");
+                    .HasDefaultValueSql("(user_name())");
 
                 entity.Property(e => e.Description)
                     .IsRequired()
                     .HasColumnName("DESCRIPTION")
                     .HasMaxLength(150)
                     .IsUnicode(false)
-                    .HasDefaultValueSql("('0')")
-                    .HasComment("Provides business description of the submission processing status");
+                    .HasDefaultValueSql("('0')");
+
+                entity.Property(e => e.LongDescription)
+                    .HasColumnName("LONG_DESCRIPTION")
+                    .HasMaxLength(255)
+                    .IsUnicode(false)
+                    .HasComment("Full description of the status code.");
 
                 entity.Property(e => e.StatusCode)
                     .IsRequired()
                     .HasColumnName("STATUS_CODE")
                     .HasMaxLength(20)
-                    .IsUnicode(false)
-                    .HasComment("Describes the file processing status.");
+                    .IsUnicode(false);
 
                 entity.Property(e => e.StatusType)
                     .HasColumnName("STATUS_TYPE")
                     .HasMaxLength(12)
-                    .IsUnicode(false)
-                    .HasComment("Indicates if status code is for SUBMISSION OBJECT, SUBMISSION  ROW or final staging table..");
+                    .IsUnicode(false);
             });
 
             modelBuilder.Entity<HmrSubmissionStream>(entity =>
@@ -4597,7 +4530,8 @@ Either - may be spatially represented in either manner");
                 entity.Property(e => e.SystemValidationId)
                     .HasColumnName("SYSTEM_VALIDATION_ID")
                     .HasColumnType("numeric(9, 0)")
-                    .HasDefaultValueSql("(NEXT VALUE FOR [SYS_VLD_ID_SEQ])");
+                    .HasDefaultValueSql("(NEXT VALUE FOR [SYS_VLD_ID_SEQ])")
+                    .HasComment("A system generated unique identifier.");
 
                 entity.Property(e => e.AttributeName)
                     .HasColumnName("ATTRIBUTE_NAME")
@@ -4942,6 +4876,8 @@ Either - may be spatially represented in either manner");
 
                 entity.ToTable("HMR_WILDLIFE_REPORT");
 
+                entity.HasComment("Submission data regarding wildlife incidents is ultimately staged in this table after being loaded and validated.  Validation status of the data is also provided here, as it may be desirable for some invalid data to be available and marked accordingly.");
+
                 entity.HasIndex(e => e.ServiceArea)
                     .HasName("WLDLF_RPT_CNT_ARA_FK_I");
 
@@ -4951,117 +4887,153 @@ Either - may be spatially represented in either manner");
                 entity.Property(e => e.WildlifeRecordId)
                     .HasColumnName("WILDLIFE_RECORD_ID")
                     .HasColumnType("numeric(9, 0)")
-                    .HasDefaultValueSql("(NEXT VALUE FOR [HMR_WLDLF_ID_SEQ])");
+                    .HasDefaultValueSql("(NEXT VALUE FOR [HMR_WLDLF_ID_SEQ])")
+                    .HasComment("Unique identifier for a record");
 
                 entity.Property(e => e.AccidentDate)
                     .HasColumnName("ACCIDENT_DATE")
-                    .HasColumnType("datetime");
+                    .HasColumnType("datetime")
+                    .HasComment("Date of accident. ");
 
                 entity.Property(e => e.Age)
                     .HasColumnName("AGE")
                     .HasMaxLength(1)
-                    .IsUnicode(false);
+                    .IsUnicode(false)
+                    .HasComment("Unique identifer for age range of involved animal.  (eg: A=Adult, Y=Young,U=unknown) ");
 
                 entity.Property(e => e.AppCreateTimestamp)
                     .HasColumnName("APP_CREATE_TIMESTAMP")
-                    .HasColumnType("datetime");
+                    .HasColumnType("datetime")
+                    .HasComment("Date and time of record creation");
 
                 entity.Property(e => e.AppCreateUserDirectory)
                     .IsRequired()
                     .HasColumnName("APP_CREATE_USER_DIRECTORY")
                     .HasMaxLength(12)
-                    .IsUnicode(false);
+                    .IsUnicode(false)
+                    .HasComment("Active Directory which retains source of truth for user idenifiers.");
 
-                entity.Property(e => e.AppCreateUserGuid).HasColumnName("APP_CREATE_USER_GUID");
+                entity.Property(e => e.AppCreateUserGuid)
+                    .HasColumnName("APP_CREATE_USER_GUID")
+                    .HasComment("Unique idenifier of user who created record");
 
                 entity.Property(e => e.AppCreateUserid)
                     .IsRequired()
                     .HasColumnName("APP_CREATE_USERID")
                     .HasMaxLength(30)
-                    .IsUnicode(false);
+                    .IsUnicode(false)
+                    .HasComment("Unique idenifier of user who created record");
 
                 entity.Property(e => e.AppLastUpdateTimestamp)
                     .HasColumnName("APP_LAST_UPDATE_TIMESTAMP")
-                    .HasColumnType("datetime");
+                    .HasColumnType("datetime")
+                    .HasComment("Date and time of last record update");
 
                 entity.Property(e => e.AppLastUpdateUserDirectory)
                     .IsRequired()
                     .HasColumnName("APP_LAST_UPDATE_USER_DIRECTORY")
                     .HasMaxLength(12)
-                    .IsUnicode(false);
+                    .IsUnicode(false)
+                    .HasComment("Active Directory which retains source of truth for user idenifiers.");
 
-                entity.Property(e => e.AppLastUpdateUserGuid).HasColumnName("APP_LAST_UPDATE_USER_GUID");
+                entity.Property(e => e.AppLastUpdateUserGuid)
+                    .HasColumnName("APP_LAST_UPDATE_USER_GUID")
+                    .HasComment("Unique idenifier of user who last updated record");
 
                 entity.Property(e => e.AppLastUpdateUserid)
                     .IsRequired()
                     .HasColumnName("APP_LAST_UPDATE_USERID")
                     .HasMaxLength(30)
-                    .IsUnicode(false);
+                    .IsUnicode(false)
+                    .HasComment("Unique idenifier of user who last updated record");
 
                 entity.Property(e => e.Comment)
                     .HasColumnName("COMMENT")
                     .HasMaxLength(1024)
-                    .IsUnicode(false);
+                    .IsUnicode(false)
+                    .HasComment("Text field for comments and/or notes pertinent to the specified occurance.");
 
                 entity.Property(e => e.ConcurrencyControlNumber)
                     .HasColumnName("CONCURRENCY_CONTROL_NUMBER")
-                    .HasDefaultValueSql("((1))");
+                    .HasDefaultValueSql("((1))")
+                    .HasComment("Record under edit indicator used for optomisitc record contention management.  If number differs from start of edit, then user will be prompted to that record has been updated by someone else.");
 
                 entity.Property(e => e.DbAuditCreateTimestamp)
                     .HasColumnName("DB_AUDIT_CREATE_TIMESTAMP")
                     .HasColumnType("datetime")
-                    .HasDefaultValueSql("(getutcdate())");
+                    .HasDefaultValueSql("(getutcdate())")
+                    .HasComment("Date and time record created in the database");
 
                 entity.Property(e => e.DbAuditCreateUserid)
                     .IsRequired()
                     .HasColumnName("DB_AUDIT_CREATE_USERID")
                     .HasMaxLength(30)
                     .IsUnicode(false)
-                    .HasDefaultValueSql("(user_name())");
+                    .HasDefaultValueSql("(user_name())")
+                    .HasComment("Named database user who created record");
 
                 entity.Property(e => e.DbAuditLastUpdateTimestamp)
                     .HasColumnName("DB_AUDIT_LAST_UPDATE_TIMESTAMP")
                     .HasColumnType("datetime")
-                    .HasDefaultValueSql("(getutcdate())");
+                    .HasDefaultValueSql("(getutcdate())")
+                    .HasComment("Date and time record was last updated in the database.");
 
                 entity.Property(e => e.DbAuditLastUpdateUserid)
                     .IsRequired()
                     .HasColumnName("DB_AUDIT_LAST_UPDATE_USERID")
                     .HasMaxLength(30)
                     .IsUnicode(false)
-                    .HasDefaultValueSql("(user_name())");
+                    .HasDefaultValueSql("(user_name())")
+                    .HasComment("Named database user who last updated record");
 
-                entity.Property(e => e.HighwayUniqueNumber)
-                    .HasColumnName("HIGHWAY_UNIQUE_NUMBER")
+                entity.Property(e => e.HighwayUnique)
+                    .HasColumnName("HIGHWAY_UNIQUE")
                     .HasMaxLength(16)
-                    .IsUnicode(false);
+                    .IsUnicode(false)
+                    .HasComment(@"This identifies the section of road on which the incident occurred.
+This is a value in the in the format:
+[Service Area]-[area manager area]-[subarea]-[highway number]
+This reference number reflects a valid reference in the road network (currenltyRFI within  CHRIS as of 2019)");
 
                 entity.Property(e => e.Landmark)
                     .HasColumnName("LANDMARK")
                     .HasMaxLength(8)
-                    .IsUnicode(false);
+                    .IsUnicode(false)
+                    .HasComment("Highway reference point (HRP) landmark.  This reference number reflects a valid landmark in the asset management system (currenlty CHRIS as of 2019)");
 
                 entity.Property(e => e.Latitude)
                     .HasColumnName("LATITUDE")
-                    .HasColumnType("numeric(11, 6)");
+                    .HasColumnType("numeric(16, 8)")
+                    .HasComment(@"The Y (northing) portion of the accident coordinate. Coordinate is to be reported using the WGS84 datum.
+");
 
                 entity.Property(e => e.Longitude)
                     .HasColumnName("LONGITUDE")
-                    .HasColumnType("numeric(11, 6)");
+                    .HasColumnType("numeric(16, 8)")
+                    .HasComment("The X (easting)  portion of the accident coordinate. Coordinate is to be reported using the WGS84 datum.");
 
                 entity.Property(e => e.NearestTown)
                     .HasColumnName("NEAREST_TOWN")
                     .HasMaxLength(150)
-                    .IsUnicode(false);
+                    .IsUnicode(false)
+                    .HasComment("Name of nearest town to wildlife accident");
+
+                entity.Property(e => e.Offset)
+                    .HasColumnName("OFFSET")
+                    .HasColumnType("numeric(7, 3)")
+                    .HasComment(@"This field is needed for linear referencing for location specific reports. 
+Offset from beginning of segment.");
 
                 entity.Property(e => e.Quantity)
                     .HasColumnName("QUANTITY")
-                    .HasColumnType("numeric(4, 0)");
+                    .HasColumnType("numeric(4, 0)")
+                    .HasComment("Number of animals injured or killed");
 
                 entity.Property(e => e.RecordType)
                     .HasColumnName("RECORD_TYPE")
                     .HasMaxLength(1)
-                    .IsUnicode(false);
+                    .IsUnicode(false)
+                    .HasComment("Identifies the type of record.  WARS = W / Allowed Values: W");
 
                 entity.Property(e => e.RowNum)
                     .HasColumnName("ROW_NUM")
@@ -5070,38 +5042,42 @@ Either - may be spatially represented in either manner");
 
                 entity.Property(e => e.ServiceArea)
                     .HasColumnName("SERVICE_AREA")
-                    .HasColumnType("numeric(9, 0)");
+                    .HasColumnType("numeric(9, 0)")
+                    .HasComment("The Ministry Contract Service Area number in which the incident occured.");
 
                 entity.Property(e => e.Sex)
                     .HasColumnName("SEX")
                     .HasMaxLength(1)
-                    .IsUnicode(false);
+                    .IsUnicode(false)
+                    .HasComment("Unique identifer for sex of involved animal.  Allowed values: M, F, U");
 
                 entity.Property(e => e.Species)
                     .HasColumnName("SPECIES")
-                    .HasColumnType("numeric(2, 0)");
-
-                entity.Property(e => e.StartOffset)
-                    .HasColumnName("START_OFFSET")
-                    .HasColumnType("numeric(7, 3)");
+                    .HasColumnType("numeric(2, 0)")
+                    .HasComment("Unique identifier for animal species. (eg: 2 = Moose)");
 
                 entity.Property(e => e.SubmissionObjectId)
                     .HasColumnName("SUBMISSION_OBJECT_ID")
-                    .HasColumnType("numeric(9, 0)");
+                    .HasColumnType("numeric(9, 0)")
+                    .HasComment("Unique identifier for SUBMISSION OBJECT.");
 
                 entity.Property(e => e.TimeOfKill)
                     .HasColumnName("TIME_OF_KILL")
                     .HasMaxLength(1)
-                    .IsUnicode(false);
+                    .IsUnicode(false)
+                    .HasComment(@"General  light conditions at time the incident occured. (eg: 1=Dawn, 2=Dusk)
+");
 
                 entity.Property(e => e.ValidationStatusId)
                     .HasColumnName("VALIDATION_STATUS_ID")
-                    .HasColumnType("numeric(9, 0)");
+                    .HasColumnType("numeric(9, 0)")
+                    .HasComment("Unique identifier for VALIDATION STATUS.  Indicates the overall status of the submitted row of data.");
 
                 entity.Property(e => e.WildlifeSign)
                     .HasColumnName("WILDLIFE_SIGN")
                     .HasMaxLength(1)
-                    .IsUnicode(false);
+                    .IsUnicode(false)
+                    .HasComment("Is Wildlife sign within 100m (Y, N or Unknown)");
 
                 entity.HasOne(d => d.ServiceAreaNavigation)
                     .WithMany(p => p.HmrWildlifeReports)
@@ -5217,8 +5193,8 @@ Either - may be spatially represented in either manner");
                     .HasColumnName("END_DATE_HIST")
                     .HasColumnType("datetime");
 
-                entity.Property(e => e.HighwayUniqueNumber)
-                    .HasColumnName("HIGHWAY_UNIQUE_NUMBER")
+                entity.Property(e => e.HighwayUnique)
+                    .HasColumnName("HIGHWAY_UNIQUE")
                     .HasMaxLength(16)
                     .IsUnicode(false);
 
@@ -5229,16 +5205,20 @@ Either - may be spatially represented in either manner");
 
                 entity.Property(e => e.Latitude)
                     .HasColumnName("LATITUDE")
-                    .HasColumnType("numeric(18, 0)");
+                    .HasColumnType("numeric(16, 8)");
 
                 entity.Property(e => e.Longitude)
                     .HasColumnName("LONGITUDE")
-                    .HasColumnType("numeric(18, 0)");
+                    .HasColumnType("numeric(16, 8)");
 
                 entity.Property(e => e.NearestTown)
                     .HasColumnName("NEAREST_TOWN")
                     .HasMaxLength(150)
                     .IsUnicode(false);
+
+                entity.Property(e => e.Offset)
+                    .HasColumnName("OFFSET")
+                    .HasColumnType("numeric(7, 3)");
 
                 entity.Property(e => e.Quantity)
                     .HasColumnName("QUANTITY")
@@ -5264,10 +5244,6 @@ Either - may be spatially represented in either manner");
 
                 entity.Property(e => e.Species)
                     .HasColumnName("SPECIES")
-                    .HasColumnType("numeric(18, 0)");
-
-                entity.Property(e => e.StartOffset)
-                    .HasColumnName("START_OFFSET")
                     .HasColumnType("numeric(18, 0)");
 
                 entity.Property(e => e.SubmissionObjectId)
@@ -5300,131 +5276,182 @@ Either - may be spatially represented in either manner");
 
                 entity.ToTable("HMR_WORK_REPORT");
 
+                entity.HasComment("Submission data regarding maintenance activities is ultimately staged in this table after being loaded and validated.  Validation status of the data is also provided here, as it may be desirable for some invalid data to be available and marked accordingly.");
+
                 entity.HasIndex(e => e.SubmissionObjectId)
                     .HasName("HMR_WRK_RRT_FK_I");
 
                 entity.Property(e => e.WorkReportId)
                     .HasColumnName("WORK_REPORT_ID")
                     .HasColumnType("numeric(9, 0)")
-                    .HasDefaultValueSql("(NEXT VALUE FOR [HMR_WRK_RPT_ID_SEQ])");
+                    .HasDefaultValueSql("(NEXT VALUE FOR [HMR_WRK_RPT_ID_SEQ])")
+                    .HasComment("A system generated unique identifier.");
 
                 entity.Property(e => e.Accomplishment)
                     .HasColumnName("ACCOMPLISHMENT")
-                    .HasColumnType("numeric(7, 2)");
+                    .HasColumnType("numeric(9, 2)")
+                    .HasComment("The number of units of work completed for the activity corresponding to the activity number.");
 
                 entity.Property(e => e.ActivityNumber)
                     .HasColumnName("ACTIVITY_NUMBER")
-                    .HasMaxLength(6)
-                    .IsUnicode(false);
+                    .HasMaxLength(30)
+                    .IsUnicode(false)
+                    .HasComment(@"Code which uniquely identifies the activity performed.  The number reflects a a classificaiton hierarchy comprised of three levels: ABBCCC
+
+A - the first digit represents Specification Category (eg:2 - Drainage )
+BB - the second two digits represent Activity Category (eg: 02 - Drainage Appliance Maintenance)
+CCC - the last three digits represent Activity Type and Detail (eg: 310 - Boring, Augering.  300 series reflects Quantified value, which would be linear meters in this case.)");
 
                 entity.Property(e => e.AppCreateTimestamp)
                     .HasColumnName("APP_CREATE_TIMESTAMP")
-                    .HasColumnType("datetime");
+                    .HasColumnType("datetime")
+                    .HasComment("Date and time of record creation");
 
                 entity.Property(e => e.AppCreateUserDirectory)
                     .IsRequired()
                     .HasColumnName("APP_CREATE_USER_DIRECTORY")
                     .HasMaxLength(12)
-                    .IsUnicode(false);
+                    .IsUnicode(false)
+                    .HasComment("Active Directory which retains source of truth for user idenifiers.");
 
-                entity.Property(e => e.AppCreateUserGuid).HasColumnName("APP_CREATE_USER_GUID");
+                entity.Property(e => e.AppCreateUserGuid)
+                    .HasColumnName("APP_CREATE_USER_GUID")
+                    .HasComment("Unique idenifier of user who created record");
 
                 entity.Property(e => e.AppCreateUserid)
                     .IsRequired()
                     .HasColumnName("APP_CREATE_USERID")
                     .HasMaxLength(30)
-                    .IsUnicode(false);
+                    .IsUnicode(false)
+                    .HasComment("Unique idenifier of user who created record");
 
                 entity.Property(e => e.AppLastUpdateTimestamp)
                     .HasColumnName("APP_LAST_UPDATE_TIMESTAMP")
-                    .HasColumnType("datetime");
+                    .HasColumnType("datetime")
+                    .HasComment("Date and time of last record update");
 
                 entity.Property(e => e.AppLastUpdateUserDirectory)
                     .IsRequired()
                     .HasColumnName("APP_LAST_UPDATE_USER_DIRECTORY")
                     .HasMaxLength(12)
-                    .IsUnicode(false);
+                    .IsUnicode(false)
+                    .HasComment("Active Directory which retains source of truth for user idenifiers.");
 
-                entity.Property(e => e.AppLastUpdateUserGuid).HasColumnName("APP_LAST_UPDATE_USER_GUID");
+                entity.Property(e => e.AppLastUpdateUserGuid)
+                    .HasColumnName("APP_LAST_UPDATE_USER_GUID")
+                    .HasComment("Unique idenifier of user who last updated record");
 
                 entity.Property(e => e.AppLastUpdateUserid)
                     .IsRequired()
                     .HasColumnName("APP_LAST_UPDATE_USERID")
                     .HasMaxLength(30)
-                    .IsUnicode(false);
+                    .IsUnicode(false)
+                    .HasComment("Unique idenifier of user who last updated record");
 
                 entity.Property(e => e.Comments)
                     .HasColumnName("COMMENTS")
                     .HasMaxLength(1024)
-                    .IsUnicode(false);
+                    .IsUnicode(false)
+                    .HasComment("Text field for comments and/or notes pertinent to the specified activity.");
 
                 entity.Property(e => e.ConcurrencyControlNumber)
                     .HasColumnName("CONCURRENCY_CONTROL_NUMBER")
-                    .HasDefaultValueSql("((1))");
+                    .HasDefaultValueSql("((1))")
+                    .HasComment("Record under edit indicator used for optomisitc record contention management.  If number differs from start of edit, then user will be prompted to that record has been updated by someone else.");
 
                 entity.Property(e => e.DbAuditCreateTimestamp)
                     .HasColumnName("DB_AUDIT_CREATE_TIMESTAMP")
                     .HasColumnType("datetime")
-                    .HasDefaultValueSql("(getutcdate())");
+                    .HasDefaultValueSql("(getutcdate())")
+                    .HasComment("Date and time record created in the database");
 
                 entity.Property(e => e.DbAuditCreateUserid)
                     .IsRequired()
                     .HasColumnName("DB_AUDIT_CREATE_USERID")
                     .HasMaxLength(30)
                     .IsUnicode(false)
-                    .HasDefaultValueSql("(user_name())");
+                    .HasDefaultValueSql("(user_name())")
+                    .HasComment("Named database user who created record");
 
                 entity.Property(e => e.DbAuditLastUpdateTimestamp)
                     .HasColumnName("DB_AUDIT_LAST_UPDATE_TIMESTAMP")
                     .HasColumnType("datetime")
-                    .HasDefaultValueSql("(getutcdate())");
+                    .HasDefaultValueSql("(getutcdate())")
+                    .HasComment("Date and time record was last updated in the database.");
 
                 entity.Property(e => e.DbAuditLastUpdateUserid)
                     .IsRequired()
                     .HasColumnName("DB_AUDIT_LAST_UPDATE_USERID")
                     .HasMaxLength(30)
                     .IsUnicode(false)
-                    .HasDefaultValueSql("(user_name())");
+                    .HasDefaultValueSql("(user_name())")
+                    .HasComment("Named database user who last updated record");
 
                 entity.Property(e => e.EndDate)
                     .HasColumnName("END_DATE")
-                    .HasColumnType("date");
+                    .HasColumnType("date")
+                    .HasComment("Date when work was completed");
 
                 entity.Property(e => e.EndLatitude)
                     .HasColumnName("END_LATITUDE")
-                    .HasColumnType("numeric(11, 6)");
+                    .HasColumnType("numeric(16, 8)")
+                    .HasComment(@"The M (northing) portion of the activity end coordinate. Specified as a latitude in decimal degrees with six decimal places of precision.
+Positive numbers are indicative of the Northern Hemisphere. Coordinate is to be reported using the WGS84 datum.
+For point activity if this field is not provided it can be defaulted to same as START LATITUDE");
 
                 entity.Property(e => e.EndLongitude)
                     .HasColumnName("END_LONGITUDE")
-                    .HasColumnType("numeric(11, 6)");
+                    .HasColumnType("numeric(16, 8)")
+                    .HasComment(@"The X (easting) portion of the activity end coordinate. Specified as a longitude in decimal degrees with six decimal places of precision.
+Negative numbers are indicative of the Western Hemisphere. Coordinate is to be reported using the WGS84 datum.
+For point activity if this field is not provided it can be defaulted to same as START LONGITUDE.");
 
                 entity.Property(e => e.EndOffset)
                     .HasColumnName("END_OFFSET")
-                    .HasColumnType("numeric(7, 3)");
+                    .HasColumnType("numeric(7, 3)")
+                    .HasComment(@"This field is needed for linear referencing for location specific reports.
+If the work is less than 30 m, this field is not mandatory
+Offset from beginning of segment");
 
                 entity.Property(e => e.HighwayUnique)
                     .HasColumnName("HIGHWAY_UNIQUE")
                     .HasMaxLength(16)
-                    .IsUnicode(false);
+                    .IsUnicode(false)
+                    .HasComment(@"This identifies the section of road on which the activity occurred.
+This is a value in the in the format:
+[Service Area]-[area manager area]-[subarea]-[highway number]
+This should be a value found in RFI (CHRIS)");
 
                 entity.Property(e => e.Landmark)
                     .HasColumnName("LANDMARK")
                     .HasMaxLength(8)
-                    .IsUnicode(false);
+                    .IsUnicode(false)
+                    .HasComment(@"This field needed for location reference:
+Landmarks provided should be those listed in the CHRIS HRP report for each Highway or road within the Service Area");
 
                 entity.Property(e => e.PostedDate)
                     .HasColumnName("POSTED_DATE")
-                    .HasColumnType("date");
+                    .HasColumnType("date")
+                    .HasComment("Date the data is posted into the contractor management system");
 
                 entity.Property(e => e.RecordNumber)
                     .HasColumnName("RECORD_NUMBER")
-                    .HasMaxLength(8)
-                    .IsUnicode(false);
+                    .HasMaxLength(30)
+                    .IsUnicode(false)
+                    .HasComment(@"Unique work report record number from the maintainence contractor.
+This is uniquely identifies each record submission for a contractor.
+<Service Area><Record Number> will uniquely identify each record in the application for a particular contractor.");
 
                 entity.Property(e => e.RecordType)
                     .HasColumnName("RECORD_TYPE")
                     .HasMaxLength(1)
-                    .IsUnicode(false);
+                    .IsUnicode(false)
+                    .HasComment(@"This field describes the type of work the associated record is reporting on.
+This is restricted to specific set of values -
+Q - Quantified,
+R - Routine,
+E - Major Event,
+A - Additional");
 
                 entity.Property(e => e.RowNum)
                     .HasColumnName("ROW_NUM")
@@ -5433,55 +5460,82 @@ Either - may be spatially represented in either manner");
 
                 entity.Property(e => e.ServiceArea)
                     .HasColumnName("SERVICE_AREA")
-                    .HasColumnType("numeric(9, 0)");
+                    .HasColumnType("numeric(9, 0)")
+                    .HasComment("The Ministry Contract Service Area number in which the activity occured.");
 
                 entity.Property(e => e.SiteNumber)
                     .HasColumnName("SITE_NUMBER")
                     .HasMaxLength(8)
-                    .IsUnicode(false);
+                    .IsUnicode(false)
+                    .HasComment(@"Contains a site type code followed by a The Ministry site number. Site types are provided by the Province, are four to six digits preceded by:
+A – Avalanche
+B – Arrestor Bed/Dragnet Barrier
+D – Debris and/or Rockfall
+L – Landscape
+R – Rest Area
+S – Signalized Intersection
+T – Traffic Patrol
+W – Weather Station
+X – Railway Crossing");
 
                 entity.Property(e => e.StartDate)
                     .HasColumnName("START_DATE")
-                    .HasColumnType("date");
+                    .HasColumnType("date")
+                    .HasComment("Date when work commenced");
 
                 entity.Property(e => e.StartLatitude)
                     .HasColumnName("START_LATITUDE")
-                    .HasColumnType("numeric(11, 6)");
+                    .HasColumnType("numeric(16, 8)")
+                    .HasComment(@"The M (northing) portion of the activity start coordinate. Specified as a latitude in decimal degrees with six decimal places of precision.
+Positive numbers are indicative of the Northern Hemisphere. Coordinate is to be reported using the WGS84 datum.
+");
 
                 entity.Property(e => e.StartLongitude)
                     .HasColumnName("START_LONGITUDE")
-                    .HasColumnType("numeric(11, 6)");
+                    .HasColumnType("numeric(16, 8)")
+                    .HasComment(@"The X (easting) portion of the activity start coordinate. Specified as a longitude in decimal degrees with six decimal places of precision.
+Negative numbers are indicative of the Western Hemisphere. Coordinate is to be reported using the WGS84 datum.");
 
                 entity.Property(e => e.StartOffset)
                     .HasColumnName("START_OFFSET")
-                    .HasColumnType("numeric(7, 3)");
+                    .HasColumnType("numeric(7, 3)")
+                    .HasComment(@"This field is needed for linear referencing for location specific reports. 
+Offset from beginning of segment.");
 
                 entity.Property(e => e.StructureNumber)
                     .HasColumnName("STRUCTURE_NUMBER")
                     .HasMaxLength(5)
-                    .IsUnicode(false);
+                    .IsUnicode(false)
+                    .HasComment(@"From list of Bridge Structure Road (BSR) structures provided by the Province.
+Is only applicable at defined BSR structures.  BSR structures include; bridges, culverts over 3m, retaining walls.
+");
 
                 entity.Property(e => e.SubmissionObjectId)
                     .HasColumnName("SUBMISSION_OBJECT_ID")
-                    .HasColumnType("numeric(9, 0)");
+                    .HasColumnType("numeric(9, 0)")
+                    .HasComment("Unique identifier for SUBMISSION OBJECT.");
 
                 entity.Property(e => e.TaskNumber)
                     .HasColumnName("TASK_NUMBER")
-                    .HasMaxLength(6)
-                    .IsUnicode(false);
+                    .HasMaxLength(30)
+                    .IsUnicode(false)
+                    .HasComment("Contractor Task Number");
 
                 entity.Property(e => e.UnitOfMeasure)
                     .HasColumnName("UNIT_OF_MEASURE")
                     .HasMaxLength(12)
-                    .IsUnicode(false);
+                    .IsUnicode(false)
+                    .HasComment("The code which represents the unit of measure for the specified activity. ");
 
                 entity.Property(e => e.ValidationStatusId)
                     .HasColumnName("VALIDATION_STATUS_ID")
-                    .HasColumnType("numeric(9, 0)");
+                    .HasColumnType("numeric(9, 0)")
+                    .HasComment("Unique identifier for VALIDATION STATUS.  Indicates the overall status of the submitted row of data.");
 
                 entity.Property(e => e.ValueOfWork)
                     .HasColumnName("VALUE_OF_WORK")
-                    .HasColumnType("numeric(8, 2)");
+                    .HasColumnType("numeric(9, 2)")
+                    .HasComment("Total dollar value of the work activity being reported, for each activity.");
 
                 entity.HasOne(d => d.ServiceAreaNavigation)
                     .WithMany(p => p.HmrWorkReports)
@@ -5518,11 +5572,11 @@ Either - may be spatially represented in either manner");
 
                 entity.Property(e => e.Accomplishment)
                     .HasColumnName("ACCOMPLISHMENT")
-                    .HasColumnType("numeric(18, 0)");
+                    .HasColumnType("numeric(9, 2)");
 
                 entity.Property(e => e.ActivityNumber)
                     .HasColumnName("ACTIVITY_NUMBER")
-                    .HasMaxLength(6)
+                    .HasMaxLength(30)
                     .IsUnicode(false);
 
                 entity.Property(e => e.AppCreateTimestamp)
@@ -5603,15 +5657,15 @@ Either - may be spatially represented in either manner");
 
                 entity.Property(e => e.EndLatitude)
                     .HasColumnName("END_LATITUDE")
-                    .HasColumnType("numeric(18, 0)");
+                    .HasColumnType("numeric(16, 8)");
 
                 entity.Property(e => e.EndLongitude)
                     .HasColumnName("END_LONGITUDE")
-                    .HasColumnType("numeric(18, 0)");
+                    .HasColumnType("numeric(16, 8)");
 
                 entity.Property(e => e.EndOffset)
                     .HasColumnName("END_OFFSET")
-                    .HasColumnType("numeric(18, 0)");
+                    .HasColumnType("numeric(16, 8)");
 
                 entity.Property(e => e.HighwayUnique)
                     .HasColumnName("HIGHWAY_UNIQUE")
@@ -5629,7 +5683,7 @@ Either - may be spatially represented in either manner");
 
                 entity.Property(e => e.RecordNumber)
                     .HasColumnName("RECORD_NUMBER")
-                    .HasMaxLength(8)
+                    .HasMaxLength(30)
                     .IsUnicode(false);
 
                 entity.Property(e => e.RecordType)
@@ -5656,15 +5710,15 @@ Either - may be spatially represented in either manner");
 
                 entity.Property(e => e.StartLatitude)
                     .HasColumnName("START_LATITUDE")
-                    .HasColumnType("numeric(18, 0)");
+                    .HasColumnType("numeric(16, 8)");
 
                 entity.Property(e => e.StartLongitude)
                     .HasColumnName("START_LONGITUDE")
-                    .HasColumnType("numeric(18, 0)");
+                    .HasColumnType("numeric(16, 8)");
 
                 entity.Property(e => e.StartOffset)
                     .HasColumnName("START_OFFSET")
-                    .HasColumnType("numeric(18, 0)");
+                    .HasColumnType("numeric(16, 8)");
 
                 entity.Property(e => e.StructureNumber)
                     .HasColumnName("STRUCTURE_NUMBER")
@@ -5677,7 +5731,7 @@ Either - may be spatially represented in either manner");
 
                 entity.Property(e => e.TaskNumber)
                     .HasColumnName("TASK_NUMBER")
-                    .HasMaxLength(6)
+                    .HasMaxLength(30)
                     .IsUnicode(false);
 
                 entity.Property(e => e.UnitOfMeasure)
@@ -5691,7 +5745,7 @@ Either - may be spatially represented in either manner");
 
                 entity.Property(e => e.ValueOfWork)
                     .HasColumnName("VALUE_OF_WORK")
-                    .HasColumnType("numeric(18, 0)");
+                    .HasColumnType("numeric(9, 2)");
 
                 entity.Property(e => e.WorkReportId)
                     .HasColumnName("WORK_REPORT_ID")

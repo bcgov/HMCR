@@ -12,9 +12,8 @@ namespace Hmcr.Model.Dtos.Role
         public string Name { get; set; }
         public string Description { get; set; }
         public DateTime? EndDate { get; set; }
-        public string IsInternal { get; set; }
-        public bool Internal => IsInternal == "Y";
+        public bool IsInternal { get; set; }
         public bool IsActive => EndDate == null || EndDate > DateTime.Today;
-        public bool InUse { get; set; }
+        public bool IsReferenced { get; set; }
     }
 }
