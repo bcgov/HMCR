@@ -31,15 +31,18 @@ export const buildApiErrorObject = response => {
 export const updateQueryParamsFromHistory = (history, newParam, overwrite) => {
   const params = queryString.parse(history.location.search);
 
-  const processedParams = { ..._.pickBy(newParam, _.identity) };
+  let processedParams = { ..._.pickBy(newParam, _.identity) };
   Object.keys(processedParams).forEach(key => {
     if (moment.isMoment(processedParams[key]))
       processedParams[key] = processedParams[key].format(Constants.DATE_DISPLAY_FORMAT);
   });
 
-  if (overwrite) return queryString.stringify({ ...processedParams });
+  if (!overwrite) processedParams = { ...params, ...processedParams };
 
-  return queryString.stringify({ ...params, ...processedParams });
+  // remove empty isActive
+  if (newParam.isActive === null) processedParams = _.omit(processedParams, ['isActive']);
+
+  return queryString.stringify(processedParams);
 };
 
 export const stringifyQueryParams = newParam => {
