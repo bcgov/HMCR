@@ -29,7 +29,8 @@
         public string DitchSnowIce { get; set; }
         public string VehicleDamage { get; set; }
         public string Comments { get; set; }
-        public string ReporterName { get; set; }
+        public string Name { get; set; }
+        public string McName { get; set; }
         public string McPhoneNumber { get; set; }
         public string ReportDate { get; set; }
         public decimal? RowNum { get; set; }
