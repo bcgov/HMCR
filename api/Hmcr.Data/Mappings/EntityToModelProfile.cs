@@ -92,7 +92,10 @@ namespace Hmcr.Data.Mappings
             CreateMap<HmrWorkReport, WorkReportDto>();
             CreateMap<HmrWorkReport, WorkReportExportDto>();
 
-            CreateMap<HmrRockfallReport, RockfallReportDto>();
+            CreateMap<HmrRockfallReport, RockfallReportDto>()
+                .ForMember(dst => dst.Name, opt => opt.MapFrom(src => src.ReporterName))
+                .ForMember(dst => dst.McName, opt => opt.MapFrom(src => src.SubmissionObject.Party.BusinessLegalName));
+
             CreateMap<HmrRockfallReport, RockfallReportExportDto>()
                 .ForMember(dst => dst.Name, opt => opt.MapFrom(src => src.ReporterName))
                 .ForMember(dst => dst.McName, opt => opt.MapFrom(src => src.SubmissionObject.Party.BusinessLegalName));

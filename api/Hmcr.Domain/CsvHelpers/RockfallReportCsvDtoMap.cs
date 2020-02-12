@@ -29,7 +29,6 @@ namespace Hmcr.Domain.CsvHelpers
             Map(m => m.ReportDate).TypeConverter<DateTypeConverter>();
             Map(m => m.EstimatedRockfallDate).TypeConverter<DateTypeConverter>();
             Map(m => m.McPhoneNumber).TypeConverter<PhoneNumberConverter>();
-            Map(m => m.ReporterName).Name(Fields.Name.ToLower());
         }
     }
 }
