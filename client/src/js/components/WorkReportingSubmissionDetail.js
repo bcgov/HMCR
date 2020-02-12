@@ -136,25 +136,21 @@ const WorkReportingSubmissionDetail = ({ toggle, submission }) => {
           </ul>
         </div>
         <div style={{ whiteSpace: 'nowrap' }}>
-          <Button
-            size="sm"
-            color="primary"
-            className="mr-2"
-            onClick={() =>
-              api.getSubmissionFile(submissionResultData.id).then(response => {
-                const filename = response.headers['content-disposition']
-                  .split(';')
-                  .find(token => token.trim().startsWith('filename='))
-                  .replace('filename=', '')
-                  .trim();
-
-                FileSaver.saveAs(new Blob([response.data]), filename);
-              })
-            }
-            title="Download original submission"
-          >
-            <FontAwesomeIcon icon="download" /> Original
-          </Button>
+          {submissionResultData.submissionStatusCode !== 'FE' && (
+            <Button
+              size="sm"
+              color="primary"
+              className="mr-2"
+              onClick={() =>
+                api
+                  .getSubmissionFile(submissionResultData.id)
+                  .then(response => FileSaver.saveAs(new Blob([response.data]), submissionResultData.fileName))
+              }
+              title="Download original submission"
+            >
+              <FontAwesomeIcon icon="download" /> Original
+            </Button>
+          )}
           <Clipboard
             className="btn btn-primary btn-sm"
             data-clipboard-text={createClipboardText(submissionResultData)}
