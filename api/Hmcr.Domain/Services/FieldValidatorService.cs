@@ -30,11 +30,12 @@ namespace Hmcr.Domain.Services
 
             LoadWorkReportInitRules();
             LoadWorkReportD2Rules();
-            LoadWorkReportD2BRules();
             LoadWorkReportD3Rules();
-            LoadWorkReportD3SiteRules();
             LoadWorkReportD4Rules();
-            LoadWorkReportD4SiteRules();
+            LoadWorkReportHighwayUniqueRule();
+            LoadWorkReportSiteRule();
+            LoadWorkReportStructureRule();
+            LoadWorkReportValueOfWorkRule();
 
             LoadRockfallReportInitRules();
             LoadRockfallReportRules();
@@ -87,7 +88,7 @@ namespace Hmcr.Domain.Services
             _rules.Add(new FieldValidationRule(Entities.WorkReportD2, Fields.StartDate, FieldTypes.Date, false, null, null, null, null, new DateTime(1900, 1, 1), new DateTime(9999, 12, 31), null, null));
             _rules.Add(new FieldValidationRule(Entities.WorkReportD2, Fields.EndDate, FieldTypes.Date, true, null, null, null, null, new DateTime(1900, 1, 1), new DateTime(9999, 12, 31), null, null));
             _rules.Add(new FieldValidationRule(Entities.WorkReportD2, Fields.Accomplishment, FieldTypes.String, true, null, null, null, null, null, null, _regex.GetRegexInfo(RegexDefs.DollarValue), null));
-            _rules.Add(new FieldValidationRule(Entities.WorkReportD2, Fields.UnitOfMeasure, FieldTypes.String, true, null, null, null, null, null, null, null, CodeSet.UnitOfMeasure)); 
+            _rules.Add(new FieldValidationRule(Entities.WorkReportD2, Fields.UnitOfMeasure, FieldTypes.String, true, null, null, null, null, null, null, null, CodeSet.UnitOfMeasure));
             _rules.Add(new FieldValidationRule(Entities.WorkReportD2, Fields.PostedDate, FieldTypes.Date, true, null, null, null, null, new DateTime(1900, 1, 1), new DateTime(9999, 12, 31), null, null));
             _rules.Add(new FieldValidationRule(Entities.WorkReportD2, Fields.Comments, FieldTypes.String, false, 0, 1024, null, null, null, null, null, null));
 
@@ -113,13 +114,46 @@ namespace Hmcr.Domain.Services
             _rules.Add(new FieldValidationRule(Entities.WorkReportD2, Fields.ValueOfWork, FieldTypes.String, false, null, null, null, null, null, null, _regex.GetRegexInfo(RegexDefs.DollarValue), null));
         }
 
-        private void LoadWorkReportD2BRules()
-        {
-            _rules.AddRange(_rules.Where(x => x.EntityName == Entities.WorkReportD2).Select(x => x.ShallowCopy(Entities.WorkReportD2B)).ToArray());
 
-            //For location B, Highway Unique is required
-            _rules.First(x => x.EntityName == Entities.WorkReportD2B && x.FieldName == Fields.HighwayUnique).Required = true;
+        # region For work report field validation which depends on other fields 
+
+        /// <summary>
+        /// For D2 and location code = 'B', HighwayUnique is required
+        /// </summary>
+        private void LoadWorkReportHighwayUniqueRule()
+        {
+            var rule = _rules.First(x => x.EntityName == Entities.WorkReportD2 && x.FieldName == Fields.HighwayUnique).ShallowCopy(Entities.WorkReportHighwayUnique);
+            _rules.Add(rule);
+            rule.Required = true;
         }
+        /// <summary>
+        /// For special activity numbers (ActivityNumbers.SiteRequired), SiteNumber is required
+        /// </summary>
+        private void LoadWorkReportSiteRule()
+        {
+            var rule = _rules.First(x => x.EntityName == Entities.WorkReportD2 && x.FieldName == Fields.SiteNumber).ShallowCopy(Entities.WorkReportSite);
+            _rules.Add(rule);
+            rule.Required = true;
+        }
+        /// <summary>
+        /// For activity numbers which start with 6, StructureNumber is required
+        /// </summary>
+        private void LoadWorkReportStructureRule()
+        {
+            var rule = _rules.First(x => x.EntityName == Entities.WorkReportD2 && x.FieldName == Fields.StructureNumber).ShallowCopy(Entities.WorkReportStructure);
+            _rules.Add(rule);
+            rule.Required = true;
+        }
+        /// <summary>
+        /// For activity numbers which start with 6, StructureNumber is required
+        /// </summary>
+        private void LoadWorkReportValueOfWorkRule()
+        {
+            var rule = _rules.First(x => x.EntityName == Entities.WorkReportD2 && x.FieldName == Fields.ValueOfWork).ShallowCopy(Entities.WorkReportValueOfWork);
+            _rules.Add(rule);
+            rule.Required = true;
+        }
+        #endregion
 
         private void LoadWorkReportD3Rules()
         {
@@ -132,15 +166,6 @@ namespace Hmcr.Domain.Services
             _rules.First(x => x.EntityName == Entities.WorkReportD3 && x.FieldName == Fields.ValueOfWork).Required = true;
         }
 
-        private void LoadWorkReportD3SiteRules()
-        {
-            _rules.AddRange(_rules.Where(x => x.EntityName == Entities.WorkReportD3).Select(x => x.ShallowCopy(Entities.WorkReportD3Site)).ToArray());
-
-            //For some D3, Structure and Site info are also required
-            _rules.First(x => x.EntityName == Entities.WorkReportD3Site && x.FieldName == Fields.StructureNumber).Required = true;
-            _rules.First(x => x.EntityName == Entities.WorkReportD3Site && x.FieldName == Fields.SiteNumber).Required = true;
-        }
-
         private void LoadWorkReportD4Rules()
         {
             _rules.AddRange(_rules.Where(x => x.EntityName == Entities.WorkReportD2).Select(x => x.ShallowCopy(Entities.WorkReportD4)).ToArray());
@@ -150,15 +175,6 @@ namespace Hmcr.Domain.Services
             _rules.First(x => x.EntityName == Entities.WorkReportD4 && x.FieldName == Fields.Landmark).Required = true;
             _rules.First(x => x.EntityName == Entities.WorkReportD4 && x.FieldName == Fields.StartOffset).Required = true;
             _rules.First(x => x.EntityName == Entities.WorkReportD4 && x.FieldName == Fields.ValueOfWork).Required = true;
-        }
-
-        private void LoadWorkReportD4SiteRules()
-        {
-            _rules.AddRange(_rules.Where(x => x.EntityName == Entities.WorkReportD4).Select(x => x.ShallowCopy(Entities.WorkReportD4Site)).ToArray());
-
-            //For some D4, Structure and Site info are also required
-            _rules.First(x => x.EntityName == Entities.WorkReportD4Site && x.FieldName == Fields.StructureNumber).Required = true;
-            _rules.First(x => x.EntityName == Entities.WorkReportD4Site && x.FieldName == Fields.SiteNumber).Required = true;
         }
 
         private void LoadRockfallReportInitRules()
@@ -324,7 +340,7 @@ namespace Hmcr.Domain.Services
 
             if (messages.Count > 0)
             {
-                foreach(var message in messages)
+                foreach (var message in messages)
                 {
                     errors.AddItem(rule.FieldName, message);
                 }

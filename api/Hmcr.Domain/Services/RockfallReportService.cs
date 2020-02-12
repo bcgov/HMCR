@@ -49,6 +49,8 @@ namespace Hmcr.Domain.Services
             CsvHelperUtils.Config(errors, csv);
             csv.Configuration.RegisterClassMap<RockfallRptInitCsvDtoMap>();
 
+            var serviceArea = (long)submission.ServiceAreaNumber;
+
             var rows = new List<RockfallRptInitCsvDto>();
             while (csv.Read())
             {
@@ -72,6 +74,12 @@ namespace Hmcr.Domain.Services
                 {
                     _logger.LogError(ex.ToString());
                     throw;
+                }
+
+                if (row.ServiceArea != serviceArea.ToString())
+                {
+                    errors.AddItem("ServiceArea", $"The file contains service area which is not {submission.ServiceAreaNumber}.");
+                    return false;
                 }
 
                 var line = csv.Context.RawRecord.RemoveLineBreak();

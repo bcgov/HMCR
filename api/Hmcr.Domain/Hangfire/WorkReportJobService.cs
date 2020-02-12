@@ -37,7 +37,7 @@ namespace Hmcr.Domain.Hangfire
 
         public WorkReportJobService(IUnitOfWork unitOfWork, ILogger<IWorkReportJobService> logger,
             IActivityCodeRepository activityRepo, ISubmissionStatusRepository statusRepo, ISubmissionObjectRepository submissionRepo,
-            ISumbissionRowRepository submissionRowRepo, IWorkReportRepository workReportRepo, IFieldValidatorService validator, 
+            ISumbissionRowRepository submissionRowRepo, IWorkReportRepository workReportRepo, IFieldValidatorService validator,
             IEmailService emailService, IConfiguration config, EmailBody emailBody, IFeebackMessageRepository feedbackRepo,
             IMapsApi mapsApi, IOasApi oasApi)
             : base(unitOfWork, statusRepo, submissionRepo, submissionRowRepo, emailService, logger, config, emailBody, feedbackRepo)
@@ -111,9 +111,12 @@ namespace Hmcr.Domain.Hangfire
 
                 untypedRow.PointLineFeature = activityCode.PointLineFeature ?? PointLineFeature.None;
 
+                //this also sets RowType (D2, D3, D4)
                 var entityName = GetValidationEntityName(untypedRow, activityCode);
 
                 _validator.Validate(entityName, untypedRow, errors);
+
+                PerformFieldValidation(errors, untypedRow, activityCode);
 
                 if (errors.Count > 0)
                 {
@@ -157,6 +160,29 @@ namespace Hmcr.Domain.Hangfire
             await CommitAndSendEmail();
 
             return true;
+        }
+
+        private void PerformFieldValidation(Dictionary<string, List<string>> errors, WorkReportCsvDto untypedRow, ActivityCodeDto activityCode)
+        {
+            if (activityCode.ActivityNumber.StartsWith('6'))
+            {
+                _validator.Validate(Entities.WorkReportStructure, Fields.StructureNumber, untypedRow.StructureNumber, errors);
+            }
+
+            if (ActivityNumbers.SiteRequired.Contains(activityCode.ActivityNumber))
+            {
+                _validator.Validate(Entities.WorkReportSite, Fields.SiteNumber, untypedRow.SiteNumber, errors);
+            }
+
+            if (untypedRow.RowType == RowTypes.D2 && activityCode.LocationCode.LocationCode == "B")
+            {
+                _validator.Validate(Entities.WorkReportHighwayUnique, Fields.HighwayUnique, untypedRow.HighwayUnique, errors);
+            }
+
+            if (untypedRow.RecordType == "Q")
+            {
+                _validator.Validate(Entities.WorkReportValueOfWork, Fields.ValueOfWork, untypedRow.ValueOfWork, errors);
+            }
         }
 
         private void CopyCalculatedFieldsFormUntypedRow(List<WorkReportDto> typedRows, List<WorkReportCsvDto> untypedRows)
@@ -365,8 +391,6 @@ namespace Hmcr.Domain.Hangfire
         {
             MethodLogger.LogEntry(_logger, _enableMethodLog, _methodLogHeader, $"RowNum: {untypedRow.RowNum}");
 
-            var isSite = activityCode.ActivityNumber.Substring(0, 1) == "6";
-
             var locationCode = activityCode.LocationCode;
 
             string entityName;
@@ -374,18 +398,18 @@ namespace Hmcr.Domain.Hangfire
             {
                 if (untypedRow.EndLatitude.IsEmpty())
                 {
-                    entityName = isSite ? Entities.WorkReportD4Site : Entities.WorkReportD4;
+                    entityName = Entities.WorkReportD4;
                     untypedRow.RowType = RowTypes.D4;
                 }
                 else
                 {
-                    entityName = isSite ? Entities.WorkReportD3Site : Entities.WorkReportD3;
+                    entityName = Entities.WorkReportD3;
                     untypedRow.RowType = RowTypes.D3;
                 }
             }
             else
             {
-                entityName = (locationCode.LocationCode == "B") ? Entities.WorkReportD2B : Entities.WorkReportD2;
+                entityName = Entities.WorkReportD2;
                 untypedRow.RowType = RowTypes.D2;
             }
 
