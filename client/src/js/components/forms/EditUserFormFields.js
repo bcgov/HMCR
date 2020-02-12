@@ -41,7 +41,7 @@ const EditUserFormFields = ({
             .filter(r => r.isActive === true)
             .map(r => ({ ...r, description: r.name }));
 
-          if (userType === Constants.USER_TYPE.BUSINESS) setRoles(data.filter(r => r.internal === false));
+          if (userType === Constants.USER_TYPE.BUSINESS) setRoles(data.filter(r => r.isInternal === false));
           else setRoles(data);
         });
       })

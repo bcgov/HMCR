@@ -142,7 +142,7 @@ const AddUserSetupUser = ({ serviceAreas, values, submitting, setWizardState }) 
           .filter(r => r.isActive === true)
           .map(r => ({ ...r, description: r.name }));
 
-        if (values.userType === Constants.USER_TYPE.BUSINESS) setRoles(data.filter(r => r.internal === false));
+        if (values.userType === Constants.USER_TYPE.BUSINESS) setRoles(data.filter(r => r.isInternal === false));
         else setRoles(data);
       })
       .finally(() => setLoading(false));
