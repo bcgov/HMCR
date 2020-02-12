@@ -96,6 +96,7 @@ namespace Hmcr.Model
         public const string LastName = "LastName";
         public const string Email = "Email";
         public const string EndDate = "EndDate";
+        public const string IsInternal = "IsInternal";
 
         public const string ServiceAreaNumber = "ServiceAreaNumber";
 

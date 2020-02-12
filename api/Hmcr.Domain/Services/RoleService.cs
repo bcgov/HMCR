@@ -22,13 +22,15 @@ namespace Hmcr.Domain.Services
     public class RoleService : IRoleService
     {
         private IRoleRepository _roleRepo;
+        IUserRoleRepository _userRoleRepo;
         private IUnitOfWork _unitOfWork;
         private IFieldValidatorService _validator;
         private IPermissionRepository _permRepo;
 
-        public RoleService(IRoleRepository roleRepo, IPermissionRepository permRepo, IUnitOfWork unitOfWork, IFieldValidatorService validator)
+        public RoleService(IRoleRepository roleRepo, IUserRoleRepository userRoleRepo, IPermissionRepository permRepo, IUnitOfWork unitOfWork, IFieldValidatorService validator)
         {
             _roleRepo = roleRepo;
+            _userRoleRepo = userRoleRepo;
             _unitOfWork = unitOfWork;
             _validator = validator;
             _permRepo = permRepo;
@@ -134,6 +136,16 @@ namespace Hmcr.Domain.Services
                 if (await _roleRepo.DoesNameExistAsync(role.Name))
                 {
                     errors.AddItem(Fields.Username, $"The role name [{role.Name}] already exists.");
+                }
+            }
+
+            if(role.IsInternal != roleFromDb.IsInternal)
+            {
+                var isRoleReferenced = await _userRoleRepo.IsRoleInUseAsync(role.RoleId);
+
+                if (isRoleReferenced)
+                {
+                    errors.AddItem(Fields.IsInternal, $"Cannot set role Internal to [{role.IsInternal}] because role is in use.");
                 }
             }
 
