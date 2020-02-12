@@ -5,7 +5,7 @@ import moment from 'moment';
 import MultiSelect from '../ui/MultiSelect';
 import SingleDateField from '../ui/SingleDateField';
 import PageSpinner from '../ui/PageSpinner';
-import { FormRow, FormInput, FormSwitchInput } from './FormInputs';
+import { FormRow, FormInput, FormCheckboxInput } from './FormInputs';
 
 import * as api from '../../Api';
 import * as Constants from '../../Constants';
@@ -14,7 +14,7 @@ const defaultValues = {
   name: '',
   description: '',
   permissions: [],
-  internal: false,
+  isInternal: false,
   endDate: null,
 };
 
@@ -33,6 +33,7 @@ const validationSchema = Yup.object({
 const EditRoleFormFields = ({ setInitialValues, formValues, setValidationSchema, formType, roleId }) => {
   const [permissionIds, setPermissionIds] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [isReferenced, setIsReferenced] = useState(false);
 
   useEffect(() => {
     setValidationSchema(validationSchema);
@@ -49,6 +50,7 @@ const EditRoleFormFields = ({ setInitialValues, formValues, setValidationSchema,
             ...response.data,
             endDate: response.data.endDate ? moment(response.data.endDate) : null,
           });
+          setIsReferenced(response.data.isReferenced);
           setLoading(false);
         });
       }
@@ -69,8 +71,8 @@ const EditRoleFormFields = ({ setInitialValues, formValues, setValidationSchema,
       <FormRow name="permissions" label="Permissions*">
         <MultiSelect items={permissionIds} name="permissions" />
       </FormRow>
-      <FormRow name="internal" label="Internal">
-        <FormSwitchInput name="internal" disabled />
+      <FormRow name="isInternal" label="Internal">
+        <FormCheckboxInput name="isInternal" disabled={isReferenced} />
       </FormRow>
       <FormRow name="endDate" label="End Date">
         <SingleDateField name="endDate" placeholder="End Date" />

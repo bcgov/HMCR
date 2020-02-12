@@ -63,7 +63,7 @@ const RoleAdmin = ({ history, showValidationErrorDialog }) => {
       isActive = values.statusId[0] === 'ACTIVE';
     }
 
-    const options = { ...searchData.searchOptions, isActive, searchText };
+    const options = { ...searchData.searchOptions, isActive, searchText, pageNumber: 1 };
     searchData.updateSearchOptions(options);
   };
 
