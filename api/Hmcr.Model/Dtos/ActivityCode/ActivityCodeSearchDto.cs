@@ -17,8 +17,7 @@ namespace Hmcr.Model.Dtos.ActivityCode
         public string PointLineFeature { get; set; }
         public string ActivityApplication { get; set; }
         public DateTime? EndDate { get; set; }
-        public bool IsActive { get; set; }  //=> EndDate == null || EndDate > DateTime.Today;
-        public bool CanDelete { get; set; }
-
+        public bool IsActive => EndDate == null || EndDate > DateTime.Today;
+        public bool CanDelete { get; set; } = true;
     }
 }

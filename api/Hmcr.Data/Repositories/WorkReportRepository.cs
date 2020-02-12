@@ -13,6 +13,7 @@ namespace Hmcr.Data.Repositories
     {
         IAsyncEnumerable<HmrWorkReport> SaveWorkReportAsnyc(HmrSubmissionObject submission, List<WorkReportDto> rows);
         Task<IEnumerable<WorkReportExportDto>> ExporReportAsync(decimal submissionObjectId);
+        Task<bool> IsActivityNumberInUseAsync(string activityNumber);
     }
     public class WorkReportRepository : HmcrRepositoryBase<HmrWorkReport>, IWorkReportRepository, IReportExportRepository<WorkReportExportDto>
     {
@@ -56,6 +57,11 @@ namespace Hmcr.Data.Repositories
                 .ToListAsync();
 
             return Mapper.Map<IEnumerable<WorkReportExportDto>>(entities);
+        }
+
+        public async Task<bool> IsActivityNumberInUseAsync(string activityNumber)
+        {
+            return await DbSet.AnyAsync(wr => wr.ActivityNumber == activityNumber);
         }
     }
 }

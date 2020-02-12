@@ -87,8 +87,14 @@ namespace Hmcr.Data.Mappings
             CreateMap<HmrSubmissionStream, SubmissionStreamDto>();
 
             CreateMap<HmrActivityCode, ActivityCodeDto>();
-            CreateMap<HmrLocationCode, LocationCodeDto>();
+            CreateMap<HmrActivityCode, ActivityCodeSearchDto>();
+            CreateMap<HmrActivityCode, ActivityCodeCreateDto>();
+            CreateMap<HmrActivityCode, ActivityCodeUpdateDto>();
+            CreateMap<HmrActivityCode, ActivityCodeDeleteDto>();
 
+            CreateMap<HmrLocationCode, LocationCodeDto>();
+            CreateMap<HmrLocationCode, LocationCodeDropDownDto>();
+            
             CreateMap<HmrWorkReport, WorkReportDto>();
             CreateMap<HmrWorkReport, WorkReportExportDto>();
 
@@ -107,7 +113,7 @@ namespace Hmcr.Data.Mappings
 
             CreateMap<HmrFeedbackMessage, FeedbackMessageDto>();
 
-            CreateMap<HmrLocationCode, LocationCodeDropDownDto>();
+            
         }
     }
 }
