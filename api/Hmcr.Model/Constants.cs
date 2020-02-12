@@ -29,11 +29,13 @@ namespace Hmcr.Model
 
         public const string WorkReportInit = "worki";
         public const string WorkReportD2 = "workd2";
-        public const string WorkReportD2B = "workd2b";
         public const string WorkReportD3 = "workd3";
-        public const string WorkReportD3Site = "workrd3site";
         public const string WorkReportD4 = "workd4";
-        public const string WorkReportD4Site = "workd4site";
+
+        public const string WorkReportHighwayUnique = "wrokhu";
+        public const string WorkReportSite = "worksite";
+        public const string WorkReportStructure = "workstructure";
+        public const string WorkReportValueOfWork = "worvow";
 
         public const string RockfallReportInit = "rockfalli";
         public const string RockfallReport = "rockfall";
@@ -47,6 +49,11 @@ namespace Hmcr.Model
         public const string WildlifeReport = "wildlife";
         public const string WildlifeReportGps = "wildlifegps";
         public const string WildlifeReportLrs = "wildlifelrs";
+    }
+
+    public static class ActivityNumbers
+    {
+        public static string[] SiteRequired = { "304200", "304201", "404200", "404201", "901200", "920200", "920201" };
     }
 
     public static class FieldTypes
