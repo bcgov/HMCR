@@ -27,7 +27,7 @@ namespace Hmcr.Api.Controllers
         }
 
         [HttpGet]
-        //does this require read permissions?
+        [RequiresPermission(Permissions.CodeRead)]
         public async Task<ActionResult<PagedDto<ActivityCodeSearchDto>>> GetActivityCodesAsync(
             [FromQuery]string? maintenanceTypes, [FromQuery]string? locationCodes, [FromQuery]bool? isActive, [FromQuery]string? searchText,
             [FromQuery]int pageSize, [FromQuery]int pageNumber, [FromQuery]string orderBy = "activitynumber", [FromQuery]string direction = "desc")
@@ -65,6 +65,30 @@ namespace Hmcr.Api.Controllers
             }
 
             var response = await _activityCodeSvc.UpdateActivityCodeAsync(activityCode);
+
+            if (response.NotFound)
+            {
+                return NotFound();
+            }
+
+            if (response.Errors.Count > 0)
+            {
+                return ValidationUtils.GetValidationErrorResult(response.Errors, ControllerContext);
+            }
+
+            return NoContent();
+        }
+
+        [HttpDelete("{id}")]
+        [RequiresPermission(Permissions.CodeWrite)]
+        public async Task<ActionResult> DeleteActivityCode(decimal id, ActivityCodeDeleteDto activityCode)
+        {
+            if (id != activityCode.ActivityCodeId)
+            {
+                throw new Exception($"The activity code ID from the query string does not match that of the body.");
+            }
+
+            var response = await _activityCodeSvc.DeleteActivityCodeAsync(activityCode);
 
             if (response.NotFound)
             {

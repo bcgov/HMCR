@@ -17,6 +17,7 @@ namespace Hmcr.Domain.Services
         Task<ActivityCodeSearchDto> GetActivityCodeAsync(decimal id);
         Task<(bool NotFound, Dictionary<string, List<string>> Errors)> UpdateActivityCodeAsync(ActivityCodeUpdateDto activityCode);
         Task<(decimal id, Dictionary<string, List<string>> Errors)> CreateActivityCodeAsync(ActivityCodeCreateDto activityCode);
+        Task<(bool NotFound, Dictionary<string, List<string>> Errors)> DeleteActivityCodeAsync(ActivityCodeDeleteDto activityCode);
     }
 
     public class ActivityCodeService : IActivityCodeService
@@ -24,12 +25,15 @@ namespace Hmcr.Domain.Services
         private IActivityCodeRepository _activityCodeRepo;
         private IFieldValidatorService _validatorService;
         private IUnitOfWork _unitOfWork;
+        private IWorkReportRepository _workReportRepo;
 
-        public ActivityCodeService(IActivityCodeRepository activityCodeRepo, IFieldValidatorService validatorService, IUnitOfWork unitOfWork)
+        public ActivityCodeService(IActivityCodeRepository activityCodeRepo, IFieldValidatorService validatorService, IUnitOfWork unitOfWork,
+            IWorkReportRepository workReportRepo)
         {
             _activityCodeRepo = activityCodeRepo;
             _validatorService = validatorService;
             _unitOfWork = unitOfWork;
+            _workReportRepo = workReportRepo;
         }
 
         public async Task<(decimal id, Dictionary<string, List<string>> Errors)> CreateActivityCodeAsync(ActivityCodeCreateDto activityCode)
@@ -44,7 +48,6 @@ namespace Hmcr.Domain.Services
             _validatorService.Validate(entityName, activityCode, errors);
             */
 
-            /* TODO: Check for ActivityNumber existence */
             if (await _activityCodeRepo.DoesActivityNumberExistAsync(activityCode.ActivityNumber))
             {
                 errors.AddItem(Fields.ActivityNumber, $"ActivityNumber [{activityCode.ActivityNumber})] already exists.");
@@ -59,6 +62,19 @@ namespace Hmcr.Domain.Services
             await _unitOfWork.CommitAsync();
 
             return (activityCodeEntity.ActivityCodeId, errors);
+        }
+
+        public async Task<(bool NotFound, Dictionary<string, List<string>> Errors)> DeleteActivityCodeAsync(ActivityCodeDeleteDto activityCode)
+        {
+            if (await _workReportRepo.IsActivityNumberInUseAsync(activityCode.ActivityNumber))
+            {
+                //disable only
+            } else
+            {
+                //delete
+            }
+
+            throw new NotImplementedException();
         }
 
         public async Task<ActivityCodeSearchDto> GetActivityCodeAsync(decimal id)
