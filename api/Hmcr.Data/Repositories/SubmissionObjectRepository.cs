@@ -63,7 +63,7 @@ namespace Hmcr.Data.Repositories
         public SubmissionDto[] GetSubmissionObjecsForBackgroundJob(decimal serviceAreaNumber)
         {
             var submissions = DbSet.AsNoTracking()
-                .Where(x => x.ServiceAreaNumber == serviceAreaNumber && x.SubmissionStatus.StatusType == StatusType.File &&
+                .Where(x => x.ServiceAreaNumber == serviceAreaNumber && x.DigitalRepresentation != null && x.SubmissionStatus.StatusType == StatusType.File &&
                     (x.SubmissionStatus.StatusCode == FileStatus.FileReceived || x.SubmissionStatus.StatusCode == FileStatus.InProgress))
                 .Include(x => x.MimeType)
                 .Include(x => x.SubmissionStream)
