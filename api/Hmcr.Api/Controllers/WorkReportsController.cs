@@ -41,8 +41,6 @@ namespace Hmcr.Api.Controllers
                 return ValidationUtils.GetValidationErrorResult(errors, ControllerContext);
             }
 
-            //BackgroundJob.Enqueue<IWorkReportService>(x => x.StartBackgroundProcess(submissionObjectId));
-
             return CreatedAtRoute("GetSubmissionObject", new { id = submissionObjectId }, await _submissionService.GetSubmissionObjectAsync(submissionObjectId));
         }
 
