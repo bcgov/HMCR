@@ -18,6 +18,7 @@ namespace Hmcr.Domain.Services
         Task<(bool NotFound, Dictionary<string, List<string>> Errors)> UpdateActivityCodeAsync(ActivityCodeUpdateDto activityCode);
         Task<(decimal id, Dictionary<string, List<string>> Errors)> CreateActivityCodeAsync(ActivityCodeCreateDto activityCode);
         Task<(bool NotFound, Dictionary<string, List<string>> Errors)> DeleteActivityCodeAsync(ActivityCodeDeleteDto activityCode);
+        Task<(bool NotFound, Dictionary<string, List<string>> Errors)> DisableActivityCodeAsync(ActivityCodeDeleteDto activityCode);
     }
 
     public class ActivityCodeService : IActivityCodeService
@@ -66,15 +67,46 @@ namespace Hmcr.Domain.Services
 
         public async Task<(bool NotFound, Dictionary<string, List<string>> Errors)> DeleteActivityCodeAsync(ActivityCodeDeleteDto activityCode)
         {
-            if (await _workReportRepo.IsActivityNumberInUseAsync(activityCode.ActivityNumber))
+            var errors = new Dictionary<string, List<string>>();
+
+            var activityFromDB = await GetActivityCodeAsync(activityCode.ActivityCodeId);
+
+            if (activityFromDB == null)
             {
-                //disable only
-            } else
-            {
-                //delete
+                return (true, null);
             }
 
-            throw new NotImplementedException();
+            if (await _workReportRepo.IsActivityNumberInUseAsync(activityCode.ActivityNumber))
+            {
+                errors.AddItem(Fields.ActivityNumber, $"ActivityNumber [{activityCode.ActivityNumber}] is in use and cannot be deleted.");
+            }
+
+            if (errors.Count > 0)
+            {
+                return (false, errors);
+            }
+
+            await _activityCodeRepo.DeleteActivityCodeAsync(activityCode);
+            await _unitOfWork.CommitAsync();
+
+            return (false, errors);
+        }
+
+        public async Task<(bool NotFound, Dictionary<string, List<string>> Errors)> DisableActivityCodeAsync(ActivityCodeDeleteDto activityCode)
+        {
+            var errors = new Dictionary<string, List<string>>();
+
+            var activityFromDB = await GetActivityCodeAsync(activityCode.ActivityCodeId);
+
+            if (activityFromDB == null)
+            {
+                return (true, null);
+            }
+
+            await _activityCodeRepo.DisableActivityCodeAsync(activityCode);
+            await _unitOfWork.CommitAsync();
+
+            return (false, errors);
         }
 
         public async Task<ActivityCodeSearchDto> GetActivityCodeAsync(decimal id)

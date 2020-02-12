@@ -13,7 +13,7 @@ namespace Hmcr.Data.Repositories
     {
         IAsyncEnumerable<HmrWorkReport> SaveWorkReportAsnyc(HmrSubmissionObject submission, List<WorkReportDto> rows);
         Task<IEnumerable<WorkReportExportDto>> ExporReportAsync(decimal submissionObjectId);
-        Task<bool> IsActivityNumberInUseAsync(string activityNumber)
+        Task<bool> IsActivityNumberInUseAsync(string activityNumber);
     }
     public class WorkReportRepository : HmcrRepositoryBase<HmrWorkReport>, IWorkReportRepository, IReportExportRepository<WorkReportExportDto>
     {

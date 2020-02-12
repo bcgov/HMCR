@@ -20,13 +20,18 @@ namespace Hmcr.Data.Repositories
         Task<HmrActivityCode> CreateActivityCodeAsync(ActivityCodeCreateDto activityCode);
         Task UpdateActivityCodeAsync(ActivityCodeUpdateDto activityCode);
         Task<bool> DoesActivityNumberExistAsync(string activityNumber);
+        Task DeleteActivityCodeAsync(ActivityCodeDeleteDto activityCode);
+        Task DisableActivityCodeAsync(ActivityCodeDeleteDto activityCode);
     }
 
     public class ActivityCodeRepository : HmcrRepositoryBase<HmrActivityCode>, IActivityCodeRepository
     {
-        public ActivityCodeRepository(AppDbContext dbContext, IMapper mapper)
+        private IWorkReportRepository _workReport;
+
+        public ActivityCodeRepository(AppDbContext dbContext, IMapper mapper, IWorkReportRepository workReport)
             : base(dbContext, mapper)
         {
+            _workReport = workReport;
         }
 
         public async Task<IEnumerable<ActivityCodeDto>> GetActiveActivityCodesAsync()
@@ -99,6 +104,12 @@ namespace Hmcr.Data.Repositories
 
             var activityCodes = Mapper.Map<IEnumerable<ActivityCodeSearchDto>>(pagedEntity.SourceList);
 
+            // Find out which activity numbers are being used
+            await foreach (var activityNumber in FindActivityNumbersInUseAync(activityCodes.Select(ac => ac.ActivityNumber)))
+            {
+                activityCodes.FirstOrDefault(ac => ac.ActivityNumber == activityNumber).CanDelete = false;
+            }
+
             var pagedDTO = new PagedDto<ActivityCodeSearchDto>
             {
                 PageNumber = pageNumber,
@@ -120,9 +131,34 @@ namespace Hmcr.Data.Repositories
             Mapper.Map(activityCode, activityCodeEntity);
         }
 
+        public async Task DeleteActivityCodeAsync(ActivityCodeDeleteDto activityCode)
+        {
+            var activityCodeEntity = await DbSet
+                .FirstAsync(ac => ac.ActivityCodeId == activityCode.ActivityCodeId);
+
+            DbSet.Remove(activityCodeEntity);
+        }
+
+        public async Task DisableActivityCodeAsync(ActivityCodeDeleteDto activityCode)
+        {
+            var activityCodeEntity = await DbSet
+                .FirstAsync(ac => ac.ActivityCodeId == activityCode.ActivityCodeId);
+
+            Mapper.Map(activityCode, activityCodeEntity);
+        }
+
         public async Task<bool> DoesActivityNumberExistAsync(string activityNumber)
         {
             return await DbSet.AnyAsync(ac => ac.ActivityNumber == activityNumber);
+        }
+
+        private async IAsyncEnumerable<string> FindActivityNumbersInUseAync(IEnumerable<string> activityNumbers)
+        {
+            foreach (var activityNumber in activityNumbers)
+            {
+                if (await _workReport.IsActivityNumberInUseAsync(activityNumber))
+                    yield return activityNumber;
+            }
         }
     }
 }
