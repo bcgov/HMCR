@@ -157,8 +157,10 @@ namespace Hmcr.Data.Repositories
 
             if (searchText.IsNotEmpty())
             {
+                searchText = searchText.Trim();
+
                 query = query
-                    .Where(u => u.FirstName.Contains(searchText) || u.LastName.Contains(searchText));
+                    .Where(u => u.FirstName.Contains(searchText) || u.LastName.Contains(searchText) || (u.FirstName + " " + u.LastName).Contains(searchText));
             }
 
             return await Page<SubmissionObjectSearchDto, SubmissionObjectSearchDto>(query, pageSize, pageNumber, orderBy, direction);

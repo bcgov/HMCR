@@ -121,10 +121,12 @@ namespace Hmcr.Data.Repositories
 
             if (searchText.IsNotEmpty())
             {
+                searchText = searchText.Trim();
+
                 query = query
-                    .Where(u => u.Username.Contains(searchText) || u.FirstName.Contains(searchText) || u.LastName.Contains(searchText) || u.BusinessLegalName.Contains(searchText));
+                    .Where(u => u.Username.Contains(searchText) || u.FirstName.Contains(searchText) || (u.FirstName + " " + u.LastName).Contains(searchText) || u.LastName.Contains(searchText) || u.BusinessLegalName.Contains(searchText));
             }
-            
+
             if (isActive != null)
             {
                 query = (bool)isActive
