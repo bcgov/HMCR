@@ -54,6 +54,8 @@ namespace Hmcr.Data.Repositories
 
             if (searchText.IsNotEmpty())
             {
+                searchText = searchText.Trim();
+
                 query = query
                     .Where(x => x.Name.Contains(searchText) || x.Description.Contains(searchText));
             }

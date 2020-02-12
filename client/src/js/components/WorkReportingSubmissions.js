@@ -89,6 +89,9 @@ const WorkReportingSubmissions = ({ serviceArea, history }, ref) => {
     searchData.updateSearchOptions({ ...searchData.searchOptions, dateFrom, dateTo, pageNumber: 1 });
   };
 
+  const handleSearchFormSubmit = () =>
+    searchData.updateSearchOptions({ ...searchData.searchOptions, searchText, pageNumber: 1 });
+
   return (
     <React.Fragment>
       <Row className="mb-3">
@@ -124,22 +127,30 @@ const WorkReportingSubmissions = ({ serviceArea, history }, ref) => {
                 minimumNights={0}
               />
               <div
-                style={{ position: 'relative', display: 'inline-block', height: 'calc(1.5em + 0.75rem + 2px)' }}
+                style={{
+                  position: 'relative',
+                  display: 'inline-block',
+                  height: 'calc(1.5em + 0.75rem + 2px)',
+                  width: '160px',
+                }}
                 className="ml-2"
               >
                 <Input
                   type="text"
-                  style={{ width: '160px', position: 'absolute', top: '15px' }}
+                  style={{ position: 'absolute', top: '15px' }}
                   placeholder="Name"
                   value={searchText}
                   onChange={e => setSearchText(e.target.value)}
                   onKeyDown={e => {
                     if (e.key === 'Enter') {
-                      searchData.updateSearchOptions({ ...searchData.searchOptions, searchText, pageNumber: 1 });
+                      handleSearchFormSubmit();
                     }
                   }}
                 />
               </div>
+              <Button color="primary" type="button" className="ml-2" onClick={handleSearchFormSubmit}>
+                Search
+              </Button>
             </div>
             <div>
               <FontAwesomeButton
