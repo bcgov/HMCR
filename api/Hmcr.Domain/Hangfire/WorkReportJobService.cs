@@ -396,7 +396,7 @@ namespace Hmcr.Domain.Hangfire
             string entityName;
             if (locationCode.LocationCode == "C")
             {
-                if (untypedRow.EndLatitude.IsEmpty())
+                if (untypedRow.StartLatitude.IsEmpty() || untypedRow.StartLongitude.IsEmpty())
                 {
                     entityName = Entities.WorkReportD4;
                     untypedRow.RowType = RowTypes.D4;
