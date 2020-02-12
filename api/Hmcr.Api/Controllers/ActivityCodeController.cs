@@ -29,8 +29,8 @@ namespace Hmcr.Api.Controllers
         [HttpGet]
         [RequiresPermission(Permissions.CodeRead)]
         public async Task<ActionResult<PagedDto<ActivityCodeSearchDto>>> GetActivityCodesAsync(
-            [FromQuery]string? maintenanceTypes, [FromQuery]string? locationCodes, [FromQuery]bool? isActive, [FromQuery]string? searchText,
-            [FromQuery]int pageSize, [FromQuery]int pageNumber, [FromQuery]string orderBy = "activitynumber", [FromQuery]string direction = "desc")
+            string? maintenanceTypes, string? locationCodes, bool? isActive, string? searchText,
+            int pageSize, int pageNumber, string orderBy = "activitynumber", string direction = "desc")
         {
             return Ok(await _activityCodeSvc.GetActivityCodesAsync(maintenanceTypes.ToStringArray(), locationCodes.ToDecimalArray(), isActive, searchText, pageSize, pageNumber, orderBy, direction));
         }

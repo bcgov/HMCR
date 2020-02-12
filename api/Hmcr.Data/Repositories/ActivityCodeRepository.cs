@@ -45,15 +45,17 @@ namespace Hmcr.Data.Repositories
 
         public async Task<HmrActivityCode> CreateActivityCodeAsync(ActivityCodeCreateDto activityCode)
         {
-            var activityCodeEntity = new HmrActivityCode
-            {
+            var activityCodeEntity = new HmrActivityCode();
+            /*{
                 ActivityNumber = activityCode.ActivityNumber,
                 ActivityName = activityCode.ActivityName,
                 UnitOfMeasure = activityCode.UnitOfMeasure,
                 MaintenanceType = activityCode.MaintenanceType,
                 LocationCodeId = activityCode.LocationCodeId,
                 PointLineFeature = activityCode.PointLineFeature,
-            };
+            };*/
+
+            Mapper.Map(activityCode, activityCodeEntity);
 
             await DbSet.AddAsync(activityCodeEntity);
             
