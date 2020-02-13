@@ -81,8 +81,17 @@ const ActivityAdmin = ({ maintenanceTypes, locationCodes, history, showValidatio
     formModal.openForm(Constants.FORM_TYPE.EDIT, { activityId });
   };
 
-  const onDeleteClicked = (roleId, endDate, permanentDelete) => {
-    api.deleteActivityCode(roleId, endDate, permanentDelete).then(() => searchData.refresh());
+  const onDeleteClicked = (activityId, endDate, permanentDelete) => {
+    if (permanentDelete) {
+      api.deleteActivityCode(activityId).then(() => searchData.refresh());
+    } else {
+      // api.deleteActivityCode(roleId, endDate, permanentDelete).then(() => searchData.refresh());
+      api
+        .getActivityCode(activityId)
+        .then(response =>
+          api.putActivityCode(activityId, { ...response.data, endDate }).then(() => searchData.refresh())
+        );
+    }
   };
 
   const handleEditFormSubmit = (values, formType) => {
@@ -116,6 +125,7 @@ const ActivityAdmin = ({ maintenanceTypes, locationCodes, history, showValidatio
   const data = searchData.data.map(item => ({
     ...item,
     locationCode: locationCodes.find(code => code.id === item.locationCodeId).name,
+    canDelete: !item.isReferenced,
   }));
 
   return (

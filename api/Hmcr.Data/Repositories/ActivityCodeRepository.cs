@@ -131,6 +131,8 @@ namespace Hmcr.Data.Repositories
             var activityCodeEntity = await DbSet
                     .FirstAsync(ac => ac.ActivityCodeId == activityCode.ActivityCodeId);
 
+            activityCode.EndDate = activityCode.EndDate?.Date;
+
             Mapper.Map(activityCode, activityCodeEntity);
         }
 
