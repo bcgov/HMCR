@@ -12,14 +12,14 @@ using System.Threading.Tasks;
 namespace Hmcr.Data.Repositories
 {
    
-    public interface ILocationCodeDropDownRepository
+    public interface ILocationCodeRepository
     {
         Task<IEnumerable<LocationCodeDropDownDto>> GetLocationCodes();
     }
     
-    public class LocationCodeDropDownRepository : HmcrRepositoryBase<HmrLocationCode>, ILocationCodeDropDownRepository
+    public class LocationCodeRepository : HmcrRepositoryBase<HmrLocationCode>, ILocationCodeRepository
     {
-        public LocationCodeDropDownRepository(AppDbContext dbContext, IMapper mapper)
+        public LocationCodeRepository(AppDbContext dbContext, IMapper mapper)
                : base(dbContext, mapper)
         {
         }
@@ -30,6 +30,11 @@ namespace Hmcr.Data.Repositories
                 .ToListAsync();
 
             return Mapper.Map<IEnumerable<LocationCodeDropDownDto>>(entity);
+        }
+
+        public async Task<bool> DoesExistAsync(decimal locationCodeId)
+        {
+            return await DbSet.AnyAsync(lc => lc.LocationCodeId == locationCodeId);
         }
     }
 }
