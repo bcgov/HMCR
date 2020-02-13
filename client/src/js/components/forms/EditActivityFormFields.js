@@ -57,10 +57,14 @@ const EditActivityFormFields = ({
     // Add validation for point line feature when location code is C.
     // Need to get the id value of location code C
     const defaultValidationSchema = validationSchema.shape({
-      pointLineFeature: Yup.string(12).when('locationCodeId', {
-        is: locationCodeCId,
-        then: Yup.string(12).required('Required'),
-      }),
+      pointLineFeature: Yup.string()
+        .nullable()
+        .when('locationCodeId', {
+          is: locationCodeCId,
+          then: Yup.string()
+            .required('Required')
+            .max(12),
+        }),
     });
 
     setValidationSchema(defaultValidationSchema);
@@ -102,15 +106,13 @@ const EditActivityFormFields = ({
       <FormRow name="locationCodeId" label="Location Code*">
         <SingleDropdownField defaultTitle="Select Location Code" items={locationCodes} name="locationCodeId" />
       </FormRow>
-      {formValues.locationCodeId === locationCodeCId && (
-        <FormRow name="pointLineFeature" label="Point Line Feature*">
-          <SingleDropdownField
-            defaultTitle="Select Point Line Feature"
-            items={pointLineFeatures}
-            name="pointLineFeature"
-          />
-        </FormRow>
-      )}
+      <FormRow name="pointLineFeature" label="Point Line Feature*">
+        <SingleDropdownField
+          defaultTitle="Select Point Line Feature"
+          items={pointLineFeatures}
+          name="pointLineFeature"
+        />
+      </FormRow>
       <FormRow name="endDate" label="End Date">
         <SingleDateField name="endDate" placeholder="End Date" />
       </FormRow>
