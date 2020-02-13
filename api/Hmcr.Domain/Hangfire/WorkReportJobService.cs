@@ -164,7 +164,7 @@ namespace Hmcr.Domain.Hangfire
 
         private void PerformFieldValidation(Dictionary<string, List<string>> errors, WorkReportCsvDto untypedRow, ActivityCodeDto activityCode)
         {
-            if (activityCode.ActivityNumber.StartsWith('6'))
+            if (activityCode.LocationCode.LocationCode == "C" && activityCode.ActivityNumber.StartsWith('6'))
             {
                 _validator.Validate(Entities.WorkReportStructure, Fields.StructureNumber, untypedRow.StructureNumber, errors);
             }

@@ -8,6 +8,7 @@ namespace Hmcr.Domain.CsvHelpers
         public WildlifeRptInitCsvDtoMap()
         {
             AutoMap();
+            Map(m => m.AccidentDate).TypeConverter<DateTypeConverter>();
         }
     }
     public class WildlifeReportCsvDtoMap : ClassMap<WildlifeReportCsvDto>
