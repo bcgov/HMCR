@@ -10,6 +10,6 @@
         public string RowValue { get; set; }
         public string ErrorDetail { get; set; }
         public decimal? RowNum { get; set; }
-        public string IsResubmitted { get; set; }
+        public bool IsResubmitted { get; set; }
     }
 }

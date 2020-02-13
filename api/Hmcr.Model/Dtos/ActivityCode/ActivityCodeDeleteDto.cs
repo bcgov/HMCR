@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Text.Json.Serialization;
 
-namespace Hmcr.Model.Dtos.ActivityCode
+namespace Hmcr.Model.Dtos.LocationCode
 {
     public class ActivityCodeDeleteDto
     {

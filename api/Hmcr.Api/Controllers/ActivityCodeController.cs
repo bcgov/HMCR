@@ -7,7 +7,7 @@ using Hmcr.Api.Controllers.Base;
 using Hmcr.Domain.Services;
 using Hmcr.Model;
 using Hmcr.Model.Dtos;
-using Hmcr.Model.Dtos.ActivityCode;
+using Hmcr.Model.Dtos.LocationCode;
 using Hmcr.Model.Utils;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;

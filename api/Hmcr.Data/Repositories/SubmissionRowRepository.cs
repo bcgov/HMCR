@@ -76,7 +76,7 @@ namespace Hmcr.Data.Repositories
                 
                 if (latestRow != null && latestRow.RowHash != row.RowHash)
                 {
-                    row.IsResubmitted = "Y";
+                    row.IsResubmitted = true;
                     yield return row.RecordNumber;
                 }
             }

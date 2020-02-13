@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Text.Json.Serialization;
 
-namespace Hmcr.Model.Dtos.ActivityCode
+namespace Hmcr.Model.Dtos.LocationCode
 {
     public class ActivityCodeSearchDto
     {
@@ -16,6 +16,7 @@ namespace Hmcr.Model.Dtos.ActivityCode
         public decimal LocationCodeId { get; set; }
         public string PointLineFeature { get; set; }
         public string ActivityApplication { get; set; }
+        public bool IsSiteNumRequired { get; set; }
         public DateTime? EndDate { get; set; }
         public bool IsActive => EndDate == null || EndDate > DateTime.Today;
         public bool CanDelete { get; set; } = true;

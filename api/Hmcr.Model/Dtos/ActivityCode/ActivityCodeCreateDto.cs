@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace Hmcr.Model.Dtos.ActivityCode
+namespace Hmcr.Model.Dtos.LocationCode
 {
     public class ActivityCodeCreateDto
     {
@@ -13,6 +13,7 @@ namespace Hmcr.Model.Dtos.ActivityCode
         public decimal LocationCodeId { get; set; }
         public string PointLineFeature { get; set; }
         public bool SiteNumberRequired { get; set; }
+        public bool IsSiteNumRequired { get; set; }
         public DateTime? EndDate { get; set; }
     }
 }

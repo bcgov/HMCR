@@ -7,7 +7,7 @@ using Hmcr.Domain.CsvHelpers;
 using Hmcr.Domain.Hangfire.Base;
 using Hmcr.Domain.Services;
 using Hmcr.Model;
-using Hmcr.Model.Dtos.ActivityCode;
+using Hmcr.Model.Dtos.LocationCode;
 using Hmcr.Model.Dtos.SubmissionObject;
 using Hmcr.Model.Dtos.WorkReport;
 using Hmcr.Model.Utils;
@@ -169,7 +169,7 @@ namespace Hmcr.Domain.Hangfire
                 _validator.Validate(Entities.WorkReportStructure, Fields.StructureNumber, untypedRow.StructureNumber, errors);
             }
 
-            if (ActivityNumbers.SiteRequired.Contains(activityCode.ActivityNumber))
+            if (activityCode.IsSiteNumRequired)
             {
                 _validator.Validate(Entities.WorkReportSite, Fields.SiteNumber, untypedRow.SiteNumber, errors);
             }
