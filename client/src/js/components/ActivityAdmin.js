@@ -39,7 +39,7 @@ const tableColumns = [
   { heading: 'Active', key: 'isActive', nosort: true },
 ];
 
-const ActivityAdmin = ({ maintenanceTypes, locationCodes, history, showValidationErrorDialog }) => {
+const ActivityAdmin = ({ maintenanceTypes, locationCodes, unitOfMeasures, history, showValidationErrorDialog }) => {
   const searchData = useSearchData(defaultSearchOptions, history);
   const [searchInitialValues, setSearchInitialValues] = useState(defaultSearchFormValues);
 
@@ -62,13 +62,14 @@ const ActivityAdmin = ({ maintenanceTypes, locationCodes, history, showValidatio
 
   const handleSearchFormSubmit = values => {
     const searchText = values.searchText.trim() || null;
+    const maintenanceTypes = values.maintenanceTypeIds.join(',') || null;
 
     let isActive = null;
     if (values.statusId.length === 1) {
       isActive = values.statusId[0] === 'ACTIVE';
     }
 
-    const options = { ...searchData.searchOptions, isActive, searchText };
+    const options = { ...searchData.searchOptions, isActive, searchText, maintenanceTypes };
     searchData.updateSearchOptions(options);
   };
 
@@ -129,6 +130,8 @@ const ActivityAdmin = ({ maintenanceTypes, locationCodes, history, showValidatio
   const data = searchData.data.map(item => ({
     ...item,
     locationCode: locationCodes.find(code => code.id === item.locationCodeId).name,
+    maintenanceType: maintenanceTypes.find(type => type.id === item.maintenanceType).name,
+    unitOfMeasures: unitOfMeasures.find(uom => uom.id === item.unitOfMeasure).name,
     canDelete: !item.isReferenced,
   }));
 
@@ -220,6 +223,7 @@ const mapStateToProps = state => {
   return {
     maintenanceTypes: state.codeLookups.maintenanceTypes,
     locationCodes: state.codeLookups.locationCodes,
+    unitOfMeasures: state.codeLookups.unitOfMeasures,
   };
 };
 
