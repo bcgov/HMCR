@@ -19,6 +19,6 @@ namespace Hmcr.Model.Dtos.LocationCode
         public bool IsSiteNumRequired { get; set; }
         public DateTime? EndDate { get; set; }
         public bool IsActive => EndDate == null || EndDate > DateTime.Today;
-        public bool CanDelete { get; set; } = true;
+        public bool IsReferenced { get; set; } = true;
     }
 }

@@ -81,22 +81,9 @@ namespace Hmcr.Api.Controllers
 
         [HttpDelete("{id}")]
         [RequiresPermission(Permissions.CodeWrite)]
-        public async Task<ActionResult> DeleteActivityCode(decimal id, ActivityCodeDeleteDto activityCode)
+        public async Task<ActionResult> DeleteActivityCode(decimal id)
         {
-            (bool NotFound, Dictionary<string, List<string>> Errors) response;
-
-            if (id != activityCode.ActivityCodeId)
-            {
-                throw new Exception($"The activity code ID from the query string does not match that of the body.");
-            }
-
-            if (activityCode.EndDate != null)
-            {
-                response = await _activityCodeSvc.DisableActivityCodeAsync(activityCode);
-            } else
-            {
-                response = await _activityCodeSvc.DeleteActivityCodeAsync(activityCode);
-            }
+            var response = await _activityCodeSvc.DeleteActivityCodeAsync(id);
 
             if (response.NotFound)
             {
