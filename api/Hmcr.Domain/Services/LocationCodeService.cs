@@ -17,9 +17,9 @@ namespace Hmcr.Domain.Services
 
     public class LocationCodeService : ILocationCodeService
     {
-        private ILocationCodeDropDownRepository _locationCodeRepo;
+        private ILocationCodeRepository _locationCodeRepo;
 
-        public LocationCodeService(ILocationCodeDropDownRepository locationCodeRepo)
+        public LocationCodeService(ILocationCodeRepository locationCodeRepo)
         {
             _locationCodeRepo = locationCodeRepo;
         }
