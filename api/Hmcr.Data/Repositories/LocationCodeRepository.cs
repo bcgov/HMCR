@@ -15,6 +15,7 @@ namespace Hmcr.Data.Repositories
     public interface ILocationCodeRepository
     {
         Task<IEnumerable<LocationCodeDropDownDto>> GetLocationCodes();
+        Task<bool> DoesExistAsync(decimal locationCodeId);
     }
     
     public class LocationCodeRepository : HmcrRepositoryBase<HmrLocationCode>, ILocationCodeRepository

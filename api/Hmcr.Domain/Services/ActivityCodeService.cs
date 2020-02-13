@@ -27,31 +27,33 @@ namespace Hmcr.Domain.Services
         private IFieldValidatorService _validatorService;
         private IUnitOfWork _unitOfWork;
         private IWorkReportRepository _workReportRepo;
+        private ILocationCodeRepository _locationCodeRepo;
 
         public ActivityCodeService(IActivityCodeRepository activityCodeRepo, IFieldValidatorService validatorService, IUnitOfWork unitOfWork,
-            IWorkReportRepository workReportRepo)
+            IWorkReportRepository workReportRepo, ILocationCodeRepository locationCodeRepo)
         {
             _activityCodeRepo = activityCodeRepo;
             _validatorService = validatorService;
             _unitOfWork = unitOfWork;
             _workReportRepo = workReportRepo;
+            _locationCodeRepo = locationCodeRepo;
         }
 
         public async Task<(decimal id, Dictionary<string, List<string>> Errors)> CreateActivityCodeAsync(ActivityCodeCreateDto activityCode)
         {
             var errors = new Dictionary<string, List<string>>();
-            /* TODO: validation required?? see HMCR-234
-             * - Need a new ActivityCode Entities Const 
-             * - Rules added to FieldValidationRules
             var entityName = Entities.ActivityCode;
-            var errors = new Dictionary<string, List<string>>();
-
+            
             _validatorService.Validate(entityName, activityCode, errors);
-            */
-
+            
             if (await _activityCodeRepo.DoesActivityNumberExistAsync(activityCode.ActivityNumber))
             {
                 errors.AddItem(Fields.ActivityNumber, $"ActivityNumber [{activityCode.ActivityNumber})] already exists.");
+            }
+
+            if (await _locationCodeRepo.DoesExistAsync(activityCode.LocationCodeId) == false)
+            {
+                errors.AddItem(Fields.LocationCodeId, $"LocationCodeId [{activityCode.LocationCodeId}] does not exist.");
             }
 
             if (errors.Count > 0)
@@ -129,16 +131,13 @@ namespace Hmcr.Domain.Services
             }
 
             var errors = new Dictionary<string, List<string>>();
-            /* TODO: validation required?? see HMCR-236 
-             * - Field rules added to FieldValidationRules?
-             * - Point-Line rules
-             * - Location Code rules
-             * - Disable/Delete rules
             var entityName = Entities.ActivityCode;
-            var errors = new Dictionary<string, List<string>>();
-
+            
             _validatorService.Validate(entityName, activityCode, errors);
-            */
+            if (await _locationCodeRepo.DoesExistAsync(activityCode.LocationCodeId) == false)
+            {
+                errors.AddItem(Fields.LocationCodeId, $"Location Code Id does not exist.");
+            }
 
             if (errors.Count > 0)
             {

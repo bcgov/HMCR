@@ -49,6 +49,8 @@ namespace Hmcr.Model
         public const string WildlifeReport = "wildlife";
         public const string WildlifeReportGps = "wildlifegps";
         public const string WildlifeReportLrs = "wildlifelrs";
+
+        public const string ActivityCode = "activitycode";
     }
 
     public static class FieldTypes
@@ -168,6 +170,11 @@ namespace Hmcr.Model
 
         public const string WildlifeRecordId = "WildlifeRecordId";
         public const string RockfallReportId = "RockfallReportId";
+
+        public const string ActivityName = "ActivityName";
+        public const string MaintenanceType = "MaintenanceType";
+        public const string PointLineFeature = "PointLineFeature";
+        public const string LocationCodeId = "LocationCodeId";
     }
 
     public interface IReportHeaders
@@ -220,6 +227,7 @@ namespace Hmcr.Model
         public const string WarsRptRecordType = "WARS_RPT_RECORD_TYPE";
         public const string WarsRptSign = "WARS_RPT_SIGN";
         public const string RkflRptRecordType = "RKFL_RPT_RECORD_TYPE";
+        public const string PointLineFeature = "POINT_LINE_FEATURE";
     }
 
     public static class FileError
