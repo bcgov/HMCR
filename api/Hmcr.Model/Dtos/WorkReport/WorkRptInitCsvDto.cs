@@ -9,7 +9,7 @@ namespace Hmcr.Model.Dtos.WorkReport
         public string ServiceArea { get; set; }
         public string RecordType { get; set; }
         public string RecordNumber { get; set; }
-        public DateTime EndDate { get; set; }
+        public DateTime? EndDate { get; set; }
         
     }
 }

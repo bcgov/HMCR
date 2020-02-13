@@ -70,7 +70,8 @@ namespace Hmcr.Model.Utils
         {
             if (dictionary.ContainsKey(keyName))
             {
-                dictionary[keyName].Add(item);
+                if (!dictionary[keyName].Contains(item))
+                    dictionary[keyName].Add(item);
             }
             else
             {
