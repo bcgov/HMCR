@@ -85,7 +85,6 @@ const ActivityAdmin = ({ maintenanceTypes, locationCodes, history, showValidatio
     if (permanentDelete) {
       api.deleteActivityCode(activityId).then(() => searchData.refresh());
     } else {
-      // api.deleteActivityCode(roleId, endDate, permanentDelete).then(() => searchData.refresh());
       api
         .getActivityCode(activityId)
         .then(response =>

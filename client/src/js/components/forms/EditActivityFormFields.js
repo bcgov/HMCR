@@ -39,12 +39,6 @@ const validationSchema = Yup.object({
   locationCodeId: Yup.number().required('Required'),
 });
 
-const pointLineFeatures = [
-  { id: 'L', name: 'Line' },
-  { id: 'P', name: 'Point' },
-  { id: 'E', name: 'Either' },
-];
-
 const EditActivityFormFields = ({
   setInitialValues,
   formValues,
@@ -54,6 +48,7 @@ const EditActivityFormFields = ({
   maintenanceTypes,
   unitOfMeasures,
   locationCodes,
+  pointLineFeatures,
 }) => {
   const [loading, setLoading] = useState(true);
   const locationCodeCId = locationCodes.find(code => code.name === 'C').id;
@@ -128,6 +123,7 @@ const mapStateToProps = state => {
     maintenanceTypes: state.codeLookups.maintenanceTypes,
     unitOfMeasures: state.codeLookups.unitOfMeasures,
     locationCodes: state.codeLookups.locationCodes,
+    pointLineFeatures: state.codeLookups.pointLineFeatures,
   };
 };
 
