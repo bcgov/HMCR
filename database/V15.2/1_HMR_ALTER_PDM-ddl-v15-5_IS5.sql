@@ -182,15 +182,6 @@ ALTER TABLE [dbo].[HMR_FEEDBACK_MESSAGE] ALTER COLUMN [IS_ERROR] BIT
 GO
 
 
-ALTER TABLE [dbo].[HMR_FEEDBACK_MESSAGE] ADD CONSTRAINT [HMR_FDBK_MSG_IS_ER_CH] 
-    CHECK ([IS_ERROR]='Y' OR [IS_ERROR]='N')
-GO
-
-
-ALTER TABLE [dbo].[HMR_FEEDBACK_MESSAGE] ADD CONSTRAINT [HMR_FDBK_MSG_IS_SNT_CH] 
-    CHECK ([IS_SENT]='Y' OR [IS_SENT]='N')
-GO
-
 
 /* ---------------------------------------------------------------------- */
 /* Drop and recreate table "dbo.HMR_ROCKFALL_REPORT"                      */
