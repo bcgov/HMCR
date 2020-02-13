@@ -20,18 +20,17 @@ namespace Hmcr.Data.Repositories
         Task<HmrActivityCode> CreateActivityCodeAsync(ActivityCodeCreateDto activityCode);
         Task UpdateActivityCodeAsync(ActivityCodeUpdateDto activityCode);
         Task<bool> DoesActivityNumberExistAsync(string activityNumber);
-        Task DeleteActivityCodeAsync(ActivityCodeDeleteDto activityCode);
-        Task DisableActivityCodeAsync(ActivityCodeDeleteDto activityCode);
+        Task DeleteActivityCodeAsync(decimal id);
     }
 
     public class ActivityCodeRepository : HmcrRepositoryBase<HmrActivityCode>, IActivityCodeRepository
     {
-        private IWorkReportRepository _workReport;
+        private IWorkReportRepository _workReportRepo;
 
-        public ActivityCodeRepository(AppDbContext dbContext, IMapper mapper, IWorkReportRepository workReport)
+        public ActivityCodeRepository(AppDbContext dbContext, IMapper mapper, IWorkReportRepository workReportRepo)
             : base(dbContext, mapper)
         {
-            _workReport = workReport;
+            _workReportRepo = workReportRepo;
         }
 
         public async Task<IEnumerable<ActivityCodeDto>> GetActiveActivityCodesAsync()
@@ -72,6 +71,8 @@ namespace Hmcr.Data.Repositories
 
             var activityCode = Mapper.Map<ActivityCodeSearchDto>(activityCodeEntity);
 
+            activityCode.IsReferenced = await _workReportRepo.IsActivityNumberInUseAsync(activityCode.ActivityNumber);
+
             return activityCode;
         }
 
@@ -109,7 +110,7 @@ namespace Hmcr.Data.Repositories
             // Find out which activity numbers are being used
             await foreach (var activityNumber in FindActivityNumbersInUseAync(activityCodes.Select(ac => ac.ActivityNumber)))
             {
-                activityCodes.FirstOrDefault(ac => ac.ActivityNumber == activityNumber).CanDelete = false;
+                activityCodes.FirstOrDefault(ac => ac.ActivityNumber == activityNumber).IsReferenced = false;
             }
 
             var pagedDTO = new PagedDto<ActivityCodeSearchDto>
@@ -130,23 +131,17 @@ namespace Hmcr.Data.Repositories
             var activityCodeEntity = await DbSet
                     .FirstAsync(ac => ac.ActivityCodeId == activityCode.ActivityCodeId);
 
+            activityCode.EndDate = activityCode.EndDate?.Date;
+
             Mapper.Map(activityCode, activityCodeEntity);
         }
 
-        public async Task DeleteActivityCodeAsync(ActivityCodeDeleteDto activityCode)
+        public async Task DeleteActivityCodeAsync(decimal id)
         {
             var activityCodeEntity = await DbSet
-                .FirstAsync(ac => ac.ActivityCodeId == activityCode.ActivityCodeId);
+                .FirstAsync(ac => ac.ActivityCodeId == id);
 
             DbSet.Remove(activityCodeEntity);
-        }
-
-        public async Task DisableActivityCodeAsync(ActivityCodeDeleteDto activityCode)
-        {
-            var activityCodeEntity = await DbSet
-                .FirstAsync(ac => ac.ActivityCodeId == activityCode.ActivityCodeId);
-
-            Mapper.Map(activityCode, activityCodeEntity);
         }
 
         public async Task<bool> DoesActivityNumberExistAsync(string activityNumber)
@@ -158,7 +153,7 @@ namespace Hmcr.Data.Repositories
         {
             foreach (var activityNumber in activityNumbers)
             {
-                if (await _workReport.IsActivityNumberInUseAsync(activityNumber))
+                if (await _workReportRepo.IsActivityNumberInUseAsync(activityNumber))
                     yield return activityNumber;
             }
         }

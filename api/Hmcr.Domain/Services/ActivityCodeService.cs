@@ -17,8 +17,7 @@ namespace Hmcr.Domain.Services
         Task<ActivityCodeSearchDto> GetActivityCodeAsync(decimal id);
         Task<(bool NotFound, Dictionary<string, List<string>> Errors)> UpdateActivityCodeAsync(ActivityCodeUpdateDto activityCode);
         Task<(decimal id, Dictionary<string, List<string>> Errors)> CreateActivityCodeAsync(ActivityCodeCreateDto activityCode);
-        Task<(bool NotFound, Dictionary<string, List<string>> Errors)> DeleteActivityCodeAsync(ActivityCodeDeleteDto activityCode);
-        Task<(bool NotFound, Dictionary<string, List<string>> Errors)> DisableActivityCodeAsync(ActivityCodeDeleteDto activityCode);
+        Task<(bool NotFound, Dictionary<string, List<string>> Errors)> DeleteActivityCodeAsync(decimal id);
     }
 
     public class ActivityCodeService : IActivityCodeService
@@ -65,20 +64,20 @@ namespace Hmcr.Domain.Services
             return (activityCodeEntity.ActivityCodeId, errors);
         }
 
-        public async Task<(bool NotFound, Dictionary<string, List<string>> Errors)> DeleteActivityCodeAsync(ActivityCodeDeleteDto activityCode)
+        public async Task<(bool NotFound, Dictionary<string, List<string>> Errors)> DeleteActivityCodeAsync(decimal id)
         {
             var errors = new Dictionary<string, List<string>>();
 
-            var activityFromDB = await GetActivityCodeAsync(activityCode.ActivityCodeId);
+            var activityFromDB = await GetActivityCodeAsync(id);
 
             if (activityFromDB == null)
             {
                 return (true, null);
             }
 
-            if (await _workReportRepo.IsActivityNumberInUseAsync(activityCode.ActivityNumber))
+            if (await _workReportRepo.IsActivityNumberInUseAsync(activityFromDB.ActivityNumber))
             {
-                errors.AddItem(Fields.ActivityNumber, $"ActivityNumber [{activityCode.ActivityNumber}] is in use and cannot be deleted.");
+                errors.AddItem(Fields.ActivityNumber, $"ActivityNumber [{activityFromDB.ActivityNumber}] is in use and cannot be deleted.");
             }
 
             if (errors.Count > 0)
@@ -86,24 +85,7 @@ namespace Hmcr.Domain.Services
                 return (false, errors);
             }
 
-            await _activityCodeRepo.DeleteActivityCodeAsync(activityCode);
-            await _unitOfWork.CommitAsync();
-
-            return (false, errors);
-        }
-
-        public async Task<(bool NotFound, Dictionary<string, List<string>> Errors)> DisableActivityCodeAsync(ActivityCodeDeleteDto activityCode)
-        {
-            var errors = new Dictionary<string, List<string>>();
-
-            var activityFromDB = await GetActivityCodeAsync(activityCode.ActivityCodeId);
-
-            if (activityFromDB == null)
-            {
-                return (true, null);
-            }
-
-            await _activityCodeRepo.DisableActivityCodeAsync(activityCode);
+            await _activityCodeRepo.DeleteActivityCodeAsync(id);
             await _unitOfWork.CommitAsync();
 
             return (false, errors);

@@ -61,7 +61,6 @@ export const searchActivityCodes = params =>
 export const getActivityCode = id => instance.get(`${Constants.API_PATHS.ACTIVITY_CODES}/${id}`);
 export const postActivityCode = data => instance.post(Constants.API_PATHS.ACTIVITY_CODES, data);
 export const putActivityCode = (id, data) => instance.put(`${Constants.API_PATHS.ACTIVITY_CODES}/${id}`, data);
-export const deleteActivityCode = (id, endDate, permanentDelete) =>
-  instance.delete(`${Constants.API_PATHS.ACTIVITY_CODES}/${id}`, { data: { id, endDate, permanentDelete } });
+export const deleteActivityCode = id => instance.delete(`${Constants.API_PATHS.ACTIVITY_CODES}/${id}`);
 
 export const getVersion = () => instance.get(Constants.API_PATHS.VERSION);

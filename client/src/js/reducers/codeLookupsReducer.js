@@ -3,7 +3,7 @@ import _ from 'lodash';
 import {
   FETCH_MAINTENANCE_TYPES,
   FETCH_UNIT_OF_MEASURES,
-  //   FETCH_POINT_LINE_FEATURES,
+  FETCH_POINT_LINE_FEATURES,
   FETCH_LOCATION_CODES,
 } from '../actions/types';
 
@@ -22,6 +22,8 @@ export default (state = defaultState, action) => {
       return { ...state, unitOfMeasures: _.orderBy(action.payload, ['name']) };
     case FETCH_LOCATION_CODES:
       return { ...state, locationCodes: _.orderBy(action.payload, ['name']) };
+    case FETCH_POINT_LINE_FEATURES:
+      return { ...state, pointLineFeatures: _.orderBy(action.payload, ['name']) };
     default:
       return state;
   }
