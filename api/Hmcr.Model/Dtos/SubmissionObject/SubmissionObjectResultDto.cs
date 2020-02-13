@@ -20,7 +20,7 @@ namespace Hmcr.Model.Dtos.SubmissionObject
         public string SubmissionStatusCode { get; set; }
         public string Description { get; set; }
         public string ErrorDetail { get; set; }
-        public int NumResubmitRows { get { return SubmissionRows.Count(x => x.IsResubmitted == "Y"); } }
+        public int NumResubmitRows { get { return SubmissionRows.Count(x => x.IsResubmitted); } }
         public DateTime AppCreateTimestamp { get; set; }
 
         public IEnumerable<SubmissionRowResultDto> SubmissionRows { get; set; }

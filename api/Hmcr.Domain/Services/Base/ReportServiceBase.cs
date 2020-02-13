@@ -71,7 +71,7 @@ namespace Hmcr.Domain.Services.Base
             if (errors.Count > 0)
                 return (errors, null);
 
-            var resubmittedRecordNumbers = submission.SubmissionRows.Where(x => x.IsResubmitted == "Y").Select(x => x.RecordNumber).ToList();
+            var resubmittedRecordNumbers = submission.SubmissionRows.Where(x => x.IsResubmitted).Select(x => x.RecordNumber).ToList();
 
             return (errors, resubmittedRecordNumbers);
         }

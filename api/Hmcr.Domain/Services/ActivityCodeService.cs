@@ -2,7 +2,7 @@
 using Hmcr.Data.Repositories;
 using Hmcr.Model;
 using Hmcr.Model.Dtos;
-using Hmcr.Model.Dtos.ActivityCode;
+using Hmcr.Model.Dtos.LocationCode;
 using Hmcr.Model.Utils;
 using System;
 using System.Collections.Generic;

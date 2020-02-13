@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace Hmcr.Model.Dtos.ActivityCode
+namespace Hmcr.Model.Dtos.LocationCode
 {
     public class LocationCodeDto
     {

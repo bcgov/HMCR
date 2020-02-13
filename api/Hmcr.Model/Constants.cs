@@ -51,11 +51,6 @@ namespace Hmcr.Model
         public const string WildlifeReportLrs = "wildlifelrs";
     }
 
-    public static class ActivityNumbers
-    {
-        public static string[] SiteRequired = { "304200", "304201", "404200", "404201", "901200", "920200", "920201" };
-    }
-
     public static class FieldTypes
     {
         public const string String = "S";

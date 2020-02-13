@@ -3,7 +3,7 @@ using Hmcr.Data.Database.Entities;
 using Hmcr.Data.Repositories.Base;
 using Hmcr.Model.Dtos;
 using Hmcr.Model.Utils;
-using Hmcr.Model.Dtos.ActivityCode;
+using Hmcr.Model.Dtos.LocationCode;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
