@@ -1,7 +1,6 @@
 ﻿using AutoMapper;
 using Hmcr.Data.Database.Entities;
 using Hmcr.Model;
-using Hmcr.Model.Dtos.LocationCode;
 using Hmcr.Model.Dtos.CodeLookup;
 using Hmcr.Model.Dtos.ContractTerm;
 using Hmcr.Model.Dtos.District;
@@ -24,8 +23,6 @@ using Hmcr.Model.Dtos.User;
 using Hmcr.Model.Dtos.UserRole;
 using Hmcr.Model.Dtos.WildlifeReport;
 using Hmcr.Model.Dtos.WorkReport;
-
-using System.Linq;
 
 namespace Hmcr.Data.Mappings
 {

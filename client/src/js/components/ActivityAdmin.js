@@ -97,6 +97,11 @@ const ActivityAdmin = ({ maintenanceTypes, locationCodes, history, showValidatio
     if (!formModal.submitting) {
       formModal.setSubmitting(true);
 
+      if (values.locationCodeId !== locationCodes.find(location => location.name === 'C').id) {
+        values.pointLineFeature = null;
+        values.isSiteNumRequired = false;
+      }
+
       if (formType === Constants.FORM_TYPE.ADD) {
         api
           .postActivityCode(values)

@@ -6,7 +6,7 @@ import moment from 'moment';
 import SingleDateField from '../ui/SingleDateField';
 import SingleDropdownField from '../ui/SingleDropdownField';
 import PageSpinner from '../ui/PageSpinner';
-import { FormRow, FormInput } from './FormInputs';
+import { FormRow, FormInput, FormCheckboxInput } from './FormInputs';
 
 import * as api from '../../Api';
 import * as Constants from '../../Constants';
@@ -18,6 +18,7 @@ const defaultValues = {
   maintenanceType: '',
   locationCodeId: '',
   pointLineFeature: '',
+  isSiteNumRequired: false,
   endDate: null,
 };
 
@@ -51,6 +52,9 @@ const EditActivityFormFields = ({
   pointLineFeatures,
 }) => {
   const [loading, setLoading] = useState(true);
+  const [validLocationCodeValues, setValidLocationCodeValues] = useState(locationCodes);
+  const [disableLocationCodeEdit, setDisableLocationCodeEdit] = useState(false);
+  const [validPointLineFeatureValues, setValidPointLineFeatureValues] = useState(pointLineFeatures);
   const locationCodeCId = locationCodes.find(code => code.name === 'C').id;
 
   useEffect(() => {
@@ -65,6 +69,10 @@ const EditActivityFormFields = ({
             .required('Required')
             .max(12),
         }),
+      isSiteNumRequired: Yup.boolean().when('locationCodeId', {
+        is: locationCodeCId,
+        then: Yup.boolean().required('Required'),
+      }),
     });
 
     setValidationSchema(defaultValidationSchema);
@@ -80,6 +88,37 @@ const EditActivityFormFields = ({
           ...response.data,
           endDate: response.data.endDate ? moment(response.data.endDate) : null,
         });
+
+        setValidLocationCodeValues(() => {
+          if (formType === Constants.FORM_TYPE.EDIT) {
+            if (response.data.locationCodeId === locationCodes.find(code => code.name === 'B').id)
+              return locationCodes.filter(location => location.name !== 'C');
+          }
+
+          return locationCodes;
+        });
+
+        setDisableLocationCodeEdit(() => {
+          if (formType === Constants.FORM_TYPE.EDIT) {
+            if (response.data.locationCodeId === locationCodes.find(code => code.name === 'A').id) return true;
+          }
+          return false;
+        });
+
+        setValidPointLineFeatureValues(() => {
+          if (formType === Constants.FORM_TYPE.EDIT) {
+            if (response.data.pointLineFeature === 'Either')
+              return pointLineFeatures.filter(feature => feature.id === 'Either');
+
+            if (response.data.pointLineFeature)
+              return pointLineFeatures.filter(
+                feature => feature.id === 'Either' || feature.id === response.data.pointLineFeature
+              );
+          }
+
+          return pointLineFeatures;
+        });
+
         setLoading(false);
       });
     }
@@ -92,27 +131,54 @@ const EditActivityFormFields = ({
   return (
     <React.Fragment>
       <FormRow name="activityNumber" label="Activity Code*">
-        <FormInput type="text" name="activityNumber" placeholder="Activity Code" />
+        <FormInput
+          type="text"
+          name="activityNumber"
+          placeholder="Activity Code"
+          disabled={formType === Constants.FORM_TYPE.EDIT}
+        />
       </FormRow>
       <FormRow name="activityName" label="Activity Name*">
         <FormInput type="text" name="activityName" placeholder="Activity Name" />
       </FormRow>
       <FormRow name="unitOfMeasure" label="Unit*">
-        <SingleDropdownField defaultTitle="Select Unit" items={unitOfMeasures} name="unitOfMeasure" />
-      </FormRow>
-      <FormRow name="maintenanceType" label="Maintenance Type*">
-        <SingleDropdownField defaultTitle="Select Maintenance Type" items={maintenanceTypes} name="maintenanceType" />
-      </FormRow>
-      <FormRow name="locationCodeId" label="Location Code*">
-        <SingleDropdownField defaultTitle="Select Location Code" items={locationCodes} name="locationCodeId" />
-      </FormRow>
-      <FormRow name="pointLineFeature" label="Point Line Feature*">
         <SingleDropdownField
-          defaultTitle="Select Point Line Feature"
-          items={pointLineFeatures}
-          name="pointLineFeature"
+          defaultTitle="Select Unit"
+          items={unitOfMeasures}
+          name="unitOfMeasure"
+          disabled={formType === Constants.FORM_TYPE.EDIT}
         />
       </FormRow>
+      <FormRow name="maintenanceType" label="Maintenance Type*">
+        <SingleDropdownField
+          defaultTitle="Select Maintenance Type"
+          items={maintenanceTypes}
+          name="maintenanceType"
+          disabled={formType === Constants.FORM_TYPE.EDIT}
+        />
+      </FormRow>
+      <FormRow name="locationCodeId" label="Location Code*">
+        <SingleDropdownField
+          defaultTitle="Select Location Code"
+          items={validLocationCodeValues}
+          name="locationCodeId"
+          disabled={disableLocationCodeEdit}
+        />
+      </FormRow>
+      {formValues.locationCodeId === locationCodeCId && (
+        <React.Fragment>
+          <FormRow name="pointLineFeature" label="Point Line Feature*">
+            <SingleDropdownField
+              defaultTitle="Select Point Line Feature"
+              items={validPointLineFeatureValues}
+              name="pointLineFeature"
+            />
+          </FormRow>
+          <FormRow name="isSiteNumRequired" label="Site Number Required">
+            <FormCheckboxInput name="isSiteNumRequired" />
+          </FormRow>
+        </React.Fragment>
+      )}
       <FormRow name="endDate" label="End Date">
         <SingleDateField name="endDate" placeholder="End Date" />
       </FormRow>
