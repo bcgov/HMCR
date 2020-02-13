@@ -110,7 +110,7 @@ namespace Hmcr.Data.Repositories
             // Find out which activity numbers are being used
             await foreach (var activityNumber in FindActivityNumbersInUseAync(activityCodes.Select(ac => ac.ActivityNumber)))
             {
-                activityCodes.FirstOrDefault(ac => ac.ActivityNumber == activityNumber).IsReferenced = false;
+                activityCodes.FirstOrDefault(ac => ac.ActivityNumber == activityNumber).IsReferenced = true;
             }
 
             var pagedDTO = new PagedDto<ActivityCodeSearchDto>
