@@ -136,7 +136,7 @@ namespace Hmcr.Domain.Services
             _validatorService.Validate(entityName, activityCode, errors);
             if (await _locationCodeRepo.DoesExistAsync(activityCode.LocationCodeId) == false)
             {
-                errors.AddItem(Fields.LocationCodeId, $"Location Code Id does not exist.");
+                errors.AddItem(Fields.LocationCodeId, $"LocationCodeId [{activityCode.LocationCodeId}] does not exist.");
             }
 
             if (errors.Count > 0)
