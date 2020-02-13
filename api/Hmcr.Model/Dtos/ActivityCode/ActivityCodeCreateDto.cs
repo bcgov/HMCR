@@ -12,7 +12,6 @@ namespace Hmcr.Model.Dtos.LocationCode
         public string MaintenanceType { get; set; }
         public decimal LocationCodeId { get; set; }
         public string PointLineFeature { get; set; }
-        public bool SiteNumberRequired { get; set; }
         public bool IsSiteNumRequired { get; set; }
         public DateTime? EndDate { get; set; }
     }
