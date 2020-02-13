@@ -48,12 +48,24 @@ namespace Hmcr.Domain.Services
             LoadWildlifeReportRules();
             LoadWildlifeReportGpsRules();
             LoadWildlifeReportLrsRules();
+
+            LoadActivityCodeRules();
         }
 
 
         public IEnumerable<FieldValidationRule> GetFieldValidationRules(string entityName)
         {
             return _rules.Where(x => x.EntityName.ToLowerInvariant() == entityName.ToLowerInvariant());
+        }
+
+        private void LoadActivityCodeRules()
+        {
+            _rules.Add(new FieldValidationRule(Entities.ActivityCode, Fields.ActivityNumber, FieldTypes.String, true, 1, 6, null, null, null, null, null, null));
+            _rules.Add(new FieldValidationRule(Entities.ActivityCode, Fields.ActivityName, FieldTypes.String, true, 1, 150, null, null, null, null, null, null));
+            _rules.Add(new FieldValidationRule(Entities.ActivityCode, Fields.UnitOfMeasure, FieldTypes.String, true, null, null, null, null, null, null, null, CodeSet.UnitOfMeasure));
+            _rules.Add(new FieldValidationRule(Entities.ActivityCode, Fields.MaintenanceType, FieldTypes.String, true, null, null, null, null, null, null, null, CodeSet.WrkRptMaintType));
+            _rules.Add(new FieldValidationRule(Entities.ActivityCode, Fields.PointLineFeature, FieldTypes.String, false, null, null, null, null, null, null, null, CodeSet.PointLineFeature));
+            //_rules.Add(new FieldValidationRule(Entities.ActivityCode, Fields.SiteNumberRequired, FieldTypes., false, null, null, null, null, null, null, null, null));
         }
 
         private void LoadUserEntityRules()
