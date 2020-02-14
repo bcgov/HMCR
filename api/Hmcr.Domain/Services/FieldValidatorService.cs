@@ -242,23 +242,24 @@ namespace Hmcr.Domain.Services
         {
             _rules.AddRange(_rules.Where(x => x.EntityName == Entities.RockfallReport).Select(x => x.ShallowCopy(Entities.RockfallReportGps)).ToArray());
 
-            _rules.First(x => x.EntityName == Entities.RockfallReport && x.FieldName == Fields.StartLatitude).Required = true;
-            _rules.First(x => x.EntityName == Entities.RockfallReport && x.FieldName == Fields.StartLongitude).Required = true;
-            _rules.First(x => x.EntityName == Entities.RockfallReport && x.FieldName == Fields.EndLatitude).Required = true;
-            _rules.First(x => x.EntityName == Entities.RockfallReport && x.FieldName == Fields.EndLongitude).Required = true;
+            _rules.First(x => x.EntityName == Entities.RockfallReportGps && x.FieldName == Fields.StartLatitude).Required = true;
+            _rules.First(x => x.EntityName == Entities.RockfallReportGps && x.FieldName == Fields.StartLongitude).Required = true;
+            _rules.First(x => x.EntityName == Entities.RockfallReportGps && x.FieldName == Fields.EndLatitude).Required = true;
+            _rules.First(x => x.EntityName == Entities.RockfallReportGps && x.FieldName == Fields.EndLongitude).Required = true;
         }
 
         public void LoadRockfallReportLrsRules()
         {
             _rules.AddRange(_rules.Where(x => x.EntityName == Entities.RockfallReport).Select(x => x.ShallowCopy(Entities.RockfallReportLrs)).ToArray());
 
-            _rules.First(x => x.EntityName == Entities.RockfallReport && x.FieldName == Fields.Landmark).Required = true;
-            _rules.First(x => x.EntityName == Entities.RockfallReport && x.FieldName == Fields.LandmarkName).Required = true;
-            _rules.First(x => x.EntityName == Entities.RockfallReport && x.FieldName == Fields.StartOffset).Required = true;
-            _rules.First(x => x.EntityName == Entities.RockfallReport && x.FieldName == Fields.EndOffset).Required = true;
-            _rules.First(x => x.EntityName == Entities.RockfallReport && x.FieldName == Fields.DirectionFromLandmark).Required = true;
+            _rules.First(x => x.EntityName == Entities.RockfallReportLrs && x.FieldName == Fields.Landmark).Required = true;
+            _rules.First(x => x.EntityName == Entities.RockfallReportLrs && x.FieldName == Fields.LandmarkName).Required = true;
+            _rules.First(x => x.EntityName == Entities.RockfallReportLrs && x.FieldName == Fields.StartOffset).Required = true;
+            _rules.First(x => x.EntityName == Entities.RockfallReportLrs && x.FieldName == Fields.EndOffset).Required = true;
+            _rules.First(x => x.EntityName == Entities.RockfallReportLrs && x.FieldName == Fields.DirectionFromLandmark).Required = true;
         }
 
+        #region Field Validation for Rockfall
         public void LoadRockfallOtherDitchVolumeRules()
         {
             _rules.Add(new FieldValidationRule(Entities.RockfallReportOtherDitchVolume, Fields.OtherDitchVolume, FieldTypes.String, true, null, null, null, null, null, null, _regex.GetRegexInfo(RegexDefs.Volume), null));
@@ -268,12 +269,14 @@ namespace Hmcr.Domain.Services
         {
             _rules.Add(new FieldValidationRule(Entities.RockfallReportOtherTravelledLanesVolume, Fields.OtherTravelledLanesVolume, FieldTypes.String, true, null, null, null, null, null, null, _regex.GetRegexInfo(RegexDefs.Volume), null));
         }
+        #endregion
 
         public void LoadWildlifeReportInitRules()
         {
             _rules.Add(new FieldValidationRule(Entities.WildlifeReportInit, Fields.RecordType, FieldTypes.String, true, null, null, null, null, null, null, null, CodeSet.WarsRptRecordType));
             _rules.Add(new FieldValidationRule(Entities.WildlifeReportInit, Fields.AccidentDate, FieldTypes.Date, true, null, null, null, null, new DateTime(1900, 1, 1), new DateTime(9999, 12, 31), null, null));
         }
+
 
         public void LoadWildlifeReportRules()
         {
@@ -299,22 +302,24 @@ namespace Hmcr.Domain.Services
             _rules.Add(new FieldValidationRule(Entities.WildlifeReport, Fields.Comments, FieldTypes.String, false, 0, 1024, null, null, null, null, null, null));
         }
 
+        #region Field validation for Wildlife
         public void LoadWildlifeReportGpsRules()
         {
             _rules.AddRange(_rules.Where(x => x.EntityName == Entities.WildlifeReport).Select(x => x.ShallowCopy(Entities.WildlifeReportGps)).ToArray());
 
-            _rules.First(x => x.EntityName == Entities.WildlifeReport && x.FieldName == Fields.Latitude).Required = true;
-            _rules.First(x => x.EntityName == Entities.WildlifeReport && x.FieldName == Fields.Longitude).Required = true;
+            _rules.First(x => x.EntityName == Entities.WildlifeReportGps && x.FieldName == Fields.Latitude).Required = true;
+            _rules.First(x => x.EntityName == Entities.WildlifeReportGps && x.FieldName == Fields.Longitude).Required = true;
         }
 
         public void LoadWildlifeReportLrsRules()
         {
             _rules.AddRange(_rules.Where(x => x.EntityName == Entities.WildlifeReport).Select(x => x.ShallowCopy(Entities.WildlifeReportLrs)).ToArray());
 
-            _rules.First(x => x.EntityName == Entities.WildlifeReport && x.FieldName == Fields.Landmark).Required = true;
-            _rules.First(x => x.EntityName == Entities.WildlifeReport && x.FieldName == Fields.Offset).Required = true;
-            _rules.First(x => x.EntityName == Entities.WildlifeReport && x.FieldName == Fields.NearestTown).Required = true;
+            _rules.First(x => x.EntityName == Entities.WildlifeReportLrs && x.FieldName == Fields.Landmark).Required = true;
+            _rules.First(x => x.EntityName == Entities.WildlifeReportLrs && x.FieldName == Fields.Offset).Required = true;
+            _rules.First(x => x.EntityName == Entities.WildlifeReportLrs && x.FieldName == Fields.NearestTown).Required = true;
         }
+        #endregion
 
         public void Validate<T>(string entityName, T entity, Dictionary<string, List<string>> errors, params string[] fieldsToSkip)
         {
