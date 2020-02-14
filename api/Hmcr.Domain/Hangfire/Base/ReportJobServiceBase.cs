@@ -175,7 +175,8 @@ namespace Hmcr.Domain.Hangfire.Base
             var submissionInfo = await _submissionRepo.GetSubmissionInfoForEmail(_submission.SubmissionObjectId);
 
             DateTime.SpecifyKind(submissionInfo.SubmissionDate, DateTimeKind.Utc);
-            submissionInfo.SubmissionDate = TimeZoneInfo.ConvertTimeBySystemTimeZoneId(submissionInfo.SubmissionDate, Constants.PacificTimeZone);
+            //submissionInfo.SubmissionDate = TimeZoneInfo.ConvertTimeBySystemTimeZoneId(submissionInfo.SubmissionDate, Constants.PacificTimeZone);
+            submissionInfo.SubmissionDate = submissionInfo.SubmissionDate.ToLocalTime();
 
             var submissionId = _submission.SubmissionObjectId;
             var resultUrl = string.Format(_config.GetValue<string>("SUBMISSION_RESULT"), _submission.ServiceAreaNumber, submissionId);
