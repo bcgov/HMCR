@@ -66,10 +66,14 @@ namespace Hmcr.Domain.Services
                     errors.AddItem(ex.MemberMapData.Member.Name, ex.Message);
                     break;
                 }
+                catch (CsvHelper.MissingFieldException)
+                {
+                    break; //handled in CsvHelperUtils
+                }
                 catch (CsvHelperException ex)
                 {
                     _logger.LogInformation(ex.ToString());
-                    break;
+                    throw;
                 }
                 catch (Exception ex)
                 {

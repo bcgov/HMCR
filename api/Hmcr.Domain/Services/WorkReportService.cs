@@ -13,8 +13,6 @@ using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace Hmcr.Domain.Services
@@ -68,9 +66,14 @@ namespace Hmcr.Domain.Services
                     errors.AddItem(ex.MemberMapData.Member.Name, ex.Message);
                     break;
                 }
-                catch (CsvHelperException)
+                catch (CsvHelper.MissingFieldException)
                 {
-                    break;
+                    break; //handled in CsvHelperUtils
+                }
+                catch (CsvHelperException ex)
+                {
+                    _logger.LogInformation(ex.ToString());
+                    throw;
                 }
                 catch (Exception ex)
                 {
