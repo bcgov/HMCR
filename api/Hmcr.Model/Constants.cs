@@ -233,7 +233,7 @@ namespace Hmcr.Model
 
     public static class FileError
     {
-        public const string ReferToRowErrors = "{ \"fieldMessages\": [ { \"field\": \"File\", \"messages\": [ \"Please refer to row error(s)\" ] } ] }";
+        public const string ReferToRowErrors = "{ \"fieldMessages\": [ { \"field\": \"File\", \"messages\": [ \"Some headers or values are missing/incorrect. Please refer to row error(s).\" ] } ] }";
     }
 
     public static class HmcrEnvironments

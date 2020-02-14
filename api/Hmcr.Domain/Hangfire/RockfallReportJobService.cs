@@ -181,7 +181,7 @@ namespace Hmcr.Domain.Hangfire
         {
             MethodLogger.LogEntry(_logger, _enableMethodLog, _methodLogHeader, $"RowNum: {untypedRow.RowNum}");
 
-            return untypedRow.StartLatitude.IsEmpty() ? Entities.RockfallReportLrs : Entities.RockfallReportGps;
+            return untypedRow.StartLatitude.IsEmpty() || untypedRow.StartLongitude.IsEmpty() ? Entities.RockfallReportLrs : Entities.RockfallReportGps;
         }
 
         private (List<RockfallReportCsvDto> untypedRows, string headers) ParseRowsUnTyped(Dictionary<string, List<string>> errors)
