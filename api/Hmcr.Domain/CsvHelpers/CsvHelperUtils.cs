@@ -1,11 +1,8 @@
 ﻿using CsvHelper;
 using CsvHelper.Configuration;
 using Hmcr.Model.Utils;
-using System;
 using System.Collections.Generic;
 using System.Globalization;
-using System.Linq;
-using System.Text;
 using System.Text.RegularExpressions;
 
 namespace Hmcr.Domain.CsvHelpers
