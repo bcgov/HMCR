@@ -9,7 +9,7 @@
         public string TimeOfKill { get; set; }
         public string Latitude { get; set; }
         public string Longitude { get; set; }
-        public string HighwayUniqueNumber { get; set; }
+        public string HighwayUnique { get; set; }
         public string Landmark { get; set; }
         public string Offset { get; set; }
         public string NearestTown { get; set; }

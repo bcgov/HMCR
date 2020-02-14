@@ -156,7 +156,7 @@ namespace Hmcr.Domain.Hangfire
         {
             MethodLogger.LogEntry(_logger, _enableMethodLog, _methodLogHeader, $"RowNum: {untypedRow.RowNum}");
 
-            return untypedRow.Latitude.IsEmpty() ? Entities.WildlifeReportLrs : Entities.WildlifeReportGps;
+            return untypedRow.Latitude.IsEmpty() || untypedRow.Longitude.IsEmpty() ? Entities.WildlifeReportLrs : Entities.WildlifeReportGps;
         }
 
         private (List<WildlifeReportCsvDto> untypedRows, string headers) ParseRowsUnTyped(Dictionary<string, List<string>> errors)
