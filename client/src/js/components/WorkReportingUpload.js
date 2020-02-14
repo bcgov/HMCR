@@ -171,7 +171,7 @@ const WorkReportingUpload = ({
         setResubCheckStatus(
           updateUploadStatusMessage(Constants.UPLOAD_STATE.RESUB_CHECK, Constants.UPLOAD_STATE_STATUS.ERROR)
         );
-        setErrorMessages(Object.values(error.response.data.errors));
+        setErrorMessages(error.response.data.errors);
         resetCallback();
         handleFileSubmitted();
       });
@@ -190,7 +190,7 @@ const WorkReportingUpload = ({
       })
       .catch(error => {
         setSavingStatus(updateUploadStatusMessage(Constants.UPLOAD_STATE.SAVING, Constants.UPLOAD_STATE_STATUS.ERROR));
-        setErrorMessages(Object.values(error.response.data.errors));
+        setErrorMessages(error.response.data.errors);
       })
       .finally(() => {
         resetCallback();
@@ -288,13 +288,24 @@ const WorkReportingUpload = ({
       >
         {resubCheckStatus}
         {savingStatus}
-        {errorMessages && errorMessages.length > 0 && (
+        {errorMessages && Object.keys(errorMessages).length > 0 && (
           <Alert color="danger">
             <p>Upload unsuccessful. The following errors were found:</p>
-            <ul>
-              {errorMessages.map((error, index) => (
-                <li key={index}>{error}</li>
-              ))}
+            <ul style={{ marginLeft: '-32px' }}>
+              {Object.keys(errorMessages).map(key => {
+                return (
+                  <React.Fragment>
+                    <li key={key} style={{ listStyleType: 'none' }}>
+                      {key}:
+                    </li>
+                    <ul>
+                      {errorMessages[key].map((message, index) => (
+                        <li key={`${key}_${index}`}>{message}</li>
+                      ))}
+                    </ul>
+                  </React.Fragment>
+                );
+              })}
             </ul>
           </Alert>
         )}
