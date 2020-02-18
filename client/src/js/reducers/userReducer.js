@@ -1,37 +1,11 @@
 import _ from 'lodash';
 
-import {
-  FETCH_CURRENT_USER,
-  FETCH_USER_TYPES,
-  FETCH_USER_STATUSES,
-  SET_SINGLE_USER_SEARCH_CRITERIA,
-  SEARCH_USERS,
-} from '../actions/types';
-
-import * as Constants from '../Constants';
+import { FETCH_CURRENT_USER, FETCH_USER_TYPES, FETCH_USER_STATUSES } from '../actions/types';
 
 const defaultState = {
   types: {},
   statuses: {},
   current: {},
-  list: {},
-  searchCriteria: {
-    serviceAreas: null,
-    userTypes: null,
-    searchText: null,
-    isActive: true,
-    pageSize: Constants.DEFAULT_PAGE_SIZE,
-    pageNumber: 1,
-    orderBy: null,
-  },
-  searchPagination: {
-    currentPage: null,
-    pageSize: null,
-    pageCount: null,
-    hasPreviousPage: null,
-    hasNextPage: null,
-    totalCount: null,
-  },
 };
 
 export default (state = defaultState, action) => {
@@ -42,19 +16,6 @@ export default (state = defaultState, action) => {
       return { ...state, types: { ...state.types, ..._.mapKeys(action.payload, 'id') } };
     case FETCH_USER_STATUSES:
       return { ...state, statuses: { ...state.statuses, ..._.mapKeys(action.payload, 'id') } };
-    case SET_SINGLE_USER_SEARCH_CRITERIA:
-      return { ...state, searchCriteria: { ...state.searchCriteria, [action.payload.key]: action.payload.value } };
-    case SEARCH_USERS:
-      const { hasPreviousPage, hasNextPage } = action.payload;
-      const pageNumber = parseInt(action.payload.pageNumber);
-      const pageSize = parseInt(action.payload.pageSize);
-      const totalCount = parseInt(action.payload.totalCount);
-      const pageCount = parseInt(action.payload.pageCount);
-      return {
-        ...state,
-        list: { ...action.payload.sourceList },
-        searchPagination: { hasPreviousPage, hasNextPage, pageNumber, pageSize, totalCount, pageCount },
-      };
     default:
       return state;
   }

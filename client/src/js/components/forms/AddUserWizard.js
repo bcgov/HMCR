@@ -10,7 +10,7 @@ import SingleDropdownField from '../ui/SingleDropdownField';
 import { FormInput, FormRow } from './FormInputs';
 import SubmitButton from '../ui/SubmitButton';
 
-import { createUser, editUser, showValidationErrorDialog, hideErrorDialog } from '../../actions';
+import { showValidationErrorDialog, hideErrorDialog } from '../../actions';
 
 import * as Constants from '../../Constants';
 import * as api from '../../Api';
@@ -209,7 +209,6 @@ const AddUserWizard = ({
   serviceAreas,
   showValidationErrorDialog,
   hideErrorDialog,
-  createUser,
   validationSchema,
 }) => {
   const [wizardState, setWizardState] = useState(WIZARD_STATE.SEARCH);
@@ -237,7 +236,8 @@ const AddUserWizard = ({
     if (!submitting) {
       setSubmitting(true);
 
-      createUser(values)
+      api
+        .postUser(values)
         .then(() => setWizardState(WIZARD_STATE.USER_SETUP_CONFIRM))
         .catch(error => {
           showValidationErrorDialog(error.response.data.errors);
@@ -300,6 +300,4 @@ const mapStateToProps = state => {
   };
 };
 
-export default connect(mapStateToProps, { createUser, editUser, showValidationErrorDialog, hideErrorDialog })(
-  AddUserWizard
-);
+export default connect(mapStateToProps, { showValidationErrorDialog, hideErrorDialog })(AddUserWizard);
