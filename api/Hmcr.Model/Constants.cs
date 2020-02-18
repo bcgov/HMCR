@@ -9,7 +9,7 @@ namespace Hmcr.Model
         public static DateTime MaxDate = new DateTime(9999, 12, 31); 
         public static DateTime MinDate = new DateTime(1900, 1, 1);
         public static decimal MaxFileSize = 2097152;
-        public const string PacificTimeZone = "Pacific Standard Time";
+        public const string PacificTimeZone = "America/Vancouver";
     }
 
     public static class Permissions

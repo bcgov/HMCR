@@ -175,8 +175,8 @@ namespace Hmcr.Domain.Hangfire.Base
             var submissionInfo = await _submissionRepo.GetSubmissionInfoForEmail(_submission.SubmissionObjectId);
 
             DateTime.SpecifyKind(submissionInfo.SubmissionDate, DateTimeKind.Utc);
-            //submissionInfo.SubmissionDate = TimeZoneInfo.ConvertTimeBySystemTimeZoneId(submissionInfo.SubmissionDate, Constants.PacificTimeZone);
-            submissionInfo.SubmissionDate = submissionInfo.SubmissionDate.ToLocalTime();
+            submissionInfo.SubmissionDate = TimeZoneInfo.ConvertTimeBySystemTimeZoneId(submissionInfo.SubmissionDate, Constants.PacificTimeZone);
+            //submissionInfo.SubmissionDate = submissionInfo.SubmissionDate.ToLocalTime();
 
             var submissionId = _submission.SubmissionObjectId;
             var resultUrl = string.Format(_config.GetValue<string>("SUBMISSION_RESULT"), _submission.ServiceAreaNumber, submissionId);
@@ -188,7 +188,7 @@ namespace Hmcr.Domain.Hangfire.Base
 
             var htmlBodyTemplate = submissionInfo.Success ? _emailBody.SuccessHtmlBody : _emailBody.ErrorHtmlBody;
             var htmlBody = string.Format(htmlBodyTemplate, 
-                submissionInfo.FileName, submissionInfo.FileType, submissionInfo.ServiceAreaNumber, submissionInfo.SubmissionDate.ToString("yyyy-MM-dd hh:mm:ss"), 
+                submissionInfo.FileName, submissionInfo.FileType, submissionInfo.ServiceAreaNumber, submissionInfo.SubmissionDate.ToString("yyyy-MM-dd HH:mm:ss"), 
                 submissionId, submissionInfo.NumOfRecords, submissionInfo.NumOfErrorRecords, resultUrl);
 
             var textBody = htmlBody.HtmlToPlainText();
