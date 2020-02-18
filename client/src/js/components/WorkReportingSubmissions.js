@@ -1,9 +1,11 @@
 import React, { useState, useEffect, forwardRef, useImperativeHandle } from 'react';
-import { Button, Row, Col, Input } from 'reactstrap';
+import { connect } from 'react-redux';
+import { Button, Row, Col, Input, UncontrolledPopover, PopoverBody, PopoverHeader } from 'reactstrap';
 import moment from 'moment';
 import { DateRangePicker } from 'react-dates';
 import queryString from 'query-string';
 import _ from 'lodash';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 import DataTableWithPaginaionControl from './ui/DataTableWithPaginaionControl';
 import PageSpinner from './ui/PageSpinner';
@@ -23,6 +25,7 @@ const tableColumns = [
   { heading: 'Submitted By', key: 'name', nosort: true },
   { heading: 'Report Type', key: 'streamName', nosort: true },
   { heading: 'Submission Status', key: 'description', nosort: true },
+  { heading: '', key: 'longDescription', nosort: true },
 ];
 
 const defaultSearchOptions = {
@@ -33,7 +36,7 @@ const defaultSearchOptions = {
   dataPath: Constants.API_PATHS.SUBMISSIONS,
 };
 
-const WorkReportingSubmissions = ({ serviceArea, history }, ref) => {
+const WorkReportingSubmissions = ({ serviceArea, submissionStatuses, history }, ref) => {
   const searchData = useSearchData(defaultSearchOptions, history);
   const [searchText, setSearchText] = useState(defaultSearchOptions.searchText);
 
@@ -183,6 +186,20 @@ const WorkReportingSubmissions = ({ serviceArea, history }, ref) => {
                       {item.id}
                     </Button>
                   ),
+                  longDescription: (
+                    <React.Fragment>
+                      <FontAwesomeIcon
+                        id={`tooltip_${item.id}`}
+                        style={{ cursor: 'pointer' }}
+                        className="fa-color-primary"
+                        icon="question-circle"
+                      />
+                      <UncontrolledPopover trigger="focus" placement="auto" target={`tooltip_${item.id}`}>
+                        <PopoverHeader>{submissionStatuses[item.submissionStatusCode].description}</PopoverHeader>
+                        <PopoverBody>{submissionStatuses[item.submissionStatusCode].longDescription}</PopoverBody>
+                      </UncontrolledPopover>
+                    </React.Fragment>
+                  ),
                 }))}
                 tableColumns={tableColumns}
                 searchPagination={searchData.pagination}
@@ -208,4 +225,12 @@ const WorkReportingSubmissions = ({ serviceArea, history }, ref) => {
   );
 };
 
-export default forwardRef(WorkReportingSubmissions);
+const refWorkReportingSubmissions = forwardRef(WorkReportingSubmissions);
+
+const mapStateToProps = state => {
+  return {
+    submissionStatuses: state.submissions.statuses,
+  };
+};
+
+export default connect(mapStateToProps, null, null, { forwardRef: true })(refWorkReportingSubmissions);

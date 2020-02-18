@@ -13,6 +13,7 @@ import {
   fetchUnitOfMeasures,
   fetchLocationCodes,
   fetchPointLineFeatures,
+  fetchSubmissionStatuses,
 } from '../actions';
 
 const Main = ({
@@ -26,6 +27,7 @@ const Main = ({
   fetchUnitOfMeasures,
   fetchLocationCodes,
   fetchPointLineFeatures,
+  fetchSubmissionStatuses,
 }) => {
   const [loading, setLoading] = useState(true);
 
@@ -39,6 +41,7 @@ const Main = ({
       fetchUnitOfMeasures(),
       fetchLocationCodes(),
       fetchPointLineFeatures(),
+      fetchSubmissionStatuses(),
     ]).then(() => setLoading(false));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -66,4 +69,5 @@ export default connect(mapStateToProps, {
   fetchUnitOfMeasures,
   fetchLocationCodes,
   fetchPointLineFeatures,
+  fetchSubmissionStatuses,
 })(Main);
