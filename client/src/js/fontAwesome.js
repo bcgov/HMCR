@@ -12,6 +12,7 @@ import {
   faSync,
   faDownload,
   faCopy,
+  faQuestionCircle,
 } from '@fortawesome/free-solid-svg-icons';
 import { faCheckCircle as farCheckCircle } from '@fortawesome/free-regular-svg-icons';
 
@@ -29,6 +30,7 @@ const addIconsToLibrary = () => {
   library.add(farCheckCircle);
   library.add(faDownload);
   library.add(faCopy);
+  library.add(faQuestionCircle);
 };
 
 export default addIconsToLibrary;
