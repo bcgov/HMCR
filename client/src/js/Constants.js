@@ -23,6 +23,7 @@ export const API_PATHS = {
   WILDLIFE_REPORT: '/wildlifereports',
   WORK_REPORT: '/workreports',
   SUBMISSIONS: '/submissionobjects',
+  SUBMISSION_STATUS: '/submissionstatus',
   SUBMISSION_STREAMS: '/submissionstreams',
   VERSION: '/version',
 };
