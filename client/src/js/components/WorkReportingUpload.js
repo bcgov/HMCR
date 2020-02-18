@@ -291,19 +291,17 @@ const WorkReportingUpload = ({
         {errorMessages && Object.keys(errorMessages).length > 0 && (
           <Alert color="danger">
             <p>Upload unsuccessful. The following errors were found:</p>
-            <ul style={{ marginLeft: '-32px' }}>
+            <ul style={{ marginLeft: '-40px' }}>
               {Object.keys(errorMessages).map(key => {
                 return (
-                  <React.Fragment>
-                    <li key={key} style={{ listStyleType: 'none' }}>
-                      {key}:
-                    </li>
+                  <li key={key} style={{ listStyleType: 'none' }}>
+                    {key}:
                     <ul>
                       {errorMessages[key].map((message, index) => (
                         <li key={`${key}_${index}`}>{message}</li>
                       ))}
                     </ul>
-                  </React.Fragment>
+                  </li>
                 );
               })}
             </ul>
