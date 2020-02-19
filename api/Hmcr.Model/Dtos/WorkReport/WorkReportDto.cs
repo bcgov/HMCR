@@ -6,6 +6,7 @@ namespace Hmcr.Model.Dtos.WorkReport
     {
         public decimal WorkReportId { get; set; }
         public decimal SubmissionObjectId { get; set; }
+        public decimal RowId { get; set; }
         public string RecordType { get; set; }
         public decimal ServiceArea { get; set; }
         public string RecordNumber { get; set; }

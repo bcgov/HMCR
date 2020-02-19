@@ -8,6 +8,7 @@ namespace Hmcr.Model.Dtos.WildlifeReport
     {
         public decimal WildlifeRecordId { get; set; }
         public decimal SubmissionObjectId { get; set; }
+        public decimal RowId { get; set; }
         public decimal? ValidationStatusId { get; set; }
         public string RecordType { get; set; }
         public decimal ServiceArea { get; set; }
