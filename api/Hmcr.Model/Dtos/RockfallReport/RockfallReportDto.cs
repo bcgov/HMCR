@@ -40,6 +40,6 @@ namespace Hmcr.Model.Dtos.RockfallReport
         public string McPhoneNumber { get; set; }
         public DateTime? ReportDate { get; set; }
         public decimal? RowNum { get; set; }
-
+        public SpatialData SpatialData { get; set; }
     }
 }

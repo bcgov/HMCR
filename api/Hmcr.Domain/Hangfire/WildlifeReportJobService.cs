@@ -111,6 +111,9 @@ namespace Hmcr.Domain.Hangfire
                 }
 
                 typedRows = rows;
+
+                CopyCalculatedFieldsFormUntypedRow(typedRows, untypedRows);
+
                 await PerformAdditionalValidationAsync(typedRows);
             }
 
@@ -152,11 +155,34 @@ namespace Hmcr.Domain.Hangfire
             }
         }
 
+        private void CopyCalculatedFieldsFormUntypedRow(List<WildlifeReportDto> typedRows, List<WildlifeReportCsvDto> untypedRows)
+        {
+            MethodLogger.LogEntry(_logger, _enableMethodLog, _methodLogHeader);
+
+            foreach (var typedRow in typedRows)
+            {
+                var untypedRow = untypedRows.First(x => x.RowNum == typedRow.RowNum);
+                typedRow.SpatialData = untypedRow.SpatialData;
+            }
+        }
+
         private string GetValidationEntityName(WildlifeReportCsvDto untypedRow)
         {
             MethodLogger.LogEntry(_logger, _enableMethodLog, _methodLogHeader, $"RowNum: {untypedRow.RowNum}");
 
-            return untypedRow.Latitude.IsEmpty() || untypedRow.Longitude.IsEmpty() ? Entities.WildlifeReportLrs : Entities.WildlifeReportGps;
+            var entityName = "";
+            if (untypedRow.Latitude.IsEmpty() || untypedRow.Longitude.IsEmpty())
+            {
+                entityName = Entities.WildlifeReportLrs;
+                untypedRow.SpatialData = SpatialData.Lrs;
+            }
+            else
+            {
+                entityName = Entities.WildlifeReportGps;
+                untypedRow.SpatialData = SpatialData.Gps;
+            }
+
+            return entityName;
         }
 
         private (List<WildlifeReportCsvDto> untypedRows, string headers) ParseRowsUnTyped(Dictionary<string, List<string>> errors)

@@ -42,6 +42,6 @@ namespace Hmcr.Model.Dtos.WorkReport
         /// <summary>
         /// D2, D3, D4 report type
         /// </summary>
-        public RowTypes RowType { get; set; }
+        public SpatialData SpatialData { get; set; }
     }
 }
