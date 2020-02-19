@@ -163,6 +163,7 @@ namespace Hmcr.Domain.Hangfire
             {
                 var untypedRow = untypedRows.First(x => x.RowNum == typedRow.RowNum);
                 typedRow.SpatialData = untypedRow.SpatialData;
+                typedRow.RowId = untypedRow.RowId;
             }
         }
 

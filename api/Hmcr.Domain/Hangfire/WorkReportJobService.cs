@@ -194,6 +194,7 @@ namespace Hmcr.Domain.Hangfire
                 var untypedRow = untypedRows.First(x => x.RowNum == typedRow.RowNum);
                 typedRow.PointLineFeature = untypedRow.PointLineFeature;
                 typedRow.SpatialData = untypedRow.SpatialData;
+                typedRow.RowId = untypedRow.RowId;
             }
         }
 
