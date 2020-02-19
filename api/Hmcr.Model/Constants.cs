@@ -266,14 +266,16 @@ namespace Hmcr.Model
     }
 
     /// <summary>
-    /// Work Report Row Types
-    /// D2 - Non-Location specific reporting Fields
-    /// D3 - Location specific reporting fields(GPS)
-    /// D4 - Location specific reporting(without GPS)
+    /// Spatial Data
+    /// None - Non-Location specific reporting Fields
+    /// GPS - Location specific reporting fields(GPS)
+    /// LRS - Location specific reporting (without GPS)
     /// </summary>
-    public enum RowTypes
+    public enum SpatialData
     {
-        D2, D3, D4
+        None, 
+        Gps, 
+        Lrs
     }
 
     public static class DitchVolume

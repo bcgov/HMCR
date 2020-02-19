@@ -34,6 +34,6 @@
         public string McPhoneNumber { get; set; }
         public string ReportDate { get; set; }
         public decimal? RowNum { get; set; }
-
+        public SpatialData SpatialData { get; set; }
     }
 }

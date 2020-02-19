@@ -174,7 +174,7 @@ namespace Hmcr.Domain.Hangfire
                 _validator.Validate(Entities.WorkReportSite, Fields.SiteNumber, untypedRow.SiteNumber, errors);
             }
 
-            if (untypedRow.RowType == RowTypes.D2 && activityCode.LocationCode.LocationCode == "B")
+            if (untypedRow.SpatialData == SpatialData.None && activityCode.LocationCode.LocationCode == "B")
             {
                 _validator.Validate(Entities.WorkReportHighwayUnique, Fields.HighwayUnique, untypedRow.HighwayUnique, errors);
             }
@@ -193,7 +193,7 @@ namespace Hmcr.Domain.Hangfire
             {
                 var untypedRow = untypedRows.First(x => x.RowNum == typedRow.RowNum);
                 typedRow.PointLineFeature = untypedRow.PointLineFeature;
-                typedRow.RowType = untypedRow.RowType;
+                typedRow.SpatialData = untypedRow.SpatialData;
             }
         }
 
@@ -366,14 +366,14 @@ namespace Hmcr.Domain.Hangfire
                     errors.AddItem(Fields.EndDate, "Cannot be a future date.");
                 }
 
-                if (typedRow.RowType == RowTypes.D3)
+                if (typedRow.SpatialData == SpatialData.Gps)
                 {
                     PerformGpsPointValidation(typedRow, submissionRow);
                     PerformGpsLineValidation(typedRow, submissionRow);
                     PerformGpsEitherLineOrPointValidation(typedRow);
                 }
 
-                if (typedRow.RowType == RowTypes.D4)
+                if (typedRow.SpatialData == SpatialData.Lrs)
                 {
                     PerformOffsetPointValidation(typedRow, submissionRow);
                     PerformOffsetLineValidation(typedRow, submissionRow);
@@ -399,18 +399,18 @@ namespace Hmcr.Domain.Hangfire
                 if (untypedRow.StartLatitude.IsEmpty() || untypedRow.StartLongitude.IsEmpty())
                 {
                     entityName = Entities.WorkReportD4;
-                    untypedRow.RowType = RowTypes.D4;
+                    untypedRow.SpatialData = SpatialData.Lrs;
                 }
                 else
                 {
                     entityName = Entities.WorkReportD3;
-                    untypedRow.RowType = RowTypes.D3;
+                    untypedRow.SpatialData = SpatialData.Gps;
                 }
             }
             else
             {
                 entityName = Entities.WorkReportD2;
-                untypedRow.RowType = RowTypes.D2;
+                untypedRow.SpatialData = SpatialData.None;
             }
 
             return entityName;

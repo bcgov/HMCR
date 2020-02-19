@@ -20,6 +20,7 @@
         public string Age { get; set; }
         public string Comment { get; set; }
         public decimal? RowNum { get; set; }
+        public SpatialData SpatialData { get; set; }
 
     }
 }

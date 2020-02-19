@@ -113,6 +113,9 @@ namespace Hmcr.Domain.Hangfire
                 }
 
                 typedRows = rows;
+
+                CopyCalculatedFieldsFormUntypedRow(typedRows, untypedRows);
+
                 await PerformAdditionalValidationAsync(typedRows);
             }
 
@@ -177,11 +180,34 @@ namespace Hmcr.Domain.Hangfire
             }
         }
 
+        private void CopyCalculatedFieldsFormUntypedRow(List<RockfallReportDto> typedRows, List<RockfallReportCsvDto> untypedRows)
+        {
+            MethodLogger.LogEntry(_logger, _enableMethodLog, _methodLogHeader);
+
+            foreach (var typedRow in typedRows)
+            {
+                var untypedRow = untypedRows.First(x => x.RowNum == typedRow.RowNum);
+                typedRow.SpatialData = untypedRow.SpatialData;
+            }
+        }
+
         private string GetValidationEntityName(RockfallReportCsvDto untypedRow)
         {
             MethodLogger.LogEntry(_logger, _enableMethodLog, _methodLogHeader, $"RowNum: {untypedRow.RowNum}");
 
-            return untypedRow.StartLatitude.IsEmpty() || untypedRow.StartLongitude.IsEmpty() ? Entities.RockfallReportLrs : Entities.RockfallReportGps;
+            var entityName = "";
+            if (untypedRow.StartLatitude.IsEmpty() || untypedRow.StartLongitude.IsEmpty())
+            {
+                entityName = Entities.RockfallReportLrs;
+                untypedRow.SpatialData = SpatialData.Lrs;
+            }
+            else
+            {
+                entityName = Entities.RockfallReportGps;
+                untypedRow.SpatialData = SpatialData.Gps;
+            }
+
+            return entityName;
         }
 
         private (List<RockfallReportCsvDto> untypedRows, string headers) ParseRowsUnTyped(Dictionary<string, List<string>> errors)
