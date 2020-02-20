@@ -56,5 +56,33 @@ namespace Hmcr.Model.Utils
             return csvValue.ToString().Trim(',');
 
         }
+
+        public static string[] GetLowercaseFieldsFromCsvHeaders(string[] headers)
+        {
+            var fields = new string[headers.Length];
+
+            var i = 0;
+            foreach(var header in headers)
+            {
+                fields[i] = Regex.Replace(header.ToLower(), @"[\s|\/]", string.Empty);
+                i++;
+            }
+
+            return fields;
+        }
+
+        public static string[] ToLowercase(string[] items)
+        {
+            var lowerCaseItems = new string[items.Length];
+
+            var i = 0;
+            foreach (var item in items)
+            {
+                lowerCaseItems[i] = item.ToLowerInvariant();
+                i++;
+            }
+
+            return lowerCaseItems;
+        }
     }
 }
