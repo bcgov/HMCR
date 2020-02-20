@@ -13,13 +13,13 @@ namespace Hmcr.Domain.Services
     {
         void Validate<T>(string entityName, string fieldName, T value, Dictionary<string, List<string>> errors);
         void Validate<T>(string entityName, T entity, Dictionary<string, List<string>> errors, params string[] fieldsToSkip);
-        IEnumerable<CodeLookupForValidation> CodeLookup { get; set; }
+        IEnumerable<CodeLookupCache> CodeLookup { get; set; }
     }
     public class FieldValidatorService : IFieldValidatorService
     {
         List<FieldValidationRule> _rules;
         RegexDefs _regex;
-        public IEnumerable<CodeLookupForValidation> CodeLookup { get; set; }
+        public IEnumerable<CodeLookupCache> CodeLookup { get; set; }
         public FieldValidatorService(RegexDefs regex)
         {
             _rules = new List<FieldValidationRule>();

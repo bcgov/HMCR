@@ -13,7 +13,7 @@ namespace Hmcr.Data.Repositories
 {
     public interface ICodeLookupRepository
     {
-        IEnumerable<CodeLookupForValidation> GetCodeLookupForValidation();
+        IEnumerable<CodeLookupCache> LoadCodeLookupCache();
     }
 
     public class CodeLookupRepository : HmcrRepositoryBase<HmrCodeLookup>, ICodeLookupRepository
@@ -23,16 +23,17 @@ namespace Hmcr.Data.Repositories
         {
         }
 
-        public IEnumerable<CodeLookupForValidation> GetCodeLookupForValidation()
+        public IEnumerable<CodeLookupCache> LoadCodeLookupCache()
         {
             return DbSet.AsNoTracking()
                 .Where(x => x.EndDate == null || DateTime.Today < x.EndDate)
                 .Select(x =>
-                    new CodeLookupForValidation
+                    new CodeLookupCache
                     {
                         CodeSet = x.CodeSet,
                         CodeValue = x.CodeValueFormat == "NUMBER" ? x.CodeValueNum.ToString() : x.CodeValueText,
-                        CodeName = x.CodeName
+                        CodeName = x.CodeName,
+                        CodeValueNum = x.CodeValueNum
                     }
                 )
                 .ToArray();
