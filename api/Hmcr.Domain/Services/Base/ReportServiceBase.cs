@@ -274,5 +274,19 @@ namespace Hmcr.Domain.Services.Base
                 }
             }
         }
+
+        protected static bool CheckCommonMandatoryFields(string[] headers, string[] mandatoryFields, Dictionary<string, List<string>> errors)
+        {
+            var fields  = CsvUtils.ToLowercase(mandatoryFields);
+            headers = CsvUtils.GetLowercaseFieldsFromCsvHeaders(headers);
+
+            foreach (var field in fields)
+            {
+                if (!headers.Any(x => x == field.ToLowerInvariant()))
+                    errors.AddItem("File", $"Header [{field.WordToWords()}] is missing");
+            }
+
+            return errors.Count == 0;
+        }
     }
 }

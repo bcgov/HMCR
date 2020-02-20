@@ -50,7 +50,8 @@ namespace Hmcr.Domain.Services
             csv.Configuration.RegisterClassMap<WorkRptInitCsvDtoMap>();
 
             var serviceArea = (long)submission.ServiceAreaNumber;
-            
+
+            var headerValidated = false;
             var rows = new List<WorkRptInitCsvDto>();
             while (csv.Read())
             {
@@ -59,6 +60,19 @@ namespace Hmcr.Domain.Services
                 try
                 {
                     row = csv.GetRecord<WorkRptInitCsvDto>();
+
+                    if (!headerValidated)
+                    {
+                        if (!CheckCommonMandatoryFields(csv.Context.HeaderRecord, WorkReportHeaders.MandatoryFields, errors))
+                        {
+                            return false;
+                        }
+                        else
+                        {
+                            headerValidated = true;
+                        }
+                    }
+
                     rows.Add(row);
                 }
                 catch (TypeConverterException ex)

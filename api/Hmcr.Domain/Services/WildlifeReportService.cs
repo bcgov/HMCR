@@ -50,6 +50,7 @@ namespace Hmcr.Domain.Services
 
             var serviceArea = (long)submission.ServiceAreaNumber;
 
+            var headerValidated = false;
             var rows = new List<WildlifeRptInitCsvDto>();
             while (csv.Read())
             {
@@ -58,6 +59,19 @@ namespace Hmcr.Domain.Services
                 try
                 {
                     row = csv.GetRecord<WildlifeRptInitCsvDto>();
+
+                    if (!headerValidated)
+                    {
+                        if (!CheckCommonMandatoryFields(csv.Context.HeaderRecord, WildlifeReportHeaders.MandatoryFields, errors))
+                        {
+                            return false;
+                        }
+                        else
+                        {
+                            headerValidated = true;
+                        }
+                    }
+
                     rows.Add(row);
                 }
                 catch (TypeConverterException ex)

@@ -28,5 +28,39 @@ namespace Hmcr.Model.Utils
         {
             return date == null ? "" : date.ToString("yyyy-MM-dd");
         }
+
+        /// <summary>
+        /// Returns Pacific time if VancouverTimeZone or PacificTimeZone is defined in the system
+        /// Otherwise reutnrs UTC time.
+        /// </summary>
+        /// <param name="utcDate"></param>
+        /// <returns></returns>
+        public static DateTime ConvertUtcToPacificTime(DateTime utcDate)
+        {
+            var date = GetLocalTime(utcDate, Constants.VancouverTimeZone);
+
+            if (date != null)
+                return (DateTime)date;
+
+            date = GetLocalTime(utcDate, Constants.PacificTimeZone);
+
+            if (date != null)
+                return (DateTime)date;
+
+            return utcDate;
+        }
+
+        private static DateTime? GetLocalTime(DateTime utcDate, string id)
+        {
+            try
+            {
+                var timezone = TimeZoneInfo.FindSystemTimeZoneById(id);
+                return TimeZoneInfo.ConvertTimeFromUtc(utcDate, timezone);
+            }
+            catch (TimeZoneNotFoundException)
+            {
+                return null;
+            }
+        }
     }
 }
