@@ -76,7 +76,7 @@ namespace Hmcr.Api
             }
 
             //Inject Code Lookup
-            validator.CodeLookup = codeLookupRepo.GetCodeLookupForValidation();
+            validator.CodeLookup = codeLookupRepo.LoadCodeLookupCache();
         }
     }
 }

@@ -1,13 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 using Hmcr.Api.Authorization;
 using Hmcr.Api.Controllers.Base;
 using Hmcr.Domain.Services;
 using Hmcr.Model;
 using Hmcr.Model.Dtos.CodeLookup;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Hmcr.Api.Controllers
@@ -26,23 +23,23 @@ namespace Hmcr.Api.Controllers
 
         [HttpGet ("maintenancetypes")]
         [RequiresPermission(Permissions.CodeRead)]
-        public ActionResult<IEnumerable<CodeLookupForValidation>> GetMaintenanceTypes()
+        public ActionResult<IEnumerable<CodeLookupCache>> GetMaintenanceTypes()
         {
-           return Ok(_validator.CodeLookup.Where(x => x.CodeSet == "WRK_RPT_MAINT_TYPE"));
+           return Ok(_validator.CodeLookup.Where(x => x.CodeSet == CodeSet.WrkRptMaintType));
         }
 
         [HttpGet ("unitofmeasures")]
         [RequiresPermission(Permissions.CodeRead)]
-        public ActionResult<IEnumerable<CodeLookupForValidation>> GetUnitOfMeasures()
+        public ActionResult<IEnumerable<CodeLookupCache>> GetUnitOfMeasures()
         {
-            return Ok(_validator.CodeLookup.Where(x => x.CodeSet == "UOM"));
+            return Ok(_validator.CodeLookup.Where(x => x.CodeSet == CodeSet.UnitOfMeasure));
         }
 
         [HttpGet("pointlinefeatures")]
         [RequiresPermission(Permissions.CodeRead)]
-        public ActionResult<IEnumerable<CodeLookupForValidation>> GetPointlineFeatures()
+        public ActionResult<IEnumerable<CodeLookupCache>> GetPointlineFeatures()
         {
-            return Ok(_validator.CodeLookup.Where(x => x.CodeSet == "POINT_LINE_FEATURE"));
+            return Ok(_validator.CodeLookup.Where(x => x.CodeSet == CodeSet.PointLineFeature));
         }
     }
 }
