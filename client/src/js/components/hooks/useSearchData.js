@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useHistory } from 'react-router-dom';
 import _ from 'lodash';
 import moment from 'moment';
 
@@ -7,7 +8,8 @@ import { updateQueryParamsFromHistory } from '../../utils';
 import * as api from '../../Api';
 import * as Constants from '../../Constants';
 
-const useSearchData = (defaultSearchOptions, history) => {
+const useSearchData = defaultSearchOptions => {
+  const history = useHistory();
   const [data, setData] = useState([]);
   const [pagination, setPagination] = useState({
     currentPage: null,
