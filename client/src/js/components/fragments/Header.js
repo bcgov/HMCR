@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import { connect } from 'react-redux';
 import { Link } from 'react-router-dom';
 import {
@@ -25,12 +26,17 @@ import * as Constants from '../../Constants';
 import * as api from '../../Api';
 
 const Header = ({ currentUser }) => {
+  const location = useLocation();
   const [collapsed, setCollapsed] = useState(true);
   const [version, setVersion] = useState(null);
 
   useEffect(() => {
     api.getVersion().then(response => setVersion(response.data.environment.toLowerCase()));
-  });
+  }, []);
+
+  useEffect(() => {
+    localStorage.setItem('lastVisitedPath', location.pathname);
+  }, [location.pathname]);
 
   const toggleNavbar = () => {
     setCollapsed(!collapsed);

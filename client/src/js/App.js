@@ -45,7 +45,7 @@ const App = ({ currentUser }) => {
           <Container>
             <ErrorBoundary>
               <Switch>
-                {Routes(currentUser.userType)}
+                {Routes(currentUser)}
                 <Route path={Constants.PATHS.UNAUTHORIZED} exact component={Unauthorized} />
                 <Route path="*" component={NoMatch} />
               </Switch>
@@ -66,25 +66,45 @@ const Unauthorized = () => {
   return <p>Unauthorized</p>;
 };
 
-const Routes = userType => {
-  switch (userType) {
+const Routes = currentUser => {
+  switch (currentUser.userType) {
     case Constants.USER_TYPE.INTERNAL:
-      return AdminRoutes();
+      return AdminRoutes(currentUser);
     case Constants.USER_TYPE.BUSINESS:
-      return WorkReportingRoutes();
+      return WorkReportingRoutes(currentUser);
     default:
       return <Redirect to={Constants.PATHS.UNAUTHORIZED} />;
   }
 };
 
-const WorkReportingRoutes = () => {
+const defaultPath = currentUser => {
+  if (currentUser.permissions.includes(Constants.PERMISSIONS.CODE_R)) return Constants.PATHS.ADMIN_ACTIVITIES;
+
+  if (currentUser.permissions.includes(Constants.PERMISSIONS.USER_R)) return Constants.PATHS.ADMIN_USERS;
+
+  if (currentUser.permissions.includes(Constants.PERMISSIONS.ROLE_R)) return Constants.PATHS.ADMIN_ROLES;
+
+  if (currentUser.permissions.includes(Constants.PERMISSIONS.FILE_R)) return Constants.PATHS.WORK_REPORTING;
+
+  return Constants.PATHS.UNAUTHORIZED;
+};
+
+const getLastVistedPath = currentUser => {
+  const lastVisitedPath = localStorage.getItem('lastVisitedPath');
+
+  if (lastVisitedPath) return lastVisitedPath;
+
+  return defaultPath(currentUser);
+};
+
+const WorkReportingRoutes = currentUser => {
   return (
     <Switch>
       <Route path={Constants.PATHS.ADMIN}>
         <Redirect to={Constants.PATHS.UNAUTHORIZED} />
       </Route>
       <Route path={Constants.PATHS.HOME} exact>
-        <Redirect to={Constants.PATHS.WORK_REPORTING} />
+        <Redirect to={getLastVistedPath(currentUser)} />
       </Route>
       <Route path={Constants.PATHS.WORK_REPORTING} exact component={WorkReporting} />
       <Route path={`${Constants.PATHS.WORK_REPORTING}/:submissionId`} component={WorkReportingSubmissionDetail} />
@@ -94,15 +114,15 @@ const WorkReportingRoutes = () => {
   );
 };
 
-const AdminRoutes = () => {
+const AdminRoutes = currentUser => {
   return (
     <Switch>
       <Route path={Constants.PATHS.HOME} exact>
-        <Redirect to={Constants.PATHS.ADMIN_USERS} />
+        <Redirect to={getLastVistedPath(currentUser)} />
       </Route>
       <AuthorizedRoute
         path={Constants.PATHS.ADMIN_ACTIVITIES}
-        requires={Constants.PERMISSIONS.FILE_R}
+        requires={Constants.PERMISSIONS.CODE_R}
         userType={Constants.USER_TYPE.INTERNAL}
       >
         <Route path={Constants.PATHS.ADMIN_ACTIVITIES} exact component={ActivityAdmin} />

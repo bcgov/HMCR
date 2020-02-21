@@ -22,21 +22,18 @@ namespace Hmcr.Api.Controllers
         }
 
         [HttpGet ("maintenancetypes")]
-        [RequiresPermission(Permissions.CodeRead)]
         public ActionResult<IEnumerable<CodeLookupCache>> GetMaintenanceTypes()
         {
            return Ok(_validator.CodeLookup.Where(x => x.CodeSet == CodeSet.WrkRptMaintType));
         }
 
         [HttpGet ("unitofmeasures")]
-        [RequiresPermission(Permissions.CodeRead)]
         public ActionResult<IEnumerable<CodeLookupCache>> GetUnitOfMeasures()
         {
             return Ok(_validator.CodeLookup.Where(x => x.CodeSet == CodeSet.UnitOfMeasure));
         }
 
         [HttpGet("pointlinefeatures")]
-        [RequiresPermission(Permissions.CodeRead)]
         public ActionResult<IEnumerable<CodeLookupCache>> GetPointlineFeatures()
         {
             return Ok(_validator.CodeLookup.Where(x => x.CodeSet == CodeSet.PointLineFeature));
