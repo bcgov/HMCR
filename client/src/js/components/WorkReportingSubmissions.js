@@ -1,4 +1,5 @@
 import React, { useState, useEffect, forwardRef, useImperativeHandle } from 'react';
+import { useHistory } from 'react-router-dom';
 import { connect } from 'react-redux';
 import { Button, Row, Col, Input, UncontrolledPopover, PopoverBody, PopoverHeader } from 'reactstrap';
 import moment from 'moment';
@@ -36,8 +37,9 @@ const defaultSearchOptions = {
   dataPath: Constants.API_PATHS.SUBMISSIONS,
 };
 
-const WorkReportingSubmissions = ({ serviceArea, submissionStatuses, history }, ref) => {
-  const searchData = useSearchData(defaultSearchOptions, history);
+const WorkReportingSubmissions = ({ serviceArea, submissionStatuses }, ref) => {
+  const history = useHistory();
+  const searchData = useSearchData(defaultSearchOptions);
   const [searchText, setSearchText] = useState(defaultSearchOptions.searchText);
 
   const [showResultScreen, setShowResultScreen] = useState({ isOpen: false, submission: null });

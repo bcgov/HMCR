@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import { connect } from 'react-redux';
 import { Row, Col, Button } from 'reactstrap';
 import { Formik, Form, Field } from 'formik';
@@ -34,13 +35,14 @@ const tableColumns = [
   { heading: 'Active', key: 'isActive', nosort: true },
 ];
 
-const RoleAdmin = ({ history, showValidationErrorDialog }) => {
-  const searchData = useSearchData(defaultSearchOptions, history);
+const RoleAdmin = ({ showValidationErrorDialog }) => {
+  const location = useLocation();
+  const searchData = useSearchData(defaultSearchOptions);
   const [searchInitialValues, setSearchInitialValues] = useState(defaultSearchFormValues);
 
   // Run on load, parse URL query params
   useEffect(() => {
-    const params = queryString.parse(history.location.search);
+    const params = queryString.parse(location.search);
 
     const options = {
       ...defaultSearchOptions,

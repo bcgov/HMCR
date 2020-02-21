@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { useHistory } from 'react-router-dom';
 import { connect } from 'react-redux';
 import { Row, Col } from 'reactstrap';
 import _ from 'lodash';
@@ -12,7 +13,8 @@ import Authorize from './fragments/Authorize';
 
 import * as Constants from '../Constants';
 
-const WorkReporting = ({ currentUser, history }) => {
+const WorkReporting = ({ currentUser }) => {
+  const history = useHistory();
   const [serviceArea, setServiceArea] = useState(null);
 
   const submissionsRef = useRef();
@@ -65,7 +67,7 @@ const WorkReporting = ({ currentUser, history }) => {
             </MaterialCard>
           </Authorize>
           <MaterialCard>
-            <WorkReportingSubmissions serviceArea={serviceArea} history={history} ref={submissionsRef} />
+            <WorkReportingSubmissions serviceArea={serviceArea} ref={submissionsRef} />
           </MaterialCard>
         </React.Fragment>
       )}
