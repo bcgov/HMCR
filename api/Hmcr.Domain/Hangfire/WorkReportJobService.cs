@@ -1,5 +1,6 @@
 ﻿using CsvHelper;
 using Hmcr.Chris;
+using Hmcr.Chris.Models;
 using Hmcr.Data.Database;
 using Hmcr.Data.Database.Entities;
 using Hmcr.Data.Repositories;
@@ -30,24 +31,22 @@ namespace Hmcr.Domain.Hangfire
     public class WorkReportJobService : ReportJobServiceBase, IWorkReportJobService
     {
         private IFieldValidatorService _validator;
+        private ISpatialService _spatialService;
         private IActivityCodeRepository _activityRepo;
         private IWorkReportRepository _workReportRepo;
-        private IMapsApi _mapsApi;
-        private IOasApi _oasApi;
 
         public WorkReportJobService(IUnitOfWork unitOfWork, ILogger<IWorkReportJobService> logger,
             IActivityCodeRepository activityRepo, ISubmissionStatusRepository statusRepo, ISubmissionObjectRepository submissionRepo,
             ISumbissionRowRepository submissionRowRepo, IWorkReportRepository workReportRepo, IFieldValidatorService validator,
             IEmailService emailService, IConfiguration config, EmailBody emailBody, IFeebackMessageRepository feedbackRepo,
-            IMapsApi mapsApi, IOasApi oasApi)
+            ISpatialService spatialService)
             : base(unitOfWork, statusRepo, submissionRepo, submissionRowRepo, emailService, logger, config, emailBody, feedbackRepo)
         {
             _logger = logger;
             _activityRepo = activityRepo;
             _workReportRepo = workReportRepo;
             _validator = validator;
-            _mapsApi = mapsApi;
-            _oasApi = oasApi;
+            _spatialService = spatialService;
         }
 
         /// <summary>
@@ -204,45 +203,85 @@ namespace Hmcr.Domain.Hangfire
 
             foreach (var typedRow in typedRows)
             {
-                if (typedRow.PointLineFeature == PointLineFeature.None)
-                    continue;
+                var submissionRow = await _submissionRowRepo.GetSubmissionRowByRowNum(_submission.SubmissionObjectId, (decimal)typedRow.RowNum);
 
-                if (typedRow.PointLineFeature == PointLineFeature.Point)
+                if (typedRow.SpatialData == SpatialData.Gps)
                 {
-                }
-                else if (typedRow.PointLineFeature == PointLineFeature.Line)
-                {
-                }
-                else if (typedRow.PointLineFeature == PointLineFeature.Either)
-                {
-                }
+                    if (typedRow.PointLineFeature == PointLineFeature.Point)
+                    {
+                        await PerformSpatialGpsValidation(typedRow, submissionRow);
+                    }
+                    else
+                    {
 
-                await Task.CompletedTask;
+                    }
+                }
+                else if (typedRow.SpatialData == SpatialData.Lrs)
+                {
+                    if (typedRow.PointLineFeature == PointLineFeature.Point)
+                    {
+                        
+                    }
+                    else
+                    {
+
+                    }
+                }
 
                 yield return typedRow;
             }
         }
 
+        private async Task PerformSpatialGpsValidation(WorkReportDto typedRow, HmrSubmissionRow submissionRow)
+        {
+            var errors = new Dictionary<string, List<string>>();
+
+            Point start = new Point((decimal)typedRow.StartLongitude, (decimal)typedRow.StartLatitude);
+
+            if (typedRow.PointLineFeature == PointLineFeature.Point)
+            {
+                var result = await _spatialService.ValidateGpsPointAsync(start, typedRow.HighwayUnique, Fields.HighwayUnique, errors);
+
+                if (result.result == SpValidationResult.Fail)
+                {
+                    SetErrorDetail(submissionRow, errors);
+                    return;
+                }
+                else if (result.result == SpValidationResult.Success)
+                {
+                    typedRow.StartOffset = result.lrsResult.Offset;
+                    //typedRow.StartVariance = result.lrsResult.Variance;
+                    //typedRow.SpatialData 
+                    return;
+                }
+
+                return;
+            }            
+        }
+
         private void PerformGpsPointValidation(WorkReportDto typedRow, HmrSubmissionRow submissionRow)
         {
             //MethodLogger.LogEntry(_logger, _enableMethodLog, _methodLogHeader);
-
-            if (typedRow.StartLatitude == null || typedRow.PointLineFeature != PointLineFeature.Point)
+            
+            //if start is null, it's already set to invalid, no more validation
+            if (typedRow.StartLatitude == null || typedRow.StartLongitude == null || typedRow.PointLineFeature != PointLineFeature.Point)
                 return;
 
-            if (typedRow.EndLatitude != null && typedRow.EndLongitude != null)
-            {
-                if (typedRow.EndLatitude != typedRow.StartLatitude || typedRow.EndLongitude != typedRow.StartLongitude)
-                {
-                    var errors = new Dictionary<string, List<string>>();
-                    errors.AddItem($"{Fields.EndLatitude},{Fields.EndLongitude}", "Start GPS coordinates must be the same as end GPS coordinate");
-                    SetErrorDetail(submissionRow, errors);
-                }
-            }
-            else
+            if (typedRow.EndLatitude == null)
             {
                 typedRow.EndLatitude = typedRow.StartLatitude;
+            }
+
+            if (typedRow.EndLongitude == null)
+            {
                 typedRow.EndLongitude = typedRow.StartLongitude;
+            }
+
+            if (typedRow.EndLatitude != typedRow.StartLatitude || typedRow.EndLongitude != typedRow.StartLongitude)
+            {
+                var errors = new Dictionary<string, List<string>>();
+                errors.AddItem($"{Fields.EndLatitude},{Fields.EndLongitude}", "Start GPS coordinates must be the same as end GPS coordinate");
+                SetErrorDetail(submissionRow, errors);
             }
         }
 
@@ -250,22 +289,22 @@ namespace Hmcr.Domain.Hangfire
         {
             //MethodLogger.LogEntry(_logger, _enableMethodLog, _methodLogHeader);
 
-            if (typedRow.StartLatitude == null || typedRow.PointLineFeature != PointLineFeature.Line)
+            if (typedRow.StartLatitude == null || typedRow.StartLongitude == null || typedRow.PointLineFeature != PointLineFeature.Line)
                 return;
 
             if (typedRow.EndLatitude != null && typedRow.EndLongitude != null)
             {
-                if (typedRow.EndLatitude == typedRow.StartLatitude || typedRow.EndLongitude == typedRow.StartLongitude)
+                if (typedRow.EndLatitude == typedRow.StartLatitude && typedRow.EndLongitude == typedRow.StartLongitude)
                 {
                     var errors = new Dictionary<string, List<string>>();
-                    errors.AddItem($"{Fields.EndLatitude},{Fields.EndLongitude}", "The start GPS coordinates must not be the same as the end GPS coordinate");
+                    errors.AddItem($"{Fields.EndLatitude},{Fields.EndLongitude}", "The start GPS coordinates must not be the same as the end GPS coordinates");
                     SetErrorDetail(submissionRow, errors);
                 }
             }
             else
             {
                 var errors = new Dictionary<string, List<string>>();
-                errors.AddItem($"{Fields.EndLatitude},{Fields.EndLongitude}", "The end GPS coordinates must not be provided");
+                errors.AddItem($"{Fields.EndLatitude},{Fields.EndLongitude}", "The end GPS coordinates must be provided");
                 SetErrorDetail(submissionRow, errors);
             }
         }
@@ -274,13 +313,26 @@ namespace Hmcr.Domain.Hangfire
         {
             //MethodLogger.LogEntry(_logger, _enableMethodLog, _methodLogHeader);
 
-            if (typedRow.StartLatitude == null || typedRow.PointLineFeature != PointLineFeature.Either)
+            if (typedRow.StartLatitude == null || typedRow.StartLongitude == null || typedRow.PointLineFeature != PointLineFeature.Either)
                 return;
 
-            if (typedRow.EndLatitude == null || typedRow.EndLongitude == null)
+            if (typedRow.EndLatitude == null)
             {
                 typedRow.EndLatitude = typedRow.StartLatitude;
+            }
+
+            if (typedRow.EndLongitude == null)
+            {
                 typedRow.EndLongitude = typedRow.StartLongitude;
+            }
+
+            if (typedRow.StartLatitude == typedRow.EndLatitude && typedRow.StartLongitude == typedRow.EndLongitude)
+            {
+                typedRow.PointLineFeature = PointLineFeature.Point;
+            }
+            else
+            {
+                typedRow.PointLineFeature = PointLineFeature.Line;
             }
         }
 
@@ -337,9 +389,18 @@ namespace Hmcr.Domain.Hangfire
             if (typedRow.StartOffset == null || typedRow.PointLineFeature != PointLineFeature.Either)
                 return;
 
-            if (typedRow.EndOffset != null)
+            if (typedRow.EndOffset == null)
             {
                 typedRow.EndOffset = typedRow.StartOffset;
+            }
+
+            if (typedRow.StartOffset == typedRow.EndOffset)
+            {
+                typedRow.PointLineFeature = PointLineFeature.Point;
+            }
+            else
+            {
+                typedRow.PointLineFeature = PointLineFeature.Line;
             }
         }
 
