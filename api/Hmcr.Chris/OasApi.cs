@@ -11,11 +11,52 @@ namespace Hmcr.Chris
 {
     public interface IOasApi
     {
-        Task<bool> IsPointOnRfiSegment(int tolerance, decimal longitude, decimal latitude, string rfiSegment);
-        Task<Line> GetLineFromOffsetMeasuerOnRfiSegment(string rfiSegment, decimal start, decimal end);
-        Task<decimal> GetOffsetMeasureFromPointAndRfiSegment(decimal longitude, decimal latitude, string rfiSegment);
-        Task<Point> GetPointFromOffsetMeasureOnRfiSegment(string rfiSegment, decimal offset);
-        Task<RecordDimension> GetRfiSegmentDetail(string rfiSegment);
+        /// <summary>
+        /// This query identifies if a point (specified by a longitude/latitude coordinate pair) is 
+        /// within the specified distance (tolerance) of a specified RFI segment.  
+        /// It requires BASIC authentication using an account with membership to TRAN ALL.
+        /// </summary>
+        /// <param name="tolerance"></param>
+        /// <param name="point"></param>
+        /// <param name="rfiSegment"></param>
+        /// <returns>bool</returns>
+        Task<bool> IsPointOnRfiSegmentAsync(int tolerance, Point point, string rfiSegment);
+        /// <summary>
+        /// This GET API call returns a geojson line feature 
+        /// derived from the specified start and end offsets (0.02 km & 0.240 km) along a specified RFI segment (11-A-J-00949).
+        /// </summary>
+        /// <param name="rfiSegment"></param>
+        /// <param name="start"></param>
+        /// <param name="end"></param>
+        /// <returns>Line</returns>
+        Task<Line> GetLineFromOffsetMeasuerOnRfiSegmentAsync(string rfiSegment, decimal start, decimal end);
+        /// <summary>
+        /// This GET API call returns a geojson point feature that is snapped to the RFI and 
+        /// includes a measure attribute derived from a specified longitude (-115.302974), latitude (49.375371), and
+        /// a RFI segment ID (11-A-J-00949).  It requires BASIC authentication using an account with membership to TRAN ALL.
+        /// Note: You should validate that the specified point is on (or within a given tolerance) to the RFI segment before running this function.
+        /// </summary>
+        /// <param name="point"></param>
+        /// <param name="rfiSegment"></param>
+        /// <returns>success, offset, variance in meters</returns>   
+        Task<(bool success, LrsPointResult result)> GetOffsetMeasureFromPointAndRfiSegmentAsync(Point point, string rfiSegment);
+        /// <summary>
+        /// This GET API call returns a geojson point feature derived 
+        /// from the specified offset (0.02 km) along a specified RFI segment (11-A-J-00949).  
+        /// It requires BASIC authentication using an account with membership to TRAN ALL.
+        /// </summary>
+        /// <param name="rfiSegment"></param>
+        /// <param name="offset"></param>
+        /// <returns>LrsPointResult</returns>
+        Task<Point> GetPointFromOffsetMeasureOnRfiSegmentAsync(string rfiSegment, decimal offset);
+        /// <summary>
+        /// This query retrieves a single RFI (Geometry and Attributes) in json format.  It should be used for validation purposes 
+        /// such as ensuring that specified measures actually fall on an RFI.  
+        /// It requires BASIC authentication using an account with membership to TRAN ALL.
+        /// </summary>
+        /// <param name="rfiSegment"></param>
+        /// <returns>RecordDimension (Point, Line, Na)</returns>
+        Task<RecordDimension> GetRfiSegmentDetailAsync(string rfiSegment);
     }
     public class OasApi : IOasApi
     {
@@ -31,9 +72,9 @@ namespace Hmcr.Chris
             _queries = new OasQueries();
         }
 
-        public async Task<bool> IsPointOnRfiSegment(int tolerance, decimal longitude, decimal latitude, string rfiSegment)
+        public async Task<bool> IsPointOnRfiSegmentAsync(int tolerance, Point point, string rfiSegment)
         {
-            var body = string.Format(_queries.PointOnRfiSegQuery, tolerance, longitude, latitude, rfiSegment);
+            var body = string.Format(_queries.PointOnRfiSegQuery, tolerance, point.Longitude, point.Latitude, rfiSegment);
 
             var contents = await _api.Post(_client, _path, body);
 
@@ -42,7 +83,7 @@ namespace Hmcr.Chris
             return features.numberMatched > 0;
         }
 
-        public async Task<Line> GetLineFromOffsetMeasuerOnRfiSegment(string rfiSegment, decimal start, decimal end)
+        public async Task<Line> GetLineFromOffsetMeasuerOnRfiSegmentAsync(string rfiSegment, decimal start, decimal end)
         {
             var query = _path + string.Format(_queries.LineFromOffsetMeasureOnRfiSeg, rfiSegment, start, end);
 
@@ -55,20 +96,23 @@ namespace Hmcr.Chris
             return new Line(features.features[0].geometry.coordinates);
         }
 
-        public async Task<decimal> GetOffsetMeasureFromPointAndRfiSegment(decimal longitude, decimal latitude, string rfiSegment)
+        public async Task<(bool success, LrsPointResult result)> GetOffsetMeasureFromPointAndRfiSegmentAsync(Point point, string rfiSegment)
         {
-            var query = _path + string.Format(_queries.OffsetMeasureFromPointAndRfiSeg, longitude, latitude, rfiSegment);
+            var query = _path + string.Format(_queries.OffsetMeasureFromPointAndRfiSeg, point.Longitude, point.Latitude, rfiSegment);
 
             var content = await _api.Get(_client, query);
 
             var features = JsonSerializer.Deserialize<FeatureCollection<decimal[]>>(content);
 
-            if (features.totalFeatures == 0) return 0;
+            if (features.totalFeatures == 0) return (false, null);
 
-            return Convert.ToDecimal(features.features[0].properties.MEASURE);
+            return (true, new LrsPointResult(
+                Convert.ToDecimal(features.features[0].properties.MEASURE),
+                Convert.ToDecimal(features.features[0].properties.POINT_VARIANCE) * 1000,
+                new Point(features.features[0].geometry.coordinates)));
         }
 
-        public async Task<Point> GetPointFromOffsetMeasureOnRfiSegment(string rfiSegment, decimal offset)
+        public async Task<Point> GetPointFromOffsetMeasureOnRfiSegmentAsync(string rfiSegment, decimal offset)
         {
             var query = _path + string.Format(_queries.PointFromOffsetMeasureOnRfiSeg, rfiSegment, offset);
 
@@ -80,7 +124,7 @@ namespace Hmcr.Chris
 
             return new Point(features.features[0].geometry.coordinates);
         }
-        public async Task<RecordDimension> GetRfiSegmentDetail(string rfiSegment)
+        public async Task<RecordDimension> GetRfiSegmentDetailAsync(string rfiSegment)
         {
             var query = _path + string.Format(_queries.RfiSegmentDetail, rfiSegment);
 
