@@ -97,6 +97,13 @@ const WorkReportingSubmissions = ({ serviceArea, submissionStatuses }, ref) => {
   const handleSearchFormSubmit = () =>
     searchData.updateSearchOptions({ ...searchData.searchOptions, searchText, pageNumber: 1 });
 
+  const handleSearchFormReset = () => {
+    setDateFrom(defaultSearchOptions.dateFrom);
+    setDateTo(defaultSearchOptions.dateTo);
+    setSearchText(defaultSearchOptions.searchText);
+    searchData.updateSearchOptions({ ...defaultSearchOptions, serviceAreaNumber: serviceArea, serviceArea });
+  };
+
   return (
     <React.Fragment>
       <Row className="mb-3">
@@ -155,6 +162,9 @@ const WorkReportingSubmissions = ({ serviceArea, submissionStatuses }, ref) => {
               </div>
               <Button color="primary" type="button" className="ml-2" onClick={handleSearchFormSubmit}>
                 Search
+              </Button>
+              <Button color="secondary" type="button" className="ml-2" onClick={handleSearchFormReset}>
+                Reset
               </Button>
             </div>
             <div>
