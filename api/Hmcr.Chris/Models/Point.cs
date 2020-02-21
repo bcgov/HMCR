@@ -17,5 +17,16 @@
             Longitude = coordinates[0];
             Latitude = coordinates[1];
         }
+
+        public Point(decimal longitude, decimal latitude)
+        {
+            Longitude = longitude;
+            Latitude = latitude;
+
+            Coordinates = new decimal[2];
+
+            Coordinates[0] = Longitude;
+            Coordinates[1] = Latitude;
+        }
     }
 }
