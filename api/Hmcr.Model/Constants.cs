@@ -54,6 +54,7 @@ namespace Hmcr.Model
         public const string WildlifeReportLrs = "wildlifelrs";
 
         public const string ActivityCode = "activitycode";
+        public const string ActivityCodePointLineUnique = "activitycodeplu";
     }
 
     public static class FieldTypes
@@ -178,6 +179,7 @@ namespace Hmcr.Model
         public const string MaintenanceType = "MaintenanceType";
         public const string FeatureType = "FeatureType";
         public const string LocationCodeId = "LocationCodeId";
+        public const string PointLineFeatureUnique = "PointLineFeature";
     }
 
     public interface IReportHeaders

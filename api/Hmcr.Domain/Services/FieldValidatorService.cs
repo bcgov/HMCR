@@ -50,6 +50,7 @@ namespace Hmcr.Domain.Services
             LoadWildlifeReportLrsRules();
 
             LoadActivityCodeRules();
+            LoadActivityCodePointLineFeatureRequiredRule();
         }
 
 
@@ -66,6 +67,16 @@ namespace Hmcr.Domain.Services
             _rules.Add(new FieldValidationRule(Entities.ActivityCode, Fields.MaintenanceType, FieldTypes.String, true, null, null, null, null, null, null, null, CodeSet.WrkRptMaintType));
             _rules.Add(new FieldValidationRule(Entities.ActivityCode, Fields.FeatureType, FieldTypes.String, false, null, null, null, null, null, null, null, CodeSet.FeatureType));
             //_rules.Add(new FieldValidationRule(Entities.ActivityCode, Fields.SiteNumberRequired, FieldTypes., false, null, null, null, null, null, null, null, null));
+        }
+
+        /// <summary>
+        /// When Location Code is C, point line feature is required
+        /// </summary>
+        private void LoadActivityCodePointLineFeatureRequiredRule()
+        {
+            var rule = _rules.First(x => x.EntityName == Entities.ActivityCode && x.FieldName == Fields.PointLineFeature).ShallowCopy(Entities.ActivityCodePointLineUnique);
+            _rules.Add(rule);
+            rule.Required = true;
         }
 
         private void LoadUserEntityRules()
