@@ -56,7 +56,7 @@ namespace Hmcr.Chris
         /// </summary>
         /// <param name="rfiSegment"></param>
         /// <returns>RecordDimension (Point, Line, Na)</returns>
-        Task<RecordDimension> GetRfiSegmentDetailAsync(string rfiSegment);
+        Task<RfiSegment> GetRfiSegmentDetailAsync(string rfiSegment);
     }
     public class OasApi : IOasApi
     {
@@ -124,7 +124,7 @@ namespace Hmcr.Chris
 
             return new Point(features.features[0].geometry.coordinates);
         }
-        public async Task<RecordDimension> GetRfiSegmentDetailAsync(string rfiSegment)
+        public async Task<RfiSegment> GetRfiSegmentDetailAsync(string rfiSegment)
         {
             var query = _path + string.Format(_queries.RfiSegmentDetail, rfiSegment);
 
@@ -132,9 +132,14 @@ namespace Hmcr.Chris
 
             var features = JsonSerializer.Deserialize<FeatureCollection<object>>(content);
 
-            if (features.totalFeatures == 0) return RecordDimension.Na;
+            if (features.totalFeatures == 0)
+                return new RfiSegment { Dimension = RecordDimension.Na };
 
-            return features.features[0].geometry.type.ToLower() == "linestring" ? RecordDimension.Line : RecordDimension.Point;
+            var feature = features.features[0];
+
+            var dimension = feature.geometry.type.ToLower() == "linestring" ? RecordDimension.Line : RecordDimension.Point;
+
+            return new RfiSegment { Dimension = dimension, Length = Convert.ToDecimal(feature.properties.NE_LENGTH) };
         }
     }
 }

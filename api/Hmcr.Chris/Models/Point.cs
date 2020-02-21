@@ -6,6 +6,10 @@
         public decimal Longitude { get; set; }
         public decimal Latitude { get; set; }
 
+        /// <summary>
+        /// Longitude, Latitude
+        /// </summary>
+        /// <param name="coordinates"></param>
         public Point(decimal[] coordinates)
         {
             Coordinates = coordinates;

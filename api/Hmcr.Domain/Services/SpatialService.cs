@@ -15,8 +15,8 @@ namespace Hmcr.Domain.Services
             string rfiSegmentName, Dictionary<string, List<string>> errors);
         Task<(SpValidationResult result, LrsPointResult startPointResult, LrsPointResult endPointResult, Line line)> ValidateGpsLineAsync(Point startPoint, Point endPoint, string rfiSegment,
              string rfiSegmentName, Dictionary<string, List<string>> errors);
-        Task<(SpValidationResult result, Point point)> ValidateLrsPointAsync(decimal offset, string rfiSegment, string rfiSegmentName, Dictionary<string, List<string>> errors);
-        Task<(SpValidationResult result, Point startPoint, Point endPoint, Line line)> ValidateLrsLineAsync(decimal startOffset, decimal endOffset, string rfiSegment, 
+        Task<(SpValidationResult result, decimal snappedOffset, Point point)> ValidateLrsPointAsync(decimal offset, string rfiSegment, string rfiSegmentName, Dictionary<string, List<string>> errors);
+        Task<(SpValidationResult result, decimal snappedStartOffset, decimal snappedEndOffset, Point startPoint, Point endPoint, Line line)> ValidateLrsLineAsync(decimal startOffset, decimal endOffset, string rfiSegment, 
             string rfiSegmentName, Dictionary<string, List<string>> errors);
     }
     
@@ -108,7 +108,7 @@ namespace Hmcr.Domain.Services
                 return (SpValidationResult.Fail, null, null, null);
             }
 
-            if (rfiResult.dimension != RecordDimension.Line || startResult.result.Offset == endResult.result.Offset)
+            if (rfiResult.segment.Dimension != RecordDimension.Line || startResult.result.Offset == endResult.result.Offset)
             {
                 return (SpValidationResult.Success, startResult.result, endResult.result, new Line(startResult.result.SnappedPoint));
             }
@@ -118,45 +118,71 @@ namespace Hmcr.Domain.Services
             return (SpValidationResult.Success, startResult.result, endResult.result, line);
         }
 
-        public async Task<(SpValidationResult result, Point point)> ValidateLrsPointAsync(decimal offset, string rfiSegment, string rfiSegmentName, Dictionary<string, List<string>> errors)
+        public async Task<(SpValidationResult result, decimal snappedOffset, Point point)> ValidateLrsPointAsync(decimal offset, string rfiSegment, string rfiSegmentName, Dictionary<string, List<string>> errors)
         {
             var rfiResult = await ValidateRfiSegmentAsync(rfiSegment, rfiSegmentName, errors);
             if (rfiResult.result != SpValidationResult.Success)
             {
-                return (rfiResult.result, null);
+                return (rfiResult.result, offset, null);
             }
 
-            var point = await _oasApi.GetPointFromOffsetMeasureOnRfiSegmentAsync(rfiSegment, offset);
+            var (withinTolerance, snappedOffset) = GetSnappedOffset(rfiResult.segment, offset, rfiSegment, rfiSegmentName, errors);
+            if (!withinTolerance)
+            {
+                return (SpValidationResult.Fail, rfiResult.segment.Length, null);
+            }
+
+            //Get point by snappedOffset. Otherwise, it will raise an exception when the offset is greater than length of the road
+            var point = await _oasApi.GetPointFromOffsetMeasureOnRfiSegmentAsync(rfiSegment, snappedOffset);
 
             if (point == null)
             {
                 errors.AddItem("Offset", $"Couldn't get GPS position from offset [{offset}] and {rfiSegmentName} [{rfiSegment}]");
-                return (SpValidationResult.Fail, point);
+                return (SpValidationResult.Fail, snappedOffset, point);
             }
 
-            return (SpValidationResult.Success, point);
+            return (SpValidationResult.Success, snappedOffset, point);
         }
 
-        public async Task<(SpValidationResult result, Point startPoint, Point endPoint, Line line)> ValidateLrsLineAsync(decimal startOffset, decimal endOffset, string rfiSegment, string rfiSegmentName, Dictionary<string, List<string>> errors)
+        public async Task<(SpValidationResult result, decimal snappedStartOffset, decimal snappedEndOffset, Point startPoint, Point endPoint, Line line)> ValidateLrsLineAsync(decimal startOffset, decimal endOffset, string rfiSegment, string rfiSegmentName, Dictionary<string, List<string>> errors)
         {
+            var snappedStartOffset = startOffset;
+            var snappedEndOffset = endOffset;
+
             var rfiResult = await ValidateRfiSegmentAsync(rfiSegment, rfiSegmentName, errors);
             if (rfiResult.result != SpValidationResult.Success)
             {
-                return (rfiResult.result, null, null, null);
+                return (rfiResult.result, snappedStartOffset, snappedEndOffset, null, null, null);
             }
 
-            var startPoint = await _oasApi.GetPointFromOffsetMeasureOnRfiSegmentAsync(rfiSegment, startOffset);
+            var startTolCheck = GetSnappedOffset(rfiResult.segment, startOffset, rfiSegment, rfiSegmentName, errors);
+            if (!startTolCheck.withinTolerance)
+            {
+                return (SpValidationResult.Fail, rfiResult.segment.Length, rfiResult.segment.Length, null, null, null);
+            }
+            snappedStartOffset = startTolCheck.snappedOffset;            
+
+            //Get point by snappedStartOffset. Otherwise, it will raise an exception when the offset is greater than length of the road
+            var startPoint = await _oasApi.GetPointFromOffsetMeasureOnRfiSegmentAsync(rfiSegment, snappedStartOffset);
 
             if (startPoint == null)
             {
                 errors.AddItem("Start Offset", $"Couldn't get start GPS position from offset [{startOffset}] and {rfiSegmentName} [{rfiSegment}]");
             }
 
+            var endTolCheck = GetSnappedOffset(rfiResult.segment, endOffset, rfiSegment, rfiSegmentName, errors);
+            if (!endTolCheck.withinTolerance)
+            {
+                return (SpValidationResult.Fail, rfiResult.segment.Length, rfiResult.segment.Length, null, null, null);
+            }
+            snappedEndOffset = endTolCheck.snappedOffset;
+
             var endPoint = startPoint;
 
-            if (startOffset != endOffset)
+            if (snappedStartOffset != snappedEndOffset)
             {
-                endPoint = await _oasApi.GetPointFromOffsetMeasureOnRfiSegmentAsync(rfiSegment, endOffset);
+                //Get point by snappedEndOffset. Otherwise, it will raise an exception when the offset is greater than length of the road
+                endPoint = await _oasApi.GetPointFromOffsetMeasureOnRfiSegmentAsync(rfiSegment, snappedEndOffset);
 
                 if (endPoint == null)
                 {
@@ -166,24 +192,24 @@ namespace Hmcr.Domain.Services
 
             if (errors.Count > 0)
             {
-                return (SpValidationResult.Fail, startPoint, endPoint, null);
+                return (SpValidationResult.Fail, snappedStartOffset, snappedEndOffset, startPoint, endPoint, null);
             }
 
-            if (rfiResult.dimension != RecordDimension.Line || startOffset == endOffset)
+            if (rfiResult.segment.Dimension != RecordDimension.Line || snappedStartOffset == snappedEndOffset)
             {
-                return (SpValidationResult.Success, startPoint, endPoint, new Line(startPoint));
+                return (SpValidationResult.Success, snappedStartOffset, snappedEndOffset, startPoint, endPoint, new Line(startPoint));
             }
 
-            var line = await _oasApi.GetLineFromOffsetMeasuerOnRfiSegmentAsync(rfiSegment, startOffset, endOffset);
+            var line = await _oasApi.GetLineFromOffsetMeasuerOnRfiSegmentAsync(rfiSegment, snappedStartOffset, snappedEndOffset);
 
-            return (SpValidationResult.Success, startPoint, endPoint, line);
+            return (SpValidationResult.Success, snappedStartOffset, snappedEndOffset, startPoint, endPoint, line);
         }
 
-        private async Task<(SpValidationResult result, RecordDimension dimension)> ValidateRfiSegmentAsync(string rfiSegment, string rfiSegmentName, Dictionary<string, List<string>> errors)
+        private async Task<(SpValidationResult result, RfiSegment segment)> ValidateRfiSegmentAsync(string rfiSegment, string rfiSegmentName, Dictionary<string, List<string>> errors)
         {
             var rfiDetail = await _oasApi.GetRfiSegmentDetailAsync(rfiSegment);
 
-            if (rfiDetail == RecordDimension.Na)
+            if (rfiDetail.Dimension == RecordDimension.Na)
             {
                 if (_nonSpHighwayUniques.Any(x => x == rfiSegment.ToLowerInvariant()))
                 {
@@ -191,10 +217,31 @@ namespace Hmcr.Domain.Services
                 }
 
                 errors.AddItem($"{rfiSegmentName}", $"{rfiSegmentName} [{rfiSegment}] is not valid.");
-                return (SpValidationResult.NonSpatial, rfiDetail);
+                return (SpValidationResult.Fail, rfiDetail);
             }
 
             return (SpValidationResult.Success, rfiDetail);
+        }
+
+        private (bool withinTolerance, decimal snappedOffset) GetSnappedOffset(RfiSegment segment, decimal offset, string rfiSegment,
+            string rfiSegmentName, Dictionary<string, List<string>> errors)
+        {
+            var snappedOffset = offset;
+
+            if (segment.Length < offset)
+            {
+                if (segment.Length + (_errorThreshold * 1000) < offset)
+                {
+                    errors.AddItem($"Offset", $"Offset [{offset}] is not on the {rfiSegmentName} [{rfiSegment}] within the tolerance [{_errorThreshold}]");
+                    return (false, snappedOffset);
+                }
+                else
+                {
+                    return (true, segment.Length);
+                }
+            }
+
+            return (true, offset);
         }
     }
 }
