@@ -286,4 +286,9 @@ namespace Hmcr.Model
     {
         public const string Threshold = ">5.0";
     }
+
+    public enum SpValidationResult
+    {
+        Success, Fail, NonSpatial
+    }
 }

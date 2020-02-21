@@ -167,5 +167,19 @@ namespace Hmcr.Model.Utils
 
             return text;
         }
+
+        public static string[] ToLowercase(this string[] items)
+        {
+            var lowerCaseItems = new string[items.Length];
+
+            var i = 0;
+            foreach (var item in items)
+            {
+                lowerCaseItems[i] = item.ToLowerInvariant();
+                i++;
+            }
+
+            return lowerCaseItems;
+        }
     }
 }

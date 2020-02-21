@@ -277,7 +277,7 @@ namespace Hmcr.Domain.Services.Base
 
         protected static bool CheckCommonMandatoryFields(string[] headers, string[] mandatoryFields, Dictionary<string, List<string>> errors)
         {
-            var fields  = CsvUtils.ToLowercase(mandatoryFields);
+            var fields  = mandatoryFields.ToLowercase();
             headers = CsvUtils.GetLowercaseFieldsFromCsvHeaders(headers);
 
             foreach (var field in fields)

@@ -70,19 +70,5 @@ namespace Hmcr.Model.Utils
 
             return fields;
         }
-
-        public static string[] ToLowercase(string[] items)
-        {
-            var lowerCaseItems = new string[items.Length];
-
-            var i = 0;
-            foreach (var item in items)
-            {
-                lowerCaseItems[i] = item.ToLowerInvariant();
-                i++;
-            }
-
-            return lowerCaseItems;
-        }
     }
 }
