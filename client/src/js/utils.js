@@ -40,7 +40,11 @@ export const updateQueryParamsFromHistory = (history, newParam, overwrite) => {
   if (!overwrite) processedParams = { ...params, ...processedParams };
 
   // remove empty isActive
-  if (newParam.isActive === null) processedParams = { ...processedParams, isActive: null };
+  if (newParam.isActive === null) processedParams = _.omit(processedParams, ['isActive']);
+  else processedParams = { ...processedParams, isActive: newParam.isActive };
+
+  // remove empty searchText
+  if (!newParam.searchText) processedParams = _.omit(processedParams, ['searchText']);
 
   return queryString.stringify(processedParams);
 };
