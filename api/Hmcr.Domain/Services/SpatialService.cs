@@ -29,8 +29,8 @@ namespace Hmcr.Domain.Services
         public SpatialService(IOasApi oasApi, IFieldValidatorService validator)
         {
             _oasApi = oasApi;
-            _errorThreshold = Convert.ToInt32(validator.CodeLookup.FirstOrDefault(x => x.CodeSet == CodeSet.ThresholdSpError).CodeValueNum ?? 0);
-            _nonSpHighwayUniques = validator.CodeLookup.Where(x => x.CodeSet == CodeSet.NonSpHighwayUnique).Select(x => x.CodeValue).ToArray().ToLowercase();
+            _errorThreshold = Convert.ToInt32(validator.CodeLookup?.FirstOrDefault(x => x.CodeSet == CodeSet.ThresholdSpError)?.CodeValueNum ?? 0);
+            _nonSpHighwayUniques = validator.CodeLookup?.Where(x => x.CodeSet == CodeSet.NonSpHighwayUnique).Select(x => x.CodeValue).ToArray().ToLowercase();
         }
 
         public async Task<(SpValidationResult result, LrsPointResult lrsResult)> ValidateGpsPointAsync(Point point, string rfiSegment, 
