@@ -1,6 +1,4 @@
 using Hangfire;
-using Hangfire.AspNetCore;
-using Hmcr.Api.Authentication;
 using Hmcr.Api.Extensions;
 using Hmcr.Bceid;
 using Hmcr.Chris;
@@ -12,8 +10,6 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using System;
-using System.Linq;
 
 namespace Hmcr.Api
 {
@@ -46,17 +42,19 @@ namespace Hmcr.Api
             services.AddChrisHttpClient(Configuration);
             services.AddBceidSoapClient(Configuration);
             services.AddHmcrHangfire(connectionString);
+            services.AddHmcrHealthCheck(connectionString);
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env, ISubmissionObjectJobService jobService, 
             IServiceScopeFactory serviceScopeFactory, IServiceAreaService svcAreaService, ICodeLookupRepository codeLookupRepo, IFieldValidatorService validator)
         {
             if (env.IsDevelopment())
-                app.UseDeveloperExceptionPage();
+                app.UseDeveloperExceptionPage();            
 
             app.UseHttpsRedirection();
             app.UseHmcrCors();
             app.UseExceptionMiddleware();
+            app.UseHmcrHealthCheck();
             app.UseAuthorization();
             app.UseAuthentication();
             app.UseRouting();

@@ -25,6 +25,7 @@ using Microsoft.Extensions.Configuration;
 using Hangfire;
 using Hangfire.SqlServer;
 using System;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
 
 namespace Hmcr.Api.Extensions
 {
@@ -184,6 +185,12 @@ namespace Hmcr.Api.Extensions
             {
                 options.WorkerCount = 3;
             });
+        }
+
+        public static void AddHmcrHealthCheck(this IServiceCollection services, string connectionString)
+        {
+            services.AddHealthChecks()
+                .AddSqlServer(connectionString, name: "HMCR-DB-Check", failureStatus: HealthStatus.Degraded, tags: new string[] { "sql", "db" });
         }
     }
 }
