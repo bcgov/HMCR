@@ -55,10 +55,20 @@ namespace Hmcr.Domain.Services
                 errors.AddItem(Fields.LocationCodeId, $"LocationCodeId [{activityCode.LocationCodeId}] does not exist.");
             }
 
-            if ((await _locationCodeRepo.GetLocationCode(activityCode.LocationCodeId)).LocationCode == "C")
+            var newLocationCode = (await _locationCodeRepo.GetLocationCode(activityCode.LocationCodeId)).LocationCode;
+
+            // location code is C validate FeatureType
+            // location code is A or B, FeatureType is forced to null and SiteNumRequired is forced to false
+            if (newLocationCode == "C")
             {
                 _validatorService.Validate(Entities.ActivityCodeFeatureTypeUnique, Fields.FeatureType, activityCode.FeatureType, errors);
             }
+            else //if (newLocationCode == "A" || newLocationCode == "B")
+            {
+                activityCode.FeatureType = null;
+                activityCode.IsSiteNumRequired = false;
+            }
+
 
             if (errors.Count > 0)
             {
@@ -139,10 +149,16 @@ namespace Hmcr.Domain.Services
             {
                 errors.AddItem(Fields.LocationCodeId, $"LocationCode can only be changed to A");
             }
-            //Point Line feature is required when Location Code is C
+
+            // location code is C validate FeatureType
+            // location code is A or B, FeatureType is forced to null and SiteNumRequired is forced to false
             if (newLocationCode == "C")
             {
                 _validatorService.Validate(Entities.ActivityCodeFeatureTypeUnique, Fields.FeatureType, activityCode.FeatureType, errors);
+            } else //if (newLocationCode == "A" || newLocationCode == "B")
+            {
+                activityCode.FeatureType = null;
+                activityCode.IsSiteNumRequired = false;
             }
 
             if (errors.Count > 0)
