@@ -57,7 +57,7 @@ namespace Hmcr.Domain.Services
 
             if ((await _locationCodeRepo.GetLocationCode(activityCode.LocationCodeId)).LocationCode == "C")
             {
-                _validatorService.Validate(Entities.ActivityCodePointLineUnique, Fields.PointLineFeature, activityCode.PointLineFeature, errors);
+                _validatorService.Validate(Entities.ActivityCodeFeatureTypeUnique, Fields.FeatureType, activityCode.FeatureType, errors);
             }
 
             if (errors.Count > 0)
@@ -142,7 +142,7 @@ namespace Hmcr.Domain.Services
             //Point Line feature is required when Location Code is C
             if (newLocationCode == "C")
             {
-                _validatorService.Validate(Entities.ActivityCodePointLineUnique, Fields.PointLineFeature, activityCode.PointLineFeature, errors);
+                _validatorService.Validate(Entities.ActivityCodeFeatureTypeUnique, Fields.FeatureType, activityCode.FeatureType, errors);
             }
 
             if (errors.Count > 0)

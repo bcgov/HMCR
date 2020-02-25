@@ -74,7 +74,7 @@ namespace Hmcr.Domain.Services
         /// </summary>
         private void LoadActivityCodePointLineFeatureRequiredRule()
         {
-            var rule = _rules.First(x => x.EntityName == Entities.ActivityCode && x.FieldName == Fields.PointLineFeature).ShallowCopy(Entities.ActivityCodePointLineUnique);
+            var rule = _rules.First(x => x.EntityName == Entities.ActivityCode && x.FieldName == Fields.FeatureType).ShallowCopy(Entities.ActivityCodeFeatureTypeUnique);
             _rules.Add(rule);
             rule.Required = true;
         }
