@@ -24,6 +24,7 @@ const defaultValues = {
 
 const validationSchema = Yup.object({
   activityNumber: Yup.string()
+    .matches(/^[a-z0-9]+$/i, 'Numbers or letters only')
     .required('Required')
     .max(6)
     .trim(),
