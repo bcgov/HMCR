@@ -16,21 +16,38 @@ namespace Hmcr.Domain.Services
         Task<(SpValidationResult result, LrsPointResult startPointResult, LrsPointResult endPointResult, Line line)> ValidateGpsLineAsync(Point startPoint, Point endPoint, string rfiSegment,
              string rfiSegmentName, Dictionary<string, List<string>> errors);
         Task<(SpValidationResult result, decimal snappedOffset, Point point)> ValidateLrsPointAsync(decimal offset, string rfiSegment, string rfiSegmentName, Dictionary<string, List<string>> errors);
-        Task<(SpValidationResult result, decimal snappedStartOffset, decimal snappedEndOffset, Point startPoint, Point endPoint, Line line)> ValidateLrsLineAsync(decimal startOffset, decimal endOffset, string rfiSegment, 
+        Task<(SpValidationResult result, decimal snappedStartOffset, decimal snappedEndOffset, Point startPoint, Point endPoint, Line line)> ValidateLrsLineAsync(decimal startOffset, decimal endOffset, string rfiSegment,
             string rfiSegmentName, Dictionary<string, List<string>> errors);
     }
-    
+
     public class SpatialService : ISpatialService
     {
         private IOasApi _oasApi;
-        private int _errorThreshold;
-        private IEnumerable<string> _nonSpHighwayUniques;
+
+        private IFieldValidatorService _validator;
+
+        private int? _errorThreshold = null;
+        private int ErrorThreshold 
+        { 
+            get 
+            { 
+                return _errorThreshold ??= Convert.ToInt32(_validator.CodeLookup.FirstOrDefault(x => x.CodeSet == CodeSet.ThresholdSpError)?.CodeValueNum ?? 0); 
+            }
+        }
+
+        private IEnumerable<string> _nonSpHighwayUniques = null;
+        private IEnumerable<string> NonSpHighwayUniques
+        {
+            get
+            {
+                return _nonSpHighwayUniques ??= _validator.CodeLookup.Where(x => x.CodeSet == CodeSet.NonSpHighwayUnique).Select(x => x.CodeValue).ToArray().ToLowercase();
+            }
+        }
 
         public SpatialService(IOasApi oasApi, IFieldValidatorService validator)
         {
             _oasApi = oasApi;
-            _errorThreshold = Convert.ToInt32(validator.CodeLookup?.FirstOrDefault(x => x.CodeSet == CodeSet.ThresholdSpError)?.CodeValueNum ?? 0);
-            _nonSpHighwayUniques = validator.CodeLookup?.Where(x => x.CodeSet == CodeSet.NonSpHighwayUnique).Select(x => x.CodeValue).ToArray().ToLowercase();
+            _validator = validator;
         }
 
         public async Task<(SpValidationResult result, LrsPointResult lrsResult)> ValidateGpsPointAsync(Point point, string rfiSegment, 
@@ -42,11 +59,11 @@ namespace Hmcr.Domain.Services
                 return (rfiResult.result, null);
             }
 
-            var isOnRfi = await _oasApi.IsPointOnRfiSegmentAsync(_errorThreshold, point, rfiSegment);
+            var isOnRfi = await _oasApi.IsPointOnRfiSegmentAsync(ErrorThreshold, point, rfiSegment);
 
             if (!isOnRfi)
             {
-                errors.AddItem($"GPS position", $"GPS position [{point.Longitude}/{point.Latitude}] is not on the {rfiSegmentName} [{rfiSegment}] within the tolerance [{_errorThreshold}]");
+                errors.AddItem($"GPS position", $"GPS position [{point.Longitude}/{point.Latitude}] is not on the {rfiSegmentName} [{rfiSegment}] within the tolerance [{ErrorThreshold}]");
                 return (SpValidationResult.Fail, null);
             }
 
@@ -72,18 +89,18 @@ namespace Hmcr.Domain.Services
                 return (rfiResult.result, null, null, null);
             }
 
-            var isStartOnRfi = await _oasApi.IsPointOnRfiSegmentAsync(_errorThreshold, startPoint, rfiSegment);
+            var isStartOnRfi = await _oasApi.IsPointOnRfiSegmentAsync(ErrorThreshold, startPoint, rfiSegment);
 
             if (!isStartOnRfi)
             {
-                errors.AddItem($"Start GPS position", $"Start GPS position [{startPoint.Longitude}/{startPoint.Latitude}] is not on the {rfiSegmentName} [{rfiSegment}] within the tolerance [{_errorThreshold}]");
+                errors.AddItem($"Start GPS position", $"Start GPS position [{startPoint.Longitude}/{startPoint.Latitude}] is not on the {rfiSegmentName} [{rfiSegment}] within the tolerance [{ErrorThreshold}]");
             }
 
-            var isEndOnRfi = await _oasApi.IsPointOnRfiSegmentAsync(_errorThreshold, endPoint, rfiSegment);
+            var isEndOnRfi = await _oasApi.IsPointOnRfiSegmentAsync(ErrorThreshold, endPoint, rfiSegment);
 
             if (!isEndOnRfi)
             {
-                errors.AddItem($"End GPS position", $"End GPS position [{endPoint.Longitude}/{endPoint.Latitude}] is not on the {rfiSegmentName} [{rfiSegment}] within the tolerance [{_errorThreshold}]");
+                errors.AddItem($"End GPS position", $"End GPS position [{endPoint.Longitude}/{endPoint.Latitude}] is not on the {rfiSegmentName} [{rfiSegment}] within the tolerance [{ErrorThreshold}]");
             }
 
             if (errors.Count > 0)
@@ -211,7 +228,7 @@ namespace Hmcr.Domain.Services
 
             if (rfiDetail.Dimension == RecordDimension.Na)
             {
-                if (_nonSpHighwayUniques.Any(x => x == rfiSegment.ToLowerInvariant()))
+                if (NonSpHighwayUniques.Any(x => x == rfiSegment.ToLowerInvariant()))
                 {
                     return (SpValidationResult.NonSpatial, rfiDetail);
                 }
@@ -230,9 +247,9 @@ namespace Hmcr.Domain.Services
 
             if (segment.Length < offset)
             {
-                if (segment.Length + (_errorThreshold * 1000) < offset)
+                if (segment.Length + (ErrorThreshold * 1000) < offset)
                 {
-                    errors.AddItem($"Offset", $"Offset [{offset}] is not on the {rfiSegmentName} [{rfiSegment}] within the tolerance [{_errorThreshold}]");
+                    errors.AddItem($"Offset", $"Offset [{offset}] is not on the {rfiSegmentName} [{rfiSegment}] within the tolerance [{ErrorThreshold}]");
                     return (false, snappedOffset);
                 }
                 else
