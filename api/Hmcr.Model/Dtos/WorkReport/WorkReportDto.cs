@@ -1,4 +1,5 @@
-﻿using System;
+﻿using NetTopologySuite.Geometries;
+using System;
 
 namespace Hmcr.Model.Dtos.WorkReport
 {
@@ -7,6 +8,7 @@ namespace Hmcr.Model.Dtos.WorkReport
         public decimal WorkReportId { get; set; }
         public decimal SubmissionObjectId { get; set; }
         public decimal RowId { get; set; }
+        public decimal? ValidationStatusId { get; set; }
         public string RecordType { get; set; }
         public decimal ServiceArea { get; set; }
         public string RecordNumber { get; set; }
@@ -29,6 +31,7 @@ namespace Hmcr.Model.Dtos.WorkReport
         public string SiteNumber { get; set; }
         public decimal? ValueOfWork { get; set; }
         public string Comments { get; set; }
+        //public Geometry Geometry { get; set; }
 
         /// <summary>
         /// Line number of the record in the CSV file
@@ -36,9 +39,9 @@ namespace Hmcr.Model.Dtos.WorkReport
         public decimal? RowNum { get; set; }
 
         /// <summary>
-        /// Point Line Feature derived from activity code
+        /// Feature type derived from activity code
         /// </summary>
-        public string PointLineFeature { get; set; }
+        public string FeatureType { get; set; }
 
         /// <summary>
         /// D2, D3, D4 report type

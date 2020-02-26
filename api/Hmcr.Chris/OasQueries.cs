@@ -1,7 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Text;
+﻿using System.IO;
+using System.Reflection;
 
 namespace Hmcr.Chris
 {
@@ -10,7 +8,10 @@ namespace Hmcr.Chris
         private string _pointOnRfiSeqQuery;
         public string PointOnRfiSegQuery
         {
-            get { return _pointOnRfiSeqQuery ?? (_pointOnRfiSeqQuery = File.ReadAllText(@"XmlTemplates\IsPointOnRfiSegment.xml")); }
+            get {
+                var folder = Path.GetDirectoryName(Assembly.GetEntryAssembly().Location);
+                return _pointOnRfiSeqQuery ?? (_pointOnRfiSeqQuery = File.ReadAllText(Path.Combine(folder, @"XmlTemplates\IsPointOnRfiSegment.xml"))); 
+            }
         }
 
         public readonly string LineFromOffsetMeasureOnRfiSeg

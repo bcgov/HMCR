@@ -261,12 +261,12 @@ namespace Hmcr.Model
         public const string Unknown = "UNKNOWN";
     }
 
-    public static class PointLineFeature
+    public static class FeatureType
     {
         public const string None = "None";
         public const string Point = "Point";
         public const string Line = "Line";
-        public const string Either = "Either";
+        public const string PointLine = "Point/Line";
     }
 
     /// <summary>

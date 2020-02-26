@@ -14,6 +14,8 @@ using Hmcr.Model.Dtos.WorkReport;
 using Hmcr.Model.Utils;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using NetTopologySuite;
+using NetTopologySuite.Geometries;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -33,6 +35,7 @@ namespace Hmcr.Domain.Hangfire
     {
         private IFieldValidatorService _validator;
         private ISpatialService _spatialService;
+        private GeometryFactory _geometryFactory;
         private IActivityCodeRepository _activityRepo;
         private IWorkReportRepository _workReportRepo;
 
@@ -48,6 +51,7 @@ namespace Hmcr.Domain.Hangfire
             _workReportRepo = workReportRepo;
             _validator = validator;
             _spatialService = spatialService;
+            _geometryFactory = NtsGeometryServices.Instance.CreateGeometryFactory(srid: 4326);
         }
 
         /// <summary>
@@ -109,7 +113,7 @@ namespace Hmcr.Domain.Hangfire
                     continue;
                 }
 
-                untypedRow.PointLineFeature = activityCode.FeatureType ?? PointLineFeature.None;
+                untypedRow.FeatureType = activityCode.FeatureType ?? FeatureType.None;
 
                 //this also sets RowType (D2, D3, D4)
                 var entityName = GetValidationEntityName(untypedRow, activityCode);
@@ -152,6 +156,10 @@ namespace Hmcr.Domain.Hangfire
             }
 
             //Spatial Validation and Conversion
+            await foreach (var typedRow in PerformSpatialValidationAndConversionAsync(typedRows))
+            {
+
+            }
 
             _submission.SubmissionStatusId = _successFileStatusId;
 
@@ -192,7 +200,7 @@ namespace Hmcr.Domain.Hangfire
             foreach (var typedRow in typedRows)
             {
                 var untypedRow = untypedRows.First(x => x.RowNum == typedRow.RowNum);
-                typedRow.PointLineFeature = untypedRow.PointLineFeature;
+                typedRow.FeatureType = untypedRow.FeatureType;
                 typedRow.SpatialData = untypedRow.SpatialData;
                 typedRow.RowId = untypedRow.RowId;
             }
@@ -208,7 +216,7 @@ namespace Hmcr.Domain.Hangfire
 
                 if (typedRow.SpatialData == SpatialData.Gps)
                 {
-                    if (typedRow.PointLineFeature == PointLineFeature.Point)
+                    if (typedRow.FeatureType == FeatureType.Point)
                     {
                         await PerformSpatialGpsValidation(typedRow, submissionRow);
                     }
@@ -219,7 +227,7 @@ namespace Hmcr.Domain.Hangfire
                 }
                 else if (typedRow.SpatialData == SpatialData.Lrs)
                 {
-                    if (typedRow.PointLineFeature == PointLineFeature.Point)
+                    if (typedRow.FeatureType == FeatureType.Point)
                     {
                         
                     }
@@ -237,27 +245,44 @@ namespace Hmcr.Domain.Hangfire
         {
             var errors = new Dictionary<string, List<string>>();
 
-            Point start = new Point((decimal)typedRow.StartLongitude, (decimal)typedRow.StartLatitude);
+            var start = new Chris.Models.Point((decimal)typedRow.StartLongitude, (decimal)typedRow.StartLatitude);
 
-            if (typedRow.PointLineFeature == PointLineFeature.Point)
+            //remeber that feature type line/point has been replaced either line or point in PerformGpsEitherLineOrPointValidation().
+            if (typedRow.FeatureType == FeatureType.Point)
             {
                 var result = await _spatialService.ValidateGpsPointAsync(start, typedRow.HighwayUnique, Fields.HighwayUnique, errors);
 
                 if (result.result == SpValidationResult.Fail)
                 {
                     SetErrorDetail(submissionRow, errors);
-                    return;
                 }
                 else if (result.result == SpValidationResult.Success)
                 {
                     typedRow.StartOffset = result.lrsResult.Offset;
-                    //typedRow.StartVariance = result.lrsResult.Variance;
-                    //typedRow.SpatialData 
-                    return;
+                    //typedRow.Geometry = _geometryFactory.CreatePoint(result.lrsResult.SnappedPoint.ToTopologyCoordinate());                  
+                    //todo: typedRow.StartVariance = result.lrsResult.Variance;
                 }
+            }  
+            else if (typedRow.FeatureType == FeatureType.Line)
+            {
+                var end = new Chris.Models.Point((decimal)typedRow.EndLongitude, (decimal)typedRow.EndLatitude);
+                var result = await _spatialService.ValidateGpsLineAsync(start, end, typedRow.HighwayUnique, Fields.HighwayUnique, errors);
 
-                return;
-            }            
+                if (result.result == SpValidationResult.Fail)
+                {
+                    SetErrorDetail(submissionRow, errors);
+                }
+                else if (result.result == SpValidationResult.Success)
+                {
+                    typedRow.StartOffset = result.startPointResult.Offset;
+                    //todo: typedRow.StartVariance = result.lrsResult.Variance;
+
+                    typedRow.EndOffset = result.endPointResult.Offset;
+                    //todo: typedRow.EndVariance = result.lrsResult.Variance;
+
+                    //typedRow.Geometry = _geometryFactory.CreateLineString(result.line.ToTopologyCoordinates());
+                }
+            } 
         }
 
         private void PerformGpsPointValidation(WorkReportDto typedRow, HmrSubmissionRow submissionRow)
@@ -265,7 +290,7 @@ namespace Hmcr.Domain.Hangfire
             //MethodLogger.LogEntry(_logger, _enableMethodLog, _methodLogHeader);
             
             //if start is null, it's already set to invalid, no more validation
-            if (typedRow.StartLatitude == null || typedRow.StartLongitude == null || typedRow.PointLineFeature != PointLineFeature.Point)
+            if (typedRow.StartLatitude == null || typedRow.StartLongitude == null || typedRow.FeatureType != FeatureType.Point)
                 return;
 
             if (typedRow.EndLatitude == null)
@@ -290,7 +315,7 @@ namespace Hmcr.Domain.Hangfire
         {
             //MethodLogger.LogEntry(_logger, _enableMethodLog, _methodLogHeader);
 
-            if (typedRow.StartLatitude == null || typedRow.StartLongitude == null || typedRow.PointLineFeature != PointLineFeature.Line)
+            if (typedRow.StartLatitude == null || typedRow.StartLongitude == null || typedRow.FeatureType != FeatureType.Line)
                 return;
 
             if (typedRow.EndLatitude != null && typedRow.EndLongitude != null)
@@ -314,7 +339,7 @@ namespace Hmcr.Domain.Hangfire
         {
             //MethodLogger.LogEntry(_logger, _enableMethodLog, _methodLogHeader);
 
-            if (typedRow.StartLatitude == null || typedRow.StartLongitude == null || typedRow.PointLineFeature != PointLineFeature.Either)
+            if (typedRow.StartLatitude == null || typedRow.StartLongitude == null || typedRow.FeatureType != FeatureType.PointLine)
                 return;
 
             if (typedRow.EndLatitude == null)
@@ -329,11 +354,11 @@ namespace Hmcr.Domain.Hangfire
 
             if (typedRow.StartLatitude == typedRow.EndLatitude && typedRow.StartLongitude == typedRow.EndLongitude)
             {
-                typedRow.PointLineFeature = PointLineFeature.Point;
+                typedRow.FeatureType = FeatureType.Point;
             }
             else
             {
-                typedRow.PointLineFeature = PointLineFeature.Line;
+                typedRow.FeatureType = FeatureType.Line;
             }
         }
 
@@ -341,7 +366,7 @@ namespace Hmcr.Domain.Hangfire
         {
             //MethodLogger.LogEntry(_logger, _enableMethodLog, _methodLogHeader);
 
-            if (typedRow.StartOffset == null || typedRow.PointLineFeature != PointLineFeature.Point)
+            if (typedRow.StartOffset == null || typedRow.FeatureType != FeatureType.Point)
                 return;
 
             if (typedRow.EndOffset != null)
@@ -363,7 +388,7 @@ namespace Hmcr.Domain.Hangfire
         {
             //MethodLogger.LogEntry(_logger, _enableMethodLog, _methodLogHeader);
 
-            if (typedRow.StartOffset == null || typedRow.PointLineFeature != PointLineFeature.Line)
+            if (typedRow.StartOffset == null || typedRow.FeatureType != FeatureType.Line)
                 return;
 
             if (typedRow.EndOffset != null)
@@ -387,7 +412,7 @@ namespace Hmcr.Domain.Hangfire
         {
             //MethodLogger.LogEntry(_logger, _enableMethodLog, _methodLogHeader);
 
-            if (typedRow.StartOffset == null || typedRow.PointLineFeature != PointLineFeature.Either)
+            if (typedRow.StartOffset == null || typedRow.FeatureType != FeatureType.PointLine)
                 return;
 
             if (typedRow.EndOffset == null)
@@ -397,11 +422,11 @@ namespace Hmcr.Domain.Hangfire
 
             if (typedRow.StartOffset == typedRow.EndOffset)
             {
-                typedRow.PointLineFeature = PointLineFeature.Point;
+                typedRow.FeatureType = FeatureType.Point;
             }
             else
             {
-                typedRow.PointLineFeature = PointLineFeature.Line;
+                typedRow.FeatureType = FeatureType.Line;
             }
         }
 

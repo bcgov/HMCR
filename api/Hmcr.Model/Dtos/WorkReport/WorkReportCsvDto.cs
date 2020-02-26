@@ -1,4 +1,6 @@
-﻿namespace Hmcr.Model.Dtos.WorkReport
+﻿using NetTopologySuite.Geometries;
+
+namespace Hmcr.Model.Dtos.WorkReport
 {
     public class WorkReportCsvDto : IReportCsvDto
     {
@@ -32,9 +34,9 @@
         public decimal? RowNum { get; set; }
 
         /// <summary>
-        /// Point Line Feature derived from activity code
+        /// Feature type derived from activity code
         /// </summary>
-        public string PointLineFeature { get; set; }
+        public string FeatureType { get; set; }
 
         /// <summary>
         /// D2, D3, D4 report type
