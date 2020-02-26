@@ -12,6 +12,7 @@ using Hmcr.Model.Utils;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Threading.Tasks;
 
@@ -44,7 +45,7 @@ namespace Hmcr.Domain.Services
         protected override async Task<bool> ParseRowsAsync(SubmissionObjectCreateDto submission, string text, Dictionary<string, List<string>> errors)
         {
             using var stringReader = new StringReader(text);
-            using var csv = new CsvReader(stringReader);
+            using var csv = new CsvReader(stringReader, CultureInfo.InvariantCulture);
 
             CsvHelperUtils.Config(errors, csv);
             csv.Configuration.RegisterClassMap<RockfallRptInitCsvDtoMap>();

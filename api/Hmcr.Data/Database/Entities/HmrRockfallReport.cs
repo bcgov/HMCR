@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using NetTopologySuite.Geometries;
 
 namespace Hmcr.Data.Database.Entities
 {
@@ -38,6 +39,7 @@ namespace Hmcr.Data.Database.Entities
         public string ReporterName { get; set; }
         public string McPhoneNumber { get; set; }
         public DateTime? ReportDate { get; set; }
+        public Geometry Geometry { get; set; }
         public long ConcurrencyControlNumber { get; set; }
         public string AppCreateUserid { get; set; }
         public DateTime AppCreateTimestamp { get; set; }

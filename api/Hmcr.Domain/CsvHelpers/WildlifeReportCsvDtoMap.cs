@@ -1,5 +1,6 @@
 ﻿using CsvHelper.Configuration;
 using Hmcr.Model.Dtos.WildlifeReport;
+using System.Globalization;
 
 namespace Hmcr.Domain.CsvHelpers
 {
@@ -7,7 +8,7 @@ namespace Hmcr.Domain.CsvHelpers
     {
         public WildlifeRptInitCsvDtoMap()
         {
-            AutoMap();
+            AutoMap(CultureInfo.InvariantCulture);
             Map(m => m.AccidentDate).TypeConverter<DateTypeConverter>();
         }
     }
@@ -15,7 +16,7 @@ namespace Hmcr.Domain.CsvHelpers
     {
         public WildlifeReportCsvDtoMap()
         {
-            AutoMap();
+            AutoMap(CultureInfo.InvariantCulture);
         }
     }
 
@@ -23,7 +24,7 @@ namespace Hmcr.Domain.CsvHelpers
     {
         public WildlifeReportDtoMap()
         {
-            AutoMap();
+            AutoMap(CultureInfo.InvariantCulture);
             Map(m => m.AccidentDate).TypeConverter<DateTypeConverter>();
         }
     }

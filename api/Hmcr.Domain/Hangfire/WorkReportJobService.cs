@@ -16,6 +16,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -485,7 +486,7 @@ namespace Hmcr.Domain.Hangfire
             var text = Encoding.UTF8.GetString(_submission.DigitalRepresentation);
 
             using var stringReader = new StringReader(text);
-            using var csv = new CsvReader(stringReader);
+            using var csv = new CsvReader(stringReader, CultureInfo.InvariantCulture);
 
             CsvHelperUtils.Config(errors, csv, false);
             csv.Configuration.RegisterClassMap<WorkReportCsvDtoMap>();
@@ -504,7 +505,7 @@ namespace Hmcr.Domain.Hangfire
             MethodLogger.LogEntry(_logger, _enableMethodLog, _methodLogHeader);
 
             using var stringReader = new StringReader(text);
-            using var csv = new CsvReader(stringReader);
+            using var csv = new CsvReader(stringReader, CultureInfo.InvariantCulture);
 
             CsvHelperUtils.Config(errors, csv, false);
             csv.Configuration.RegisterClassMap<WorkReportDtoMap>();

@@ -12,7 +12,7 @@ namespace Hmcr.Data.Database.Entities
         public string Type { get; set; }
         public string ColumnName { get; set; }
         public string EntityName { get; set; }
-        public bool? IsRequired { get; set; }
+        public string IsRequired { get; set; }
         public decimal? MaxLength { get; set; }
         public decimal? MinLength { get; set; }
         public decimal? MaxValue { get; set; }

@@ -1,6 +1,7 @@
 ﻿using CsvHelper.Configuration;
 using Hmcr.Model;
 using Hmcr.Model.Dtos.RockfallReport;
+using System.Globalization;
 
 namespace Hmcr.Domain.CsvHelpers
 {
@@ -8,7 +9,7 @@ namespace Hmcr.Domain.CsvHelpers
     {
         public RockfallRptInitCsvDtoMap()
         {
-            AutoMap();
+            AutoMap(CultureInfo.InvariantCulture);
             Map(m => m.ReportDate).TypeConverter<DateTypeConverter>();
         }
     }
@@ -17,7 +18,7 @@ namespace Hmcr.Domain.CsvHelpers
     {
         public RockfallReportCsvDtoMap()
         {
-            AutoMap();
+            AutoMap(CultureInfo.InvariantCulture);
         }
     }
 
@@ -25,7 +26,7 @@ namespace Hmcr.Domain.CsvHelpers
     {
         public RockfallReportDtoMap()
         {
-            AutoMap();
+            AutoMap(CultureInfo.InvariantCulture);
             Map(m => m.ReportDate).TypeConverter<DateTypeConverter>();
             Map(m => m.EstimatedRockfallDate).TypeConverter<DateTypeConverter>();
             Map(m => m.McPhoneNumber).TypeConverter<PhoneNumberConverter>();
