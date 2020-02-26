@@ -176,7 +176,7 @@ namespace Hmcr.Model
 
         public const string ActivityName = "ActivityName";
         public const string MaintenanceType = "MaintenanceType";
-        public const string PointLineFeature = "PointLineFeature";
+        public const string FeatureType = "FeatureType";
         public const string LocationCodeId = "LocationCodeId";
     }
 
@@ -230,7 +230,7 @@ namespace Hmcr.Model
         public const string WarsRptRecordType = "WARS_RPT_RECORD_TYPE";
         public const string WarsRptSign = "WARS_RPT_SIGN";
         public const string RkflRptRecordType = "RKFL_RPT_RECORD_TYPE";
-        public const string PointLineFeature = "POINT_LINE_FEATURE";
+        public const string FeatureType = "FEATURE_TYPE";
         public const string ThresholdSpWarn = "THRSHLD_SP_VAR_WARN";
         public const string ThresholdSpError = "THRSHLD_SP_VAR_ERROR";
         public const string NonSpHighwayUnique = "NONSP_HIGHWAY_UNIQUE";

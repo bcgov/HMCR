@@ -17,7 +17,7 @@ const defaultValues = {
   unitOfMeasure: '',
   maintenanceType: '',
   locationCodeId: '',
-  pointLineFeature: '',
+  featureType: '',
   isSiteNumRequired: false,
   endDate: null,
 };
@@ -50,19 +50,19 @@ const EditActivityFormFields = ({
   maintenanceTypes,
   unitOfMeasures,
   locationCodes,
-  pointLineFeatures,
+  featureTypes,
 }) => {
   const [loading, setLoading] = useState(true);
   const [validLocationCodeValues, setValidLocationCodeValues] = useState(locationCodes);
   const [disableLocationCodeEdit, setDisableLocationCodeEdit] = useState(false);
-  const [validPointLineFeatureValues, setValidPointLineFeatureValues] = useState(pointLineFeatures);
+  const [validFeatureTypeValues, setValidFeatureTypeValues] = useState(featureTypes);
   const locationCodeCId = locationCodes.find(code => code.name === 'C').id;
 
   useEffect(() => {
     // Add validation for point line feature when location code is C.
     // Need to get the id value of location code C
     const defaultValidationSchema = validationSchema.shape({
-      pointLineFeature: Yup.string()
+      featureType: Yup.string()
         .nullable()
         .when('locationCodeId', {
           is: locationCodeCId,
@@ -106,18 +106,20 @@ const EditActivityFormFields = ({
           return false;
         });
 
-        setValidPointLineFeatureValues(() => {
-          if (formType === Constants.FORM_TYPE.EDIT) {
-            if (response.data.pointLineFeature === 'Either')
-              return pointLineFeatures.filter(feature => feature.id === 'Either');
+        setValidFeatureTypeValues(() => {
+          const pointLineType = 'Point/Line';
 
-            if (response.data.pointLineFeature)
-              return pointLineFeatures.filter(
-                feature => feature.id === 'Either' || feature.id === response.data.pointLineFeature
+          if (formType === Constants.FORM_TYPE.EDIT) {
+            if (response.data.featureType === pointLineType)
+              return featureTypes.filter(feature => feature.id === pointLineType);
+
+            if (response.data.featureType)
+              return featureTypes.filter(
+                feature => feature.id === pointLineType || feature.id === response.data.featureType
               );
           }
 
-          return pointLineFeatures;
+          return featureTypes;
         });
 
         setLoading(false);
@@ -168,12 +170,8 @@ const EditActivityFormFields = ({
       </FormRow>
       {formValues.locationCodeId === locationCodeCId && (
         <React.Fragment>
-          <FormRow name="pointLineFeature" label="Point Line Feature*">
-            <SingleDropdownField
-              defaultTitle="Select Point Line Feature"
-              items={validPointLineFeatureValues}
-              name="pointLineFeature"
-            />
+          <FormRow name="featureType" label="Feature Type*">
+            <SingleDropdownField defaultTitle="Select Feature Type" items={validFeatureTypeValues} name="featureType" />
           </FormRow>
           <FormRow name="isSiteNumRequired" label="Site Number Required">
             <FormCheckboxInput name="isSiteNumRequired" />
@@ -192,7 +190,7 @@ const mapStateToProps = state => {
     maintenanceTypes: state.codeLookups.maintenanceTypes,
     unitOfMeasures: state.codeLookups.unitOfMeasures,
     locationCodes: state.codeLookups.locationCodes,
-    pointLineFeatures: state.codeLookups.pointLineFeatures,
+    featureTypes: state.codeLookups.featureTypes,
   };
 };
 
