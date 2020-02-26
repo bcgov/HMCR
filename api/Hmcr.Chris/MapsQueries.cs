@@ -1,7 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Text;
+﻿using System.IO;
+using System.Reflection;
 
 namespace Hmcr.Chris
 {
@@ -10,7 +8,10 @@ namespace Hmcr.Chris
         private string _pointWithinServiceAreaQuery;
         public string PointWithinServiceAreaQuery
         {
-            get { return _pointWithinServiceAreaQuery ?? (_pointWithinServiceAreaQuery = File.ReadAllText(@"XmlTemplates\IsPointWithinServiceArea.xml")); }
+            get {
+                var folder = Path.GetDirectoryName(Assembly.GetEntryAssembly().Location);
+                return _pointWithinServiceAreaQuery ?? (_pointWithinServiceAreaQuery = File.ReadAllText(Path.Combine(folder, (@"XmlTemplates\IsPointWithinServiceArea.xml")))); 
+            }
         }
     }
 }

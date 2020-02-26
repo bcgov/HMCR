@@ -146,8 +146,6 @@ namespace Hmcr.Domain.Hangfire.Base
 
         protected void SetErrorDetail(HmrSubmissionRow submissionRow, Dictionary<string, List<string>> errors)
         {
-            MethodLogger.LogEntry(_logger, _enableMethodLog, _methodLogHeader);
-
             submissionRow.RowStatusId = _errorRowStatusId;
             submissionRow.ErrorDetail = errors.GetErrorDetail();
             _submission.ErrorDetail = FileError.ReferToRowErrors;
