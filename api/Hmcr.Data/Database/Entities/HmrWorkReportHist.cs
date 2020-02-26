@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using NetTopologySuite.Geometries;
 
 namespace Hmcr.Data.Database.Entities
 {
@@ -34,6 +35,7 @@ namespace Hmcr.Data.Database.Entities
         public string SiteNumber { get; set; }
         public decimal? ValueOfWork { get; set; }
         public string Comments { get; set; }
+        public Geometry Geometry { get; set; }
         public long ConcurrencyControlNumber { get; set; }
         public string AppCreateUserid { get; set; }
         public DateTime AppCreateTimestamp { get; set; }

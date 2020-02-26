@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Hmcr.Data.Database.Entities;
 using Microsoft.EntityFrameworkCore;
 using System.Linq;
+using NetTopologySuite.Geometries;
 
 namespace Hmcr.Data.Repositories.Base
 {

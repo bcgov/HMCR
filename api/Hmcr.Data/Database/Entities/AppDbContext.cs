@@ -74,14 +74,6 @@ namespace Hmcr.Data.Database.Entities
         public virtual DbSet<Set> Sets { get; set; }
         public virtual DbSet<State> States { get; set; }
 
-        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        {
-            if (!optionsBuilder.IsConfigured)
-            {
-                optionsBuilder.UseSqlServer("Data Source=(localdb)\\MSSQLLocalDB;Initial Catalog=aspnet-hmcr");
-            }
-        }
-
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<AggregatedCounter>(entity =>
@@ -455,7 +447,10 @@ namespace Hmcr.Data.Database.Entities
                     .HasColumnName("ID")
                     .HasColumnType("numeric(9, 0)");
 
-                entity.Property(e => e.IsRequired).HasColumnName("IS_REQUIRED");
+                entity.Property(e => e.IsRequired)
+                    .HasColumnName("IS_REQUIRED")
+                    .HasMaxLength(1)
+                    .IsUnicode(false);
 
                 entity.Property(e => e.MaxDate)
                     .HasColumnName("MAX_DATE")
@@ -2075,6 +2070,11 @@ namespace Hmcr.Data.Database.Entities
                     .IsUnicode(false)
                     .HasComment("Freezing/thawing conditions present at rockfall site. Enter “Y” or leave blank.");
 
+                entity.Property(e => e.Geometry)
+                    .HasColumnName("GEOMETRY")
+                    .HasColumnType("geometry")
+                    .HasComment("Spatial geometry where the event occured, as conformed to the road network.   ");
+
                 entity.Property(e => e.HeavyPrecip)
                     .HasColumnName("HEAVY_PRECIP")
                     .HasMaxLength(1)
@@ -2339,6 +2339,10 @@ namespace Hmcr.Data.Database.Entities
                     .HasColumnName("FREEZE_THAW")
                     .HasMaxLength(1)
                     .IsUnicode(false);
+
+                entity.Property(e => e.Geometry)
+                    .HasColumnName("GEOMETRY")
+                    .HasColumnType("geometry");
 
                 entity.Property(e => e.HeavyPrecip)
                     .HasColumnName("HEAVY_PRECIP")
@@ -5142,6 +5146,11 @@ This is uniquely identifies each record submission for a contractor.
                     .HasDefaultValueSql("(user_name())")
                     .HasComment("Named database user who last updated record");
 
+                entity.Property(e => e.Geometry)
+                    .HasColumnName("GEOMETRY")
+                    .HasColumnType("geometry")
+                    .HasComment("Spatial geometry where the event occured, as conformed to the road network.  ");
+
                 entity.Property(e => e.HighwayUnique)
                     .HasColumnName("HIGHWAY_UNIQUE")
                     .HasMaxLength(16)
@@ -5342,6 +5351,10 @@ This is uniquely identifies each record submission for a contractor.
                 entity.Property(e => e.EndDateHist)
                     .HasColumnName("END_DATE_HIST")
                     .HasColumnType("datetime");
+
+                entity.Property(e => e.Geometry)
+                    .HasColumnName("GEOMETRY")
+                    .HasColumnType("geometry");
 
                 entity.Property(e => e.HighwayUnique)
                     .HasColumnName("HIGHWAY_UNIQUE")
@@ -5552,6 +5565,11 @@ This is uniquely identifies each record submission for a contractor.
                     .HasColumnName("END_OFFSET")
                     .HasColumnType("numeric(7, 3)")
                     .HasComment("This field is needed for linear referencing for location specific reports. If the work is less than 30 m, this field is not mandatory Offset from beginning of segment");
+
+                entity.Property(e => e.Geometry)
+                    .HasColumnName("GEOMETRY")
+                    .HasColumnType("geometry")
+                    .HasComment("Spatial geometry where the activity occured, as conformed to the road network.   Provided start and end coordinates are used to derive the best-fit road segment.");
 
                 entity.Property(e => e.HighwayUnique)
                     .HasColumnName("HIGHWAY_UNIQUE")
@@ -5781,6 +5799,10 @@ This is uniquely identifies each record submission for a contractor.
                     .HasColumnName("END_OFFSET")
                     .HasColumnType("numeric(16, 8)");
 
+                entity.Property(e => e.Geometry)
+                    .HasColumnName("GEOMETRY")
+                    .HasColumnType("geometry");
+
                 entity.Property(e => e.HighwayUnique)
                     .HasColumnName("HIGHWAY_UNIQUE")
                     .HasMaxLength(16)
@@ -6007,12 +6029,10 @@ This is uniquely identifies each record submission for a contractor.
                 .HasMax(999999999);
 
             modelBuilder.HasSequence("HMR_ACT_CODE_ID_SEQ")
-                .StartsAt(157)
                 .HasMin(1)
                 .HasMax(999999999);
 
             modelBuilder.HasSequence("HMR_ACTIVITY_CODE_H_ID_SEQ")
-                .StartsAt(2889)
                 .HasMin(1)
                 .HasMax(2147483647);
 
@@ -6021,12 +6041,10 @@ This is uniquely identifies each record submission for a contractor.
                 .HasMax(999999999);
 
             modelBuilder.HasSequence("HMR_CODE_LKUP_ID_SEQ")
-                .StartsAt(157)
                 .HasMin(1)
                 .HasMax(999999999);
 
             modelBuilder.HasSequence("HMR_CODE_LOOKUP_H_ID_SEQ")
-                .StartsAt(242)
                 .HasMin(1)
                 .HasMax(2147483647);
 

@@ -1,5 +1,6 @@
 ﻿using CsvHelper.Configuration;
 using Hmcr.Model.Dtos.WorkReport;
+using System.Globalization;
 
 namespace Hmcr.Domain.CsvHelpers
 {
@@ -7,7 +8,7 @@ namespace Hmcr.Domain.CsvHelpers
     {
         public WorkRptInitCsvDtoMap()
         {
-            AutoMap();
+            AutoMap(CultureInfo.InvariantCulture);
             Map(m => m.EndDate)
                 .TypeConverter<DateTypeConverter>();
         }
@@ -17,7 +18,7 @@ namespace Hmcr.Domain.CsvHelpers
     {
         public WorkReportCsvDtoMap()
         {
-            AutoMap();
+            AutoMap(CultureInfo.InvariantCulture);
             Map(m => m.ValueOfWork).TypeConverter<DollarValueConverter>();
         }
     }
@@ -26,7 +27,7 @@ namespace Hmcr.Domain.CsvHelpers
     {
         public WorkReportDtoMap()
         {
-            AutoMap();
+            AutoMap(CultureInfo.InvariantCulture);
             Map(m => m.StartDate).TypeConverter<DateTypeConverter>();
             Map(m => m.EndDate).TypeConverter<DateTypeConverter>();
             Map(m => m.PostedDate).TypeConverter<DateTypeConverter>();
