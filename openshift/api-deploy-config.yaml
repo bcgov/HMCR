@@ -84,16 +84,6 @@ objects:
                     secretKeyRef:
                       name: chris-service
                       key: CHRIS_OAS_URL
-                - name: CHRIS_USER
-                  valueFrom:
-                    secretKeyRef:
-                      name: bceid-service
-                      key: BCEID_USER
-                - name: CHRIS_PASSWORD
-                  valueFrom:
-                    secretKeyRef:
-                      name: bceid-service
-                      key: BCEID_PASSWORD
                 - name: BCEID_USER
                   valueFrom:
                     secretKeyRef:
