@@ -53,7 +53,7 @@ export const getSubmissionFile = id =>
 
 export const getMaintenanceTypes = () => instance.get(Constants.API_PATHS.MAINTENANCE_TYPES);
 export const getUnitOfMeasures = () => instance.get(Constants.API_PATHS.UNIT_OF_MEASURES);
-export const getPointLineFeatures = () => instance.get(Constants.API_PATHS.POINT_LINE_FEATURES);
+export const getFeatureTypes = () => instance.get(Constants.API_PATHS.FEATURE_TYPES);
 export const getLocationCodes = () => instance.get(Constants.API_PATHS.LOCATION_CODE);
 
 export const searchActivityCodes = params =>

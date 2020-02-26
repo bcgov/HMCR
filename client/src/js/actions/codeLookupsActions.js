@@ -1,9 +1,4 @@
-import {
-  FETCH_MAINTENANCE_TYPES,
-  FETCH_UNIT_OF_MEASURES,
-  FETCH_POINT_LINE_FEATURES,
-  FETCH_LOCATION_CODES,
-} from './types';
+import { FETCH_MAINTENANCE_TYPES, FETCH_UNIT_OF_MEASURES, FETCH_FEATURE_TYPES, FETCH_LOCATION_CODES } from './types';
 
 import * as api from '../Api';
 
@@ -21,10 +16,10 @@ export const fetchUnitOfMeasures = () => dispatch => {
   });
 };
 
-export const fetchPointLineFeatures = () => dispatch => {
-  return api.getPointLineFeatures().then(response => {
+export const fetchFeatureTypes = () => dispatch => {
+  return api.getFeatureTypes().then(response => {
     const data = response.data;
-    dispatch({ type: FETCH_POINT_LINE_FEATURES, payload: data });
+    dispatch({ type: FETCH_FEATURE_TYPES, payload: data });
   });
 };
 

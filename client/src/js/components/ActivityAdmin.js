@@ -36,7 +36,7 @@ const tableColumns = [
   { heading: 'Unit', key: 'unitOfMeasure' },
   { heading: 'Maintenance Type', key: 'maintenanceType' },
   { heading: 'Location Code', key: 'locationCode' },
-  { heading: 'Point Line Feature', key: 'pointLineFeature' },
+  { heading: 'Feature Type', key: 'featureType' },
   { heading: 'Active', key: 'isActive', nosort: true },
 ];
 
@@ -101,7 +101,7 @@ const ActivityAdmin = ({ maintenanceTypes, locationCodes, unitOfMeasures, showVa
       formModal.setSubmitting(true);
 
       if (values.locationCodeId !== locationCodes.find(location => location.name === 'C').id) {
-        values.pointLineFeature = null;
+        values.featureType = null;
         values.isSiteNumRequired = false;
       }
 

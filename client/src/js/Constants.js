@@ -9,7 +9,7 @@ export const API_PATHS = {
   CODE_LOOKUP: CODE_LOOKUP,
   MAINTENANCE_TYPES: `${CODE_LOOKUP}/maintenancetypes`,
   UNIT_OF_MEASURES: `${CODE_LOOKUP}/unitofmeasures`,
-  POINT_LINE_FEATURES: `${CODE_LOOKUP}/pointlinefeatures`,
+  FEATURE_TYPES: `${CODE_LOOKUP}/featuretypes`,
   LOCATION_CODE: '/locationcodes',
   PERMISSIONS: '/permissions',
   ROLE: '/roles',
