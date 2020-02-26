@@ -33,10 +33,10 @@ namespace Hmcr.Api.Controllers
             return Ok(_validator.CodeLookup.Where(x => x.CodeSet == CodeSet.UnitOfMeasure));
         }
 
-        [HttpGet("pointlinefeatures")]
-        public ActionResult<IEnumerable<CodeLookupCache>> GetPointlineFeatures()
+        [HttpGet("featuretypes")]
+        public ActionResult<IEnumerable<CodeLookupCache>> GetFeatureTypes()
         {
-            return Ok(_validator.CodeLookup.Where(x => x.CodeSet == CodeSet.PointLineFeature));
+            return Ok(_validator.CodeLookup.Where(x => x.CodeSet == CodeSet.FeatureType));
         }
     }
 }

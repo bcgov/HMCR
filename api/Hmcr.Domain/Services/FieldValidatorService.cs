@@ -64,7 +64,7 @@ namespace Hmcr.Domain.Services
             _rules.Add(new FieldValidationRule(Entities.ActivityCode, Fields.ActivityName, FieldTypes.String, true, 1, 150, null, null, null, null, null, null));
             _rules.Add(new FieldValidationRule(Entities.ActivityCode, Fields.UnitOfMeasure, FieldTypes.String, true, null, null, null, null, null, null, null, CodeSet.UnitOfMeasure));
             _rules.Add(new FieldValidationRule(Entities.ActivityCode, Fields.MaintenanceType, FieldTypes.String, true, null, null, null, null, null, null, null, CodeSet.WrkRptMaintType));
-            _rules.Add(new FieldValidationRule(Entities.ActivityCode, Fields.PointLineFeature, FieldTypes.String, false, null, null, null, null, null, null, null, CodeSet.PointLineFeature));
+            _rules.Add(new FieldValidationRule(Entities.ActivityCode, Fields.FeatureType, FieldTypes.String, false, null, null, null, null, null, null, null, CodeSet.FeatureType));
             //_rules.Add(new FieldValidationRule(Entities.ActivityCode, Fields.SiteNumberRequired, FieldTypes., false, null, null, null, null, null, null, null, null));
         }
 

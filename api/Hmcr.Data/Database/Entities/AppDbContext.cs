@@ -259,6 +259,12 @@ namespace Hmcr.Data.Database.Entities
                     .HasColumnType("datetime")
                     .HasComment("The latest date submissions will be accepted.");
 
+                entity.Property(e => e.FeatureType)
+                    .HasColumnName("FEATURE_TYPE")
+                    .HasMaxLength(12)
+                    .IsUnicode(false)
+                    .HasComment("Indicator of spatial nature of the activity.  (ie:  point, line or either)   Point - a point location will be reported  Line - activity occurs in relation to a section of road  Either - may be spatially represented in either manner");
+
                 entity.Property(e => e.IsSiteNumRequired)
                     .HasColumnName("IS_SITE_NUM_REQUIRED")
                     .HasComment("Indicates if a site number must be submitted for the activity");
@@ -274,12 +280,6 @@ namespace Hmcr.Data.Database.Entities
                     .HasMaxLength(12)
                     .IsUnicode(false)
                     .HasComment(" Classification of maintenance activities which specifies detail of submission or reporting requirements (ie: Routine, Quantified, Additional).   Routine - reoccuring maintenace activities that require less detailed reporting  Quantified - maintenance activities that require more detailed reporting  Additional - activities that exceed agreement threasholds");
-
-                entity.Property(e => e.PointLineFeature)
-                    .HasColumnName("POINT_LINE_FEATURE")
-                    .HasMaxLength(12)
-                    .IsUnicode(false)
-                    .HasComment("Indicator of spatial nature of the activity.  (ie:  point, line or either)  Point - a point location will be reported Line - activity occurs in relation to a section of road Either - may be spatially represented in either manner");
 
                 entity.Property(e => e.UnitOfMeasure)
                     .IsRequired()
@@ -402,6 +402,11 @@ namespace Hmcr.Data.Database.Entities
                     .HasColumnName("END_DATE_HIST")
                     .HasColumnType("datetime");
 
+                entity.Property(e => e.FeatureType)
+                    .HasColumnName("FEATURE_TYPE")
+                    .HasMaxLength(12)
+                    .IsUnicode(false);
+
                 entity.Property(e => e.IsSiteNumRequired).HasColumnName("IS_SITE_NUM_REQUIRED");
 
                 entity.Property(e => e.LocationCodeId)
@@ -411,11 +416,6 @@ namespace Hmcr.Data.Database.Entities
                 entity.Property(e => e.MaintenanceType)
                     .IsRequired()
                     .HasColumnName("MAINTENANCE_TYPE")
-                    .HasMaxLength(12)
-                    .IsUnicode(false);
-
-                entity.Property(e => e.PointLineFeature)
-                    .HasColumnName("POINT_LINE_FEATURE")
                     .HasMaxLength(12)
                     .IsUnicode(false);
 
@@ -455,10 +455,7 @@ namespace Hmcr.Data.Database.Entities
                     .HasColumnName("ID")
                     .HasColumnType("numeric(9, 0)");
 
-                entity.Property(e => e.IsRequired)
-                    .HasColumnName("IS_REQUIRED")
-                    .HasMaxLength(1)
-                    .IsUnicode(false);
+                entity.Property(e => e.IsRequired).HasColumnName("IS_REQUIRED");
 
                 entity.Property(e => e.MaxDate)
                     .HasColumnName("MAX_DATE")
@@ -3868,7 +3865,7 @@ namespace Hmcr.Data.Database.Entities
 
                 entity.Property(e => e.RecordNumber)
                     .HasColumnName("RECORD_NUMBER")
-                    .HasMaxLength(8)
+                    .HasMaxLength(30)
                     .IsUnicode(false)
                     .HasComment(@"Unique work report record number from the maintainence contractor.
 This is uniquely identifies each record submission for a contractor.
@@ -4018,7 +4015,7 @@ This is uniquely identifies each record submission for a contractor.
 
                 entity.Property(e => e.RowNum)
                     .HasColumnName("ROW_NUM")
-                    .HasColumnType("numeric(18, 0)");
+                    .HasColumnType("numeric(30, 0)");
 
                 entity.Property(e => e.RowStatusId)
                     .HasColumnName("ROW_STATUS_ID")
@@ -5149,10 +5146,7 @@ This is uniquely identifies each record submission for a contractor.
                     .HasColumnName("HIGHWAY_UNIQUE")
                     .HasMaxLength(16)
                     .IsUnicode(false)
-                    .HasComment(@"This identifies the section of road on which the incident occurred.
-This is a value in the in the format:
-[Service Area]-[area manager area]-[subarea]-[highway number]
-This reference number reflects a valid reference in the road network (currenltyRFI within  CHRIS as of 2019)");
+                    .HasComment("This identifies the section of road on which the incident occurred. This is a value in the in the format: [Service Area]-[area manager area]-[subarea]-[highway number] This reference number reflects a valid reference in the road network (currenltyRFI within  CHRIS as of 2019)");
 
                 entity.Property(e => e.Landmark)
                     .HasColumnName("LANDMARK")
@@ -5163,8 +5157,7 @@ This reference number reflects a valid reference in the road network (currenltyR
                 entity.Property(e => e.Latitude)
                     .HasColumnName("LATITUDE")
                     .HasColumnType("numeric(16, 8)")
-                    .HasComment(@"The Y (northing) portion of the accident coordinate. Coordinate is to be reported using the WGS84 datum.
-");
+                    .HasComment("The Y (northing) portion of the accident coordinate. Coordinate is to be reported using the WGS84 datum.");
 
                 entity.Property(e => e.Longitude)
                     .HasColumnName("LONGITUDE")
@@ -5180,8 +5173,7 @@ This reference number reflects a valid reference in the road network (currenltyR
                 entity.Property(e => e.Offset)
                     .HasColumnName("OFFSET")
                     .HasColumnType("numeric(7, 3)")
-                    .HasComment(@"This field is needed for linear referencing for location specific reports. 
-Offset from beginning of segment.");
+                    .HasComment("This field is needed for linear referencing for location specific reports.  Offset from beginning of segment.");
 
                 entity.Property(e => e.Quantity)
                     .HasColumnName("QUANTITY")
@@ -5224,8 +5216,7 @@ Offset from beginning of segment.");
                     .HasColumnName("TIME_OF_KILL")
                     .HasMaxLength(1)
                     .IsUnicode(false)
-                    .HasComment(@"General  light conditions at time the incident occured. (eg: 1=Dawn, 2=Dusk)
-");
+                    .HasComment("General  light conditions at time the incident occured. (eg: 1=Dawn, 2=Dusk)");
 
                 entity.Property(e => e.ValidationStatusId)
                     .HasColumnName("VALIDATION_STATUS_ID")
@@ -5455,11 +5446,7 @@ Offset from beginning of segment.");
                     .HasColumnName("ACTIVITY_NUMBER")
                     .HasMaxLength(30)
                     .IsUnicode(false)
-                    .HasComment(@"Code which uniquely identifies the activity performed.  The number reflects a a classificaiton hierarchy comprised of three levels: ABBCCC
-
-A - the first digit represents Specification Category (eg:2 - Drainage )
-BB - the second two digits represent Activity Category (eg: 02 - Drainage Appliance Maintenance)
-CCC - the last three digits represent Activity Type and Detail (eg: 310 - Boring, Augering.  300 series reflects Quantified value, which would be linear meters in this case.)");
+                    .HasComment("Code which uniquely identifies the activity performed.  The number reflects a a classificaiton hierarchy comprised of three levels: ABBCCC  A - the first digit represents Specification Category (eg:2 - Drainage ) BB - the second two digits represent Activity Category (eg: 02 - Drainage Appliance Maintenance) CCC - the last three digits represent Activity Type and Detail (eg: 310 - Boring, Augering.  300 series reflects Quantified value, which would be linear meters in this case.)");
 
                 entity.Property(e => e.AppCreateTimestamp)
                     .HasColumnName("APP_CREATE_TIMESTAMP")
@@ -5554,39 +5541,29 @@ CCC - the last three digits represent Activity Type and Detail (eg: 310 - Boring
                 entity.Property(e => e.EndLatitude)
                     .HasColumnName("END_LATITUDE")
                     .HasColumnType("numeric(16, 8)")
-                    .HasComment(@"The M (northing) portion of the activity end coordinate. Specified as a latitude in decimal degrees with six decimal places of precision.
-Positive numbers are indicative of the Northern Hemisphere. Coordinate is to be reported using the WGS84 datum.
-For point activity if this field is not provided it can be defaulted to same as START LATITUDE");
+                    .HasComment("The M (northing) portion of the activity end coordinate. Specified as a latitude in decimal degrees with six decimal places of precision. Positive numbers are indicative of the Northern Hemisphere. Coordinate is to be reported using the WGS84 datum. For point activity if this field is not provided it can be defaulted to same as START LATITUDE");
 
                 entity.Property(e => e.EndLongitude)
                     .HasColumnName("END_LONGITUDE")
                     .HasColumnType("numeric(16, 8)")
-                    .HasComment(@"The X (easting) portion of the activity end coordinate. Specified as a longitude in decimal degrees with six decimal places of precision.
-Negative numbers are indicative of the Western Hemisphere. Coordinate is to be reported using the WGS84 datum.
-For point activity if this field is not provided it can be defaulted to same as START LONGITUDE.");
+                    .HasComment("The X (easting) portion of the activity end coordinate. Specified as a longitude in decimal degrees with six decimal places of precision. Negative numbers are indicative of the Western Hemisphere. Coordinate is to be reported using the WGS84 datum. For point activity if this field is not provided it can be defaulted to same as START LONGITUDE.");
 
                 entity.Property(e => e.EndOffset)
                     .HasColumnName("END_OFFSET")
                     .HasColumnType("numeric(7, 3)")
-                    .HasComment(@"This field is needed for linear referencing for location specific reports.
-If the work is less than 30 m, this field is not mandatory
-Offset from beginning of segment");
+                    .HasComment("This field is needed for linear referencing for location specific reports. If the work is less than 30 m, this field is not mandatory Offset from beginning of segment");
 
                 entity.Property(e => e.HighwayUnique)
                     .HasColumnName("HIGHWAY_UNIQUE")
                     .HasMaxLength(16)
                     .IsUnicode(false)
-                    .HasComment(@"This identifies the section of road on which the activity occurred.
-This is a value in the in the format:
-[Service Area]-[area manager area]-[subarea]-[highway number]
-This should be a value found in RFI (CHRIS)");
+                    .HasComment("This identifies the section of road on which the activity occurred. This is a value in the in the format: [Service Area]-[area manager area]-[subarea]-[highway number] This should be a value found in RFI (CHRIS)");
 
                 entity.Property(e => e.Landmark)
                     .HasColumnName("LANDMARK")
                     .HasMaxLength(8)
                     .IsUnicode(false)
-                    .HasComment(@"This field needed for location reference:
-Landmarks provided should be those listed in the CHRIS HRP report for each Highway or road within the Service Area");
+                    .HasComment("This field needed for location reference: Landmarks provided should be those listed in the CHRIS HRP report for each Highway or road within the Service Area");
 
                 entity.Property(e => e.PostedDate)
                     .HasColumnName("POSTED_DATE")
@@ -5597,20 +5574,13 @@ Landmarks provided should be those listed in the CHRIS HRP report for each Highw
                     .HasColumnName("RECORD_NUMBER")
                     .HasMaxLength(30)
                     .IsUnicode(false)
-                    .HasComment(@"Unique work report record number from the maintainence contractor.
-This is uniquely identifies each record submission for a contractor.
-<Service Area><Record Number> will uniquely identify each record in the application for a particular contractor.");
+                    .HasComment("Unique work report record number from the maintainence contractor. This is uniquely identifies each record submission for a contractor. <Service Area><Record Number> will uniquely identify each record in the application for a particular contractor.");
 
                 entity.Property(e => e.RecordType)
                     .HasColumnName("RECORD_TYPE")
                     .HasMaxLength(1)
                     .IsUnicode(false)
-                    .HasComment(@"This field describes the type of work the associated record is reporting on.
-This is restricted to specific set of values -
-Q - Quantified,
-R - Routine,
-E - Major Event,
-A - Additional");
+                    .HasComment("This field describes the type of work the associated record is reporting on. This is restricted to specific set of values - Q - Quantified, R - Routine, E - Major Event, A - Additional");
 
                 entity.Property(e => e.RowNum)
                     .HasColumnName("ROW_NUM")
@@ -5626,16 +5596,7 @@ A - Additional");
                     .HasColumnName("SITE_NUMBER")
                     .HasMaxLength(8)
                     .IsUnicode(false)
-                    .HasComment(@"Contains a site type code followed by a The Ministry site number. Site types are provided by the Province, are four to six digits preceded by:
-A – Avalanche
-B – Arrestor Bed/Dragnet Barrier
-D – Debris and/or Rockfall
-L – Landscape
-R – Rest Area
-S – Signalized Intersection
-T – Traffic Patrol
-W – Weather Station
-X – Railway Crossing");
+                    .HasComment("Contains a site type code followed by a The Ministry site number. Site types are provided by the Province, are four to six digits preceded by: A – Avalanche B – Arrestor Bed/Dragnet Barrier D – Debris and/or Rockfall L – Landscape R – Rest Area S – Signalized Intersection T – Traffic Patrol W – Weather Station X – Railway Crossing");
 
                 entity.Property(e => e.StartDate)
                     .HasColumnName("START_DATE")
@@ -5645,29 +5606,23 @@ X – Railway Crossing");
                 entity.Property(e => e.StartLatitude)
                     .HasColumnName("START_LATITUDE")
                     .HasColumnType("numeric(16, 8)")
-                    .HasComment(@"The M (northing) portion of the activity start coordinate. Specified as a latitude in decimal degrees with six decimal places of precision.
-Positive numbers are indicative of the Northern Hemisphere. Coordinate is to be reported using the WGS84 datum.
-");
+                    .HasComment("The M (northing) portion of the activity start coordinate. Specified as a latitude in decimal degrees with six decimal places of precision. Positive numbers are indicative of the Northern Hemisphere. Coordinate is to be reported using the WGS84 datum.");
 
                 entity.Property(e => e.StartLongitude)
                     .HasColumnName("START_LONGITUDE")
                     .HasColumnType("numeric(16, 8)")
-                    .HasComment(@"The X (easting) portion of the activity start coordinate. Specified as a longitude in decimal degrees with six decimal places of precision.
-Negative numbers are indicative of the Western Hemisphere. Coordinate is to be reported using the WGS84 datum.");
+                    .HasComment("The X (easting) portion of the activity start coordinate. Specified as a longitude in decimal degrees with six decimal places of precision. Negative numbers are indicative of the Western Hemisphere. Coordinate is to be reported using the WGS84 datum.");
 
                 entity.Property(e => e.StartOffset)
                     .HasColumnName("START_OFFSET")
                     .HasColumnType("numeric(7, 3)")
-                    .HasComment(@"This field is needed for linear referencing for location specific reports. 
-Offset from beginning of segment.");
+                    .HasComment("This field is needed for linear referencing for location specific reports.  Offset from beginning of segment.");
 
                 entity.Property(e => e.StructureNumber)
                     .HasColumnName("STRUCTURE_NUMBER")
                     .HasMaxLength(5)
                     .IsUnicode(false)
-                    .HasComment(@"From list of Bridge Structure Road (BSR) structures provided by the Province.
-Is only applicable at defined BSR structures.  BSR structures include; bridges, culverts over 3m, retaining walls.
-");
+                    .HasComment("From list of Bridge Structure Road (BSR) structures provided by the Province. Is only applicable at defined BSR structures.  BSR structures include; bridges, culverts over 3m, retaining walls.");
 
                 entity.Property(e => e.SubmissionObjectId)
                     .HasColumnName("SUBMISSION_OBJECT_ID")
@@ -6052,10 +6007,12 @@ Is only applicable at defined BSR structures.  BSR structures include; bridges, 
                 .HasMax(999999999);
 
             modelBuilder.HasSequence("HMR_ACT_CODE_ID_SEQ")
+                .StartsAt(157)
                 .HasMin(1)
                 .HasMax(999999999);
 
             modelBuilder.HasSequence("HMR_ACTIVITY_CODE_H_ID_SEQ")
+                .StartsAt(2889)
                 .HasMin(1)
                 .HasMax(2147483647);
 
@@ -6064,10 +6021,12 @@ Is only applicable at defined BSR structures.  BSR structures include; bridges, 
                 .HasMax(999999999);
 
             modelBuilder.HasSequence("HMR_CODE_LKUP_ID_SEQ")
+                .StartsAt(157)
                 .HasMin(1)
                 .HasMax(999999999);
 
             modelBuilder.HasSequence("HMR_CODE_LOOKUP_H_ID_SEQ")
+                .StartsAt(242)
                 .HasMin(1)
                 .HasMax(2147483647);
 

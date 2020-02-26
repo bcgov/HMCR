@@ -11,7 +11,7 @@ namespace Hmcr.Data.Database.Entities
         public string UnitOfMeasure { get; set; }
         public string MaintenanceType { get; set; }
         public decimal LocationCodeId { get; set; }
-        public string PointLineFeature { get; set; }
+        public string FeatureType { get; set; }
         public bool? IsSiteNumRequired { get; set; }
         public string ActivityApplication { get; set; }
         public DateTime? EndDate { get; set; }

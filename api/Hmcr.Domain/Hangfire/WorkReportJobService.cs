@@ -108,7 +108,7 @@ namespace Hmcr.Domain.Hangfire
                     continue;
                 }
 
-                untypedRow.PointLineFeature = activityCode.PointLineFeature ?? PointLineFeature.None;
+                untypedRow.PointLineFeature = activityCode.FeatureType ?? PointLineFeature.None;
 
                 //this also sets RowType (D2, D3, D4)
                 var entityName = GetValidationEntityName(untypedRow, activityCode);
