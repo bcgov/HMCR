@@ -232,6 +232,7 @@ namespace Hmcr.Domain.Hangfire
                 }
                 else if (typedRow.SpatialData == SpatialData.Lrs)
                 {
+                    await PerformSpatialLrsValidation(workReport, submissionRow);
                 }
 
                 yield return workReport;
@@ -293,6 +294,60 @@ namespace Hmcr.Domain.Hangfire
             }
         }
 
+        private async Task PerformSpatialLrsValidation(WorkReportGeometry workReport, HmrSubmissionRow submissionRow)
+        {
+            var errors = new Dictionary<string, List<string>>();
+            var typedRow = workReport.WorkReportTyped;
+
+            //remeber that feature type line/point has been replaced either line or point in PerformGpsEitherLineOrPointValidation().
+            if (typedRow.FeatureType == FeatureType.Point)
+            {
+                var result = await _spatialService.ValidateLrsPointAsync((decimal)typedRow.StartOffset, typedRow.HighwayUnique, Fields.HighwayUnique, errors);
+
+                if (result.result == SpValidationResult.Fail)
+                {
+                    SetErrorDetail(submissionRow, errors);
+                }
+                else if (result.result == SpValidationResult.Success)
+                {
+                    typedRow.StartLongitude = result.point.Longitude;
+                    typedRow.StartLatitude = result.point.Latitude;
+                    workReport.Geometry = _geometryFactory.CreatePoint(result.point.ToTopologyCoordinate());
+                    submissionRow.StartVariance = typedRow.StartOffset - result.snappedOffset;
+                }
+            }
+            else if (typedRow.FeatureType == FeatureType.Line)
+            {
+                var result = await _spatialService.ValidateLrsLineAsync((decimal)typedRow.StartOffset, (decimal)typedRow.EndOffset, typedRow.HighwayUnique, Fields.HighwayUnique, errors);
+
+                if (result.result == SpValidationResult.Fail)
+                {
+                    SetErrorDetail(submissionRow, errors);
+                }
+                else if (result.result == SpValidationResult.Success)
+                {
+                    typedRow.StartLongitude = result.startPoint.Longitude;
+                    typedRow.StartLatitude = result.startPoint.Latitude;
+                    submissionRow.StartVariance = typedRow.StartOffset - result.snappedStartOffset;
+
+                    typedRow.EndLongitude = result.endPoint.Longitude;
+                    typedRow.EndLatitude = result.endPoint.Latitude;
+                    submissionRow.EndVariance = typedRow.EndOffset - result.snappedEndOffset;
+
+                    if (result.line.ToTopologyCoordinates().Length >= 2)
+                    {
+                        workReport.Geometry = _geometryFactory.CreateLineString(result.line.ToTopologyCoordinates());
+                    }
+                    else if (result.line.ToTopologyCoordinates().Length == 1)
+                    {
+                        _logger.LogInformation($"[Hangfire] Row [{typedRow.RowNum}] [Original: Start[{typedRow.StartOffset}]"
+                            + $" End[{typedRow.EndOffset}] were converted to a Start[{result.snappedStartOffset}] End[{result.snappedEndOffset}]");
+
+                        workReport.Geometry = _geometryFactory.CreatePoint(result.line.ToTopologyCoordinates()[0]);
+                    }
+                }
+            }
+        }
         private void PerformGpsPointValidation(WorkReportTyped typedRow, HmrSubmissionRow submissionRow)
         {
             //if start is null, it's already set to invalid, no more validation
