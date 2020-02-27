@@ -1928,7 +1928,7 @@ namespace Hmcr.Data.Database.Entities
 
                 entity.HasComment("Submission data regarding rockfall incidents is ultimately staged in this table after being loaded and validated.  Validation status of the data is also provided here, as it may be desirable for some invalid data to be available and marked accordingly.");
 
-                entity.HasIndex(e => e.SubmissionObjectId)
+                entity.HasIndex(e => new { e.SubmissionObjectId, e.RowId })
                     .HasName("HMR_RCKFL_RPT_FK_I");
 
                 entity.Property(e => e.RockfallReportId)
@@ -2151,6 +2151,11 @@ namespace Hmcr.Data.Database.Entities
                     .IsUnicode(false)
                     .HasComment("Name of person reporting occurrence");
 
+                entity.Property(e => e.RowId)
+                    .HasColumnName("ROW_ID")
+                    .HasColumnType("numeric(9, 0)")
+                    .HasComment("Unique identifier for originating SUBMISSION ROW.");
+
                 entity.Property(e => e.RowNum)
                     .HasColumnName("ROW_NUM")
                     .HasColumnType("numeric(9, 0)")
@@ -2197,6 +2202,12 @@ namespace Hmcr.Data.Database.Entities
                     .HasMaxLength(1)
                     .IsUnicode(false)
                     .HasComment("Vehicle damage present at rockfall site. Enter “Y” or leave blank.");
+
+                entity.HasOne(d => d.Row)
+                    .WithMany(p => p.HmrRockfallReports)
+                    .HasForeignKey(d => d.RowId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("HMR_RCKF_RRT_SUBM_RW_FK");
 
                 entity.HasOne(d => d.ServiceAreaNavigation)
                     .WithMany(p => p.HmrRockfallReports)
@@ -2409,6 +2420,10 @@ namespace Hmcr.Data.Database.Entities
                 entity.Property(e => e.RockfallReportId)
                     .HasColumnName("ROCKFALL_REPORT_ID")
                     .HasColumnType("numeric(18, 0)");
+
+                entity.Property(e => e.RowId)
+                    .HasColumnName("ROW_ID")
+                    .HasColumnType("numeric(9, 0)");
 
                 entity.Property(e => e.RowNum)
                     .HasColumnName("ROW_NUM")
@@ -3857,6 +3872,11 @@ namespace Hmcr.Data.Database.Entities
                     .HasDefaultValueSql("(user_name())")
                     .HasComment("Named database user who last updated record");
 
+                entity.Property(e => e.EndVariance)
+                    .HasColumnName("END_VARIANCE")
+                    .HasColumnType("numeric(25, 20)")
+                    .HasComment("Measured spatial distance from submitted coordinates to nearest road segment, as determined at time of validation.  Only applicable to submissions with end coordinates.");
+
                 entity.Property(e => e.ErrorDetail)
                     .HasColumnName("ERROR_DETAIL")
                     .HasMaxLength(4000)
@@ -3871,9 +3891,7 @@ namespace Hmcr.Data.Database.Entities
                     .HasColumnName("RECORD_NUMBER")
                     .HasMaxLength(30)
                     .IsUnicode(false)
-                    .HasComment(@"Unique work report record number from the maintainence contractor.
-This is uniquely identifies each record submission for a contractor.
-<Service Area><Record Number> will uniquely identify each record in the application for a particular contractor.");
+                    .HasComment("Unique work report record number from the maintainence contractor. This is uniquely identifies each record submission for a contractor. <Service Area><Record Number> will uniquely identify each record in the application for a particular contractor.");
 
                 entity.Property(e => e.RowHash)
                     .HasColumnName("ROW_HASH")
@@ -3896,6 +3914,11 @@ This is uniquely identifies each record submission for a contractor.
                     .HasMaxLength(4000)
                     .IsUnicode(false)
                     .HasComment("Contains a complete row of submitted data, including delimiters (ie: comma) and text qualifiers (ie: quote).  The row value is used to queue data for validation and loading.  This is staged data used to queue and compare data before loading it within the appropriate tables for reporting.");
+
+                entity.Property(e => e.StartVariance)
+                    .HasColumnName("START_VARIANCE")
+                    .HasColumnType("numeric(25, 20)")
+                    .HasComment("Measured spatial distance from submitted coordinates to nearest road segment, as determined at time of validation.");
 
                 entity.Property(e => e.SubmissionObjectId)
                     .HasColumnName("SUBMISSION_OBJECT_ID")
@@ -3996,6 +4019,10 @@ This is uniquely identifies each record submission for a contractor.
                     .HasColumnName("END_DATE_HIST")
                     .HasColumnType("datetime");
 
+                entity.Property(e => e.EndVariance)
+                    .HasColumnName("END_VARIANCE")
+                    .HasColumnType("numeric(25, 20)");
+
                 entity.Property(e => e.ErrorDetail)
                     .HasColumnName("ERROR_DETAIL")
                     .HasMaxLength(4000)
@@ -4029,6 +4056,10 @@ This is uniquely identifies each record submission for a contractor.
                     .HasColumnName("ROW_VALUE")
                     .HasMaxLength(4000)
                     .IsUnicode(false);
+
+                entity.Property(e => e.StartVariance)
+                    .HasColumnName("START_VARIANCE")
+                    .HasColumnType("numeric(25, 20)");
 
                 entity.Property(e => e.SubmissionObjectId)
                     .HasColumnName("SUBMISSION_OBJECT_ID")
@@ -5041,7 +5072,7 @@ This is uniquely identifies each record submission for a contractor.
                 entity.HasIndex(e => e.ServiceArea)
                     .HasName("WLDLF_RPT_CNT_ARA_FK_I");
 
-                entity.HasIndex(e => e.SubmissionObjectId)
+                entity.HasIndex(e => new { e.SubmissionObjectId, e.RowId })
                     .HasName("HMR_WLDLF_RPT_SUBM_FK_I");
 
                 entity.Property(e => e.WildlifeRecordId)
@@ -5195,6 +5226,11 @@ This is uniquely identifies each record submission for a contractor.
                     .IsUnicode(false)
                     .HasComment("Identifies the type of record.  WARS = W / Allowed Values: W");
 
+                entity.Property(e => e.RowId)
+                    .HasColumnName("ROW_ID")
+                    .HasColumnType("numeric(9, 0)")
+                    .HasComment("Unique identifier for originating SUBMISSION ROW");
+
                 entity.Property(e => e.RowNum)
                     .HasColumnName("ROW_NUM")
                     .HasColumnType("numeric(9, 0)")
@@ -5237,6 +5273,12 @@ This is uniquely identifies each record submission for a contractor.
                     .HasMaxLength(1)
                     .IsUnicode(false)
                     .HasComment("Is Wildlife sign within 100m (Y, N or Unknown)");
+
+                entity.HasOne(d => d.Row)
+                    .WithMany(p => p.HmrWildlifeReports)
+                    .HasForeignKey(d => d.RowId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("HMR_WLDLF_RRT_SUBM_RW_FK");
 
                 entity.HasOne(d => d.ServiceAreaNavigation)
                     .WithMany(p => p.HmrWildlifeReports)
@@ -5392,6 +5434,10 @@ This is uniquely identifies each record submission for a contractor.
                     .HasMaxLength(1)
                     .IsUnicode(false);
 
+                entity.Property(e => e.RowId)
+                    .HasColumnName("ROW_ID")
+                    .HasColumnType("numeric(9, 0)");
+
                 entity.Property(e => e.RowNum)
                     .HasColumnName("ROW_NUM")
                     .HasColumnType("numeric(18, 0)");
@@ -5441,7 +5487,7 @@ This is uniquely identifies each record submission for a contractor.
 
                 entity.HasComment("Submission data regarding maintenance activities is ultimately staged in this table after being loaded and validated.  Validation status of the data is also provided here, as it may be desirable for some invalid data to be available and marked accordingly.");
 
-                entity.HasIndex(e => e.SubmissionObjectId)
+                entity.HasIndex(e => new { e.SubmissionObjectId, e.RowId })
                     .HasName("HMR_WRK_RRT_FK_I");
 
                 entity.Property(e => e.WorkReportId)
@@ -5600,6 +5646,11 @@ This is uniquely identifies each record submission for a contractor.
                     .IsUnicode(false)
                     .HasComment("This field describes the type of work the associated record is reporting on. This is restricted to specific set of values - Q - Quantified, R - Routine, E - Major Event, A - Additional");
 
+                entity.Property(e => e.RowId)
+                    .HasColumnName("ROW_ID")
+                    .HasColumnType("numeric(9, 0)")
+                    .HasComment("Unique identifier for originating SUBMISSION ROW.");
+
                 entity.Property(e => e.RowNum)
                     .HasColumnName("ROW_NUM")
                     .HasColumnType("numeric(9, 0)")
@@ -5668,6 +5719,12 @@ This is uniquely identifies each record submission for a contractor.
                     .HasColumnName("VALUE_OF_WORK")
                     .HasColumnType("numeric(9, 2)")
                     .HasComment("Total dollar value of the work activity being reported, for each activity.");
+
+                entity.HasOne(d => d.Row)
+                    .WithMany(p => p.HmrWorkReports)
+                    .HasForeignKey(d => d.RowId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("HMR_WRK_RRT_SUBM_RW_FK");
 
                 entity.HasOne(d => d.ServiceAreaNavigation)
                     .WithMany(p => p.HmrWorkReports)
@@ -5826,6 +5883,10 @@ This is uniquely identifies each record submission for a contractor.
                     .HasColumnName("RECORD_TYPE")
                     .HasMaxLength(1)
                     .IsUnicode(false);
+
+                entity.Property(e => e.RowId)
+                    .HasColumnName("ROW_ID")
+                    .HasColumnType("numeric(9, 0)");
 
                 entity.Property(e => e.RowNum)
                     .HasColumnName("ROW_NUM")

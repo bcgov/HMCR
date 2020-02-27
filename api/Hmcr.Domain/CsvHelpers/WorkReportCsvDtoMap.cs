@@ -9,8 +9,7 @@ namespace Hmcr.Domain.CsvHelpers
         public WorkRptInitCsvDtoMap()
         {
             AutoMap(CultureInfo.InvariantCulture);
-            Map(m => m.EndDate)
-                .TypeConverter<DateTypeConverter>();
+            Map(m => m.EndDate).TypeConverter<DateTypeConverter>();
         }
     }
 

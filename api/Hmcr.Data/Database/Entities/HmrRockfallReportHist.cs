@@ -11,6 +11,7 @@ namespace Hmcr.Data.Database.Entities
         public DateTime? EndDateHist { get; set; }
         public decimal RockfallReportId { get; set; }
         public decimal SubmissionObjectId { get; set; }
+        public decimal RowId { get; set; }
         public decimal? RowNum { get; set; }
         public decimal? ValidationStatusId { get; set; }
         public string McrrIncidentNumber { get; set; }

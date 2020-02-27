@@ -21,6 +21,7 @@ namespace Hmcr.Chris.Models
         public Line(params Point[] points)
         {
             Coordinates = new decimal[points.Length][];
+            Points = new List<Point>();
 
             var i = 0;
             foreach(var point in points)
