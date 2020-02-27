@@ -9,8 +9,8 @@ namespace Hmcr.Chris
         public string PointOnRfiSegQuery
         {
             get {
-                var folder = Path.GetDirectoryName(Assembly.GetEntryAssembly().Location);
-                return _pointOnRfiSeqQuery ?? (_pointOnRfiSeqQuery = File.ReadAllText(Path.Combine(folder, @"XmlTemplates\IsPointOnRfiSegment.xml"))); 
+                var folder = Path.Combine(Path.GetDirectoryName(Assembly.GetEntryAssembly().Location), "XmlTemplates");
+                return _pointOnRfiSeqQuery ?? (_pointOnRfiSeqQuery = File.ReadAllText(Path.Combine(folder, "IsPointOnRfiSegment.xml"))); 
             }
         }
 
