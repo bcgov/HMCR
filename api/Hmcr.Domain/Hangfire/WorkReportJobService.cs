@@ -256,9 +256,9 @@ namespace Hmcr.Domain.Hangfire
                 }
                 else if (result.result == SpValidationResult.Success)
                 {
-
                     typedRow.StartOffset = result.lrsResult.Offset;
                     workReport.Geometry = _geometryFactory.CreatePoint(result.lrsResult.SnappedPoint.ToTopologyCoordinate());
+                    submissionRow.StartVariance = result.lrsResult.Variance;
                 }
             }  
             else if (typedRow.FeatureType == FeatureType.Line)
@@ -273,10 +273,10 @@ namespace Hmcr.Domain.Hangfire
                 else if (result.result == SpValidationResult.Success)
                 {
                     typedRow.StartOffset = result.startPointResult.Offset;
-                    //todo: typedRow.StartVariance = result.lrsResult.Variance;
+                    submissionRow.StartVariance = result.startPointResult.Variance;
 
                     typedRow.EndOffset = result.endPointResult.Offset;
-                    //todo: typedRow.EndVariance = result.lrsResult.Variance;
+                    submissionRow.EndVariance = result.endPointResult.Variance;
 
                     if (result.line.ToTopologyCoordinates().Length >= 2)
                     {
