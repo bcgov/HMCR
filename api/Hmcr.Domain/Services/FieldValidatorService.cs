@@ -50,6 +50,7 @@ namespace Hmcr.Domain.Services
             LoadWildlifeReportLrsRules();
 
             LoadActivityCodeRules();
+            LoadActivityCodeFeatureTypeRequiredRule();
         }
 
 
@@ -60,12 +61,21 @@ namespace Hmcr.Domain.Services
 
         private void LoadActivityCodeRules()
         {
-            _rules.Add(new FieldValidationRule(Entities.ActivityCode, Fields.ActivityNumber, FieldTypes.String, true, 1, 6, null, null, null, null, null, null));
+            _rules.Add(new FieldValidationRule(Entities.ActivityCode, Fields.ActivityNumber, FieldTypes.String, true, 1, 6, null, null, null, null, _regex.GetRegexInfo(RegexDefs.Alphanumeric), null));
             _rules.Add(new FieldValidationRule(Entities.ActivityCode, Fields.ActivityName, FieldTypes.String, true, 1, 150, null, null, null, null, null, null));
             _rules.Add(new FieldValidationRule(Entities.ActivityCode, Fields.UnitOfMeasure, FieldTypes.String, true, null, null, null, null, null, null, null, CodeSet.UnitOfMeasure));
             _rules.Add(new FieldValidationRule(Entities.ActivityCode, Fields.MaintenanceType, FieldTypes.String, true, null, null, null, null, null, null, null, CodeSet.WrkRptMaintType));
             _rules.Add(new FieldValidationRule(Entities.ActivityCode, Fields.FeatureType, FieldTypes.String, false, null, null, null, null, null, null, null, CodeSet.FeatureType));
-            //_rules.Add(new FieldValidationRule(Entities.ActivityCode, Fields.SiteNumberRequired, FieldTypes., false, null, null, null, null, null, null, null, null));
+        }
+
+        /// <summary>
+        /// When Location Code is C, point line feature is required
+        /// </summary>
+        private void LoadActivityCodeFeatureTypeRequiredRule()
+        {
+            var rule = _rules.First(x => x.EntityName == Entities.ActivityCode && x.FieldName == Fields.FeatureType).ShallowCopy(Entities.ActivityCodeFeatureTypeUnique);
+            _rules.Add(rule);
+            rule.Required = true;
         }
 
         private void LoadUserEntityRules()

@@ -16,6 +16,7 @@ namespace Hmcr.Data.Repositories
     {
         Task<IEnumerable<LocationCodeDropDownDto>> GetLocationCodes();
         Task<bool> DoesExistAsync(decimal locationCodeId);
+        Task<LocationCodeDto> GetLocationCode(decimal locationCodeId);
     }
     
     public class LocationCodeRepository : HmcrRepositoryBase<HmrLocationCode>, ILocationCodeRepository
@@ -36,6 +37,12 @@ namespace Hmcr.Data.Repositories
         public async Task<bool> DoesExistAsync(decimal locationCodeId)
         {
             return await DbSet.AnyAsync(lc => lc.LocationCodeId == locationCodeId);
+        }
+
+        public async Task<LocationCodeDto> GetLocationCode(decimal locationCodeId)
+        {
+            var entity = await DbSet.FirstOrDefaultAsync(lc => lc.LocationCodeId == locationCodeId);
+            return Mapper.Map<LocationCodeDto>(entity);
         }
     }
 }

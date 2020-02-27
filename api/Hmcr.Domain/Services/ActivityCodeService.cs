@@ -55,6 +55,21 @@ namespace Hmcr.Domain.Services
                 errors.AddItem(Fields.LocationCodeId, $"LocationCodeId [{activityCode.LocationCodeId}] does not exist.");
             }
 
+            var newLocationCode = (await _locationCodeRepo.GetLocationCode(activityCode.LocationCodeId)).LocationCode;
+
+            // location code is C validate FeatureType
+            // location code is A or B, FeatureType is forced to null and SiteNumRequired is forced to false
+            if (newLocationCode == "C")
+            {
+                _validatorService.Validate(Entities.ActivityCodeFeatureTypeUnique, Fields.FeatureType, activityCode.FeatureType, errors);
+            }
+            else //if (newLocationCode == "A" || newLocationCode == "B")
+            {
+                activityCode.FeatureType = null;
+                activityCode.IsSiteNumRequired = false;
+            }
+
+
             if (errors.Count > 0)
             {
                 return (0, errors);
@@ -106,19 +121,44 @@ namespace Hmcr.Domain.Services
         public async Task<(bool NotFound, Dictionary<string, List<string>> Errors)> UpdateActivityCodeAsync(ActivityCodeUpdateDto activityCode)
         {
             var activityCodeFromDb = await GetActivityCodeAsync(activityCode.ActivityCodeId);
-
+            
             if (activityCodeFromDb == null)
             {
                 return (true, null);
             }
 
+            var originalLocationCode = (await _locationCodeRepo.GetLocationCode(activityCodeFromDb.LocationCodeId)).LocationCode;
+
             var errors = new Dictionary<string, List<string>>();
             var entityName = Entities.ActivityCode;
-            
+                        
             _validatorService.Validate(entityName, activityCode, errors);
+            
             if (await _locationCodeRepo.DoesExistAsync(activityCode.LocationCodeId) == false)
             {
                 errors.AddItem(Fields.LocationCodeId, $"LocationCodeId [{activityCode.LocationCodeId}] does not exist.");
+            }
+
+            //location codes can only be downgraded; C => B or A, B => A
+            var newLocationCode = (await _locationCodeRepo.GetLocationCode(activityCode.LocationCodeId)).LocationCode;
+            if (originalLocationCode == "A" && newLocationCode != "A")
+            {
+                errors.AddItem(Fields.LocationCodeId, $"LocationCode cannot be changed from A");
+            }
+            if (originalLocationCode == "B" && newLocationCode == "C")
+            {
+                errors.AddItem(Fields.LocationCodeId, $"LocationCode can only be changed to A");
+            }
+
+            // location code is C validate FeatureType
+            // location code is A or B, FeatureType is forced to null and SiteNumRequired is forced to false
+            if (newLocationCode == "C")
+            {
+                _validatorService.Validate(Entities.ActivityCodeFeatureTypeUnique, Fields.FeatureType, activityCode.FeatureType, errors);
+            } else //if (newLocationCode == "A" || newLocationCode == "B")
+            {
+                activityCode.FeatureType = null;
+                activityCode.IsSiteNumRequired = false;
             }
 
             if (errors.Count > 0)

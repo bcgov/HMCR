@@ -54,6 +54,7 @@ namespace Hmcr.Model
         public const string WildlifeReportLrs = "wildlifelrs";
 
         public const string ActivityCode = "activitycode";
+        public const string ActivityCodeFeatureTypeUnique = "activitycodeplu";
     }
 
     public static class FieldTypes
