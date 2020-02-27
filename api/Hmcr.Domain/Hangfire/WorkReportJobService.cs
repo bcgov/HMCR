@@ -128,7 +128,7 @@ namespace Hmcr.Domain.Hangfire
                 }
             }
 
-            var typedRows = new List<WorkReportDto>();
+            var typedRows = new List<WorkReportTyped>();
 
             if (_submission.SubmissionStatusId != _errorFileStatusId)
             {
@@ -155,10 +155,13 @@ namespace Hmcr.Domain.Hangfire
                 return true;
             }
 
+            var workReports = new List<WorkReportGeometry>();
+
             //Spatial Validation and Conversion
-            await foreach (var typedRow in PerformSpatialValidationAndConversionAsync(typedRows))
+            await foreach (var workReport in PerformSpatialValidationAndConversionAsync(typedRows))
             {
-                _logger.LogInformation($"Spatial Validation for the row [{typedRow.RowNum}] [{typedRow.FeatureType}]");
+                workReports.Add(workReport);
+                _logger.LogInformation($"Spatial Validation for the row [{workReport.WorkReportTyped.RowNum}] [{workReport.WorkReportTyped.FeatureType}]");
             }
 
             if (_submission.SubmissionStatusId == _errorFileStatusId)
@@ -169,7 +172,9 @@ namespace Hmcr.Domain.Hangfire
 
             _submission.SubmissionStatusId = _successFileStatusId;
 
-            await foreach (var entity in _workReportRepo.SaveWorkReportAsnyc(_submission, typedRows)) { }
+            await foreach (var (entity, typedRow) in _workReportRepo.SaveWorkReportAsnyc(_submission, workReports)) 
+            {
+            }
 
             await CommitAndSendEmail();
 
@@ -199,7 +204,7 @@ namespace Hmcr.Domain.Hangfire
             }
         }
 
-        private void CopyCalculatedFieldsFormUntypedRow(List<WorkReportDto> typedRows, List<WorkReportCsvDto> untypedRows)
+        private void CopyCalculatedFieldsFormUntypedRow(List<WorkReportTyped> typedRows, List<WorkReportCsvDto> untypedRows)
         {
             MethodLogger.LogEntry(_logger, _enableMethodLog, _methodLogHeader);
 
@@ -212,29 +217,31 @@ namespace Hmcr.Domain.Hangfire
             }
         }
 
-        private async IAsyncEnumerable<WorkReportDto> PerformSpatialValidationAndConversionAsync(List<WorkReportDto> typedRows)
+        private async IAsyncEnumerable<WorkReportGeometry> PerformSpatialValidationAndConversionAsync(List<WorkReportTyped> typedRows)
         {
             MethodLogger.LogEntry(_logger, _enableMethodLog, _methodLogHeader);
 
             foreach (var typedRow in typedRows)
             {
                 var submissionRow = await _submissionRowRepo.GetSubmissionRowByRowNum(_submission.SubmissionObjectId, (decimal)typedRow.RowNum);
+                var workReport = new WorkReportGeometry(typedRow, null);
 
                 if (typedRow.SpatialData == SpatialData.Gps)
                 {
-                    await PerformSpatialGpsValidation(typedRow, submissionRow);
+                    await PerformSpatialGpsValidation(workReport, submissionRow);
                 }
                 else if (typedRow.SpatialData == SpatialData.Lrs)
                 {
                 }
 
-                yield return typedRow;
+                yield return workReport;
             }
         }
 
-        private async Task PerformSpatialGpsValidation(WorkReportDto typedRow, HmrSubmissionRow submissionRow)
+        private async Task PerformSpatialGpsValidation(WorkReportGeometry workReport, HmrSubmissionRow submissionRow)
         {
             var errors = new Dictionary<string, List<string>>();
+            var typedRow = workReport.WorkReportTyped;
 
             var start = new Chris.Models.Point((decimal)typedRow.StartLongitude, (decimal)typedRow.StartLatitude);
 
@@ -249,9 +256,9 @@ namespace Hmcr.Domain.Hangfire
                 }
                 else if (result.result == SpValidationResult.Success)
                 {
+
                     typedRow.StartOffset = result.lrsResult.Offset;
-                    //.Geometry = _geometryFactory.CreatePoint(result.lrsResult.SnappedPoint.ToTopologyCoordinate());                  
-                    //todo: typedRow.StartVariance = result.lrsResult.Variance;
+                    workReport.Geometry = _geometryFactory.CreatePoint(result.lrsResult.SnappedPoint.ToTopologyCoordinate());
                 }
             }  
             else if (typedRow.FeatureType == FeatureType.Line)
@@ -271,12 +278,22 @@ namespace Hmcr.Domain.Hangfire
                     typedRow.EndOffset = result.endPointResult.Offset;
                     //todo: typedRow.EndVariance = result.lrsResult.Variance;
 
-                    //typedRow.Geometry = _geometryFactory.CreateLineString(result.line.ToTopologyCoordinates());
+                    if (result.line.ToTopologyCoordinates().Length >= 2)
+                    {
+                        workReport.Geometry = _geometryFactory.CreateLineString(result.line.ToTopologyCoordinates());
+                    }
+                    else if (result.line.ToTopologyCoordinates().Length == 1)
+                    {
+                        _logger.LogInformation($"[Hangfire] Row [{typedRow.RowNum}] [Original: Start[{typedRow.StartLongitude}/{typedRow.StartLatitude}]"
+                            + $" End[{typedRow.EndLongitude}/{typedRow.EndLatitude}] were converted to a point [{result.line.Points[0].Longitude}/{result.line.Points[0].Latitude}]");
+
+                        workReport.Geometry = _geometryFactory.CreatePoint(result.line.ToTopologyCoordinates()[0]);
+                    }
                 }
-            } 
+            }
         }
 
-        private void PerformGpsPointValidation(WorkReportDto typedRow, HmrSubmissionRow submissionRow)
+        private void PerformGpsPointValidation(WorkReportTyped typedRow, HmrSubmissionRow submissionRow)
         {
             //if start is null, it's already set to invalid, no more validation
             if (typedRow.StartLatitude == null || typedRow.StartLongitude == null || typedRow.FeatureType != FeatureType.Point)
@@ -300,7 +317,7 @@ namespace Hmcr.Domain.Hangfire
             }
         }
 
-        private void PerformGpsLineValidation(WorkReportDto typedRow, HmrSubmissionRow submissionRow)
+        private void PerformGpsLineValidation(WorkReportTyped typedRow, HmrSubmissionRow submissionRow)
         {
             if (typedRow.StartLatitude == null || typedRow.StartLongitude == null || typedRow.FeatureType != FeatureType.Line)
                 return;
@@ -322,7 +339,7 @@ namespace Hmcr.Domain.Hangfire
             }
         }
 
-        private void PerformGpsEitherLineOrPointValidation(WorkReportDto typedRow)
+        private void PerformGpsEitherLineOrPointValidation(WorkReportTyped typedRow)
         {
             if (typedRow.StartLatitude == null || typedRow.StartLongitude == null || typedRow.FeatureType != FeatureType.PointLine)
                 return;
@@ -347,7 +364,7 @@ namespace Hmcr.Domain.Hangfire
             }
         }
 
-        private void PerformOffsetPointValidation(WorkReportDto typedRow, HmrSubmissionRow submissionRow)
+        private void PerformOffsetPointValidation(WorkReportTyped typedRow, HmrSubmissionRow submissionRow)
         {
             if (typedRow.StartOffset == null || typedRow.FeatureType != FeatureType.Point)
                 return;
@@ -367,7 +384,7 @@ namespace Hmcr.Domain.Hangfire
             }
         }
 
-        private void PerformOffsetLineValidation(WorkReportDto typedRow, HmrSubmissionRow submissionRow)
+        private void PerformOffsetLineValidation(WorkReportTyped typedRow, HmrSubmissionRow submissionRow)
         {
             if (typedRow.StartOffset == null || typedRow.FeatureType != FeatureType.Line)
                 return;
@@ -389,7 +406,7 @@ namespace Hmcr.Domain.Hangfire
             }
         }
 
-        private void PerformOffsetEitherLineOrPointValidation(WorkReportDto typedRow)
+        private void PerformOffsetEitherLineOrPointValidation(WorkReportTyped typedRow)
         {
             if (typedRow.StartOffset == null || typedRow.FeatureType != FeatureType.PointLine)
                 return;
@@ -409,7 +426,7 @@ namespace Hmcr.Domain.Hangfire
             }
         }
 
-        private async Task PerformAdditionalValidationAsync(List<WorkReportDto> typedRows)
+        private async Task PerformAdditionalValidationAsync(List<WorkReportTyped> typedRows)
         {
             MethodLogger.LogEntry(_logger, _enableMethodLog, _methodLogHeader);
 
@@ -504,7 +521,7 @@ namespace Hmcr.Domain.Hangfire
             return (rows, GetHeader(text));
         }
 
-        private (decimal rowNum, List<WorkReportDto> rows) ParseRowsTyped(string text, Dictionary<string, List<string>> errors)
+        private (decimal rowNum, List<WorkReportTyped> rows) ParseRowsTyped(string text, Dictionary<string, List<string>> errors)
         {
             MethodLogger.LogEntry(_logger, _enableMethodLog, _methodLogHeader);
 
@@ -514,13 +531,13 @@ namespace Hmcr.Domain.Hangfire
             CsvHelperUtils.Config(errors, csv, false);
             csv.Configuration.RegisterClassMap<WorkReportDtoMap>();
 
-            var rows = new List<WorkReportDto>();
+            var rows = new List<WorkReportTyped>();
             var rowNum = 0M;
             while (csv.Read())
             {
                 try
                 {
-                    var row = csv.GetRecord<WorkReportDto>();
+                    var row = csv.GetRecord<WorkReportTyped>();
                     rows.Add(row);
                     rowNum = (decimal)row.RowNum;
                 }
