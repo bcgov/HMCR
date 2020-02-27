@@ -161,7 +161,7 @@ namespace Hmcr.Domain.Hangfire
             await foreach (var workReport in PerformSpatialValidationAndConversionAsync(typedRows))
             {
                 workReports.Add(workReport);
-                _logger.LogInformation($"Spatial Validation for the row [{workReport.WorkReportTyped.RowNum}] [{workReport.WorkReportTyped.FeatureType}]");
+                _logger.LogInformation($"[Hangfire] Spatial Validation for the row [{workReport.WorkReportTyped.RowNum}] [{workReport.WorkReportTyped.FeatureType}]");
             }
 
             if (_submission.SubmissionStatusId == _errorFileStatusId)
