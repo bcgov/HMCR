@@ -15,6 +15,8 @@ namespace Hmcr.Data.Database.Entities
         public string RecordNumber { get; set; }
         public string RowValue { get; set; }
         public string RowHash { get; set; }
+        public decimal? StartVariance { get; set; }
+        public decimal? EndVariance { get; set; }
         public bool? IsResubmitted { get; set; }
         public string ErrorDetail { get; set; }
         public long ConcurrencyControlNumber { get; set; }

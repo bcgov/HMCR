@@ -5,6 +5,13 @@ namespace Hmcr.Data.Database.Entities
 {
     public partial class HmrSubmissionRow
     {
+        public HmrSubmissionRow()
+        {
+            HmrRockfallReports = new HashSet<HmrRockfallReport>();
+            HmrWildlifeReports = new HashSet<HmrWildlifeReport>();
+            HmrWorkReports = new HashSet<HmrWorkReport>();
+        }
+
         public decimal RowId { get; set; }
         public decimal SubmissionObjectId { get; set; }
         public decimal? RowStatusId { get; set; }
@@ -12,6 +19,8 @@ namespace Hmcr.Data.Database.Entities
         public string RecordNumber { get; set; }
         public string RowValue { get; set; }
         public string RowHash { get; set; }
+        public decimal? StartVariance { get; set; }
+        public decimal? EndVariance { get; set; }
         public bool? IsResubmitted { get; set; }
         public string ErrorDetail { get; set; }
         public long ConcurrencyControlNumber { get; set; }
@@ -30,5 +39,8 @@ namespace Hmcr.Data.Database.Entities
 
         public virtual HmrSubmissionStatu RowStatus { get; set; }
         public virtual HmrSubmissionObject SubmissionObject { get; set; }
+        public virtual ICollection<HmrRockfallReport> HmrRockfallReports { get; set; }
+        public virtual ICollection<HmrWildlifeReport> HmrWildlifeReports { get; set; }
+        public virtual ICollection<HmrWorkReport> HmrWorkReports { get; set; }
     }
 }
