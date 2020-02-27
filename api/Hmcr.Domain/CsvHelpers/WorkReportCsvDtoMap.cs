@@ -22,7 +22,7 @@ namespace Hmcr.Domain.CsvHelpers
         }
     }
 
-    public class WorkReportDtoMap : ClassMap<WorkReportDto>
+    public class WorkReportDtoMap : ClassMap<WorkReportTyped>
     {
         public WorkReportDtoMap()
         {

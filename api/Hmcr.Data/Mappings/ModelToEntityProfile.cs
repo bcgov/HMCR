@@ -84,7 +84,7 @@ namespace Hmcr.Data.Mappings
             CreateMap<ActivityCodeUpdateDto, HmrActivityCode>();
             CreateMap<LocationCodeDto, HmrLocationCode>();
 
-            CreateMap<WorkReportDto, HmrWorkReport>();
+            CreateMap<WorkReportTyped, HmrWorkReport>();
 
             CreateMap<RockfallReportDto, HmrRockfallReport>()
                 .ForMember(dst => dst.ReporterName, opt => opt.MapFrom(src => src.Name));

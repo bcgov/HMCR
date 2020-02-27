@@ -91,7 +91,7 @@ namespace Hmcr.Data.Mappings
             CreateMap<HmrLocationCode, LocationCodeDto>();
             CreateMap<HmrLocationCode, LocationCodeDropDownDto>();
             
-            CreateMap<HmrWorkReport, WorkReportDto>();
+            CreateMap<HmrWorkReport, WorkReportTyped>();
             CreateMap<HmrWorkReport, WorkReportExportDto>();
 
             CreateMap<HmrRockfallReport, RockfallReportDto>()

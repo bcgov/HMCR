@@ -11,7 +11,7 @@ namespace Hmcr.Data.Repositories
 {
     public interface IWorkReportRepository
     {
-        IAsyncEnumerable<HmrWorkReport> SaveWorkReportAsnyc(HmrSubmissionObject submission, List<WorkReportDto> rows);
+        IAsyncEnumerable<(HmrWorkReport report, WorkReportGeometry workReport)> SaveWorkReportAsnyc(HmrSubmissionObject submission, List<WorkReportGeometry> workReports);
         Task<IEnumerable<WorkReportExportDto>> ExporReportAsync(decimal submissionObjectId);
         Task<bool> IsActivityNumberInUseAsync(string activityNumber);
     }
@@ -22,28 +22,32 @@ namespace Hmcr.Data.Repositories
         {
         }
 
-        public async IAsyncEnumerable<HmrWorkReport> SaveWorkReportAsnyc(HmrSubmissionObject submission, List<WorkReportDto> rows)
+        public async IAsyncEnumerable<(HmrWorkReport report, WorkReportGeometry workReport)> SaveWorkReportAsnyc(HmrSubmissionObject submission, List<WorkReportGeometry> workReports)
         {
-            foreach (var row in rows)
+            foreach (var workReport in workReports)
             {
-                row.SubmissionObjectId = submission.SubmissionObjectId;
+                workReport.WorkReportTyped.SubmissionObjectId = submission.SubmissionObjectId;
 
                 var entity = await DbSet
-                    .Where(x => x.SubmissionObject.PartyId == submission.PartyId && x.RecordNumber == row.RecordNumber)
+                    .Where(x => x.SubmissionObject.PartyId == submission.PartyId && x.RecordNumber == workReport.WorkReportTyped.RecordNumber)
                     .FirstOrDefaultAsync();
 
                 if (entity == null)
                 {
+                    entity = Mapper.Map<HmrWorkReport>(workReport.WorkReportTyped);
+                    entity.Geometry = workReport.Geometry;
+
                     submission.HmrWorkReports
-                        .Add(Mapper.Map<HmrWorkReport>(row));
+                        .Add(entity);
                 }
                 else
                 {
-                    row.WorkReportId = entity.WorkReportId;
-                    Mapper.Map(row, entity);
+                    workReport.WorkReportTyped.WorkReportId = entity.WorkReportId;
+                    Mapper.Map(workReport.WorkReportTyped, entity);
+                    entity.Geometry = workReport.Geometry;
                 }
 
-                yield return entity;
+                yield return (entity, workReport);
             }
         }
         

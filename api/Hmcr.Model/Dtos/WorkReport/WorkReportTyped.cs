@@ -1,9 +1,8 @@
-﻿using NetTopologySuite.Geometries;
-using System;
+﻿using System;
 
 namespace Hmcr.Model.Dtos.WorkReport
 {
-    public class WorkReportDto
+    public class WorkReportTyped
     {
         public decimal WorkReportId { get; set; }
         public decimal SubmissionObjectId { get; set; }
