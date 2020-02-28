@@ -11,8 +11,8 @@ namespace Hmcr.Data.Repositories
 {
     public interface IWildlifeReportRepository
     {
-        void SaveWildlifeReport(HmrSubmissionObject submission, List<WildlifeReportDto> rows);
-        Task<IEnumerable<WildlifeReportExportDto>> ExporReportAsync(decimal submissionObjectId);
+        void SaveWildlifeReport(HmrSubmissionObject submission, List<WildlifeReportGeometry> rows);
+        Task<IEnumerable<WildlifeReportExportDto>> ExportReportAsync(decimal submissionObjectId);
     }
     public class WildlifeReportRepository : HmcrRepositoryBase<HmrWildlifeReport>, IWildlifeReportRepository, IReportExportRepository<WildlifeReportExportDto>
     {
@@ -21,17 +21,20 @@ namespace Hmcr.Data.Repositories
         {
         }
 
-        public void SaveWildlifeReport(HmrSubmissionObject submission, List<WildlifeReportDto> rows)
+        public void SaveWildlifeReport(HmrSubmissionObject submission, List<WildlifeReportGeometry> rows)
         {
             foreach (var row in rows)
             {
-                row.SubmissionObjectId = submission.SubmissionObjectId;
+                row.WildlifeReportTyped.SubmissionObjectId = submission.SubmissionObjectId;
+                
+                var entity = Mapper.Map<HmrWildlifeReport>(row.WildlifeReportTyped);
+                entity.Geometry = row.Geometry;
 
                 submission.HmrWildlifeReports
-                    .Add(Mapper.Map<HmrWildlifeReport>(row));
+                    .Add(entity);
             }
         }
-        public async Task<IEnumerable<WildlifeReportExportDto>> ExporReportAsync(decimal submissionObjectId)
+        public async Task<IEnumerable<WildlifeReportExportDto>> ExportReportAsync(decimal submissionObjectId)
         {
             var entities = await DbSet.AsNoTracking()
                 .Include(x => x.SubmissionObject)

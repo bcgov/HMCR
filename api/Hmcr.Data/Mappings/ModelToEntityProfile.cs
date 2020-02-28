@@ -89,7 +89,7 @@ namespace Hmcr.Data.Mappings
             CreateMap<RockfallReportTyped, HmrRockfallReport>()
                 .ForMember(dst => dst.ReporterName, opt => opt.MapFrom(src => src.Name));
 
-            CreateMap<WildlifeReportDto, HmrWildlifeReport>();
+            CreateMap<WildlifeReportTyped, HmrWildlifeReport>();
 
             CreateMap<CodeLookupDto, HmrCodeLookup>();
 

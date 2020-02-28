@@ -20,7 +20,7 @@ namespace Hmcr.Domain.CsvHelpers
         }
     }
 
-    public class WildlifeReportDtoMap : ClassMap<WildlifeReportDto>
+    public class WildlifeReportDtoMap : ClassMap<WildlifeReportTyped>
     {
         public WildlifeReportDtoMap()
         {

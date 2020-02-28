@@ -1,5 +1,6 @@
 ﻿using CsvHelper;
 using Hmcr.Data.Database;
+using Hmcr.Data.Database.Entities;
 using Hmcr.Data.Repositories;
 using Hmcr.Domain.CsvHelpers;
 using Hmcr.Domain.Hangfire.Base;
@@ -10,6 +11,8 @@ using Hmcr.Model.Dtos.WildlifeReport;
 using Hmcr.Model.Utils;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using NetTopologySuite;
+using NetTopologySuite.Geometries;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -21,23 +24,28 @@ namespace Hmcr.Domain.Hangfire
 {
     public interface IWildlifeReportJobService
     {
-        Task<bool> ProcessSubmission(SubmissionDto submission);
+        Task<bool> ProcessSubmissionMain(SubmissionDto submission);
     }
 
     public class WildlifeReportJobService : ReportJobServiceBase, IWildlifeReportJobService
     {
         protected IFieldValidatorService _validator;
+        private ISpatialService _spatialService;
+        private GeometryFactory _geometryFactory;
         private IWildlifeReportRepository _wildlifeReportRepo;
 
         public WildlifeReportJobService(IUnitOfWork unitOfWork, ILogger<IWildlifeReportJobService> logger,
             ISubmissionStatusRepository statusRepo, ISubmissionObjectRepository submissionRepo,
             ISumbissionRowRepository submissionRowRepo, IWildlifeReportRepository wildlifeReportRepo, IFieldValidatorService validator, 
-            IEmailService emailService, IConfiguration config, EmailBody emailBody, IFeebackMessageRepository feedbackRepo)
+            IEmailService emailService, IConfiguration config, EmailBody emailBody, IFeebackMessageRepository feedbackRepo,
+            ISpatialService spatailService)
              : base(unitOfWork, statusRepo, submissionRepo, submissionRowRepo, emailService, logger, config, emailBody, feedbackRepo)
         {
             _logger = logger;
             _wildlifeReportRepo = wildlifeReportRepo;
             _validator = validator;
+            _spatialService = spatailService;
+            _geometryFactory = NtsGeometryServices.Instance.CreateGeometryFactory(srid: 4326);
         }
 
         /// <summary>
@@ -47,7 +55,7 @@ namespace Hmcr.Domain.Hangfire
         /// </summary>
         /// <param name="submissionDto"></param>
         /// <returns></returns>
-        public async Task<bool> ProcessSubmission(SubmissionDto submissionDto)
+        public override async Task<bool> ProcessSubmission(SubmissionDto submissionDto)
         {
             var errors = new Dictionary<string, List<string>>();
 
@@ -64,7 +72,7 @@ namespace Hmcr.Domain.Hangfire
                 {
                     _submission.ErrorDetail = errors.GetErrorDetail();
                     _submission.SubmissionStatusId = _errorFileStatusId;
-                    await CommitAndSendEmail();
+                    await CommitAndSendEmailAsync();
                     return true;
                 }
             }
@@ -77,7 +85,7 @@ namespace Hmcr.Domain.Hangfire
                 errors.AddItem("File", "No new records were found in the file; all records were already processed in the past submission.");
                 _submission.ErrorDetail = errors.GetErrorDetail();
                 _submission.SubmissionStatusId = _duplicateFileStatusId;
-                await CommitAndSendEmail();
+                await CommitAndSendEmailAsync();
                 return true;
             }
 
@@ -97,7 +105,7 @@ namespace Hmcr.Domain.Hangfire
                 }
             }
 
-            var typedRows = new List<WildlifeReportDto>();
+            var typedRows = new List<WildlifeReportTyped>();
 
             if (_submission.SubmissionStatusId != _errorFileStatusId)
             {
@@ -107,7 +115,7 @@ namespace Hmcr.Domain.Hangfire
                 {
                     var submissionRow = await _submissionRowRepo.GetSubmissionRowByRowNum(_submission.SubmissionObjectId, rowNum);
                     SetErrorDetail(submissionRow, errors);
-                    await CommitAndSendEmail();
+                    await CommitAndSendEmailAsync();
                     return true;
                 }
 
@@ -120,21 +128,35 @@ namespace Hmcr.Domain.Hangfire
 
             if (_submission.SubmissionStatusId == _errorFileStatusId)
             {
-                await CommitAndSendEmail();
+                await CommitAndSendEmailAsync();
+                return true;
             }
-            else
+
+            var wildlifeReports = new List<WildlifeReportGeometry>();
+
+            //Spatial Validation and Conversion
+            await foreach (var wildlifeReport in PerformSpatialValidationAndConversionAsync(typedRows))
             {
-                _submission.SubmissionStatusId = _successFileStatusId;
-
-                _wildlifeReportRepo.SaveWildlifeReport(_submission, typedRows);
-
-                await CommitAndSendEmail();
+                wildlifeReports.Add(wildlifeReport);
+                _logger.LogInformation($"[Hangfire] Spatial Validation for the row [{wildlifeReport.WildlifeReportTyped.RowNum}] [{wildlifeReport.WildlifeReportTyped.SpatialData}]");
             }
+
+            if (_submission.SubmissionStatusId == _errorFileStatusId)
+            {
+                await CommitAndSendEmailAsync();
+                return true;
+            }
+
+            _submission.SubmissionStatusId = _successFileStatusId;
+
+            _wildlifeReportRepo.SaveWildlifeReport(_submission, wildlifeReports);
+
+            await CommitAndSendEmailAsync();
 
             return true;
         }
 
-        private async Task PerformAdditionalValidationAsync(List<WildlifeReportDto> typedRows)
+        private async Task PerformAdditionalValidationAsync(List<WildlifeReportTyped> typedRows)
         {
             MethodLogger.LogEntry(_logger, _enableMethodLog, _methodLogHeader);
 
@@ -143,10 +165,14 @@ namespace Hmcr.Domain.Hangfire
                 var errors = new Dictionary<string, List<string>>();
                 var submissionRow = await _submissionRowRepo.GetSubmissionRowByRowNum(_submission.SubmissionObjectId, (decimal)typedRow.RowNum);
 
-                //Geo-spatial Validation here
                 if (typedRow.AccidentDate != null && typedRow.AccidentDate > DateTime.Now)
                 {
                     errors.AddItem(Fields.AccidentDate, "Cannot be a future date.");
+                }
+
+                if (!ValidateGpsCoordsRange(typedRow.Longitude, typedRow.Latitude))
+                {
+                    errors.AddItem($"{Fields.Longitude}/{Fields.Latitude}", "Invalid range of GPS coordinates.");
                 }
 
                 if (errors.Count > 0)
@@ -156,7 +182,7 @@ namespace Hmcr.Domain.Hangfire
             }
         }
 
-        private void CopyCalculatedFieldsFormUntypedRow(List<WildlifeReportDto> typedRows, List<WildlifeReportCsvDto> untypedRows)
+        private void CopyCalculatedFieldsFormUntypedRow(List<WildlifeReportTyped> typedRows, List<WildlifeReportCsvDto> untypedRows)
         {
             MethodLogger.LogEntry(_logger, _enableMethodLog, _methodLogHeader);
 
@@ -165,6 +191,69 @@ namespace Hmcr.Domain.Hangfire
                 var untypedRow = untypedRows.First(x => x.RowNum == typedRow.RowNum);
                 typedRow.SpatialData = untypedRow.SpatialData;
                 typedRow.RowId = untypedRow.RowId;
+            }
+        }
+
+        private async IAsyncEnumerable<WildlifeReportGeometry> PerformSpatialValidationAndConversionAsync(List<WildlifeReportTyped> typedRows)
+        {
+            MethodLogger.LogEntry(_logger, _enableMethodLog, _methodLogHeader);
+
+            foreach (var typedRow in typedRows)
+            {
+                var submissionRow = await _submissionRowRepo.GetSubmissionRowByRowNum(_submission.SubmissionObjectId, (decimal)typedRow.RowNum);
+                var wildlifeReport = new WildlifeReportGeometry(typedRow, null);
+
+                if (typedRow.SpatialData == SpatialData.Gps)
+                {
+                    await PerformSpatialGpsValidation(wildlifeReport, submissionRow);
+                }
+                else if (typedRow.SpatialData == SpatialData.Lrs)
+                {
+                    await PerformSpatialLrsValidation(wildlifeReport, submissionRow);
+                }
+
+                yield return wildlifeReport;
+            }
+        }
+
+        private async Task PerformSpatialGpsValidation(WildlifeReportGeometry wildlifeReport, HmrSubmissionRow submissionRow)
+        {
+            var errors = new Dictionary<string, List<string>>();
+            var typedRow = wildlifeReport.WildlifeReportTyped;
+
+            var start = new Chris.Models.Point((decimal)typedRow.Longitude, (decimal)typedRow.Latitude);
+
+            var result = await _spatialService.ValidateGpsPointAsync(start, typedRow.HighwayUnique, Fields.HighwayUnique, errors);
+
+            if (result.result == SpValidationResult.Fail)
+            {
+                SetErrorDetail(submissionRow, errors);
+            }
+            else if (result.result == SpValidationResult.Success)
+            {
+                typedRow.Offset = result.lrsResult.Offset;
+                wildlifeReport.Geometry = _geometryFactory.CreatePoint(result.lrsResult.SnappedPoint.ToTopologyCoordinate());
+                submissionRow.StartVariance = result.lrsResult.Variance;
+            }
+        }
+
+        private async Task PerformSpatialLrsValidation(WildlifeReportGeometry wildlifeReport, HmrSubmissionRow submissionRow)
+        {
+            var errors = new Dictionary<string, List<string>>();
+            var typedRow = wildlifeReport.WildlifeReportTyped;
+
+            var result = await _spatialService.ValidateLrsPointAsync((decimal)typedRow.Offset, typedRow.HighwayUnique, Fields.HighwayUnique, errors);
+
+            if (result.result == SpValidationResult.Fail)
+            {
+                SetErrorDetail(submissionRow, errors);
+            }
+            else if (result.result == SpValidationResult.Success)
+            {
+                typedRow.Longitude = result.point.Longitude;
+                typedRow.Latitude = result.point.Latitude;
+                wildlifeReport.Geometry = _geometryFactory.CreatePoint(result.point.ToTopologyCoordinate());
+                submissionRow.StartVariance = typedRow.Offset - result.snappedOffset;
             }
         }
 
@@ -208,7 +297,7 @@ namespace Hmcr.Domain.Hangfire
             return (rows, GetHeader(text));
         }
 
-        private (decimal rowNum, List<WildlifeReportDto> rows) ParseRowsTyped(string text, Dictionary<string, List<string>> errors)
+        private (decimal rowNum, List<WildlifeReportTyped> rows) ParseRowsTyped(string text, Dictionary<string, List<string>> errors)
         {
             MethodLogger.LogEntry(_logger, _enableMethodLog, _methodLogHeader);
 
@@ -218,14 +307,14 @@ namespace Hmcr.Domain.Hangfire
             CsvHelperUtils.Config(errors, csv, false);
             csv.Configuration.RegisterClassMap<WildlifeReportDtoMap>();
 
-            var rows = new List<WildlifeReportDto>();
+            var rows = new List<WildlifeReportTyped>();
             var rowNum = 0M;
 
             while (csv.Read())
             {
                 try
                 {
-                    var row = csv.GetRecord<WildlifeReportDto>();
+                    var row = csv.GetRecord<WildlifeReportTyped>();
                     rows.Add(row);
                     rowNum = (decimal)row.RowNum;
                 }

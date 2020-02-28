@@ -1,10 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace Hmcr.Model.Dtos.WildlifeReport
 {
-    public class WildlifeReportDto
+    public class WildlifeReportTyped
     {
         public decimal WildlifeRecordId { get; set; }
         public decimal SubmissionObjectId { get; set; }

@@ -240,6 +240,7 @@ namespace Hmcr.Model
     public static class FileError
     {
         public const string ReferToRowErrors = "{ \"fieldMessages\": [ { \"field\": \"File\", \"messages\": [ \"Some headers or values are missing/incorrect. Please refer to row error(s).\" ] } ] }";
+        public const string UnknownException = "{ \"fieldMessages\": [ { \"field\": \"File\", \"messages\": [ \"Encountered unknown exception. Please contact the administrator.\" ] } ] }";
     }
 
     public static class HmcrEnvironments
@@ -291,5 +292,13 @@ namespace Hmcr.Model
     public enum SpValidationResult
     {
         Success, Fail, NonSpatial
+    }
+
+    public static class GpsCoords
+    {
+        public const decimal MaxLongitude = 0;
+        public const decimal MinLongitude = -180;
+        public const decimal MaxLatitude = 90;
+        public const decimal MinLatitude = 0;
     }
 }

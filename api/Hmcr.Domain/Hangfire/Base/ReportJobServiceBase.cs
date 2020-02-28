@@ -59,6 +59,32 @@ namespace Hmcr.Domain.Hangfire.Base
             _feedbackRepo = feedbackRepo;
         }
 
+        public async Task<bool> ProcessSubmissionMain(SubmissionDto submissionDto) 
+        {
+            try
+            {
+                return await ProcessSubmission(submissionDto);
+            }
+            catch(Exception ex)
+            {
+                _logger.LogError(ex.ToString());
+
+                if (_submission != null)
+                {
+                    _submission.ErrorDetail = FileError.UnknownException;
+                    _submission.SubmissionStatusId = _errorFileStatusId;
+                    await CommitAndSendEmailAsync();
+                }
+            }
+
+            return true;
+        }
+
+        public virtual Task<bool> ProcessSubmission(SubmissionDto submissionDto)
+        {
+            throw new NotImplementedException();
+        }
+
         protected async Task SetMemberVariablesAsync()
         {
             var statuses = await _statusRepo.GetActiveStatuses();
@@ -164,7 +190,7 @@ namespace Hmcr.Domain.Hangfire.Base
             return header ?? "";
         }
 
-        protected async Task CommitAndSendEmail()
+        protected async Task CommitAndSendEmailAsync()
         {
             MethodLogger.LogEntry(_logger, _enableMethodLog, _methodLogHeader);
 
@@ -243,6 +269,18 @@ namespace Hmcr.Domain.Hangfire.Base
             }
 
             return rowNum;
+        }
+
+        protected bool ValidateGpsCoordsRange(decimal? longitude, decimal? latitude)
+        {
+            //do not validate
+            if (longitude == null || latitude == null)
+                return true;
+
+            if (latitude > GpsCoords.MinLatitude && latitude < GpsCoords.MaxLatitude && longitude > GpsCoords.MinLongitude && longitude < GpsCoords.MaxLongitude)
+                return true;
+
+            return false;
         }
     }
 }

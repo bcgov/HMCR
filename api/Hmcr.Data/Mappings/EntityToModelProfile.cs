@@ -102,7 +102,7 @@ namespace Hmcr.Data.Mappings
                 .ForMember(dst => dst.Name, opt => opt.MapFrom(src => src.ReporterName))
                 .ForMember(dst => dst.McName, opt => opt.MapFrom(src => src.SubmissionObject.Party.BusinessLegalName));
 
-            CreateMap<HmrWildlifeReport, WildlifeReportDto>();
+            CreateMap<HmrWildlifeReport, WildlifeReportTyped>();
             CreateMap<HmrWildlifeReport, WildlifeReportExportDto>();
 
             CreateMap<HmrCodeLookup, CodeLookupDto>();

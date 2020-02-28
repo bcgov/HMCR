@@ -6,6 +6,6 @@ namespace Hmcr.Data.Repositories
 {
     public interface IReportExportRepository<T> where T : IReportExportDto
     {
-        Task<IEnumerable<T>> ExporReportAsync(decimal submissionObjectId);
+        Task<IEnumerable<T>> ExportReportAsync(decimal submissionObjectId);
     }
 }

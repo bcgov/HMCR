@@ -12,6 +12,7 @@ namespace Hmcr.Data.Repositories
     public interface IRockfallReportRepository
     {
         IAsyncEnumerable<HmrRockfallReport> SaveRockfallReportAsnyc(HmrSubmissionObject submission, List<RockfallReportGeometry> rows);
+        Task<IEnumerable<RockfallReportExportDto>> ExportReportAsync(decimal submissionObjectId);
     }
     public class RockfallReportRepository : HmcrRepositoryBase<HmrRockfallReport>, IRockfallReportRepository, IReportExportRepository<RockfallReportExportDto>
     {
@@ -49,7 +50,7 @@ namespace Hmcr.Data.Repositories
             }
         }
 
-        public async Task<IEnumerable<RockfallReportExportDto>> ExporReportAsync(decimal submissionObjectId)
+        public async Task<IEnumerable<RockfallReportExportDto>> ExportReportAsync(decimal submissionObjectId)
         {
             var entities = await DbSet.AsNoTracking()
                 .Include(x => x.SubmissionObject)

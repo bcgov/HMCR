@@ -1,9 +1,7 @@
 ﻿using Hangfire;
 using Hmcr.Data.Repositories;
 using Hmcr.Model;
-using Hmcr.Model.Dtos.SubmissionObject;
 using Hmcr.Model.Dtos.User;
-using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Linq;
@@ -58,23 +56,23 @@ namespace Hmcr.Domain.Hangfire
                 switch (submission.StagingTableName)
                 {
                     case TableNames.WorkReport:
-                        if (!await _workRptJobService.ProcessSubmission(submission))
+                        if (!await _workRptJobService.ProcessSubmissionMain(submission))
                         {
-                            _logger.LogWarning($"[Hangfire] Detected other instance of the job. Cancelling the current job {submission.ServiceAreaNumber} for the submission {submission.SubmissionObjectId}.");
+                            _logger.LogWarning($"[Hangfire] Detected another instance of the job. Cancelling the current job {submission.ServiceAreaNumber} for the submission {submission.SubmissionObjectId}.");
                             return;
                         }
                         break;
                     case TableNames.RockfallReport:
-                        if (!await _rockfallRptJobService.ProcessSubmission(submission))
+                        if (!await _rockfallRptJobService.ProcessSubmissionMain(submission))
                         {
-                            _logger.LogWarning($"[Hangfire] Detected other instance of the job. Cancelling the current job {submission.ServiceAreaNumber} for the submission {submission.SubmissionObjectId}.");
+                            _logger.LogWarning($"[Hangfire] Detected another instance of the job. Cancelling the current job {submission.ServiceAreaNumber} for the submission {submission.SubmissionObjectId}.");
                             return;
                         }
                         break;
                     case TableNames.WildlifeReport:
-                        if (!await _wildlifeRptJobService.ProcessSubmission(submission))
+                        if (!await _wildlifeRptJobService.ProcessSubmissionMain(submission))
                         {
-                            _logger.LogWarning($"[Hangfire] Detected other instance of the job. Cancelling the current job {submission.ServiceAreaNumber} for the submission {submission.SubmissionObjectId}.");
+                            _logger.LogWarning($"[Hangfire] Detected another instance of the job. Cancelling the current job {submission.ServiceAreaNumber} for the submission {submission.SubmissionObjectId}.");
                             return;
                         }
                         break;
