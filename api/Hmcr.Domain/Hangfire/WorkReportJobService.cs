@@ -1,6 +1,4 @@
 ﻿using CsvHelper;
-using Hmcr.Chris;
-using Hmcr.Chris.Models;
 using Hmcr.Data.Database;
 using Hmcr.Data.Database.Entities;
 using Hmcr.Data.Repositories;
@@ -14,8 +12,6 @@ using Hmcr.Model.Dtos.WorkReport;
 using Hmcr.Model.Utils;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
-using NetTopologySuite;
-using NetTopologySuite.Geometries;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -33,9 +29,6 @@ namespace Hmcr.Domain.Hangfire
 
     public class WorkReportJobService : ReportJobServiceBase, IWorkReportJobService
     {
-        private IFieldValidatorService _validator;
-        private ISpatialService _spatialService;
-        private GeometryFactory _geometryFactory;
         private IActivityCodeRepository _activityRepo;
         private IWorkReportRepository _workReportRepo;
 
@@ -44,14 +37,10 @@ namespace Hmcr.Domain.Hangfire
             ISumbissionRowRepository submissionRowRepo, IWorkReportRepository workReportRepo, IFieldValidatorService validator,
             IEmailService emailService, IConfiguration config, EmailBody emailBody, IFeebackMessageRepository feedbackRepo,
             ISpatialService spatialService)
-            : base(unitOfWork, statusRepo, submissionRepo, submissionRowRepo, emailService, logger, config, emailBody, feedbackRepo)
+            : base(unitOfWork, statusRepo, submissionRepo, submissionRowRepo, emailService, logger, config, validator, spatialService, emailBody, feedbackRepo)
         {
-            _logger = logger;
             _activityRepo = activityRepo;
             _workReportRepo = workReportRepo;
-            _validator = validator;
-            _spatialService = spatialService;
-            _geometryFactory = NtsGeometryServices.Instance.CreateGeometryFactory(srid: 4326);
         }
 
         /// <summary>
@@ -232,6 +221,8 @@ namespace Hmcr.Domain.Hangfire
                 {
                     await PerformSpatialLrsValidation(workReport, submissionRow);
                 }
+
+                SetVarianceWarningDetail(submissionRow);
 
                 yield return workReport;
             }

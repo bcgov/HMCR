@@ -103,7 +103,7 @@ namespace Hmcr.Data.Repositories
                     Description = x.SubmissionStatus.Description,
                     ErrorDetail = x.ErrorDetail,
                     AppCreateTimestamp = x.AppCreateTimestamp,
-                    SubmissionRows = x.HmrSubmissionRows.Where(y => y.ErrorDetail != null).Select(y => new SubmissionRowResultDto
+                    SubmissionRows = x.HmrSubmissionRows.Where(y => y.ErrorDetail != null || y.WarningDetail != null).Select(y => new SubmissionRowResultDto
                     {
                         RowId = y.RowId,
                         SubmissionObjectId = y.SubmissionObjectId,
@@ -112,6 +112,9 @@ namespace Hmcr.Data.Repositories
                         RecordNumber = y.RecordNumber,
                         RowValue = y.RowValue,
                         ErrorDetail = y.ErrorDetail,
+                        WarningDetail = y.WarningDetail,
+                        StartVariance = y.StartVariance,
+                        EndVariance = y.EndVariance,
                         RowNum = y.RowNum,
                         IsResubmitted = y.IsResubmitted ?? false
                     }).OrderBy(y => y.RowNum)

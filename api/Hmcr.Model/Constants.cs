@@ -243,6 +243,11 @@ namespace Hmcr.Model
         public const string UnknownException = "{ \"fieldMessages\": [ { \"field\": \"File\", \"messages\": [ \"Encountered unknown exception. Please contact the administrator.\" ] } ] }";
     }
 
+    public static class RowWarning
+    {
+        public const string VarianceWarning = "{ \"fieldMessages\": [ { \"field\": \"Variance\", \"messages\": [ \"Reported location is not within the warning threshold on the RFI segment.\" ] } ] }";
+    }
+
     public static class HmcrEnvironments
     {
         public const string Dev = "DEV";

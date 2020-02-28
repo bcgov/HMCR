@@ -11,8 +11,6 @@ using Hmcr.Model.Dtos.SubmissionObject;
 using Hmcr.Model.Utils;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
-using NetTopologySuite;
-using NetTopologySuite.Geometries;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -29,25 +27,18 @@ namespace Hmcr.Domain.Hangfire
     }
 
     public class RockfallReportJobService : ReportJobServiceBase, IRockfallReportJobService
-    {
-        
-        private IFieldValidatorService _validator;
-        private ISpatialService _spatialService;
+    {        
         private IRockfallReportRepository _rockfallReportRepo;
-        private GeometryFactory _geometryFactory;
 
         public RockfallReportJobService(IUnitOfWork unitOfWork, ILogger<IRockfallReportJobService> logger, 
             ISubmissionStatusRepository statusRepo, ISubmissionObjectRepository submissionRepo,
             ISumbissionRowRepository submissionRowRepo, IRockfallReportRepository rockfallReportRepo, IFieldValidatorService validator, 
             IEmailService emailService, IConfiguration config, EmailBody emailBody, IFeebackMessageRepository feedbackRepo,
             ISpatialService spatialService)
-            : base(unitOfWork, statusRepo, submissionRepo, submissionRowRepo, emailService, logger, config, emailBody, feedbackRepo)
+            : base(unitOfWork, statusRepo, submissionRepo, submissionRowRepo, emailService, logger, config, validator, spatialService, emailBody, feedbackRepo)
         {
             _logger = logger;
             _rockfallReportRepo = rockfallReportRepo;
-            _validator = validator;
-            _spatialService = spatialService;
-            _geometryFactory = NtsGeometryServices.Instance.CreateGeometryFactory(srid: 4326);
         }
 
         /// <summary>
@@ -239,6 +230,7 @@ namespace Hmcr.Domain.Hangfire
                     await PerformSpatialLrsValidation(rockfallReport, submissionRow);
                 }
 
+                SetVarianceWarningDetail(submissionRow);
                 yield return rockfallReport;
             }
         }

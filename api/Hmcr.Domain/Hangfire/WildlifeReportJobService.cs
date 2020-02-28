@@ -11,8 +11,6 @@ using Hmcr.Model.Dtos.WildlifeReport;
 using Hmcr.Model.Utils;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
-using NetTopologySuite;
-using NetTopologySuite.Geometries;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -29,23 +27,16 @@ namespace Hmcr.Domain.Hangfire
 
     public class WildlifeReportJobService : ReportJobServiceBase, IWildlifeReportJobService
     {
-        protected IFieldValidatorService _validator;
-        private ISpatialService _spatialService;
-        private GeometryFactory _geometryFactory;
         private IWildlifeReportRepository _wildlifeReportRepo;
 
         public WildlifeReportJobService(IUnitOfWork unitOfWork, ILogger<IWildlifeReportJobService> logger,
             ISubmissionStatusRepository statusRepo, ISubmissionObjectRepository submissionRepo,
             ISumbissionRowRepository submissionRowRepo, IWildlifeReportRepository wildlifeReportRepo, IFieldValidatorService validator, 
             IEmailService emailService, IConfiguration config, EmailBody emailBody, IFeebackMessageRepository feedbackRepo,
-            ISpatialService spatailService)
-             : base(unitOfWork, statusRepo, submissionRepo, submissionRowRepo, emailService, logger, config, emailBody, feedbackRepo)
+            ISpatialService spatialService)
+             : base(unitOfWork, statusRepo, submissionRepo, submissionRowRepo, emailService, logger, config, validator, spatialService, emailBody, feedbackRepo)
         {
-            _logger = logger;
             _wildlifeReportRepo = wildlifeReportRepo;
-            _validator = validator;
-            _spatialService = spatailService;
-            _geometryFactory = NtsGeometryServices.Instance.CreateGeometryFactory(srid: 4326);
         }
 
         /// <summary>
@@ -211,6 +202,8 @@ namespace Hmcr.Domain.Hangfire
                 {
                     await PerformSpatialLrsValidation(wildlifeReport, submissionRow);
                 }
+
+                SetVarianceWarningDetail(submissionRow);
 
                 yield return wildlifeReport;
             }

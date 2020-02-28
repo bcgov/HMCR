@@ -19,6 +19,7 @@ namespace Hmcr.Data.Database.Entities
         public decimal? EndVariance { get; set; }
         public bool? IsResubmitted { get; set; }
         public string ErrorDetail { get; set; }
+        public string WarningDetail { get; set; }
         public long ConcurrencyControlNumber { get; set; }
         public string AppCreateUserid { get; set; }
         public DateTime AppCreateTimestamp { get; set; }
