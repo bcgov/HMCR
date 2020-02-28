@@ -296,9 +296,9 @@ namespace Hmcr.Model
 
     public static class GpsCoords
     {
-        public const decimal MaxLongitude = 0;
-        public const decimal MinLongitude = -180;
-        public const decimal MaxLatitude = 90;
-        public const decimal MinLatitude = 0;
+        public const decimal MaxLongitude = -109;
+        public const decimal MinLongitude = -141;
+        public const decimal MaxLatitude = 62;
+        public const decimal MinLatitude = 47;
     }
 }
