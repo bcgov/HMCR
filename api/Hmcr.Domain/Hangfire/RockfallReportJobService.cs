@@ -1,5 +1,6 @@
 ﻿using CsvHelper;
 using Hmcr.Data.Database;
+using Hmcr.Data.Database.Entities;
 using Hmcr.Data.Repositories;
 using Hmcr.Domain.CsvHelpers;
 using Hmcr.Domain.Hangfire.Base;
@@ -10,6 +11,8 @@ using Hmcr.Model.Dtos.SubmissionObject;
 using Hmcr.Model.Utils;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using NetTopologySuite;
+using NetTopologySuite.Geometries;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -29,17 +32,22 @@ namespace Hmcr.Domain.Hangfire
     {
         
         private IFieldValidatorService _validator;
+        private ISpatialService _spatialService;
         private IRockfallReportRepository _rockfallReportRepo;
+        private GeometryFactory _geometryFactory;
 
         public RockfallReportJobService(IUnitOfWork unitOfWork, ILogger<IRockfallReportJobService> logger, 
             ISubmissionStatusRepository statusRepo, ISubmissionObjectRepository submissionRepo,
             ISumbissionRowRepository submissionRowRepo, IRockfallReportRepository rockfallReportRepo, IFieldValidatorService validator, 
-            IEmailService emailService, IConfiguration config, EmailBody emailBody, IFeebackMessageRepository feedbackRepo)
+            IEmailService emailService, IConfiguration config, EmailBody emailBody, IFeebackMessageRepository feedbackRepo,
+            ISpatialService spatialService)
             : base(unitOfWork, statusRepo, submissionRepo, submissionRowRepo, emailService, logger, config, emailBody, feedbackRepo)
         {
             _logger = logger;
             _rockfallReportRepo = rockfallReportRepo;
             _validator = validator;
+            _spatialService = spatialService;
+            _geometryFactory = NtsGeometryServices.Instance.CreateGeometryFactory(srid: 4326);
         }
 
         /// <summary>
@@ -99,7 +107,7 @@ namespace Hmcr.Domain.Hangfire
                 }
             }
 
-            var typedRows = new List<RockfallReportDto>();
+            var typedRows = new List<RockfallReportTyped>();
 
             if (_submission.SubmissionStatusId != _errorFileStatusId)
             {
@@ -120,25 +128,31 @@ namespace Hmcr.Domain.Hangfire
                 await PerformAdditionalValidationAsync(typedRows);
             }
 
+            var rockfallReports = new List<RockfallReportGeometry>();
+
+            //Spatial Validation and Conversion
+            await foreach (var rockfallReport in PerformSpatialValidationAndConversionAsync(typedRows))
+            {
+                rockfallReports.Add(rockfallReport);
+                _logger.LogInformation($"[Hangfire] Spatial Validation for the row [{rockfallReport.RockfallReportTyped.RowNum}] [{rockfallReport.RockfallReportTyped.SpatialData}]");
+            }
 
             if (_submission.SubmissionStatusId == _errorFileStatusId)
             {
                 await CommitAndSendEmail();
+                return true;
             }
-            else
 
-            {
-                _submission.SubmissionStatusId = _successFileStatusId;
+            _submission.SubmissionStatusId = _successFileStatusId;
 
-                await foreach (var entity in _rockfallReportRepo.SaveRockfallReportAsnyc(_submission, typedRows)) { }
+            await foreach (var entity in _rockfallReportRepo.SaveRockfallReportAsnyc(_submission, rockfallReports)) { }
 
-                await CommitAndSendEmail();
-            }
+            await CommitAndSendEmail();
 
             return true;
         }
 
-        private async Task PerformAdditionalValidationAsync(List<RockfallReportDto> typedRows)
+        private async Task PerformAdditionalValidationAsync(List<RockfallReportTyped> typedRows)
         {
             MethodLogger.LogEntry(_logger, _enableMethodLog, _methodLogHeader);
 
@@ -172,8 +186,6 @@ namespace Hmcr.Domain.Hangfire
                     errors.AddItem(Fields.EstimatedRockfallDate, "Report Date cannot be a future date.");
                 }
 
-                //Geo-spatial Validation here
-
                 if (errors.Count > 0)
                 {
                     SetErrorDetail(submissionRow, errors);
@@ -181,7 +193,7 @@ namespace Hmcr.Domain.Hangfire
             }
         }
 
-        private void CopyCalculatedFieldsFormUntypedRow(List<RockfallReportDto> typedRows, List<RockfallReportCsvDto> untypedRows)
+        private void CopyCalculatedFieldsFormUntypedRow(List<RockfallReportTyped> typedRows, List<RockfallReportCsvDto> untypedRows)
         {
             MethodLogger.LogEntry(_logger, _enableMethodLog, _methodLogHeader);
 
@@ -193,11 +205,170 @@ namespace Hmcr.Domain.Hangfire
             }
         }
 
+        private async IAsyncEnumerable<RockfallReportGeometry> PerformSpatialValidationAndConversionAsync(List<RockfallReportTyped> typedRows)
+        {
+            MethodLogger.LogEntry(_logger, _enableMethodLog, _methodLogHeader);
+
+            foreach (var typedRow in typedRows)
+            {
+                var submissionRow = await _submissionRowRepo.GetSubmissionRowByRowNum(_submission.SubmissionObjectId, (decimal)typedRow.RowNum);
+                var rockfallReport = new RockfallReportGeometry(typedRow, null);
+
+                if (typedRow.SpatialData == SpatialData.Gps)
+                {
+                    await PerformSpatialGpsValidation(rockfallReport, submissionRow);
+                }
+                else if (typedRow.SpatialData == SpatialData.Lrs)
+                {
+                    await PerformSpatialLrsValidation(rockfallReport, submissionRow);
+                }
+
+                yield return rockfallReport;
+            }
+        }
+
+        private bool IsPoint(RockfallReportTyped typedRow)
+        {
+            if (typedRow.SpatialData == SpatialData.Gps)
+            {
+                //not necessary because they are mandatory
+                if (typedRow.EndLongitude == null || typedRow.EndLatitude == null)
+                    return true;
+
+                if (typedRow.StartLongitude == typedRow.EndLongitude && typedRow.StartLatitude == typedRow.EndLatitude)
+                    return true;
+            }
+            else
+            {
+                //not necessary because they are mandatory
+                if (typedRow.EndOffset == null)
+                    return true;
+
+                if (typedRow.StartOffset == typedRow.EndOffset)
+                    return true;
+            }
+
+            return false;
+        }
+
+        private async Task PerformSpatialGpsValidation(RockfallReportGeometry rockfallReport, HmrSubmissionRow submissionRow)
+        {
+            var errors = new Dictionary<string, List<string>>();
+            var typedRow = rockfallReport.RockfallReportTyped;
+
+            var start = new Chris.Models.Point((decimal)typedRow.StartLongitude, (decimal)typedRow.StartLatitude);
+
+            if (IsPoint(typedRow))
+            {
+                var result = await _spatialService.ValidateGpsPointAsync(start, typedRow.HighwayUnique, Fields.HighwayUnique, errors);
+
+                if (result.result == SpValidationResult.Fail)
+                {
+                    SetErrorDetail(submissionRow, errors);
+                }
+                else if (result.result == SpValidationResult.Success)
+                {
+                    typedRow.StartOffset = result.lrsResult.Offset;
+                    typedRow.EndOffset = typedRow.EndOffset;
+                    rockfallReport.Geometry = _geometryFactory.CreatePoint(result.lrsResult.SnappedPoint.ToTopologyCoordinate());
+                    submissionRow.StartVariance = result.lrsResult.Variance;
+                }
+            }
+            else
+            {
+                var end = new Chris.Models.Point((decimal)typedRow.EndLongitude, (decimal)typedRow.EndLatitude);
+                var result = await _spatialService.ValidateGpsLineAsync(start, end, typedRow.HighwayUnique, Fields.HighwayUnique, errors);
+
+                if (result.result == SpValidationResult.Fail)
+                {
+                    SetErrorDetail(submissionRow, errors);
+                }
+                else if (result.result == SpValidationResult.Success)
+                {
+                    typedRow.StartOffset = result.startPointResult.Offset;
+                    submissionRow.StartVariance = result.startPointResult.Variance;
+
+                    typedRow.EndOffset = result.endPointResult.Offset;
+                    submissionRow.EndVariance = result.endPointResult.Variance;
+
+                    if (result.line.ToTopologyCoordinates().Length >= 2)
+                    {
+                        rockfallReport.Geometry = _geometryFactory.CreateLineString(result.line.ToTopologyCoordinates());
+                    }
+                    else if (result.line.ToTopologyCoordinates().Length == 1)
+                    {
+                        _logger.LogInformation($"[Hangfire] Row [{typedRow.RowNum}] [Original: Start[{typedRow.StartLongitude}/{typedRow.StartLatitude}]"
+                            + $" End[{typedRow.EndLongitude}/{typedRow.EndLatitude}] were converted to a point [{result.line.Points[0].Longitude}/{result.line.Points[0].Latitude}]");
+
+                        rockfallReport.Geometry = _geometryFactory.CreatePoint(result.line.ToTopologyCoordinates()[0]);
+                    }
+                }
+            }
+        }
+
+        private async Task PerformSpatialLrsValidation(RockfallReportGeometry rockfallReport, HmrSubmissionRow submissionRow)
+        {
+            var errors = new Dictionary<string, List<string>>();
+            var typedRow = rockfallReport.RockfallReportTyped;
+
+            //remeber that feature type line/point has been replaced either line or point in PerformGpsEitherLineOrPointValidation().
+            if (IsPoint(typedRow))
+            {
+                var result = await _spatialService.ValidateLrsPointAsync((decimal)typedRow.StartOffset, typedRow.HighwayUnique, Fields.HighwayUnique, errors);
+
+                if (result.result == SpValidationResult.Fail)
+                {
+                    SetErrorDetail(submissionRow, errors);
+                }
+                else if (result.result == SpValidationResult.Success)
+                {
+                    typedRow.StartLongitude = result.point.Longitude;
+                    typedRow.StartLatitude = result.point.Latitude;
+                    typedRow.EndLongitude = typedRow.StartLongitude;
+                    typedRow.EndLatitude = typedRow.StartLatitude;
+                    rockfallReport.Geometry = _geometryFactory.CreatePoint(result.point.ToTopologyCoordinate());
+                    submissionRow.StartVariance = typedRow.StartOffset - result.snappedOffset;
+                    submissionRow.EndVariance = submissionRow.StartVariance;
+                }
+            }
+            else
+            {
+                var result = await _spatialService.ValidateLrsLineAsync((decimal)typedRow.StartOffset, (decimal)typedRow.EndOffset, typedRow.HighwayUnique, Fields.HighwayUnique, errors);
+
+                if (result.result == SpValidationResult.Fail)
+                {
+                    SetErrorDetail(submissionRow, errors);
+                }
+                else if (result.result == SpValidationResult.Success)
+                {
+                    typedRow.StartLongitude = result.startPoint.Longitude;
+                    typedRow.StartLatitude = result.startPoint.Latitude;
+                    submissionRow.StartVariance = typedRow.StartOffset - result.snappedStartOffset;
+
+                    typedRow.EndLongitude = result.endPoint.Longitude;
+                    typedRow.EndLatitude = result.endPoint.Latitude;
+                    submissionRow.EndVariance = typedRow.EndOffset - result.snappedEndOffset;
+
+                    if (result.line.ToTopologyCoordinates().Length >= 2)
+                    {
+                        rockfallReport.Geometry = _geometryFactory.CreateLineString(result.line.ToTopologyCoordinates());
+                    }
+                    else if (result.line.ToTopologyCoordinates().Length == 1)
+                    {
+                        _logger.LogInformation($"[Hangfire] Row [{typedRow.RowNum}] [Original: Start[{typedRow.StartOffset}]"
+                            + $" End[{typedRow.EndOffset}] were converted to a Start[{result.snappedStartOffset}] End[{result.snappedEndOffset}]");
+
+                        rockfallReport.Geometry = _geometryFactory.CreatePoint(result.line.ToTopologyCoordinates()[0]);
+                    }
+                }
+            }
+        }
+
         private string GetValidationEntityName(RockfallReportCsvDto untypedRow)
         {
             MethodLogger.LogEntry(_logger, _enableMethodLog, _methodLogHeader, $"RowNum: {untypedRow.RowNum}");
 
-            var entityName = "";
+            string entityName;
             if (untypedRow.StartLatitude.IsEmpty() || untypedRow.StartLongitude.IsEmpty())
             {
                 entityName = Entities.RockfallReportLrs;
@@ -233,7 +404,7 @@ namespace Hmcr.Domain.Hangfire
             return (rows, GetHeader(text));
         }
 
-        private (decimal rowNum, List<RockfallReportDto> rows) ParseRowsTyped(string text, Dictionary<string, List<string>> errors)
+        private (decimal rowNum, List<RockfallReportTyped> rows) ParseRowsTyped(string text, Dictionary<string, List<string>> errors)
         {
             MethodLogger.LogEntry(_logger, _enableMethodLog, _methodLogHeader);
 
@@ -243,14 +414,14 @@ namespace Hmcr.Domain.Hangfire
             CsvHelperUtils.Config(errors, csv, false);
             csv.Configuration.RegisterClassMap<RockfallReportDtoMap>();
 
-            var rows = new List<RockfallReportDto>();
+            var rows = new List<RockfallReportTyped>();
             var rowNum = 0M;
 
             while (csv.Read())
             {
                 try
                 {
-                    var row = csv.GetRecord<RockfallReportDto>();
+                    var row = csv.GetRecord<RockfallReportTyped>();
                     rows.Add(row);
                     rowNum = (decimal)row.RowNum;
                 }

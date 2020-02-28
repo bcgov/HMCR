@@ -22,7 +22,7 @@ namespace Hmcr.Domain.CsvHelpers
         }
     }
 
-    public class RockfallReportDtoMap : ClassMap<RockfallReportDto>
+    public class RockfallReportDtoMap : ClassMap<RockfallReportTyped>
     {
         public RockfallReportDtoMap()
         {

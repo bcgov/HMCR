@@ -11,7 +11,7 @@ namespace Hmcr.Data.Repositories
 {
     public interface IRockfallReportRepository
     {
-        IAsyncEnumerable<HmrRockfallReport> SaveRockfallReportAsnyc(HmrSubmissionObject submission, List<RockfallReportDto> rows);
+        IAsyncEnumerable<HmrRockfallReport> SaveRockfallReportAsnyc(HmrSubmissionObject submission, List<RockfallReportGeometry> rows);
     }
     public class RockfallReportRepository : HmcrRepositoryBase<HmrRockfallReport>, IRockfallReportRepository, IReportExportRepository<RockfallReportExportDto>
     {
@@ -20,25 +20,29 @@ namespace Hmcr.Data.Repositories
         {
         }
 
-        public async IAsyncEnumerable<HmrRockfallReport> SaveRockfallReportAsnyc(HmrSubmissionObject submission, List<RockfallReportDto> rows)
+        public async IAsyncEnumerable<HmrRockfallReport> SaveRockfallReportAsnyc(HmrSubmissionObject submission, List<RockfallReportGeometry> rockfallReports)
         {
-            foreach (var row in rows)
+            foreach (var rockfallReport in rockfallReports)
             {
-                row.SubmissionObjectId = submission.SubmissionObjectId;
+                rockfallReport.RockfallReportTyped.SubmissionObjectId = submission.SubmissionObjectId;
 
                 var entity = await DbSet
-                    .Where(x => x.SubmissionObject.PartyId == submission.PartyId && x.McrrIncidentNumber == row.McrrIncidentNumber)
+                    .Where(x => x.SubmissionObject.PartyId == submission.PartyId && x.McrrIncidentNumber == rockfallReport.RockfallReportTyped.McrrIncidentNumber)
                     .FirstOrDefaultAsync();
 
                 if (entity == null)
                 {
+                    entity = Mapper.Map<HmrRockfallReport>(rockfallReport.RockfallReportTyped);
+                    entity.Geometry = rockfallReport.Geometry;
+
                     submission.HmrRockfallReports
-                        .Add(Mapper.Map<HmrRockfallReport>(row));
+                        .Add(entity);
                 }
                 else
                 {
-                    row.RockfallReportId = entity.RockfallReportId;
-                    Mapper.Map(row, entity);
+                    rockfallReport.RockfallReportTyped.RockfallReportId = entity.RockfallReportId;
+                    Mapper.Map(rockfallReport.RockfallReportTyped, entity);
+                    entity.Geometry = rockfallReport.Geometry;
                 }
 
                 yield return entity;
