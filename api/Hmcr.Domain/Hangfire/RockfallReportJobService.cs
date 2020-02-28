@@ -25,7 +25,7 @@ namespace Hmcr.Domain.Hangfire
 {
     public interface IRockfallReportJobService
     {
-        Task<bool> ProcessSubmission(SubmissionDto submission);
+        Task<bool> ProcessSubmissionMain(SubmissionDto submission);
     }
 
     public class RockfallReportJobService : ReportJobServiceBase, IRockfallReportJobService
@@ -57,7 +57,7 @@ namespace Hmcr.Domain.Hangfire
         /// </summary>
         /// <param name="submissionDto"></param>
         /// <returns></returns>
-        public async Task<bool> ProcessSubmission(SubmissionDto submissionDto)
+        public override async Task<bool> ProcessSubmission(SubmissionDto submissionDto)
         {
             var errors = new Dictionary<string, List<string>>();
 
@@ -74,7 +74,7 @@ namespace Hmcr.Domain.Hangfire
                 {
                     _submission.ErrorDetail = errors.GetErrorDetail();
                     _submission.SubmissionStatusId = _errorFileStatusId;
-                    await CommitAndSendEmail();
+                    await CommitAndSendEmailAsync();
                     return true;
                 }
             }
@@ -87,7 +87,7 @@ namespace Hmcr.Domain.Hangfire
                 errors.AddItem("File", "No new records were found in the file; all records were already processed in the past submission.");
                 _submission.ErrorDetail = errors.GetErrorDetail();
                 _submission.SubmissionStatusId = _duplicateFileStatusId;
-                await CommitAndSendEmail();
+                await CommitAndSendEmailAsync();
                 return true;
             }
 
@@ -117,7 +117,7 @@ namespace Hmcr.Domain.Hangfire
                 {
                     var submissionRow = await _submissionRowRepo.GetSubmissionRowByRowNum(_submission.SubmissionObjectId, rowNum);
                     SetErrorDetail(submissionRow, errors);
-                    await CommitAndSendEmail();
+                    await CommitAndSendEmailAsync();
                     return true;
                 }
 
@@ -126,6 +126,12 @@ namespace Hmcr.Domain.Hangfire
                 CopyCalculatedFieldsFormUntypedRow(typedRows, untypedRows);
 
                 await PerformAdditionalValidationAsync(typedRows);
+            }
+
+            if (_submission.SubmissionStatusId == _errorFileStatusId)
+            {
+                await CommitAndSendEmailAsync();
+                return true;
             }
 
             var rockfallReports = new List<RockfallReportGeometry>();
@@ -139,7 +145,7 @@ namespace Hmcr.Domain.Hangfire
 
             if (_submission.SubmissionStatusId == _errorFileStatusId)
             {
-                await CommitAndSendEmail();
+                await CommitAndSendEmailAsync();
                 return true;
             }
 
@@ -147,7 +153,7 @@ namespace Hmcr.Domain.Hangfire
 
             await foreach (var entity in _rockfallReportRepo.SaveRockfallReportAsnyc(_submission, rockfallReports)) { }
 
-            await CommitAndSendEmail();
+            await CommitAndSendEmailAsync();
 
             return true;
         }
@@ -184,6 +190,16 @@ namespace Hmcr.Domain.Hangfire
                 if (typedRow.EstimatedRockfallDate != null && typedRow.EstimatedRockfallDate > DateTime.Now)
                 {
                     errors.AddItem(Fields.EstimatedRockfallDate, "Report Date cannot be a future date.");
+                }
+
+                if (!ValidateGpsCoordsRange(typedRow.StartLongitude, typedRow.StartLatitude))
+                {
+                    errors.AddItem($"{Fields.StartLongitude}/{Fields.StartLatitude}", "Invalid range of GPS coordinates.");
+                }
+
+                if (!ValidateGpsCoordsRange(typedRow.EndLongitude, typedRow.EndLatitude))
+                {
+                    errors.AddItem($"{Fields.EndLongitude}/{Fields.EndLatitude}", "Invalid range of GPS coordinates.");
                 }
 
                 if (errors.Count > 0)

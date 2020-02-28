@@ -81,7 +81,7 @@ namespace Hmcr.Domain.Services
 
         private async Task<byte[]> ExportToCsvAsync<T>(decimal submissionObjectId, IReportExportRepository<T> repo) where T : IReportExportDto
         {
-            var report = await repo.ExporReportAsync(submissionObjectId);
+            var report = await repo.ExportReportAsync(submissionObjectId);
 
             if (report.Count() == 0)
             {

@@ -28,7 +28,7 @@ namespace Hmcr.Domain.Hangfire
 {
     public interface IWorkReportJobService
     {
-        Task<bool> ProcessSubmission(SubmissionDto submission);
+        Task<bool> ProcessSubmissionMain(SubmissionDto submission);
     }
 
     public class WorkReportJobService : ReportJobServiceBase, IWorkReportJobService
@@ -61,7 +61,7 @@ namespace Hmcr.Domain.Hangfire
         /// </summary>
         /// <param name="submissionDto"></param>
         /// <returns></returns>
-        public async Task<bool> ProcessSubmission(SubmissionDto submissionDto)
+        public override async Task<bool> ProcessSubmission(SubmissionDto submissionDto)
         {
             var errors = new Dictionary<string, List<string>>();
 
@@ -80,7 +80,7 @@ namespace Hmcr.Domain.Hangfire
                 {
                     _submission.ErrorDetail = errors.GetErrorDetail();
                     _submission.SubmissionStatusId = _errorFileStatusId;
-                    await CommitAndSendEmail();
+                    await CommitAndSendEmailAsync();
                     return true;
                 }
             }
@@ -93,7 +93,7 @@ namespace Hmcr.Domain.Hangfire
                 errors.AddItem("File", "No new records were found in the file; all records were already processed in the past submission.");
                 _submission.ErrorDetail = errors.GetErrorDetail();
                 _submission.SubmissionStatusId = _duplicateFileStatusId;
-                await CommitAndSendEmail();
+                await CommitAndSendEmailAsync();
                 return true;
             }
 
@@ -138,7 +138,7 @@ namespace Hmcr.Domain.Hangfire
                 {
                     var submissionRow = await _submissionRowRepo.GetSubmissionRowByRowNum(_submission.SubmissionObjectId, rowNum);
                     SetErrorDetail(submissionRow, errors);
-                    await CommitAndSendEmail();
+                    await CommitAndSendEmailAsync();
                     return true;
                 }
 
@@ -151,7 +151,7 @@ namespace Hmcr.Domain.Hangfire
 
             if (_submission.SubmissionStatusId == _errorFileStatusId)
             {
-                await CommitAndSendEmail();
+                await CommitAndSendEmailAsync();
                 return true;
             }
 
@@ -166,7 +166,7 @@ namespace Hmcr.Domain.Hangfire
 
             if (_submission.SubmissionStatusId == _errorFileStatusId)
             {
-                await CommitAndSendEmail();
+                await CommitAndSendEmailAsync();
                 return true;
             }
 
@@ -174,7 +174,7 @@ namespace Hmcr.Domain.Hangfire
 
             await foreach (var entity in _workReportRepo.SaveWorkReportAsnyc(_submission, workReports)) { }
 
-            await CommitAndSendEmail();
+            await CommitAndSendEmailAsync();
 
             return true;
         }
@@ -515,6 +515,16 @@ namespace Hmcr.Domain.Hangfire
                     PerformOffsetPointValidation(typedRow, submissionRow);
                     PerformOffsetLineValidation(typedRow, submissionRow);
                     PerformOffsetEitherLineOrPointValidation(typedRow);
+                }
+
+                if (!ValidateGpsCoordsRange(typedRow.StartLongitude, typedRow.StartLatitude))
+                {
+                    errors.AddItem($"{Fields.StartLongitude}/{Fields.StartLatitude}", "Invalid range of GPS coordinates.");
+                }
+
+                if (!ValidateGpsCoordsRange(typedRow.EndLongitude, typedRow.EndLatitude))
+                {
+                    errors.AddItem($"{Fields.EndLongitude}/{Fields.EndLatitude}", "Invalid range of GPS coordinates.");
                 }
 
                 if (errors.Count > 0)

@@ -12,7 +12,7 @@ namespace Hmcr.Data.Repositories
     public interface IWorkReportRepository
     {
         IAsyncEnumerable<HmrWorkReport> SaveWorkReportAsnyc(HmrSubmissionObject submission, List<WorkReportGeometry> workReports);
-        Task<IEnumerable<WorkReportExportDto>> ExporReportAsync(decimal submissionObjectId);
+        Task<IEnumerable<WorkReportExportDto>> ExportReportAsync(decimal submissionObjectId);
         Task<bool> IsActivityNumberInUseAsync(string activityNumber);
     }
     public class WorkReportRepository : HmcrRepositoryBase<HmrWorkReport>, IWorkReportRepository, IReportExportRepository<WorkReportExportDto>
@@ -51,7 +51,7 @@ namespace Hmcr.Data.Repositories
             }
         }
         
-        public async Task<IEnumerable<WorkReportExportDto>> ExporReportAsync(decimal submissionObjectId)
+        public async Task<IEnumerable<WorkReportExportDto>> ExportReportAsync(decimal submissionObjectId)
         {
             var entities = await DbSet.AsNoTracking()
                 .Include(x => x.SubmissionObject)
