@@ -3925,6 +3925,12 @@ namespace Hmcr.Data.Database.Entities
                     .HasColumnType("numeric(9, 0)")
                     .HasComment("Unique identifier for a SUBMISSION OBJECT record");
 
+                entity.Property(e => e.WarningDetail)
+                    .HasColumnName("WARNING_DETAIL")
+                    .HasMaxLength(4000)
+                    .IsUnicode(false)
+                    .HasComment("Full listing of validation warnings for the submitted row.  Thresholds can be  established whereby data will not be rejected, but a warning will be noted.");
+
                 entity.HasOne(d => d.RowStatus)
                     .WithMany(p => p.HmrSubmissionRows)
                     .HasForeignKey(d => d.RowStatusId)
@@ -4064,6 +4070,11 @@ namespace Hmcr.Data.Database.Entities
                 entity.Property(e => e.SubmissionObjectId)
                     .HasColumnName("SUBMISSION_OBJECT_ID")
                     .HasColumnType("numeric(18, 0)");
+
+                entity.Property(e => e.WarningDetail)
+                    .HasColumnName("WARNING_DETAIL")
+                    .HasMaxLength(4000)
+                    .IsUnicode(false);
             });
 
             modelBuilder.Entity<HmrSubmissionStatu>(entity =>

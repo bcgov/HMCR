@@ -9,7 +9,11 @@
         public string RecordNumber { get; set; }
         public string RowValue { get; set; }
         public string ErrorDetail { get; set; }
+        public string WarningDetail { get; set; }
         public decimal? RowNum { get; set; }
+        public decimal? StartVariance { get; set; }
+        public decimal? EndVariance { get; set; }
+
         public bool IsResubmitted { get; set; }
     }
 }

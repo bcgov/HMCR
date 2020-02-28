@@ -10,6 +10,8 @@ using Hmcr.Model.Dtos.SubmissionObject;
 using Hmcr.Model.Utils;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using NetTopologySuite;
+using NetTopologySuite.Geometries;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -25,11 +27,16 @@ namespace Hmcr.Domain.Hangfire.Base
         protected ISubmissionStatusRepository _statusRepo;
         protected ISubmissionObjectRepository _submissionRepo;
         protected ISumbissionRowRepository _submissionRowRepo;
-        private IEmailService _emailService;
         protected ILogger _logger;
-        private IConfiguration _config;
-        private EmailBody _emailBody;
-        private IFeebackMessageRepository _feedbackRepo;
+        protected IFieldValidatorService _validator;
+        protected ISpatialService _spatialService;
+        protected GeometryFactory _geometryFactory;
+
+        protected IEmailService _emailService;
+        protected IConfiguration _config;
+        protected EmailBody _emailBody;
+        protected IFeebackMessageRepository _feedbackRepo;
+
         protected decimal _duplicateRowStatusId;
         protected decimal _errorRowStatusId;
         protected decimal _successRowStatusId;
@@ -42,11 +49,13 @@ namespace Hmcr.Domain.Hangfire.Base
 
         protected bool _enableMethodLog;
         protected string _methodLogHeader;
+        protected int _warningThreshold;
+
 
         public ReportJobServiceBase(IUnitOfWork unitOfWork,
             ISubmissionStatusRepository statusRepo, ISubmissionObjectRepository submissionRepo,
-            ISumbissionRowRepository submissionRowRepo, IEmailService emailService, ILogger logger, IConfiguration config,
-            EmailBody emailBody, IFeebackMessageRepository feedbackRepo)
+            ISumbissionRowRepository submissionRowRepo, IEmailService emailService, ILogger logger, IConfiguration config, IFieldValidatorService validator,
+            ISpatialService spatialService, EmailBody emailBody, IFeebackMessageRepository feedbackRepo)
         {
             _unitOfWork = unitOfWork;
             _statusRepo = statusRepo;
@@ -57,6 +66,9 @@ namespace Hmcr.Domain.Hangfire.Base
             _config = config;
             _emailBody = emailBody;
             _feedbackRepo = feedbackRepo;
+            _validator = validator;
+            _spatialService = spatialService;
+            _geometryFactory = NtsGeometryServices.Instance.CreateGeometryFactory(srid: 4326);
         }
 
         public async Task<bool> ProcessSubmissionMain(SubmissionDto submissionDto) 
@@ -98,6 +110,7 @@ namespace Hmcr.Domain.Hangfire.Base
             _duplicateFileStatusId = statuses.First(x => x.StatusType == StatusType.File && x.StatusCode == FileStatus.DuplicateSubmission).StatusId;
 
             _inProgressRowStatusId = statuses.First(x => x.StatusType == StatusType.File && x.StatusCode == FileStatus.InProgress).StatusId;
+            _warningThreshold = Convert.ToInt32(_validator.CodeLookup.FirstOrDefault(x => x.CodeSet == CodeSet.ThresholdSpWarn)?.CodeValueNum ?? 0);
         }
 
         protected async Task<bool> SetSubmissionAsync(SubmissionDto submissionDto)
@@ -269,6 +282,18 @@ namespace Hmcr.Domain.Hangfire.Base
             }
 
             return rowNum;
+        }
+
+        protected void SetVarianceWarningDetail(HmrSubmissionRow row)
+        {
+            if (row.StartVariance != null && row.StartVariance > _warningThreshold)
+            {
+                row.WarningDetail = RowWarning.VarianceWarning;
+            }
+            else if (row.EndVariance != null && row.EndVariance > _warningThreshold)
+            {
+                row.WarningDetail = RowWarning.VarianceWarning;
+            }
         }
 
         protected bool ValidateGpsCoordsRange(decimal? longitude, decimal? latitude)
