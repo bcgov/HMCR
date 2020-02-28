@@ -11,7 +11,7 @@ namespace Hmcr.Data.Repositories
 {
     public interface IWorkReportRepository
     {
-        IAsyncEnumerable<(HmrWorkReport report, WorkReportGeometry workReport)> SaveWorkReportAsnyc(HmrSubmissionObject submission, List<WorkReportGeometry> workReports);
+        IAsyncEnumerable<HmrWorkReport> SaveWorkReportAsnyc(HmrSubmissionObject submission, List<WorkReportGeometry> workReports);
         Task<IEnumerable<WorkReportExportDto>> ExporReportAsync(decimal submissionObjectId);
         Task<bool> IsActivityNumberInUseAsync(string activityNumber);
     }
@@ -22,7 +22,7 @@ namespace Hmcr.Data.Repositories
         {
         }
 
-        public async IAsyncEnumerable<(HmrWorkReport report, WorkReportGeometry workReport)> SaveWorkReportAsnyc(HmrSubmissionObject submission, List<WorkReportGeometry> workReports)
+        public async IAsyncEnumerable<HmrWorkReport> SaveWorkReportAsnyc(HmrSubmissionObject submission, List<WorkReportGeometry> workReports)
         {
             foreach (var workReport in workReports)
             {
@@ -47,7 +47,7 @@ namespace Hmcr.Data.Repositories
                     entity.Geometry = workReport.Geometry;
                 }
 
-                yield return (entity, workReport);
+                yield return entity;
             }
         }
         

@@ -172,9 +172,7 @@ namespace Hmcr.Domain.Hangfire
 
             _submission.SubmissionStatusId = _successFileStatusId;
 
-            await foreach (var (entity, typedRow) in _workReportRepo.SaveWorkReportAsnyc(_submission, workReports)) 
-            {
-            }
+            await foreach (var entity in _workReportRepo.SaveWorkReportAsnyc(_submission, workReports)) { }
 
             await CommitAndSendEmail();
 

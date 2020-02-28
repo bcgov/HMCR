@@ -94,7 +94,7 @@ namespace Hmcr.Data.Mappings
             CreateMap<HmrWorkReport, WorkReportTyped>();
             CreateMap<HmrWorkReport, WorkReportExportDto>();
 
-            CreateMap<HmrRockfallReport, RockfallReportDto>()
+            CreateMap<HmrRockfallReport, RockfallReportTyped>()
                 .ForMember(dst => dst.Name, opt => opt.MapFrom(src => src.ReporterName))
                 .ForMember(dst => dst.McName, opt => opt.MapFrom(src => src.SubmissionObject.Party.BusinessLegalName));
 

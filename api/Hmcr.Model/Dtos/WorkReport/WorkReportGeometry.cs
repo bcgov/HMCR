@@ -7,9 +7,9 @@ namespace Hmcr.Model.Dtos.WorkReport
         public WorkReportTyped WorkReportTyped { get; set; }
         public Geometry Geometry { get; set; }
 
-        public WorkReportGeometry(WorkReportTyped workReportDto, Geometry geometry)
+        public WorkReportGeometry(WorkReportTyped workReport, Geometry geometry)
         {
-            WorkReportTyped = workReportDto;
+            WorkReportTyped = workReport;
             Geometry = geometry;
         }
     }
