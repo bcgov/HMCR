@@ -29,6 +29,7 @@ namespace Hmcr.Api
         public void ConfigureServices(IServiceCollection services)
         {
             var connectionString = Configuration.GetValue<string>("CONNECTION_STRING");
+            var runHangfireServer = Configuration.GetValue<bool>("RUN_HANGFIRE_SERVER");
 
             services.AddHttpContextAccessor();
             services.AddHmcrAuthentication(Configuration);
@@ -41,7 +42,7 @@ namespace Hmcr.Api
             services.AddHmcrSwagger(_env);
             services.AddChrisHttpClient(Configuration);
             services.AddBceidSoapClient(Configuration);
-            services.AddHmcrHangfire(connectionString);
+            services.AddHmcrHangfire(connectionString, runHangfireServer);
             services.AddHmcrHealthCheck(connectionString);
         }
 

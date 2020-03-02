@@ -164,7 +164,7 @@ namespace Hmcr.Api.Extensions
             services.AddSingleton<EmailBody>();
         }
 
-        public static void AddHmcrHangfire(this IServiceCollection services, string connectionString)
+        public static void AddHmcrHangfire(this IServiceCollection services, string connectionString, bool runServer)
         {
             services.AddHangfire(configuration => configuration
                 .UseSerilogLogProvider()
@@ -181,10 +181,13 @@ namespace Hmcr.Api.Extensions
                     DisableGlobalLocks = true
                 }));
 
-            services.AddHangfireServer(options =>
+            if (runServer)
             {
-                options.WorkerCount = 3;
-            });
+                services.AddHangfireServer(options =>
+                {
+                    options.WorkerCount = 3;
+                });
+            }
         }
 
         public static void AddHmcrHealthCheck(this IServiceCollection services, string connectionString)
