@@ -286,6 +286,10 @@ namespace Hmcr.Domain.Hangfire.Base
 
         protected void SetVarianceWarningDetail(HmrSubmissionRow row)
         {
+            //Do not set warning message if the row has an error already.
+            if (row.ErrorDetail.IsNotEmpty())
+                return;
+
             if (row.StartVariance != null && row.StartVariance > _warningThreshold)
             {
                 row.WarningDetail = RowWarning.VarianceWarning;
