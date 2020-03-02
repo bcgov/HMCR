@@ -181,7 +181,10 @@ namespace Hmcr.Data.Repositories
                      ServiceAreaNumber = (int)x.ServiceAreaNumber,
                      NumOfRecords = x.HmrSubmissionRows.Count(),
                      NumOfErrorRecords = x.HmrSubmissionRows.Count(y => y.ErrorDetail != null),
-                     Success = x.ErrorDetail == null
+                     Success = x.ErrorDetail == null,
+                     NumOfDuplicateRecords = x.HmrSubmissionRows.Count(y => y.RowStatus.StatusCode == "DR"),
+                     NumOfReplacedRecords = x.HmrSubmissionRows.Count(y => y.IsResubmitted == true),
+                     NumOfWarningRecords = x.HmrSubmissionRows.Count(y => y.WarningDetail != null)
                  })
                  .FirstAsync(x => x.SubmissionObjectId == submissionObjectId);
 

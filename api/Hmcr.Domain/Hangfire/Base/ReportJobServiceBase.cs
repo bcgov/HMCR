@@ -223,7 +223,8 @@ namespace Hmcr.Domain.Hangfire.Base
             var htmlBodyTemplate = submissionInfo.Success ? _emailBody.SuccessHtmlBody : _emailBody.ErrorHtmlBody;
             var htmlBody = string.Format(htmlBodyTemplate, 
                 submissionInfo.FileName, submissionInfo.FileType, submissionInfo.ServiceAreaNumber, submissionInfo.SubmissionDate.ToString("yyyy-MM-dd HH:mm:ss"), 
-                submissionId, submissionInfo.NumOfRecords, submissionInfo.NumOfErrorRecords, resultUrl);
+                submissionId, submissionInfo.NumOfRecords, submissionInfo.NumOfDuplicateRecords, submissionInfo.NumOfReplacedRecords,
+                submissionInfo.NumOfErrorRecords, submissionInfo.NumOfWarningRecords, resultUrl);
 
             var textBody = htmlBody.HtmlToPlainText();
 
