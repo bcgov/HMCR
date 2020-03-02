@@ -47,7 +47,7 @@ namespace Hmcr.Model
             _regexInfos.Add(YN, new RegexInfo { Regex = @"^[YN]$", ErrorMessage = "Value must be Y or N" });
             _regexInfos.Add(Phone, new RegexInfo { Regex = @"^(\+0?1\s)?\(?\d{3}\)?[\s.-]\d{3}[\s.-]\d{4}$", ErrorMessage = "Value must follow phone number format" });
             
-            _regexInfos.Add(Alphanumeric, new RegexInfo { Regex = @"^[a-z0-9]*$", ErrorMessage = "Value must be alphanumeric" });
+            _regexInfos.Add(Alphanumeric, new RegexInfo { Regex = @"^[a-zA-Z0-9]*$", ErrorMessage = "Value must be alphanumeric" });
 
             //_regexInfos.Add(W, new RegexInfo { Regex = @"^[W]$", ErrorMessage = "Value must be W" });
         }
