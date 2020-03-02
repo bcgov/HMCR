@@ -290,11 +290,11 @@ namespace Hmcr.Domain.Hangfire.Base
             if (row.ErrorDetail.IsNotEmpty())
                 return;
 
-            if (row.StartVariance != null && row.StartVariance > _warningThreshold)
+            if (row.StartVariance != null && row.StartVariance > _warningThreshold / 1000)
             {
                 row.WarningDetail = RowWarning.VarianceWarning;
             }
-            else if (row.EndVariance != null && row.EndVariance > _warningThreshold)
+            else if (row.EndVariance != null && row.EndVariance > _warningThreshold / 1000)
             {
                 row.WarningDetail = RowWarning.VarianceWarning;
             }
