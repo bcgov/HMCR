@@ -291,11 +291,13 @@ namespace Hmcr.Domain.Hangfire.Base
             if (row.ErrorDetail.IsNotEmpty())
                 return;
 
-            if (row.StartVariance != null && row.StartVariance > _warningThreshold / 1000)
+            var threasholdInKm = _warningThreshold / 1000M;
+
+            if (row.StartVariance != null && row.StartVariance > threasholdInKm)
             {
                 row.WarningDetail = RowWarning.VarianceWarning;
             }
-            else if (row.EndVariance != null && row.EndVariance > _warningThreshold / 1000)
+            else if (row.EndVariance != null && row.EndVariance > threasholdInKm)
             {
                 row.WarningDetail = RowWarning.VarianceWarning;
             }
