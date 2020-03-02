@@ -63,7 +63,7 @@ namespace Hmcr.Domain.Services
 
             if (!isOnRfi)
             {
-                errors.AddItem($"GPS position", $"GPS position [{point.Longitude}/{point.Latitude}] is not on the {rfiSegmentName} [{rfiSegment}] within the tolerance [{ErrorThreshold}]");
+                errors.AddItem($"GPS position", $"GPS position [{point.Longitude}/{point.Latitude}] is not on the {rfiSegmentName} [{rfiSegment}] within the tolerance [{ErrorThreshold}] metres");
                 return (SpValidationResult.Fail, null);
             }
 
@@ -93,14 +93,14 @@ namespace Hmcr.Domain.Services
 
             if (!isStartOnRfi)
             {
-                errors.AddItem($"Start GPS position", $"Start GPS position [{startPoint.Longitude}/{startPoint.Latitude}] is not on the {rfiSegmentName} [{rfiSegment}] within the tolerance [{ErrorThreshold}]");
+                errors.AddItem($"Start GPS position", $"Start GPS position [{startPoint.Longitude}/{startPoint.Latitude}] is not on the {rfiSegmentName} [{rfiSegment}] within the tolerance [{ErrorThreshold}] metres");
             }
 
             var isEndOnRfi = await _oasApi.IsPointOnRfiSegmentAsync(ErrorThreshold, endPoint, rfiSegment);
 
             if (!isEndOnRfi)
             {
-                errors.AddItem($"End GPS position", $"End GPS position [{endPoint.Longitude}/{endPoint.Latitude}] is not on the {rfiSegmentName} [{rfiSegment}] within the tolerance [{ErrorThreshold}]");
+                errors.AddItem($"End GPS position", $"End GPS position [{endPoint.Longitude}/{endPoint.Latitude}] is not on the {rfiSegmentName} [{rfiSegment}] within the tolerance [{ErrorThreshold}] metres");
             }
 
             if (errors.Count > 0)
@@ -249,7 +249,7 @@ namespace Hmcr.Domain.Services
             {
                 if (segment.Length + ErrorThreshold / 1000 < offset) 
                 {
-                    errors.AddItem($"Offset", $"Offset [{offset}] is not on the {rfiSegmentName} [{rfiSegment}] within the tolerance [{ErrorThreshold}]");
+                    errors.AddItem($"Offset", $"Offset [{offset}] is not on the {rfiSegmentName} [{rfiSegment}] within the tolerance [{ErrorThreshold}] metres");
                     return (false, snappedOffset);
                 }
                 else
