@@ -35,12 +35,16 @@ namespace Hmcr.Model
             htmlBody.Append("<li>Submission Date: {3}");
             htmlBody.Append("<li>Submission #: {4}");
             htmlBody.Append("<li>Total Number of Records: {5}");
-            htmlBody.Append("<li>Number of Records with Errors: {6}");
+            htmlBody.Append("<li>Duplicate Records (not uploaded): {6}");
+            htmlBody.Append("<li>Replaced Records: {7}");
+            htmlBody.Append("<li>Number of Records with Errors: {8}");
+            htmlBody.Append("<li>Number of Records with Warnings: {9}");
+
             htmlBody.Append("</ul>");
 
             htmlBody.Append("<br/>");
 
-            htmlBody.Append("Please check the status of the submission at {7}.");
+            htmlBody.Append("Please check the status of the submission at {10}.");
             htmlBody.Append(correctionMessage);
             htmlBody.Append("<br/>");
 
