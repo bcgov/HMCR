@@ -293,12 +293,10 @@ namespace Hmcr.Domain.Hangfire.Base
 
             if (row.StartVariance != null && row.StartVariance > _warningThreshold / 1000)
             {
-                _logger.LogInformation($"Warning: Row {row.RowNum}, Start Variance {row.StartVariance}, Threshold {_warningThreshold / 1000} ");
                 row.WarningDetail = RowWarning.VarianceWarning;
             }
             else if (row.EndVariance != null && row.EndVariance > _warningThreshold / 1000)
             {
-                _logger.LogInformation($"Warning: Row {row.RowNum}, Start Variance {row.EndVariance}, Threshold {_warningThreshold / 1000} ");
                 row.WarningDetail = RowWarning.VarianceWarning;
             }
         }
