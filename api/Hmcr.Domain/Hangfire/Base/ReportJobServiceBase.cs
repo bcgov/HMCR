@@ -291,14 +291,14 @@ namespace Hmcr.Domain.Hangfire.Base
             if (row.ErrorDetail.IsNotEmpty())
                 return;
 
-            if (row.StartVariance != null && row.StartVariance > _warningThreshold / 1000)
+            var threasholdInKm = _warningThreshold / 1000M;
+
+            if (row.StartVariance != null && row.StartVariance > threasholdInKm)
             {
-                _logger.LogInformation($"Warning: Row {row.RowNum}, Start Variance {row.StartVariance}, Threshold {_warningThreshold / 1000} ");
                 row.WarningDetail = RowWarning.VarianceWarning;
             }
-            else if (row.EndVariance != null && row.EndVariance > _warningThreshold / 1000)
+            else if (row.EndVariance != null && row.EndVariance > threasholdInKm)
             {
-                _logger.LogInformation($"Warning: Row {row.RowNum}, Start Variance {row.EndVariance}, Threshold {_warningThreshold / 1000} ");
                 row.WarningDetail = RowWarning.VarianceWarning;
             }
         }

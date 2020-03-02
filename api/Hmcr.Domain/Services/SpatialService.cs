@@ -247,7 +247,7 @@ namespace Hmcr.Domain.Services
 
             if (segment.Length < offset)
             {
-                if (segment.Length + ErrorThreshold / 1000 < offset) 
+                if (segment.Length + ErrorThreshold / 1000M < offset) 
                 {
                     errors.AddItem($"Offset", $"Offset [{offset}] is not on the {rfiSegmentName} [{rfiSegment}] within the tolerance [{ErrorThreshold}] metres");
                     return (false, snappedOffset);
