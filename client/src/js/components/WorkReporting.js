@@ -41,7 +41,7 @@ const WorkReporting = ({ currentUser }) => {
               <Col sm={9}>
                 <SingleDropdown
                   items={_.orderBy(currentUser.serviceAreas, ['id'])}
-                  defaultTitle="Select Servcie Area"
+                  defaultTitle="Select Service Area"
                   value={serviceArea}
                   handleOnChange={serviceArea => {
                     setServiceArea(serviceArea);

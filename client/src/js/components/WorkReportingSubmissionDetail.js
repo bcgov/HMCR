@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Button, Modal, ModalBody, ModalHeader } from 'reactstrap';
 import moment from 'moment';
-import _ from 'lodash';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import FileSaver from 'file-saver';
 import Clipboard from 'react-clipboard.js';
@@ -13,12 +12,12 @@ import * as Constants from '../Constants';
 import * as api from '../Api';
 import DataTableControl from './ui/DataTableControl';
 
-const tableColumns = [
+const errorTableColumns = [
   { heading: 'Row #', key: 'rowNum', nosort: true },
   { heading: 'Service Area', key: 'serviceArea', nosort: true },
   { heading: 'Record Number', key: 'recordNumber', nosort: true },
   { heading: 'Field', key: 'fieldName', nosort: true },
-  { heading: 'Error', key: 'errors', nosort: true },
+  { heading: 'Message', key: 'message', nosort: true },
 ];
 
 const parseErrorDetailJson = json => JSON.parse(json).fieldMessages;
@@ -38,6 +37,23 @@ const submissionRowErrors = (rowNum, errorDetail) => {
       ))}
     </ul>
   );
+};
+
+const createRowString = (json, rowNum, recordNumber, serviceAreaNumber) => {
+  let result = '';
+
+  if (json) {
+    const errorDetail = parseErrorDetailJson(json);
+
+    result += errorDetail
+      .map(field =>
+        field.messages.map(msg => `${rowNum}\t${serviceAreaNumber}\t${recordNumber}\t${field.field}\t"${msg}"`)
+      )
+      .join('\n');
+    result += '\n';
+  }
+
+  return result;
 };
 
 const createClipboardText = data => {
@@ -60,22 +76,25 @@ const createClipboardText = data => {
   }
 
   if (data.submissionRows.length > 0) {
-    clipboardData += '\n\ndata errors\n';
-
-    clipboardData += 'row\tservice area\trecord number\tfield\tmessage\n';
+    let errorRows = '';
+    let warningRows = '';
 
     data.submissionRows.forEach(row => {
-      const errors = parseErrorDetailJson(row.errorDetail);
-
-      clipboardData += errors
-        .map(field =>
-          field.messages.map(
-            msg => `${row.rowNum}\t${data.serviceAreaNumber}\t${row.recordNumber}\t${field.field}\t"${msg}"`
-          )
-        )
-        .join('\n');
-      clipboardData += '\n';
+      errorRows += createRowString(row.errorDetail, row.rowNum, row.recordNumber, data.serviceAreaNumber);
+      warningRows += createRowString(row.warningDetail, row.rowNum, row.recordNumber, data.serviceAreaNumber);
     });
+
+    if (errorRows) {
+      clipboardData += '\n\ndata errors\n';
+      clipboardData += 'row\tservice area\trecord number\tfield\tmessage\n';
+      clipboardData += errorRows;
+    }
+
+    if (warningRows) {
+      clipboardData += '\n\nwarnings\n';
+      clipboardData += 'row\tservice area\trecord number\tfield\tmessage\n';
+      clipboardData += warningRows;
+    }
   }
 
   return clipboardData;
@@ -166,26 +185,48 @@ const WorkReportingSubmissionDetail = ({ toggle, submission }) => {
     );
   };
 
+  const constructTableRow = (json, rowNum, recordNumber) => {
+    const result = [];
+
+    if (json)
+      parseErrorDetailJson(json).forEach(field =>
+        result.push({
+          rowNum,
+          recordNumber,
+          serviceArea: submissionResultData.serviceAreaNumber,
+          fieldName: field.field,
+          message: field.messages.map((msg, k) => <div key={`${rowNum}_${field.field}_${k}`}>{msg}</div>),
+        })
+      );
+
+    return result;
+  };
+
   const submissionRows = () => {
     if (submissionResultData.submissionRows.length <= 0) return;
 
-    const tableRowData = [];
+    let rowErrorData = [];
+    let rowWarningData = [];
 
-    submissionResultData.submissionRows.forEach(row =>
-      parseErrorDetailJson(row.errorDetail).forEach(field =>
-        tableRowData.push({
-          ..._.pick(row, ['rowNum', 'recordNumber']),
-          serviceArea: submissionResultData.serviceAreaNumber,
-          fieldName: field.field,
-          errors: field.messages.map((msg, k) => <div key={`${row.rowNum}_${field.field}_${k}`}>{msg}</div>),
-        })
-      )
-    );
+    submissionResultData.submissionRows.forEach(row => {
+      rowErrorData = rowErrorData.concat(constructTableRow(row.errorDetail, row.rowNum, row.recordNumber));
+      rowWarningData = rowWarningData.concat(constructTableRow(row.warningDetail, row.rowNum, row.recordNumber));
+    });
 
     return (
       <React.Fragment>
-        <strong>Data Errors:</strong>
-        <DataTableControl dataList={tableRowData} tableColumns={tableColumns} />
+        {rowErrorData.length > 0 && (
+          <React.Fragment>
+            <strong>Data Errors:</strong>
+            <DataTableControl dataList={rowErrorData} tableColumns={errorTableColumns} />
+          </React.Fragment>
+        )}
+        {rowWarningData.length > 0 && (
+          <React.Fragment>
+            <strong>Warnings:</strong>
+            <DataTableControl dataList={rowWarningData} tableColumns={errorTableColumns} />
+          </React.Fragment>
+        )}
       </React.Fragment>
     );
   };
