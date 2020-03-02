@@ -13,7 +13,7 @@ namespace Hmcr.Chris
         /// within the specified distance (tolerance) of a specified RFI segment.  
         /// It requires BASIC authentication using an account with membership to TRAN ALL.
         /// </summary>
-        /// <param name="tolerance"></param>
+        /// <param name="tolerance">Metres of tolerance (i.e. 10)</param>
         /// <param name="point"></param>
         /// <param name="rfiSegment"></param>
         /// <returns>bool</returns>
@@ -23,8 +23,8 @@ namespace Hmcr.Chris
         /// derived from the specified start and end offsets (0.02 km & 0.240 km) along a specified RFI segment (11-A-J-00949).
         /// </summary>
         /// <param name="rfiSegment"></param>
-        /// <param name="start"></param>
-        /// <param name="end"></param>
+        /// <param name="start">Offset in KM</param>
+        /// <param name="end">Offset in KM</param>
         /// <returns>Line</returns>
         Task<Line> GetLineFromOffsetMeasuerOnRfiSegmentAsync(string rfiSegment, decimal start, decimal end);
         /// <summary>
@@ -35,7 +35,7 @@ namespace Hmcr.Chris
         /// </summary>
         /// <param name="point"></param>
         /// <param name="rfiSegment"></param>
-        /// <returns>success, offset, variance in meters</returns>   
+        /// <returns>success, offset, variance in KM</returns>   
         Task<(bool success, LrsPointResult result)> GetOffsetMeasureFromPointAndRfiSegmentAsync(Point point, string rfiSegment);
         /// <summary>
         /// This GET API call returns a geojson point feature derived 
@@ -43,7 +43,7 @@ namespace Hmcr.Chris
         /// It requires BASIC authentication using an account with membership to TRAN ALL.
         /// </summary>
         /// <param name="rfiSegment"></param>
-        /// <param name="offset"></param>
+        /// <param name="offset">Offset in KM<</param>
         /// <returns>LrsPointResult</returns>
         Task<Point> GetPointFromOffsetMeasureOnRfiSegmentAsync(string rfiSegment, decimal offset);
         /// <summary>
@@ -51,7 +51,7 @@ namespace Hmcr.Chris
         /// such as ensuring that specified measures actually fall on an RFI.  
         /// It requires BASIC authentication using an account with membership to TRAN ALL.
         /// </summary>
-        /// <param name="rfiSegment"></param>
+        /// <param name="rfiSegment">Returns length in KM</param>
         /// <returns>RecordDimension (Point, Line, Na)</returns>
         Task<RfiSegment> GetRfiSegmentDetailAsync(string rfiSegment);
     }
@@ -105,7 +105,7 @@ namespace Hmcr.Chris
 
             return (true, new LrsPointResult(
                 Convert.ToDecimal(features.features[0].properties.MEASURE),
-                Convert.ToDecimal(features.features[0].properties.POINT_VARIANCE) * 1000,
+                Convert.ToDecimal(features.features[0].properties.POINT_VARIANCE),
                 new Point(features.features[0].geometry.coordinates)));
         }
 
