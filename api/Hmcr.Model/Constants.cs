@@ -245,7 +245,7 @@ namespace Hmcr.Model
 
     public static class RowWarning
     {
-        public const string VarianceWarning = "{ \"fieldMessages\": [ { \"field\": \"Variance\", \"messages\": [ \"Reported location is not within the warning threshold on the RFI segment.\" ] } ] }";
+        public const string VarianceWarning = "{{ \"fieldMessages\": [ {{ \"field\": \"Variance\", \"messages\": [ \"Reported {0} location is is not on the Highway Unique [{1}] within the warning threshold [{2}] metres\" ] }} ] }}";
     }
 
     public static class HmcrEnvironments

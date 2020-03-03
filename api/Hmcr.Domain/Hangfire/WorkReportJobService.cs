@@ -227,7 +227,7 @@ namespace Hmcr.Domain.Hangfire
                     await PerformSpatialLrsValidation(workReport, submissionRow);
                 }
 
-                SetVarianceWarningDetail(submissionRow);
+                SetVarianceWarningDetail(submissionRow, typedRow.HighwayUnique);
 
                 yield return workReport;
             }
