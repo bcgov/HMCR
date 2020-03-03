@@ -77,18 +77,18 @@ objects:
                 - name: ServiceAccount__User
                   valueFrom:
                     secretKeyRef:
-                      name: bceid-service
-                      key: BCEID_USER
+                      name: service-account
+                      key: SERVICE_USER
                 - name: ServiceAccount__Password
                   valueFrom:
                     secretKeyRef:
-                      name: bceid-service
-                      key: BCEID_PASSWORD                
+                      name: service-account
+                      key: SERVICE_PASSWORD                
                 - name: ServiceAccount__GUID
                   valueFrom:
                     secretKeyRef:
-                      name: bceid-service
-                      key: BCEID_GUID
+                      name: service-account
+                      key: SERVICE_GUID
                 - name: BCEID__OSID
                   valueFrom:
                     secretKeyRef:

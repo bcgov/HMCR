@@ -1,8 +1,6 @@
 #!/bin/bash
 set -e
 
-# You can write S2I scripts in any programming language, as long as the 
-# scripts are executable inside the builder image.
 echo "---> Overwriting appsettings.json ..."
 cp /opt/app-root/configmap/appsettings.json /opt/app-root/app/appsettings.json
 
