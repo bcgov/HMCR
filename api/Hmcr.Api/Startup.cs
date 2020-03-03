@@ -28,8 +28,8 @@ namespace Hmcr.Api
 
         public void ConfigureServices(IServiceCollection services)
         {
-            var connectionString = Configuration.GetValue<string>("CONNECTION_STRING");
-            var runHangfireServer = Configuration.GetValue<bool>("RUN_HANGFIRE_SERVER");
+            var connectionString = Configuration.GetValue<string>("ConnectionString:HMCR");
+            var runHangfireServer = Configuration.GetValue<bool>("Hangfire:EnableServer");
 
             services.AddHttpContextAccessor();
             services.AddHmcrAuthentication(Configuration);
@@ -66,7 +66,7 @@ namespace Hmcr.Api
             //Register Hangfire Recurring Jobs 
             var serviceAreas = svcAreaService.GetAllServiceAreas();
 
-            var minutes = Configuration.GetValue<int>("ReportJobIntervalInMinutes");
+            var minutes = Configuration.GetValue<int>("Hangfire:ReportJobIntervalInMinutes");
             minutes = minutes < 1 ? 5 : minutes;
 
             foreach (var serviceArea in serviceAreas)

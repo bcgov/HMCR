@@ -26,11 +26,11 @@ namespace Hmcr.Domain.Services
 
         public EmailService(IConfiguration config, IUserRepository userRepo)
         {
-            SenderName = config.GetValue<string>("SMTP_SENDER_NAME");
-            SenderAddress = config.GetValue<string>("SMTP_SENDER_ADDRESS");
-            Thumbprint = config.GetValue<string>("SMTP_THUMBPRINT");
-            SmtpServer = config.GetValue<string>("SMTP_SERVER");
-            SmtpPort = config.GetValue<int>("SMTP_PORT");
+            SenderName = config.GetValue<string>("Smtp:SenderName");
+            SenderAddress = config.GetValue<string>("Smtp:SenderAddress");
+            Thumbprint = config.GetValue<string>("Smtp:Thumbprint");
+            SmtpServer = config.GetValue<string>("Smtp:Server");
+            SmtpPort = config.GetValue<int>("Smtp:Port");
 
             _userRepo = userRepo;
         }
