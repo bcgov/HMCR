@@ -74,73 +74,42 @@ objects:
                     secretKeyRef:
                       name: sso-configs-${ENV}
                       key: JWT_SSO_AUDIENCE
-                - name: CHRIS__MapUrl
-                  valueFrom:
-                    secretKeyRef:
-                      name: chris-service
-                      key: CHRIS_MAP_URL
-                - name: CHRIS__OASUrl
-                  valueFrom:
-                    secretKeyRef:
-                      name: chris-service
-                      key: CHRIS_OAS_URL
                 - name: ServiceAccount__User
                   valueFrom:
                     secretKeyRef:
-                      name: bceid-service
-                      key: BCEID_USER
+                      name: service-account
+                      key: SERVICE_USER
                 - name: ServiceAccount__Password
                   valueFrom:
                     secretKeyRef:
-                      name: bceid-service
-                      key: BCEID_PASSWORD
-                - name: BCEID__Url
+                      name: service-account
+                      key: SERVICE_PASSWORD                
+                - name: ServiceAccount__GUID
                   valueFrom:
                     secretKeyRef:
-                      name: bceid-service
-                      key: BCEID_URL
+                      name: service-account
+                      key: SERVICE_GUID
                 - name: BCEID__OSID
                   valueFrom:
                     secretKeyRef:
                       name: bceid-service
                       key: BCEID_OSID
-                - name: ServiceAccount__GUID
-                  valueFrom:
-                    secretKeyRef:
-                      name: bceid-service
-                      key: BCEID_GUID
-                - name: Smtp__SenderName
-                  valueFrom:
-                    secretKeyRef:
-                      name: email-service
-                      key: SMTP_SENDER_NAME
-                - name: Smtp__SenderAddress
-                  valueFrom:
-                    secretKeyRef:
-                      name: email-service
-                      key: SMTP_SENDER_ADDRESS
                 - name: Smtp__Thumbprint
                   valueFrom:
                     secretKeyRef:
                       name: email-service
                       key: SMTP_THUMBPRINT
-                - name: Smtp__Server
-                  valueFrom:
-                    secretKeyRef:
-                      name: email-service
-                      key: SMTP_SERVER
-                - name: Smtp__Port
-                  valueFrom:
-                    secretKeyRef:
-                      name: email-service
-                      key: SMTP_PORT
-                - name: Smtp__SubmissionResult
-                  valueFrom:
-                    secretKeyRef:
-                      name: urls-${ENV}
-                      key: SUBMISSION_RESULT
                 - name: ASPNETCORE_ENVIRONMENT
                   value: ${ASPNETCORE_ENVIRONMENT}
+              volumeMounts:
+                - name: ${NAME}${SUFFIX}-config-volume
+                  mountPath: /opt/app-root/configmap
+                  readOnly: true
+          volumes:
+            - name: ${NAME}${SUFFIX}-config-volume
+              configMap:
+                defaultMode: 420
+                name: api-appsettings-${ENV}
       test: false
       triggers:
         - imageChangeParams:
