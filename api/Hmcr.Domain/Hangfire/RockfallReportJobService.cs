@@ -230,7 +230,7 @@ namespace Hmcr.Domain.Hangfire
                     await PerformSpatialLrsValidation(rockfallReport, submissionRow);
                 }
 
-                SetVarianceWarningDetail(submissionRow);
+                SetVarianceWarningDetail(submissionRow, typedRow.HighwayUnique);
                 yield return rockfallReport;
             }
         }

@@ -285,17 +285,17 @@ namespace Hmcr.Domain.Hangfire.Base
             return rowNum;
         }
 
-        protected void SetVarianceWarningDetail(HmrSubmissionRow row)
+        protected void SetVarianceWarningDetail(HmrSubmissionRow row, string rfiSegment)
         {
             var threasholdInKm = _warningThreshold / 1000M;
 
             if (row.StartVariance != null && row.StartVariance > threasholdInKm)
             {
-                row.WarningDetail = RowWarning.VarianceWarning;
+                row.WarningDetail = string.Format(RowWarning.VarianceWarning, "start", rfiSegment, _warningThreshold);
             }
             else if (row.EndVariance != null && row.EndVariance > threasholdInKm)
             {
-                row.WarningDetail = RowWarning.VarianceWarning;
+                row.WarningDetail = string.Format(RowWarning.VarianceWarning, "end", rfiSegment, _warningThreshold);
             }
         }
 

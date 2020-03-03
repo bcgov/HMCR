@@ -203,7 +203,7 @@ namespace Hmcr.Domain.Hangfire
                     await PerformSpatialLrsValidation(wildlifeReport, submissionRow);
                 }
 
-                SetVarianceWarningDetail(submissionRow);
+                SetVarianceWarningDetail(submissionRow, typedRow.HighwayUnique);
 
                 yield return wildlifeReport;
             }
