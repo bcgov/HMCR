@@ -64,42 +64,42 @@ objects:
                     secretKeyRef:
                       name: api-connections-${ENV}
                       key: hmr.db
-                - name: JWT_AUTHORITY
+                - name: JWT__Authority
                   valueFrom:
                     secretKeyRef:
                       name: sso-configs-${ENV}
                       key: JWT_SSO_AUTHORITY
-                - name: JWT_AUDIENCE
+                - name: JWT__Audience
                   valueFrom:
                     secretKeyRef:
                       name: sso-configs-${ENV}
                       key: JWT_SSO_AUDIENCE
-                - name: CHRIS_MAP_URL
+                - name: CHRIS__MapUrl
                   valueFrom:
                     secretKeyRef:
                       name: chris-service
                       key: CHRIS_MAP_URL
-                - name: CHRIS_OAS_URL
+                - name: CHRIS__OASUrl
                   valueFrom:
                     secretKeyRef:
                       name: chris-service
                       key: CHRIS_OAS_URL
-                - name: BCEID_USER
+                - name: BCEID__User
                   valueFrom:
                     secretKeyRef:
                       name: bceid-service
                       key: BCEID_USER
-                - name: BCEID_PASSWORD
+                - name: BCEID__Password
                   valueFrom:
                     secretKeyRef:
                       name: bceid-service
                       key: BCEID_PASSWORD
-                - name: BCEID_URL
+                - name: BCEID__Url
                   valueFrom:
                     secretKeyRef:
                       name: bceid-service
                       key: BCEID_URL
-                - name: BCEID_OSID
+                - name: BCEID__OSID
                   valueFrom:
                     secretKeyRef:
                       name: bceid-service
@@ -109,32 +109,32 @@ objects:
                     secretKeyRef:
                       name: bceid-service
                       key: BCEID_GUID
-                - name: SMTP_SENDER_NAME
+                - name: Smtp__SenderName
                   valueFrom:
                     secretKeyRef:
                       name: email-service
                       key: SMTP_SENDER_NAME
-                - name: SMTP_SENDER_ADDRESS
+                - name: Smtp__SenderAddress
                   valueFrom:
                     secretKeyRef:
                       name: email-service
                       key: SMTP_SENDER_ADDRESS
-                - name: SMTP_THUMBPRINT
+                - name: Smtp__Thumbprint
                   valueFrom:
                     secretKeyRef:
                       name: email-service
                       key: SMTP_THUMBPRINT
-                - name: SMTP_SERVER
+                - name: Smtp_Server
                   valueFrom:
                     secretKeyRef:
                       name: email-service
                       key: SMTP_SERVER
-                - name: SMTP_PORT
+                - name: Smtp_Port
                   valueFrom:
                     secretKeyRef:
                       name: email-service
                       key: SMTP_PORT
-                - name: SUBMISSION_RESULT
+                - name: Smtp_SubmissionResult
                   valueFrom:
                     secretKeyRef:
                       name: urls-${ENV}
