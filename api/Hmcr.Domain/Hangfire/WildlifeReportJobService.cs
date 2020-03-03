@@ -284,7 +284,7 @@ namespace Hmcr.Domain.Hangfire
             var rows = csv.GetRecords<WildlifeReportCsvDto>().ToList();
             for (var i = 0; i < rows.Count; i++)
             {
-                rows[i].RowNum = i + 1;
+                rows[i].RowNum = i + 2;
             }
 
             return (rows, GetHeader(text));

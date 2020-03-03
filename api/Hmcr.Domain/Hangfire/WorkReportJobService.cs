@@ -569,7 +569,7 @@ namespace Hmcr.Domain.Hangfire
             var rows = csv.GetRecords<WorkReportCsvDto>().ToList();
             for (var i = 0; i < rows.Count; i++)
             {
-                rows[i].RowNum = i + 1;
+                rows[i].RowNum = i + 2;
             }
 
             return (rows, GetHeader(text));
