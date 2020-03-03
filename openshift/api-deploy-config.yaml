@@ -59,7 +59,7 @@ objects:
                 initialDelaySeconds: 15
                 periodSeconds: 5
               env:
-                - name: CONNECTION_STRING
+                - name: ConnectionString__HMCR
                   valueFrom:
                     secretKeyRef:
                       name: api-connections-${ENV}
