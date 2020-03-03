@@ -12,11 +12,11 @@ namespace Hmcr.Bceid
         {
             services.AddSingleton<BCeIDServiceSoapClient>(provider =>
             {
-                var username = config.GetValue<string>("BCEID:User");
-                var password = config.GetValue<string>("BCEID:Password");
+                var username = config.GetValue<string>("ServiceAccount:User");
+                var password = config.GetValue<string>("ServiceAccount:Password");
                 var url = config.GetValue<string>("BCEID:Url");
                 var osid = config.GetValue<string>("BCEID:OSID");
-                var guid = config.GetValue<string>("BCEID:GUID");
+                var guid = config.GetValue<string>("ServiceAccount:GUID");
                 var cacheLifeSpan = config.GetValue<int>("BCEID:CacheLifespan");
 
                 var binding = new BasicHttpsBinding(BasicHttpsSecurityMode.Transport);
