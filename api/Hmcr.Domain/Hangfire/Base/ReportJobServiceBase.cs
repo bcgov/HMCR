@@ -213,7 +213,7 @@ namespace Hmcr.Domain.Hangfire.Base
             submissionInfo.SubmissionDate = DateUtils.ConvertUtcToPacificTime(submissionInfo.SubmissionDate);
 
             var submissionId = _submission.SubmissionObjectId;
-            var resultUrl = string.Format(_config.GetValue<string>("SUBMISSION_RESULT"), _submission.ServiceAreaNumber, submissionId);
+            var resultUrl = string.Format(_config.GetValue<string>("Smtp:SubmissionResult"), _submission.ServiceAreaNumber, submissionId);
 
             var env = _config.GetEnvironment();
             var environment = env == HmcrEnvironments.Prod ? " " : $" [{env}] ";

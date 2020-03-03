@@ -12,19 +12,19 @@ namespace Hmcr.Chris
         {
             services.AddHttpClient<IMapsApi, MapsApi>(client =>
             {
-                client.BaseAddress = new Uri(config.GetValue<string>("CHRIS_MAP_URL"));
+                client.BaseAddress = new Uri(config.GetValue<string>("CHRIS:MapUrl"));
                 client.Timeout = new TimeSpan(0, 0, 15);
                 client.DefaultRequestHeaders.Clear();
             });
 
             services.AddHttpClient<IOasApi, OasApi>(client =>
             {
-                client.BaseAddress = new Uri(config.GetValue<string>("CHRIS_OAS_URL"));
+                client.BaseAddress = new Uri(config.GetValue<string>("CHRIS:OASUrl"));
                 client.Timeout = new TimeSpan(0, 0, 15);
                 client.DefaultRequestHeaders.Clear();
 
-                var userId = config.GetValue<string>("BCEID_USER");
-                var password = config.GetValue<string>("BCEID_PASSWORD");
+                var userId = config.GetValue<string>("BCEID:User");
+                var password = config.GetValue<string>("BCEID:Password");
                 var basicAuth = Convert.ToBase64String(Encoding.GetEncoding("ISO-8859-1").GetBytes($"{userId}:{password}"));
                 client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", basicAuth);
             });
