@@ -287,10 +287,6 @@ namespace Hmcr.Domain.Hangfire.Base
 
         protected void SetVarianceWarningDetail(HmrSubmissionRow row)
         {
-            //Do not set warning message if the row has an error already.
-            if (row.ErrorDetail.IsNotEmpty())
-                return;
-
             var threasholdInKm = _warningThreshold / 1000M;
 
             if (row.StartVariance != null && row.StartVariance > threasholdInKm)

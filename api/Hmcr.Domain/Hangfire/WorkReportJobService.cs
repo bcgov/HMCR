@@ -189,6 +189,11 @@ namespace Hmcr.Domain.Hangfire
             {
                 _validator.Validate(Entities.WorkReportValueOfWork, Fields.ValueOfWork, untypedRow.ValueOfWork, errors);
             }
+
+            if (untypedRow.UnitOfMeasure.ToLowerInvariant() != activityCode.UnitOfMeasure.ToLowerInvariant())
+            {
+                errors.AddItem(Fields.UnitOfMeasure, $"Unit of measuer for the activity Code [{activityCode.ActivityNumber}] must be [{activityCode.UnitOfMeasure}]");
+            }
         }
 
         private void CopyCalculatedFieldsFormUntypedRow(List<WorkReportTyped> typedRows, List<WorkReportCsvDto> untypedRows)
