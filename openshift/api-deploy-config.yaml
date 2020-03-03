@@ -101,6 +101,10 @@ objects:
                       key: SMTP_THUMBPRINT
                 - name: ASPNETCORE_ENVIRONMENT
                   value: ${ASPNETCORE_ENVIRONMENT}
+              volumeMounts:
+                - name: ${NAME}${SUFFIX}-config-volume
+                  mountPath: /opt/app-root/configmap
+                  readOnly: true
           volumes:
             - name: ${NAME}${SUFFIX}-config-volume
               configMap:
