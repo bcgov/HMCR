@@ -7,20 +7,10 @@ using Hangfire.Server;
 
 namespace Hmcr.Domain.Hangfire
 {
-    /// <summary>
-    /// This prevents jobs for the same service area from running concurrently
-    /// 
-    /// However, it's not complete because when there are more than one Hangfire server,
-    /// more than one job instance may get the same monitor query result of "there's no job running for the service area".
-    /// In that case, more than one jobs can run conccurrently.
-    /// Locking using sp_getapplock is one solution but not an ideal solution. (ex. DisableConcurrentExecution in Hangfire library)
-    /// 
-    /// The solution implemented in this app is to follow optimistic concurrency control approach and 
-    /// it's implemented by handling the result of SubmissionObjectRepository.UpdateSubmissionStatusAsync() 
-    /// in the SubmissionObjectJobService.RunReportingJob().
-    /// </summary>
-    public sealed class SkipSameJobAttribute : JobFilterAttribute, IClientFilter
+    public sealed class SkipSameJobAttribute : JobFilterAttribute, IClientFilter, IServerFilter
     {
+        private readonly int _timeoutInSeconds = 1;
+
         public void OnCreated(CreatedContext filterContext)
         {
         }
@@ -51,6 +41,27 @@ namespace Hmcr.Domain.Hangfire
 
                 return;
             }
+        }
+
+        public void OnPerforming(PerformingContext filterContext)
+        {
+            var resource = GetJobFingerprint(filterContext.BackgroundJob.Job);
+
+            var timeout = TimeSpan.FromSeconds(_timeoutInSeconds);
+
+            var distributedLock = filterContext.Connection.AcquireDistributedLock(resource, timeout);
+            filterContext.Items["DistributedLock"] = distributedLock;
+        }
+
+        public void OnPerformed(PerformedContext filterContext)
+        {
+            if (!filterContext.Items.ContainsKey("DistributedLock"))
+            {
+                throw new InvalidOperationException("Can not release a distributed lock: it was not acquired.");
+            }
+
+            var distributedLock = (IDisposable)filterContext.Items["DistributedLock"];
+            distributedLock.Dispose();
         }
 
         private string GetJobFingerprint(Job job)
