@@ -117,12 +117,9 @@ namespace Hmcr.Domain.Hangfire.Base
         {
             _logger.LogInformation("[Hangfire] Starting submission {submissionObjectId}", (long)submissionDto.SubmissionObjectId);
 
-            var success = await _submissionRepo.UpdateSubmissionStatusAsync(submissionDto.SubmissionObjectId, _inProgressRowStatusId, submissionDto.ConcurrencyControlNumber);
-
-            if (!success)
-                return false;
-
             _submission = await _submissionRepo.GetSubmissionObjecForBackgroundJobAsync(submissionDto.SubmissionObjectId);
+            _submission.SubmissionStatusId = _inProgressRowStatusId;
+            _unitOfWork.Commit();
 
             _methodLogHeader = $"[Hangfire] Submission ({_submission.SubmissionObjectId}): ";
             _enableMethodLog = _config.GetValue<string>("DISABLE_METHOD_LOGGER") != "Y"; //enabled by default
