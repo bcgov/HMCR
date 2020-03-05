@@ -30,6 +30,7 @@ namespace Hmcr.Data.Repositories.Base
         Task<TDto> GetFirstOrDefaultAsync<TDto>(Expression<Func<TEntity, bool>> where);
         Task<PagedDto<TOutput>> Page<TInput, TOutput>(IQueryable<TInput> list, int pageSize, int pageNumber, string orderBy,string orderDir);
         Task<bool> ExistsAsync(object id);
+        void RollBackEntities();
     }
 
     public class HmcrRepositoryBase<TEntity> : IHmcrRepositoryBase<TEntity>
@@ -180,6 +181,28 @@ namespace Hmcr.Data.Repositories.Base
             return pagedDTO;
         }
 
+        public void RollBackEntities()
+        {
+            var changedEntries = DbContext.ChangeTracker.Entries()
+                .Where(x => x.State != EntityState.Unchanged).ToList();
+
+            foreach (var entry in changedEntries)
+            {
+                switch (entry.State)
+                {
+                    case EntityState.Modified:
+                        entry.CurrentValues.SetValues(entry.OriginalValues);
+                        entry.State = EntityState.Unchanged;
+                        break;
+                    case EntityState.Added:
+                        entry.State = EntityState.Detached;
+                        break;
+                    case EntityState.Deleted:
+                        entry.State = EntityState.Unchanged;
+                        break;
+                }
+            }
+        }
         #endregion
     }
 }

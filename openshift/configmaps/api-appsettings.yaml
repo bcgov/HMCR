@@ -86,4 +86,4 @@ parameters:
       displayName: ENV
       name: ENV
       required: true
-      value: "dev"
+      value: "prod"

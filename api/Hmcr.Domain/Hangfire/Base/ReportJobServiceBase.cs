@@ -2,6 +2,7 @@
 using Hmcr.Data.Database;
 using Hmcr.Data.Database.Entities;
 using Hmcr.Data.Repositories;
+using Hmcr.Data.Repositories.Base;
 using Hmcr.Domain.Services;
 using Hmcr.Model;
 using Hmcr.Model.Dtos;
@@ -83,6 +84,8 @@ namespace Hmcr.Domain.Hangfire.Base
 
                 if (_submission != null)
                 {
+                    ((HmcrRepositoryBase<HmrSubmissionObject>)_submissionRepo).RollBackEntities();
+
                     _submission.ErrorDetail = FileError.UnknownException;
                     _submission.SubmissionStatusId = _errorFileStatusId;
                     await CommitAndSendEmailAsync();

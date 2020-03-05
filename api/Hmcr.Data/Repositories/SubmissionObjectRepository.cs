@@ -208,7 +208,9 @@ namespace Hmcr.Data.Repositories
             //  The net result should be file #1 submission error instead of duplicate file error.
 
             var latestFile = await DbSet
-                .Where(x => x.SubmissionStreamId == submission.SubmissionStreamId && x.ServiceAreaNumber == submission.ServiceAreaNumber) 
+                .Where(x => x.SubmissionStreamId == submission.SubmissionStreamId && 
+                    x.ServiceAreaNumber == submission.ServiceAreaNumber &&
+                    x.ErrorDetail != FileError.UnknownException) //File with unknown exception can be resubmitted without duplicate file check.
                 .OrderByDescending(x => x.SubmissionObjectId)
                 .FirstOrDefaultAsync();
 
