@@ -12,8 +12,6 @@ module.exports = settings => {
   );
   const templatesLocalBaseUrl = oc.toFileUrl(
     path.resolve(__dirname, "../../openshift")
-  );
-  const altEnv = phases[phase].phase === 'test' ? 'tst' : phases[phase].phase;
   var objects = [];
 
   // The deployment of your cool app goes here ▼▼▼
