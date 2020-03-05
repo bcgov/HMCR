@@ -125,12 +125,25 @@ namespace Hmcr.Domain.Hangfire
 
             var wildlifeReports = new List<WildlifeReportGeometry>();
 
+            var step = (int)(typedRows.Count / 100f);
+            var i = 0;
+            var pct = 0;
+            
             //Spatial Validation and Conversion
             await foreach (var wildlifeReport in PerformSpatialValidationAndConversionAsync(typedRows))
             {
                 wildlifeReports.Add(wildlifeReport);
-                _logger.LogInformation($"[Hangfire] Spatial Validation for the row [{wildlifeReport.WildlifeReportTyped.RowNum}] [{wildlifeReport.WildlifeReportTyped.SpatialData}]");
+
+                i++;
+
+                if (step != 0 && i % step == 0)
+                {
+                    pct += 10;
+                    _logger.LogInformation($"{_methodLogHeader} PerformSpatialValidationAndConversionAsync {pct}%");
+                }
             }
+
+            _logger.LogInformation($"{_methodLogHeader} PerformSpatialValidationAndConversionAsync 100%");
 
             if (_submission.SubmissionStatusId == _errorFileStatusId)
             {

@@ -127,12 +127,24 @@ namespace Hmcr.Domain.Hangfire
 
             var rockfallReports = new List<RockfallReportGeometry>();
 
+            var step = (int)(typedRows.Count / 100f);
+            var i = 0;
+            var pct = 0;
+            
             //Spatial Validation and Conversion
             await foreach (var rockfallReport in PerformSpatialValidationAndConversionAsync(typedRows))
             {
                 rockfallReports.Add(rockfallReport);
-                _logger.LogInformation($"[Hangfire] Spatial Validation for the row [{rockfallReport.RockfallReportTyped.RowNum}] [{rockfallReport.RockfallReportTyped.SpatialData}]");
+                i++;
+
+                if (step != 0 && i % step == 0)
+                {
+                    pct += 10;
+                    _logger.LogInformation($"{_methodLogHeader} PerformSpatialValidationAndConversionAsync {pct}%");
+                }
             }
+
+            _logger.LogInformation($"{_methodLogHeader} PerformSpatialValidationAndConversionAsync 100%");
 
             if (_submission.SubmissionStatusId == _errorFileStatusId)
             {
