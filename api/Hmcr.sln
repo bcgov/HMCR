@@ -15,7 +15,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Hmcr.Chris", "Hmcr.Chris\Hm
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Hmcr.Bceid", "Hmcr.Bceid\Hmcr.Bceid.csproj", "{0078AD21-A559-41B2-B960-EE2D685D3E6F}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SerilogSinksPostgreSQL", "SerilogSinksPostgreSQL\SerilogSinksPostgreSQL.csproj", "{15E4A303-1D06-428C-A3D9-0077B1C631D3}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Serilog.Sinks.PostgreSql", "Serilog.Sinks.PostgreSql\Serilog.Sinks.PostgreSql.csproj", "{648E6080-2DD1-4982-89A7-B2AA4B7096D2}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -47,10 +47,10 @@ Global
 		{0078AD21-A559-41B2-B960-EE2D685D3E6F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0078AD21-A559-41B2-B960-EE2D685D3E6F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0078AD21-A559-41B2-B960-EE2D685D3E6F}.Release|Any CPU.Build.0 = Release|Any CPU
-		{15E4A303-1D06-428C-A3D9-0077B1C631D3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{15E4A303-1D06-428C-A3D9-0077B1C631D3}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{15E4A303-1D06-428C-A3D9-0077B1C631D3}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{15E4A303-1D06-428C-A3D9-0077B1C631D3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{648E6080-2DD1-4982-89A7-B2AA4B7096D2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{648E6080-2DD1-4982-89A7-B2AA4B7096D2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{648E6080-2DD1-4982-89A7-B2AA4B7096D2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{648E6080-2DD1-4982-89A7-B2AA4B7096D2}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
