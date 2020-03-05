@@ -81,6 +81,8 @@ objects:
       kind: ConfigMap
       metadata:
           name: api-appsettings-${ENV}
+          labels:
+            shared: "true"
 parameters:
     - description: Deployment environment (dev, test, uat, prod)
       displayName: ENV
