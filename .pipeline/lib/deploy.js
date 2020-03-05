@@ -12,7 +12,6 @@ module.exports = settings => {
   );
   const templatesLocalBaseUrl = oc.toFileUrl(
     path.resolve(__dirname, "../../openshift")
-  );
   var objects = [];
 
   // The deployment of your cool app goes here ▼▼▼
@@ -26,6 +25,19 @@ module.exports = settings => {
           VERSION: phases[phase].tag,
           ENV: phases[phase].phase,
           HOST: phases[phase].host
+        }
+      }
+    )
+  );
+
+  objects.push(
+    ...oc.processDeploymentTemplate(
+      `${templatesLocalBaseUrl}/configmaps/api-appsettings.yaml`,
+      {
+        param: {
+          ENV: phases[phase].phase,
+          SUBMISSION_URL: `https://${phases[phase].url_prefix}hmcr.th.gov.bc.ca/workreporting?serviceArea={0}&showResult={1}`,
+          BCEID_SERVICE: phases[phase].bceid_service
         }
       }
     )

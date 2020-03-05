@@ -28,7 +28,7 @@ namespace Hmcr.Api
 
         public void ConfigureServices(IServiceCollection services)
         {
-            var connectionString = Configuration.GetValue<string>("ConnectionString:HMCR");
+            var connectionString = Configuration.GetValue<string>("ConnectionStrings:HMCR");
             var runHangfireServer = Configuration.GetValue<bool>("Hangfire:EnableServer");
             var workerCount = Configuration.GetValue<int>("Hangfire:WorkerCount");
 
