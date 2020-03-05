@@ -4,18 +4,15 @@ using NetTopologySuite.Geometries;
 
 namespace Hmcr.Data.Database.Entities
 {
-    public partial class HmrWorkReport
+    public partial class HmrWorkReportVw
     {
-        public decimal WorkReportId { get; set; }
-        public decimal SubmissionObjectId { get; set; }
-        public decimal RowId { get; set; }
-        public decimal? RowNum { get; set; }
-        public decimal? ValidationStatusId { get; set; }
+        public string ReportType { get; set; }
         public string RecordType { get; set; }
-        public decimal ServiceArea { get; set; }
+        public decimal? ServiceAreaNumber { get; set; }
         public string RecordNumber { get; set; }
         public string TaskNumber { get; set; }
         public string ActivityNumber { get; set; }
+        public string ActivityName { get; set; }
         public DateTime? StartDate { get; set; }
         public DateTime? EndDate { get; set; }
         public decimal? Accomplishment { get; set; }
@@ -29,31 +26,23 @@ namespace Hmcr.Data.Database.Entities
         public decimal? EndOffset { get; set; }
         public decimal? StartLatitude { get; set; }
         public decimal? StartLongitude { get; set; }
+        public decimal? StartVariance { get; set; }
         public decimal? EndLatitude { get; set; }
         public decimal? EndLongitude { get; set; }
+        public decimal? EndVariance { get; set; }
         public decimal? WorkLength { get; set; }
+        public string IsOverSpTolerance { get; set; }
         public string StructureNumber { get; set; }
         public string SiteNumber { get; set; }
         public decimal? ValueOfWork { get; set; }
         public string Comments { get; set; }
         public Geometry Geometry { get; set; }
-        public long ConcurrencyControlNumber { get; set; }
-        public string AppCreateUserid { get; set; }
+        public decimal SubmissionObjectId { get; set; }
+        public string SubmissionFileName { get; set; }
+        public decimal WorkReportId { get; set; }
+        public decimal? RowNum { get; set; }
+        public string ValidationStatus { get; set; }
         public DateTime AppCreateTimestamp { get; set; }
-        public Guid AppCreateUserGuid { get; set; }
-        public string AppCreateUserDirectory { get; set; }
-        public string AppLastUpdateUserid { get; set; }
         public DateTime AppLastUpdateTimestamp { get; set; }
-        public Guid AppLastUpdateUserGuid { get; set; }
-        public string AppLastUpdateUserDirectory { get; set; }
-        public string DbAuditCreateUserid { get; set; }
-        public DateTime DbAuditCreateTimestamp { get; set; }
-        public string DbAuditLastUpdateUserid { get; set; }
-        public DateTime DbAuditLastUpdateTimestamp { get; set; }
-
-        public virtual HmrSubmissionRow Row { get; set; }
-        public virtual HmrServiceArea ServiceAreaNavigation { get; set; }
-        public virtual HmrSubmissionObject SubmissionObject { get; set; }
-        public virtual HmrSubmissionStatu ValidationStatus { get; set; }
     }
 }

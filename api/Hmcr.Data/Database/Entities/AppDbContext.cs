@@ -20,12 +20,8 @@ namespace Hmcr.Data.Database.Entities
         public virtual DbSet<Hash> Hashes { get; set; }
         public virtual DbSet<HmrActivityCode> HmrActivityCodes { get; set; }
         public virtual DbSet<HmrActivityCodeHist> HmrActivityCodeHists { get; set; }
-        public virtual DbSet<HmrAllValidationRulesV> HmrAllValidationRulesVs { get; set; }
         public virtual DbSet<HmrCodeLookup> HmrCodeLookups { get; set; }
         public virtual DbSet<HmrCodeLookupHist> HmrCodeLookupHists { get; set; }
-        public virtual DbSet<HmrCodeMaintenanceTypeV> HmrCodeMaintenanceTypeVs { get; set; }
-        public virtual DbSet<HmrCodeTimeOfDayV> HmrCodeTimeOfDayVs { get; set; }
-        public virtual DbSet<HmrCodeUnitOfMeasureV> HmrCodeUnitOfMeasureVs { get; set; }
         public virtual DbSet<HmrContractTerm> HmrContractTerms { get; set; }
         public virtual DbSet<HmrContractTermHist> HmrContractTermHists { get; set; }
         public virtual DbSet<HmrDistrict> HmrDistricts { get; set; }
@@ -40,6 +36,7 @@ namespace Hmcr.Data.Database.Entities
         public virtual DbSet<HmrRegion> HmrRegions { get; set; }
         public virtual DbSet<HmrRockfallReport> HmrRockfallReports { get; set; }
         public virtual DbSet<HmrRockfallReportHist> HmrRockfallReportHists { get; set; }
+        public virtual DbSet<HmrRockfallReportVw> HmrRockfallReportVws { get; set; }
         public virtual DbSet<HmrRole> HmrRoles { get; set; }
         public virtual DbSet<HmrRoleHist> HmrRoleHists { get; set; }
         public virtual DbSet<HmrRolePermission> HmrRolePermissions { get; set; }
@@ -63,8 +60,10 @@ namespace Hmcr.Data.Database.Entities
         public virtual DbSet<HmrUserRoleHist> HmrUserRoleHists { get; set; }
         public virtual DbSet<HmrWildlifeReport> HmrWildlifeReports { get; set; }
         public virtual DbSet<HmrWildlifeReportHist> HmrWildlifeReportHists { get; set; }
+        public virtual DbSet<HmrWildlifeReportVw> HmrWildlifeReportVws { get; set; }
         public virtual DbSet<HmrWorkReport> HmrWorkReports { get; set; }
         public virtual DbSet<HmrWorkReportHist> HmrWorkReportHists { get; set; }
+        public virtual DbSet<HmrWorkReportVw> HmrWorkReportVws { get; set; }
         public virtual DbSet<Job> Jobs { get; set; }
         public virtual DbSet<JobParameter> JobParameters { get; set; }
         public virtual DbSet<JobQueue> JobQueues { get; set; }
@@ -418,94 +417,6 @@ namespace Hmcr.Data.Database.Entities
                     .IsUnicode(false);
             });
 
-            modelBuilder.Entity<HmrAllValidationRulesV>(entity =>
-            {
-                entity.HasNoKey();
-
-                entity.ToView("HMR_ALL_VALIDATION_RULES_V");
-
-                entity.Property(e => e.CodeSet)
-                    .HasColumnName("CODE_SET")
-                    .HasMaxLength(20)
-                    .IsUnicode(false);
-
-                entity.Property(e => e.ColumnName)
-                    .HasColumnName("COLUMN_NAME")
-                    .HasMaxLength(50)
-                    .IsUnicode(false);
-
-                entity.Property(e => e.ElementAttributeEndDate)
-                    .HasColumnName("ELEMENT_ATTRIBUTE_END_DATE")
-                    .HasColumnType("datetime");
-
-                entity.Property(e => e.EntityName)
-                    .HasColumnName("ENTITY_NAME")
-                    .HasMaxLength(30)
-                    .IsUnicode(false);
-
-                entity.Property(e => e.Id)
-                    .HasColumnName("ID")
-                    .HasColumnType("numeric(9, 0)");
-
-                entity.Property(e => e.IsRequired)
-                    .HasColumnName("IS_REQUIRED")
-                    .HasMaxLength(1)
-                    .IsUnicode(false);
-
-                entity.Property(e => e.MaxDate)
-                    .HasColumnName("MAX_DATE")
-                    .HasColumnType("datetime");
-
-                entity.Property(e => e.MaxLength)
-                    .HasColumnName("MAX_LENGTH")
-                    .HasColumnType("numeric(9, 0)");
-
-                entity.Property(e => e.MaxValue)
-                    .HasColumnName("MAX_VALUE")
-                    .HasColumnType("numeric(9, 0)");
-
-                entity.Property(e => e.MinDate)
-                    .HasColumnName("MIN_DATE")
-                    .HasColumnType("datetime");
-
-                entity.Property(e => e.MinLength)
-                    .HasColumnName("MIN_LENGTH")
-                    .HasColumnType("numeric(9, 2)");
-
-                entity.Property(e => e.MinValue)
-                    .HasColumnName("MIN_VALUE")
-                    .HasColumnType("numeric(9, 2)");
-
-                entity.Property(e => e.Name)
-                    .HasColumnName("NAME")
-                    .HasMaxLength(30)
-                    .IsUnicode(false);
-
-                entity.Property(e => e.RegExp)
-                    .HasColumnName("REG_EXP")
-                    .HasMaxLength(4000)
-                    .IsUnicode(false);
-
-                entity.Property(e => e.StreamEndDate)
-                    .HasColumnName("STREAM_END_DATE")
-                    .HasColumnType("datetime");
-
-                entity.Property(e => e.SubmissionStreamId)
-                    .HasColumnName("SUBMISSION_STREAM_ID")
-                    .HasColumnType("numeric(9, 0)");
-
-                entity.Property(e => e.Type)
-                    .HasColumnName("TYPE")
-                    .HasMaxLength(30)
-                    .IsUnicode(false);
-
-                entity.Property(e => e.ValidationSource)
-                    .IsRequired()
-                    .HasColumnName("VALIDATION_SOURCE")
-                    .HasMaxLength(18)
-                    .IsUnicode(false);
-            });
-
             modelBuilder.Entity<HmrCodeLookup>(entity =>
             {
                 entity.HasKey(e => e.CodeLookupId)
@@ -685,72 +596,11 @@ namespace Hmcr.Data.Database.Entities
                     .HasColumnType("datetime");
             });
 
-            modelBuilder.Entity<HmrCodeMaintenanceTypeV>(entity =>
-            {
-                entity.HasNoKey();
-
-                entity.ToView("HMR_CODE_MAINTENANCE_TYPE_V");
-
-                entity.Property(e => e.CodeLookupId)
-                    .HasColumnName("CODE_LOOKUP_ID")
-                    .HasColumnType("numeric(9, 0)");
-
-                entity.Property(e => e.MaintenanceTypeCode)
-                    .HasColumnName("MAINTENANCE_TYPE_CODE")
-                    .HasMaxLength(20)
-                    .IsUnicode(false);
-
-                entity.Property(e => e.MaintenanceTypeDescription)
-                    .HasColumnName("MAINTENANCE_TYPE_DESCRIPTION")
-                    .HasMaxLength(20)
-                    .IsUnicode(false);
-            });
-
-            modelBuilder.Entity<HmrCodeTimeOfDayV>(entity =>
-            {
-                entity.HasNoKey();
-
-                entity.ToView("HMR_CODE_TIME_OF_DAY_V");
-
-                entity.Property(e => e.CodeLookupId)
-                    .HasColumnName("CODE_LOOKUP_ID")
-                    .HasColumnType("numeric(9, 0)");
-
-                entity.Property(e => e.TimeOfDayDescription)
-                    .HasColumnName("TIME_OF_DAY_DESCRIPTION")
-                    .HasMaxLength(20)
-                    .IsUnicode(false);
-
-                entity.Property(e => e.TimeOfKillCode)
-                    .HasColumnName("TIME_OF_KILL_CODE")
-                    .HasColumnType("numeric(9, 0)");
-            });
-
-            modelBuilder.Entity<HmrCodeUnitOfMeasureV>(entity =>
-            {
-                entity.HasNoKey();
-
-                entity.ToView("HMR_CODE_UNIT_OF_MEASURE_V");
-
-                entity.Property(e => e.CodeLookupId)
-                    .HasColumnName("CODE_LOOKUP_ID")
-                    .HasColumnType("numeric(9, 0)");
-
-                entity.Property(e => e.UomCode)
-                    .HasColumnName("UOM_CODE")
-                    .HasMaxLength(20)
-                    .IsUnicode(false);
-
-                entity.Property(e => e.UomDescription)
-                    .HasColumnName("UOM_DESCRIPTION")
-                    .HasMaxLength(20)
-                    .IsUnicode(false);
-            });
-
             modelBuilder.Entity<HmrContractTerm>(entity =>
             {
                 entity.HasKey(e => e.ContractTermId)
-                    .HasName("HMR_CNRT_TRM_PK");
+                    .HasName("HMR_CNRT_TRM_PK")
+                    .IsClustered(false);
 
                 entity.ToTable("HMR_CONTRACT_TERM");
 
@@ -881,7 +731,6 @@ namespace Hmcr.Data.Database.Entities
                 entity.HasOne(d => d.Party)
                     .WithMany(p => p.HmrContractTerms)
                     .HasForeignKey(d => d.PartyId)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("HMR_CNRT_TRM_PRTY_FK");
 
                 entity.HasOne(d => d.ServiceAreaNumberNavigation)
@@ -2464,6 +2313,191 @@ namespace Hmcr.Data.Database.Entities
                     .IsUnicode(false);
             });
 
+            modelBuilder.Entity<HmrRockfallReportVw>(entity =>
+            {
+                entity.HasNoKey();
+
+                entity.ToView("HMR_ROCKFALL_REPORT_VW");
+
+                entity.Property(e => e.AppCreateTimestamp)
+                    .HasColumnName("APP_CREATE_TIMESTAMP")
+                    .HasColumnType("datetime");
+
+                entity.Property(e => e.AppLastUpdateTimestamp)
+                    .HasColumnName("APP_LAST_UPDATE_TIMESTAMP")
+                    .HasColumnType("datetime");
+
+                entity.Property(e => e.Comments)
+                    .HasColumnName("COMMENTS")
+                    .HasMaxLength(4000)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.DirectionFromLandmark)
+                    .HasColumnName("DIRECTION_FROM_LANDMARK")
+                    .HasMaxLength(1)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.DitchSnowIce)
+                    .HasColumnName("DITCH_SNOW_ICE")
+                    .HasMaxLength(1)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.DitchVolume)
+                    .HasColumnName("DITCH_VOLUME")
+                    .HasMaxLength(30)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.EndLatitude)
+                    .HasColumnName("END_LATITUDE")
+                    .HasColumnType("numeric(16, 8)");
+
+                entity.Property(e => e.EndLongitude)
+                    .HasColumnName("END_LONGITUDE")
+                    .HasColumnType("numeric(16, 8)");
+
+                entity.Property(e => e.EndOffset)
+                    .HasColumnName("END_OFFSET")
+                    .HasColumnType("numeric(7, 3)");
+
+                entity.Property(e => e.EstimatedRockfallDate)
+                    .HasColumnName("ESTIMATED_ROCKFALL_DATE")
+                    .HasColumnType("date");
+
+                entity.Property(e => e.EstimatedRockfallTime).HasColumnName("ESTIMATED_ROCKFALL_TIME");
+
+                entity.Property(e => e.FreezeThaw)
+                    .HasColumnName("FREEZE_THAW")
+                    .HasMaxLength(1)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.Geometry)
+                    .HasColumnName("GEOMETRY")
+                    .HasColumnType("geometry");
+
+                entity.Property(e => e.HeavyPrecip)
+                    .HasColumnName("HEAVY_PRECIP")
+                    .HasMaxLength(1)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.HighwayUnique)
+                    .HasColumnName("HIGHWAY_UNIQUE")
+                    .HasMaxLength(16)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.HighwayUniqueName)
+                    .HasColumnName("HIGHWAY_UNIQUE_NAME")
+                    .HasMaxLength(255)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.Landmark)
+                    .HasColumnName("LANDMARK")
+                    .HasMaxLength(8)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.LandmarkName)
+                    .HasColumnName("LANDMARK_NAME")
+                    .HasMaxLength(255)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.LocationDescription)
+                    .HasColumnName("LOCATION_DESCRIPTION")
+                    .HasMaxLength(4000)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.McName)
+                    .HasColumnName("MC_NAME")
+                    .HasMaxLength(200)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.McPhoneNumber)
+                    .HasColumnName("MC_PHONE_NUMBER")
+                    .HasMaxLength(30)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.McrrIncidentNumber)
+                    .HasColumnName("MCRR_INCIDENT_NUMBER")
+                    .HasMaxLength(12)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.OtherDitchVolume)
+                    .HasColumnName("OTHER_DITCH_VOLUME")
+                    .HasColumnType("numeric(6, 2)");
+
+                entity.Property(e => e.OtherTravelledLanesVolume)
+                    .HasColumnName("OTHER_TRAVELLED_LANES_VOLUME")
+                    .HasColumnType("numeric(6, 2)");
+
+                entity.Property(e => e.RecordType)
+                    .IsRequired()
+                    .HasColumnName("RECORD_TYPE")
+                    .HasMaxLength(1)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.ReportDate)
+                    .HasColumnName("REPORT_DATE")
+                    .HasColumnType("date");
+
+                entity.Property(e => e.ReportType)
+                    .IsRequired()
+                    .HasColumnName("REPORT_TYPE")
+                    .HasMaxLength(15)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.ReporterName)
+                    .HasColumnName("REPORTER_NAME")
+                    .HasMaxLength(1024)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.RockfallReportId)
+                    .HasColumnName("ROCKFALL_REPORT_ID")
+                    .HasColumnType("numeric(9, 0)");
+
+                entity.Property(e => e.RowNum)
+                    .HasColumnName("ROW_NUM")
+                    .HasColumnType("numeric(9, 0)");
+
+                entity.Property(e => e.ServiceArea)
+                    .HasColumnName("SERVICE_AREA")
+                    .HasColumnType("numeric(9, 0)");
+
+                entity.Property(e => e.StartLatitude)
+                    .HasColumnName("START_LATITUDE")
+                    .HasColumnType("numeric(16, 8)");
+
+                entity.Property(e => e.StartLongitude)
+                    .HasColumnName("START_LONGITUDE")
+                    .HasColumnType("numeric(16, 8)");
+
+                entity.Property(e => e.StartOffset)
+                    .HasColumnName("START_OFFSET")
+                    .HasColumnType("numeric(7, 3)");
+
+                entity.Property(e => e.SubmissionFileName)
+                    .IsRequired()
+                    .HasColumnName("SUBMISSION_FILE_NAME")
+                    .HasMaxLength(100)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.SubmissionObjectId)
+                    .HasColumnName("SUBMISSION_OBJECT_ID")
+                    .HasColumnType("numeric(9, 0)");
+
+                entity.Property(e => e.TravelledLanesVolume)
+                    .HasColumnName("TRAVELLED_LANES_VOLUME")
+                    .HasMaxLength(30)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.ValidationStatus)
+                    .HasColumnName("VALIDATION_STATUS")
+                    .HasMaxLength(173)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.VehicleDamage)
+                    .HasColumnName("VEHICLE_DAMAGE")
+                    .HasMaxLength(1)
+                    .IsUnicode(false);
+            });
+
             modelBuilder.Entity<HmrRole>(entity =>
             {
                 entity.HasKey(e => e.RoleId)
@@ -4038,7 +4072,7 @@ namespace Hmcr.Data.Database.Entities
 
                 entity.Property(e => e.RecordNumber)
                     .HasColumnName("RECORD_NUMBER")
-                    .HasMaxLength(8)
+                    .HasMaxLength(30)
                     .IsUnicode(false);
 
                 entity.Property(e => e.RowHash)
@@ -5489,6 +5523,133 @@ namespace Hmcr.Data.Database.Entities
                     .IsUnicode(false);
             });
 
+            modelBuilder.Entity<HmrWildlifeReportVw>(entity =>
+            {
+                entity.HasNoKey();
+
+                entity.ToView("HMR_WILDLIFE_REPORT_VW");
+
+                entity.Property(e => e.AccidentDate)
+                    .HasColumnName("ACCIDENT_DATE")
+                    .HasColumnType("datetime");
+
+                entity.Property(e => e.Age)
+                    .HasColumnName("AGE")
+                    .HasMaxLength(1)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.AppCreateTimestamp)
+                    .HasColumnName("APP_CREATE_TIMESTAMP")
+                    .HasColumnType("datetime");
+
+                entity.Property(e => e.AppLastUpdateTimestamp)
+                    .HasColumnName("APP_LAST_UPDATE_TIMESTAMP")
+                    .HasColumnType("datetime");
+
+                entity.Property(e => e.Comment)
+                    .HasColumnName("COMMENT")
+                    .HasMaxLength(1024)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.FileName)
+                    .IsRequired()
+                    .HasColumnName("FILE_NAME")
+                    .HasMaxLength(100)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.Geometry)
+                    .HasColumnName("GEOMETRY")
+                    .HasColumnType("geometry");
+
+                entity.Property(e => e.HighwayUnique)
+                    .HasColumnName("HIGHWAY_UNIQUE")
+                    .HasMaxLength(16)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.IsOverSpTolerance)
+                    .IsRequired()
+                    .HasColumnName("IS_OVER_SP_TOLERANCE")
+                    .HasMaxLength(1)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.Landmark)
+                    .HasColumnName("LANDMARK")
+                    .HasMaxLength(8)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.Latitude)
+                    .HasColumnName("LATITUDE")
+                    .HasColumnType("numeric(16, 8)");
+
+                entity.Property(e => e.Longitude)
+                    .HasColumnName("LONGITUDE")
+                    .HasColumnType("numeric(16, 8)");
+
+                entity.Property(e => e.NearestTown)
+                    .HasColumnName("NEAREST_TOWN")
+                    .HasMaxLength(150)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.Offset)
+                    .HasColumnName("OFFSET")
+                    .HasColumnType("numeric(7, 3)");
+
+                entity.Property(e => e.Quantity)
+                    .HasColumnName("QUANTITY")
+                    .HasColumnType("numeric(4, 0)");
+
+                entity.Property(e => e.RecordType)
+                    .HasColumnName("RECORD_TYPE")
+                    .HasMaxLength(1)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.ReportType)
+                    .IsRequired()
+                    .HasColumnName("REPORT_TYPE")
+                    .HasMaxLength(15)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.RowNum)
+                    .HasColumnName("ROW_NUM")
+                    .HasColumnType("numeric(9, 0)");
+
+                entity.Property(e => e.ServiceArea)
+                    .HasColumnName("SERVICE_AREA")
+                    .HasColumnType("numeric(9, 0)");
+
+                entity.Property(e => e.Sex)
+                    .HasColumnName("SEX")
+                    .HasMaxLength(1)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.Species)
+                    .HasColumnName("SPECIES")
+                    .HasColumnType("numeric(2, 0)");
+
+                entity.Property(e => e.SubmissionObjectId)
+                    .HasColumnName("SUBMISSION_OBJECT_ID")
+                    .HasColumnType("numeric(9, 0)");
+
+                entity.Property(e => e.TimeOfKill)
+                    .HasColumnName("TIME_OF_KILL")
+                    .HasMaxLength(1)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.ValidationStatus)
+                    .HasColumnName("VALIDATION_STATUS")
+                    .HasMaxLength(173)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.WildlifeRecordId)
+                    .HasColumnName("WILDLIFE_RECORD_ID")
+                    .HasColumnType("numeric(9, 0)");
+
+                entity.Property(e => e.WildlifeSign)
+                    .HasColumnName("WILDLIFE_SIGN")
+                    .HasMaxLength(1)
+                    .IsUnicode(false);
+            });
+
             modelBuilder.Entity<HmrWorkReport>(entity =>
             {
                 entity.HasKey(e => e.WorkReportId)
@@ -5634,6 +5795,17 @@ namespace Hmcr.Data.Database.Entities
                     .IsUnicode(false)
                     .HasComment("This identifies the section of road on which the activity occurred. This is a value in the in the format: [Service Area]-[area manager area]-[subarea]-[highway number] This should be a value found in RFI (CHRIS)");
 
+                entity.Property(e => e.HighwayUniqueLength)
+                    .HasColumnName("HIGHWAY_UNIQUE_LENGTH")
+                    .HasColumnType("numeric(25, 20)")
+                    .HasComment("Driven length in KM of the HIGHWAY_UNIQUE segment at the time of data submission.  ");
+
+                entity.Property(e => e.HighwayUniqueName)
+                    .HasColumnName("HIGHWAY_UNIQUE_NAME")
+                    .HasMaxLength(255)
+                    .IsUnicode(false)
+                    .HasComment("Road or Highway description sourced from a road network data product (Road Feature Inventory [RFI] as of Dec 2019).  The name is derived from the HIGHWAY_UNIQUE value provided wtihin the submission.");
+
                 entity.Property(e => e.Landmark)
                     .HasColumnName("LANDMARK")
                     .HasMaxLength(8)
@@ -5730,6 +5902,11 @@ namespace Hmcr.Data.Database.Entities
                     .HasColumnName("VALUE_OF_WORK")
                     .HasColumnType("numeric(9, 2)")
                     .HasComment("Total dollar value of the work activity being reported, for each activity.");
+
+                entity.Property(e => e.WorkLength)
+                    .HasColumnName("WORK_LENGTH")
+                    .HasColumnType("numeric(25, 20)")
+                    .HasComment("Driven length in KM of the work distance as calculated from start and end coordinates and related HIGHWAY_UNIQUE segment at the time of data submission.");
 
                 entity.HasOne(d => d.Row)
                     .WithMany(p => p.HmrWorkReports)
@@ -5876,6 +6053,15 @@ namespace Hmcr.Data.Database.Entities
                     .HasMaxLength(16)
                     .IsUnicode(false);
 
+                entity.Property(e => e.HighwayUniqueLength)
+                    .HasColumnName("HIGHWAY_UNIQUE_LENGTH")
+                    .HasColumnType("numeric(25, 20)");
+
+                entity.Property(e => e.HighwayUniqueName)
+                    .HasColumnName("HIGHWAY_UNIQUE_NAME")
+                    .HasMaxLength(255)
+                    .IsUnicode(false);
+
                 entity.Property(e => e.Landmark)
                     .HasColumnName("LANDMARK")
                     .HasMaxLength(8)
@@ -5955,9 +6141,191 @@ namespace Hmcr.Data.Database.Entities
                     .HasColumnName("VALUE_OF_WORK")
                     .HasColumnType("numeric(9, 2)");
 
+                entity.Property(e => e.WorkLength)
+                    .HasColumnName("WORK_LENGTH")
+                    .HasColumnType("numeric(25, 20)");
+
                 entity.Property(e => e.WorkReportId)
                     .HasColumnName("WORK_REPORT_ID")
                     .HasColumnType("numeric(18, 0)");
+            });
+
+            modelBuilder.Entity<HmrWorkReportVw>(entity =>
+            {
+                entity.HasNoKey();
+
+                entity.ToView("HMR_WORK_REPORT_VW");
+
+                entity.Property(e => e.Accomplishment)
+                    .HasColumnName("ACCOMPLISHMENT")
+                    .HasColumnType("numeric(9, 2)");
+
+                entity.Property(e => e.ActivityName)
+                    .HasColumnName("ACTIVITY_NAME")
+                    .HasMaxLength(150)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.ActivityNumber)
+                    .HasColumnName("ACTIVITY_NUMBER")
+                    .HasMaxLength(30)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.AppCreateTimestamp)
+                    .HasColumnName("APP_CREATE_TIMESTAMP")
+                    .HasColumnType("datetime");
+
+                entity.Property(e => e.AppLastUpdateTimestamp)
+                    .HasColumnName("APP_LAST_UPDATE_TIMESTAMP")
+                    .HasColumnType("datetime");
+
+                entity.Property(e => e.Comments)
+                    .HasColumnName("COMMENTS")
+                    .HasMaxLength(1024)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.EndDate)
+                    .HasColumnName("END_DATE")
+                    .HasColumnType("date");
+
+                entity.Property(e => e.EndLatitude)
+                    .HasColumnName("END_LATITUDE")
+                    .HasColumnType("numeric(16, 8)");
+
+                entity.Property(e => e.EndLongitude)
+                    .HasColumnName("END_LONGITUDE")
+                    .HasColumnType("numeric(16, 8)");
+
+                entity.Property(e => e.EndOffset)
+                    .HasColumnName("END_OFFSET")
+                    .HasColumnType("numeric(7, 3)");
+
+                entity.Property(e => e.EndVariance)
+                    .HasColumnName("END_VARIANCE")
+                    .HasColumnType("numeric(25, 20)");
+
+                entity.Property(e => e.Geometry)
+                    .HasColumnName("GEOMETRY")
+                    .HasColumnType("geometry");
+
+                entity.Property(e => e.HighwayUnique)
+                    .HasColumnName("HIGHWAY_UNIQUE")
+                    .HasMaxLength(16)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.HighwayUniqueLength)
+                    .HasColumnName("HIGHWAY_UNIQUE_LENGTH")
+                    .HasColumnType("numeric(25, 20)");
+
+                entity.Property(e => e.HighwayUniqueName)
+                    .HasColumnName("HIGHWAY_UNIQUE_NAME")
+                    .HasMaxLength(255)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.IsOverSpTolerance)
+                    .IsRequired()
+                    .HasColumnName("IS_OVER_SP_TOLERANCE")
+                    .HasMaxLength(1)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.Landmark)
+                    .HasColumnName("LANDMARK")
+                    .HasMaxLength(8)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.PostedDate)
+                    .HasColumnName("POSTED_DATE")
+                    .HasColumnType("date");
+
+                entity.Property(e => e.RecordNumber)
+                    .HasColumnName("RECORD_NUMBER")
+                    .HasMaxLength(30)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.RecordType)
+                    .HasColumnName("RECORD_TYPE")
+                    .HasMaxLength(1)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.ReportType)
+                    .IsRequired()
+                    .HasColumnName("REPORT_TYPE")
+                    .HasMaxLength(11)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.RowNum)
+                    .HasColumnName("ROW_NUM")
+                    .HasColumnType("numeric(9, 0)");
+
+                entity.Property(e => e.ServiceAreaNumber)
+                    .HasColumnName("SERVICE_AREA_NUMBER")
+                    .HasColumnType("numeric(9, 0)");
+
+                entity.Property(e => e.SiteNumber)
+                    .HasColumnName("SITE_NUMBER")
+                    .HasMaxLength(8)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.StartDate)
+                    .HasColumnName("START_DATE")
+                    .HasColumnType("date");
+
+                entity.Property(e => e.StartLatitude)
+                    .HasColumnName("START_LATITUDE")
+                    .HasColumnType("numeric(16, 8)");
+
+                entity.Property(e => e.StartLongitude)
+                    .HasColumnName("START_LONGITUDE")
+                    .HasColumnType("numeric(16, 8)");
+
+                entity.Property(e => e.StartOffset)
+                    .HasColumnName("START_OFFSET")
+                    .HasColumnType("numeric(7, 3)");
+
+                entity.Property(e => e.StartVariance)
+                    .HasColumnName("START_VARIANCE")
+                    .HasColumnType("numeric(25, 20)");
+
+                entity.Property(e => e.StructureNumber)
+                    .HasColumnName("STRUCTURE_NUMBER")
+                    .HasMaxLength(5)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.SubmissionFileName)
+                    .IsRequired()
+                    .HasColumnName("SUBMISSION_FILE_NAME")
+                    .HasMaxLength(100)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.SubmissionObjectId)
+                    .HasColumnName("SUBMISSION_OBJECT_ID")
+                    .HasColumnType("numeric(9, 0)");
+
+                entity.Property(e => e.TaskNumber)
+                    .HasColumnName("TASK_NUMBER")
+                    .HasMaxLength(30)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.UnitOfMeasure)
+                    .HasColumnName("UNIT_OF_MEASURE")
+                    .HasMaxLength(12)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.ValidationStatus)
+                    .HasColumnName("VALIDATION_STATUS")
+                    .HasMaxLength(173)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.ValueOfWork)
+                    .HasColumnName("VALUE_OF_WORK")
+                    .HasColumnType("numeric(9, 2)");
+
+                entity.Property(e => e.WorkLength)
+                    .HasColumnName("WORK_LENGTH")
+                    .HasColumnType("numeric(25, 20)");
+
+                entity.Property(e => e.WorkReportId)
+                    .HasColumnName("WORK_REPORT_ID")
+                    .HasColumnType("numeric(9, 0)");
             });
 
             modelBuilder.Entity<Job>(entity =>
