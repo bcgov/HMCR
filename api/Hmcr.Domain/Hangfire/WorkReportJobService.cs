@@ -146,7 +146,7 @@ namespace Hmcr.Domain.Hangfire
 
             var workReports = new List<WorkReportGeometry>();
 
-            var step = (int)(typedRows.Count / 100f);
+            var step = typedRows.Count / 10 + 1;
             var i = 0;
             var pct = 0;
 
@@ -159,8 +159,9 @@ namespace Hmcr.Domain.Hangfire
                 if (step != 0 && i % step == 0)
                 {
                     pct += 10;
-                    _logger.LogInformation($"{_methodLogHeader} PerformSpatialValidationAndConversionAsync {pct}%");                    
-                }                
+                    if (pct < 100)
+                        _logger.LogInformation($"{_methodLogHeader} PerformSpatialValidationAndConversionAsync {pct}%");
+                }
             }
 
             _logger.LogInformation($"{_methodLogHeader} PerformSpatialValidationAndConversionAsync 100%");
@@ -223,7 +224,7 @@ namespace Hmcr.Domain.Hangfire
 
         private async IAsyncEnumerable<WorkReportGeometry> PerformSpatialValidationAndConversionAsync(List<WorkReportTyped> typedRows)
         {
-            MethodLogger.LogEntry(_logger, _enableMethodLog, _methodLogHeader);
+            MethodLogger.LogEntry(_logger, _enableMethodLog, _methodLogHeader, $"Total Record: {typedRows.Count}");
 
             foreach (var typedRow in typedRows)
             {

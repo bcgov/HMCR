@@ -125,7 +125,7 @@ namespace Hmcr.Domain.Hangfire
 
             var wildlifeReports = new List<WildlifeReportGeometry>();
 
-            var step = (int)(typedRows.Count / 100f);
+            var step = typedRows.Count / 10;
             var i = 0;
             var pct = 0;
             
@@ -139,7 +139,8 @@ namespace Hmcr.Domain.Hangfire
                 if (step != 0 && i % step == 0)
                 {
                     pct += 10;
-                    _logger.LogInformation($"{_methodLogHeader} PerformSpatialValidationAndConversionAsync {pct}%");
+                    if (pct < 100)
+                        _logger.LogInformation($"{_methodLogHeader} PerformSpatialValidationAndConversionAsync {pct}%");
                 }
             }
 
@@ -200,7 +201,7 @@ namespace Hmcr.Domain.Hangfire
 
         private async IAsyncEnumerable<WildlifeReportGeometry> PerformSpatialValidationAndConversionAsync(List<WildlifeReportTyped> typedRows)
         {
-            MethodLogger.LogEntry(_logger, _enableMethodLog, _methodLogHeader);
+            MethodLogger.LogEntry(_logger, _enableMethodLog, _methodLogHeader, $"Total Record: {typedRows.Count}");
 
             foreach (var typedRow in typedRows)
             {
