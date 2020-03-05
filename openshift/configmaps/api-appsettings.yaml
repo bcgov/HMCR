@@ -60,7 +60,7 @@ objects:
                       "Audience": "<app-id>"
                   },
                   "BCeID": {
-                      "Url": ${BCEID_SERVICE},
+                      "Url": "${BCEID_SERVICE}",
                       "OSID": "<BCeID:OSID>",
                       "CacheLifespan": 600
                   },
@@ -75,7 +75,7 @@ objects:
                       "Thumbprint": "<Smtp:Thumbprint>",
                       "Server": "apps.smtp.gov.bc.ca",
                       "Port": 25,
-                      "SubmissionResult": ${SUBMISSION_URL}
+                      "SubmissionResult": "${SUBMISSION_URL}"
                   }
               }
       kind: ConfigMap
