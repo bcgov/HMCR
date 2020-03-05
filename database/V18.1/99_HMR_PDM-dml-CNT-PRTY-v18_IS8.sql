@@ -6,7 +6,7 @@
 --    Description:	- Load CONTRACT_TERM PARTY association based on the first user established for each party/service area combination
 -- =============================================
 
-USE HMR_DZ; -- uncomment appropriate instance
+USE HMR_DEV; -- uncomment appropriate instance
 --USE HMR_TST;
 --USE HMR_UAT;
 --USE HMR_PRD;

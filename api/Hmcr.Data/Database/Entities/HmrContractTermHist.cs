@@ -10,7 +10,7 @@ namespace Hmcr.Data.Database.Entities
         public DateTime? EndDateHist { get; set; }
         public decimal ContractTermId { get; set; }
         public string ContractName { get; set; }
-        public decimal PartyId { get; set; }
+        public decimal? PartyId { get; set; }
         public decimal ServiceAreaNumber { get; set; }
         public DateTime? StartDate { get; set; }
         public DateTime? EndDate { get; set; }
