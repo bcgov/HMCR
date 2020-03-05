@@ -209,12 +209,15 @@ namespace Hmcr.Data.Repositories
 
             var latestFile = await DbSet
                 .Where(x => x.SubmissionStreamId == submission.SubmissionStreamId && 
-                    x.ServiceAreaNumber == submission.ServiceAreaNumber &&
-                    x.ErrorDetail != FileError.UnknownException) //File with unknown exception can be resubmitted without duplicate file check.
+                    x.ServiceAreaNumber == submission.ServiceAreaNumber)
                 .OrderByDescending(x => x.SubmissionObjectId)
                 .FirstOrDefaultAsync();
 
             if (latestFile == null)
+                return false;
+
+            //if it was internal error, the user should be able to upload again.
+            if (latestFile.ErrorDetail == FileError.UnknownException)
                 return false;
 
             return latestFile.FileHash == submission.FileHash;
