@@ -22,7 +22,7 @@ namespace Hmcr.Data.Repositories
         {
             var contract = await DbSet.FirstOrDefaultAsync(x => x.ServiceAreaNumber == serviceAreaNumber && x.StartDate <= date && x.EndDate > date);
 
-            return contract == null ? 0 : contract.PartyId;
+            return contract == null ? 0 : contract.PartyId ?? 0;
         }
     }
 }
