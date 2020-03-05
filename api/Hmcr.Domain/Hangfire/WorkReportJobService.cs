@@ -146,12 +146,24 @@ namespace Hmcr.Domain.Hangfire
 
             var workReports = new List<WorkReportGeometry>();
 
+            var step = (int)(typedRows.Count / 100f);
+            var i = 0;
+            var pct = 0;
+
             //Spatial Validation and Conversion
             await foreach (var workReport in PerformSpatialValidationAndConversionAsync(typedRows))
             {
                 workReports.Add(workReport);
-                _logger.LogInformation($"[Hangfire] Spatial Validation for the row [{workReport.WorkReportTyped.RowNum}] [{workReport.WorkReportTyped.FeatureType}]");
+                i++;
+
+                if (step != 0 && i % step == 0)
+                {
+                    pct += 10;
+                    _logger.LogInformation($"{_methodLogHeader} PerformSpatialValidationAndConversionAsync {pct}%");                    
+                }                
             }
+
+            _logger.LogInformation($"{_methodLogHeader} PerformSpatialValidationAndConversionAsync 100%");
 
             if (_submission.SubmissionStatusId == _errorFileStatusId)
             {
@@ -532,8 +544,6 @@ namespace Hmcr.Domain.Hangfire
 
         private string GetValidationEntityName(WorkReportCsvDto untypedRow, ActivityCodeDto activityCode)
         {
-            MethodLogger.LogEntry(_logger, _enableMethodLog, _methodLogHeader, $"RowNum: {untypedRow.RowNum}");
-
             var locationCode = activityCode.LocationCode;
 
             string entityName;

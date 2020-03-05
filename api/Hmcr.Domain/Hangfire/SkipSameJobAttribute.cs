@@ -37,8 +37,6 @@ namespace Hmcr.Domain.Hangfire
 
                 context.Canceled = true;
 
-                Console.WriteLine($"[Hangfire] Cancelling a job {jobFingerprint}");
-
                 return;
             }
         }

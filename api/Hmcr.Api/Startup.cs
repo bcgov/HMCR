@@ -30,6 +30,7 @@ namespace Hmcr.Api
         {
             var connectionString = Configuration.GetValue<string>("ConnectionString:HMCR");
             var runHangfireServer = Configuration.GetValue<bool>("Hangfire:EnableServer");
+            var workerCount = Configuration.GetValue<int>("Hangfire:WorkerCount");
 
             services.AddHttpContextAccessor();
             services.AddHmcrAuthentication(Configuration);
@@ -42,7 +43,7 @@ namespace Hmcr.Api
             services.AddHmcrSwagger(_env);
             services.AddChrisHttpClient(Configuration);
             services.AddBceidSoapClient(Configuration);
-            services.AddHmcrHangfire(connectionString, runHangfireServer);
+            services.AddHmcrHangfire(connectionString, runHangfireServer, workerCount);
             services.AddHmcrHealthCheck(connectionString);
         }
 
