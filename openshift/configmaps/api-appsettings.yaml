@@ -18,32 +18,32 @@ objects:
                       "Override": {
                           "Microsoft": "Warning",
                           "System": "Warning"
-                      }
+                        }
                       },
                       "WriteTo": [
-                      {
-                          "Name": "Async",
-                          "Args": {
-                          "configure": [
-                              { "Name": "Console" },
-                              {
-                              "Name": "File",
-                              "Args": {
-                                  "path": "hmrlog.log",
-                                  "rollingInterval": "Day",
-                                  "retainedFileCountLimit": 30,
-                                  "buffered": true
-                              }
-                              }
-                          ]
-                          }
-                      }
+                        {
+                            "Name": "Async",
+                            "Args": {
+                                "configure": [
+                                    { "Name": "Console" },
+                                    {
+                                    "Name": "File",
+                                    "Args": {
+                                        "path": "hmrlog.log",
+                                        "rollingInterval": "Day",
+                                        "retainedFileCountLimit": 30,
+                                        "buffered": true
+                                        }
+                                    }
+                                ]
+                            }
+                        }
                       ],
                       "Enrich": [
-                      "FromLogContext"
+                        "FromLogContext"
                       ]
                   },  
-                  "ConnectionString": {
+                  "ConnectionStrings": {
                       "HMCR": "Server=(localdb)\\mssqllocaldb;Database=HMR_DEV;Trusted_Connection=True;MultipleActiveResultSets=true"
                   },
                   "Hangfire": {
@@ -60,7 +60,7 @@ objects:
                       "Audience": "<app-id>"
                   },
                   "BCeID": {
-                      "Url": "https://gws1.test.bceid.ca/webservices/client/v10/bceidservice.asmx",
+                      "Url": ${BCEID_SERVICE},
                       "OSID": "<BCeID:OSID>",
                       "CacheLifespan": 600
                   },
@@ -75,7 +75,7 @@ objects:
                       "Thumbprint": "<Smtp:Thumbprint>",
                       "Server": "apps.smtp.gov.bc.ca",
                       "Port": 25,
-                      "SubmissionResult": "https://dev-hmcr.th.gov.bc.ca/workreporting?serviceArea={0}&showResult={1}"
+                      "SubmissionResult": ${SUBMISSION_URL}
                   }
               }
       kind: ConfigMap
@@ -86,4 +86,14 @@ parameters:
       displayName: ENV
       name: ENV
       required: true
-      value: "prod"
+      value: "dev"
+    - description: Submission results URL
+      displayName: SUBMISSION_URL
+      name: SUBMISSION_URL
+      required: true
+      value: "https://dev-hmcr.th.gov.bc.ca/workreporting?serviceArea={0}&showResult={1}"
+    - description: BCeID webservice URL
+      displayName: BCEID_SERVICE
+      name: BCEID_SERVICE
+      required: true
+      value: "https://gws1.test.bceid.ca/webservices/client/v10/bceidservice.asmx"
