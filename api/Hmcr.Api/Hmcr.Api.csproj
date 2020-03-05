@@ -44,7 +44,7 @@
     <ProjectReference Include="..\Hmcr.Data\Hmcr.Data.csproj" />
     <ProjectReference Include="..\Hmcr.Domain\Hmcr.Domain.csproj" />
     <ProjectReference Include="..\Hmcr.Model\Hmcr.Model.csproj" />
-    <ProjectReference Include="..\Serilog.Sinks.PostgreSql\Serilog.Sinks.PostgreSql.csproj" />
+    <ProjectReference Include="..\Serilog.Sinks.HmcrPostgreSql\Serilog.Sinks.HmcrPostgreSql.csproj" />
   </ItemGroup>
 
 </Project>

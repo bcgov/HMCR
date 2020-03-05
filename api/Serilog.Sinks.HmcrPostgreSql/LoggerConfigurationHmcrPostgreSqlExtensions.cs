@@ -1,26 +1,18 @@
-﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="LoggerConfigurationPostgreSQLExtensions.cs" company="Hämmer Electronics">
-// The project is licensed under the MIT license
-// </copyright>
-// <summary>
-//   This class contains the PostgreSQL logger configuration.
-// </summary>
-// --------------------------------------------------------------------------------------------------------------------
+﻿using System;
+using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 
-namespace Serilog
+using Serilog.Configuration;
+using Serilog.Core;
+using Serilog.Events;
+using Serilog.Sinks.PostgreSQL;
+
+using Microsoft.Extensions.Configuration;
+using NpgsqlTypes;
+using Serilog.Debugging;
+
+namespace Serilog.Sinks.HmcrPostgreSql
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Diagnostics.CodeAnalysis;
-
-    using Serilog.Configuration;
-    using Serilog.Core;
-    using Serilog.Events;
-    using Serilog.Sinks.PostgreSQL;
-
-    using Microsoft.Extensions.Configuration;
-    using NpgsqlTypes;
-
     /// <summary>
     ///     This class contains the PostgreSQL logger configuration.
     /// </summary>
@@ -29,7 +21,7 @@ namespace Serilog
         "SA1650:ElementDocumentationMustBeSpelledCorrectly",
         Justification = "Reviewed. Suppression is OK here.")]
     // ReSharper disable once UnusedMember.Global
-    public static class LoggerConfigurationPostgreSqlExtensions
+    public static class LoggerConfigurationHmcrPostgreSqlExtensions
     {
         /// <summary>
         ///     Default time to wait between checking for event batches.
@@ -58,7 +50,7 @@ namespace Serilog
             "SA1650:ElementDocumentationMustBeSpelledCorrectly",
             Justification = "Reviewed. Suppression is OK here.")]
         // ReSharper disable once UnusedMember.Global
-        public static LoggerConfiguration PostgreSql(
+        public static LoggerConfiguration HmcrPostgreSql(
             this LoggerSinkConfiguration sinkConfiguration,
             string connectionString,
             string tableName,
@@ -80,7 +72,7 @@ namespace Serilog
 
             period = period ?? DefaultPeriod;
 
-            var connectionStr = ApplyMicrosoftExtensionsConfiguration.GetConnectionString(connectionString, appConfiguration);
+            var connectionStr = GetConnectionString(connectionString, appConfiguration);
 
             IDictionary<string, ColumnWriterBase> columnOpts = new Dictionary<string, ColumnWriterBase>
             {
@@ -94,7 +86,7 @@ namespace Serilog
             };
 
             return sinkConfiguration.Sink(
-                new PostgreSqlSink(
+                new HmcrPostgreSqlSink(
                     connectionStr,
                     tableName,
                     period.Value,
@@ -106,6 +98,19 @@ namespace Serilog
                     needAutoCreateTable),
                 restrictedToMinimumLevel,
                 levelSwitch);
+        }
+
+        private static string GetConnectionString(string nameOrConnectionString, IConfiguration appConfiguration)
+        {
+            // If there is an `=`, we assume this is a raw connection string not a named value
+            // If there are no `=`, attempt to pull the named value from config
+            if (nameOrConnectionString.IndexOf('=') > -1) return nameOrConnectionString;
+            string cs = appConfiguration?.GetConnectionString(nameOrConnectionString);
+            if (string.IsNullOrEmpty(cs))
+            {
+                SelfLog.WriteLine("HmcrPostgreSql sink configured value {0} is not found in ConnectionStrings settings and does not appear to be a raw connection string.", nameOrConnectionString);
+            }
+            return cs;
         }
     }
 }
