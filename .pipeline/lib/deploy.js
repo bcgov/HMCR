@@ -12,6 +12,7 @@ module.exports = settings => {
   );
   const templatesLocalBaseUrl = oc.toFileUrl(
     path.resolve(__dirname, "../../openshift")
+  );
   var objects = [];
 
   // The deployment of your cool app goes here ▼▼▼
