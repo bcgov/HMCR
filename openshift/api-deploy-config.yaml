@@ -64,6 +64,11 @@ objects:
                     secretKeyRef:
                       name: api-connections-${ENV}
                       key: hmr.db
+                - name: ConnectionStrings__serilog
+                  valueFrom:
+                    secretKeyRef:
+                      name: ${LOGDB_NAME}${SUFFIX}
+                      key: connection-string
                 - name: JWT__Authority
                   valueFrom:
                     secretKeyRef:
@@ -164,6 +169,11 @@ parameters:
     name: NAME
     required: true
     value: "api"
+  - description: A name used for all objects
+    displayName: LOGDB_NAME
+    name: LOGDB_NAME
+    required: true
+    value: "logdb"
   - description: A name suffix used for all objects
     displayName: Suffix
     name: SUFFIX
