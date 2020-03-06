@@ -2,6 +2,8 @@
 const { OpenShiftClientX } = require("pipeline-cli");
 const path = require("path");
 
+const KeyCloakClient = require('./keycloak');
+
 module.exports = settings => {
   const phases = settings.phases;
   const options = settings.options;
@@ -14,6 +16,9 @@ module.exports = settings => {
     path.resolve(__dirname, "../../openshift")
   );
   var objects = [];
+  const kc = new KeyCloakClient(settings, oc);
+
+  kc.addUris();
 
   // The deployment of your cool app goes here ▼▼▼
   objects.push(
@@ -26,6 +31,20 @@ module.exports = settings => {
           VERSION: phases[phase].tag,
           ENV: phases[phase].phase,
           HOST: phases[phase].host
+        }
+      }
+    )
+  );
+
+  objects.push(
+    ...oc.processDeploymentTemplate(
+      `${templatesLocalBaseUrl}/postgresql-deploy-config.yaml`,
+      {
+        param: {
+          NAME: `${phases[phase].name}-logdb`,
+          SUFFIX: phases[phase].suffix,
+          VERSION: phases[phase].tag,
+          ENV: phases[phase].phase,
         }
       }
     )
@@ -50,6 +69,7 @@ module.exports = settings => {
       {
         param: {
           NAME: `${phases[phase].name}-api`,
+          LOGDB_NAME: `${phases[phase].name}-logdb`,
           SUFFIX: phases[phase].suffix,
           VERSION: phases[phase].tag,
           HOST: phases[phase].host,

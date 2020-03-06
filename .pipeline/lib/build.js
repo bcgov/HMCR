@@ -1,6 +1,5 @@
 'use strict';
 const {OpenShiftClientX} = require('pipeline-cli')
-const KeyCloakClient = require('./keycloak');
 const path = require('path');
 
 module.exports = (settings)=>{
@@ -10,9 +9,6 @@ module.exports = (settings)=>{
   const phase='build'
   let objects = []
   const templatesLocalBaseUrl =oc.toFileUrl(path.resolve(__dirname, '../../openshift'))  
-  const kc = new KeyCloakClient(settings, oc);
-
-  kc.addUris();
 
   objects.push(
     ...oc.processDeploymentTemplate(
