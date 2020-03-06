@@ -11,6 +11,8 @@ import App from './js/App';
 import store from './js/store';
 import * as Keycloak from './js/Keycloak';
 
+// Adding a comment
+
 Keycloak.init(() => {
   ReactDOM.render(
     <Provider store={store}>
