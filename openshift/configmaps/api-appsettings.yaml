@@ -32,9 +32,10 @@ objects:
                         {
                             "Name": "HmcrPostgreSql",
                             "Args": {
-                            "connectionString": "serilog",
-                            "tableName": "hmcr",
-                            "needAutoCreateTable": true
+                                "connectionString": "serilog",
+                                "tableName": "hmcr",
+                                "needAutoCreateTable": true
+                            }
                         }
                       ],
                       "Enrich": [
