@@ -77,18 +77,12 @@ namespace Hmcr.Api.Authentication
             var userGuid = new Guid(principal.FindFirstValue(userGuidClaim));
 
             var user = await _userService.GetActiveUserEntityAsync(userGuid);
+            var email = principal.FindFirstValue(ClaimTypes.Email).ToUpperInvariant();
 
             if (user == null)
             {
                 _logger.LogWarning($"Access Denied - User[{username}/{userGuid}] does not exist");
                 return false;
-            }
-
-            var email = principal.FindFirstValue(ClaimTypes.Email).ToUpperInvariant();
-            if (user.Username.ToUpperInvariant() != username || user.Email.ToUpperInvariant() != email)
-            {
-                _logger.LogWarning($"Username/Email changed from {user.Username}/{user.Email} to {user.Email}/{email}.");
-                await _userService.UpdateUserFromBceidAsync(username, user.UserType, user.ConcurrencyControlNumber);
             }
 
             if (directory == "IDIR")
@@ -107,10 +101,16 @@ namespace Hmcr.Api.Authentication
 
             _curentUser.UniversalId = username;
             _curentUser.AuthDirName = directory;
-            _curentUser.Email = user.Email;
+            _curentUser.Email = email;
             _curentUser.UserName = username;
             _curentUser.FirstName = user.FirstName;
             _curentUser.LastName = user.LastName;
+
+            if (user.Username.ToUpperInvariant() != username || user.Email.ToUpperInvariant() != email)
+            {
+                _logger.LogWarning($"Username/Email changed from {user.Username}/{user.Email} to {user.Email}/{email}.");
+                await _userService.UpdateUserFromBceidAsync(username, user.UserType, user.ConcurrencyControlNumber);
+            }
 
             return true;
         }
