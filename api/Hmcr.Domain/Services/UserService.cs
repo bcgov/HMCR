@@ -73,7 +73,7 @@ namespace Hmcr.Domain.Services
 
         public async Task<UserBceidAccountDto> GetBceidAccountAsync(string username, string userType)
         {
-            var (error, account) = await _bceid.GetBceidAccountCachedAsync(username, userType);
+            var (error, account) = await _bceid.GetBceidAccountCachedAsync(username, userType, _currentUser.UserGuid, _currentUser.UserType);
 
             if (string.IsNullOrEmpty(error))
             {
@@ -97,7 +97,7 @@ namespace Hmcr.Domain.Services
                 return (0, errors);
             }
 
-            var (error, account) = await _bceid.GetBceidAccountCachedAsync(user.Username, user.UserType);
+            var (error, account) = await _bceid.GetBceidAccountCachedAsync(user.Username, user.UserType, _currentUser.UserGuid, _currentUser.UserType);
 
             if (error.IsNotEmpty())
             {
@@ -195,7 +195,7 @@ namespace Hmcr.Domain.Services
 
         public async Task UpdateUserFromBceidAsync(string username, string userType, long concurrencyControlNumber)
         {
-            var (error, account) = await _bceid.GetBceidAccountCachedAsync(username, userType);
+            var (error, account) = await _bceid.GetBceidAccountCachedAsync(username, userType, _currentUser.UserGuid, _currentUser.UserType);
 
             if (error.IsNotEmpty())
             {

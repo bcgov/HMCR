@@ -16,7 +16,6 @@ namespace Hmcr.Bceid
                 var password = config.GetValue<string>("ServiceAccount:Password");
                 var url = config.GetValue<string>("BCEID:Url");
                 var osid = config.GetValue<string>("BCEID:OSID");
-                var guid = config.GetValue<string>("ServiceAccount:GUID");
                 var cacheLifeSpan = config.GetValue<int>("BCEID:CacheLifespan");
 
                 var binding = new BasicHttpsBinding(BasicHttpsSecurityMode.Transport);
@@ -29,7 +28,6 @@ namespace Hmcr.Bceid
                 client.Endpoint.Binding = binding;
                 client.Endpoint.Address = new EndpointAddress(url);
                 client.Osid = osid;
-                client.Guid = guid;
                 client.CacheLifespan = cacheLifeSpan == 0 ? 60 : cacheLifeSpan; //60 minutes default
 
                 return client;
