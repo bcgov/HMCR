@@ -28,6 +28,8 @@ module.exports = class KeyCloakClient {
 
   getSecrets() {
     const keycloakSecret = this.oc.raw("get", [
+      "-n",
+      this.phases.build.namespace,
       "secret",
       "keycloak-service-client",
       "-o",
