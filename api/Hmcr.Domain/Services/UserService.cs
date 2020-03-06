@@ -7,6 +7,7 @@ using Hmcr.Model;
 using Hmcr.Model.Dtos;
 using Hmcr.Model.Dtos.User;
 using Hmcr.Model.Utils;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -36,9 +37,10 @@ namespace Hmcr.Domain.Services
         private IFieldValidatorService _validator;
         private IBceidApi _bceid;
         private IMapper _mapper;
+        private ILogger _logger;
 
         public UserService(IUserRepository userRepo, IPartyRepository partyRepo, IServiceAreaRepository serviceAreaRepo, IRoleRepository roleRepo,
-            IUnitOfWork unitOfWork, HmcrCurrentUser currentUser, IFieldValidatorService validator, IBceidApi bceid, IMapper mapper)
+            IUnitOfWork unitOfWork, HmcrCurrentUser currentUser, IFieldValidatorService validator, IBceidApi bceid, IMapper mapper, ILogger<UserService> logger)
         {
             _userRepo = userRepo;
             _partyRepo = partyRepo;
@@ -49,6 +51,7 @@ namespace Hmcr.Domain.Services
             _validator = validator;
             _bceid = bceid;
             _mapper = mapper;
+            _logger = logger;
         }
 
         public async Task<UserCurrentDto> GetCurrentUserAsync()
@@ -199,7 +202,10 @@ namespace Hmcr.Domain.Services
 
             if (error.IsNotEmpty())
             {
-                throw new HmcrException($"Unable to retrieve User[{username} ({userType})] from BCeID Service.");
+                //throw new HmcrException($"Unable to retrieve User[{username} ({userType})] from BCeID Service.");
+                _logger.LogInformation($"BCeID {error}");
+                _logger.LogInformation($"Unable to retrieve User[{username} ({userType})] from BCeID Service.");
+                return;
             }
 
             await _userRepo.UpdateUserFromBceidAsync(account, concurrencyControlNumber);
