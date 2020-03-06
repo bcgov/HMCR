@@ -25,18 +25,16 @@ objects:
                             "Name": "Async",
                             "Args": {
                                 "configure": [
-                                    { "Name": "Console" },
-                                    {
-                                    "Name": "File",
-                                    "Args": {
-                                        "path": "hmrlog.log",
-                                        "rollingInterval": "Day",
-                                        "retainedFileCountLimit": 30,
-                                        "buffered": true
-                                        }
-                                    }
+                                    { "Name": "Console" }
                                 ]
                             }
+                        },
+                        {
+                            "Name": "HmcrPostgreSql",
+                            "Args": {
+                            "connectionString": "serilog",
+                            "tableName": "hmcr",
+                            "needAutoCreateTable": true
                         }
                       ],
                       "Enrich": [
