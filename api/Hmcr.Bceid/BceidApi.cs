@@ -12,7 +12,7 @@ namespace Hmcr.Bceid
 {
     public interface IBceidApi
     {
-        Task<(string error, BceidAccount account)> GetBceidAccountCachedAsync(string username, string userType, Guid requestorGuid, string requestorType);
+        Task<(string error, BceidAccount account)> GetBceidAccountCachedAsync(Guid? userGuid, string username, string userType, Guid requestorGuid, string requestorType);
     }
 
     public class BceidApi : IBceidApi
@@ -38,7 +38,7 @@ namespace Hmcr.Bceid
             _accountCache.Clear();
         }
 
-        public async Task<(string error, BceidAccount account)> GetBceidAccountCachedAsync(string username, string userType, Guid requestorGuid, string requestorType)
+        public async Task<(string error, BceidAccount account)> GetBceidAccountCachedAsync(Guid? userGuid, string username, string userType, Guid requestorGuid, string requestorType)
         {
             //to minimize the BCeID web service calls - may have a performance issue when multiple fresh users log in at the same time.            
             await _semaphore.WaitAsync();
@@ -52,7 +52,7 @@ namespace Hmcr.Bceid
                     return ("", _accountCache[key]);
                 }
 
-                var (error, account) = await GetBceidAccountAsync(username, userType, requestorGuid.ToString("N"), requestorType);
+                var (error, account) = await GetBceidAccountAsync(userGuid, username, userType, requestorGuid.ToString("N"), requestorType);
 
                 if (account != null)
                 {
@@ -70,7 +70,7 @@ namespace Hmcr.Bceid
             }
         }
 
-        private async Task<(string error, BceidAccount account)> GetBceidAccountAsync(string username, string userType, string requestorGuid, string requestorType)
+        private async Task<(string error, BceidAccount account)> GetBceidAccountAsync(Guid? userGuid, string username, string userType, string requestorGuid, string requestorType)
         {
             var targetTypeCode = userType.IsIdirUser() ? BCeIDAccountTypeCode.Internal : BCeIDAccountTypeCode.Business;
             var requesterTypeCode = requestorType.IsIdirUser() ? BCeIDAccountTypeCode.Internal : BCeIDAccountTypeCode.Business;
@@ -79,7 +79,21 @@ namespace Hmcr.Bceid
             request.requesterAccountTypeCode = requesterTypeCode;
             request.requesterUserGuid = requestorGuid;
             request.accountTypeCode = targetTypeCode;
-            request.userId = username;
+
+            //ISA - for IDIR, only IDIR search is allowed
+            if (userType.IsIdirUser())
+            {
+                request.userId = username;
+            }
+            else if (userGuid != null)
+            {
+                request.userGuid = userGuid?.ToString("N");
+            }
+            else
+            {
+                request.userId = username;
+            }
+
             request.onlineServiceId = _client.Osid;
 
             var response = await _client.getAccountDetailAsync(request);
@@ -96,7 +110,7 @@ namespace Hmcr.Bceid
             var account = new BceidAccount();
 
             account.Username = response.account.userId.value;
-            account.UserGuid = new Guid(response.account.guid.value);
+            account.UserGuid = userGuid ?? new Guid(response.account.guid.value);
             account.UserType = userType;
 
             if (account.UserType.IsBusinessUser())
@@ -118,5 +132,6 @@ namespace Hmcr.Bceid
 
             return ("", account);
         }
+
     }
 }

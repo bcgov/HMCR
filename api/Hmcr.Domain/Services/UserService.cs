@@ -24,7 +24,7 @@ namespace Hmcr.Domain.Services
         Task<(bool NotFound, Dictionary<string, List<string>> Errors)> UpdateUserAsync(UserUpdateDto user);
         Task<(bool NotFound, Dictionary<string, List<string>> Errors)> DeleteUserAsync(UserDeleteDto user);
         Task<HmrSystemUser> GetActiveUserEntityAsync(Guid userGuid);
-        Task UpdateUserFromBceidAsync(string username, string userType, long concurrencyControlNumber);
+        Task UpdateUserFromBceidAsync(Guid userGuid, string username, string userType, long concurrencyControlNumber);
     }
     public class UserService : IUserService
     {
@@ -76,7 +76,7 @@ namespace Hmcr.Domain.Services
 
         public async Task<UserBceidAccountDto> GetBceidAccountAsync(string username, string userType)
         {
-            var (error, account) = await _bceid.GetBceidAccountCachedAsync(username, userType, _currentUser.UserGuid, _currentUser.UserType);
+            var (error, account) = await _bceid.GetBceidAccountCachedAsync(null, username, userType, _currentUser.UserGuid, _currentUser.UserType);
 
             if (string.IsNullOrEmpty(error))
             {
@@ -100,7 +100,7 @@ namespace Hmcr.Domain.Services
                 return (0, errors);
             }
 
-            var (error, account) = await _bceid.GetBceidAccountCachedAsync(user.Username, user.UserType, _currentUser.UserGuid, _currentUser.UserType);
+            var (error, account) = await _bceid.GetBceidAccountCachedAsync(null, user.Username, user.UserType, _currentUser.UserGuid, _currentUser.UserType);
 
             if (error.IsNotEmpty())
             {
@@ -196,16 +196,13 @@ namespace Hmcr.Domain.Services
             return (false, errors);
         }
 
-        public async Task UpdateUserFromBceidAsync(string username, string userType, long concurrencyControlNumber)
+        public async Task UpdateUserFromBceidAsync(Guid userGuid, string username, string userType, long concurrencyControlNumber)
         {
-            var (error, account) = await _bceid.GetBceidAccountCachedAsync(username, userType, _currentUser.UserGuid, _currentUser.UserType);
+            var (error, account) = await _bceid.GetBceidAccountCachedAsync(userGuid, username, userType, _currentUser.UserGuid, _currentUser.UserType);
 
             if (error.IsNotEmpty())
             {
-                //throw new HmcrException($"Unable to retrieve User[{username} ({userType})] from BCeID Service.");
-                _logger.LogInformation($"BCeID {error}");
-                _logger.LogInformation($"Unable to retrieve User[{username} ({userType})] from BCeID Service.");
-                return;
+                throw new HmcrException($"Unable to retrieve User [{userGuid.ToString("N")} ({userType})] from BCeID Service.");
             }
 
             await _userRepo.UpdateUserFromBceidAsync(account, concurrencyControlNumber);
