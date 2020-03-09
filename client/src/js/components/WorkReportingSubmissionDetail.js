@@ -172,7 +172,7 @@ const WorkReportingSubmissionDetail = ({ toggle, submission }) => {
           )}
           <Clipboard
             className="btn btn-primary btn-sm"
-            data-clipboard-text={createClipboardText(submissionResultData)}
+            option-text={() => createClipboardText(submissionResultData)}
             onSuccess={() => {
               toast.info(<div className="text-center">Copied to clipboard.</div>);
             }}
