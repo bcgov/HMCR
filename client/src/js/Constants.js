@@ -36,6 +36,7 @@ export const PATHS = {
   ADMIN: '/admin',
   ADMIN_ACTIVITIES: '/admin/activities',
   ADMIN_USERS: '/admin/users',
+  ADMIN_REPORTS: '/admin/reports',
   ADMIN_ROLES: '/admin/roles',
 };
 
