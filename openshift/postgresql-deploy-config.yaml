@@ -24,7 +24,7 @@ objects:
             deploymentconfig: ${NAME}${SUFFIX}
         spec:
           containers:
-            - image: docker-registry.default.svc:5000/txkggj-tools/postgresql-12-rhel8:1
+            - image: docker-registry.default.svc:5000/txkggj-tools/${IMAGE_STREAM_TAG}
               imagePullPolicy: IfNotPresent
               name: ${NAME}${SUFFIX}
               env:
@@ -99,7 +99,7 @@ objects:
               - ${NAME}${SUFFIX}
             from:
               kind: ImageStreamTag
-              name: 'postgresql-12-rhel8:1'
+              name: ${IMAGE_STREAM_TAG}
               namespace: txkggj-tools
           type: ImageChange
   - kind: PersistentVolumeClaim
@@ -165,6 +165,10 @@ parameters:
     name: VERSION
     required: true
     value: "v1.0.0"
+  - description: ImageStreamTag
+    displayName: ImageStreamTag
+    name: IMAGE_STREAM_TAG
+    value: "postgresql-10-rhel8:1"
   - name: POSTGRESQL_DATABASE_NAME
     displayName: PostgreSQL Database Name
     description: The name of the PostgreSQL database.
