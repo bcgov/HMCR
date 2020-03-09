@@ -169,6 +169,7 @@ const UserAdmin = ({ serviceAreas, userStatuses, userTypes, showValidationErrorD
 
   return (
     <React.Fragment>
+      <h1>User Management</h1>
       <MaterialCard>
         <Formik
           initialValues={searchInitialValues}

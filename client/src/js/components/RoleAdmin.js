@@ -112,6 +112,7 @@ const RoleAdmin = ({ showValidationErrorDialog }) => {
 
   return (
     <React.Fragment>
+      <h1>Role and Permissions Management</h1>
       <MaterialCard>
         <Formik
           initialValues={searchInitialValues}

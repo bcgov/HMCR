@@ -33,6 +33,7 @@ const WorkReporting = ({ currentUser }) => {
 
   return (
     <React.Fragment>
+      <h1>Report Upload</h1>
       <MaterialCard>
         <Row>
           <Col lg="8">

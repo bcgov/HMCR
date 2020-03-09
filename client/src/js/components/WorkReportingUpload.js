@@ -61,6 +61,7 @@ const WorkReportingUpload = ({
   showValidationErrorDialog,
   serviceArea,
   handleFileSubmitted,
+  submissionStreams,
   ...props
 }) => {
   const [fileInputKey, setFileInputKey] = useState(Math.random());
@@ -73,12 +74,10 @@ const WorkReportingUpload = ({
   const [reportTypes, setReportTypes] = useState([]);
 
   useEffect(() => {
-    api
-      .getSubmissionStreams()
-      .then(response =>
-        setReportTypes(response.data.map(o => ({ ...o, fileSizeLimit: o.fileSizeLimit / 1024 / 1024 })))
-      );
-  }, []);
+    setReportTypes(
+      submissionStreams.filter(o => o.isActive).map(o => ({ ...o, fileSizeLimit: o.fileSizeLimit / 1024 / 1024 }))
+    );
+  }, [submissionStreams]);
 
   const resetUploadStatus = () => {
     setFileInputKey(Math.random());
@@ -328,6 +327,7 @@ const WorkReportingUpload = ({
 const mapStateToProps = state => {
   return {
     currentUser: state.user.current,
+    submissionStreams: state.submissions.streams,
   };
 };
 

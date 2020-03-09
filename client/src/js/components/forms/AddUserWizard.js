@@ -190,7 +190,7 @@ const AddUserSetupUserSuccess = ({ toggle }) => {
       <ModalBody>
         <div className="text-center">
           <FontAwesomeIcon icon={['far', 'check-circle']} size="10x" className="fa-color-success" />
-          <h3 className="mt-3">User Created</h3>
+          <h1 className="mt-3">User Created</h1>
         </div>
       </ModalBody>
       <ModalFooter>

@@ -139,6 +139,7 @@ const ActivityAdmin = ({ maintenanceTypes, locationCodes, unitOfMeasures, showVa
 
   return (
     <React.Fragment>
+      <h1>Activity Number Management</h1>
       <MaterialCard>
         <Formik
           initialValues={searchInitialValues}
