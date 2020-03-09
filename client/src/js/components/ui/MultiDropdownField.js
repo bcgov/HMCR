@@ -4,7 +4,7 @@ import { FieldArray } from 'formik';
 
 const maxSelectedItemDisplay = 2;
 
-const MultiDropdown = ({ values, setFieldValue, items, name, title }) => {
+const MultiDropdownField = ({ values, setFieldValue, items, name, title }) => {
   const [selectAll, setSelectAll] = useState(false);
   const selectedValues = values[name];
 
@@ -85,4 +85,4 @@ const MultiDropdown = ({ values, setFieldValue, items, name, title }) => {
   );
 };
 
-export default MultiDropdown;
+export default MultiDropdownField;

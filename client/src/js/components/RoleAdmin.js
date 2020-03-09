@@ -7,7 +7,7 @@ import queryString from 'query-string';
 
 import Authorize from './fragments/Authorize';
 import MaterialCard from './ui/MaterialCard';
-import MultiDropdown from './ui/MultiDropdown';
+import MultiDropdownField from './ui/MultiDropdownField';
 import DataTableWithPaginaionControl from './ui/DataTableWithPaginaionControl';
 import SubmitButton from './ui/SubmitButton';
 import PageSpinner from './ui/PageSpinner';
@@ -127,7 +127,7 @@ const RoleAdmin = ({ showValidationErrorDialog }) => {
                   <Field type="text" name="searchText" placeholder="Role/Description" className="form-control" />
                 </Col>
                 <Col>
-                  <MultiDropdown
+                  <MultiDropdownField
                     {...formikProps}
                     title="Role Status"
                     items={Constants.ACTIVE_STATUS_ARRAY}

@@ -7,7 +7,7 @@ import queryString from 'query-string';
 
 import Authorize from './fragments/Authorize';
 import MaterialCard from './ui/MaterialCard';
-import MultiDropdown from './ui/MultiDropdown';
+import MultiDropdownField from './ui/MultiDropdownField';
 import DataTableWithPaginaionControl from './ui/DataTableWithPaginaionControl';
 import SubmitButton from './ui/SubmitButton';
 import PageSpinner from './ui/PageSpinner';
@@ -154,7 +154,7 @@ const ActivityAdmin = ({ maintenanceTypes, locationCodes, unitOfMeasures, showVa
                   <Field type="text" name="searchText" placeholder="Activity Number/Name" className="form-control" />
                 </Col>
                 <Col>
-                  <MultiDropdown
+                  <MultiDropdownField
                     {...formikProps}
                     title="Maintenance Type"
                     items={maintenanceTypes}
@@ -162,7 +162,7 @@ const ActivityAdmin = ({ maintenanceTypes, locationCodes, unitOfMeasures, showVa
                   />
                 </Col>
                 <Col>
-                  <MultiDropdown
+                  <MultiDropdownField
                     {...formikProps}
                     title="Activity Status"
                     items={Constants.ACTIVE_STATUS_ARRAY}

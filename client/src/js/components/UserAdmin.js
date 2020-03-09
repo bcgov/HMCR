@@ -9,7 +9,7 @@ import * as Yup from 'yup';
 
 import Authorize from './fragments/Authorize';
 import MaterialCard from './ui/MaterialCard';
-import MultiDropdown from './ui/MultiDropdown';
+import MultiDropdownField from './ui/MultiDropdownField';
 import AddUserWizard from './forms/AddUserWizard';
 import DataTableWithPaginaionControl from './ui/DataTableWithPaginaionControl';
 import SubmitButton from './ui/SubmitButton';
@@ -189,13 +189,18 @@ const UserAdmin = ({ serviceAreas, userStatuses, userTypes, showValidationErrorD
                   />
                 </Col>
                 <Col>
-                  <MultiDropdown {...formikProps} items={serviceAreas} name="serviceAreaIds" title="Service Area" />
+                  <MultiDropdownField
+                    {...formikProps}
+                    items={serviceAreas}
+                    name="serviceAreaIds"
+                    title="Service Area"
+                  />
                 </Col>
                 <Col>
-                  <MultiDropdown {...formikProps} items={userTypes} name="userTypeIds" title="User Type" />
+                  <MultiDropdownField {...formikProps} items={userTypes} name="userTypeIds" title="User Type" />
                 </Col>
                 <Col>
-                  <MultiDropdown {...formikProps} items={userStatuses} name="statusId" title="User Status" />
+                  <MultiDropdownField {...formikProps} items={userStatuses} name="statusId" title="User Status" />
                 </Col>
                 <Col>
                   <div className="float-right">
