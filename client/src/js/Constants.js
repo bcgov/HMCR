@@ -28,6 +28,12 @@ export const API_PATHS = {
   VERSION: '/version',
 };
 
+export const REPORT_TYPES = {
+  HMR_WORK_REPORT: { api: API_PATHS.WORK_REPORT, name: 'HMR_WORK_REPORT' },
+  HMR_ROCKFALL_REPORT: { api: API_PATHS.ROCKFALL_REPORT, name: 'HMR_ROCKFALL_REPORT' },
+  HMR_WILDLIFE_REPORT: { api: API_PATHS.WILDLIFE_REPORT, name: 'HMR_WILDLIFE_REPORT' },
+};
+
 export const PATHS = {
   UNAUTHORIZED: '/unauthorized',
   HOME: '/',
@@ -36,7 +42,7 @@ export const PATHS = {
   ADMIN: '/admin',
   ADMIN_ACTIVITIES: '/admin/activities',
   ADMIN_USERS: '/admin/users',
-  ADMIN_REPORTS: '/admin/reports',
+  ADMIN_REPORTS: '/reports',
   ADMIN_ROLES: '/admin/roles',
 };
 

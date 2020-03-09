@@ -17,19 +17,6 @@ import * as api from '../Api';
 
 const defaultFormValues = { reportTypeId: null, reportFile: null };
 
-const getApiPath = reportTypeId => {
-  switch (reportTypeId) {
-    case 1:
-      return Constants.API_PATHS.WORK_REPORT;
-    case 2:
-      return Constants.API_PATHS.ROCKFALL_REPORT;
-    case 3:
-      return Constants.API_PATHS.WILDLIFE_REPORT;
-    default:
-      return null;
-  }
-};
-
 const isFileCsvType = file => file && file.name.endsWith('.csv');
 
 const updateUploadStatusIcon = status => {
@@ -74,9 +61,7 @@ const WorkReportingUpload = ({
   const [reportTypes, setReportTypes] = useState([]);
 
   useEffect(() => {
-    setReportTypes(
-      submissionStreams.filter(o => o.isActive).map(o => ({ ...o, fileSizeLimit: o.fileSizeLimit / 1024 / 1024 }))
-    );
+    setReportTypes(Object.values(submissionStreams).filter(o => o.isActive));
   }, [submissionStreams]);
 
   const resetUploadStatus = () => {
@@ -92,7 +77,7 @@ const WorkReportingUpload = ({
   };
 
   const handleSubmit = (values, setFieldValue) => {
-    const apiPath = getApiPath(values.reportTypeId);
+    const apiPath = Constants.REPORT_TYPES[values.reportTypeId].api;
     if (!apiPath) return;
 
     const reset = () => {
@@ -232,7 +217,9 @@ const WorkReportingUpload = ({
                         File restrictions:{' '}
                         <ul>
                           <li>.csv files only</li>
-                          <li>Up to {reportTypes.find(o => o.id === values.reportTypeId).fileSizeLimit}MB per file</li>
+                          <li>
+                            Up to {reportTypes.find(o => o.id === values.reportTypeId).fileSizeLimitMb}MB per file
+                          </li>
                         </ul>
                       </Alert>
                       <CustomInput
@@ -247,7 +234,7 @@ const WorkReportingUpload = ({
                             setFieldValue,
                             setFieldError,
                             'reportFile',
-                            reportTypes.find(o => o.id === values.reportTypeId).fileSizeLimit
+                            reportTypes.find(o => o.id === values.reportTypeId).fileSizeLimitMb
                           )
                         }
                         key={fileInputKey}

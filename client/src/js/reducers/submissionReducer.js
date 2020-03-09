@@ -12,7 +12,19 @@ export default (state = defaultState, action) => {
     case FETCH_SUBMISSION_STATUSES:
       return { ...state, statuses: { ..._.mapKeys(action.payload, 'statusCode') } };
     case FETCH_SUBMISSION_STREAMS:
-      return { ...state, streams: action.payload };
+      return {
+        ...state,
+        streams: {
+          ..._.mapKeys(
+            action.payload.map(stream => ({
+              ...stream,
+              id: stream.stagingTableName,
+              fileSizeLimitMb: stream.fileSizeLimit / 1024 / 1024,
+            })),
+            'stagingTableName'
+          ),
+        },
+      };
     default:
       return state;
   }
