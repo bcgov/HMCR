@@ -1,8 +1,18 @@
 import React, { useState, useEffect } from 'react';
-import { DropdownToggle, DropdownMenu, UncontrolledDropdown, DropdownItem } from 'reactstrap';
+import { DropdownToggle, DropdownMenu, UncontrolledDropdown, DropdownItem, FormFeedback } from 'reactstrap';
 
 const SingleDropdown = props => {
-  const { items, defaultTitle, value, disabled, handleOnChange } = props;
+  const {
+    items,
+    defaultTitle,
+    value,
+    disabled,
+    handleOnChange,
+    handleOnBlur,
+    isInvalidClassName,
+    fieldMeta,
+    errorStyle,
+  } = props;
   const [title, setTitle] = useState(defaultTitle);
 
   useEffect(() => {
@@ -13,13 +23,11 @@ const SingleDropdown = props => {
     });
 
     if (item) setTitle(item.name);
-
-    // console.log(items);
-    // console.log(value);
   }, [value, items]);
 
   const handleOnSelect = item => {
-    handleOnChange(item.id);
+    if (handleOnChange) handleOnChange(item.id);
+
     setTitle(item.name);
   };
 
@@ -46,13 +54,18 @@ const SingleDropdown = props => {
   return (
     <div style={{ padding: '0' }}>
       <UncontrolledDropdown
-        className={`form-control form-input ${disabled ? 'disabled' : ''}`}
+        className={`form-control form-input ${disabled ? 'disabled' : ''} ${isInvalidClassName}`}
         disabled={disabled}
         style={{ padding: '0' }}
       >
-        <DropdownToggle caret>{title}</DropdownToggle>
+        <DropdownToggle caret onBlur={handleOnBlur}>
+          {title}
+        </DropdownToggle>
         <DropdownMenu>{renderMenuItems()}</DropdownMenu>
       </UncontrolledDropdown>
+      {fieldMeta && fieldMeta.touched && fieldMeta.error && (
+        <FormFeedback style={errorStyle}>{fieldMeta.error}</FormFeedback>
+      )}
     </div>
   );
 };
