@@ -1,8 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 
-namespace Hmcr.Model.Dtos.LocationCode
+namespace Hmcr.Model.Dtos.ActivityCode
 {
     public class ActivityCodeCreateDto
     {

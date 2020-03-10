@@ -6,6 +6,7 @@ const CODE_LOOKUP = '/codelookup';
 
 export const API_PATHS = {
   ACTIVITY_CODES: '/activitycodes',
+  ACTIVITY_CODES_LITE: '/activitycodes/lite',
   CODE_LOOKUP: CODE_LOOKUP,
   MAINTENANCE_TYPES: `${CODE_LOOKUP}/maintenancetypes`,
   UNIT_OF_MEASURES: `${CODE_LOOKUP}/unitofmeasures`,
@@ -28,6 +29,12 @@ export const API_PATHS = {
   VERSION: '/version',
 };
 
+export const REPORT_TYPES = {
+  HMR_WORK_REPORT: { api: API_PATHS.WORK_REPORT, name: 'HMR_WORK_REPORT' },
+  HMR_ROCKFALL_REPORT: { api: API_PATHS.ROCKFALL_REPORT, name: 'HMR_ROCKFALL_REPORT' },
+  HMR_WILDLIFE_REPORT: { api: API_PATHS.WILDLIFE_REPORT, name: 'HMR_WILDLIFE_REPORT' },
+};
+
 export const PATHS = {
   UNAUTHORIZED: '/unauthorized',
   HOME: '/',
@@ -36,6 +43,7 @@ export const PATHS = {
   ADMIN: '/admin',
   ADMIN_ACTIVITIES: '/admin/activities',
   ADMIN_USERS: '/admin/users',
+  ADMIN_REPORTS: '/reports',
   ADMIN_ROLES: '/admin/roles',
 };
 

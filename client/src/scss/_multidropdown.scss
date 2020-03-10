@@ -13,6 +13,8 @@
     background-color: unset;
     border: 1px solid #ced4da;
     text-align: left;
+    text-overflow: ellipsis;
+    overflow-x: hidden;
   }
 
   .btn-secondary.dropdown-toggle,
@@ -92,5 +94,6 @@
 
 .form-control.multi-select.is-invalid,
 .form-control.form-input.dropdown.is-invalid {
-  background-position: right 22px center;
+  // background-position: right 22px center;
+  background: unset;
 }

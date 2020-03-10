@@ -1,16 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Hmcr.Api.Authorization;
+﻿using Hmcr.Api.Authorization;
 using Hmcr.Api.Controllers.Base;
 using Hmcr.Domain.Services;
 using Hmcr.Model;
 using Hmcr.Model.Dtos;
-using Hmcr.Model.Dtos.LocationCode;
+using Hmcr.Model.Dtos.ActivityCode;
 using Hmcr.Model.Utils;
-using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System;
+using System.Threading.Tasks;
 
 namespace Hmcr.Api.Controllers
 {
@@ -33,12 +31,20 @@ namespace Hmcr.Api.Controllers
             int pageSize, int pageNumber, string orderBy = "activitynumber", string direction = "desc")
         {
             return Ok(await _activityCodeSvc.GetActivityCodesAsync(maintenanceTypes.ToStringArray(), locationCodes.ToDecimalArray(), isActive, searchText, pageSize, pageNumber, orderBy, direction));
-        }
+        }        
 
         [HttpGet("{id}", Name = "GetActivityCode")]
+        [RequiresPermission(Permissions.CodeRead)]
         public async Task<ActionResult<ActivityCodeSearchDto>> GetActivityCodeAsync(decimal id)
         {
             return Ok(await _activityCodeSvc.GetActivityCodeAsync(id));
+        }
+
+        [HttpGet("lite", Name = "GetActivityCodesLiteAsync")]
+        [AllowAnonymous]
+        public async Task<ActionResult<PagedDto<ActivityCodeSearchDto>>> GetActivityCodesLiteAsync()
+        {
+            return Ok(await _activityCodeSvc.GetActivityCodesLiteAsync());
         }
 
         [HttpPost]

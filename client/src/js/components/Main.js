@@ -14,6 +14,7 @@ import {
   fetchLocationCodes,
   fetchFeatureTypes,
   fetchSubmissionStatuses,
+  fetchSubmissionStreams,
 } from '../actions';
 
 const Main = ({
@@ -28,6 +29,7 @@ const Main = ({
   fetchLocationCodes,
   fetchFeatureTypes,
   fetchSubmissionStatuses,
+  fetchSubmissionStreams,
 }) => {
   const [loading, setLoading] = useState(true);
 
@@ -42,6 +44,7 @@ const Main = ({
       fetchLocationCodes(),
       fetchFeatureTypes(),
       fetchSubmissionStatuses(),
+      fetchSubmissionStreams(),
     ]).then(() => setLoading(false));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -70,4 +73,5 @@ export default connect(mapStateToProps, {
   fetchLocationCodes,
   fetchFeatureTypes,
   fetchSubmissionStatuses,
+  fetchSubmissionStreams,
 })(Main);

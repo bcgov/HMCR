@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Text.Json.Serialization;
 
-namespace Hmcr.Model.Dtos.LocationCode
+namespace Hmcr.Model.Dtos.ActivityCode
 {
     public class ActivityCodeUpdateDto
     {
