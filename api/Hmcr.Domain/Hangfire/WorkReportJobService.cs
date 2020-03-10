@@ -6,7 +6,7 @@ using Hmcr.Domain.CsvHelpers;
 using Hmcr.Domain.Hangfire.Base;
 using Hmcr.Domain.Services;
 using Hmcr.Model;
-using Hmcr.Model.Dtos.LocationCode;
+using Hmcr.Model.Dtos.ActivityCode;
 using Hmcr.Model.Dtos.SubmissionObject;
 using Hmcr.Model.Dtos.WorkReport;
 using Hmcr.Model.Utils;

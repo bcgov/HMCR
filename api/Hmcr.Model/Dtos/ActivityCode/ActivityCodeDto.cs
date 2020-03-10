@@ -1,11 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using Hmcr.Model.Dtos.LocationCode;
+using System;
+using System.Text.Json.Serialization;
 
-namespace Hmcr.Model.Dtos.LocationCode
+namespace Hmcr.Model.Dtos.ActivityCode
 {
     public class ActivityCodeDto
     {
+        [JsonPropertyName("id")]
         public decimal ActivityCodeId { get; set; }
         public string ActivityNumber { get; set; }
         public string ActivityName { get; set; }

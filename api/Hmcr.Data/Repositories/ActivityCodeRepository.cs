@@ -2,8 +2,8 @@
 using Hmcr.Data.Database.Entities;
 using Hmcr.Data.Repositories.Base;
 using Hmcr.Model.Dtos;
+using Hmcr.Model.Dtos.ActivityCode;
 using Hmcr.Model.Utils;
-using Hmcr.Model.Dtos.LocationCode;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -86,7 +86,7 @@ namespace Hmcr.Data.Repositories
             {
                 query = (bool)isActive
                     ? query.Where(ac => ac.EndDate == null || ac.EndDate > DateTime.Today)
-                    : query.Where(ac => ac.EndDate != null || ac.EndDate <= DateTime.Today.AddDays(1));
+                    : query.Where(ac => ac.EndDate != null && ac.EndDate <= DateTime.Today);
             }
 
             if (searchText.IsNotEmpty())

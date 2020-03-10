@@ -22,6 +22,7 @@ using Hmcr.Model.Dtos.User;
 using Hmcr.Model.Dtos.UserRole;
 using Hmcr.Model.Dtos.WildlifeReport;
 using Hmcr.Model.Dtos.WorkReport;
+using Hmcr.Model.Dtos.ActivityCode;
 
 namespace Hmcr.Data.Mappings
 {
