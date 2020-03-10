@@ -2319,12 +2319,12 @@ namespace Hmcr.Data.Database.Entities
 
                 entity.ToView("HMR_ROCKFALL_REPORT_VW");
 
-                entity.Property(e => e.AppCreateTimestamp)
-                    .HasColumnName("APP_CREATE_TIMESTAMP")
+                entity.Property(e => e.AppCreateTimestampPst)
+                    .HasColumnName("APP_CREATE_TIMESTAMP_PST")
                     .HasColumnType("datetime");
 
-                entity.Property(e => e.AppLastUpdateTimestamp)
-                    .HasColumnName("APP_LAST_UPDATE_TIMESTAMP")
+                entity.Property(e => e.AppLastUpdateTimestampPst)
+                    .HasColumnName("APP_LAST_UPDATE_TIMESTAMP_PST")
                     .HasColumnType("datetime");
 
                 entity.Property(e => e.Comments)
@@ -5538,12 +5538,12 @@ namespace Hmcr.Data.Database.Entities
                     .HasMaxLength(1)
                     .IsUnicode(false);
 
-                entity.Property(e => e.AppCreateTimestamp)
-                    .HasColumnName("APP_CREATE_TIMESTAMP")
+                entity.Property(e => e.AppCreateTimestampPst)
+                    .HasColumnName("APP_CREATE_TIMESTAMP_PST")
                     .HasColumnType("datetime");
 
-                entity.Property(e => e.AppLastUpdateTimestamp)
-                    .HasColumnName("APP_LAST_UPDATE_TIMESTAMP")
+                entity.Property(e => e.AppLastUpdateTimestampPst)
+                    .HasColumnName("APP_LAST_UPDATE_TIMESTAMP_PST")
                     .HasColumnType("datetime");
 
                 entity.Property(e => e.Comment)
@@ -6170,12 +6170,12 @@ namespace Hmcr.Data.Database.Entities
                     .HasMaxLength(30)
                     .IsUnicode(false);
 
-                entity.Property(e => e.AppCreateTimestamp)
-                    .HasColumnName("APP_CREATE_TIMESTAMP")
+                entity.Property(e => e.AppCreateTimestampPst)
+                    .HasColumnName("APP_CREATE_TIMESTAMP_PST")
                     .HasColumnType("datetime");
 
-                entity.Property(e => e.AppLastUpdateTimestamp)
-                    .HasColumnName("APP_LAST_UPDATE_TIMESTAMP")
+                entity.Property(e => e.AppLastUpdateTimestampPst)
+                    .HasColumnName("APP_LAST_UPDATE_TIMESTAMP_PST")
                     .HasColumnType("datetime");
 
                 entity.Property(e => e.Comments)

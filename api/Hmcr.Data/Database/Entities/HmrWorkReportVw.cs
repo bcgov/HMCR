@@ -6,6 +6,7 @@ namespace Hmcr.Data.Database.Entities
 {
     public partial class HmrWorkReportVw
     {
+        public decimal WorkReportId { get; set; }
         public string ReportType { get; set; }
         public string RecordType { get; set; }
         public decimal? ServiceAreaNumber { get; set; }
@@ -39,10 +40,9 @@ namespace Hmcr.Data.Database.Entities
         public Geometry Geometry { get; set; }
         public decimal SubmissionObjectId { get; set; }
         public string SubmissionFileName { get; set; }
-        public decimal WorkReportId { get; set; }
         public decimal? RowNum { get; set; }
         public string ValidationStatus { get; set; }
-        public DateTime AppCreateTimestamp { get; set; }
-        public DateTime AppLastUpdateTimestamp { get; set; }
+        public DateTime? AppCreateTimestampPst { get; set; }
+        public DateTime? AppLastUpdateTimestampPst { get; set; }
     }
 }
