@@ -207,6 +207,11 @@ namespace Hmcr.Domain.Hangfire
             {
                 errors.AddItem(Fields.UnitOfMeasure, $"Unit of measuer for the activity Code [{activityCode.ActivityNumber}] must be [{activityCode.UnitOfMeasure}]");
             }
+
+            if (untypedRow.RecordType.ToLowerInvariant() != activityCode.MaintenanceType.ToLowerInvariant())
+            {
+                errors.AddItem(Fields.RecordType, $"Report type of the activity code [{activityCode.ActivityNumber}] must be [{activityCode.MaintenanceType}]");
+            }
         }
 
         private void CopyCalculatedFieldsFormUntypedRow(List<WorkReportTyped> typedRows, List<WorkReportCsvDto> untypedRows)
