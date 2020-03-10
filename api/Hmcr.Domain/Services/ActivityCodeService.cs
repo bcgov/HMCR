@@ -13,6 +13,7 @@ namespace Hmcr.Domain.Services
     {
         Task<PagedDto<ActivityCodeSearchDto>> GetActivityCodesAsync(string[]? maintenanceTypes, decimal[]? locationCodes, bool? isActive, string searchText, int pageSize, int pageNumber, string orderBy, string direction);
         Task<ActivityCodeSearchDto> GetActivityCodeAsync(decimal id);
+        Task<IEnumerable<ActivityCodeLiteDto>> GetActivityCodesLiteAsync();
         Task<(bool NotFound, Dictionary<string, List<string>> Errors)> UpdateActivityCodeAsync(ActivityCodeUpdateDto activityCode);
         Task<(decimal id, Dictionary<string, List<string>> Errors)> CreateActivityCodeAsync(ActivityCodeCreateDto activityCode);
         Task<(bool NotFound, Dictionary<string, List<string>> Errors)> DeleteActivityCodeAsync(decimal id);
@@ -168,6 +169,11 @@ namespace Hmcr.Domain.Services
             await _unitOfWork.CommitAsync();
 
             return (false, errors);
+        }
+
+        public async Task<IEnumerable<ActivityCodeLiteDto>> GetActivityCodesLiteAsync()
+        {
+            return await _activityCodeRepo.GetActiveActivityCodesLiteAsync();
         }
     }
 }

@@ -15,6 +15,7 @@ namespace Hmcr.Data.Repositories
     public interface IActivityCodeRepository
     {
         Task<IEnumerable<ActivityCodeDto>> GetActiveActivityCodesAsync();
+        Task<IEnumerable<ActivityCodeLiteDto>> GetActiveActivityCodesLiteAsync();
         Task<PagedDto<ActivityCodeSearchDto>> GetActivityCodesAsync(string[]? maintenanceTypes, decimal[]? locationCodes, bool? isActive, string searchText, int pageSize, int pageNumber, string orderBy, string direction);
         Task<ActivityCodeSearchDto> GetActivityCodeAsync(decimal id);
         Task<HmrActivityCode> CreateActivityCodeAsync(ActivityCodeCreateDto activityCode);
@@ -42,17 +43,32 @@ namespace Hmcr.Data.Repositories
             return Mapper.Map<IEnumerable<ActivityCodeDto>>(activities).Where(x => x.IsActive);
         }
 
+        public async Task<IEnumerable<ActivityCodeLiteDto>> GetActiveActivityCodesLiteAsync()
+        {
+            var activities = await DbSet
+                .OrderBy(x => x.ActivityNumber)
+                .ThenBy(x => x.ActivityName)
+                .Select(x => new ActivityCodeLiteDto()
+                {
+                    Id = x.ActivityCodeId,
+                    Name = $"{x.ActivityNumber}-{x.ActivityName}",
+                })
+                .ToListAsync();
+
+            return activities;
+        }
+
         public async Task<HmrActivityCode> CreateActivityCodeAsync(ActivityCodeCreateDto activityCode)
         {
             var activityCodeEntity = new HmrActivityCode();
-            
+
             Mapper.Map(activityCode, activityCodeEntity);
 
             await DbSet.AddAsync(activityCodeEntity);
-            
+
             return activityCodeEntity;
         }
-        
+
         public async Task<ActivityCodeSearchDto> GetActivityCodeAsync(decimal id)
         {
             var activityCodeEntity = await DbSet.AsNoTracking()
@@ -71,7 +87,7 @@ namespace Hmcr.Data.Repositories
         public async Task<PagedDto<ActivityCodeSearchDto>> GetActivityCodesAsync(string[]? maintenanceTypes, decimal[]? locationCodes, bool? isActive, string searchText, int pageSize, int pageNumber, string orderBy, string direction)
         {
             var query = DbSet.AsNoTracking();
-            
+
             if (maintenanceTypes != null && maintenanceTypes.Length > 0)
             {
                 query = query.Where(ac => maintenanceTypes.Contains(ac.MaintenanceType));
