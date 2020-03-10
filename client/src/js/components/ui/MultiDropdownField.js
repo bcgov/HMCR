@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
+import PropTypes from 'prop-types';
 import { DropdownToggle, DropdownMenu, UncontrolledDropdown, Label, Input } from 'reactstrap';
 import { FieldArray } from 'formik';
 
 const maxSelectedItemDisplay = 2;
 
-const MultiDropdownField = ({ values, setFieldValue, items, name, title }) => {
+const MultiDropdownField = ({ values, setFieldValue, items, name, title, searchable }) => {
   const [selectAll, setSelectAll] = useState(false);
+  const [textFilter, setTextFilter] = useState('');
   const selectedValues = values[name];
 
   const updateTitle = () => {
@@ -38,10 +40,31 @@ const MultiDropdownField = ({ values, setFieldValue, items, name, title }) => {
 
   updateSelectAll();
 
+  let displayItems = items;
+
+  if (textFilter.trim().length > 0) {
+    const pattern = new RegExp(textFilter.trim(), 'i');
+    const filteredItems = items.filter(item => pattern.test(item.name));
+    displayItems = filteredItems;
+  }
+
   return (
     <UncontrolledDropdown className="form-input">
       <DropdownToggle caret>{updateTitle()}</DropdownToggle>
       <DropdownMenu className="multi">
+        {searchable && (
+          <div className="multi-item select-all p-2">
+            <Input
+              name={name}
+              type="textbox"
+              placeholder="Search"
+              value={textFilter}
+              onChange={e => {
+                setTextFilter(e.target.value);
+              }}
+            />
+          </div>
+        )}
         <div className="multi-item select-all">
           <Label check className="multi-item-label">
             <Input
@@ -58,7 +81,7 @@ const MultiDropdownField = ({ values, setFieldValue, items, name, title }) => {
         <FieldArray name={name}>
           {({ push, remove }) => (
             <div className="multi-menu">
-              {items.map(item => {
+              {displayItems.map(item => {
                 const displayName = item.name;
                 return (
                   <div key={item.id} className="multi-item">
@@ -83,6 +106,26 @@ const MultiDropdownField = ({ values, setFieldValue, items, name, title }) => {
       </DropdownMenu>
     </UncontrolledDropdown>
   );
+};
+
+MultiDropdownField.propTypes = {
+  // Formik form values
+  values: PropTypes.object.isRequired,
+
+  // Formik setFieldValue
+  setFieldValue: PropTypes.func.isRequired,
+
+  // Dropdown items
+  items: PropTypes.array.isRequired,
+
+  // Formik field name
+  name: PropTypes.string.isRequired,
+
+  // Default title of dropdown
+  title: PropTypes.string.isRequired,
+
+  // Enable search text field
+  searchable: PropTypes.bool,
 };
 
 export default MultiDropdownField;

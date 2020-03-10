@@ -13,6 +13,8 @@
     background-color: unset;
     border: 1px solid #ced4da;
     text-align: left;
+    text-overflow: ellipsis;
+    overflow-x: hidden;
   }
 
   .btn-secondary.dropdown-toggle,

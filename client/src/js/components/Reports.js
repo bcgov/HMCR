@@ -126,14 +126,22 @@ const Reports = ({
                           title="Activity Number"
                           items={activityCodes}
                           name="activityNumberIds"
+                          searchable={true}
                         />
+                      </div>
+                      <div>
+                        <Button color="primary" type="submit" className="mr-2">
+                          Search
+                        </Button>
+                        <Button color="secondary" type="reset">
+                          Reset
+                        </Button>
                       </div>
                     </div>
                   </React.Fragment>
                 )}
               </Form>
             </MaterialCard>
-            <Button onClick={formikProps.submitForm}>Submit</Button>
           </React.Fragment>
         )}
       </Formik>
