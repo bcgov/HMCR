@@ -87,6 +87,12 @@
   }
 }
 
+.DatePickerWrapper.is-invalid {
+  .DateRangePickerInput__withBorder {
+    border: 1px solid theme-color(danger);
+  }
+}
+
 .DateRangePicker {
   .DateRangePickerInput__withBorder {
     height: calc(1.5em + 0.75rem + 2px);
