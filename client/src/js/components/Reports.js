@@ -1,24 +1,37 @@
 import React, { useState, useEffect } from 'react';
 import { connect } from 'react-redux';
-import { Row, Col, Button } from 'reactstrap';
-import { Formik, Form, Field } from 'formik';
+import { Button } from 'reactstrap';
+import { Formik, Form } from 'formik';
 import * as Yup from 'yup';
+import moment from 'moment';
+
+import { fetchActivityCodesDropdown } from '../actions';
 
 import MaterialCard from './ui/MaterialCard';
 import SingleDropdownField from './ui/SingleDropdownField';
 import DateRangeField from './ui/DateRangeField';
 import MultiDropdownField from './ui/MultiDropdownField';
+import { FormInput } from './forms/FormInputs';
 
-import * as Constants from '../Constants';
+// import * as Constants from '../Constants';
+
+const filterContainerStyle = {
+  width: '200px',
+  marginRight: '1rem',
+};
 
 const defaultSearchFormValues = {
   reportTypeId: '',
-  dateFrom: null,
-  dateTo: null,
+  dateFrom: moment()
+    .subtract(1, 'months')
+    .startOf('month'),
+  dateTo: moment()
+    .subtract(1, 'months')
+    .endOf('month'),
   serviceAreaNumbers: [],
   highwayUniqueId: '',
   maintenanceTypeIds: [],
-  activityNumbers: [],
+  activityNumberIds: [],
 };
 
 const validationSchema = Yup.object({
@@ -29,15 +42,31 @@ const validationSchema = Yup.object({
   dateTo: Yup.object().required('Required'),
 });
 
-const Reports = ({ reportTypes, maintenanceTypes, serviceAreas, currentUser }) => {
+const Reports = ({
+  reportTypes,
+  maintenanceTypes,
+  serviceAreas,
+  currentUser,
+  activityCodes,
+  fetchActivityCodesDropdown,
+}) => {
   const [validServiceAreas, setValidServiceAreas] = useState([]);
 
   useEffect(() => {
     const currentUserSAIds = currentUser.serviceAreas.map(sa => sa.id);
     setValidServiceAreas(serviceAreas.filter(sa => currentUserSAIds.includes(sa.id)));
+
+    if (activityCodes.length === 0) {
+      fetchActivityCodesDropdown();
+    }
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  console.log(validServiceAreas);
+  function disableFutureDates(date) {
+    return date.isAfter(moment());
+  }
+
   return (
     <React.Fragment>
       <h1>Reports Export</h1>
@@ -56,29 +85,50 @@ const Reports = ({ reportTypes, maintenanceTypes, serviceAreas, currentUser }) =
             <MaterialCard>
               <Form>
                 <div className="d-flex">
-                  <div style={{ width: '200px' }} className="mr-3">
+                  <div style={filterContainerStyle}>
                     <SingleDropdownField defaultTitle="Select Report Type" items={reportTypes} name="reportTypeId" />
                   </div>
-                  <DateRangeField name="reportDate" fromName="dateFrom" toName="dateTo" />
+                  <DateRangeField
+                    name="reportDate"
+                    fromName="dateFrom"
+                    toName="dateTo"
+                    isOutsideRange={disableFutureDates}
+                  />
                 </div>
                 {formikProps.values.reportTypeId && formikProps.values.dateFrom && formikProps.values.dateTo && (
                   <React.Fragment>
                     <div className="mt-3 mb-1">
                       <strong>Optional filters</strong>
                     </div>
-                    <Row>
-                      <Col>
+                    <div className="d-flex">
+                      <div style={filterContainerStyle}>
+                        <MultiDropdownField
+                          {...formikProps}
+                          title="Service Area"
+                          items={validServiceAreas}
+                          name="serviceAreaNumbers"
+                        />
+                      </div>
+                      <div style={filterContainerStyle}>
+                        <FormInput type="text" name="highwayUniqueId" placeholder="Highway Unique" />
+                      </div>
+                      <div style={filterContainerStyle}>
                         <MultiDropdownField
                           {...formikProps}
                           title="Maintenance Type"
                           items={maintenanceTypes}
                           name="maintenanceTypeIds"
                         />
-                      </Col>
-                      <Col />
-                      <Col />
-                      <Col />
-                    </Row>
+                      </div>
+                      <div style={filterContainerStyle}>
+                        <MultiDropdownField
+                          {...formikProps}
+                          title="Activity Number"
+                          items={activityCodes}
+                          name="activityNumberIds"
+                        />
+                      </div>
+                    </div>
                   </React.Fragment>
                 )}
               </Form>
@@ -97,7 +147,8 @@ const mapStateToProps = state => {
     maintenanceTypes: state.codeLookups.maintenanceTypes,
     serviceAreas: Object.values(state.serviceAreas),
     currentUser: state.user.current,
+    activityCodes: state.codeLookups.activityCodes,
   };
 };
 
-export default connect(mapStateToProps)(Reports);
+export default connect(mapStateToProps, { fetchActivityCodesDropdown })(Reports);

@@ -6,6 +6,7 @@ const CODE_LOOKUP = '/codelookup';
 
 export const API_PATHS = {
   ACTIVITY_CODES: '/activitycodes',
+  ACTIVITY_CODES_LITE: '/activitycodes/lite',
   CODE_LOOKUP: CODE_LOOKUP,
   MAINTENANCE_TYPES: `${CODE_LOOKUP}/maintenancetypes`,
   UNIT_OF_MEASURES: `${CODE_LOOKUP}/unitofmeasures`,

@@ -1,4 +1,10 @@
-import { FETCH_MAINTENANCE_TYPES, FETCH_UNIT_OF_MEASURES, FETCH_FEATURE_TYPES, FETCH_LOCATION_CODES } from './types';
+import {
+  FETCH_MAINTENANCE_TYPES,
+  FETCH_UNIT_OF_MEASURES,
+  FETCH_FEATURE_TYPES,
+  FETCH_LOCATION_CODES,
+  FETCH_ACTIVITY_CODES_DROPDOWN,
+} from './types';
 
 import * as api from '../Api';
 
@@ -27,5 +33,12 @@ export const fetchLocationCodes = () => dispatch => {
   return api.getLocationCodes().then(response => {
     const data = response.data;
     dispatch({ type: FETCH_LOCATION_CODES, payload: data });
+  });
+};
+
+export const fetchActivityCodesDropdown = () => dispatch => {
+  return api.getActivityCodesLite().then(response => {
+    const data = response.data;
+    dispatch({ type: FETCH_ACTIVITY_CODES_DROPDOWN, payload: data });
   });
 };

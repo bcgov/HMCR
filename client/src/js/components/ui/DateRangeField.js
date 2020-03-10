@@ -35,7 +35,6 @@ const DateRangePickerWithFormik = ({ name, fromName, toName, isOutsideRange, for
         startDatePlaceholderText="Date From"
         endDatePlaceholderText="Date To"
         hideKeyboardShortcutsPanel={true}
-        transitionDuration={0}
         small
         showDefaultInputIcon={true}
         inputIconPosition="after"

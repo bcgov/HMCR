@@ -63,7 +63,6 @@ const DeleteButton = ({
                 onFocusChange={({ focused }) => handleDatePickerFocusChange(focused)}
                 hideKeyboardShortcutsPanel={true}
                 numberOfMonths={1}
-                transitionDuration={0}
                 small
                 block
                 noBorder

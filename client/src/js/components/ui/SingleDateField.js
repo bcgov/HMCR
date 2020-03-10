@@ -25,7 +25,6 @@ const SingleDatePickerWithFormik = ({ field: { name }, placeholder, style, isOut
         onFocusChange={({ focused }) => handleFocusChanged(focused)}
         hideKeyboardShortcutsPanel={true}
         numberOfMonths={1}
-        transitionDuration={0}
         small
         block
         noBorder
