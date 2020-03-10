@@ -18,7 +18,6 @@ export default (state = defaultState, action) => {
           ..._.mapKeys(
             action.payload.map(stream => ({
               ...stream,
-              id: stream.stagingTableName,
               fileSizeLimitMb: stream.fileSizeLimit / 1024 / 1024,
             })),
             'stagingTableName'

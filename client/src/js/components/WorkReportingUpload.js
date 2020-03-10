@@ -77,7 +77,8 @@ const WorkReportingUpload = ({
   };
 
   const handleSubmit = (values, setFieldValue) => {
-    const apiPath = Constants.REPORT_TYPES[values.reportTypeId].api;
+    const stagingTableName = reportTypes.find(type => values.reportTypeId === type.id).stagingTableName;
+    const apiPath = Constants.REPORT_TYPES[stagingTableName].api;
     if (!apiPath) return;
 
     const reset = () => {
