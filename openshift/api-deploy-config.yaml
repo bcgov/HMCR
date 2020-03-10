@@ -88,12 +88,7 @@ objects:
                   valueFrom:
                     secretKeyRef:
                       name: service-account
-                      key: SERVICE_PASSWORD                
-                - name: ServiceAccount__GUID
-                  valueFrom:
-                    secretKeyRef:
-                      name: service-account
-                      key: SERVICE_GUID
+                      key: SERVICE_PASSWORD
                 - name: BCEID__OSID
                   valueFrom:
                     secretKeyRef:
