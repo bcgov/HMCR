@@ -7,5 +7,6 @@
         /// Length in KM
         /// </summary>
         public decimal Length { get; set; }
+        public string Descr { get; set; }
     }
 }

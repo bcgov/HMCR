@@ -15,6 +15,8 @@ namespace Hmcr.Model.Dtos.WildlifeReport
         public decimal? Latitude { get; set; }
         public decimal? Longitude { get; set; }
         public string HighwayUnique { get; set; }
+        public string HighwayUniqueName { get; set; }
+        public decimal? HighwayUniqueLength { get; set; }
         public string Landmark { get; set; }
         public decimal? Offset { get; set; }
         public string NearestTown { get; set; }
