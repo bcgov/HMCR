@@ -19,6 +19,8 @@ namespace Hmcr.Model.Dtos.WorkReport
         public string UnitOfMeasure { get; set; }
         public DateTime? PostedDate { get; set; }
         public string HighwayUnique { get; set; }
+        public string HighwayUniqueName { get; set; }
+        public decimal? HighwayUniqueLength { get; set; }
         public string Landmark { get; set; }
         public decimal? StartOffset { get; set; }
         public decimal? EndOffset { get; set; }
@@ -26,6 +28,7 @@ namespace Hmcr.Model.Dtos.WorkReport
         public decimal? StartLongitude { get; set; }
         public decimal? EndLatitude { get; set; }
         public decimal? EndLongitude { get; set; }
+        public decimal? WorkLength { get; set; }
         public string StructureNumber { get; set; }
         public string SiteNumber { get; set; }
         public decimal? ValueOfWork { get; set; }

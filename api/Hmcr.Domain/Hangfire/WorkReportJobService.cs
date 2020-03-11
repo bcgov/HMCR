@@ -269,6 +269,9 @@ namespace Hmcr.Domain.Hangfire
                 }
                 else if (result.result == SpValidationResult.Success)
                 {
+                    typedRow.HighwayUniqueLength = result.rfiSegment.Length;
+                    typedRow.HighwayUniqueName = result.rfiSegment.Descr;
+
                     typedRow.StartOffset = result.lrsResult.Offset;
                     workReport.Geometry = _geometryFactory.CreatePoint(result.lrsResult.SnappedPoint.ToTopologyCoordinate());
                     submissionRow.StartVariance = result.lrsResult.Variance;
@@ -285,11 +288,16 @@ namespace Hmcr.Domain.Hangfire
                 }
                 else if (result.result == SpValidationResult.Success)
                 {
+                    typedRow.HighwayUniqueLength = result.rfiSegment.Length;
+                    typedRow.HighwayUniqueName = result.rfiSegment.Descr;
+
                     typedRow.StartOffset = result.startPointResult.Offset;
                     submissionRow.StartVariance = result.startPointResult.Variance;
 
                     typedRow.EndOffset = result.endPointResult.Offset;
                     submissionRow.EndVariance = result.endPointResult.Variance;
+
+                    typedRow.WorkLength = typedRow.EndOffset - typedRow.StartOffset;
 
                     if (result.line.ToTopologyCoordinates().Length >= 2)
                     {
@@ -322,6 +330,9 @@ namespace Hmcr.Domain.Hangfire
                 }
                 else if (result.result == SpValidationResult.Success)
                 {
+                    typedRow.HighwayUniqueLength = result.rfiSegment.Length;
+                    typedRow.HighwayUniqueName = result.rfiSegment.Descr;
+
                     typedRow.StartLongitude = result.point.Longitude;
                     typedRow.StartLatitude = result.point.Latitude;
                     workReport.Geometry = _geometryFactory.CreatePoint(result.point.ToTopologyCoordinate());
@@ -338,6 +349,9 @@ namespace Hmcr.Domain.Hangfire
                 }
                 else if (result.result == SpValidationResult.Success)
                 {
+                    typedRow.HighwayUniqueLength = result.rfiSegment.Length;
+                    typedRow.HighwayUniqueName = result.rfiSegment.Descr;
+
                     typedRow.StartLongitude = result.startPoint.Longitude;
                     typedRow.StartLatitude = result.startPoint.Latitude;
                     submissionRow.StartVariance = typedRow.StartOffset - result.snappedStartOffset;
@@ -345,6 +359,8 @@ namespace Hmcr.Domain.Hangfire
                     typedRow.EndLongitude = result.endPoint.Longitude;
                     typedRow.EndLatitude = result.endPoint.Latitude;
                     submissionRow.EndVariance = typedRow.EndOffset - result.snappedEndOffset;
+
+                    typedRow.WorkLength = result.snappedEndOffset - result.snappedStartOffset;
 
                     if (result.line.ToTopologyCoordinates().Length >= 2)
                     {

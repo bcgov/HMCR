@@ -238,6 +238,9 @@ namespace Hmcr.Domain.Hangfire
             }
             else if (result.result == SpValidationResult.Success)
             {
+                typedRow.HighwayUniqueLength = result.rfiSegment.Length;
+                typedRow.HighwayUniqueName = result.rfiSegment.Descr;
+
                 typedRow.Offset = result.lrsResult.Offset;
                 wildlifeReport.Geometry = _geometryFactory.CreatePoint(result.lrsResult.SnappedPoint.ToTopologyCoordinate());
                 submissionRow.StartVariance = result.lrsResult.Variance;
@@ -257,6 +260,9 @@ namespace Hmcr.Domain.Hangfire
             }
             else if (result.result == SpValidationResult.Success)
             {
+                typedRow.HighwayUniqueLength = result.rfiSegment.Length;
+                typedRow.HighwayUniqueName = result.rfiSegment.Descr;
+
                 typedRow.Longitude = result.point.Longitude;
                 typedRow.Latitude = result.point.Latitude;
                 wildlifeReport.Geometry = _geometryFactory.CreatePoint(result.point.ToTopologyCoordinate());

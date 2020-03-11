@@ -136,7 +136,7 @@ namespace Hmcr.Chris
 
             var dimension = feature.geometry.type.ToLower() == "point" ? RecordDimension.Point : RecordDimension.Line;
 
-            return new RfiSegment { Dimension = dimension, Length = Convert.ToDecimal(feature.properties.NE_LENGTH) };
+            return new RfiSegment { Dimension = dimension, Length = Convert.ToDecimal(feature.properties.NE_LENGTH), Descr = feature.properties.NE_DESCR };
         }
     }
 }
