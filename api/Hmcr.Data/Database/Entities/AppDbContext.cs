@@ -1936,11 +1936,16 @@ namespace Hmcr.Data.Database.Entities
                     .IsUnicode(false)
                     .HasComment("This identifies the section of road on which the activity occurred.  Road or Highway number sourced from a road network data product (RFI as of  2019) This is a value in the in the format: [Service Area]-[area manager area]-[subarea]-[highway number]");
 
+                entity.Property(e => e.HighwayUniqueLength)
+                    .HasColumnName("HIGHWAY_UNIQUE_LENGTH")
+                    .HasColumnType("numeric(25, 20)")
+                    .HasComment("Driven length in KM of the HIGHWAY_UNIQUE segment at the time of data submission.  ");
+
                 entity.Property(e => e.HighwayUniqueName)
                     .HasColumnName("HIGHWAY_UNIQUE_NAME")
                     .HasMaxLength(255)
                     .IsUnicode(false)
-                    .HasComment("Road or Highway name sourced from a road network data product (RFI as of Dec 2019)");
+                    .HasComment("Road or Highway description sourced from a road network data product (RFI as of Dec 2019)");
 
                 entity.Property(e => e.Landmark)
                     .HasColumnName("LANDMARK")
@@ -2214,6 +2219,10 @@ namespace Hmcr.Data.Database.Entities
                     .HasMaxLength(16)
                     .IsUnicode(false);
 
+                entity.Property(e => e.HighwayUniqueLength)
+                    .HasColumnName("HIGHWAY_UNIQUE_LENGTH")
+                    .HasColumnType("numeric(25, 20)");
+
                 entity.Property(e => e.HighwayUniqueName)
                     .HasColumnName("HIGHWAY_UNIQUE_NAME")
                     .HasMaxLength(255)
@@ -2383,6 +2392,10 @@ namespace Hmcr.Data.Database.Entities
                     .HasColumnName("HIGHWAY_UNIQUE")
                     .HasMaxLength(16)
                     .IsUnicode(false);
+
+                entity.Property(e => e.HighwayUniqueLength)
+                    .HasColumnName("HIGHWAY_UNIQUE_LENGTH")
+                    .HasColumnType("numeric(25, 20)");
 
                 entity.Property(e => e.HighwayUniqueName)
                     .HasColumnName("HIGHWAY_UNIQUE_NAME")
@@ -5233,6 +5246,17 @@ namespace Hmcr.Data.Database.Entities
                     .IsUnicode(false)
                     .HasComment("This identifies the section of road on which the incident occurred. This is a value in the in the format: [Service Area]-[area manager area]-[subarea]-[highway number] This reference number reflects a valid reference in the road network (currenltyRFI within  CHRIS as of 2019)");
 
+                entity.Property(e => e.HighwayUniqueLength)
+                    .HasColumnName("HIGHWAY_UNIQUE_LENGTH")
+                    .HasColumnType("numeric(25, 20)")
+                    .HasComment("Driven length in KM of the HIGHWAY_UNIQUE segment at the time of data submission.  ");
+
+                entity.Property(e => e.HighwayUniqueName)
+                    .HasColumnName("HIGHWAY_UNIQUE_NAME")
+                    .HasMaxLength(40)
+                    .IsUnicode(false)
+                    .HasComment("Road or Highway description sourced from a road network data product (RFI as of Dec 2019)");
+
                 entity.Property(e => e.Landmark)
                     .HasColumnName("LANDMARK")
                     .HasMaxLength(8)
@@ -5448,6 +5472,15 @@ namespace Hmcr.Data.Database.Entities
                     .HasMaxLength(16)
                     .IsUnicode(false);
 
+                entity.Property(e => e.HighwayUniqueLength)
+                    .HasColumnName("HIGHWAY_UNIQUE_LENGTH")
+                    .HasColumnType("numeric(25, 20)");
+
+                entity.Property(e => e.HighwayUniqueName)
+                    .HasColumnName("HIGHWAY_UNIQUE_NAME")
+                    .HasMaxLength(40)
+                    .IsUnicode(false);
+
                 entity.Property(e => e.Landmark)
                     .HasColumnName("LANDMARK")
                     .HasMaxLength(8)
@@ -5564,6 +5597,15 @@ namespace Hmcr.Data.Database.Entities
                 entity.Property(e => e.HighwayUnique)
                     .HasColumnName("HIGHWAY_UNIQUE")
                     .HasMaxLength(16)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.HighwayUniqueLength)
+                    .HasColumnName("HIGHWAY_UNIQUE_LENGTH")
+                    .HasColumnType("numeric(25, 20)");
+
+                entity.Property(e => e.HighwayUniqueName)
+                    .HasColumnName("HIGHWAY_UNIQUE_NAME")
+                    .HasMaxLength(40)
                     .IsUnicode(false);
 
                 entity.Property(e => e.IsOverSpTolerance)

@@ -19,6 +19,7 @@ namespace Hmcr.Data.Database.Entities
         public decimal? EndLongitude { get; set; }
         public string HighwayUnique { get; set; }
         public string HighwayUniqueName { get; set; }
+        public decimal? HighwayUniqueLength { get; set; }
         public string Landmark { get; set; }
         public string LandmarkName { get; set; }
         public decimal? StartOffset { get; set; }
