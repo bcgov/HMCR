@@ -83,7 +83,7 @@ namespace Hmcr.Domain.Hangfire
             foreach (var untypedRow in untypedRows)
             {
                 errors = new Dictionary<string, List<string>>();
-                var submissionRow = await _submissionRowRepo.GetSubmissionRowByRowId(untypedRow.RowId);
+                var submissionRow = await _submissionRowRepo.GetSubmissionRowByRowIdAsync(untypedRow.RowId);
                 submissionRow.RowStatusId = _successRowStatusId; //set the initial row status as success 
 
                 var entityName = GetValidationEntityName(untypedRow);
@@ -104,7 +104,7 @@ namespace Hmcr.Domain.Hangfire
 
                 if (rowNum != 0)
                 {
-                    var submissionRow = await _submissionRowRepo.GetSubmissionRowByRowNum(_submission.SubmissionObjectId, rowNum);
+                    var submissionRow = await _submissionRowRepo.GetSubmissionRowByRowNumAsync(_submission.SubmissionObjectId, rowNum);
                     SetErrorDetail(submissionRow, errors);
                     await CommitAndSendEmailAsync();
                     return true;
@@ -168,7 +168,7 @@ namespace Hmcr.Domain.Hangfire
             foreach (var typedRow in typedRows)
             {
                 var errors = new Dictionary<string, List<string>>();
-                var submissionRow = await _submissionRowRepo.GetSubmissionRowByRowNum(_submission.SubmissionObjectId, (decimal)typedRow.RowNum);
+                var submissionRow = await _submissionRowRepo.GetSubmissionRowByRowNumAsync(_submission.SubmissionObjectId, (decimal)typedRow.RowNum);
 
                 if (typedRow.AccidentDate != null && typedRow.AccidentDate > DateTime.Now)
                 {
@@ -205,7 +205,7 @@ namespace Hmcr.Domain.Hangfire
 
             foreach (var typedRow in typedRows)
             {
-                var submissionRow = await _submissionRowRepo.GetSubmissionRowByRowNum(_submission.SubmissionObjectId, (decimal)typedRow.RowNum);
+                var submissionRow = await _submissionRowRepo.GetSubmissionRowByRowNumAsync(_submission.SubmissionObjectId, (decimal)typedRow.RowNum);
                 var wildlifeReport = new WildlifeReportGeometry(typedRow, null);
 
                 if (typedRow.SpatialData == SpatialData.Gps)
@@ -325,12 +325,20 @@ namespace Hmcr.Domain.Hangfire
                     rows.Add(row);
                     rowNum = (decimal)row.RowNum;
                 }
+                catch (CsvHelper.TypeConversion.TypeConverterException ex)
+                {
+                    _logger.LogError(ex.ToString());
+                    rowNum = GetRowNum(csv.Context.RawRecord);
+                    LogRowParseException(rowNum, ex.ToString(), csv.Context);
+                    errors.AddItem("Parse Error", $"Exception while parsing the text [{ex.Text}]");
+                    return (rowNum, null);
+                }
                 catch (Exception ex)
                 {
                     _logger.LogError(ex.ToString());
                     rowNum = GetRowNum(csv.Context.RawRecord);
                     LogRowParseException(rowNum, ex.ToString(), csv.Context);
-                    errors.AddItem("Parse Error", "Exception while parsing");
+                    errors.AddItem("Parse Error", $"Exception while parsing");
                     return (rowNum, null);
                 }
             }
