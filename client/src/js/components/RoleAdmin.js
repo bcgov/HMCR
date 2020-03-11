@@ -7,6 +7,7 @@ import queryString from 'query-string';
 
 import Authorize from './fragments/Authorize';
 import MaterialCard from './ui/MaterialCard';
+import UIHeader from './ui/UIHeader';
 import MultiDropdownField from './ui/MultiDropdownField';
 import DataTableWithPaginaionControl from './ui/DataTableWithPaginaionControl';
 import SubmitButton from './ui/SubmitButton';
@@ -112,8 +113,8 @@ const RoleAdmin = ({ showValidationErrorDialog }) => {
 
   return (
     <React.Fragment>
-      <h1>Role and Permissions Management</h1>
       <MaterialCard>
+        <UIHeader>Role and Permissions Management</UIHeader>
         <Formik
           initialValues={searchInitialValues}
           enableReinitialize={true}

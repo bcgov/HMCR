@@ -7,6 +7,7 @@ import queryString from 'query-string';
 
 import Authorize from './fragments/Authorize';
 import MaterialCard from './ui/MaterialCard';
+import UIHeader from './ui/UIHeader';
 import MultiDropdownField from './ui/MultiDropdownField';
 import DataTableWithPaginaionControl from './ui/DataTableWithPaginaionControl';
 import SubmitButton from './ui/SubmitButton';
@@ -139,8 +140,8 @@ const ActivityAdmin = ({ maintenanceTypes, locationCodes, unitOfMeasures, showVa
 
   return (
     <React.Fragment>
-      <h1>Activity Number Management</h1>
       <MaterialCard>
+        <UIHeader>Activity Number Management</UIHeader>
         <Formik
           initialValues={searchInitialValues}
           enableReinitialize={true}
