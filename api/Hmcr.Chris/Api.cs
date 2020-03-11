@@ -9,6 +9,8 @@ namespace Hmcr.Chris
     {
         Task<string> Get(HttpClient client, string path);
         Task<string> Post(HttpClient client, string path, string body);
+        Task<string> GetWithRetry(HttpClient client, string path);
+        Task<string> PostWithRetry(HttpClient client, string path, string body);
 
     }
     public class Api : IApi
@@ -16,6 +18,31 @@ namespace Hmcr.Chris
         const int maxAttempt = 5;
 
         public async Task<string> Get(HttpClient client, string path)
+        {
+            var response = await client.GetAsync(path);
+
+            if (!response.IsSuccessStatusCode)
+            {
+                throw new Exception($"Status Code: {response.StatusCode}");
+            }
+
+            return await response.Content.ReadAsStringAsync();
+        }
+
+        public async Task<string> Post(HttpClient client, string path, string body)
+        {
+            var response
+                = await client.PostAsync(path, new StringContent(body, Encoding.UTF8));
+
+            if (!response.IsSuccessStatusCode)
+            {
+                throw new Exception($"Status Code: {response.StatusCode}");
+            }
+
+            return await response.Content.ReadAsStringAsync();
+        }
+
+        public async Task<string> GetWithRetry(HttpClient client, string path)
         {
             var response = await client.GetAsync(path);
 
@@ -41,7 +68,7 @@ namespace Hmcr.Chris
             return await response.Content.ReadAsStringAsync();
         }
 
-        public async Task<string> Post(HttpClient client, string path, string body)
+        public async Task<string> PostWithRetry(HttpClient client, string path, string body)
         {
             var response
                 = await client.PostAsync(path, new StringContent(body, Encoding.UTF8));
