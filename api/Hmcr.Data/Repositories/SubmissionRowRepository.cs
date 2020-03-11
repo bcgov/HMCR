@@ -15,8 +15,9 @@ namespace Hmcr.Data.Repositories
         IAsyncEnumerable<SubmissionRowDto> FindDuplicateFromLatestRecordsAsync(decimal submissionStreamId, decimal partyId, IEnumerable<SubmissionRowDto> rows);
         IAsyncEnumerable<SubmissionRowDto> FindDuplicateFromAllRecordsAsync(decimal submissionStreamId, IEnumerable<SubmissionRowDto> rows);
         IAsyncEnumerable<string> UpdateIsResubmitAsync(decimal submissionStreamId, decimal partyId, IEnumerable<SubmissionRowDto> rows);
-        Task<HmrSubmissionRow> GetSubmissionRowByRowNum(decimal submissionObjectId, decimal rowNum);
-        Task<HmrSubmissionRow> GetSubmissionRowByRowId(decimal rowId);
+        Task<HmrSubmissionRow> GetSubmissionRowByRowNumAsync(decimal submissionObjectId, decimal rowNum);
+        Task<HmrSubmissionRow> GetSubmissionRowByRowIdAsync(decimal rowId);
+        Task<HmrSubmissionRow> GetSubmissionRowByRowIdFirstOrDefaultAsync(decimal submissionObjectId, decimal rowNum);
     }
     public class SubmissionRowRepository : HmcrRepositoryBase<HmrSubmissionRow>, ISumbissionRowRepository
     {
@@ -82,14 +83,19 @@ namespace Hmcr.Data.Repositories
             }
         }
 
-        public async Task<HmrSubmissionRow> GetSubmissionRowByRowNum(decimal submissionObjectId, decimal rowNum)
+        public async Task<HmrSubmissionRow> GetSubmissionRowByRowNumAsync(decimal submissionObjectId, decimal rowNum)
         {
             return await DbSet.FirstAsync(x => x.SubmissionObjectId == submissionObjectId && x.RowNum == rowNum);
         }
 
-        public async Task<HmrSubmissionRow> GetSubmissionRowByRowId(decimal rowId)
+        public async Task<HmrSubmissionRow> GetSubmissionRowByRowIdAsync(decimal rowId)
         {
             return await DbSet.FirstAsync(x => x.RowId == rowId);
+        }
+
+        public async Task<HmrSubmissionRow> GetSubmissionRowByRowIdFirstOrDefaultAsync(decimal submissionObjectId, decimal rowNum)
+        {
+            return await DbSet.FirstOrDefaultAsync(x => x.SubmissionObjectId == submissionObjectId && x.RowNum == rowNum);
         }
     }
 }

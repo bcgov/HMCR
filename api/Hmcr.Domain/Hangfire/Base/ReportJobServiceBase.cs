@@ -167,7 +167,7 @@ namespace Hmcr.Domain.Hangfire.Base
             for (int i = untypedRows.Count - 1; i >= 0; i--)
             {
                 var untypedRow = untypedRows[i];
-                var entity = await _submissionRowRepo.GetSubmissionRowByRowNum(_submission.SubmissionObjectId, (decimal)untypedRow.RowNum);
+                var entity = await _submissionRowRepo.GetSubmissionRowByRowNumAsync(_submission.SubmissionObjectId, (decimal)untypedRow.RowNum);
 
                 if (entity.RowStatusId == _duplicateRowStatusId)
                 {
@@ -185,10 +185,18 @@ namespace Hmcr.Domain.Hangfire.Base
 
         protected void SetErrorDetail(HmrSubmissionRow submissionRow, Dictionary<string, List<string>> errors)
         {
-            submissionRow.RowStatusId = _errorRowStatusId;
-            submissionRow.ErrorDetail = errors.GetErrorDetail();
-            _submission.ErrorDetail = FileError.ReferToRowErrors;
-            _submission.SubmissionStatusId = _errorFileStatusId;
+            if (submissionRow != null)
+            {
+                submissionRow.RowStatusId = _errorRowStatusId;
+                submissionRow.ErrorDetail = errors.GetErrorDetail();
+                _submission.ErrorDetail = FileError.ReferToRowErrors;
+                _submission.SubmissionStatusId = _errorFileStatusId;
+            }
+            else
+            {
+                _submission.ErrorDetail = errors.GetErrorDetail();
+                _submission.SubmissionStatusId = _errorFileStatusId;
+            }
         }
         protected string GetHeader(string text)
         {
@@ -276,7 +284,7 @@ namespace Hmcr.Domain.Hangfire.Base
             MethodLogger.LogEntry(_logger, _enableMethodLog, _methodLogHeader);
 
             var cols = row.Split(',');
-            if (decimal.TryParse(cols[0], out decimal rowNum))
+            if (!decimal.TryParse(cols[0], out decimal rowNum))
             {
                 _logger.LogError($"Parsing cols[0] to rowNum failed. Using rowNum 1 instead for logging.");
                 rowNum = 1M;
