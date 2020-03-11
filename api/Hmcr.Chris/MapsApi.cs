@@ -32,7 +32,7 @@ namespace Hmcr.Chris
         {
             var body = string.Format(_queries.PointWithinServiceAreaQuery, longitude, latitude, serviceAreaNumber);
 
-            var contents = await _api.Post(_client, _path, body);
+            var contents = await _api.PostWithRetry(_client, _path, body);
 
             var features = JsonSerializer.Deserialize<FeatureCollection<decimal[]>>(contents);
 

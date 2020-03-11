@@ -73,7 +73,7 @@ namespace Hmcr.Chris
         {
             var body = string.Format(_queries.PointOnRfiSegQuery, tolerance, point.Longitude, point.Latitude, rfiSegment);
 
-            var contents = await _api.Post(_client, _path, body);
+            var contents = await _api.PostWithRetry(_client, _path, body);
 
             var features = JsonSerializer.Deserialize<FeatureCollection<decimal[]>>(contents);
 
@@ -84,7 +84,7 @@ namespace Hmcr.Chris
         {
             var query = _path + string.Format(_queries.LineFromOffsetMeasureOnRfiSeg, rfiSegment, start, end);
 
-            var content = await _api.Get(_client, query);
+            var content = await _api.GetWithRetry(_client, query);
 
             var features = JsonSerializer.Deserialize<FeatureCollection<decimal[][]>>(content);
 
@@ -97,7 +97,7 @@ namespace Hmcr.Chris
         {
             var query = _path + string.Format(_queries.OffsetMeasureFromPointAndRfiSeg, point.Longitude, point.Latitude, rfiSegment);
 
-            var content = await _api.Get(_client, query);
+            var content = await _api.GetWithRetry(_client, query);
 
             var features = JsonSerializer.Deserialize<FeatureCollection<decimal[]>>(content);
 
@@ -113,7 +113,7 @@ namespace Hmcr.Chris
         {
             var query = _path + string.Format(_queries.PointFromOffsetMeasureOnRfiSeg, rfiSegment, offset);
 
-            var content = await _api.Get(_client, query);
+            var content = await _api.GetWithRetry(_client, query);
 
             var features = JsonSerializer.Deserialize<FeatureCollection<decimal[]>>(content);
 
@@ -125,7 +125,7 @@ namespace Hmcr.Chris
         {
             var query = _path + string.Format(_queries.RfiSegmentDetail, rfiSegment);
 
-            var content = await _api.Get(_client, query);
+            var content = await _api.GetWithRetry(_client, query);
 
             var features = JsonSerializer.Deserialize<FeatureCollection<object>>(content);
 
