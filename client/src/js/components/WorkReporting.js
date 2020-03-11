@@ -7,6 +7,7 @@ import queryString from 'query-string';
 
 import SingleDropdown from './ui/SingleDropdown';
 import MaterialCard from './ui/MaterialCard';
+import UIHeader from './ui/UIHeader';
 import WorkReportingUpload from './WorkReportingUpload';
 import WorkReportingSubmissions from './WorkReportingSubmissions';
 import Authorize from './fragments/Authorize';
@@ -33,8 +34,8 @@ const WorkReporting = ({ currentUser }) => {
 
   return (
     <React.Fragment>
-      <h1>Report Upload</h1>
       <MaterialCard>
+        <UIHeader>Report Upload</UIHeader>
         <Row>
           <Col lg="8">
             <Row>
