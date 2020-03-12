@@ -32,15 +32,15 @@
 
 .main-nav.dev,
 .main-nav.unknown {
-  @include main-nav-colors(#ef6c00);
+  @include main-nav-colors(#448a38);
 }
 
 .main-nav.tst {
-  @include main-nav-colors(#4527a0);
+  @include main-nav-colors(#f9a825);
 }
 
 .main-nav.uat {
-  @include main-nav-colors(#2e7d32);
+  @include main-nav-colors(#744e91);
 }
 
 .navbar-brand {
