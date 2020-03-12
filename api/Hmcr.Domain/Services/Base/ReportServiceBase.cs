@@ -137,6 +137,14 @@ namespace Hmcr.Domain.Services.Base
 
             submission.FileName = Path.GetFileName(upload.ReportFile.FileName).SanitizeFileName() + ".csv";
 
+            if (submission.FileName.Length > 100)
+            {
+                submission.FileName = submission.FileName.Substring(0, 90) + ".csv";
+                errors.AddItem("File", "the filename needs to be shorter than 100 characters");
+                submission.SubmissionStatusId = await _statusRepo.GetStatusIdByTypeAndCodeAsync(StatusType.File, FileStatus.FileError);
+                return (errors, submission);
+            }
+
             using var stream = upload.ReportFile.OpenReadStream();
             using var streamReader = new StreamReader(stream, Encoding.UTF8);
 
