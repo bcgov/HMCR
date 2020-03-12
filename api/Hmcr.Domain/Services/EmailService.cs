@@ -1,4 +1,5 @@
 ﻿using Hmcr.Data.Repositories;
+using Hmcr.Model.Utils;
 using MailKit.Net.Smtp;
 using MailKit.Security;
 using Microsoft.Extensions.Configuration;
@@ -41,7 +42,8 @@ namespace Hmcr.Domain.Services
 
             foreach(var user in _userRepo.GetActiveUsersByServiceAreaNumber(serviceAreaNumber))
             {
-                recipients.Add(new MailboxAddress(user.Email));
+                if (user.Email.IsNotEmpty())
+                    recipients.Add(new MailboxAddress(user.Email));
             }
 
             SendEmail(recipients, subject, htmlBody, textBody);
