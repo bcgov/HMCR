@@ -195,6 +195,7 @@ const UserAdmin = ({ serviceAreas, userStatuses, userTypes, showValidationErrorD
                     items={serviceAreas}
                     name="serviceAreaIds"
                     title="Service Area"
+                    searchable={true}
                   />
                 </Col>
                 <Col>
