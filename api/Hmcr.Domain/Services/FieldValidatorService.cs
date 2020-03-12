@@ -11,8 +11,8 @@ namespace Hmcr.Domain.Services
 {
     public interface IFieldValidatorService
     {
-        void Validate<T>(string entityName, string fieldName, T value, Dictionary<string, List<string>> errors);
-        void Validate<T>(string entityName, T entity, Dictionary<string, List<string>> errors, params string[] fieldsToSkip);
+        void Validate<T>(string entityName, string fieldName, T value, Dictionary<string, List<string>> errors, int rowNum = 0);
+        void Validate<T>(string entityName, T entity, Dictionary<string, List<string>> errors, int rowNum = 0, params string[] fieldsToSkip);
         IEnumerable<CodeLookupCache> CodeLookup { get; set; }
     }
     public class FieldValidatorService : IFieldValidatorService
@@ -95,7 +95,6 @@ namespace Hmcr.Domain.Services
         private void LoadWorkReportInitRules()
         {
             //Common for all work reports
-            _rules.Add(new FieldValidationRule(Entities.WorkReportInit, Fields.RecordType, FieldTypes.String, true, null, null, null, null, null, null, null, CodeSet.WrkRptMaintType));
             _rules.Add(new FieldValidationRule(Entities.WorkReportInit, Fields.RecordNumber, FieldTypes.String, true, 1, 12, null, null, null, null, null, null));
             _rules.Add(new FieldValidationRule(Entities.WorkReportInit, Fields.EndDate, FieldTypes.Date, true, null, null, null, null, new DateTime(1900, 1, 1), new DateTime(9999, 12, 31), null, null));
         }
@@ -201,7 +200,6 @@ namespace Hmcr.Domain.Services
 
         private void LoadRockfallReportInitRules()
         {
-            _rules.Add(new FieldValidationRule(Entities.RockfallReportInit, Fields.RecordType, FieldTypes.String, true, null, null, null, null, null, null, null, CodeSet.RkflRptRecordType));
             _rules.Add(new FieldValidationRule(Entities.RockfallReportInit, Fields.McrrIncidentNumber, FieldTypes.String, true, 1, 12, null, null, null, null, null, null));
             _rules.Add(new FieldValidationRule(Entities.RockfallReportInit, Fields.ReportDate, FieldTypes.Date, true, null, null, null, null, new DateTime(1900, 1, 1), new DateTime(9999, 12, 31), null, null));
         }
@@ -283,10 +281,8 @@ namespace Hmcr.Domain.Services
 
         public void LoadWildlifeReportInitRules()
         {
-            _rules.Add(new FieldValidationRule(Entities.WildlifeReportInit, Fields.RecordType, FieldTypes.String, true, null, null, null, null, null, null, null, CodeSet.WarsRptRecordType));
             _rules.Add(new FieldValidationRule(Entities.WildlifeReportInit, Fields.AccidentDate, FieldTypes.Date, true, null, null, null, null, new DateTime(1900, 1, 1), new DateTime(9999, 12, 31), null, null));
         }
-
 
         public void LoadWildlifeReportRules()
         {
@@ -331,7 +327,7 @@ namespace Hmcr.Domain.Services
         }
         #endregion
 
-        public void Validate<T>(string entityName, T entity, Dictionary<string, List<string>> errors, params string[] fieldsToSkip)
+        public void Validate<T>(string entityName, T entity, Dictionary<string, List<string>> errors, int rowNum = 0, params string[] fieldsToSkip)
         {
             var fields = typeof(T).GetProperties();
 
@@ -340,11 +336,11 @@ namespace Hmcr.Domain.Services
                 if (fieldsToSkip.Any(x => x == field.Name))
                     continue;
 
-                Validate(entityName, field.Name, field.GetValue(entity), errors);
+                Validate(entityName, field.Name, field.GetValue(entity), errors, rowNum);
             }
         }
 
-        public void Validate<T>(string entityName, string fieldName, T val, Dictionary<string, List<string>> errors)
+        public void Validate<T>(string entityName, string fieldName, T val, Dictionary<string, List<string>> errors, int rowNum = 0)
         {
             var rule = _rules.FirstOrDefault(r => r.EntityName == entityName && r.FieldName == fieldName);
 
@@ -356,7 +352,7 @@ namespace Hmcr.Domain.Services
             switch (rule.FieldType)
             {
                 case FieldTypes.String:
-                    messages.AddRange(ValidateStringField(rule, val));
+                    messages.AddRange(ValidateStringField(rule, val, rowNum));
                     break;
                 case FieldTypes.Date:
                     messages.AddRange(ValidateDateField(rule, val));
@@ -374,13 +370,17 @@ namespace Hmcr.Domain.Services
             }
         }
 
-        private List<string> ValidateStringField<T>(FieldValidationRule rule, T val)
+        private List<string> ValidateStringField<T>(FieldValidationRule rule, T val, int rowNum = 0)
         {
             var messages = new List<string>();
 
+            var rowNumPrefix = rowNum == 0 ? "" : $"Row # {rowNum}: ";
+
+            var field = rule.FieldName.WordToWords();
+
             if (rule.Required && val is null)
             {
-                messages.Add($"The {rule.FieldName} field is required.");
+                messages.Add($"{rowNumPrefix}The {field} field is required.");
                 return messages;
             }
 
@@ -391,7 +391,7 @@ namespace Hmcr.Domain.Services
 
             if (rule.Required && value.IsEmpty())
             {
-                messages.Add($"The {rule.FieldName} field is required.");
+                messages.Add($"{rowNumPrefix}The {field} field is required.");
                 return messages;
             }
 
@@ -399,7 +399,7 @@ namespace Hmcr.Domain.Services
             {
                 if (value.Length < rule.MinLength || value.Length > rule.MaxLength)
                 {
-                    messages.Add($"The length of {rule.FieldName} field must be between {rule.MinLength} and {rule.MaxLength}.");
+                    messages.Add($"{rowNumPrefix}The length of {field} field must be between {rule.MinLength} and {rule.MaxLength}.");
                 }
             }
 
@@ -407,7 +407,7 @@ namespace Hmcr.Domain.Services
             {
                 if (!Regex.IsMatch(value, rule.Regex.Regex))
                 {
-                    messages.Add($"{rule.FieldName} {rule.Regex.ErrorMessage}.");
+                    messages.Add($"{rowNumPrefix}{field} {rule.Regex.ErrorMessage}.");
                 }
             }
 
@@ -415,20 +415,24 @@ namespace Hmcr.Domain.Services
             {
                 if (!CodeLookup.Any(x => x.CodeSet == rule.CodeSet && x.CodeValue.ToLowerInvariant() == value.ToLowerInvariant()))
                 {
-                    messages.Add($"Invalid value. [{value}] doesn't exist in the code set {rule.CodeSet}.");
+                    messages.Add($"{rowNumPrefix}Invalid value. [{value}] doesn't exist in the code set {rule.CodeSet}.");
                 }
             }
 
             return messages;
         }
 
-        private List<string> ValidateDateField<T>(FieldValidationRule rule, T val)
+        private List<string> ValidateDateField<T>(FieldValidationRule rule, T val, int rowNum = 0)
         {
             var messages = new List<string>();
 
+            var rowNumPrefix = rowNum == 0 ? "" : $"Row # {rowNum}: ";
+
+            var field = rule.FieldName.WordToWords();
+
             if (rule.Required && val is null)
             {
-                messages.Add($"{rule.FieldName} field is required.");
+                messages.Add($"{rowNumPrefix}{field} field is required.");
                 return messages;
             }
 
@@ -439,7 +443,7 @@ namespace Hmcr.Domain.Services
 
             if (!parsed)
             {
-                messages.Add($"Cannot convert {rule.FieldName} field to date");
+                messages.Add($"{rowNumPrefix}Cannot convert {field} field to date");
                 return messages;
             }
 
@@ -449,7 +453,7 @@ namespace Hmcr.Domain.Services
             {
                 if (value < rule.MinDate || value > rule.MaxDate)
                 {
-                    messages.Add($"The length of {rule.FieldName} must be between {rule.MinDate} and {rule.MaxDate}.");
+                    messages.Add($"{rowNumPrefix}The length of {field} must be between {rule.MinDate} and {rule.MaxDate}.");
                 }
             }
 

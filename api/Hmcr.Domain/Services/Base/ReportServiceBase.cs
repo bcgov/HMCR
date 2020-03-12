@@ -137,6 +137,14 @@ namespace Hmcr.Domain.Services.Base
 
             submission.FileName = Path.GetFileName(upload.ReportFile.FileName).SanitizeFileName() + ".csv";
 
+            if (submission.FileName.Length > 100)
+            {
+                submission.FileName = submission.FileName.Substring(0, 90) + ".csv";
+                errors.AddItem("File", "the filename needs to be shorter than 100 characters");
+                submission.SubmissionStatusId = await _statusRepo.GetStatusIdByTypeAndCodeAsync(StatusType.File, FileStatus.FileError);
+                return (errors, submission);
+            }
+
             using var stream = upload.ReportFile.OpenReadStream();
             using var streamReader = new StreamReader(stream, Encoding.UTF8);
 
@@ -261,11 +269,11 @@ namespace Hmcr.Domain.Services.Base
             throw new NotImplementedException();
         }
 
-        protected void Validate<T>(IEnumerable<T> rows, string entityName, Dictionary<string, List<string>> errors)
+        protected void Validate<T>(IEnumerable<T> rows, string entityName, Dictionary<string, List<string>> errors) where T: IRptInitCsvDto
         {
             foreach(var row in rows)
-            {
-                _validator.Validate<T>(entityName, row, errors);
+            {                
+                _validator.Validate<T>(entityName, row, errors, row.RowNum);
 
                 if (errors.Count > 10)
                 {
@@ -277,14 +285,16 @@ namespace Hmcr.Domain.Services.Base
 
         protected static bool CheckCommonMandatoryFields(string[] headers, string[] mandatoryFields, Dictionary<string, List<string>> errors)
         {
-            var fields  = mandatoryFields.ToLowercase();
             headers = CsvUtils.GetLowercaseFieldsFromCsvHeaders(headers);
 
-            foreach (var field in fields)
+            foreach (var field in mandatoryFields)
             {
                 if (!headers.Any(x => x == field.ToLowerInvariant()))
                     errors.AddItem("File", $"Header [{field.WordToWords()}] is missing");
             }
+
+            if (errors.Count > 0)
+                errors.AddItem("File", "Please ensure the file headers are correct and correct file type is chosen");
 
             return errors.Count == 0;
         }

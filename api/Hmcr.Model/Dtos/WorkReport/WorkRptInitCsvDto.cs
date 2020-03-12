@@ -1,15 +1,12 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace Hmcr.Model.Dtos.WorkReport
 {
-    public class WorkRptInitCsvDto
+    public class WorkRptInitCsvDto : IRptInitCsvDto
     {
+        public int RowNum { get; set; }
         public string ServiceArea { get; set; }
-        public string RecordType { get; set; }
         public string RecordNumber { get; set; }
         public DateTime? EndDate { get; set; }
-        
     }
 }

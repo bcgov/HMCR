@@ -240,7 +240,7 @@ namespace Hmcr.Model
     public static class FileError
     {
         public const string ReferToRowErrors = "{ \"fieldMessages\": [ { \"field\": \"File\", \"messages\": [ \"Some headers or values are missing/incorrect. Please refer to row error(s).\" ] } ] }";
-        public const string UnknownException = "{ \"fieldMessages\": [ { \"field\": \"File\", \"messages\": [ \"Encountered unknown exception. Please try it again after a few minutes. If it keeps happening, please contact the administrator.\" ] } ] }";
+        public const string UnknownException = "{ \"fieldMessages\": [ { \"field\": \"File\", \"messages\": [ \"Encountered unexpected error. Please try again later. If it keeps happening, please contact the administrator.\" ] } ] }";
     }
 
     public static class RowWarning
