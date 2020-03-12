@@ -47,13 +47,15 @@ namespace Hmcr.Domain.Services
             using var stringReader = new StringReader(text);
             using var csv = new CsvReader(stringReader, CultureInfo.InvariantCulture);
 
-            CsvHelperUtils.Config(errors, csv);
+            CsvHelperUtils.Config(errors, csv, false);
             csv.Configuration.RegisterClassMap<RockfallRptInitCsvDtoMap>();
 
             var serviceArea = (long)submission.ServiceAreaNumber;
 
             var headerValidated = false;
             var rows = new List<RockfallRptInitCsvDto>();
+            var rowNum = 1;
+
             while (csv.Read())
             {
                 RockfallRptInitCsvDto row = null;
@@ -74,6 +76,7 @@ namespace Hmcr.Domain.Services
                         }
                     }
 
+                    row.RowNum = ++rowNum;
                     rows.Add(row);
                 }
                 catch (TypeConverterException ex)

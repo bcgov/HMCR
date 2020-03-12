@@ -261,11 +261,11 @@ namespace Hmcr.Domain.Services.Base
             throw new NotImplementedException();
         }
 
-        protected void Validate<T>(IEnumerable<T> rows, string entityName, Dictionary<string, List<string>> errors)
+        protected void Validate<T>(IEnumerable<T> rows, string entityName, Dictionary<string, List<string>> errors) where T: IRptInitCsvDto
         {
             foreach(var row in rows)
-            {
-                _validator.Validate<T>(entityName, row, errors);
+            {                
+                _validator.Validate<T>(entityName, row, errors, row.RowNum);
 
                 if (errors.Count > 10)
                 {
@@ -277,14 +277,16 @@ namespace Hmcr.Domain.Services.Base
 
         protected static bool CheckCommonMandatoryFields(string[] headers, string[] mandatoryFields, Dictionary<string, List<string>> errors)
         {
-            var fields  = mandatoryFields.ToLowercase();
             headers = CsvUtils.GetLowercaseFieldsFromCsvHeaders(headers);
 
-            foreach (var field in fields)
+            foreach (var field in mandatoryFields)
             {
                 if (!headers.Any(x => x == field.ToLowerInvariant()))
                     errors.AddItem("File", $"Header [{field.WordToWords()}] is missing");
             }
+
+            if (errors.Count > 0)
+                errors.AddItem("File", "Please ensure the file headers are correct and correct file type is chosen");
 
             return errors.Count == 0;
         }
