@@ -185,6 +185,12 @@ const WorkReportingUpload = ({
 
   const validateFile = (e, setFieldValue, setFieldError, fieldName, sizeLimit) => {
     const file = e.currentTarget.files[0];
+
+    if (file.name.length > 100) {
+      setFieldError(fieldName, 'The file name exceeds the maximum allowed length of 100 characters.');
+      return;
+    }
+
     if (!isFileCsvType(file)) {
       setFieldError(fieldName, 'The selected file is not a CSV file');
       return;
