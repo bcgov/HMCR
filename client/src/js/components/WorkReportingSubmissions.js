@@ -6,7 +6,6 @@ import moment from 'moment';
 import { DateRangePicker } from 'react-dates';
 import queryString from 'query-string';
 import _ from 'lodash';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 import DataTableWithPaginaionControl from './ui/DataTableWithPaginaionControl';
 import PageSpinner from './ui/PageSpinner';
@@ -200,10 +199,10 @@ const WorkReportingSubmissions = ({ serviceArea, submissionStatuses }, ref) => {
                   ),
                   longDescription: (
                     <React.Fragment>
-                      <FontAwesomeIcon
+                      <FontAwesomeButton
                         id={`tooltip_${item.id}`}
-                        style={{ cursor: 'pointer' }}
                         className="fa-color-primary"
+                        color="link"
                         icon="question-circle"
                       />
                       <UncontrolledPopover trigger="focus" placement="auto" target={`tooltip_${item.id}`}>
