@@ -9,6 +9,7 @@ import * as Yup from 'yup';
 
 import Authorize from './fragments/Authorize';
 import MaterialCard from './ui/MaterialCard';
+import UIHeader from './ui/UIHeader';
 import MultiDropdownField from './ui/MultiDropdownField';
 import AddUserWizard from './forms/AddUserWizard';
 import DataTableWithPaginaionControl from './ui/DataTableWithPaginaionControl';
@@ -169,8 +170,8 @@ const UserAdmin = ({ serviceAreas, userStatuses, userTypes, showValidationErrorD
 
   return (
     <React.Fragment>
-      <h1>User Management</h1>
       <MaterialCard>
+        <UIHeader>User Management</UIHeader>
         <Formik
           initialValues={searchInitialValues}
           enableReinitialize={true}

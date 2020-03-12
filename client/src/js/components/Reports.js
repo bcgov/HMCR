@@ -8,6 +8,7 @@ import moment from 'moment';
 import { fetchActivityCodesDropdown } from '../actions';
 
 import MaterialCard from './ui/MaterialCard';
+import UIHeader from './ui/UIHeader';
 import SingleDropdownField from './ui/SingleDropdownField';
 import DateRangeField from './ui/DateRangeField';
 import MultiDropdownField from './ui/MultiDropdownField';
@@ -69,8 +70,7 @@ const Reports = ({
 
   return (
     <React.Fragment>
-      <h1>Reports Export</h1>
-
+      <UIHeader>Report Export</UIHeader>
       <Formik
         initialValues={defaultSearchFormValues}
         enableReinitialize={true}
