@@ -45,6 +45,7 @@ export const PATHS = {
   ADMIN_USERS: '/admin/users',
   ADMIN_REPORTS: '/reports',
   ADMIN_ROLES: '/admin/roles',
+  VERSION: '/version',
 };
 
 export const MESSAGE_DATE_FORMAT = 'YYYY-MM-DD hh:mmA';

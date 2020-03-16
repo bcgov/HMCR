@@ -102,10 +102,9 @@ const Header = ({ currentUser }) => {
                   Quick Links
                 </DropdownToggle>
                 <DropdownMenu right>
-                  <DropdownItem>Link 1</DropdownItem>
-                  <DropdownItem>Link 2</DropdownItem>
-                  <DropdownItem>Link 3</DropdownItem>
-                  <DropdownItem>Link 4</DropdownItem>
+                  <DropdownItem tag={Link} to={Constants.PATHS.VERSION}>
+                    Version
+                  </DropdownItem>
                 </DropdownMenu>
               </UncontrolledDropdown>
             </Nav>
