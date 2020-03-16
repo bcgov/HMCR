@@ -24,6 +24,7 @@ namespace Hmcr.Model
         public const string YN = "YN";
         public const string Phone = "Phone";
         public const string Alphanumeric = "Alphanumeric";
+        public const string StructureNumber = "StructureNumber";
 
         private readonly Dictionary<string, RegexInfo> _regexInfos;
 
@@ -47,6 +48,7 @@ namespace Hmcr.Model
             _regexInfos.Add(Phone, new RegexInfo { Regex = @"^(\+0?1\s)?\(?\d{3}\)?[\s.-]\d{3}[\s.-]\d{4}$", ErrorMessage = "Value must follow phone number format" });
             
             _regexInfos.Add(Alphanumeric, new RegexInfo { Regex = @"^[a-zA-Z0-9]*$", ErrorMessage = "Value must be alphanumeric" });
+            _regexInfos.Add(StructureNumber, new RegexInfo { Regex = @"^[a-zA-Z0-9]{2,6}$", ErrorMessage = "Structure number must be alphanumeric with max length 6 and minimum length 2" });
         }
 
         public RegexInfo GetRegexInfo(string name)
