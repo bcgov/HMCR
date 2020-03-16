@@ -46,9 +46,5 @@
     <ProjectReference Include="..\Hmcr.Model\Hmcr.Model.csproj" />
     <ProjectReference Include="..\Serilog.Sinks.HmcrPostgreSql\Serilog.Sinks.HmcrPostgreSql.csproj" />
   </ItemGroup>
-  
-  <Target Name="PreBuild" BeforeTargets="PreBuildEvent">
-    <Exec Command="Copy $(SolutionDir)\Hmcr.Api\appsettings.json $(ProjectDir)" />
-  </Target>
 
 </Project>
