@@ -5,17 +5,11 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="appsettings.json" />
     <None Remove="XmlTemplates\IsPointOnRfiSegment.xml" />
     <None Remove="XmlTemplates\IsPointWithinServiceArea.xml" />
   </ItemGroup>
 
   <ItemGroup>
-    <Content Include="appsettings.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
-      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
-    </Content>
     <Content Include="XmlTemplates\IsPointOnRfiSegment.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>

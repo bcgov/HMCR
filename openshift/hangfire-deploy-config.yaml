@@ -1,0 +1,167 @@
+apiVersion: v1
+kind: Template
+metadata:
+  creationTimestamp: null
+  name: ${PROJECT_NAME}
+labels:
+  template: hangfire-deploy
+objects:
+  - apiVersion: v1
+    kind: ImageStream
+    metadata:
+      creationTimestamp: null
+      labels:
+        shared: true
+      name: ${NAME}
+    spec:
+      lookupPolicy:
+        local: false
+  - apiVersion: v1
+    kind: DeploymentConfig
+    metadata:
+      creationTimestamp: null
+      name: ${NAME}${SUFFIX}
+    spec:
+      replicas: 1
+      selector:
+        deploymentconfig: ${NAME}${SUFFIX}
+      strategy:
+        resources:
+          requests:
+            cpu: 1
+            memory: 1Gi
+          limits:
+            cpu: 2
+            memory: 2Gi
+      template:
+        metadata:
+          creationTimestamp: null
+          labels:
+            deploymentconfig: ${NAME}${SUFFIX}
+        spec:
+          containers:
+            - image: ${NAME}:${VERSION}
+              name: hangfire
+              ports:
+                - containerPort: 8080
+                  protocol: TCP
+              resources:
+                requests:
+                  cpu: 1
+                  memory: 1Gi
+                limits:
+                  cpu: 2
+                  memory: 2Gi
+              livenessProbe:
+                httpGet:
+                  path: /healthz
+                  port: 8080
+                initialDelaySeconds: 15
+                periodSeconds: 5
+              env:
+                - name: ConnectionStrings__HMCR
+                  valueFrom:
+                    secretKeyRef:
+                      name: api-connections-${ENV}
+                      key: hmr.db
+                - name: ConnectionStrings__serilog
+                  valueFrom:
+                    secretKeyRef:
+                      name: ${LOGDB_NAME}${SUFFIX}
+                      key: connection-string
+                - name: ServiceAccount__User
+                  valueFrom:
+                    secretKeyRef:
+                      name: service-account
+                      key: SERVICE_USER
+                - name: ServiceAccount__Password
+                  valueFrom:
+                    secretKeyRef:
+                      name: service-account
+                      key: SERVICE_PASSWORD
+                - name: Smtp__Thumbprint
+                  valueFrom:
+                    secretKeyRef:
+                      name: email-service
+                      key: SMTP_THUMBPRINT
+                - name: ASPNETCORE_ENVIRONMENT
+                  value: ${ASPNETCORE_ENVIRONMENT}
+              volumeMounts:
+                - name: ${NAME}${SUFFIX}-config-volume
+                  mountPath: /opt/app-root/configmap
+                  readOnly: true
+          volumes:
+            - name: ${NAME}${SUFFIX}-config-volume
+              configMap:
+                defaultMode: 420
+                name: api-appsettings-${ENV}
+      test: false
+      triggers:
+        - imageChangeParams:
+            automatic: true
+            containerNames:
+              - hangfire
+            from:
+              kind: ImageStreamTag
+              name: ${NAME}:${VERSION}
+          type: ImageChange
+        - type: ConfigChange
+  - apiVersion: v1
+    kind: Service
+    metadata:
+      creationTimestamp: null
+      name: ${NAME}${SUFFIX}
+    spec:
+      ports:
+        - name: web
+          port: 8080
+          protocol: TCP
+          targetPort: 8080
+      selector:
+        deploymentconfig: ${NAME}${SUFFIX}
+parameters:
+  - description: Name of the project (HMCR)
+    displayName: PROJECT_NAME
+    name: PROJECT_NAME
+    required: true
+    value: "hmcr"
+  - description: A name used for all objects
+    displayName: Name
+    name: NAME
+    required: true
+    value: "hangfire"
+  - description: A name used for all objects
+    displayName: LOGDB_NAME
+    name: LOGDB_NAME
+    required: true
+    value: "logdb"
+  - description: A name suffix used for all objects
+    displayName: Suffix
+    name: SUFFIX
+    required: false
+    value: "-dev"
+  - description: Environment short name (dev,test,uat,prod)
+    displayName: ENV
+    name: ENV
+    required: false
+    value: "dev"
+  - description: A version used for the image tags
+    displayName: version
+    name: VERSION
+    required: true
+    value: "v1.0.0"
+  - description: The ASP Net Core deployment environment setting
+    displayName: AspNetCore Environment
+    name: ASPNETCORE_ENVIRONMENT
+    required: true
+    value: "Development"
+  - description: SOURCE_REPOSITORY_URL
+    displayName: SOURCE_REPOSITORY_URL
+    name: SOURCE_REPOSITORY_URL
+    required: false
+    value: ""
+  - description: SOURCE_REPOSITORY_REF
+    displayName: SOURCE_REPOSITORY_REF
+    name: SOURCE_REPOSITORY_REF
+    required: false
+    value: ""
