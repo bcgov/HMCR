@@ -24,6 +24,27 @@
     text-decoration: none;
     font-size: 0.85rem;
   }
+
+  .navbar-nav {
+    .dropdown {
+      .dropdown-menu {
+        background-color: $background-color;
+
+        .dropdown-item {
+          color: $navbar-dark-color;
+          text-decoration: none;
+        }
+      }
+
+      @include hover-focus() {
+        .dropdown-item {
+          text-decoration: underline;
+          background-color: $background-color;
+          color: $navbar-dark-hover-color;
+        }
+      }
+    }
+  }
 }
 
 .main-nav {

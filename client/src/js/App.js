@@ -18,6 +18,7 @@ import UserAdmin from './components/UserAdmin';
 import RoleAdmin from './components/RoleAdmin';
 import Reports from './components/Reports';
 import WorkReporting from './components/WorkReporting';
+import Version from './components/Version';
 import WorkReportingSubmissionDetail from './components/WorkReportingSubmissionDetail';
 import ErrorBoundary from './components/ErrorBoundary';
 
@@ -109,6 +110,7 @@ const WorkReportingRoutes = currentUser => {
       </Route>
       <Route path={Constants.PATHS.WORK_REPORTING} exact component={WorkReporting} />
       <Route path={`${Constants.PATHS.WORK_REPORTING}/:submissionId`} component={WorkReportingSubmissionDetail} />
+      <Route path={Constants.PATHS.VERSION} exact component={Version} />
       <Route path={Constants.PATHS.UNAUTHORIZED} exact component={Unauthorized} />
       <Route path="*" component={NoMatch} />
     </Switch>
@@ -150,6 +152,7 @@ const AdminRoutes = currentUser => {
       >
         <Route path={Constants.PATHS.WORK_REPORTING} exact component={WorkReporting} />
       </AuthorizedRoute>
+      <Route path={Constants.PATHS.VERSION} exact component={Version} />
       <Route path={Constants.PATHS.UNAUTHORIZED} exact component={Unauthorized} />
       <Route path="*" component={NoMatch} />
     </Switch>
