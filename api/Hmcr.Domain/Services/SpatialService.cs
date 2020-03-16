@@ -131,7 +131,7 @@ namespace Hmcr.Domain.Services
                 return (SpValidationResult.Success, startResult.result, endResult.result, new Line(startResult.result.SnappedPoint), rfiResult.segment);
             }
 
-            var line = await _oasApi.GetLineFromOffsetMeasuerOnRfiSegmentAsync(rfiSegment, startResult.result.Offset, endResult.result.Offset);
+            var line = await _oasApi.GetLineFromOffsetMeasureOnRfiSegmentAsync(rfiSegment, startResult.result.Offset, endResult.result.Offset);
 
             return (SpValidationResult.Success, startResult.result, endResult.result, line, rfiResult.segment);
         }
@@ -218,7 +218,7 @@ namespace Hmcr.Domain.Services
                 return (SpValidationResult.Success, snappedStartOffset, snappedEndOffset, startPoint, endPoint, new Line(startPoint), rfiResult.segment);
             }
 
-            var line = await _oasApi.GetLineFromOffsetMeasuerOnRfiSegmentAsync(rfiSegment, snappedStartOffset, snappedEndOffset);
+            var line = await _oasApi.GetLineFromOffsetMeasureOnRfiSegmentAsync(rfiSegment, snappedStartOffset, snappedEndOffset);
 
             return (SpValidationResult.Success, snappedStartOffset, snappedEndOffset, startPoint, endPoint, line, rfiResult.segment);
         }

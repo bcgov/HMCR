@@ -27,7 +27,7 @@ namespace Hmcr.Chris
         /// <param name="start">Offset in KM</param>
         /// <param name="end">Offset in KM</param>
         /// <returns>Line</returns>
-        Task<Line> GetLineFromOffsetMeasuerOnRfiSegmentAsync(string rfiSegment, decimal start, decimal end);
+        Task<Line> GetLineFromOffsetMeasureOnRfiSegmentAsync(string rfiSegment, decimal start, decimal end);
         /// <summary>
         /// This GET API call returns a geojson point feature that is snapped to the RFI and 
         /// includes a measure attribute derived from a specified longitude (-115.302974), latitude (49.375371), and
@@ -82,7 +82,7 @@ namespace Hmcr.Chris
             return features.numberMatched > 0;
         }
 
-        public async Task<Line> GetLineFromOffsetMeasuerOnRfiSegmentAsync(string rfiSegment, decimal start, decimal end)
+        public async Task<Line> GetLineFromOffsetMeasureOnRfiSegmentAsync(string rfiSegment, decimal start, decimal end)
         {
             var query = _path + string.Format(_queries.LineFromOffsetMeasureOnRfiSeg, rfiSegment, start, end);
 
