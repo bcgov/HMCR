@@ -26,13 +26,21 @@ objects:
       selector:
         deploymentconfig: ${NAME}${SUFFIX}
       strategy:
+        activeDeadlineSeconds: 21600
         resources:
           requests:
-            cpu: 500m
-            memory: 256Mi
+            cpu: 1
+            memory: 2Gi
           limits:
-            cpu: 500m
-            memory: 512Mi
+            cpu: 2
+            memory: 4Gi
+        rollingParams:
+          intervalSeconds: 1
+          maxSurge: 25%
+          maxUnavailable: 25%
+          timeoutSeconds: 600
+          updatePeriodSeconds: 1
+        type: Rolling
       template:
         metadata:
           creationTimestamp: null
@@ -48,10 +56,10 @@ objects:
               resources:
                 requests:
                   cpu: 500m
-                  memory: 256Mi
-                limits:
-                  cpu: 500m
                   memory: 512Mi
+                limits:
+                  cpu: 750m
+                  memory: 768Mi
               livenessProbe:
                 httpGet:
                   path: /healthz
