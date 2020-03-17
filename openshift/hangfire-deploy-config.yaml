@@ -25,14 +25,7 @@ objects:
       replicas: 1
       selector:
         deploymentconfig: ${NAME}${SUFFIX}
-      strategy:
-        resources:
-          requests:
-            cpu: 1
-            memory: 2Gi
-          limits:
-            cpu: 2
-            memory: 4Gi
+      strategy: {}
       template:
         metadata:
           creationTimestamp: null
