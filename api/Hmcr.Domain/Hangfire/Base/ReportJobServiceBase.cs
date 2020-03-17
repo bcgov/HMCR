@@ -47,6 +47,7 @@ namespace Hmcr.Domain.Hangfire.Base
         protected decimal _duplicateFileStatusId;
 
         protected HmrSubmissionObject _submission;
+        protected Dictionary<decimal, HmrSubmissionRow> _submissionRows;
 
         protected bool _enableMethodLog;
         protected string _methodLogHeader;
@@ -70,6 +71,8 @@ namespace Hmcr.Domain.Hangfire.Base
             _validator = validator;
             _spatialService = spatialService;
             _geometryFactory = NtsGeometryServices.Instance.CreateGeometryFactory(srid: 4326);
+
+            _submissionRows = new Dictionary<decimal, HmrSubmissionRow>();
         }
 
         public async Task<bool> ProcessSubmissionMain(SubmissionDto submissionDto) 
@@ -124,6 +127,8 @@ namespace Hmcr.Domain.Hangfire.Base
             _submission.SubmissionStatusId = _inProgressRowStatusId;
             _unitOfWork.Commit();
 
+            _submissionRows = new Dictionary<decimal, HmrSubmissionRow>();
+
             _methodLogHeader = $"[Hangfire] Submission ({_submission.SubmissionObjectId}): ";
             _enableMethodLog = _config.GetValue<string>("DISABLE_METHOD_LOGGER") != "Y"; //enabled by default
 
@@ -167,13 +172,16 @@ namespace Hmcr.Domain.Hangfire.Base
             for (int i = untypedRows.Count - 1; i >= 0; i--)
             {
                 var untypedRow = untypedRows[i];
-                var entity = await _submissionRowRepo.GetSubmissionRowByRowNumAsync(_submission.SubmissionObjectId, (decimal)untypedRow.RowNum);
+                var rowNum = (decimal)untypedRow.RowNum;
+                var entity = await _submissionRowRepo.GetSubmissionRowByRowNumAsync(_submission.SubmissionObjectId, rowNum);
 
                 if (entity.RowStatusId == _duplicateRowStatusId)
                 {
                     untypedRows.RemoveAt(i);
                     continue;
                 }
+
+                _submissionRows.Add(rowNum, entity);
 
                 rowCount++;
                 text.AppendLine($"{untypedRow.RowNum},{entity.RowValue}");

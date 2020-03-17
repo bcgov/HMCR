@@ -1,100 +1,100 @@
 apiVersion: v1
 kind: Template
 metadata:
-    name: "true"
+  name: "true"
 objects:
-    - apiVersion: v1
-      data:
-          appsettings.json: |-
-              {
-                  "AllowedHosts": "*",
-                  "Constants": {
-                      "Version": "0.5.0.0",
-                      "SwaggerApiUrl": "/swagger/v1/swagger.json"
-                  },
-                  "Serilog": {
-                      "MinimumLevel": {
-                      "Default": "Information",
-                      "Override": {
-                          "Microsoft": "Warning",
-                          "System": "Warning"
-                        }
-                      },
-                      "WriteTo": [
-                        {
-                            "Name": "Async",
-                            "Args": {
-                                "configure": [
-                                    { "Name": "Console" }
-                                ]
-                            }
-                        },
-                        {
-                            "Name": "HmcrPostgreSql",
-                            "Args": {
-                                "connectionString": "serilog",
-                                "tableName": "hmcr",
-                                "needAutoCreateTable": true
-                            }
-                        }
-                      ],
-                      "Enrich": [
-                        "FromLogContext"
-                      ]
-                  },  
-                  "ConnectionStrings": {
-                      "HMCR": "Server=(localdb)\\mssqllocaldb;Database=HMR_DEV;Trusted_Connection=True;MultipleActiveResultSets=true"
-                  },
-                  "Hangfire": {
-                      "EnableServer": true,
-                      "ReportJobIntervalInMinutes": 1,
-                      "WorkerCount": 1
-                  },
-                  "CHRIS": {
-                      "MapUrl": "https://prd-maps.th.gov.bc.ca",
-                      "OASUrl": "https://prdoas2.apps.th.gov.bc.ca"
-                  },
-                  "JWT": {
-                      "Authority": "https://sso-dev.pathfinder.gov.bc.ca/auth/realms/<realmid>",
-                      "Audience": "<app-id>"
-                  },
-                  "BCeID": {
-                      "Url": "${BCEID_SERVICE}",
-                      "OSID": "<BCeID:OSID>",
-                      "CacheLifespan": 600
-                  },
-                  "ServiceAccount": {
-                      "User": "<ServiceAccount:User>",
-                      "Password": "<ServiceAccount:Password>",
-                      "GUID": "<ServiceAccount:GUID>"
-                  },
-                  "Smtp": {
-                      "SenderName": "HMR NDR Email TRAN:EX",
-                      "SenderAddress": "DoNotReply_HMR@gov.bc.ca",
-                      "Thumbprint": "<Smtp:Thumbprint>",
-                      "Server": "apps.smtp.gov.bc.ca",
-                      "Port": 25,
-                      "SubmissionResult": "${SUBMISSION_URL}"
+  - apiVersion: v1
+    data:
+      appsettings.json: |-
+        {
+            "AllowedHosts": "*",
+            "Constants": {
+                "Version": "0.5.0.0",
+                "SwaggerApiUrl": "/swagger/v1/swagger.json"
+            },
+            "Serilog": {
+                "MinimumLevel": {
+                "Default": "Information",
+                "Override": {
+                    "Microsoft": "Warning",
+                    "System": "Warning"
                   }
-              }
-      kind: ConfigMap
-      metadata:
-          name: api-appsettings-${ENV}
-          labels:
-            shared: "true"
+                },
+                "WriteTo": [
+                  {
+                      "Name": "Async",
+                      "Args": {
+                          "configure": [
+                              { "Name": "Console" }
+                          ]
+                      }
+                  },
+                  {
+                      "Name": "HmcrPostgreSql",
+                      "Args": {
+                          "connectionString": "serilog",
+                          "tableName": "hmcr",
+                          "needAutoCreateTable": true
+                      }
+                  }
+                ],
+                "Enrich": [
+                  "FromLogContext"
+                ]
+            },  
+            "ConnectionStrings": {
+                "HMCR": "Server=(localdb)\\mssqllocaldb;Database=HMR_DEV;Trusted_Connection=True;MultipleActiveResultSets=true"
+            },
+            "Hangfire": {
+                "EnableServer": true,
+                "ReportJobIntervalInMinutes": 1,
+                "WorkerCount": 2
+            },
+            "CHRIS": {
+                "MapUrl": "https://prd-maps.th.gov.bc.ca",
+                "OASUrl": "https://prdoas2.apps.th.gov.bc.ca"
+            },
+            "JWT": {
+                "Authority": "https://sso-dev.pathfinder.gov.bc.ca/auth/realms/<realmid>",
+                "Audience": "<app-id>"
+            },
+            "BCeID": {
+                "Url": "${BCEID_SERVICE}",
+                "OSID": "<BCeID:OSID>",
+                "CacheLifespan": 600
+            },
+            "ServiceAccount": {
+                "User": "<ServiceAccount:User>",
+                "Password": "<ServiceAccount:Password>",
+                "GUID": "<ServiceAccount:GUID>"
+            },
+            "Smtp": {
+                "SenderName": "HMR NDR Email TRAN:EX",
+                "SenderAddress": "DoNotReply_HMR@gov.bc.ca",
+                "Thumbprint": "<Smtp:Thumbprint>",
+                "Server": "apps.smtp.gov.bc.ca",
+                "Port": 25,
+                "SubmissionResult": "${SUBMISSION_URL}"
+            }
+        }
+    kind: ConfigMap
+    metadata:
+      name: api-appsettings-${ENV}
+      labels:
+        shared: "true"
 parameters:
-    - description: Deployment environment (dev, test, uat, prod)
-      displayName: ENV
-      name: ENV
-      required: true
-      value: "dev"
-    - description: Submission results URL
-      displayName: SUBMISSION_URL
-      name: SUBMISSION_URL
-      required: true
-      value: "https://dev-hmcr.th.gov.bc.ca/workreporting?serviceArea={0}&showResult={1}"
-    - description: BCeID webservice URL
-      displayName: BCEID_SERVICE
-      name: BCEID_SERVICE
-      required: true
-      value: "https://gws1.test.bceid.ca/webservices/client/v10/bceidservice.asmx"
+  - description: Deployment environment (dev, test, uat, prod)
+    displayName: ENV
+    name: ENV
+    required: true
+    value: "dev"
+  - description: Submission results URL
+    displayName: SUBMISSION_URL
+    name: SUBMISSION_URL
+    required: true
+    value: "https://dev-hmcr.th.gov.bc.ca/workreporting?serviceArea={0}&showResult={1}"
+  - description: BCeID webservice URL
+    displayName: BCEID_SERVICE
+    name: BCEID_SERVICE
+    required: true
+    value: "https://gws1.test.bceid.ca/webservices/client/v10/bceidservice.asmx"

@@ -12,6 +12,7 @@ using Hmcr.Model.Utils;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
@@ -83,7 +84,9 @@ namespace Hmcr.Domain.Hangfire
             foreach (var untypedRow in untypedRows)
             {
                 errors = new Dictionary<string, List<string>>();
-                var submissionRow = await _submissionRowRepo.GetSubmissionRowByRowIdAsync(untypedRow.RowId);
+
+                var submissionRow = _submissionRows[(decimal)untypedRow.RowNum];
+
                 submissionRow.RowStatusId = _successRowStatusId; //set the initial row status as success 
 
                 var entityName = GetValidationEntityName(untypedRow);
@@ -104,7 +107,7 @@ namespace Hmcr.Domain.Hangfire
 
                 if (rowNum != 0)
                 {
-                    var submissionRow = await _submissionRowRepo.GetSubmissionRowByRowNumAsync(_submission.SubmissionObjectId, rowNum);
+                    var submissionRow = _submissionRows[rowNum];
                     SetErrorDetail(submissionRow, errors);
                     await CommitAndSendEmailAsync();
                     return true;
@@ -114,7 +117,7 @@ namespace Hmcr.Domain.Hangfire
 
                 CopyCalculatedFieldsFormUntypedRow(typedRows, untypedRows);
 
-                await PerformAdditionalValidationAsync(typedRows);
+                PerformAdditionalValidation(typedRows);
             }
 
             if (_submission.SubmissionStatusId == _errorFileStatusId)
@@ -123,26 +126,7 @@ namespace Hmcr.Domain.Hangfire
                 return true;
             }
 
-            var wildlifeReports = new List<WildlifeReportGeometry>();
-
-            var step = typedRows.Count / 10;
-            var i = 0;
-            var pct = 0;
-            
-            //Spatial Validation and Conversion
-            await foreach (var wildlifeReport in PerformSpatialValidationAndConversionAsync(typedRows))
-            {
-                wildlifeReports.Add(wildlifeReport);
-
-                i++;
-
-                if (step != 0 && i % step == 0)
-                {
-                    pct += 10;
-                    if (pct < 100)
-                        _logger.LogInformation($"{_methodLogHeader} PerformSpatialValidationAndConversionAsync {pct}%");
-                }
-            }
+            var wildlifeReports = PerformSpatialValidationAndConversionBatchAsync(typedRows);
 
             _logger.LogInformation($"{_methodLogHeader} PerformSpatialValidationAndConversionAsync 100%");
 
@@ -161,14 +145,14 @@ namespace Hmcr.Domain.Hangfire
             return true;
         }
 
-        private async Task PerformAdditionalValidationAsync(List<WildlifeReportTyped> typedRows)
+        private void PerformAdditionalValidation(List<WildlifeReportTyped> typedRows)
         {
             MethodLogger.LogEntry(_logger, _enableMethodLog, _methodLogHeader);
 
             foreach (var typedRow in typedRows)
             {
                 var errors = new Dictionary<string, List<string>>();
-                var submissionRow = await _submissionRowRepo.GetSubmissionRowByRowNumAsync(_submission.SubmissionObjectId, (decimal)typedRow.RowNum);
+                var submissionRow = _submissionRows[(decimal)typedRow.RowNum];
 
                 if (typedRow.AccidentDate != null && typedRow.AccidentDate > DateTime.Now)
                 {
@@ -199,28 +183,80 @@ namespace Hmcr.Domain.Hangfire
             }
         }
 
-        private async IAsyncEnumerable<WildlifeReportGeometry> PerformSpatialValidationAndConversionAsync(List<WildlifeReportTyped> typedRows)
+        private List<WildlifeReportGeometry> PerformSpatialValidationAndConversionBatchAsync(List<WildlifeReportTyped> typedRows)
         {
             MethodLogger.LogEntry(_logger, _enableMethodLog, _methodLogHeader, $"Total Record: {typedRows.Count}");
 
+            //grouping the rows
+            var groups = new List<List<WildlifeReportTyped>>();
+            var currentGroup = new List<WildlifeReportTyped>();
+
+            var count = 0;
             foreach (var typedRow in typedRows)
             {
-                var submissionRow = await _submissionRowRepo.GetSubmissionRowByRowNumAsync(_submission.SubmissionObjectId, (decimal)typedRow.RowNum);
-                var wildlifeReport = new WildlifeReportGeometry(typedRow, null);
+                currentGroup.Add(typedRow);
+                count++;
 
-                if (typedRow.SpatialData == SpatialData.Gps)
+                if (count % 10 == 0)
                 {
-                    await PerformSpatialGpsValidation(wildlifeReport, submissionRow);
+                    groups.Add(currentGroup);
+                    currentGroup = new List<WildlifeReportTyped>();
                 }
-                else if (typedRow.SpatialData == SpatialData.Lrs)
-                {
-                    await PerformSpatialLrsValidation(wildlifeReport, submissionRow);
-                }
-
-                SetVarianceWarningDetail(submissionRow, typedRow.HighwayUnique);
-
-                yield return wildlifeReport;
             }
+
+            if (currentGroup.Count > 0)
+            {
+                groups.Add(currentGroup);
+            }
+
+            var geometries = new ConcurrentBag<WildlifeReportGeometry>();
+            var progress = 0;
+
+            var step = Math.Round((double)typedRows.Count / 100) * 10;
+            step = step == 0 ? 10 : step;
+
+            var pct = 0;
+
+            foreach (var group in groups)
+            {
+                var tasklist = new List<Task>();
+
+                foreach (var row in group)
+                {
+                    tasklist.Add(Task.Run(async () => geometries.Add(await PerformSpatialValidationAndConversionAsync(row))));
+                }
+
+                Task.WaitAll(tasklist.ToArray());
+
+                progress += 10;
+
+                if (progress % step == 0)
+                {
+                    pct += 10;
+                    _logger.LogInformation($"{_methodLogHeader} PerformSpatialValidationAndConversionAsync {pct}%");
+                }
+            }
+
+            return geometries.ToList();
+        }
+
+        private async Task<WildlifeReportGeometry> PerformSpatialValidationAndConversionAsync(WildlifeReportTyped typedRow)
+        {
+            var submissionRow = _submissionRows[(decimal)typedRow.RowNum];
+            var wildlifeReport = new WildlifeReportGeometry(typedRow, null);
+
+            if (typedRow.SpatialData == SpatialData.Gps)
+            {
+                await PerformSpatialGpsValidation(wildlifeReport, submissionRow);
+            }
+            else if (typedRow.SpatialData == SpatialData.Lrs)
+            {
+                await PerformSpatialLrsValidation(wildlifeReport, submissionRow);
+            }
+
+            SetVarianceWarningDetail(submissionRow, typedRow.HighwayUnique);
+
+            return wildlifeReport;
         }
 
         private async Task PerformSpatialGpsValidation(WildlifeReportGeometry wildlifeReport, HmrSubmissionRow submissionRow)
@@ -272,9 +308,7 @@ namespace Hmcr.Domain.Hangfire
 
         private string GetValidationEntityName(WildlifeReportCsvDto untypedRow)
         {
-            MethodLogger.LogEntry(_logger, _enableMethodLog, _methodLogHeader, $"RowNum: {untypedRow.RowNum}");
-
-            var entityName = "";
+            string entityName;
             if (untypedRow.Latitude.IsEmpty() || untypedRow.Longitude.IsEmpty())
             {
                 entityName = Entities.WildlifeReportLrs;
