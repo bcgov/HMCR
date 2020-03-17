@@ -13,6 +13,7 @@ using Hmcr.Model.Utils;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
@@ -90,7 +91,8 @@ namespace Hmcr.Domain.Hangfire
             {
                 errors = new Dictionary<string, List<string>>();
 
-                var submissionRow = await _submissionRowRepo.GetSubmissionRowByRowIdAsync(untypedRow.RowId);
+                var submissionRow = _submissionRows[(decimal)untypedRow.RowNum];
+
                 submissionRow.RowStatusId = _successRowStatusId; //set the initial row status as success 
 
                 var activityCode = activityCodes.FirstOrDefault(x => x.ActivityNumber == untypedRow.ActivityNumber);
@@ -125,7 +127,7 @@ namespace Hmcr.Domain.Hangfire
 
                 if (rowNum != 0)
                 {
-                    var submissionRow = await _submissionRowRepo.GetSubmissionRowByRowIdFirstOrDefaultAsync(_submission.SubmissionObjectId, rowNum);
+                    var submissionRow = _submissionRows[rowNum];
                     SetErrorDetail(submissionRow, errors);
                     await CommitAndSendEmailAsync();
                     return true;
@@ -135,7 +137,7 @@ namespace Hmcr.Domain.Hangfire
 
                 CopyCalculatedFieldsFormUntypedRow(typedRows, untypedRows);
 
-                await PerformAdditionalValidationAsync(typedRows);
+                PerformAdditionalValidation(typedRows);
             }
 
             if (_submission.SubmissionStatusId == _errorFileStatusId)
@@ -144,25 +146,7 @@ namespace Hmcr.Domain.Hangfire
                 return true;
             }
 
-            var workReports = new List<WorkReportGeometry>();
-
-            var step = typedRows.Count / 10 + 1;
-            var i = 0;
-            var pct = 0;
-
-            //Spatial Validation and Conversion
-            await foreach (var workReport in PerformSpatialValidationAndConversionAsync(typedRows))
-            {
-                workReports.Add(workReport);
-                i++;
-
-                if (step != 0 && i % step == 0)
-                {
-                    pct += 10;
-                    if (pct < 100)
-                        _logger.LogInformation($"{_methodLogHeader} PerformSpatialValidationAndConversionAsync {pct}%");
-                }
-            }
+            var workReports = PerformSpatialValidationAndConversionBatchAsync(typedRows);
 
             _logger.LogInformation($"{_methodLogHeader} PerformSpatialValidationAndConversionAsync 100%");
 
@@ -214,6 +198,61 @@ namespace Hmcr.Domain.Hangfire
             }
         }
 
+        private void PerformAdditionalValidation(List<WorkReportTyped> typedRows)
+        {
+            MethodLogger.LogEntry(_logger, _enableMethodLog, _methodLogHeader);
+
+            foreach (var typedRow in typedRows)
+            {
+                var errors = new Dictionary<string, List<string>>();
+                var submissionRow = _submissionRows[(decimal)typedRow.RowNum];
+
+                if (typedRow.StartDate != null && typedRow.EndDate < typedRow.StartDate)
+                {
+                    errors.AddItem("StartDate", "Start Date cannot be greater than End Date");
+                }
+
+                if (typedRow.StartDate != null && typedRow.StartDate > DateTime.Now)
+                {
+                    errors.AddItem(Fields.StartDate, "Cannot be a future date.");
+                }
+
+                if (typedRow.EndDate != null && typedRow.EndDate > DateTime.Now)
+                {
+                    errors.AddItem(Fields.EndDate, "Cannot be a future date.");
+                }
+
+                if (typedRow.SpatialData == SpatialData.Gps)
+                {
+                    PerformGpsPointValidation(typedRow, submissionRow);
+                    PerformGpsLineValidation(typedRow, submissionRow);
+                    PerformGpsEitherLineOrPointValidation(typedRow);
+                }
+
+                if (typedRow.SpatialData == SpatialData.Lrs)
+                {
+                    PerformOffsetPointValidation(typedRow, submissionRow);
+                    PerformOffsetLineValidation(typedRow, submissionRow);
+                    PerformOffsetEitherLineOrPointValidation(typedRow);
+                }
+
+                if (!ValidateGpsCoordsRange(typedRow.StartLongitude, typedRow.StartLatitude))
+                {
+                    errors.AddItem($"{Fields.StartLongitude}/{Fields.StartLatitude}", "Invalid range of GPS coordinates.");
+                }
+
+                if (!ValidateGpsCoordsRange(typedRow.EndLongitude, typedRow.EndLatitude))
+                {
+                    errors.AddItem($"{Fields.EndLongitude}/{Fields.EndLatitude}", "Invalid range of GPS coordinates.");
+                }
+
+                if (errors.Count > 0)
+                {
+                    SetErrorDetail(submissionRow, errors);
+                }
+            }
+        }
+
         private void CopyCalculatedFieldsFormUntypedRow(List<WorkReportTyped> typedRows, List<WorkReportCsvDto> untypedRows)
         {
             MethodLogger.LogEntry(_logger, _enableMethodLog, _methodLogHeader);
@@ -227,28 +266,80 @@ namespace Hmcr.Domain.Hangfire
             }
         }
 
-        private async IAsyncEnumerable<WorkReportGeometry> PerformSpatialValidationAndConversionAsync(List<WorkReportTyped> typedRows)
+        private List<WorkReportGeometry> PerformSpatialValidationAndConversionBatchAsync(List<WorkReportTyped> typedRows)
         {
             MethodLogger.LogEntry(_logger, _enableMethodLog, _methodLogHeader, $"Total Record: {typedRows.Count}");
 
+            //grouping the rows
+            var groups = new List<List<WorkReportTyped>>();
+            var currentGroup = new List<WorkReportTyped>();
+
+            var count = 0;
             foreach (var typedRow in typedRows)
-            {
-                var submissionRow = await _submissionRowRepo.GetSubmissionRowByRowNumAsync(_submission.SubmissionObjectId, (decimal)typedRow.RowNum);
-                var workReport = new WorkReportGeometry(typedRow, null);
+            {                
+                currentGroup.Add(typedRow);
+                count++;
 
-                if (typedRow.SpatialData == SpatialData.Gps)
+                if (count % 10 == 0)
                 {
-                    await PerformSpatialGpsValidation(workReport, submissionRow);
+                    groups.Add(currentGroup);
+                    currentGroup = new List<WorkReportTyped>();
                 }
-                else if (typedRow.SpatialData == SpatialData.Lrs)
-                {
-                    await PerformSpatialLrsValidation(workReport, submissionRow);
-                }
-
-                SetVarianceWarningDetail(submissionRow, typedRow.HighwayUnique);
-
-                yield return workReport;
             }
+
+            if (currentGroup.Count > 0)
+            {
+                groups.Add(currentGroup);
+            }
+
+            var geometries = new ConcurrentBag<WorkReportGeometry>();
+            var progress = 0;
+
+            var step = Math.Round((double)typedRows.Count / 100) * 10;
+            step = step == 0 ? 10 : step;
+
+            var pct = 0;
+
+            foreach (var group in groups)
+            {
+                var tasklist = new List<Task>();
+
+                foreach (var row in group)
+                {
+                    tasklist.Add(Task.Run(async () => geometries.Add(await PerformSpatialValidationAndConversionAsync(row))));
+                }
+
+                Task.WaitAll(tasklist.ToArray());
+
+                progress += 10;
+
+                if (progress % step == 0)
+                {
+                    pct += 10;
+                    _logger.LogInformation($"{_methodLogHeader} PerformSpatialValidationAndConversionAsync {pct}%");
+                }
+            }
+
+            return geometries.ToList();
+        }
+
+        private async Task<WorkReportGeometry> PerformSpatialValidationAndConversionAsync(WorkReportTyped typedRow)
+        {
+            var submissionRow = _submissionRows[(decimal)typedRow.RowNum];
+            var workReport = new WorkReportGeometry(typedRow, null);
+
+            if (typedRow.SpatialData == SpatialData.Gps)
+            {
+                await PerformSpatialGpsValidation(workReport, submissionRow);
+            }
+            else if (typedRow.SpatialData == SpatialData.Lrs)
+            {
+                await PerformSpatialLrsValidation(workReport, submissionRow);
+            }
+
+            SetVarianceWarningDetail(submissionRow, typedRow.HighwayUnique);
+
+            return workReport;
         }
 
         private async Task PerformSpatialGpsValidation(WorkReportGeometry workReport, HmrSubmissionRow submissionRow)
@@ -376,6 +467,7 @@ namespace Hmcr.Domain.Hangfire
                 }
             }
         }
+
         private void PerformGpsPointValidation(WorkReportTyped typedRow, HmrSubmissionRow submissionRow)
         {
             //if start is null, it's already set to invalid, no more validation
@@ -506,61 +598,6 @@ namespace Hmcr.Domain.Hangfire
             else
             {
                 typedRow.FeatureType = FeatureType.Line;
-            }
-        }
-
-        private async Task PerformAdditionalValidationAsync(List<WorkReportTyped> typedRows)
-        {
-            MethodLogger.LogEntry(_logger, _enableMethodLog, _methodLogHeader);
-
-            foreach (var typedRow in typedRows)
-            {
-                var errors = new Dictionary<string, List<string>>();
-                var submissionRow = await _submissionRowRepo.GetSubmissionRowByRowNumAsync(_submission.SubmissionObjectId, (decimal)typedRow.RowNum);
-
-                if (typedRow.StartDate != null && typedRow.EndDate < typedRow.StartDate)
-                {
-                    errors.AddItem("StartDate", "Start Date cannot be greater than End Date");
-                }
-
-                if (typedRow.StartDate != null && typedRow.StartDate > DateTime.Now)
-                {
-                    errors.AddItem(Fields.StartDate, "Cannot be a future date.");
-                }
-
-                if (typedRow.EndDate != null && typedRow.EndDate > DateTime.Now)
-                {
-                    errors.AddItem(Fields.EndDate, "Cannot be a future date.");
-                }
-
-                if (typedRow.SpatialData == SpatialData.Gps)
-                {
-                    PerformGpsPointValidation(typedRow, submissionRow);
-                    PerformGpsLineValidation(typedRow, submissionRow);
-                    PerformGpsEitherLineOrPointValidation(typedRow);
-                }
-
-                if (typedRow.SpatialData == SpatialData.Lrs)
-                {
-                    PerformOffsetPointValidation(typedRow, submissionRow);
-                    PerformOffsetLineValidation(typedRow, submissionRow);
-                    PerformOffsetEitherLineOrPointValidation(typedRow);
-                }
-
-                if (!ValidateGpsCoordsRange(typedRow.StartLongitude, typedRow.StartLatitude))
-                {
-                    errors.AddItem($"{Fields.StartLongitude}/{Fields.StartLatitude}", "Invalid range of GPS coordinates.");
-                }
-
-                if (!ValidateGpsCoordsRange(typedRow.EndLongitude, typedRow.EndLatitude))
-                {
-                    errors.AddItem($"{Fields.EndLongitude}/{Fields.EndLatitude}", "Invalid range of GPS coordinates.");
-                }
-
-                if (errors.Count > 0)
-                {
-                    SetErrorDetail(submissionRow, errors);
-                }
             }
         }
 

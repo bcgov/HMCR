@@ -4,7 +4,7 @@ metadata:
   creationTimestamp: null
   name: ${PROJECT_NAME}
 labels:
-  template: api-deploy
+  template: hangfire-deploy
 objects:
   - apiVersion: v1
     kind: ImageStream
@@ -26,7 +26,6 @@ objects:
       selector:
         deploymentconfig: ${NAME}${SUFFIX}
       strategy:
-        activeDeadlineSeconds: 21600
         resources:
           requests:
             cpu: 1
@@ -34,13 +33,6 @@ objects:
           limits:
             cpu: 2
             memory: 4Gi
-        rollingParams:
-          intervalSeconds: 1
-          maxSurge: 25%
-          maxUnavailable: 25%
-          timeoutSeconds: 600
-          updatePeriodSeconds: 1
-        type: Rolling
       template:
         metadata:
           creationTimestamp: null
@@ -49,17 +41,17 @@ objects:
         spec:
           containers:
             - image: ${NAME}:${VERSION}
-              name: api
+              name: hangfire
               ports:
                 - containerPort: 8080
                   protocol: TCP
               resources:
                 requests:
                   cpu: 500m
-                  memory: 512Mi
-                limits:
-                  cpu: 750m
                   memory: 768Mi
+                limits:
+                  cpu: 1
+                  memory: 1Gi
               livenessProbe:
                 httpGet:
                   path: /healthz
@@ -77,16 +69,6 @@ objects:
                     secretKeyRef:
                       name: ${LOGDB_NAME}${SUFFIX}
                       key: connection-string
-                - name: JWT__Authority
-                  valueFrom:
-                    secretKeyRef:
-                      name: sso-configs-${ENV}
-                      key: JWT_SSO_AUTHORITY
-                - name: JWT__Audience
-                  valueFrom:
-                    secretKeyRef:
-                      name: sso-configs-${ENV}
-                      key: JWT_SSO_AUDIENCE
                 - name: ServiceAccount__User
                   valueFrom:
                     secretKeyRef:
@@ -97,11 +79,6 @@ objects:
                     secretKeyRef:
                       name: service-account
                       key: SERVICE_PASSWORD
-                - name: BCEID__OSID
-                  valueFrom:
-                    secretKeyRef:
-                      name: bceid-service
-                      key: BCEID_OSID
                 - name: Smtp__Thumbprint
                   valueFrom:
                     secretKeyRef:
@@ -123,7 +100,7 @@ objects:
         - imageChangeParams:
             automatic: true
             containerNames:
-              - api
+              - hangfire
             from:
               kind: ImageStreamTag
               name: ${NAME}:${VERSION}
@@ -142,25 +119,6 @@ objects:
           targetPort: 8080
       selector:
         deploymentconfig: ${NAME}${SUFFIX}
-  - apiVersion: route.openshift.io/v1
-    kind: Route
-    metadata:
-      annotations:
-        haproxy.router.openshift.io/timeout: 1h
-      creationTimestamp: null
-      name: ${NAME}${SUFFIX}
-    spec:
-      host: ${HOST}
-      path: "/api"
-      port:
-        targetPort: web
-      tls:
-        termination: edge
-      to:
-        kind: Service
-        name: ${NAME}${SUFFIX}
-        weight: 100
-      wildcardPolicy: None
 parameters:
   - description: Name of the project (HMCR)
     displayName: PROJECT_NAME
@@ -171,7 +129,7 @@ parameters:
     displayName: Name
     name: NAME
     required: true
-    value: "api"
+    value: "hangfire"
   - description: A name used for all objects
     displayName: LOGDB_NAME
     name: LOGDB_NAME
@@ -197,11 +155,6 @@ parameters:
     name: ASPNETCORE_ENVIRONMENT
     required: true
     value: "Development"
-  - description: HOST
-    displayName: HOST
-    name: HOST
-    required: true
-    value: ""
   - description: SOURCE_REPOSITORY_URL
     displayName: SOURCE_REPOSITORY_URL
     name: SOURCE_REPOSITORY_URL
