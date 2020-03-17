@@ -7,15 +7,42 @@ namespace Hmcr.Chris
 {
     public interface IApi
     {
-        Task<string> Get(HttpClient client, string path);
-        Task<string> Post(HttpClient client, string path, string body);
+        Task<HttpResponseMessage> Get(HttpClient client, string path);
+        Task<HttpResponseMessage> Post(HttpClient client, string path, string body);
+        Task<HttpResponseMessage> GetWithRetry(HttpClient client, string path);
+        Task<HttpResponseMessage> PostWithRetry(HttpClient client, string path, string body);
 
     }
     public class Api : IApi
     {
         const int maxAttempt = 5;
 
-        public async Task<string> Get(HttpClient client, string path)
+        public async Task<HttpResponseMessage> Get(HttpClient client, string path)
+        {
+            var response = await client.GetAsync(path);
+
+            if (!response.IsSuccessStatusCode)
+            {
+                throw new Exception($"Status Code: {response.StatusCode}");
+            }
+
+            return response;
+        }
+
+        public async Task<HttpResponseMessage> Post(HttpClient client, string path, string body)
+        {
+            var response
+                = await client.PostAsync(path, new StringContent(body, Encoding.UTF8));
+
+            if (!response.IsSuccessStatusCode)
+            {
+                throw new Exception($"Status Code: {response.StatusCode}");
+            }
+
+            return response;
+        }
+
+        public async Task<HttpResponseMessage> GetWithRetry(HttpClient client, string path)
         {
             var response = await client.GetAsync(path);
 
@@ -38,10 +65,10 @@ namespace Hmcr.Chris
                 }
             }
 
-            return await response.Content.ReadAsStringAsync();
+            return response;
         }
 
-        public async Task<string> Post(HttpClient client, string path, string body)
+        public async Task<HttpResponseMessage> PostWithRetry(HttpClient client, string path, string body)
         {
             var response
                 = await client.PostAsync(path, new StringContent(body, Encoding.UTF8));
@@ -65,7 +92,7 @@ namespace Hmcr.Chris
                 }                
             }
 
-            return await response.Content.ReadAsStringAsync();
+            return response;
         }
 
     }
