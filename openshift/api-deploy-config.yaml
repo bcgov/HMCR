@@ -27,17 +27,10 @@ objects:
         deploymentconfig: ${NAME}${SUFFIX}
       strategy:
         activeDeadlineSeconds: 21600
-        resources:
-          requests:
-            cpu: 1
-            memory: 2Gi
-          limits:
-            cpu: 2
-            memory: 4Gi
         rollingParams:
           intervalSeconds: 1
-          maxSurge: 25%
-          maxUnavailable: 25%
+          maxSurge: 1
+          maxUnavailable: 1
           timeoutSeconds: 600
           updatePeriodSeconds: 1
         type: Rolling
