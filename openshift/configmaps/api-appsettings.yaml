@@ -48,7 +48,7 @@ objects:
             "Hangfire": {
                 "EnableServer": true,
                 "ReportJobIntervalInMinutes": 1,
-                "WorkerCount": 2
+                "WorkerCount": 1
             },
             "CHRIS": {
                 "MapUrl": "https://prd-maps.th.gov.bc.ca",
