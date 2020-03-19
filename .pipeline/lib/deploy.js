@@ -2,6 +2,7 @@
 const { OpenShiftClientX } = require("pipeline-cli");
 const path = require("path");
 
+const util = require('./util');
 const KeyCloakClient = require("./keycloak");
 
 module.exports = settings => {
@@ -17,8 +18,10 @@ module.exports = settings => {
   );
   var objects = [];
   const kc = new KeyCloakClient(settings, oc);
+  const logDbSecret = util.getSecret(oc, phases[phase].namespace, `${phases[phase].name}-logdb${phases[phase].suffix}`);
 
   kc.addUris();
+  
 
   // The deployment of your cool app goes here ▼▼▼
   objects.push(
@@ -35,6 +38,21 @@ module.exports = settings => {
       }
     )
   );
+
+  if(!logDbSecret) {
+    console.log("Adding logDb postgresql secret");
+
+    objects.push(
+      ...oc.processDeploymentTemplate(
+        `${templatesLocalBaseUrl}/secrets/logdb-postgresql-secrets.yaml`,
+        {
+          param: {
+            NAME: `${phases[phase].name}-logdb`,
+            SUFFIX: phases[phase].suffix, }
+        }
+      )
+    );
+  }
 
   objects.push(
     ...oc.processDeploymentTemplate(

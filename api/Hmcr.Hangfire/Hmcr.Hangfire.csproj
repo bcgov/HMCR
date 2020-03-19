@@ -32,6 +32,7 @@
     <PackageReference Include="Microsoft.Extensions.Diagnostics.HealthChecks" Version="3.1.2" />
     <PackageReference Include="NetCore.AutoRegisterDi" Version="1.1.0" />
     <PackageReference Include="Serilog.AspNetCore" Version="3.2.0" />
+    <PackageReference Include="Serilog.Enrichers.Environment" Version="2.1.3" />
     <PackageReference Include="Serilog.Settings.Configuration" Version="3.1.0" />
     <PackageReference Include="Serilog.Sinks.Async" Version="1.4.0" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="5.0.0" />
@@ -45,6 +46,12 @@
     <ProjectReference Include="..\Hmcr.Domain\Hmcr.Domain.csproj" />
     <ProjectReference Include="..\Hmcr.Model\Hmcr.Model.csproj" />
     <ProjectReference Include="..\Serilog.Sinks.HmcrPostgreSql\Serilog.Sinks.HmcrPostgreSql.csproj" />
+  </ItemGroup>
+  
+  <ItemGroup>
+    <Content Update="appsettings.json">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
 
 </Project>
