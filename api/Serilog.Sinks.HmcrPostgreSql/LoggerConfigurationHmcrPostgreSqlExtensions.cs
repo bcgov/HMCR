@@ -82,7 +82,8 @@ namespace Serilog.Sinks.HmcrPostgreSql
                 { "raise_date", new TimestampColumnWriter(NpgsqlDbType.TimestampTz) },
                 { "exception", new ExceptionColumnWriter(NpgsqlDbType.Text) },
                 { "properties", new LogEventSerializedColumnWriter(NpgsqlDbType.Jsonb) },
-                { "props_test", new PropertiesColumnWriter(NpgsqlDbType.Jsonb) }
+                { "props_test", new PropertiesColumnWriter(NpgsqlDbType.Jsonb) },
+                { "machine_name", new SinglePropertyColumnWriter("MachineName", PropertyWriteMethod.ToString, NpgsqlDbType.Text, "l") }
             };
 
             return sinkConfiguration.Sink(
