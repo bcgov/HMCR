@@ -2,6 +2,8 @@
 const axios = require("axios");
 const _ = require("lodash");
 
+const util = require('./util');
+
 module.exports = class KeyCloakClient {
   constructor(settings, oc) {
     this.phases = settings.phases;
@@ -27,15 +29,7 @@ module.exports = class KeyCloakClient {
   }
 
   getSecrets() {
-    const keycloakSecret = this.oc.raw("get", [
-      "-n",
-      this.phases.build.namespace,
-      "secret",
-      "keycloak-service-client",
-      "-o",
-      "json"
-    ]);
-    const secret = JSON.parse(keycloakSecret.stdout).data;
+    const secret = util.getSecret(this.oc, this.phases.build.namespace, "keycloak-service-client");
 
     this.clientId = Buffer.from(secret.clientId, "base64").toString();
     this.clientSecret = Buffer.from(secret.clientSecret, "base64").toString();

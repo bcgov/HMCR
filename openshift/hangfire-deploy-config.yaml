@@ -32,6 +32,10 @@ objects:
           labels:
             deploymentconfig: ${NAME}${SUFFIX}
         spec:
+          initContainers:  # check if logdb is ready, and only continue when true
+            - name: check-logdb-ready
+              image: docker-registry.default.svc:5000/txkggj-tools/postgresql-10-rhel8:1
+              command: ['sh', '-c',  'until pg_isready -h ${LOGDB_NAME}${SUFFIX} -p 5432;  do echo waiting for database; sleep 2; done;']
           containers:
             - image: ${NAME}:${VERSION}
               name: hangfire

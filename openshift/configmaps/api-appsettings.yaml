@@ -39,7 +39,8 @@ objects:
                   }
                 ],
                 "Enrich": [
-                  "FromLogContext"
+                  "FromLogContext",
+                  "WithMachineName"
                 ]
             },  
             "ConnectionStrings": {
