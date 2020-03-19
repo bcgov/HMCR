@@ -87,6 +87,12 @@ namespace Hmcr.Domain.Services
                 {
                     break; //handled in CsvHelperUtils
                 }
+                catch (CsvHelper.ReaderException ex)
+                {
+                    _logger.LogWarning(ex.Message);
+                    errors.AddItem("Report Type", "Please make sure the report type selected is correct.");
+                    return false;
+                }
                 catch (CsvHelperException ex)
                 {
                     _logger.LogInformation(ex.ToString());
