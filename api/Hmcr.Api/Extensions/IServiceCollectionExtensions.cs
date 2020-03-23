@@ -1,31 +1,31 @@
 ﻿using AutoMapper;
+using Hangfire;
+using Hangfire.SqlServer;
 using Hmcr.Api.Authentication;
 using Hmcr.Api.Authorization;
 using Hmcr.Data.Database;
 using Hmcr.Data.Database.Entities;
 using Hmcr.Data.Mappings;
+using Hmcr.Domain.Services;
 using Hmcr.Model;
+using Hmcr.Model.JsonConverters;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Authorization;
 using Microsoft.AspNetCore.Mvc.Versioning;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
+using Microsoft.Extensions.Hosting;
+using Microsoft.OpenApi.Models;
 using NetCore.AutoRegisterDi;
+using System;
 using System.Linq;
 using System.Reflection;
 using System.Text.Json;
-using Microsoft.Extensions.Hosting;
-using Microsoft.OpenApi.Models;
-using Hmcr.Model.JsonConverters;
-using Hmcr.Domain.Services;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.Extensions.Configuration;
-using Hangfire;
-using Hangfire.SqlServer;
-using System;
-using Microsoft.Extensions.Diagnostics.HealthChecks;
 
 namespace Hmcr.Api.Extensions
 {
@@ -122,6 +122,26 @@ namespace Hmcr.Api.Extensions
                         Title = "HMCR REST API",
                         Description = "Highway Maintenance Contract Reporting System"
                     });
+
+                    var securitySchema = new OpenApiSecurityScheme
+                    {
+                        Description = "JWT Authorization header using the Bearer scheme. Example: \"Authorization: Bearer {token}\"",
+                        Name = "Authorization",
+                        In = ParameterLocation.Header,
+                        Type = SecuritySchemeType.Http,
+                        Scheme = "bearer",
+                        Reference = new OpenApiReference
+                        {
+                            Type = ReferenceType.SecurityScheme,
+                            Id = "Bearer"
+                        }
+                    };
+
+                    options.AddSecurityDefinition("Bearer", securitySchema);
+
+                    var securityRequirement = new OpenApiSecurityRequirement();
+                    securityRequirement.Add(securitySchema, new[] { "Bearer" });
+                    options.AddSecurityRequirement(securityRequirement);
                 });
             }
         }
