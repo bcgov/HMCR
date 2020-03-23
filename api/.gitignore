@@ -282,6 +282,7 @@ __pycache__/
 *.sonarqube
 
 **/*.Local.json
+**/appsettings.Development.json
 
 *.DotSettings
 *.DotSettings.user
