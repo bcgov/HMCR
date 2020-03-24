@@ -51,5 +51,21 @@ namespace Hmcr.Api
                 ContentTypes = { "application/problem+json" }
             };
         }
+
+        public static ValidationProblemDetails GetServiceAreasMissingErrorResult(ActionContext context)
+        {
+            var problem = new ValidationProblemDetails(context.ModelState)
+            {
+                Type = "https://hmcr.bc.gov.ca/model-validation-error",
+                Title = "Service areas missing",
+                Status = StatusCodes.Status422UnprocessableEntity,
+                Detail = "Please include service areas in the query string as comma separated string.",
+                Instance = context.HttpContext.Request.Path
+            };
+
+            problem.Extensions.Add("traceId", context.HttpContext.TraceIdentifier);
+
+            return problem;
+        }
     }
 }
