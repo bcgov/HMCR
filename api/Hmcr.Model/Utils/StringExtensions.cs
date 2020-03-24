@@ -25,25 +25,26 @@ namespace Hmcr.Model.Utils
         {
             if (str == null) return new decimal[] { };
 
-            decimal[] result;
+            var result = new List<decimal>();
 
             try
             {
                 string[] tokens = str.Split(',');
 
-                result = new decimal[tokens.Length];
-
-                for (int i = 0; i < tokens.Length; i++)
+                foreach(var token in tokens)
                 {
-                    result[i] = decimal.Parse(tokens[i]);
+                    var decToken = decimal.Parse(token);
+
+                    if (!result.Contains(decToken))
+                        result.Add(decToken);
                 }
             }
             catch
             {
-                result = null;
+                return new decimal[] { };
             }
 
-            return result;
+            return result.ToArray();
         }
 
         public static string[] ToStringArray(this string str)
@@ -180,6 +181,11 @@ namespace Hmcr.Model.Utils
             }
 
             return lowerCaseItems;
+        }
+
+        public static string RemoveQuestionMark(this string query)
+        {
+            return query.StartsWith("?") ? query.Substring(1) : query;
         }
     }
 }
