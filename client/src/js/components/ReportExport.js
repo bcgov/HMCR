@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { connect } from 'react-redux';
-import { Button, ButtonGroup, Spinner } from 'reactstrap';
+import { Button, Spinner } from 'reactstrap';
 import { Formik, Form } from 'formik';
 import * as Yup from 'yup';
 import moment from 'moment';
@@ -15,15 +15,22 @@ import MultiDropdownField from './ui/MultiDropdownField';
 import { FormInput } from './forms/FormInputs';
 import SimpleModalWrapper from './ui/SimpleModalWrapper';
 
-// import * as Constants from '../Constants';
+import * as Constants from '../Constants';
+import * as api from '../Api';
 
 const exportFormats = [
   { id: 'csv', name: 'CSV' },
   { id: 'application/vnd.google-earth.kml+xml', name: 'KML' },
-  { id: 'application/vnd.google-earth.kmz', name: 'KMZ' },
-  { id: 'json', name: 'GeoJSON' },
+  // { id: 'application/vnd.google-earth.kmz', name: 'KMZ' },
+  { id: 'application/json', name: 'GeoJSON' },
   { id: 'application/gml+xml; version=3.2', name: 'GML' },
 ];
+
+const reportSpecificDateField = {
+  HMR_WORK_REPORT: 'END_DATE',
+  HMR_ROCKFALL_REPORT: 'REPORT_DATE',
+  HMR_WILDLIFE_REPORT: 'ACCIDENT_DATE',
+};
 
 const filterContainerStyle = {
   width: '200px',
@@ -39,7 +46,7 @@ const defaultSearchFormValues = {
     .subtract(1, 'months')
     .endOf('month'),
   serviceAreaNumbers: [],
-  highwayUniqueId: '',
+  highwayUnique: '',
   maintenanceTypeIds: [],
   activityNumberIds: [],
   outputFormat: 'csv',
@@ -54,7 +61,7 @@ const validationSchema = Yup.object({
   outputFormat: Yup.string().required('Reuired'),
 });
 
-const Reports = ({
+const ReportExport = ({
   reportTypes,
   maintenanceTypes,
   serviceAreas,
@@ -63,8 +70,8 @@ const Reports = ({
   fetchActivityCodesDropdown,
 }) => {
   const [validServiceAreas, setValidServiceAreas] = useState([]);
-  const [submitting, setSubmitting] = useState(true);
-  const [showModal, setShowModal] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
+  const [showModal, setShowModal] = useState(false);
 
   useEffect(() => {
     const currentUserSAIds = currentUser.serviceAreas.map(sa => sa.id);
@@ -77,29 +84,71 @@ const Reports = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  function disableFutureDates(date) {
-    return date.isAfter(moment());
-  }
+  const disableFutureDates = date => date.isAfter(moment());
 
-  function isRequiredFieldsSet(formikProps) {
-    return formikProps.values.reportTypeId && formikProps.values.dateFrom && formikProps.values.dateTo;
-  }
+  const isRequiredFieldsSet = formikProps =>
+    formikProps.values.reportTypeId && formikProps.values.dateFrom && formikProps.values.dateTo;
+
+  const submitExport = values => {
+    setSubmitting(true);
+    setShowModal(true);
+
+    const queryParams = {};
+
+    queryParams.typeName = `hmr:${values.reportTypeId}_VW`;
+    queryParams.outputFormat = values.outputFormat;
+    queryParams.cql_filter = '';
+
+    const dateFrom = values.dateFrom.startOf('day').format(Constants.DATE_DISPLAY_FORMAT);
+    const dateTo = values.dateTo.endOf('day').format(Constants.DATE_DISPLAY_FORMAT);
+    const serviceAreas = values.serviceAreaNumbers.join(',');
+    const highwayUnique = values.highwayUnique.trim();
+
+    queryParams.cql_filter += `${reportSpecificDateField[values.reportTypeId]} BETWEEN ${dateFrom} AND ${dateTo}`;
+
+    if (values.serviceAreaNumbers.length > 0) {
+      queryParams.cql_filter += ` AND SERVICE_AREA IN (${serviceAreas})`;
+      queryParams.serviceAreas = serviceAreas;
+    }
+
+    if (highwayUnique.length > 0) {
+      queryParams.cql_filter += ` AND (HIGHWAY_UNIQUE LIKE '${highwayUnique}%' OR HIGHWAY_UNIQUE_NAME LIKE '${highwayUnique}%')`;
+    }
+
+    if (values.reportTypeId === 'HMR_WORK_REPORT') {
+      // Maintenance Type is stored as Record Type in the table/view
+      // Maintenance Type and Record Type are used interchangeably elsewhere
+      const recordTypes = values.maintenanceTypeIds.join(',');
+      const activityNumbers = values.activityNumberIds.join(',');
+
+      if (values.maintenanceTypeIds.length > 0) {
+        queryParams.cql_filter += ` AND RECORD_TYPE IN (${recordTypes})`;
+      }
+
+      if (values.activityNumberIds.length > 0) {
+        queryParams.cql_filter += ` AND ACTIVITY_NUMBER IN (${activityNumbers})`;
+      }
+    }
+
+    api.getReportExport(queryParams);
+
+    console.log(values);
+    console.log(queryParams);
+  };
 
   return (
     <React.Fragment>
-      <UIHeader>Report Export</UIHeader>
       <Formik
         initialValues={defaultSearchFormValues}
         enableReinitialize={true}
-        onSubmit={values => {
-          console.log(values);
-        }}
+        onSubmit={submitExport}
         onReset={() => {}}
         validationSchema={validationSchema}
       >
         {formikProps => (
           <React.Fragment>
             <MaterialCard>
+              <UIHeader>Report Export</UIHeader>
               <Form>
                 <div className="d-flex">
                   <div style={filterContainerStyle}>
@@ -127,25 +176,29 @@ const Reports = ({
                         />
                       </div>
                       <div style={filterContainerStyle}>
-                        <FormInput type="text" name="highwayUniqueId" placeholder="Highway Unique" />
+                        <FormInput type="text" name="highwayUnique" placeholder="Highway Unique" />
                       </div>
-                      <div style={filterContainerStyle}>
-                        <MultiDropdownField
-                          {...formikProps}
-                          title="Maintenance Type"
-                          items={maintenanceTypes}
-                          name="maintenanceTypeIds"
-                        />
-                      </div>
-                      <div style={filterContainerStyle}>
-                        <MultiDropdownField
-                          {...formikProps}
-                          title="Activity Number"
-                          items={activityCodes}
-                          name="activityNumberIds"
-                          searchable={true}
-                        />
-                      </div>
+                      {formikProps.values.reportTypeId === 'HMR_WORK_REPORT' && (
+                        <React.Fragment>
+                          <div style={filterContainerStyle}>
+                            <MultiDropdownField
+                              {...formikProps}
+                              title="Maintenance Type"
+                              items={maintenanceTypes}
+                              name="maintenanceTypeIds"
+                            />
+                          </div>
+                          <div style={filterContainerStyle}>
+                            <MultiDropdownField
+                              {...formikProps}
+                              title="Activity Number"
+                              items={activityCodes}
+                              name="activityNumberIds"
+                              searchable={true}
+                            />
+                          </div>
+                        </React.Fragment>
+                      )}
                     </div>
                   </React.Fragment>
                 )}
@@ -156,14 +209,12 @@ const Reports = ({
                 <div style={{ width: '100px' }} className="mr-2">
                   <SingleDropdownField defaultTitle="Export Format" items={exportFormats} name="outputFormat" />
                 </div>
-                <ButtonGroup>
-                  <Button color="primary" size="sm" type="button" onClick={formikProps.submitForm}>
-                    Export
-                  </Button>
-                  <Button color="secondary" size="sm" type="button" onClick={formikProps.resetForm}>
-                    Reset
-                  </Button>
-                </ButtonGroup>
+                <Button color="primary" size="sm" type="button" onClick={formikProps.submitForm} className="mr-2">
+                  Export
+                </Button>
+                <Button color="secondary" size="sm" type="button" onClick={formikProps.resetForm}>
+                  Reset
+                </Button>
               </div>
             )}
           </React.Fragment>
@@ -192,7 +243,7 @@ const Reports = ({
 
 const mapStateToProps = state => {
   return {
-    reportTypes: Object.values(state.submissions.streams),
+    reportTypes: Object.values(state.submissions.streams).map(item => ({ ...item, id: item.stagingTableName })),
     maintenanceTypes: state.codeLookups.maintenanceTypes,
     serviceAreas: Object.values(state.serviceAreas),
     currentUser: state.user.current,
@@ -200,4 +251,4 @@ const mapStateToProps = state => {
   };
 };
 
-export default connect(mapStateToProps, { fetchActivityCodesDropdown })(Reports);
+export default connect(mapStateToProps, { fetchActivityCodesDropdown })(ReportExport);
