@@ -185,7 +185,6 @@ namespace Hmcr.Domain.Services
             _rules.First(x => x.EntityName == Entities.WorkReportD3 && x.FieldName == Fields.HighwayUnique).Required = true;
             _rules.First(x => x.EntityName == Entities.WorkReportD3 && x.FieldName == Fields.StartLatitude).Required = true;
             _rules.First(x => x.EntityName == Entities.WorkReportD3 && x.FieldName == Fields.StartLongitude).Required = true;
-            _rules.First(x => x.EntityName == Entities.WorkReportD3 && x.FieldName == Fields.ValueOfWork).Required = true;
         }
 
         private void LoadWorkReportD4Rules()
@@ -196,7 +195,6 @@ namespace Hmcr.Domain.Services
             _rules.First(x => x.EntityName == Entities.WorkReportD4 && x.FieldName == Fields.HighwayUnique).Required = true;
             _rules.First(x => x.EntityName == Entities.WorkReportD4 && x.FieldName == Fields.Landmark).Required = true;
             _rules.First(x => x.EntityName == Entities.WorkReportD4 && x.FieldName == Fields.StartOffset).Required = true;
-            _rules.First(x => x.EntityName == Entities.WorkReportD4 && x.FieldName == Fields.ValueOfWork).Required = true;
         }
 
         private void LoadRockfallReportInitRules()
