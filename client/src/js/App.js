@@ -16,7 +16,7 @@ import Header from './components/fragments/Header';
 import ActivityAdmin from './components/ActivityAdmin';
 import UserAdmin from './components/UserAdmin';
 import RoleAdmin from './components/RoleAdmin';
-import Reports from './components/Reports';
+import ReportExport from './components/ReportExport';
 import WorkReporting from './components/WorkReporting';
 import Version from './components/Version';
 import WorkReportingSubmissionDetail from './components/WorkReportingSubmissionDetail';
@@ -144,7 +144,7 @@ const AdminRoutes = currentUser => {
       >
         <Route path={Constants.PATHS.ADMIN_ROLES} exact component={RoleAdmin} />
       </AuthorizedRoute>
-      <Route path={Constants.PATHS.ADMIN_REPORTS} exact component={Reports} />
+      <Route path={Constants.PATHS.ADMIN_REPORT_EXPORT} exact component={ReportExport} />
       <AuthorizedRoute
         path={Constants.PATHS.WORK_REPORTING}
         requires={Constants.PERMISSIONS.FILE_R}

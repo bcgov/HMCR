@@ -26,6 +26,7 @@ export const API_PATHS = {
   SUBMISSIONS: '/submissionobjects',
   SUBMISSION_STATUS: '/submissionstatus',
   SUBMISSION_STREAMS: '/submissionstreams',
+  REPORT_EXPORT: '/export',
   VERSION: '/version',
 };
 
@@ -43,7 +44,7 @@ export const PATHS = {
   ADMIN: '/admin',
   ADMIN_ACTIVITIES: '/admin/activities',
   ADMIN_USERS: '/admin/users',
-  ADMIN_REPORTS: '/reports',
+  ADMIN_REPORT_EXPORT: '/admin/export',
   ADMIN_ROLES: '/admin/roles',
   VERSION: '/version',
 };
