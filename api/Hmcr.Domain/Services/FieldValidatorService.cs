@@ -216,7 +216,7 @@ namespace Hmcr.Domain.Services
             _rules.Add(new FieldValidationRule(Entities.RockfallReport, Fields.EndLongitude, FieldTypes.String, false, null, null, null, null, null, null, _regex.GetRegexInfo(RegexDefs.GpsCoords), null));
 
             _rules.Add(new FieldValidationRule(Entities.RockfallReport, Fields.HighwayUnique, FieldTypes.String, true, 1, 16, null, null, null, null, null, null));
-            _rules.Add(new FieldValidationRule(Entities.RockfallReport, Fields.HighwayUniqueName, FieldTypes.String, true, 1, 255, null, null, null, null, null, null));
+            _rules.Add(new FieldValidationRule(Entities.RockfallReport, Fields.HighwayUniqueName, FieldTypes.String, false, 1, 255, null, null, null, null, null, null));
 
             _rules.Add(new FieldValidationRule(Entities.RockfallReport, Fields.Landmark, FieldTypes.String, false, 0, 8, null, null, null, null, null, null));
             _rules.Add(new FieldValidationRule(Entities.RockfallReport, Fields.LandmarkName, FieldTypes.String, false, 0, 255, null, null, null, null, null, null));
@@ -238,7 +238,7 @@ namespace Hmcr.Domain.Services
 
             _rules.Add(new FieldValidationRule(Entities.RockfallReport, Fields.Comments, FieldTypes.String, false, 0, 1024, null, null, null, null, null, null));
 
-            _rules.Add(new FieldValidationRule(Entities.RockfallReport, Fields.McName, FieldTypes.String, true, 1, 150, null, null, null, null, null, null));
+            _rules.Add(new FieldValidationRule(Entities.RockfallReport, Fields.McName, FieldTypes.String, false, 1, 150, null, null, null, null, null, null));
             _rules.Add(new FieldValidationRule(Entities.RockfallReport, Fields.Name, FieldTypes.String, true, 1, 150, null, null, null, null, null, null));
             _rules.Add(new FieldValidationRule(Entities.RockfallReport, Fields.McPhoneNumber, FieldTypes.String, true, 10, 12, null, null, null, null, null, null));
             _rules.Add(new FieldValidationRule(Entities.RockfallReport, Fields.ReportDate, FieldTypes.Date, true, null, null, null, null, new DateTime(1900, 1, 1), new DateTime(9999, 12, 31), null, null));
@@ -251,8 +251,6 @@ namespace Hmcr.Domain.Services
 
             _rules.First(x => x.EntityName == Entities.RockfallReportGps && x.FieldName == Fields.StartLatitude).Required = true;
             _rules.First(x => x.EntityName == Entities.RockfallReportGps && x.FieldName == Fields.StartLongitude).Required = true;
-            _rules.First(x => x.EntityName == Entities.RockfallReportGps && x.FieldName == Fields.EndLatitude).Required = true;
-            _rules.First(x => x.EntityName == Entities.RockfallReportGps && x.FieldName == Fields.EndLongitude).Required = true;
         }
 
         public void LoadRockfallReportLrsRules()
@@ -262,7 +260,6 @@ namespace Hmcr.Domain.Services
             _rules.First(x => x.EntityName == Entities.RockfallReportLrs && x.FieldName == Fields.Landmark).Required = true;
             _rules.First(x => x.EntityName == Entities.RockfallReportLrs && x.FieldName == Fields.LandmarkName).Required = true;
             _rules.First(x => x.EntityName == Entities.RockfallReportLrs && x.FieldName == Fields.StartOffset).Required = true;
-            _rules.First(x => x.EntityName == Entities.RockfallReportLrs && x.FieldName == Fields.EndOffset).Required = true;
             _rules.First(x => x.EntityName == Entities.RockfallReportLrs && x.FieldName == Fields.DirectionFromLandmark).Required = true;
         }
 
