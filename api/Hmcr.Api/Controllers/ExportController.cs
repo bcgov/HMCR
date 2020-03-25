@@ -14,6 +14,7 @@ using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
 using System.Net;
+using System;
 
 namespace Hmcr.Api.Controllers
 {
@@ -31,55 +32,154 @@ namespace Hmcr.Api.Controllers
             _exportApi = exportApi;
         }
 
+        /// <summary>
+        /// Search report records and export in the specified output format
+        /// </summary>
+        /// <param name="serviceAreas">1 ~ 28</param>
+        /// <param name="typeName">hmr:HMR_WORK_REPORT_VW, hmr:HMR_WILDLIFE_REPORT_VW, hmr:HMR_ROCKFALL_REPORT_VW</param>
+        /// <param name="outputFormat">csv, application/json, application/vnd.google-earth.kml+xml</param>
+        /// <param name="fromDate">From date in yyyy-MM-dd format</param>
+        /// <param name="toDate">To date in yyyy-MM-dd format</param>
+        /// <returns></returns>
         [HttpGet("report", Name = "Export")]
-        [RequiresPermission(Permissions.FileUploadRead)]
-        public async Task<HttpResponse> ExportReport(string? serviceAreas)
+        [RequiresPermission(Permissions.FileUploadRead)]        
+        public async Task<IActionResult> ExportReport(string serviceAreas, string typeName, string outputFormat, DateTime fromDate, DateTime toDate)
         {
             var serviceAreaNumbers = serviceAreas.ToDecimalArray();
+            
+            var invalidResult = ValidateQueryParameters(serviceAreaNumbers, typeName, outputFormat, fromDate, toDate);
 
+            if (invalidResult != null)
+            {
+                return invalidResult;
+            }
+
+            var query = BuildQuery(serviceAreaNumbers, fromDate, toDate, GetDateColName(typeName)); 
+
+            var responseMessage = await _exportApi.ExportReport(query);
+
+            var (mimeType, fileName) = GetContentType(outputFormat);
+
+            if (mimeType == null)
+            {
+                return ValidationUtils.GetValidationErrorResult(ControllerContext,
+                    "Invalid output format", "Please include a valid output format in the query string.");
+            }
+
+            var bytes = await responseMessage.Content.ReadAsByteArrayAsync();
+
+            if (responseMessage.StatusCode == HttpStatusCode.OK)
+            {
+                return File(bytes, responseMessage.Content.Headers.ContentType.ToString(), fileName);
+            }
+            else
+            {
+                return ValidationUtils.GetValidationErrorResult(ControllerContext,
+                     (int)responseMessage.StatusCode, "Error from Geoserver", Encoding.UTF8.GetString(bytes));
+            }
+        }
+
+        private UnprocessableEntityObjectResult ValidateQueryParameters(decimal[] serviceAreaNumbers, string typeName, string outputFormat, DateTime fromDate, DateTime toDate)
+        {
             if (serviceAreaNumbers.Length == 0)
             {
-                await HttpContext.Response.WriteJsonAsync(ValidationUtils.GetServiceAreasMissingErrorResult(ControllerContext), "application/problem+json");
-                return HttpContext.Response;
+                return ValidationUtils.GetValidationErrorResult(ControllerContext,
+                    "Service areas are missing", "Please include service areas in the query string as a comma separated string.");
             }
 
             var problem = AreServiceAreasAuthorized(_currentUser, serviceAreaNumbers);
 
             if (problem != null)
             {
-                await HttpContext.Response.WriteJsonAsync(problem, "application/problem+json");
-                return HttpContext.Response;
+                return ValidationUtils.GetValidationErrorResult(problem);
             }
 
-            string query = BuildQuery(serviceAreaNumbers);
+            if (outputFormat == null)
+            {
+                return ValidationUtils.GetValidationErrorResult(ControllerContext,
+                    "Output format is missing", "Please include a valid output format in the query string.");
+            }
 
-            var responseMessage = await _exportApi.ExportReport(query);
+            if (typeName == null)
+            {
+                return ValidationUtils.GetValidationErrorResult(ControllerContext,
+                    "Type name is missing", "Please include a valid type name in the query string.");
+            }
 
-            await WriteProxiedHttpResponseAsync(responseMessage);
+            var dateFieldName = GetDateColName(typeName);
+            if (dateFieldName == null)
+            {
+                return ValidationUtils.GetValidationErrorResult(ControllerContext,
+                    "Type name is invalid", "Please include a valid type name in the query string.");
+            }
 
-            return HttpContext.Response;
+            if (fromDate < Constants.MinDate)
+            {
+                return ValidationUtils.GetValidationErrorResult(ControllerContext,
+                    "Invalid fromDate", "Please include a valid fromDate in the query string.");
+            }
+
+            if (fromDate > toDate)
+            {
+                return ValidationUtils.GetValidationErrorResult(ControllerContext,
+                    "Invalid toDate", "toDate must be greater than fromDate");
+            }
+
+            return null;
         }
 
-        private string BuildQuery(decimal[] serviceAreaNumbers)
+        private (string mimeType, string fileName) GetContentType(string outputFormat)
         {
-            var saCql = BuildCsqlFromServiceAreaNumbers(serviceAreaNumbers);
-
-            var pq = QueryHelpers.ParseQuery(Request.QueryString.Value);
-
-            if (pq.ContainsKey(Constants.CqlFilter))
+            if (outputFormat == null)
             {
-                var orgFilter = pq[Constants.CqlFilter].First();
-                pq.Remove(Constants.CqlFilter);
-                var filter = WebUtility.HtmlEncode($"{saCql} and ({orgFilter})");
-                pq.Add(Constants.CqlFilter, filter);
+                return (null, null);
+            }
+
+            outputFormat = outputFormat.ToLowerInvariant();
+
+            switch (outputFormat)
+            {
+                case "csv":
+                    return ("text/csv;charset=UTF-8", "export.csv");
+                case "application/json":
+                    return ("application/json;charset=UTF-8", "export.json");
+                case "application/vnd.google-earth.kml+xml":
+                case "application/vnd.google-earth.kml xml":
+                    return ("application/vnd.google-earth.kml+xml;charset=UTF-8", "export.kml");
+                case "application/vnd.google-earth.kmz+xml":
+                case "application/vnd.google-earth.kmz xml":
+                    return ("application/vnd.google-earth.kmz+xml;charset=UTF-8", "export.kml");
+                case "application/gml+xml;version=3.2":
+                case "application/gml xml;version=3.2":
+                    return ("application/gml+xml; version=3.2;charset=UTF-8", "export.gml");
+                default:
+                    return (null, null);
+            }
+        }
+
+        private string BuildQuery(decimal[] serviceAreaNumbers, DateTime fromDate, DateTime toDate, string dateColName)
+        {
+            var saCql = BuildCsqlFromParameters(serviceAreaNumbers, fromDate, toDate, dateColName);
+
+            var pq = QueryHelpers.ParseQuery(WebUtility.HtmlDecode(Request.QueryString.Value));
+
+            string filter = "";
+            if (pq.ContainsKey(ExportQuery.CqlFilter))
+            {
+                var orgFilter = pq[ExportQuery.CqlFilter].First();
+                pq.Remove(ExportQuery.CqlFilter);
+                filter = $"{saCql} and ({orgFilter})";
+                pq.Add(ExportQuery.CqlFilter, filter);
             }
             else
             {
-                var filter = WebUtility.HtmlEncode(saCql);
-                pq.Add(Constants.CqlFilter, filter);
+                filter = saCql;
+                pq.Add(ExportQuery.CqlFilter, filter);
             }
 
-            pq.Remove(Constants.ServiceAreas);
+            pq.Remove(ExportQuery.ServiceAreas);
+            pq.Remove(ExportQuery.FromDate);
+            pq.Remove(ExportQuery.ToDate);
 
             var pqkv = new List<KeyValuePair<string, string>>();
             foreach (var kv in pq)
@@ -88,13 +188,17 @@ namespace Hmcr.Api.Controllers
             }
 
             var bq = new QueryBuilder(pqkv);
-            var query = bq.ToQueryString().Value.RemoveQuestionMark();
-            return query;
+
+            return bq.ToQueryString().Value.RemoveQuestionMark();
         }
 
-        private string BuildCsqlFromServiceAreaNumbers(decimal[] serviceAreaNumbers)
+        private string BuildCsqlFromParameters(decimal[] serviceAreaNumbers, DateTime fromDate, DateTime toDate, string dateColName)
         {
             var csql = new StringBuilder();
+            var fromDt = fromDate.ToString("yyyy-MM-dd");
+            var toDt = toDate.ToString("yyyy-MM-dd");
+
+            csql.Append($"({dateColName} BETWEEN {fromDt} AND {toDt} AND ");
 
             csql.Append("SERVICE_AREA IN (");
 
@@ -103,27 +207,24 @@ namespace Hmcr.Api.Controllers
                 csql.Append($"{(int)serviceAreaNumber},");
             }
 
-            return csql.ToString().TrimEnd(',') + ")";
+            return csql.ToString().TrimEnd(',') + "))";
         }
 
-        private Task WriteProxiedHttpResponseAsync(HttpResponseMessage responseMessage)
+        private string GetDateColName(string typeName)
         {
-            var response = HttpContext.Response;
+            typeName = typeName.ToLowerInvariant();
 
-            response.StatusCode = (int)responseMessage.StatusCode;
-            foreach (var header in responseMessage.Headers)
+            switch (typeName)
             {
-                response.Headers[header.Key] = header.Value.ToArray();
+                case "hmr:hmr_work_report_vw":
+                    return DateColNames.EndDate;
+                case "hmr:hmr_wildlife_report_vw":
+                    return DateColNames.AccidentDate;
+                case "hmr:hmr_rockfall_report_vw":
+                    return DateColNames.ReportDate;
+                default:
+                    return null;
             }
-
-            foreach (var header in responseMessage.Content.Headers)
-            {
-                response.Headers[header.Key] = header.Value.ToArray();
-            }
-
-            response.Headers.Remove("transfer-encoding");
-
-            return responseMessage.Content.CopyToAsync(response.Body);
         }
     }
 }

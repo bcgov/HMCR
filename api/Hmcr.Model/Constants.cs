@@ -11,8 +11,16 @@ namespace Hmcr.Model
         public static decimal MaxFileSize = 2097152;
         public const string VancouverTimeZone = "America/Vancouver";
         public const string PacificTimeZone = "Pacific Standard Time";
+    }
+
+    public static class ExportQuery
+    {
         public const string CqlFilter = "cql_filter";
         public const string ServiceAreas = "serviceAreas";
+        public const string OutputFormat = "outputFormat";
+        public const string TypeName = "typeName";
+        public const string FromDate = "fromDate";
+        public const string ToDate = "toDate";
     }
 
     public static class Permissions
@@ -219,6 +227,13 @@ namespace Hmcr.Model
             Fields.WildlifeSign, Fields.Quantity, Fields.Species, Fields.Sex, Fields.Age
         };
         public string[] CommonMandatoryFields => MandatoryFields;
+    }
+
+    public class DateColNames
+    {
+        public const string EndDate = "END_DATE";
+        public const string ReportDate = "REPORT_DATE";
+        public const string AccidentDate = "ACCIDENT_DATE";
     }
 
     public static class CodeSet

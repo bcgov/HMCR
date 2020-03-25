@@ -37,7 +37,7 @@ namespace Hmcr.Domain.Services
         {
             TableName = TableNames.WildlifeReport;
             HasRowIdentifier = false;
-            DateFieldName = "Today";
+            DateFieldName = Fields.AccidentDate;
             _wildlifeRepo = wildlifeRepo;
             _logger = logger;
         }
