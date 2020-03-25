@@ -21,11 +21,6 @@ namespace Hmcr.Chris
         {
             var response = await client.GetAsync(path);
 
-            if (!response.IsSuccessStatusCode)
-            {
-                throw new Exception($"Status Code: {response.StatusCode}");
-            }
-
             return response;
         }
 
@@ -60,7 +55,15 @@ namespace Hmcr.Chris
                     }
                     else if (attempt == maxAttempt)
                     {
-                        throw new Exception($"Status Code: {response.StatusCode}");
+                        string message = "";
+
+                        if (response.Content != null)
+                        {
+                            var bytes = await response.Content.ReadAsByteArrayAsync();
+                            message = Encoding.UTF8.GetString(bytes);
+                        }
+
+                        throw new Exception($"Status Code: {response.StatusCode}" + Environment.NewLine + message);
                     }
                 }
             }
@@ -87,7 +90,15 @@ namespace Hmcr.Chris
                     }
                     else if (attempt == maxAttempt)
                     {
-                        throw new Exception($"Status Code: {response.StatusCode}");
+                        string message = "";
+
+                        if (response.Content != null)
+                        {
+                            var bytes = await response.Content.ReadAsByteArrayAsync();
+                            message = Encoding.UTF8.GetString(bytes);
+                        }
+
+                        throw new Exception($"Status Code: {response.StatusCode}" + Environment.NewLine + message);
                     }
                 }                
             }
