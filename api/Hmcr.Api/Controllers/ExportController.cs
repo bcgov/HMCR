@@ -46,6 +46,11 @@ namespace Hmcr.Api.Controllers
         public async Task<IActionResult> ExportReport(string serviceAreas, string typeName, string outputFormat, DateTime fromDate, DateTime toDate)
         {
             var serviceAreaNumbers = serviceAreas.ToDecimalArray();
+
+            if (serviceAreaNumbers.Length == 0)
+            {
+                serviceAreaNumbers = _currentUser.UserInfo.ServiceAreas.Select(x => x.ServiceAreaNumber).ToArray();
+            }
             
             var invalidResult = ValidateQueryParameters(serviceAreaNumbers, typeName, outputFormat, fromDate, toDate);
 
@@ -81,12 +86,6 @@ namespace Hmcr.Api.Controllers
 
         private UnprocessableEntityObjectResult ValidateQueryParameters(decimal[] serviceAreaNumbers, string typeName, string outputFormat, DateTime fromDate, DateTime toDate)
         {
-            if (serviceAreaNumbers.Length == 0)
-            {
-                return ValidationUtils.GetValidationErrorResult(ControllerContext,
-                    "Service areas are missing", "Please include service areas in the query string as a comma separated string.");
-            }
-
             var problem = AreServiceAreasAuthorized(_currentUser, serviceAreaNumbers);
 
             if (problem != null)

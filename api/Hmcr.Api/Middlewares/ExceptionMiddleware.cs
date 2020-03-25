@@ -29,6 +29,15 @@ namespace Hmcr.Api.Middlewares
             {
                 await _next(httpContext);
             }
+            catch (InvalidOperationException ex)
+            {
+                if (ex.Message != "StatusCode cannot be set because the response has already started.")
+                {
+                    var guid = Guid.NewGuid();
+                    _logger.LogError($"HMCR Exception{guid}: {ex}");
+                    await HandleExceptionAsync(httpContext, guid);
+                }
+            }
             catch (Exception ex)
             {
                 var guid = Guid.NewGuid();
