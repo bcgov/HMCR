@@ -187,7 +187,10 @@ const WorkReportingSubmissions = ({ serviceArea, submissionStatuses }, ref) => {
                 dataList={searchData.data.map(item => ({
                   ...item,
                   name: `${item.firstName} ${item.lastName}`,
-                  date: moment(item.appCreateTimestamp).format(Constants.DATE_DISPLAY_FORMAT),
+                  date: moment(item.appCreateTimestamp)
+                    .utc(item.appCreateTimestamp, Constants.MESSAGE_DATE_FORMAT)
+                    .local()
+                    .format(Constants.DATE_DISPLAY_FORMAT),
                   id: (
                     <Button
                       color="link"

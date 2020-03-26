@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { connect } from 'react-redux';
-import { Link } from 'react-router-dom';
 import { Col, FormGroup, FormFeedback, Label, CustomInput, Spinner, Alert, Button } from 'reactstrap';
 import { Formik, Form } from 'formik';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -304,9 +303,7 @@ const WorkReportingUpload = ({
           <Alert color="success">
             Upload successful.
             <ul>
-              <li>
-                Submission ID: <Link to="#">{completeMessage.id}</Link>
-              </li>
+              <li>Submission ID: {completeMessage.id}</li>
               <li>Filename: {completeMessage.fileName}</li>
               <li>Service Area: {completeMessage.serviceAreaNumber}</li>
               <li>Type: {reportTypes.find(o => o.id === completeMessage.submissionStreamId).name}</li>
