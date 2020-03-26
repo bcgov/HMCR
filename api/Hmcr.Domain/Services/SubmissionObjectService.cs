@@ -46,7 +46,9 @@ namespace Hmcr.Domain.Services
 
         public async Task<PagedDto<SubmissionObjectSearchDto>> GetSubmissionObjectsAsync(decimal serviceAreaNumber, DateTime dateFrom, DateTime dateTo, int pageSize, int pageNumber, string searchText, string orderBy, string direction)
         {
-            return await _submissionRepo.GetSubmissionObjectsAsync(serviceAreaNumber, dateFrom, dateTo, pageSize, pageNumber, searchText, orderBy, direction);
+            var (utcDateFrom, utcDateTo) = DateUtils.GetUtcDateRange(dateFrom, dateTo);
+
+            return await _submissionRepo.GetSubmissionObjectsAsync(serviceAreaNumber, utcDateFrom, utcDateTo, pageSize, pageNumber, searchText, orderBy, direction);
         }
 
         public async Task<SubmissionObjectResultDto> GetSubmissionResultAsync(decimal submissionObjectId)

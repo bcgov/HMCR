@@ -31,18 +31,18 @@ namespace Hmcr.Model.Utils
 
         /// <summary>
         /// Returns Pacific time if VancouverTimeZone or PacificTimeZone is defined in the system
-        /// Otherwise reutnrs UTC time.
+        /// Otherwise return UTC time.
         /// </summary>
         /// <param name="utcDate"></param>
         /// <returns></returns>
         public static DateTime ConvertUtcToPacificTime(DateTime utcDate)
         {
-            var date = GetLocalTime(utcDate, Constants.VancouverTimeZone);
+            var date = ConvertTimeFromUtc(utcDate, Constants.VancouverTimeZone);
 
             if (date != null)
                 return (DateTime)date;
 
-            date = GetLocalTime(utcDate, Constants.PacificTimeZone);
+            date = ConvertTimeFromUtc(utcDate, Constants.PacificTimeZone);
 
             if (date != null)
                 return (DateTime)date;
@@ -50,17 +50,56 @@ namespace Hmcr.Model.Utils
             return utcDate;
         }
 
-        private static DateTime? GetLocalTime(DateTime utcDate, string id)
+        private static DateTime? ConvertTimeFromUtc(DateTime date, string timeZoneId)
         {
             try
             {
-                var timezone = TimeZoneInfo.FindSystemTimeZoneById(id);
-                return TimeZoneInfo.ConvertTimeFromUtc(utcDate, timezone);
+                var timezone = TimeZoneInfo.FindSystemTimeZoneById(timeZoneId);
+                return TimeZoneInfo.ConvertTimeFromUtc(date, timezone);
             }
             catch (TimeZoneNotFoundException)
             {
                 return null;
             }
+        }
+
+        public static DateTime ConvertPacificToUtcTime(DateTime pstDate)
+        {
+            var date = ConvertTimeToUtc(pstDate, Constants.VancouverTimeZone);
+
+            if (date != null)
+                return (DateTime)date;
+
+            date = ConvertTimeToUtc(pstDate, Constants.PacificTimeZone);
+
+            if (date != null)
+                return (DateTime)date;
+
+            return pstDate;
+        }
+
+        private static DateTime? ConvertTimeToUtc(DateTime date, string timeZoneId)
+        {
+            try
+            {
+                var timezone = TimeZoneInfo.FindSystemTimeZoneById(timeZoneId);
+                return TimeZoneInfo.ConvertTimeToUtc(date, timezone);
+            }
+            catch (TimeZoneNotFoundException)
+            {
+                return null;
+            }
+        }
+
+        public static (DateTime utcDateFrom, DateTime utcDateTo) GetUtcDateRange(DateTime pstDateFrom, DateTime pstDateTo)
+        {
+            pstDateFrom = pstDateFrom.Date;
+            pstDateTo = pstDateTo.Date.AddDays(1).AddSeconds(-1);
+
+            var utcDateFrom = ConvertPacificToUtcTime(pstDateFrom);
+            var utcDateTo = ConvertPacificToUtcTime(pstDateTo);
+
+            return(utcDateFrom, utcDateTo);
         }
     }
 }
