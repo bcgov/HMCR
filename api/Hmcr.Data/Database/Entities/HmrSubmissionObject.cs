@@ -18,6 +18,7 @@ namespace Hmcr.Data.Database.Entities
         public string FileName { get; set; }
         public byte[] DigitalRepresentation { get; set; }
         public decimal MimeTypeId { get; set; }
+        public decimal? ContractTermId { get; set; }
         public decimal SubmissionStatusId { get; set; }
         public decimal ServiceAreaNumber { get; set; }
         public decimal? PartyId { get; set; }
@@ -38,6 +39,7 @@ namespace Hmcr.Data.Database.Entities
         public string DbAuditLastUpdateUserid { get; set; }
         public DateTime DbAuditLastUpdateTimestamp { get; set; }
 
+        public virtual HmrContractTerm ContractTerm { get; set; }
         public virtual HmrMimeType MimeType { get; set; }
         public virtual HmrParty Party { get; set; }
         public virtual HmrServiceArea ServiceAreaNumberNavigation { get; set; }

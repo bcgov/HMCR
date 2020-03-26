@@ -19,6 +19,7 @@ namespace Hmcr.Model.Dtos.SubmissionObject
         public decimal ServiceAreaNumber { get; set; }
         public decimal SubmissionStreamId { get; set; }
         public decimal? PartyId { get; set; }
+        public decimal? ContractTermId { get; set; }
         public string ErrorDetail { get; set; }
         public string FileHash { get; set; }
         public IList<SubmissionRowDto> SubmissionRows { get; set; }
