@@ -12,9 +12,9 @@ namespace Hmcr.Data.Repositories
 {
     public interface ISumbissionRowRepository
     {
-        IAsyncEnumerable<SubmissionRowDto> FindDuplicateFromLatestRecordsAsync(decimal submissionStreamId, decimal partyId, IEnumerable<SubmissionRowDto> rows);
+        IAsyncEnumerable<SubmissionRowDto> FindDuplicateFromLatestRecordsAsync(decimal submissionStreamId, decimal contractTermId, IEnumerable<SubmissionRowDto> rows);
         IAsyncEnumerable<SubmissionRowDto> FindDuplicateFromAllRecordsAsync(decimal submissionStreamId, IEnumerable<SubmissionRowDto> rows);
-        IAsyncEnumerable<string> UpdateIsResubmitAsync(decimal submissionStreamId, decimal partyId, IEnumerable<SubmissionRowDto> rows);
+        IAsyncEnumerable<string> UpdateIsResubmitAsync(decimal submissionStreamId, decimal contractTermId, IEnumerable<SubmissionRowDto> rows);
         Task<HmrSubmissionRow> GetSubmissionRowByRowNumAsync(decimal submissionObjectId, decimal rowNum);
         Task<HmrSubmissionRow> GetSubmissionRowByRowIdAsync(decimal rowId);
         Task<HmrSubmissionRow> GetSubmissionRowByRowIdFirstOrDefaultAsync(decimal submissionObjectId, decimal rowNum);
@@ -29,14 +29,14 @@ namespace Hmcr.Data.Repositories
             _statusRepo = statusRepo;
         }
 
-        public async IAsyncEnumerable<SubmissionRowDto> FindDuplicateFromLatestRecordsAsync(decimal submissionStreamId, decimal partyId, IEnumerable<SubmissionRowDto> rows)
+        public async IAsyncEnumerable<SubmissionRowDto> FindDuplicateFromLatestRecordsAsync(decimal submissionStreamId, decimal contractTermId, IEnumerable<SubmissionRowDto> rows)
         {            
             foreach (var row in rows)
             {
                 var latestRow = await DbSet
                     .Where(x => x.SubmissionObject.SubmissionStreamId == submissionStreamId 
                         && x.RecordNumber == row.RecordNumber
-                        && x.SubmissionObject.PartyId == partyId
+                        && x.SubmissionObject.ContractTermId == contractTermId
                         && x.SubmissionObject.SubmissionStatus.StatusCode == FileStatus.Success)
                     .OrderByDescending(x => x.RowId)
                     .FirstOrDefaultAsync();
@@ -61,7 +61,7 @@ namespace Hmcr.Data.Repositories
             }
         }
 
-        public async IAsyncEnumerable<string> UpdateIsResubmitAsync(decimal submissionStreamId, decimal partyId, IEnumerable<SubmissionRowDto> rows)
+        public async IAsyncEnumerable<string> UpdateIsResubmitAsync(decimal submissionStreamId, decimal contractTermId, IEnumerable<SubmissionRowDto> rows)
         {
             var duplicate = await _statusRepo.GetStatusIdByTypeAndCodeAsync(StatusType.Row, RowStatus.DuplicateRow);
 
@@ -70,7 +70,7 @@ namespace Hmcr.Data.Repositories
                 var latestRow = await DbSet
                     .Where(x => x.SubmissionObject.SubmissionStreamId == submissionStreamId
                         && x.RecordNumber == row.RecordNumber
-                        && x.SubmissionObject.PartyId == partyId
+                        && x.SubmissionObject.ContractTermId == contractTermId
                         && x.SubmissionObject.SubmissionStatus.StatusCode == FileStatus.Success)
                     .OrderByDescending(x => x.RowId)
                     .FirstOrDefaultAsync();

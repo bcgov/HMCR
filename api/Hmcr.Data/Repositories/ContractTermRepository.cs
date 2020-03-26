@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using Hmcr.Data.Database.Entities;
 using Hmcr.Data.Repositories.Base;
+using Hmcr.Model.Dtos.ContractTerm;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Threading.Tasks;
@@ -9,7 +10,7 @@ namespace Hmcr.Data.Repositories
 {
     public interface IContractTermRepository 
     {
-        Task<decimal> GetContractPartyId(decimal serviceAreaNumber, DateTime date);
+        Task<ContractTermDto> GetContractTerm(decimal serviceAreaNumber, DateTime date);
     }
     public class ContractTermRepository : HmcrRepositoryBase<HmrContractTerm>, IContractTermRepository
     {
@@ -18,11 +19,11 @@ namespace Hmcr.Data.Repositories
         {
         }
 
-        public async Task<decimal> GetContractPartyId(decimal serviceAreaNumber, DateTime date)
+        public async Task<ContractTermDto> GetContractTerm(decimal serviceAreaNumber, DateTime date)
         {
-            var contract = await DbSet.FirstOrDefaultAsync(x => x.ServiceAreaNumber == serviceAreaNumber && x.StartDate <= date && x.EndDate > date);
+            var contract = await GetFirstOrDefaultAsync<ContractTermDto>(x => x.ServiceAreaNumber == serviceAreaNumber && x.StartDate <= date && x.EndDate > date);
 
-            return contract == null ? 0 : contract.PartyId ?? 0;
+            return contract;
         }
     }
 }
