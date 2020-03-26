@@ -1,22 +1,16 @@
-﻿using CsvHelper;
-using CsvHelper.Configuration;
-using Hmcr.Data.Database;
+﻿using Hmcr.Data.Database;
 using Hmcr.Data.Repositories;
-using Hmcr.Domain.CsvHelpers;
 using Hmcr.Model;
 using Hmcr.Model.Dtos;
 using Hmcr.Model.Dtos.SubmissionObject;
 using Hmcr.Model.Dtos.SubmissionRow;
 using Hmcr.Model.Dtos.SubmissionStream;
-using Hmcr.Model.Dtos.WorkReport;
 using Hmcr.Model.Utils;
 using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
-using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace Hmcr.Domain.Services.Base
