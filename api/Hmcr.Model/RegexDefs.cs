@@ -36,7 +36,7 @@ namespace Hmcr.Model
 
             _regexInfos.Add(GpsCoords, new RegexInfo { Regex = @"^\-?\d{1,5}(\.\d{1,9})?$", ErrorMessage = "Value must be a number of less than 6 digits optionally with maximum 9 decimal digits" });
             _regexInfos.Add(Offset, new RegexInfo { Regex = @"^\-?\d{1,4}(\.\d{1,3})?$", ErrorMessage = "Value must be a number of less than 5 digits optionally with maximum 3 decimal digits" });
-            _regexInfos.Add(DollarValue, new RegexInfo { Regex = @"^\-?\d{1,7}(\.\d{1,4})?$", ErrorMessage = "Value must be a number of less than 8 digits optionally with 2 decimal digits" });
+            _regexInfos.Add(DollarValue, new RegexInfo { Regex = @"^\-?\d{1,7}(\.\d+)?$", ErrorMessage = "Value must be a number of less than 8 digits optionally with 2 decimal digits" });
             _regexInfos.Add(Volume, new RegexInfo { Regex = @"^\-?\d{1,4}(\.\d{1,2})?$", ErrorMessage = "Value must be a number of less than 5 digits optionally with maximum 2 decimal digits" });
             _regexInfos.Add(Quantity, new RegexInfo { Regex = @"^\-?\d{1,4}$", ErrorMessage = "Value must be a number of less than 5 digits" });
 
