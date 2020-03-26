@@ -9,7 +9,7 @@ namespace Hmcr.Data.Database.Entities
         public decimal WildlifeRecordId { get; set; }
         public string ReportType { get; set; }
         public string RecordType { get; set; }
-        public decimal ServiceArea { get; set; }
+        public decimal? ServiceArea { get; set; }
         public DateTime? AccidentDate { get; set; }
         public string TimeOfKill { get; set; }
         public decimal? Latitude { get; set; }
@@ -28,11 +28,11 @@ namespace Hmcr.Data.Database.Entities
         public string Age { get; set; }
         public string Comment { get; set; }
         public Geometry Geometry { get; set; }
-        public decimal SubmissionObjectId { get; set; }
+        public decimal? SubmissionObjectId { get; set; }
         public string FileName { get; set; }
         public decimal? RowNum { get; set; }
         public string ValidationStatus { get; set; }
-        public DateTime? AppCreateTimestampPst { get; set; }
-        public DateTime? AppLastUpdateTimestampPst { get; set; }
+        public DateTime? AppCreateTimestampUtc { get; set; }
+        public DateTime? AppLastUpdateTimestampUtc { get; set; }
     }
 }

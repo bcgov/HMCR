@@ -41,10 +41,10 @@ namespace Hmcr.Data.Database.Entities
         public DateTime? ReportDate { get; set; }
         public Geometry Geometry { get; set; }
         public decimal SubmissionObjectId { get; set; }
-        public string SubmissionFileName { get; set; }
+        public string FileName { get; set; }
         public decimal? RowNum { get; set; }
         public string ValidationStatus { get; set; }
-        public DateTime? AppCreateTimestampPst { get; set; }
-        public DateTime? AppLastUpdateTimestampPst { get; set; }
+        public DateTime? AppCreateTimestampUtc { get; set; }
+        public DateTime? AppLastUpdateTimestampUtc { get; set; }
     }
 }

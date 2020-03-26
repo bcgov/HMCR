@@ -5,6 +5,11 @@ namespace Hmcr.Data.Database.Entities
 {
     public partial class HmrContractTerm
     {
+        public HmrContractTerm()
+        {
+            HmrSubmissionObjects = new HashSet<HmrSubmissionObject>();
+        }
+
         public decimal ContractTermId { get; set; }
         public string ContractName { get; set; }
         public decimal? PartyId { get; set; }
@@ -27,5 +32,6 @@ namespace Hmcr.Data.Database.Entities
 
         public virtual HmrParty Party { get; set; }
         public virtual HmrServiceArea ServiceAreaNumberNavigation { get; set; }
+        public virtual ICollection<HmrSubmissionObject> HmrSubmissionObjects { get; set; }
     }
 }

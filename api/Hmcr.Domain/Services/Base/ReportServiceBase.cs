@@ -170,21 +170,22 @@ namespace Hmcr.Domain.Services.Base
             if (HasDuplicateInFile(submission.SubmissionRows, errors))
                 return (errors, submission);
 
-            var partyId = await _contractRepo.GetContractPartyId(submission.ServiceAreaNumber, submission.SubmissionRows.Max(x => x.EndDate));
+            var contract = await _contractRepo.GetContractTerm(submission.ServiceAreaNumber, submission.SubmissionRows.Max(x => x.EndDate));
 
-            if (partyId == 0)
+            if (contract == null)
             {
                 submission.FileHash = null; //it's an error outside of the file; user can submit the same file again and the system should be able to accept it.
                 errors.AddItem(DateFieldName, $"Cannot find the contract term for this file");
                 return (errors, submission);
             }
 
-            submission.PartyId = partyId;
+            submission.PartyId = contract.PartyId;
+            submission.ContractTermId = contract.ContractTermId;
 
             await MarkDuplicateRowAsync(submission);
 
             //set IsResubmitted
-            await foreach (var resubmittedRecordNumber in _rowRepo.UpdateIsResubmitAsync(submission.SubmissionStreamId, (decimal)submission.PartyId, submission.SubmissionRows)) { }
+            await foreach (var resubmittedRecordNumber in _rowRepo.UpdateIsResubmitAsync(submission.SubmissionStreamId, (decimal)submission.ContractTermId, submission.SubmissionRows)) { }
 
             submission.DigitalRepresentation = stream.ToBytes();
             submission.SubmissionStatusId = await _statusRepo.GetStatusIdByTypeAndCodeAsync(StatusType.File, FileStatus.FileReceived);
@@ -232,7 +233,7 @@ namespace Hmcr.Domain.Services.Base
         {
             if (HasRowIdentifier)
             {
-                await foreach (var row in _rowRepo.FindDuplicateFromLatestRecordsAsync(submission.SubmissionStreamId, (decimal)submission.PartyId, submission.SubmissionRows))
+                await foreach (var row in _rowRepo.FindDuplicateFromLatestRecordsAsync(submission.SubmissionStreamId, (decimal)submission.ContractTermId, submission.SubmissionRows))
                 {
                     row.RowStatusId = await _statusRepo.GetStatusIdByTypeAndCodeAsync(StatusType.Row, RowStatus.DuplicateRow);
                 }
