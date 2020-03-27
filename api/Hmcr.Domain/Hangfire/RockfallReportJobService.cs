@@ -11,6 +11,7 @@ using Hmcr.Model.Dtos.SubmissionObject;
 using Hmcr.Model.Utils;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using NetTopologySuite.Geometries;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -352,16 +353,29 @@ namespace Hmcr.Domain.Hangfire
 
                     typedRow.WorkLength = typedRow.EndOffset - typedRow.StartOffset;
 
-                    if (result.line.ToTopologyCoordinates().Length >= 2)
+                    if (result.lines.Count == 1)
                     {
-                        rockfallReport.Geometry = _geometryFactory.CreateLineString(result.line.ToTopologyCoordinates());
-                    }
-                    else if (result.line.ToTopologyCoordinates().Length == 1)
-                    {
-                        _logger.LogInformation($"[Hangfire] Row [{typedRow.RowNum}] [Original: Start[{typedRow.StartLongitude}/{typedRow.StartLatitude}]"
-                            + $" End[{typedRow.EndLongitude}/{typedRow.EndLatitude}] were converted to a point [{result.line.Points[0].Longitude}/{result.line.Points[0].Latitude}]");
+                        if (result.lines[0].ToTopologyCoordinates().Length >= 2)
+                        {
+                            rockfallReport.Geometry = _geometryFactory.CreateLineString(result.lines[0].ToTopologyCoordinates());
+                        }
+                        else if (result.lines[0].ToTopologyCoordinates().Length == 1)
+                        {
+                            _logger.LogInformation($"[Hangfire] Row [{typedRow.RowNum}] [Original: Start[{typedRow.StartLongitude}/{typedRow.StartLatitude}]"
+                                + $" End[{typedRow.EndLongitude}/{typedRow.EndLatitude}] were converted to a point [{result.lines[0].Points[0].Longitude}/{result.lines[0].Points[0].Latitude}]");
 
-                        rockfallReport.Geometry = _geometryFactory.CreatePoint(result.line.ToTopologyCoordinates()[0]);
+                            rockfallReport.Geometry = _geometryFactory.CreatePoint(result.lines[0].ToTopologyCoordinates()[0]);
+                        }
+                    }
+                    else if (result.lines.Count > 1)
+                    {
+                        var lineStrings = new List<LineString>();
+                        foreach (var line in result.lines)
+                        {
+                            lineStrings.Add(_geometryFactory.CreateLineString(line.ToTopologyCoordinates()));
+                        }
+
+                        rockfallReport.Geometry = _geometryFactory.CreateMultiLineString(lineStrings.ToArray());
                     }
                 }
             }
@@ -418,16 +432,29 @@ namespace Hmcr.Domain.Hangfire
 
                     typedRow.WorkLength = result.snappedEndOffset - result.snappedStartOffset;
 
-                    if (result.line.ToTopologyCoordinates().Length >= 2)
+                    if (result.lines.Count == 1)
                     {
-                        rockfallReport.Geometry = _geometryFactory.CreateLineString(result.line.ToTopologyCoordinates());
-                    }
-                    else if (result.line.ToTopologyCoordinates().Length == 1)
-                    {
-                        _logger.LogInformation($"[Hangfire] Row [{typedRow.RowNum}] [Original: Start[{typedRow.StartOffset}]"
-                            + $" End[{typedRow.EndOffset}] were converted to a Start[{result.snappedStartOffset}] End[{result.snappedEndOffset}]");
+                        if (result.lines[0].ToTopologyCoordinates().Length >= 2)
+                        {
+                            rockfallReport.Geometry = _geometryFactory.CreateLineString(result.lines[0].ToTopologyCoordinates());
+                        }
+                        else if (result.lines[0].ToTopologyCoordinates().Length == 1)
+                        {
+                            _logger.LogInformation($"[Hangfire] Row [{typedRow.RowNum}] [Original: Start[{typedRow.StartOffset}]"
+                                + $" End[{typedRow.EndOffset}] were converted to a Start[{result.snappedStartOffset}] End[{result.snappedEndOffset}]");
 
-                        rockfallReport.Geometry = _geometryFactory.CreatePoint(result.line.ToTopologyCoordinates()[0]);
+                            rockfallReport.Geometry = _geometryFactory.CreatePoint(result.lines[0].ToTopologyCoordinates()[0]);
+                        }
+                    }
+                    else if (result.lines.Count > 1)
+                    {
+                        var lineStrings = new List<LineString>();
+                        foreach (var line in result.lines)
+                        {
+                            lineStrings.Add(_geometryFactory.CreateLineString(line.ToTopologyCoordinates()));
+                        }
+
+                        rockfallReport.Geometry = _geometryFactory.CreateMultiLineString(lineStrings.ToArray());
                     }
                 }
             }
