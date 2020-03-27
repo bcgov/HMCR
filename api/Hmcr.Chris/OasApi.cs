@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using System;
+using System.Collections.Generic;
 using System.Net.Http;
 using System.Text.Json;
 using System.Threading.Tasks;
@@ -28,7 +29,7 @@ namespace Hmcr.Chris
         /// <param name="start">Offset in KM</param>
         /// <param name="end">Offset in KM</param>
         /// <returns>Line</returns>
-        Task<Line> GetLineFromOffsetMeasureOnRfiSegmentAsync(string rfiSegment, decimal start, decimal end);
+        Task<List<Line>> GetLineFromOffsetMeasureOnRfiSegmentAsync(string rfiSegment, decimal start, decimal end);
         /// <summary>
         /// This GET API call returns a geojson point feature that is snapped to the RFI and 
         /// includes a measure attribute derived from a specified longitude (-115.302974), latitude (49.375371), and
@@ -96,7 +97,7 @@ namespace Hmcr.Chris
             }
         }
 
-        public async Task<Line> GetLineFromOffsetMeasureOnRfiSegmentAsync(string rfiSegment, decimal start, decimal end)
+        public async Task<List<Line>> GetLineFromOffsetMeasureOnRfiSegmentAsync(string rfiSegment, decimal start, decimal end)
         {
             var query = "";
             var content = "";
@@ -107,11 +108,28 @@ namespace Hmcr.Chris
 
                 content = await (await _api.GetWithRetry(_client, query)).Content.ReadAsStringAsync();
 
-                var features = JsonSerializer.Deserialize<FeatureCollection<decimal[][]>>(content);
+                var simpleFeatures = JsonSerializer.Deserialize<FeatureCollection>(content);
 
-                if (features.totalFeatures == 0) return null;
+                if (simpleFeatures.totalFeatures == 0) return null;
 
-                return new Line(features.features[0].geometry.coordinates);
+                var lines = new List<Line>();
+
+                if (simpleFeatures.features[0].geometry.type.ToLowerInvariant() == "multilinestring")
+                {
+                    var multiline = JsonSerializer.Deserialize<FeatureCollection<decimal[][][]>>(content);
+
+                    foreach (var line in multiline.features[0].geometry.coordinates)
+                    {
+                        lines.Add(new Line(line));
+                    }
+                }
+                else
+                {
+                    var singleline = JsonSerializer.Deserialize<FeatureCollection<decimal[][]>>(content);
+                    lines.Add(new Line(singleline.features[0].geometry.coordinates));
+                }
+
+                return lines;
             }
             catch (Exception ex)
             {

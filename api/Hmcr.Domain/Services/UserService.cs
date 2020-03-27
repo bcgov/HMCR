@@ -88,6 +88,14 @@ namespace Hmcr.Domain.Services
 
         public async Task<(decimal SystemUserId, Dictionary<string, List<string>> Errors)> CreateUserAsync(UserCreateDto user)
         {
+            var (error, account) = await _bceid.GetBceidAccountCachedAsync(null, user.Username, user.UserType, _currentUser.UserGuid, _currentUser.UserType);
+            if (error.IsNotEmpty())
+            {
+                throw new HmcrException($"Unable to retrieve User[{user.Username} ({user.UserType})] from BCeID Service.");
+            }
+
+            user.Email = account.Email;
+
             var errors = await ValidateUserDtoAsync(user);
 
             if (await _userRepo.DoesUsernameExistAsync(user.Username, user.UserType))
@@ -98,13 +106,6 @@ namespace Hmcr.Domain.Services
             if (errors.Count > 0)
             {
                 return (0, errors);
-            }
-
-            var (error, account) = await _bceid.GetBceidAccountCachedAsync(null, user.Username, user.UserType, _currentUser.UserGuid, _currentUser.UserType);
-
-            if (error.IsNotEmpty())
-            {
-                throw new HmcrException($"Unable to retrieve User[{user.Username} ({user.UserType})] from BCeID Service.");
             }
 
             var userEntity = await _userRepo.CreateUserAsync(user, account);
