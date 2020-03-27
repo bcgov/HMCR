@@ -179,6 +179,13 @@ namespace Hmcr.Domain.Services.Base
                 return (errors, submission);
             }
 
+            if (contract.PartyId == null)
+            {
+                submission.FileHash = null; //it's an error outside of the file; user can submit the same file again and the system should be able to accept it.
+                errors.AddItem(DateFieldName, $"Cannot find the party ID for this file");
+                return (errors, submission);
+            }
+
             submission.PartyId = contract.PartyId;
             submission.ContractTermId = contract.ContractTermId;
 
