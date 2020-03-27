@@ -1,5 +1,6 @@
 ﻿using Hmcr.Chris.Models;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Net.Http;
 using System.Text.Json;
@@ -62,83 +63,141 @@ namespace Hmcr.Chris
         private OasQueries _queries;
         private IApi _api;
         private string _path;
+        private ILogger<OasApi> _logger;
 
-        public OasApi(HttpClient client, IApi api, IConfiguration config)
+        public OasApi(HttpClient client, IApi api, IConfiguration config, ILogger<OasApi> logger)
         {
             _client = client;
             _api = api;
             _queries = new OasQueries();
             _path = config.GetValue<string>("CHRIS:OASPath");
+            _logger = logger;
         }
 
         public async Task<bool> IsPointOnRfiSegmentAsync(int tolerance, Point point, string rfiSegment)
         {
-            var body = string.Format(_queries.PointOnRfiSegQuery, tolerance, point.Longitude, point.Latitude, rfiSegment);
+            var body = "";
+            var content = "";
 
-            var contents = await (await _api.PostWithRetry(_client, _path, body)).Content.ReadAsStringAsync();
+            try
+            {
+                body = string.Format(_queries.PointOnRfiSegQuery, tolerance, point.Longitude, point.Latitude, rfiSegment);
 
-            var features = JsonSerializer.Deserialize<FeatureCollection<decimal[]>>(contents);
+                content = await (await _api.PostWithRetry(_client, _path, body)).Content.ReadAsStringAsync();
 
-            return features.numberMatched > 0;
+                var features = JsonSerializer.Deserialize<FeatureCollection<decimal[]>>(content);
+
+                return features.numberMatched > 0;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"Exception - IsPointOnRfiSegmentAsync: {body} - {content}");
+                throw ex;
+            }
         }
 
         public async Task<Line> GetLineFromOffsetMeasureOnRfiSegmentAsync(string rfiSegment, decimal start, decimal end)
         {
-            var query = _path + string.Format(_queries.LineFromOffsetMeasureOnRfiSeg, rfiSegment, start, end);
+            var query = "";
+            var content = "";
 
-            var content = await (await _api.GetWithRetry(_client, query)).Content.ReadAsStringAsync();
+            try
+            {
+                query = _path + string.Format(_queries.LineFromOffsetMeasureOnRfiSeg, rfiSegment, start, end);
 
-            var features = JsonSerializer.Deserialize<FeatureCollection<decimal[][]>>(content);
+                content = await (await _api.GetWithRetry(_client, query)).Content.ReadAsStringAsync();
 
-            if (features.totalFeatures == 0) return null;
+                var features = JsonSerializer.Deserialize<FeatureCollection<decimal[][]>>(content);
 
-            return new Line(features.features[0].geometry.coordinates);
+                if (features.totalFeatures == 0) return null;
+
+                return new Line(features.features[0].geometry.coordinates);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"Exception - GetLineFromOffsetMeasureOnRfiSegmentAsync: {query} - {content}");
+                throw ex;
+            }
         }
 
         public async Task<(bool success, LrsPointResult result)> GetOffsetMeasureFromPointAndRfiSegmentAsync(Point point, string rfiSegment)
         {
-            var query = _path + string.Format(_queries.OffsetMeasureFromPointAndRfiSeg, point.Longitude, point.Latitude, rfiSegment);
+            var query = "";
+            var content = "";
 
-            var content = await (await _api.GetWithRetry(_client, query)).Content.ReadAsStringAsync();
+            try
+            {
+                query = _path + string.Format(_queries.OffsetMeasureFromPointAndRfiSeg, point.Longitude, point.Latitude, rfiSegment);
 
-            var features = JsonSerializer.Deserialize<FeatureCollection<decimal[]>>(content);
+                content = await (await _api.GetWithRetry(_client, query)).Content.ReadAsStringAsync();
 
-            if (features.totalFeatures == 0) return (false, null);
+                var features = JsonSerializer.Deserialize<FeatureCollection<decimal[]>>(content);
 
-            return (true, new LrsPointResult(
-                Convert.ToDecimal(features.features[0].properties.MEASURE),
-                Convert.ToDecimal(features.features[0].properties.POINT_VARIANCE),
-                new Point(features.features[0].geometry.coordinates)));
+                if (features.totalFeatures == 0) return (false, null);
+
+                return (true, new LrsPointResult(
+                    Convert.ToDecimal(features.features[0].properties.MEASURE),
+                    Convert.ToDecimal(features.features[0].properties.POINT_VARIANCE),
+                    new Point(features.features[0].geometry.coordinates)));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"Exception - GetOffsetMeasureFromPointAndRfiSegmentAsync: {query} - {content}");
+                throw ex;
+            }
         }
 
         public async Task<Point> GetPointFromOffsetMeasureOnRfiSegmentAsync(string rfiSegment, decimal offset)
         {
-            var query = _path + string.Format(_queries.PointFromOffsetMeasureOnRfiSeg, rfiSegment, offset);
+            var query = "";
+            var content = "";
 
-            var content = await (await _api.GetWithRetry(_client, query)).Content.ReadAsStringAsync();
+            try
+            {
+                query = _path + string.Format(_queries.PointFromOffsetMeasureOnRfiSeg, rfiSegment, offset);
 
-            var features = JsonSerializer.Deserialize<FeatureCollection<decimal[]>>(content);
+                content = await (await _api.GetWithRetry(_client, query)).Content.ReadAsStringAsync();
 
-            if (features.totalFeatures == 0) return null;
+                var features = JsonSerializer.Deserialize<FeatureCollection<decimal[]>>(content);
 
-            return new Point(features.features[0].geometry.coordinates);
+                if (features.totalFeatures == 0) return null;
+
+                return new Point(features.features[0].geometry.coordinates);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"Exception - GetPointFromOffsetMeasureOnRfiSegmentAsync: {query} - {content}");
+                throw ex;
+            }
         }
+
         public async Task<RfiSegment> GetRfiSegmentDetailAsync(string rfiSegment)
         {
-            var query = _path + string.Format(_queries.RfiSegmentDetail, rfiSegment);
+            var query = "";
+            var content = "";
 
-            var content = await (await _api.GetWithRetry(_client, query)).Content.ReadAsStringAsync();
+            try
+            {
+                query = _path + string.Format(_queries.RfiSegmentDetail, rfiSegment);
 
-            var features = JsonSerializer.Deserialize<FeatureCollection<object>>(content);
+                content = await (await _api.GetWithRetry(_client, query)).Content.ReadAsStringAsync();
 
-            if (features.totalFeatures == 0)
-                return new RfiSegment { Dimension = RecordDimension.Na };
+                var features = JsonSerializer.Deserialize<FeatureCollection<object>>(content);
 
-            var feature = features.features[0];
+                if (features.totalFeatures == 0)
+                    return new RfiSegment { Dimension = RecordDimension.Na };
 
-            var dimension = feature.geometry.type.ToLower() == "point" ? RecordDimension.Point : RecordDimension.Line;
+                var feature = features.features[0];
 
-            return new RfiSegment { Dimension = dimension, Length = Convert.ToDecimal(feature.properties.NE_LENGTH), Descr = feature.properties.NE_DESCR };
+                var dimension = feature.geometry.type.ToLower() == "point" ? RecordDimension.Point : RecordDimension.Line;
+
+                return new RfiSegment { Dimension = dimension, Length = Convert.ToDecimal(feature.properties.NE_LENGTH), Descr = feature.properties.NE_DESCR };
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"Exception - GetRfiSegmentDetailAsync: {query} - {content}");
+                throw ex;
+            }
         }
     }
 }
