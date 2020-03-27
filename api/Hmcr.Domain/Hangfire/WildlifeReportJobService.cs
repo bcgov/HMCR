@@ -212,9 +212,6 @@ namespace Hmcr.Domain.Hangfire
             var geometries = new ConcurrentBag<WildlifeReportGeometry>();
             var progress = 0;
 
-            var step = Math.Round((double)typedRows.Count / 100) * 10;
-            step = step == 0 ? 10 : step;
-
             foreach (var group in groups)
             {
                 var tasklist = new List<Task>();
