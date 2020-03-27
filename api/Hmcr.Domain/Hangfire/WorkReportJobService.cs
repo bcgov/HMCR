@@ -295,11 +295,6 @@ namespace Hmcr.Domain.Hangfire
             var geometries = new ConcurrentBag<WorkReportGeometry>();
             var progress = 0;
 
-            var step = Math.Round((double)typedRows.Count / 100) * 10;
-            step = step == 0 ? 10 : step;
-
-            var pct = 0;
-
             foreach (var group in groups)
             {
                 var tasklist = new List<Task>();
@@ -313,10 +308,9 @@ namespace Hmcr.Domain.Hangfire
 
                 progress += 10;
 
-                if (progress % step == 0)
+                if (progress % 500 == 0)
                 {
-                    pct += 10;
-                    _logger.LogInformation($"{_methodLogHeader} PerformSpatialValidationAndConversionAsync {pct}%");
+                    _logger.LogInformation($"{_methodLogHeader} PerformSpatialValidationAndConversionAsync {progress}");
                 }
             }
 
