@@ -2,7 +2,6 @@
 using Hmcr.Data.Database.Entities;
 using Hmcr.Data.Repositories.Base;
 using Hmcr.Model.Dtos.ContractTerm;
-using Microsoft.EntityFrameworkCore;
 using System;
 using System.Threading.Tasks;
 
