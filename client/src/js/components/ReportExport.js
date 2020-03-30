@@ -6,7 +6,7 @@ import * as Yup from 'yup';
 import moment from 'moment';
 import FileSaver from 'file-saver';
 
-import { fetchActivityCodesDropdown } from '../actions';
+import { fetchActivityCodesDropdown, hideErrorDialog } from '../actions';
 
 import MaterialCard from './ui/MaterialCard';
 import UIHeader from './ui/UIHeader';
@@ -59,6 +59,7 @@ const validationSchema = Yup.object({
 const EXPORT_STAGE = {
   WAIT: 'WAIT',
   ERROR: 'ERROR',
+  NOT_FOUND: 'NOT_FOUND',
   DONE: 'DONE',
 };
 
@@ -69,6 +70,7 @@ const ReportExport = ({
   currentUser,
   activityCodes,
   fetchActivityCodesDropdown,
+  hideErrorDialog,
 }) => {
   const [validServiceAreas, setValidServiceAreas] = useState([]);
   const [submitting, setSubmitting] = useState(false);
@@ -161,8 +163,15 @@ const ReportExport = ({
       })
       .catch(error => {
         if (error.response) {
-          setExportResult({ error: error.response.data });
-          setExportStage(EXPORT_STAGE.ERROR);
+          const response = error.response;
+
+          if (response.status === 422) {
+            setExportResult({ error: error.response.data });
+            setExportStage(EXPORT_STAGE.ERROR);
+          } else if (response.status === 404) {
+            hideErrorDialog();
+            setExportStage(EXPORT_STAGE.NOT_FOUND);
+          }
         }
       })
       .finally(() => setSubmitting(false));
@@ -170,6 +179,15 @@ const ReportExport = ({
 
   const renderContent = () => {
     switch (exportStage) {
+      case EXPORT_STAGE.NOT_FOUND:
+        return (
+          <Alert color="warning">
+            <p>
+              <strong>No Results Found</strong>
+            </p>
+            <p>There are no results matching the provided search criterion</p>
+          </Alert>
+        );
       case EXPORT_STAGE.ERROR:
         return (
           <Alert color="danger">
@@ -312,4 +330,4 @@ const mapStateToProps = state => {
   };
 };
 
-export default connect(mapStateToProps, { fetchActivityCodesDropdown })(ReportExport);
+export default connect(mapStateToProps, { fetchActivityCodesDropdown, hideErrorDialog })(ReportExport);

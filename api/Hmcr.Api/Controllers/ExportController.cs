@@ -58,6 +58,14 @@ namespace Hmcr.Api.Controllers
                 return invalidResult;
             }
 
+            var (mimeType, fileName) = GetContentType(outputFormat);
+
+            if (mimeType == null)
+            {
+                return ValidationUtils.GetValidationErrorResult(ControllerContext,
+                    "Invalid output format", "Please include a valid output format in the query string.");
+            }
+
             var dateColName = GetDateColName(typeName);
             if (!await MatchExists(serviceAreaNumbers, fromDate, toDate, dateColName))
             {
@@ -67,14 +75,7 @@ namespace Hmcr.Api.Controllers
             var query = BuildQuery(serviceAreaNumbers, fromDate, toDate, dateColName, false);           
 
             var responseMessage = await _exportApi.ExportReport(query);
-
-            var (mimeType, fileName) = GetContentType(outputFormat);
-
-            if (mimeType == null)
-            {
-                return ValidationUtils.GetValidationErrorResult(ControllerContext,
-                    "Invalid output format", "Please include a valid output format in the query string.");
-            }
+            
 
             var bytes = await responseMessage.Content.ReadAsByteArrayAsync();
 
