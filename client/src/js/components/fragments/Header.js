@@ -91,11 +91,9 @@ const Header = ({ currentUser }) => {
                       text="Roles and Permissions"
                     />
                   </Authorize>
-                  <NavLinkWithMatch
-                    hideNavbar={hideNavbar}
-                    to={Constants.PATHS.ADMIN_REPORT_EXPORT}
-                    text="Report Export"
-                  />
+                  <Authorize requires={Constants.PERMISSIONS.EXPORT}>
+                    <NavLinkWithMatch hideNavbar={hideNavbar} to={Constants.PATHS.REPORT_EXPORT} text="Report Export" />
+                  </Authorize>
                 </React.Fragment>
               )}
               <Authorize requires={Constants.PERMISSIONS.FILE_R}>

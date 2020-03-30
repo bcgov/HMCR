@@ -73,7 +73,7 @@ const Routes = currentUser => {
     case Constants.USER_TYPE.INTERNAL:
       return AdminRoutes(currentUser);
     case Constants.USER_TYPE.BUSINESS:
-      return WorkReportingRoutes(currentUser);
+      return ContractorRoutes(currentUser);
     default:
       return <Redirect to={Constants.PATHS.UNAUTHORIZED} />;
   }
@@ -99,7 +99,7 @@ const getLastVistedPath = currentUser => {
   return defaultPath(currentUser);
 };
 
-const WorkReportingRoutes = currentUser => {
+const ContractorRoutes = currentUser => {
   return (
     <Switch>
       <Route path={Constants.PATHS.ADMIN}>
@@ -144,7 +144,13 @@ const AdminRoutes = currentUser => {
       >
         <Route path={Constants.PATHS.ADMIN_ROLES} exact component={RoleAdmin} />
       </AuthorizedRoute>
-      <Route path={Constants.PATHS.ADMIN_REPORT_EXPORT} exact component={ReportExport} />
+      <AuthorizedRoute
+        path={Constants.PATHS.REPORT_EXPORT}
+        requires={Constants.PERMISSIONS.EXPORT}
+        userType={Constants.USER_TYPE.INTERNAL}
+      >
+        <Route path={Constants.PATHS.REPORT_EXPORT} exact component={ReportExport} />
+      </AuthorizedRoute>
       <AuthorizedRoute
         path={Constants.PATHS.WORK_REPORTING}
         requires={Constants.PERMISSIONS.FILE_R}

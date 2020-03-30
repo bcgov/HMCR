@@ -44,8 +44,8 @@ export const PATHS = {
   ADMIN: '/admin',
   ADMIN_ACTIVITIES: '/admin/activities',
   ADMIN_USERS: '/admin/users',
-  ADMIN_REPORT_EXPORT: '/admin/export',
   ADMIN_ROLES: '/admin/roles',
+  REPORT_EXPORT: '/export',
   VERSION: '/version',
 };
 
