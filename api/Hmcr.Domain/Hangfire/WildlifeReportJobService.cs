@@ -34,8 +34,8 @@ namespace Hmcr.Domain.Hangfire
             ISubmissionStatusRepository statusRepo, ISubmissionObjectRepository submissionRepo,
             ISumbissionRowRepository submissionRowRepo, IWildlifeReportRepository wildlifeReportRepo, IFieldValidatorService validator, 
             IEmailService emailService, IConfiguration config, EmailBody emailBody, IFeebackMessageRepository feedbackRepo,
-            ISpatialService spatialService)
-             : base(unitOfWork, statusRepo, submissionRepo, submissionRowRepo, emailService, logger, config, validator, spatialService, emailBody, feedbackRepo)
+            ISpatialService spatialService, ILookupCodeService lookupService)
+             : base(unitOfWork, statusRepo, submissionRepo, submissionRowRepo, emailService, logger, config, validator, spatialService, emailBody, feedbackRepo, lookupService)
         {
             _wildlifeReportRepo = wildlifeReportRepo;
         }
@@ -248,7 +248,7 @@ namespace Hmcr.Domain.Hangfire
                 await PerformSpatialLrsValidation(wildlifeReport, submissionRow);
             }
 
-            SetVarianceWarningDetail(submissionRow, typedRow.HighwayUnique);
+            SetVarianceWarningDetail(submissionRow, typedRow.HighwayUnique, ThresholdSpLevels.Level1);
 
             return wildlifeReport;
         }
@@ -260,7 +260,7 @@ namespace Hmcr.Domain.Hangfire
 
             var start = new Chris.Models.Point((decimal)typedRow.Longitude, (decimal)typedRow.Latitude);
 
-            var result = await _spatialService.ValidateGpsPointAsync(start, typedRow.HighwayUnique, Fields.HighwayUnique, errors);
+            var result = await _spatialService.ValidateGpsPointAsync(start, typedRow.HighwayUnique, Fields.HighwayUnique, ThresholdSpLevels.Level1, errors);
 
             if (result.result == SpValidationResult.Fail)
             {
@@ -282,7 +282,7 @@ namespace Hmcr.Domain.Hangfire
             var errors = new Dictionary<string, List<string>>();
             var typedRow = wildlifeReport.WildlifeReportTyped;
 
-            var result = await _spatialService.ValidateLrsPointAsync((decimal)typedRow.Offset, typedRow.HighwayUnique, Fields.HighwayUnique, errors);
+            var result = await _spatialService.ValidateLrsPointAsync((decimal)typedRow.Offset, typedRow.HighwayUnique, Fields.HighwayUnique, ThresholdSpLevels.Level1, errors);
 
             if (result.result == SpValidationResult.Fail)
             {

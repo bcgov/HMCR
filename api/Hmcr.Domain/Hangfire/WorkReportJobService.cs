@@ -38,8 +38,8 @@ namespace Hmcr.Domain.Hangfire
             IActivityCodeRepository activityRepo, ISubmissionStatusRepository statusRepo, ISubmissionObjectRepository submissionRepo,
             ISumbissionRowRepository submissionRowRepo, IWorkReportRepository workReportRepo, IFieldValidatorService validator,
             IEmailService emailService, IConfiguration config, EmailBody emailBody, IFeebackMessageRepository feedbackRepo,
-            ISpatialService spatialService)
-            : base(unitOfWork, statusRepo, submissionRepo, submissionRowRepo, emailService, logger, config, validator, spatialService, emailBody, feedbackRepo)
+            ISpatialService spatialService, ILookupCodeService lookupService)
+            : base(unitOfWork, statusRepo, submissionRepo, submissionRowRepo, emailService, logger, config, validator, spatialService, emailBody, feedbackRepo, lookupService)
         {
             _activityRepo = activityRepo;
             _workReportRepo = workReportRepo;
@@ -106,6 +106,7 @@ namespace Hmcr.Domain.Hangfire
                 }
 
                 untypedRow.FeatureType = activityCode.FeatureType ?? FeatureType.None;
+                untypedRow.SpThresholdLevel = activityCode.SpThresholdLevel;
 
                 //this also sets RowType (D2, D3, D4)
                 var entityName = GetValidationEntityName(untypedRow, activityCode);
@@ -264,6 +265,7 @@ namespace Hmcr.Domain.Hangfire
                 typedRow.FeatureType = untypedRow.FeatureType;
                 typedRow.SpatialData = untypedRow.SpatialData;
                 typedRow.RowId = untypedRow.RowId;
+                typedRow.SpThresholdLevel = untypedRow.SpThresholdLevel;
             }
         }
 
@@ -332,7 +334,7 @@ namespace Hmcr.Domain.Hangfire
                 await PerformSpatialLrsValidation(workReport, submissionRow);
             }
 
-            SetVarianceWarningDetail(submissionRow, typedRow.HighwayUnique);
+            SetVarianceWarningDetail(submissionRow, typedRow.HighwayUnique, typedRow.SpThresholdLevel);
 
             return workReport;
         }
@@ -347,7 +349,7 @@ namespace Hmcr.Domain.Hangfire
             //remeber that feature type line/point has been replaced either line or point in PerformGpsEitherLineOrPointValidation().
             if (typedRow.FeatureType == FeatureType.Point)
             {
-                var result = await _spatialService.ValidateGpsPointAsync(start, typedRow.HighwayUnique, Fields.HighwayUnique, errors);
+                var result = await _spatialService.ValidateGpsPointAsync(start, typedRow.HighwayUnique, Fields.HighwayUnique, typedRow.SpThresholdLevel, errors);
 
                 if (result.result == SpValidationResult.Fail)
                 {
@@ -366,7 +368,7 @@ namespace Hmcr.Domain.Hangfire
             else if (typedRow.FeatureType == FeatureType.Line)
             {
                 var end = new Chris.Models.Point((decimal)typedRow.EndLongitude, (decimal)typedRow.EndLatitude);
-                var result = await _spatialService.ValidateGpsLineAsync(start, end, typedRow.HighwayUnique, Fields.HighwayUnique, errors);
+                var result = await _spatialService.ValidateGpsLineAsync(start, end, typedRow.HighwayUnique, Fields.HighwayUnique, typedRow.SpThresholdLevel, errors);
 
                 if (result.result == SpValidationResult.Fail)
                 {
@@ -421,7 +423,7 @@ namespace Hmcr.Domain.Hangfire
             //remeber that feature type line/point has been replaced either line or point in PerformGpsEitherLineOrPointValidation().
             if (typedRow.FeatureType == FeatureType.Point)
             {
-                var result = await _spatialService.ValidateLrsPointAsync((decimal)typedRow.StartOffset, typedRow.HighwayUnique, Fields.HighwayUnique, errors);
+                var result = await _spatialService.ValidateLrsPointAsync((decimal)typedRow.StartOffset, typedRow.HighwayUnique, Fields.HighwayUnique, typedRow.SpThresholdLevel, errors);
 
                 if (result.result == SpValidationResult.Fail)
                 {
@@ -440,7 +442,8 @@ namespace Hmcr.Domain.Hangfire
             }
             else if (typedRow.FeatureType == FeatureType.Line)
             {
-                var result = await _spatialService.ValidateLrsLineAsync((decimal)typedRow.StartOffset, (decimal)typedRow.EndOffset, typedRow.HighwayUnique, Fields.HighwayUnique, errors);
+                var result = await _spatialService
+                    .ValidateLrsLineAsync((decimal)typedRow.StartOffset, (decimal)typedRow.EndOffset, typedRow.HighwayUnique, Fields.HighwayUnique, typedRow.SpThresholdLevel, errors);
 
                 if (result.result == SpValidationResult.Fail)
                 {
