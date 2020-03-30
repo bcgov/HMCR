@@ -6,5 +6,6 @@ namespace Hmcr.Model.Dtos.ActivityCode
     {
         public decimal Id { get; set; }
         public string Name { get; set; }
+        public string ActivityNumber { get; set; }
     }
 }

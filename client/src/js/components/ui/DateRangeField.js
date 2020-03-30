@@ -40,6 +40,7 @@ const DateRangePickerWithFormik = ({ name, fromName, toName, isOutsideRange, for
         inputIconPosition="after"
         displayFormat={Constants.DATE_DISPLAY_FORMAT}
         isOutsideRange={isOutsideRange}
+        minimumNights={0}
       />
       {isInvalid() && <FormFeedback style={{ display: 'block' }}>Required</FormFeedback>}
     </div>

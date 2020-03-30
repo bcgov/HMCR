@@ -52,6 +52,7 @@ namespace Hmcr.Data.Repositories
                 {
                     Id = x.ActivityCodeId,
                     Name = $"{x.ActivityNumber}-{x.ActivityName}",
+                    ActivityNumber = x.ActivityNumber
                 })
                 .ToListAsync();
 

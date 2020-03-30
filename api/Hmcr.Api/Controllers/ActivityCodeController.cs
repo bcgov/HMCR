@@ -8,6 +8,7 @@ using Hmcr.Model.Utils;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace Hmcr.Api.Controllers
@@ -42,7 +43,7 @@ namespace Hmcr.Api.Controllers
 
         [HttpGet("lite", Name = "GetActivityCodesLiteAsync")]
         [AllowAnonymous]
-        public async Task<ActionResult<PagedDto<ActivityCodeSearchDto>>> GetActivityCodesLiteAsync()
+        public async Task<ActionResult<IEnumerable<ActivityCodeLiteDto>>> GetActivityCodesLiteAsync()
         {
             return Ok(await _activityCodeSvc.GetActivityCodesLiteAsync());
         }
