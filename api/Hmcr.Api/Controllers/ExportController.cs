@@ -166,6 +166,7 @@ namespace Hmcr.Api.Controllers
                     return ("application/vnd.google-earth.kmz+xml;charset=UTF-8", "export.kml");
                 case "application/gml+xml;version=3.2":
                 case "application/gml xml;version=3.2":
+                case "application/gml+xml; version=3.2":
                     return ("application/gml+xml; version=3.2;charset=UTF-8", "export.gml");
                 default:
                     return (null, null);

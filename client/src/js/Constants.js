@@ -26,7 +26,7 @@ export const API_PATHS = {
   SUBMISSIONS: '/submissionobjects',
   SUBMISSION_STATUS: '/submissionstatus',
   SUBMISSION_STREAMS: '/submissionstreams',
-  REPORT_EXPORT: '/export',
+  REPORT_EXPORT: '/exports/report',
   VERSION: '/version',
 };
 
@@ -66,6 +66,7 @@ export const PERMISSIONS = {
   ROLE_R: 'ROLE_R',
   FILE_W: 'FILE_W',
   FILE_R: 'FILE_R',
+  EXPORT: 'EXPORT',
 };
 
 export const USER_TYPE = { INTERNAL: 'INTERNAL', BUSINESS: 'BUSINESS' };
