@@ -1,20 +1,19 @@
 ﻿using Hmcr.Api.Authorization;
 using Hmcr.Api.Controllers.Base;
-using Hmcr.Api.Extensions;
 using Hmcr.Chris;
 using Hmcr.Model;
 using Hmcr.Model.Utils;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.WebUtilities;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
 using System.Net;
 using System;
+using Hmcr.Chris.Models;
+using System.Text.Json;
 
 namespace Hmcr.Api.Controllers
 {
@@ -42,7 +41,7 @@ namespace Hmcr.Api.Controllers
         /// <param name="toDate">To date in yyyy-MM-dd format</param>
         /// <returns></returns>
         [HttpGet("report", Name = "Export")]
-        [RequiresPermission(Permissions.FileUploadRead)]        
+        [RequiresPermission(Permissions.Export)]        
         public async Task<IActionResult> ExportReport(string serviceAreas, string typeName, string outputFormat, DateTime fromDate, DateTime toDate)
         {
             var serviceAreaNumbers = serviceAreas.ToDecimalArray();
@@ -59,7 +58,13 @@ namespace Hmcr.Api.Controllers
                 return invalidResult;
             }
 
-            var query = BuildQuery(serviceAreaNumbers, fromDate, toDate, GetDateColName(typeName)); 
+            var dateColName = GetDateColName(typeName);
+            if (!await MatchExists(serviceAreaNumbers, fromDate, toDate, dateColName))
+            {
+                return NotFound();
+            }
+
+            var query = BuildQuery(serviceAreaNumbers, fromDate, toDate, dateColName, false);           
 
             var responseMessage = await _exportApi.ExportReport(query);
 
@@ -82,6 +87,17 @@ namespace Hmcr.Api.Controllers
                 return ValidationUtils.GetValidationErrorResult(ControllerContext,
                      (int)responseMessage.StatusCode, "Error from Geoserver", Encoding.UTF8.GetString(bytes));
             }
+        }
+
+        private async Task<bool> MatchExists(decimal[] serviceAreaNumbers, DateTime fromDate, DateTime toDate, string dateColName)
+        {
+            var query = BuildQuery(serviceAreaNumbers, fromDate, toDate, dateColName, true);
+            var responseMessage = await _exportApi.ExportReport(query);
+
+            var content = await responseMessage.Content.ReadAsStringAsync();
+            var features = JsonSerializer.Deserialize<FeatureCollection>(content);
+
+            return (features.numberMatched > 0);
         }
 
         private UnprocessableEntityObjectResult ValidateQueryParameters(decimal[] serviceAreaNumbers, string typeName, string outputFormat, DateTime fromDate, DateTime toDate)
@@ -156,7 +172,7 @@ namespace Hmcr.Api.Controllers
             }
         }
 
-        private string BuildQuery(decimal[] serviceAreaNumbers, DateTime fromDate, DateTime toDate, string dateColName)
+        private string BuildQuery(decimal[] serviceAreaNumbers, DateTime fromDate, DateTime toDate, string dateColName, bool count)
         {
             var saCql = BuildCsqlFromParameters(serviceAreaNumbers, fromDate, toDate, dateColName);
 
@@ -179,6 +195,13 @@ namespace Hmcr.Api.Controllers
             pq.Remove(ExportQuery.ServiceAreas);
             pq.Remove(ExportQuery.FromDate);
             pq.Remove(ExportQuery.ToDate);
+
+            if (count)
+            {
+                pq.Add(ExportQuery.Count, "1");
+                pq.Remove(ExportQuery.OutputFormat);
+                pq.Add(ExportQuery.OutputFormat, "application/json");
+            }
 
             var pqkv = new List<KeyValuePair<string, string>>();
             foreach (var kv in pq)

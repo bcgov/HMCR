@@ -93,7 +93,7 @@ namespace Hmcr.Api.Controllers
         }
 
         [HttpGet("{id}/exportcsv", Name = "ExportCsv")]
-        [RequiresPermission(Permissions.FileUploadRead)]
+        [RequiresPermission(Permissions.Export)]
         public async Task<IActionResult> ExportCsvAsync(decimal id)
         {
             var (submission, file) = await _submissionService.ExportSubmissionCsvAsync(id);

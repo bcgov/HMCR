@@ -21,6 +21,7 @@ namespace Hmcr.Model
         public const string TypeName = "typeName";
         public const string FromDate = "fromDate";
         public const string ToDate = "toDate";
+        public const string Count = "count";
     }
 
     public static class Permissions
@@ -33,6 +34,7 @@ namespace Hmcr.Model
         public const string RoleRead = "ROLE_R";
         public const string FileUploadWrite = "FILE_W";
         public const string FileUploadRead = "FILE_R";
+        public const string Export = "EXPORT";
     }
 
     public static class Entities
