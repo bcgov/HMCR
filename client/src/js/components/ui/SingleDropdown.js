@@ -25,6 +25,10 @@ const SingleDropdown = props => {
     if (item) setTitle(item.name);
   }, [value, items]);
 
+  useEffect(() => {
+    setTitle(defaultTitle);
+  }, [defaultTitle]);
+
   const handleOnSelect = item => {
     if (handleOnChange) handleOnChange(item.id);
 
