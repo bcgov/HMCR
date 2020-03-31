@@ -18,6 +18,7 @@ namespace Hmcr.Model
         public const string CqlFilter = "cql_filter";
         public const string ServiceAreas = "serviceAreas";
         public const string OutputFormat = "outputFormat";
+        public const string Format = "format";
         public const string TypeName = "typeName";
         public const string FromDate = "fromDate";
         public const string ToDate = "toDate";
