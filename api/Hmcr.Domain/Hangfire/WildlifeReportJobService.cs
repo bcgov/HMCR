@@ -242,13 +242,21 @@ namespace Hmcr.Domain.Hangfire
             if (typedRow.SpatialData == SpatialData.Gps)
             {
                 await PerformSpatialGpsValidation(wildlifeReport, submissionRow);
+
+                SetVarianceWarningDetail(submissionRow, typedRow.HighwayUnique,
+                    GetGpsString(typedRow.Latitude, typedRow.Longitude),
+                    GetGpsString(typedRow.Latitude, typedRow.Longitude),
+                    ThresholdSpLevels.Level1);
             }
             else if (typedRow.SpatialData == SpatialData.Lrs)
             {
                 await PerformSpatialLrsValidation(wildlifeReport, submissionRow);
-            }
 
-            SetVarianceWarningDetail(submissionRow, typedRow.HighwayUnique, ThresholdSpLevels.Level1);
+                SetVarianceWarningDetail(submissionRow, typedRow.HighwayUnique,
+                    GetOffsetString(typedRow.Offset),
+                    GetOffsetString(typedRow.Offset),
+                    ThresholdSpLevels.Level1);
+            }
 
             return wildlifeReport;
         }

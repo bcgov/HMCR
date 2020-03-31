@@ -328,13 +328,21 @@ namespace Hmcr.Domain.Hangfire
             if (typedRow.SpatialData == SpatialData.Gps)
             {
                 await PerformSpatialGpsValidation(workReport, submissionRow);
+
+                SetVarianceWarningDetail(submissionRow, typedRow.HighwayUnique,
+                    GetGpsString(typedRow.StartLatitude, typedRow.StartLongitude),
+                    GetGpsString(typedRow.EndLatitude, typedRow.EndLongitude),
+                    typedRow.SpThresholdLevel);
             }
             else if (typedRow.SpatialData == SpatialData.Lrs)
             {
                 await PerformSpatialLrsValidation(workReport, submissionRow);
-            }
 
-            SetVarianceWarningDetail(submissionRow, typedRow.HighwayUnique, typedRow.SpThresholdLevel);
+                SetVarianceWarningDetail(submissionRow, typedRow.HighwayUnique, 
+                    GetOffsetString(typedRow.StartOffset),
+                    GetOffsetString(typedRow.EndOffset),
+                    typedRow.SpThresholdLevel);
+            }
 
             return workReport;
         }

@@ -13,7 +13,7 @@ namespace Hmcr.Model.Dtos
         {
             if (codeText == null)
             {
-                throw new Exception("Failed parsing THRSHLD_SP_VAR value");
+                return;
             }
 
             var csv = codeText.Split(',');

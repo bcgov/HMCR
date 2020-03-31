@@ -300,19 +300,29 @@ namespace Hmcr.Domain.Hangfire.Base
             return rowNum;
         }
 
-        protected void SetVarianceWarningDetail(HmrSubmissionRow row, string rfiSegment, string thresholdLevel)
+        protected void SetVarianceWarningDetail(HmrSubmissionRow row, string rfiSegment, string start, string end, string thresholdLevel)
         {
             var threshold = _lookupService.GetThresholdLevel(thresholdLevel);
             var threasholdInKm = threshold.Warning / 1000M;
 
             if (row.StartVariance != null && row.StartVariance > threasholdInKm)
             {
-                row.WarningDetail = string.Format(RowWarning.VarianceWarning, "start", rfiSegment, threshold);
+                row.WarningDetail = string.Format(RowWarning.VarianceWarning, "Start", start, rfiSegment, threshold.Warning);
             }
             else if (row.EndVariance != null && row.EndVariance > threasholdInKm)
             {
-                row.WarningDetail = string.Format(RowWarning.VarianceWarning, "end", rfiSegment, threshold);
+                row.WarningDetail = string.Format(RowWarning.VarianceWarning, "End", end, rfiSegment, threshold.Warning);
             }
+        }
+
+        protected string GetGpsString(decimal? latitude, decimal? longitude)
+        {
+            return $"GPS position [{latitude},{longitude}]";
+        }
+
+        protected string GetOffsetString(decimal? offset)
+        {
+            return $"Offset [{offset}]";
         }
 
         protected bool ValidateGpsCoordsRange(decimal? longitude, decimal? latitude)

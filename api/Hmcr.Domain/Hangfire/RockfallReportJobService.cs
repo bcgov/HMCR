@@ -270,13 +270,21 @@ namespace Hmcr.Domain.Hangfire
             if (typedRow.SpatialData == SpatialData.Gps)
             {
                 await PerformSpatialGpsValidation(rockfallReport, submissionRow);
+
+                SetVarianceWarningDetail(submissionRow, typedRow.HighwayUnique,
+                    GetGpsString(typedRow.StartLatitude, typedRow.StartLongitude),
+                    GetGpsString(typedRow.EndLatitude, typedRow.EndLongitude),
+                    ThresholdSpLevels.Level1);
             }
             else if (typedRow.SpatialData == SpatialData.Lrs)
             {
                 await PerformSpatialLrsValidation(rockfallReport, submissionRow);
-            }
 
-            SetVarianceWarningDetail(submissionRow, typedRow.HighwayUnique, ThresholdSpLevels.Level1);
+                SetVarianceWarningDetail(submissionRow, typedRow.HighwayUnique,
+                    GetOffsetString(typedRow.StartOffset),
+                    GetOffsetString(typedRow.EndOffset),
+                    ThresholdSpLevels.Level1);
+            }
 
             return rockfallReport;
         }
