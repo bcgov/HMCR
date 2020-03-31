@@ -108,6 +108,13 @@ const ContractorRoutes = currentUser => {
       <Route path={Constants.PATHS.HOME} exact>
         <Redirect to={getLastVistedPath(currentUser)} />
       </Route>
+      <AuthorizedRoute
+        path={Constants.PATHS.REPORT_EXPORT}
+        requires={Constants.PERMISSIONS.EXPORT}
+        userType={Constants.USER_TYPE.BUSINESS}
+      >
+        <Route path={Constants.PATHS.REPORT_EXPORT} exact component={ReportExport} />
+      </AuthorizedRoute>
       <Route path={Constants.PATHS.WORK_REPORTING} exact component={WorkReporting} />
       <Route path={`${Constants.PATHS.WORK_REPORTING}/:submissionId`} component={WorkReportingSubmissionDetail} />
       <Route path={Constants.PATHS.VERSION} exact component={Version} />
