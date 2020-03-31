@@ -102,7 +102,7 @@ const ReportExport = ({
     queryParams.outputFormat = values.outputFormat;
 
     const serviceAreas = values.serviceAreaNumbers.join(',');
-    const highwayUnique = values.highwayUnique.trim();
+    const highwayUnique = values.highwayUnique.trim().replace(/\*/g, '%');
 
     queryParams.fromDate = dateFrom;
     queryParams.toDate = dateTo;
@@ -112,7 +112,7 @@ const ReportExport = ({
     }
 
     if (highwayUnique.length > 0) {
-      cql_filters.push(`(HIGHWAY_UNIQUE LIKE '${highwayUnique}%' OR HIGHWAY_UNIQUE_NAME LIKE '${highwayUnique}%')`);
+      cql_filters.push(`(HIGHWAY_UNIQUE LIKE '%${highwayUnique}%' OR HIGHWAY_UNIQUE_NAME LIKE '%${highwayUnique}%')`);
     }
 
     if (values.reportTypeId === 'HMR_WORK_REPORT') {
