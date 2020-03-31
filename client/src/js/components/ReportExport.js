@@ -203,8 +203,9 @@ const ReportExport = ({
             <p>
               <strong>Export Complete</strong>
             </p>
+            <p>Your report has been saved to your computer.</p>
             <p>
-              Your report <strong>{exportResult.fileName}</strong> has been saved to your computer.
+              <small>{exportResult.fileName}</small>
             </p>
           </Alert>
         );
