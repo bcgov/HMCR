@@ -98,8 +98,8 @@ namespace Hmcr.Api.Controllers
         /// gml: gml foramt
         /// </summary>
         /// <returns></returns>
-        [HttpGet("outputformats", Name = "OutputFormats")]
-        public IActionResult GetOutputFormats()
+        [HttpGet("supportedformats", Name = "SupportedFormats")]
+        public IActionResult GetSupportedFormats()
         {
             return Ok(OutputFormatDto.GetSupportedFormats());
         }
