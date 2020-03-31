@@ -14,6 +14,7 @@ using System.Net;
 using System;
 using Hmcr.Chris.Models;
 using System.Text.Json;
+using Hmcr.Model.Dtos;
 
 namespace Hmcr.Api.Controllers
 {
@@ -36,14 +37,14 @@ namespace Hmcr.Api.Controllers
         /// </summary>
         /// <param name="serviceAreas">1 ~ 28</param>
         /// <param name="typeName">hmr:HMR_WORK_REPORT_VW, hmr:HMR_WILDLIFE_REPORT_VW, hmr:HMR_ROCKFALL_REPORT_VW</param>
-        /// <param name="outputFormat">csv, application/json, application/vnd.google-earth.kml+xml</param>
+        /// <param name="format">csv, application/json, application/vnd.google-earth.kml+xml</param>
         /// <param name="fromDate">From date in yyyy-MM-dd format</param>
         /// <param name="toDate">To date in yyyy-MM-dd format</param>
         /// <param name="cql_filter">Filter</param>
         /// <returns></returns>
         [HttpGet("report", Name = "Export")]
         [RequiresPermission(Permissions.Export)]        
-        public async Task<IActionResult> ExportReport(string serviceAreas, string typeName, string outputFormat, DateTime fromDate, DateTime toDate, string cql_filter)
+        public async Task<IActionResult> ExportReport(string serviceAreas, string typeName, string format, DateTime fromDate, DateTime toDate, string cql_filter)
         {
             var serviceAreaNumbers = serviceAreas.ToDecimalArray();
 
@@ -52,14 +53,14 @@ namespace Hmcr.Api.Controllers
                 serviceAreaNumbers = _currentUser.UserInfo.ServiceAreas.Select(x => x.ServiceAreaNumber).ToArray();
             }
             
-            var invalidResult = ValidateQueryParameters(serviceAreaNumbers, typeName, outputFormat, fromDate, toDate);
+            var invalidResult = ValidateQueryParameters(serviceAreaNumbers, typeName, format, fromDate, toDate);
 
             if (invalidResult != null)
             {
                 return invalidResult;
             }
 
-            var (mimeType, fileName) = GetContentType(outputFormat);
+            var (mimeType, fileName, outputFormat) = GetContentType(format);
 
             if (mimeType == null)
             {
@@ -68,15 +69,14 @@ namespace Hmcr.Api.Controllers
             }
 
             var dateColName = GetDateColName(typeName);
-            if (!await MatchExists(serviceAreaNumbers, fromDate, toDate, dateColName))
+            if (!await MatchExists(serviceAreaNumbers, fromDate, toDate, outputFormat, dateColName))
             {
                 return NotFound();
             }
 
-            var query = BuildQuery(serviceAreaNumbers, fromDate, toDate, dateColName, false);           
+            var query = BuildQuery(serviceAreaNumbers, fromDate, toDate, outputFormat, dateColName, false);           
 
-            var responseMessage = await _exportApi.ExportReport(query);
-            
+            var responseMessage = await _exportApi.ExportReport(query);            
 
             var bytes = await responseMessage.Content.ReadAsByteArrayAsync();
 
@@ -91,9 +91,22 @@ namespace Hmcr.Api.Controllers
             }
         }
 
-        private async Task<bool> MatchExists(decimal[] serviceAreaNumbers, DateTime fromDate, DateTime toDate, string dateColName)
+        /// <summary>
+        /// csv: csv format
+        /// json: geo-json format
+        /// kml: kml format
+        /// gml: gml foramt
+        /// </summary>
+        /// <returns></returns>
+        [HttpGet("outputformats", Name = "OutputFormats")]
+        public IActionResult GetOutputFormats()
         {
-            var query = BuildQuery(serviceAreaNumbers, fromDate, toDate, dateColName, true);
+            return Ok(OutputFormatDto.GetSupportedFormats());
+        }
+
+        private async Task<bool> MatchExists(decimal[] serviceAreaNumbers, DateTime fromDate, DateTime toDate, string outputFormat, string dateColName)
+        {
+            var query = BuildQuery(serviceAreaNumbers, fromDate, toDate, outputFormat, dateColName, true);
             var responseMessage = await _exportApi.ExportReport(query);
 
             var content = await responseMessage.Content.ReadAsStringAsync();
@@ -145,37 +158,31 @@ namespace Hmcr.Api.Controllers
             return null;
         }
 
-        private (string mimeType, string fileName) GetContentType(string outputFormat)
+        private (string mimeType, string fileName, string format) GetContentType(string outputFormat)
         {
             if (outputFormat == null)
             {
-                return (null, null);
+                return (null, null, null);
             }
 
             outputFormat = outputFormat.ToLowerInvariant();
 
             switch (outputFormat)
             {
-                case "csv":
-                    return ("text/csv;charset=UTF-8", "export.csv");
-                case "application/json":
-                    return ("application/json;charset=UTF-8", "export.json");
-                case "application/vnd.google-earth.kml+xml":
-                case "application/vnd.google-earth.kml xml":
-                    return ("application/vnd.google-earth.kml+xml;charset=UTF-8", "export.kml");
-                case "application/vnd.google-earth.kmz+xml":
-                case "application/vnd.google-earth.kmz xml":
-                    return ("application/vnd.google-earth.kmz+xml;charset=UTF-8", "export.kml");
-                case "application/gml+xml;version=3.2":
-                case "application/gml xml;version=3.2":
-                case "application/gml+xml; version=3.2":
-                    return ("application/gml+xml; version=3.2;charset=UTF-8", "export.gml");
+                case OutputFormatDto.Csv:
+                    return ("text/csv;charset=UTF-8", "export.csv", "csv");
+                case OutputFormatDto.Json:
+                    return ("application/json;charset=UTF-8", "export.json", "application/json");
+                case OutputFormatDto.Kml:
+                    return ("application/vnd.google-earth.kml+xml;charset=UTF-8", "export.kml", "application/vnd.google-earth.kml+xml");
+                case OutputFormatDto.Gml:
+                    return ("application/gml+xml; version=3.2;charset=UTF-8", "export.gml", "application/gml+xml; version=3.2");
                 default:
-                    return (null, null);
+                    return (null, null, null);
             }
         }
 
-        private string BuildQuery(decimal[] serviceAreaNumbers, DateTime fromDate, DateTime toDate, string dateColName, bool count)
+        private string BuildQuery(decimal[] serviceAreaNumbers, DateTime fromDate, DateTime toDate, string outputFormat, string dateColName, bool count)
         {
             var saCql = BuildCsqlFromParameters(serviceAreaNumbers, fromDate, toDate, dateColName);
 
@@ -195,9 +202,12 @@ namespace Hmcr.Api.Controllers
                 pq.Add(ExportQuery.CqlFilter, filter);
             }
 
+            pq.Add(ExportQuery.OutputFormat, outputFormat);
+
             pq.Remove(ExportQuery.ServiceAreas);
             pq.Remove(ExportQuery.FromDate);
             pq.Remove(ExportQuery.ToDate);
+            pq.Remove(ExportQuery.Format);
 
             if (count)
             {
