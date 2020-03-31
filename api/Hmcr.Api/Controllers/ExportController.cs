@@ -69,7 +69,15 @@ namespace Hmcr.Api.Controllers
             }
 
             var dateColName = GetDateColName(typeName);
-            if (!await MatchExists(serviceAreaNumbers, fromDate, toDate, outputFormat, dateColName))
+
+            var (result, exists) = await MatchExists(serviceAreaNumbers, fromDate, toDate, outputFormat, dateColName);
+
+            if (result != null)
+            {
+                return result;
+            }
+
+            if (!exists)
             {
                 return NotFound();
             }
@@ -104,15 +112,23 @@ namespace Hmcr.Api.Controllers
             return Ok(OutputFormatDto.GetSupportedFormats());
         }
 
-        private async Task<bool> MatchExists(decimal[] serviceAreaNumbers, DateTime fromDate, DateTime toDate, string outputFormat, string dateColName)
+        private async Task<(UnprocessableEntityObjectResult result, bool exists)> MatchExists(decimal[] serviceAreaNumbers, DateTime fromDate, DateTime toDate, string outputFormat, string dateColName)
         {
             var query = BuildQuery(serviceAreaNumbers, fromDate, toDate, outputFormat, dateColName, true);
             var responseMessage = await _exportApi.ExportReport(query);
 
+            if (responseMessage.StatusCode != HttpStatusCode.OK)
+            {
+                var bytes = await responseMessage.Content.ReadAsByteArrayAsync();
+
+                return (ValidationUtils.GetValidationErrorResult(ControllerContext,
+                     (int)responseMessage.StatusCode, "Error from Geoserver", Encoding.UTF8.GetString(bytes)), false);
+            }
+
             var content = await responseMessage.Content.ReadAsStringAsync();
             var features = JsonSerializer.Deserialize<FeatureCollection>(content);
 
-            return (features.numberMatched > 0);
+            return (null, features.numberMatched > 0);
         }
 
         private UnprocessableEntityObjectResult ValidateQueryParameters(decimal[] serviceAreaNumbers, string typeName, string outputFormat, DateTime fromDate, DateTime toDate)
