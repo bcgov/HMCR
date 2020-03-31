@@ -39,10 +39,11 @@ namespace Hmcr.Api.Controllers
         /// <param name="outputFormat">csv, application/json, application/vnd.google-earth.kml+xml</param>
         /// <param name="fromDate">From date in yyyy-MM-dd format</param>
         /// <param name="toDate">To date in yyyy-MM-dd format</param>
+        /// <param name="cql_filter">Filter</param>
         /// <returns></returns>
         [HttpGet("report", Name = "Export")]
         [RequiresPermission(Permissions.Export)]        
-        public async Task<IActionResult> ExportReport(string serviceAreas, string typeName, string outputFormat, DateTime fromDate, DateTime toDate)
+        public async Task<IActionResult> ExportReport(string serviceAreas, string typeName, string outputFormat, DateTime fromDate, DateTime toDate, string cql_filter)
         {
             var serviceAreaNumbers = serviceAreas.ToDecimalArray();
 
