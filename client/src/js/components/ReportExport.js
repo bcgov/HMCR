@@ -89,7 +89,7 @@ const ReportExport = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const disableFutureDates = date => date.isAfter(moment());
+  const disableFutureDates = date => date.isAfter(moment().endOf('day'));
 
   const isRequiredFieldsSet = formikProps =>
     formikProps.values.reportTypeId && formikProps.values.dateFrom && formikProps.values.dateTo;
