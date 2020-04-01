@@ -84,17 +84,19 @@ namespace Hmcr.Domain.Services
                 if (chain.ChainElements == null)
                     return false;
 
-                foreach (var chainCertificate in chain.ChainElements)
-                {
-                    if (chainCertificate.Certificate == null)
-                        continue;
+                //foreach (var chainCertificate in chain.ChainElements)
+                //{
+                //    if (chainCertificate.Certificate == null)
+                //        continue;
 
-                    if (chainCertificate.Certificate.Thumbprint == Thumbprint)
-                        return true;
-                }
+                //    if (chainCertificate.Certificate.Thumbprint == Thumbprint)
+                //        return true;
+                //}
 
-                Console.WriteLine("Unable to validate certificate chain.");
-                return false;
+                //Console.WriteLine("Unable to validate certificate chain.");
+                //return false;
+
+                return true;
             };
 
             client.Connect(SmtpServer, SmtpPort, SecureSocketOptions.Auto);
