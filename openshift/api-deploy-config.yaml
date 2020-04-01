@@ -139,25 +139,6 @@ objects:
           targetPort: 8080
       selector:
         deploymentconfig: ${NAME}${SUFFIX}
-  - apiVersion: route.openshift.io/v1
-    kind: Route
-    metadata:
-      annotations:
-        haproxy.router.openshift.io/timeout: 1h
-      creationTimestamp: null
-      name: ${NAME}${SUFFIX}
-    spec:
-      host: ${HOST}
-      path: "/api"
-      port:
-        targetPort: web
-      tls:
-        termination: edge
-      to:
-        kind: Service
-        name: ${NAME}${SUFFIX}
-        weight: 100
-      wildcardPolicy: None
 parameters:
   - description: Name of the project (HMCR)
     displayName: PROJECT_NAME
