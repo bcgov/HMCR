@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { DropdownToggle, DropdownMenu, UncontrolledDropdown, Label, Input } from 'reactstrap';
 import { FieldArray } from 'formik';
@@ -16,10 +16,16 @@ const MultiDropdownField = ({ values, setFieldValue, items, name, title, searcha
     else return selectedValues.map(v => items.find(o => o.id === v).name).join(', ');
   };
 
-  const updateSelectAll = () => {
-    if (selectedValues.length === items.length && !selectAll) setSelectAll(true);
-    else if (selectedValues.length !== items.length && selectAll) setSelectAll(false);
-  };
+  const displayItems = useMemo(() => {
+    if (textFilter.trim().length > 0) {
+      const pattern = new RegExp(textFilter.trim(), 'i');
+      const filteredItems = items.filter(item => pattern.test(item.name));
+
+      return filteredItems;
+    }
+
+    return items;
+  }, [items, textFilter]);
 
   const handleSelectedAllChecked = checked => {
     setSelectAll(checked);
@@ -27,7 +33,7 @@ const MultiDropdownField = ({ values, setFieldValue, items, name, title, searcha
     if (checked)
       setFieldValue(
         name,
-        items.map(o => o.id),
+        displayItems.map(o => o.id),
         true
       );
     else setFieldValue(name, [], true);
@@ -38,15 +44,10 @@ const MultiDropdownField = ({ values, setFieldValue, items, name, title, searcha
     else remove(selectedValues.indexOf(itemId));
   };
 
-  updateSelectAll();
-
-  let displayItems = items;
-
-  if (textFilter.trim().length > 0) {
-    const pattern = new RegExp(textFilter.trim(), 'i');
-    const filteredItems = items.filter(item => pattern.test(item.name));
-    displayItems = filteredItems;
-  }
+  useEffect(() => {
+    if (selectedValues.length === displayItems.length && !selectAll) setSelectAll(true);
+    else if (selectedValues.length !== displayItems.length && selectAll) setSelectAll(false);
+  }, [selectedValues, displayItems, selectAll]);
 
   return (
     <UncontrolledDropdown className="form-input">
