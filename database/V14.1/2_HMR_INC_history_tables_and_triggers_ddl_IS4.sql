@@ -7,9 +7,9 @@
 -- Description:	T-SQL generated Triggers and History Tables.  Includes sequences for History tables.  All dates set to UTC time, to be consistent throughout the database.
 -- =============================================
 
---USE HMR_DEV; -- uncomment appropriate instance
+USE HMR_DEV; -- uncomment appropriate instance
 --USE HMR_TST;
-USE HMR_UAT;
+--USE HMR_UAT;
 --USE HMR_PRD;
 GO
 

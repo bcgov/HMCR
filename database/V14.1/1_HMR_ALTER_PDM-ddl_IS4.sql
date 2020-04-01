@@ -18,9 +18,9 @@
 -- =============================================
 
 
---USE HMR_DEV; -- uncomment appropriate instance
+USE HMR_DEV; -- uncomment appropriate instance
 --USE HMR_TST;
-USE HMR_UAT;
+--USE HMR_UAT;
 --USE HMR_PRD;
 GO
 
