@@ -252,9 +252,18 @@ namespace Hmcr.Model
         public const string WarsRptSign = "WARS_RPT_SIGN";
         public const string RkflRptRecordType = "RKFL_RPT_RECORD_TYPE";
         public const string FeatureType = "FEATURE_TYPE";
-        public const string ThresholdSpWarn = "THRSHLD_SP_VAR_WARN";
-        public const string ThresholdSpError = "THRSHLD_SP_VAR_ERROR";
+        //public const string ThresholdSpWarn = "THRSHLD_SP_VAR_WARN";
+        //public const string ThresholdSpError = "THRSHLD_SP_VAR_ERROR";
         public const string NonSpHighwayUnique = "NONSP_HIGHWAY_UNIQUE";
+        public const string ThresholdSp = "THRSHLD_SP_VAR";
+    }
+
+    public static class ThresholdSpLevels
+    {
+        public const string Level1 = "Level 1";
+        public const string Level2 = "Level 2";
+        public const string Level3 = "Level 3";
+        public const string Level4 = "Level 4";
     }
 
     public static class FileError
@@ -265,7 +274,7 @@ namespace Hmcr.Model
 
     public static class RowWarning
     {
-        public const string VarianceWarning = "{{ \"fieldMessages\": [ {{ \"field\": \"Variance\", \"messages\": [ \"Reported {0} location is is not on the Highway Unique [{1}] within the warning threshold [{2}] metres\" ] }} ] }}";
+        public const string VarianceWarning = "{{ \"fieldMessages\": [ {{ \"field\": \"Variance\", \"messages\": [ \"{0} {1} is is not on the Highway Unique [{2}] within the warning threshold [{3}] metres\" ] }} ] }}";
     }
 
     public static class HmcrEnvironments

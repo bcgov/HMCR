@@ -49,5 +49,6 @@ namespace Hmcr.Model.Dtos.WorkReport
         /// D2, D3, D4 report type
         /// </summary>
         public SpatialData SpatialData { get; set; }
+        public string SpThresholdLevel { get; set; }
     }
 }

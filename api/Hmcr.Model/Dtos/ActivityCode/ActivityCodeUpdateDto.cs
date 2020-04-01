@@ -10,6 +10,7 @@ namespace Hmcr.Model.Dtos.ActivityCode
         public string ActivityName { get; set; }
         public decimal LocationCodeId { get; set; }
         public string FeatureType { get; set; }
+        public string SpThresholdLevel { get; set; }
         public bool IsSiteNumRequired { get; set; }
         public DateTime? EndDate { get; set; }
     }
