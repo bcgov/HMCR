@@ -27,6 +27,7 @@ export const API_PATHS = {
   SUBMISSION_STATUS: '/submissionstatus',
   SUBMISSION_STREAMS: '/submissionstreams',
   REPORT_EXPORT: '/exports/report',
+  SUPPORTED_FORMATS: '/exports/supportedformats',
   VERSION: '/version',
 };
 

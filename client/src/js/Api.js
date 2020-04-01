@@ -65,5 +65,6 @@ export const putActivityCode = (id, data) => instance.put(`${Constants.API_PATHS
 export const deleteActivityCode = id => instance.delete(`${Constants.API_PATHS.ACTIVITY_CODES}/${id}`);
 
 export const getReportExport = params => instance.get(Constants.API_PATHS.REPORT_EXPORT, { params: { ...params } });
+export const getExportSupportedFormats = () => instance.get(Constants.API_PATHS.SUPPORTED_FORMATS);
 
 export const getVersion = () => instance.get(Constants.API_PATHS.VERSION);
