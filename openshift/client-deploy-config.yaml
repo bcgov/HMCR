@@ -62,7 +62,9 @@ objects:
                       name: sso-configs-${ENV}
                       key: CLIENT_SSO_CLIENTID
                 - name: REACT_APP_API_HOST
-                  value: ${HOST}
+                  value: ${HOST}                
+                - name: HMCR_DEPLOY_SUFFIX
+                  value: ${SUFFIX}
       test: false
       triggers:
         - imageChangeParams:
