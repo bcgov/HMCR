@@ -15,17 +15,10 @@ import DateRangeField from './ui/DateRangeField';
 import MultiDropdownField from './ui/MultiDropdownField';
 import { FormInput } from './forms/FormInputs';
 import SimpleModalWrapper from './ui/SimpleModalWrapper';
+import PageSpinner from './ui/PageSpinner';
 
 import * as Constants from '../Constants';
 import * as api from '../Api';
-
-const exportFormats = [
-  { id: 'csv', name: 'CSV' },
-  { id: 'application/vnd.google-earth.kml+xml', name: 'KML' },
-  // { id: 'application/vnd.google-earth.kmz', name: 'KMZ' },
-  { id: 'application/json', name: 'GeoJSON' },
-  { id: 'application/gml+xml; version=3.2', name: 'GML' },
-];
 
 const filterContainerStyle = {
   width: '200px',
@@ -77,6 +70,8 @@ const ReportExport = ({
   const [showModal, setShowModal] = useState(false);
   const [exportStage, setExportStage] = useState(EXPORT_STAGE.WAIT);
   const [exportResult, setExportResult] = useState({});
+  const [loading, setLoading] = useState(true);
+  const [supportedFormats, setSupportedFormats] = useState([]);
 
   useEffect(() => {
     const currentUserSAIds = currentUser.serviceAreas.map(sa => sa.id);
@@ -85,6 +80,11 @@ const ReportExport = ({
     if (activityCodes.length === 0) {
       fetchActivityCodesDropdown();
     }
+
+    api
+      .getExportSupportedFormats()
+      .then(response => setSupportedFormats(response.data))
+      .finally(() => setLoading(false));
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -99,7 +99,7 @@ const ReportExport = ({
     const cql_filters = [];
 
     queryParams.typeName = `hmr:${values.reportTypeId}_VW`;
-    queryParams.outputFormat = values.outputFormat;
+    queryParams.format = values.outputFormat;
 
     const serviceAreas = values.serviceAreaNumbers.join(',');
     const highwayUnique = values.highwayUnique.trim().replace(/\*/g, '%');
@@ -222,6 +222,10 @@ const ReportExport = ({
     }
   };
 
+  if (loading) {
+    return <PageSpinner />;
+  }
+
   return (
     <React.Fragment>
       <Formik
@@ -293,7 +297,7 @@ const ReportExport = ({
             {isRequiredFieldsSet(formikProps) && (
               <div className="d-flex justify-content-end">
                 <div style={{ width: '100px' }} className="mr-2">
-                  <SingleDropdownField defaultTitle="Export Format" items={exportFormats} name="outputFormat" />
+                  <SingleDropdownField defaultTitle="Export Format" items={supportedFormats} name="outputFormat" />
                 </div>
                 <Button color="primary" size="sm" type="button" onClick={formikProps.submitForm} className="mr-2">
                   Export
