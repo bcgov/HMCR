@@ -37,7 +37,7 @@ namespace Hmcr.Domain.Hangfire.Base
         protected IConfiguration _config;
         protected EmailBody _emailBody;
         protected IFeebackMessageRepository _feedbackRepo;
-
+        protected ILookupCodeService _lookupService;
         protected decimal _duplicateRowStatusId;
         protected decimal _errorRowStatusId;
         protected decimal _successRowStatusId;
@@ -51,13 +51,12 @@ namespace Hmcr.Domain.Hangfire.Base
 
         protected bool _enableMethodLog;
         protected string _methodLogHeader;
-        protected int _warningThreshold;
 
 
         public ReportJobServiceBase(IUnitOfWork unitOfWork,
             ISubmissionStatusRepository statusRepo, ISubmissionObjectRepository submissionRepo,
             ISumbissionRowRepository submissionRowRepo, IEmailService emailService, ILogger logger, IConfiguration config, IFieldValidatorService validator,
-            ISpatialService spatialService, EmailBody emailBody, IFeebackMessageRepository feedbackRepo)
+            ISpatialService spatialService, EmailBody emailBody, IFeebackMessageRepository feedbackRepo, ILookupCodeService lookupService)
         {
             _unitOfWork = unitOfWork;
             _statusRepo = statusRepo;
@@ -68,6 +67,7 @@ namespace Hmcr.Domain.Hangfire.Base
             _config = config;
             _emailBody = emailBody;
             _feedbackRepo = feedbackRepo;
+            _lookupService = lookupService;
             _validator = validator;
             _spatialService = spatialService;
             _geometryFactory = NtsGeometryServices.Instance.CreateGeometryFactory(srid: 4326);
@@ -116,7 +116,6 @@ namespace Hmcr.Domain.Hangfire.Base
             _duplicateFileStatusId = statuses.First(x => x.StatusType == StatusType.File && x.StatusCode == FileStatus.DuplicateSubmission).StatusId;
 
             _inProgressRowStatusId = statuses.First(x => x.StatusType == StatusType.File && x.StatusCode == FileStatus.InProgress).StatusId;
-            _warningThreshold = Convert.ToInt32(_validator.CodeLookup.FirstOrDefault(x => x.CodeSet == CodeSet.ThresholdSpWarn)?.CodeValueNum ?? 0);
         }
 
         protected async Task<bool> SetSubmissionAsync(SubmissionDto submissionDto)
@@ -301,18 +300,29 @@ namespace Hmcr.Domain.Hangfire.Base
             return rowNum;
         }
 
-        protected void SetVarianceWarningDetail(HmrSubmissionRow row, string rfiSegment)
+        protected void SetVarianceWarningDetail(HmrSubmissionRow row, string rfiSegment, string start, string end, string thresholdLevel)
         {
-            var threasholdInKm = _warningThreshold / 1000M;
+            var threshold = _lookupService.GetThresholdLevel(thresholdLevel);
+            var threasholdInKm = threshold.Warning / 1000M;
 
             if (row.StartVariance != null && row.StartVariance > threasholdInKm)
             {
-                row.WarningDetail = string.Format(RowWarning.VarianceWarning, "start", rfiSegment, _warningThreshold);
+                row.WarningDetail = string.Format(RowWarning.VarianceWarning, "Start", start, rfiSegment, threshold.Warning);
             }
             else if (row.EndVariance != null && row.EndVariance > threasholdInKm)
             {
-                row.WarningDetail = string.Format(RowWarning.VarianceWarning, "end", rfiSegment, _warningThreshold);
+                row.WarningDetail = string.Format(RowWarning.VarianceWarning, "End", end, rfiSegment, threshold.Warning);
             }
+        }
+
+        protected string GetGpsString(decimal? latitude, decimal? longitude)
+        {
+            return $"GPS position [{latitude},{longitude}]";
+        }
+
+        protected string GetOffsetString(decimal? offset)
+        {
+            return $"Offset [{offset}]";
         }
 
         protected bool ValidateGpsCoordsRange(decimal? longitude, decimal? latitude)

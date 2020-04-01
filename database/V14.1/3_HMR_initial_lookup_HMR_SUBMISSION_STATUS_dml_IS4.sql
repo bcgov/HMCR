@@ -6,13 +6,13 @@
 -- Description:	Dedicated load of initial values for HMR_SUBMISSION_STATUS
 -- =============================================
 
---USE HMR_DEV; -- uncomment appropriate instance
-USE HMR_TST;
+USE HMR_DEV; -- uncomment appropriate instance
+--USE HMR_TST;
 --USE HMR_UAT;
 --USE HMR_PRD;
 GO
 
-DELETE FROM [HMR_DEV].[dbo].[HMR_SUBMISSION_STATUS] WHERE STATUS_ID IS NOT NULL;
+DELETE FROM [dbo].[HMR_SUBMISSION_STATUS] WHERE STATUS_ID IS NOT NULL;
 GO
 
 ALTER SEQUENCE [dbo].[HMR_SUBM_STAT_ID_SEQ]
