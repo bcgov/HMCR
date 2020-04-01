@@ -16,6 +16,7 @@ import MultiDropdownField from './ui/MultiDropdownField';
 import { FormInput } from './forms/FormInputs';
 import SimpleModalWrapper from './ui/SimpleModalWrapper';
 import PageSpinner from './ui/PageSpinner';
+import MouseoverTooltip from './ui/MouseoverTooltip';
 
 import * as Constants from '../Constants';
 import * as api from '../Api';
@@ -240,16 +241,31 @@ const ReportExport = ({
             <MaterialCard>
               <UIHeader>Report Export</UIHeader>
               <Form>
-                <div className="d-flex">
+                <div className="d-flex align-items-start">
                   <div style={filterContainerStyle}>
                     <SingleDropdownField defaultTitle="Select Report Type" items={reportTypes} name="reportTypeId" />
                   </div>
-                  <DateRangeField
-                    name="reportDate"
-                    fromName="dateFrom"
-                    toName="dateTo"
-                    isOutsideRange={disableFutureDates}
-                  />
+                  <div className="d-flex align-items-center">
+                    <DateRangeField
+                      name="reportDate"
+                      fromName="dateFrom"
+                      toName="dateTo"
+                      isOutsideRange={disableFutureDates}
+                    />
+                    <MouseoverTooltip id="tooltip_datepicker">
+                      <ul style={{ paddingInlineStart: 10 }}>
+                        <li>
+                          For Maintenance Work Reporting this refers to the <em>End Date</em>
+                        </li>
+                        <li>
+                          For Rockfall this refers to the <em>Report Date</em>
+                        </li>
+                        <li>
+                          For Wildlife this corresponds to the <em>Accident Date</em>
+                        </li>
+                      </ul>
+                    </MouseoverTooltip>
+                  </div>
                 </div>
                 {isRequiredFieldsSet(formikProps) && (
                   <React.Fragment>
