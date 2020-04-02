@@ -6,6 +6,7 @@ import {
   FETCH_FEATURE_TYPES,
   FETCH_LOCATION_CODES,
   FETCH_ACTIVITY_CODES_DROPDOWN,
+  FETCH_THRESHOLD_LEVELS,
 } from '../actions/types';
 
 const defaultState = {
@@ -14,6 +15,7 @@ const defaultState = {
   featureTypes: [],
   locationCodes: [],
   activityCodes: [],
+  thresholdLevels: [],
 };
 
 export default (state = defaultState, action) => {
@@ -28,6 +30,8 @@ export default (state = defaultState, action) => {
       return { ...state, featureTypes: _.orderBy(action.payload, ['name']) };
     case FETCH_ACTIVITY_CODES_DROPDOWN:
       return { ...state, activityCodes: action.payload };
+    case FETCH_THRESHOLD_LEVELS:
+      return { ...state, thresholdLevels: action.payload };
     default:
       return state;
   }

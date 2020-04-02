@@ -18,6 +18,7 @@ const defaultValues = {
   maintenanceType: '',
   locationCodeId: '',
   featureType: '',
+  spThresholdLevel: '',
   isSiteNumRequired: false,
   endDate: null,
 };
@@ -51,6 +52,7 @@ const EditActivityFormFields = ({
   unitOfMeasures,
   locationCodes,
   featureTypes,
+  thresholdLevels,
 }) => {
   const [loading, setLoading] = useState(true);
   const [validLocationCodeValues, setValidLocationCodeValues] = useState(locationCodes);
@@ -69,6 +71,12 @@ const EditActivityFormFields = ({
           then: Yup.string()
             .required('Required')
             .max(12),
+        }),
+      spThresholdLevel: Yup.string()
+        .nullable()
+        .when('locationCodeId', {
+          is: locationCodeCId,
+          then: Yup.string().required('Required'),
         }),
       isSiteNumRequired: Yup.boolean().when('locationCodeId', {
         is: locationCodeCId,
@@ -173,6 +181,13 @@ const EditActivityFormFields = ({
           <FormRow name="featureType" label="Feature Type*">
             <SingleDropdownField defaultTitle="Select Feature Type" items={validFeatureTypeValues} name="featureType" />
           </FormRow>
+          <FormRow name="spThresholdLevel" label="Location Tolerance Level*">
+            <SingleDropdownField
+              defaultTitle="Select Location Tolerance Level"
+              items={thresholdLevels}
+              name="spThresholdLevel"
+            />
+          </FormRow>
           <FormRow name="isSiteNumRequired" label="Site Number Required">
             <FormCheckboxInput name="isSiteNumRequired" />
           </FormRow>
@@ -191,6 +206,7 @@ const mapStateToProps = state => {
     unitOfMeasures: state.codeLookups.unitOfMeasures,
     locationCodes: state.codeLookups.locationCodes,
     featureTypes: state.codeLookups.featureTypes,
+    thresholdLevels: state.codeLookups.thresholdLevels,
   };
 };
 

@@ -104,6 +104,7 @@ const ActivityAdmin = ({ maintenanceTypes, locationCodes, unitOfMeasures, showVa
       if (values.locationCodeId !== locationCodes.find(location => location.name === 'C').id) {
         values.featureType = null;
         values.isSiteNumRequired = false;
+        values.thresholdLevels = null;
       }
 
       if (formType === Constants.FORM_TYPE.ADD) {
