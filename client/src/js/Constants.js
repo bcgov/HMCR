@@ -11,6 +11,7 @@ export const API_PATHS = {
   MAINTENANCE_TYPES: `${CODE_LOOKUP}/maintenancetypes`,
   UNIT_OF_MEASURES: `${CODE_LOOKUP}/unitofmeasures`,
   FEATURE_TYPES: `${CODE_LOOKUP}/featuretypes`,
+  THRESHOLD_LEVELS: `${CODE_LOOKUP}/thresholdlevels`,
   LOCATION_CODE: '/locationcodes',
   PERMISSIONS: '/permissions',
   ROLE: '/roles',

@@ -55,6 +55,7 @@ export const getMaintenanceTypes = () => instance.get(Constants.API_PATHS.MAINTE
 export const getUnitOfMeasures = () => instance.get(Constants.API_PATHS.UNIT_OF_MEASURES);
 export const getFeatureTypes = () => instance.get(Constants.API_PATHS.FEATURE_TYPES);
 export const getLocationCodes = () => instance.get(Constants.API_PATHS.LOCATION_CODE);
+export const getThresholdLevels = () => instance.get(Constants.API_PATHS.THRESHOLD_LEVELS);
 
 export const searchActivityCodes = params =>
   instance.get(Constants.API_PATHS.ACTIVITY_CODES, { params: { ...params } });
