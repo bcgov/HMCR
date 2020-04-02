@@ -4,6 +4,7 @@ using Hmcr.Api.Authorization;
 using Hmcr.Api.Controllers.Base;
 using Hmcr.Domain.Services;
 using Hmcr.Model;
+using Hmcr.Model.Dtos;
 using Hmcr.Model.Dtos.CodeLookup;
 using Microsoft.AspNetCore.Mvc;
 
@@ -40,9 +41,9 @@ namespace Hmcr.Api.Controllers
         }
 
         [HttpGet("thresholdlevels")]
-        public ActionResult<IEnumerable<CodeLookupCache>> GetThresholdLevels()
+        public ActionResult<IEnumerable<SpThresholdLevel>> GetThresholdLevels()
         {
-            return Ok(_validator.CodeLookup.Where(x => x.CodeSet == CodeSet.ThresholdSp));
+            return Ok(_validator.CodeLookup.Where(x => x.CodeSet == CodeSet.ThresholdSp).Select(x => new SpThresholdLevel(x.CodeName, x.CodeValue)));
         }
     }
 }

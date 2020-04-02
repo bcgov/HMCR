@@ -33,7 +33,7 @@ namespace Hmcr.Domain.Services
                 throw new Exception($"Cannot find THRSHLD_SP_VAR value {level}");
             }           
 
-            return new SpThresholdLevel(threshold.CodeValue);
+            return new SpThresholdLevel(level, threshold.CodeValue);
         }
     }
 }

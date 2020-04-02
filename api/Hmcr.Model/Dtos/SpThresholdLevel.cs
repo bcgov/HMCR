@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Text.Json.Serialization;
 
 namespace Hmcr.Model.Dtos
 {
@@ -7,7 +8,19 @@ namespace Hmcr.Model.Dtos
         public int Error { get; set; }
         public int Warning { get; set; }
 
-        public SpThresholdLevel(string codeText)
+        [JsonPropertyName("id")]
+        public string Level { get; set; }
+
+        [JsonPropertyName("name")]
+        public string Description
+        {
+            get
+            {
+                return $"{Level} (Warning: {Warning}m, {Error}m)";
+            }
+        }
+
+        public SpThresholdLevel(string level, string codeText)
         {
             if (codeText == null)
             {
@@ -38,6 +51,8 @@ namespace Hmcr.Model.Dtos
             {
                 Error = error;
             }
+
+            Level = level;
         }
     }
 }
