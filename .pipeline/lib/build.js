@@ -23,7 +23,7 @@ module.exports = settings => {
           SUFFIX: settings.phases[phase].suffix,
           VERSION: settings.phases[phase].tag,
           SOURCE_REPOSITORY_URL: `${oc.git.uri}`,
-          SOURCE_REPOSITORY_REF: `${oc.git.branch_ref}`
+          SOURCE_REPOSITORY_REF: `${oc.git.branch_ref}`,
         }
       }
     )
