@@ -38,5 +38,11 @@ namespace Hmcr.Api.Controllers
         {
             return Ok(_validator.CodeLookup.Where(x => x.CodeSet == CodeSet.FeatureType));
         }
+
+        [HttpGet("thresholdlevels")]
+        public ActionResult<IEnumerable<CodeLookupCache>> GetThresholdLevels()
+        {
+            return Ok(_validator.CodeLookup.Where(x => x.CodeSet == CodeSet.ThresholdSp));
+        }
     }
 }
