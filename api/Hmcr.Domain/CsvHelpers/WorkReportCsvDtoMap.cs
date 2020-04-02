@@ -33,6 +33,10 @@ namespace Hmcr.Domain.CsvHelpers
             Map(m => m.PostedDate).TypeConverter<DateTypeConverter>();
             Map(m => m.ValueOfWork).TypeConverter<DollarValueToNumberConverter>();
             Map(m => m.Accomplishment).TypeConverter<DollarValueToNumberConverter>();
+            Map(m => m.StartLatitude).TypeConverter<GpsCoordsConverter>();
+            Map(m => m.EndLatitude).TypeConverter<GpsCoordsConverter>();
+            Map(m => m.StartLongitude).TypeConverter<GpsCoordsConverter>();
+            Map(m => m.EndLongitude).TypeConverter<GpsCoordsConverter>();
         }
     }
 }

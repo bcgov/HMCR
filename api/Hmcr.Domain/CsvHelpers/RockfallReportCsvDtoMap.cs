@@ -30,6 +30,10 @@ namespace Hmcr.Domain.CsvHelpers
             Map(m => m.ReportDate).TypeConverter<DateTypeConverter>();
             Map(m => m.EstimatedRockfallDate).TypeConverter<DateTypeConverter>();
             Map(m => m.McPhoneNumber).TypeConverter<PhoneNumberConverter>();
+            Map(m => m.StartLatitude).TypeConverter<GpsCoordsConverter>();
+            Map(m => m.EndLatitude).TypeConverter<GpsCoordsConverter>();
+            Map(m => m.StartLongitude).TypeConverter<GpsCoordsConverter>();
+            Map(m => m.EndLongitude).TypeConverter<GpsCoordsConverter>();
         }
     }
 }
