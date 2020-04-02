@@ -18,8 +18,9 @@ namespace Hmcr.Model
         public DateTime? MaxDate { get; set; }
         public RegexInfo Regex { get; private set; }
         public string CodeSet { get; set; }
+        public LookupItem LookupItem { get; set; }
 
-        public FieldValidationRule(string entityName, string fieldName, string fieldType, bool required, int? minLength, int? maxLength, decimal? minValue, decimal? maxValue, DateTime? minDate, DateTime? maxDate, RegexInfo regex, string codeSet)
+        public FieldValidationRule(string entityName, string fieldName, string fieldType, bool required, int? minLength, int? maxLength, decimal? minValue, decimal? maxValue, DateTime? minDate, DateTime? maxDate, RegexInfo regex, string codeSet, LookupItem lookupItem = LookupItem.Value)
         {
             EntityName = entityName;
             FieldName = fieldName;
@@ -33,6 +34,7 @@ namespace Hmcr.Model
             MaxDate = maxDate;
             Regex = regex;
             CodeSet = codeSet;
+            LookupItem = lookupItem;
         }
 
         public FieldValidationRule ShallowCopy(string entityName)
@@ -41,5 +43,11 @@ namespace Hmcr.Model
             rule.EntityName = entityName;
             return rule;
         }
+    }
+
+
+    public enum LookupItem
+    {
+        Value, Name
     }
 }

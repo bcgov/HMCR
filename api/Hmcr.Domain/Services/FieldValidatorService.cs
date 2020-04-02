@@ -66,7 +66,7 @@ namespace Hmcr.Domain.Services
             _rules.Add(new FieldValidationRule(Entities.ActivityCode, Fields.UnitOfMeasure, FieldTypes.String, true, null, null, null, null, null, null, null, CodeSet.UnitOfMeasure));
             _rules.Add(new FieldValidationRule(Entities.ActivityCode, Fields.MaintenanceType, FieldTypes.String, true, null, null, null, null, null, null, null, CodeSet.WrkRptMaintType));
             _rules.Add(new FieldValidationRule(Entities.ActivityCode, Fields.FeatureType, FieldTypes.String, false, null, null, null, null, null, null, null, CodeSet.FeatureType));
-            _rules.Add(new FieldValidationRule(Entities.ActivityCode, Fields.SpThresholdLevel, FieldTypes.String, true, null, null, null, null, null, null, null, CodeSet.ThresholdSp));
+            _rules.Add(new FieldValidationRule(Entities.ActivityCode, Fields.SpThresholdLevel, FieldTypes.String, true, null, null, null, null, null, null, null, CodeSet.ThresholdSp, LookupItem.Name));
         }
 
         /// <summary>
@@ -410,7 +410,11 @@ namespace Hmcr.Domain.Services
 
             if (rule.CodeSet != null)
             {
-                if (!CodeLookup.Any(x => x.CodeSet == rule.CodeSet && x.CodeValue.ToLowerInvariant() == value.ToLowerInvariant()))
+                var exists = rule.LookupItem == LookupItem.Value ?
+                    CodeLookup.Any(x => x.CodeSet == rule.CodeSet && x.CodeValue.ToLowerInvariant() == value.ToLowerInvariant()) :
+                    CodeLookup.Any(x => x.CodeSet == rule.CodeSet && x.CodeName.ToLowerInvariant() == value.ToLowerInvariant());
+
+                if (!exists)
                 {
                     messages.Add($"{rowNumPrefix}Invalid value. [{value}] doesn't exist in the code set {rule.CodeSet}.");
                 }
