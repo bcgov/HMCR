@@ -7,7 +7,7 @@ import { buildApiErrorObject } from './utils';
 import * as Constants from './Constants';
 
 export const instance = axios.create({
-  baseURL: `${Constants.API_URL}`,
+  baseURL: '/api',
   headers: { 'Access-Control-Allow-Origin': '*', Pragma: 'no-cache' },
 });
 

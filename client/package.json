@@ -11,6 +11,7 @@
     "bootstrap": "^4.4.1",
     "file-saver": "^2.0.2",
     "formik": "^2.1.4",
+    "http-proxy-middleware": "^1.0.3",
     "jquery": "^3.4.1",
     "keycloak-js": "^9.0.0",
     "lodash": "^4.17.15",
@@ -30,14 +31,13 @@
     "reactstrap": "^8.4.1",
     "redux": "^4.0.5",
     "redux-thunk": "^2.3.0",
-    "rimraf": "^3.0.2",
     "yup": "^0.28.3"
   },
   "devDependencies": {
     "redux-immutable-state-invariant": "^2.1.0"
   },
   "scripts": {
-    "start": "rimraf ./build && react-scripts start",
+    "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
