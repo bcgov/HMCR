@@ -26,6 +26,8 @@ namespace Hmcr.Domain.CsvHelpers
         {
             AutoMap(CultureInfo.InvariantCulture);
             Map(m => m.AccidentDate).TypeConverter<DateTypeConverter>();
+            Map(m => m.Latitude).TypeConverter<GpsCoordsConverter>();
+            Map(m => m.Longitude).TypeConverter<GpsCoordsConverter>();
         }
     }
 }
