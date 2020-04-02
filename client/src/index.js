@@ -1,20 +1,24 @@
 import 'react-app-polyfill/ie11';
 import 'react-app-polyfill/stable';
 
-import React from 'react';
+import React, { lazy, Suspense } from 'react';
 import ReactDOM from 'react-dom';
 import { Provider } from 'react-redux';
 
 import * as serviceWorker from './serviceWorker';
 
-import App from './js/App';
+/* eslint-disable import/first */
+const App = lazy(() => import('./js/App'));
+
 import store from './js/store';
 import * as Keycloak from './js/Keycloak';
 
 Keycloak.init(() => {
   ReactDOM.render(
     <Provider store={store}>
-      <App />
+      <Suspense fallback={<div></div>}>
+        <App />
+      </Suspense>
     </Provider>,
     document.getElementById('root')
   );
