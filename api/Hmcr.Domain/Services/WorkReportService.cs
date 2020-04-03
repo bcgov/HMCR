@@ -14,6 +14,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace Hmcr.Domain.Services
@@ -50,7 +51,7 @@ namespace Hmcr.Domain.Services
             CsvHelperUtils.Config(errors, csv, false);
             csv.Configuration.RegisterClassMap<WorkRptInitCsvDtoMap>();
 
-            var serviceArea = (long)submission.ServiceAreaNumber;
+            var serviceAreastrings = ConvertServiceAreaToStrings(submission.ServiceAreaNumber);
 
             var headerValidated = false;
             var rows = new List<WorkRptInitCsvDto>();
@@ -105,9 +106,9 @@ namespace Hmcr.Domain.Services
                     throw;
                 }
 
-                if (row.ServiceArea != serviceArea.ToString())
+                if (!serviceAreastrings.Contains(row.ServiceArea))
                 {
-                    errors.AddItem("ServiceArea", $"The file contains service area which is not {serviceArea}.");
+                    errors.AddItem("ServiceArea", $"The file contains service area which is not {serviceAreastrings[0]}.");
                     return false;
                 }
 

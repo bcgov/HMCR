@@ -49,7 +49,7 @@ namespace Hmcr.Domain.Services
             CsvHelperUtils.Config(errors, csv, false);
             csv.Configuration.RegisterClassMap<WildlifeRptInitCsvDtoMap>();
 
-            var serviceArea = (long)submission.ServiceAreaNumber;
+            var serviceAreastrings = ConvertServiceAreaToStrings(submission.ServiceAreaNumber);
 
             var headerValidated = false;
             var rows = new List<WildlifeRptInitCsvDto>();
@@ -104,9 +104,9 @@ namespace Hmcr.Domain.Services
                     throw;
                 }
 
-                if (row.ServiceArea != serviceArea.ToString())
+                if (!serviceAreastrings.Contains(row.ServiceArea))
                 {
-                    errors.AddItem("ServiceArea", $"The file contains service area which is not {submission.ServiceAreaNumber}.");
+                    errors.AddItem("ServiceArea", $"The file contains service area which is not {serviceAreastrings[0]}.");
                     return false;
                 }
 

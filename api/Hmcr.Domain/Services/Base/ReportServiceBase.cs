@@ -300,5 +300,10 @@ namespace Hmcr.Domain.Services.Base
 
             return errors.Count == 0;
         }
+
+        protected static string[] ConvertServiceAreaToStrings(decimal serviceArea)
+        {
+            return new string[] { ((long)serviceArea).ToString(), string.Format("{0, 2:00}", serviceArea) };
+        }
     }
 }
