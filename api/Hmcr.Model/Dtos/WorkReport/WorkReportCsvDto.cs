@@ -1,6 +1,4 @@
-﻿using NetTopologySuite.Geometries;
-
-namespace Hmcr.Model.Dtos.WorkReport
+﻿namespace Hmcr.Model.Dtos.WorkReport
 {
     public class WorkReportCsvDto : IReportCsvDto
     {

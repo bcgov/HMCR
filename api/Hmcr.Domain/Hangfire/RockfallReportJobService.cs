@@ -33,11 +33,11 @@ namespace Hmcr.Domain.Hangfire
         private IRockfallReportRepository _rockfallReportRepo;
 
         public RockfallReportJobService(IUnitOfWork unitOfWork, ILogger<IRockfallReportJobService> logger, 
-            ISubmissionStatusRepository statusRepo, ISubmissionObjectRepository submissionRepo,
+            ISubmissionStatusRepository statusRepo, ISubmissionObjectRepository submissionRepo, IServiceAreaRepository serviceAreaRepo,
             ISumbissionRowRepository submissionRowRepo, IRockfallReportRepository rockfallReportRepo, IFieldValidatorService validator, 
             IEmailService emailService, IConfiguration config, EmailBody emailBody, IFeebackMessageRepository feedbackRepo,
             ISpatialService spatialService, ILookupCodeService lookupService)
-            : base(unitOfWork, statusRepo, submissionRepo, submissionRowRepo, emailService, logger, config, validator, spatialService, emailBody, feedbackRepo, lookupService)
+            : base(unitOfWork, statusRepo, submissionRepo, serviceAreaRepo, submissionRowRepo, emailService, logger, config, validator, spatialService, emailBody, feedbackRepo, lookupService)
         {
             _logger = logger;
             _rockfallReportRepo = rockfallReportRepo;
@@ -181,6 +181,8 @@ namespace Hmcr.Domain.Hangfire
                 {
                     errors.AddItem(Fields.EstimatedRockfallDate, "Report Date cannot be a future date.");
                 }
+
+                ValidateHighwayUniqueAgainstServiceArea(typedRow.HighwayUnique, errors);
 
                 if (!ValidateGpsCoordsRange(typedRow.StartLongitude, typedRow.StartLatitude))
                 {

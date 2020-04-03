@@ -7,6 +7,7 @@ using Hmcr.Domain.Services;
 using Hmcr.Model;
 using Hmcr.Model.Dtos;
 using Hmcr.Model.Dtos.FeedbackMessage;
+using Hmcr.Model.Dtos.ServiceArea;
 using Hmcr.Model.Dtos.SubmissionObject;
 using Hmcr.Model.Utils;
 using Microsoft.Extensions.Configuration;
@@ -28,6 +29,7 @@ namespace Hmcr.Domain.Hangfire.Base
         protected ISubmissionStatusRepository _statusRepo;
         protected ISubmissionObjectRepository _submissionRepo;
         protected ISumbissionRowRepository _submissionRowRepo;
+        private IServiceAreaRepository _serviceAreaRepo;
         protected ILogger _logger;
         protected IFieldValidatorService _validator;
         protected ISpatialService _spatialService;
@@ -49,12 +51,15 @@ namespace Hmcr.Domain.Hangfire.Base
         protected HmrSubmissionObject _submission;
         protected Dictionary<decimal, HmrSubmissionRow> _submissionRows;
 
+        protected ServiceAreaNumberDto _serviceArea;
+
+
         protected bool _enableMethodLog;
         protected string _methodLogHeader;
 
 
         public ReportJobServiceBase(IUnitOfWork unitOfWork,
-            ISubmissionStatusRepository statusRepo, ISubmissionObjectRepository submissionRepo,
+            ISubmissionStatusRepository statusRepo, ISubmissionObjectRepository submissionRepo, IServiceAreaRepository serviceAreaRepo,
             ISumbissionRowRepository submissionRowRepo, IEmailService emailService, ILogger logger, IConfiguration config, IFieldValidatorService validator,
             ISpatialService spatialService, EmailBody emailBody, IFeebackMessageRepository feedbackRepo, ILookupCodeService lookupService)
         {
@@ -62,6 +67,7 @@ namespace Hmcr.Domain.Hangfire.Base
             _statusRepo = statusRepo;
             _submissionRepo = submissionRepo;
             _submissionRowRepo = submissionRowRepo;
+            _serviceAreaRepo = serviceAreaRepo;
             _emailService = emailService;
             _logger = logger;
             _config = config;
@@ -130,6 +136,8 @@ namespace Hmcr.Domain.Hangfire.Base
 
             _methodLogHeader = $"[Hangfire] Submission ({_submission.SubmissionObjectId}): ";
             _enableMethodLog = _config.GetValue<string>("DISABLE_METHOD_LOGGER") != "Y"; //enabled by default
+
+            _serviceArea = await _serviceAreaRepo.GetServiceAreaByServiceAreaNumberAsyc(_submission.ServiceAreaNumber);
 
             return true;
         }
@@ -209,7 +217,7 @@ namespace Hmcr.Domain.Hangfire.Base
         {
             MethodLogger.LogEntry(_logger, _enableMethodLog, _methodLogHeader);
 
-            if (text == null)
+            if (text.IsEmpty())
                 return "";
 
             using var reader = new StringReader(text);
@@ -284,6 +292,16 @@ namespace Hmcr.Domain.Hangfire.Base
             _logger.LogError($"Exception while parsing the line [{rowNum}]");
             _logger.LogError(string.Join(',', context.HeaderRecord));
             _logger.LogError(context.RawRecord);
+        }
+
+        protected void ValidateHighwayUniqueAgainstServiceArea(string highwayUnique, Dictionary<string, List<string>> errors)
+        {
+            var huPrefix = highwayUnique.Substring(0, 2);
+
+            if (!_serviceArea.HighwayUniquePrefixes.Contains(huPrefix))
+            {
+                errors.AddItem(Fields.HighwayUnique, $"Highway Unique [{highwayUnique}] does not belong to the service area [{_serviceArea.Name}]");
+            }            
         }
 
         protected decimal GetRowNum(string row)

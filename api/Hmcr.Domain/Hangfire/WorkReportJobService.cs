@@ -35,11 +35,11 @@ namespace Hmcr.Domain.Hangfire
         private IWorkReportRepository _workReportRepo;
 
         public WorkReportJobService(IUnitOfWork unitOfWork, ILogger<IWorkReportJobService> logger,
-            IActivityCodeRepository activityRepo, ISubmissionStatusRepository statusRepo, ISubmissionObjectRepository submissionRepo,
+            IActivityCodeRepository activityRepo, ISubmissionStatusRepository statusRepo, ISubmissionObjectRepository submissionRepo, IServiceAreaRepository serviceAreaRepo,
             ISumbissionRowRepository submissionRowRepo, IWorkReportRepository workReportRepo, IFieldValidatorService validator,
             IEmailService emailService, IConfiguration config, EmailBody emailBody, IFeebackMessageRepository feedbackRepo,
             ISpatialService spatialService, ILookupCodeService lookupService)
-            : base(unitOfWork, statusRepo, submissionRepo, submissionRowRepo, emailService, logger, config, validator, spatialService, emailBody, feedbackRepo, lookupService)
+            : base(unitOfWork, statusRepo, submissionRepo, serviceAreaRepo, submissionRowRepo, emailService, logger, config, validator, spatialService, emailBody, feedbackRepo, lookupService)
         {
             _activityRepo = activityRepo;
             _workReportRepo = workReportRepo;
@@ -223,6 +223,8 @@ namespace Hmcr.Domain.Hangfire
                 {
                     errors.AddItem(Fields.EndDate, "Cannot be a future date.");
                 }
+
+                ValidateHighwayUniqueAgainstServiceArea(typedRow.HighwayUnique, errors);
 
                 if (typedRow.SpatialData == SpatialData.Gps)
                 {

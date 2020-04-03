@@ -31,11 +31,11 @@ namespace Hmcr.Domain.Hangfire
         private IWildlifeReportRepository _wildlifeReportRepo;
 
         public WildlifeReportJobService(IUnitOfWork unitOfWork, ILogger<IWildlifeReportJobService> logger,
-            ISubmissionStatusRepository statusRepo, ISubmissionObjectRepository submissionRepo,
+            ISubmissionStatusRepository statusRepo, ISubmissionObjectRepository submissionRepo, IServiceAreaRepository serviceAreaRepo,
             ISumbissionRowRepository submissionRowRepo, IWildlifeReportRepository wildlifeReportRepo, IFieldValidatorService validator, 
             IEmailService emailService, IConfiguration config, EmailBody emailBody, IFeebackMessageRepository feedbackRepo,
             ISpatialService spatialService, ILookupCodeService lookupService)
-             : base(unitOfWork, statusRepo, submissionRepo, submissionRowRepo, emailService, logger, config, validator, spatialService, emailBody, feedbackRepo, lookupService)
+             : base(unitOfWork, statusRepo, submissionRepo, serviceAreaRepo, submissionRowRepo, emailService, logger, config, validator, spatialService, emailBody, feedbackRepo, lookupService)
         {
             _wildlifeReportRepo = wildlifeReportRepo;
         }
@@ -158,6 +158,8 @@ namespace Hmcr.Domain.Hangfire
                 {
                     errors.AddItem(Fields.AccidentDate, "Cannot be a future date.");
                 }
+
+                ValidateHighwayUniqueAgainstServiceArea(typedRow.HighwayUnique, errors);
 
                 if (!ValidateGpsCoordsRange(typedRow.Longitude, typedRow.Latitude))
                 {
