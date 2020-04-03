@@ -41,7 +41,7 @@ namespace Hmcr.Data.Repositories
         {
             var submissionEntity = await AddAsync(submission);
 
-            foreach(var row in submission.SubmissionRows)
+            foreach (var row in submission.SubmissionRows)
             {
                 submissionEntity.HmrSubmissionRows
                     .Add(Mapper.Map<HmrSubmissionRow>(row));
@@ -184,7 +184,9 @@ namespace Hmcr.Data.Repositories
                      Success = x.ErrorDetail == null,
                      NumOfDuplicateRecords = x.HmrSubmissionRows.Count(y => y.RowStatus.StatusCode == "DR"),
                      NumOfReplacedRecords = x.HmrSubmissionRows.Count(y => y.IsResubmitted == true),
-                     NumOfWarningRecords = x.HmrSubmissionRows.Count(y => y.WarningDetail != null)
+                     NumOfWarningRecords = x.HmrSubmissionRows.Count(y => y.WarningDetail != null),
+                     SubmissionStatus = x.SubmissionStatus.StatusCode,
+                     ErrorDetail = x.ErrorDetail,
                  })
                  .FirstAsync(x => x.SubmissionObjectId == submissionObjectId);
 
@@ -200,7 +202,7 @@ namespace Hmcr.Data.Repositories
             //  2. user submits a file #2 (success)
             //  3. user submits a file #1 again 
             //  The net result should be file #1 submission success instead of duplicate file error.
-            
+
             //S2.
             //  1. user submits a file #1 (fail while processing )
             //  2. user submits a file #2 (success)
@@ -208,7 +210,7 @@ namespace Hmcr.Data.Repositories
             //  The net result should be file #1 submission error instead of duplicate file error.
 
             var latestFile = await DbSet
-                .Where(x => x.SubmissionStreamId == submission.SubmissionStreamId && 
+                .Where(x => x.SubmissionStreamId == submission.SubmissionStreamId &&
                     x.ServiceAreaNumber == submission.ServiceAreaNumber)
                 .OrderByDescending(x => x.SubmissionObjectId)
                 .FirstOrDefaultAsync();

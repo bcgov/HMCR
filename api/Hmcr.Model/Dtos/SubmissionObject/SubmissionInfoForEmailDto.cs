@@ -15,5 +15,7 @@ namespace Hmcr.Model.Dtos.SubmissionObject
         public int NumOfDuplicateRecords { get; set; }
         public int NumOfReplacedRecords { get; set; }
         public bool Success { get; set; }
+        public string SubmissionStatus { get; set; }
+        public string ErrorDetail {get;set;}
     }
 }

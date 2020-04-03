@@ -10,11 +10,16 @@ namespace Hmcr.Model
 
         public List<FieldMessage> FieldMessages { get; set; }
 
-        public ErrorDetail(Dictionary<string, List<string>> errros)
+        public ErrorDetail()
+        {
+
+        }
+
+        public ErrorDetail(Dictionary<string, List<string>> errors)
         {
             FieldMessages = new List<FieldMessage>();
 
-            foreach (var error in errros)
+            foreach (var error in errors)
             {
                 FieldMessages.Add(new FieldMessage
                 {
