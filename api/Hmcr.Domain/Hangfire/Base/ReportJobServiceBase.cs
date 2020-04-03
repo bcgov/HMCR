@@ -243,7 +243,7 @@ namespace Hmcr.Domain.Hangfire.Base
             var result = submissionInfo.Success ? "SUCCESS" : "ERROR";
             var subject = $"HMCR{environment}report submission({submissionId}) result - {result}";
 
-            var htmlBodyTemplate = submissionInfo.Success ? _emailBody.SuccessHtmlBody : _emailBody.ErrorHtmlBody;
+            var htmlBodyTemplate = submissionInfo.Success ? _emailBody.SuccessHtmlBody() : _emailBody.ErrorHtmlBody(submissionInfo);
             var htmlBody = string.Format(htmlBodyTemplate, 
                 submissionInfo.FileName, submissionInfo.FileType, submissionInfo.ServiceAreaNumber, submissionInfo.SubmissionDate.ToString("yyyy-MM-dd HH:mm:ss"), 
                 submissionId, submissionInfo.NumOfRecords, submissionInfo.NumOfDuplicateRecords, submissionInfo.NumOfReplacedRecords,
