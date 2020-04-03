@@ -5,11 +5,13 @@ using Hmcr.Data.Database.Entities;
 using Hmcr.Data.Repositories;
 using Hmcr.Model;
 using Hmcr.Model.Dtos;
+using Hmcr.Model.Dtos.Role;
 using Hmcr.Model.Dtos.User;
 using Hmcr.Model.Utils;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace Hmcr.Domain.Services
@@ -160,6 +162,14 @@ namespace Hmcr.Domain.Services
                 errors.AddItem(Fields.RoleId, $"Some of the user's role IDs are invalid or inactive.");
             }
 
+            if (!_currentUser.UserInfo.IsSystemAdmin)
+            {
+                foreach (var roleId in user.UserRoleIds)
+                {
+                    await CheckIfCurrentUserHasAllThePermissions(roleId, errors);
+                }
+            }
+
             if (user.UserType != UserTypeDto.INTERNAL)
             {
                 await foreach(var role in _roleRepo.FindInternalOnlyRolesAsync(user.UserRoleIds))
@@ -169,6 +179,21 @@ namespace Hmcr.Domain.Services
             }
 
             return errors;
+        }
+
+        private async Task CheckIfCurrentUserHasAllThePermissions(decimal roleId, Dictionary<string, List<string>> errors)
+        {
+            var permissionsInRole = await _roleRepo.GetRolePermissionsAsync(roleId);
+
+            foreach (var permission in permissionsInRole.Permissions)
+            {
+                if (!_currentUser.UserInfo.Permissions.Any(x => x == permission))
+                {
+                    var role = await _roleRepo.GetRoleAsync(roleId);
+                    errors.AddItem(Fields.RoleId, $"User is not authorized to assign the role {permissionsInRole.RoleName}");
+                    return;
+                }
+            }
         }
 
         public async Task<(bool NotFound, Dictionary<string, List<string>> Errors)> DeleteUserAsync(UserDeleteDto user)
