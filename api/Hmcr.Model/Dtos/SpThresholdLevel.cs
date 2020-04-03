@@ -12,13 +12,7 @@ namespace Hmcr.Model.Dtos
         public string Level { get; set; }
 
         [JsonPropertyName("name")]
-        public string Description
-        {
-            get
-            {
-                return $"{Level} (Warning: {Warning}m, {Error}m)";
-            }
-        }
+        public string Description => $"{Level} (Warning: {Warning}m, {Error}m)";
 
         public SpThresholdLevel(string level, string codeText)
         {

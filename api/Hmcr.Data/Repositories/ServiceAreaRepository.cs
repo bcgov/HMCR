@@ -17,6 +17,7 @@ namespace Hmcr.Data.Repositories
         Task<IEnumerable<ServiceAreaNumberDto>> GetAllServiceAreasAsync();
         IEnumerable<ServiceAreaNumberDto> GetAllServiceAreas();
         Task<int> CountServiceAreaNumbersAsync(IEnumerable<decimal> serviceAreaNumbers);
+        Task<ServiceAreaNumberDto> GetServiceAreaByServiceAreaNumberAsyc(decimal serviceAreaNumber);
     }
 
     public class ServiceAreaRepository : HmcrRepositoryBase<HmrServiceArea>, IServiceAreaRepository
@@ -33,6 +34,14 @@ namespace Hmcr.Data.Repositories
                 .ToListAsync();
 
             return Mapper.Map<IEnumerable<ServiceAreaDto>>(entity);
+        }
+
+        public async Task<ServiceAreaNumberDto> GetServiceAreaByServiceAreaNumberAsyc(decimal serviceAreaNumber)
+        {
+            var entity = await DbSet.AsNoTracking()
+                .FirstAsync(s => s.ServiceAreaNumber == serviceAreaNumber);
+
+            return Mapper.Map<ServiceAreaNumberDto>(entity);
         }
 
         public async Task<IEnumerable<ServiceAreaNumberDto>> GetAllServiceAreasAsync()
