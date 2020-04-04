@@ -2,7 +2,9 @@
 using Hmcr.Data.Database.Entities;
 using Hmcr.Data.Repositories.Base;
 using Hmcr.Model.Dtos;
+using Hmcr.Model.Dtos.Permission;
 using Hmcr.Model.Dtos.Role;
+using Hmcr.Model.Dtos.RolePermission;
 using Hmcr.Model.Utils;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -15,9 +17,9 @@ namespace Hmcr.Data.Repositories
     public interface IRoleRepository : IHmcrRepositoryBase<HmrRole>
     {
         Task<int> CountActiveRoleIdsAsync(IEnumerable<decimal> roles);
-        Task<IEnumerable<RoleDto>> GetActiveRolesAsync();
         Task<PagedDto<RoleSearchDto>> GetRolesAync(string searchText, bool? isActive, int pageSize, int pageNumber, string orderBy, string direction);
         Task<RoleDto> GetRoleAsync(decimal roleId);
+        Task<PermissionsInRoleDto> GetRolePermissionsAsync(decimal roleId);
         Task<HmrRole> CreateRoleAsync(RoleCreateDto role);
         Task UpdateRoleAsync(RoleUpdateDto role);
         Task DeleteRoleAsync(RoleDeleteDto role);
@@ -38,15 +40,6 @@ namespace Hmcr.Data.Repositories
         {
             return await DbSet.CountAsync(r => roles.Contains(r.RoleId) && (r.EndDate == null || r.EndDate > DateTime.Today));
         }
-
-        public async Task<IEnumerable<RoleDto>> GetActiveRolesAsync()
-        {
-            var roleEntity = await DbSet.AsNoTracking()
-                .Where(x => x.EndDate == null || x.EndDate > DateTime.Today)
-                .ToListAsync();
-
-            return Mapper.Map<IEnumerable<RoleDto>>(roleEntity);
-        } 
 
         public async Task<PagedDto<RoleSearchDto>> GetRolesAync(string searchText, bool? isActive, int pageSize, int pageNumber, string orderBy, string direction)
         {
@@ -87,6 +80,22 @@ namespace Hmcr.Data.Repositories
             };
 
             return pagedDTO;
+        }
+
+        public async Task<PermissionsInRoleDto> GetRolePermissionsAsync(decimal roleId)
+        {
+            var role = await DbSet.AsNoTracking()
+                .Include(x => x.HmrRolePermissions)
+                    .ThenInclude(x => x.Permission)
+                .FirstAsync(x => x.RoleId == roleId);
+
+            return new PermissionsInRoleDto
+            {
+                RoleName = role.Name,
+                Permissions = role.HmrRolePermissions
+                    .Where(x => x.EndDate == null || x.EndDate > DateTime.Today)
+                    .Select(x => x.Permission.Name).ToArray()
+            };
         }
 
         public async Task<RoleDto> GetRoleAsync(decimal roleId)

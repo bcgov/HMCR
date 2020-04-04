@@ -51,7 +51,7 @@ namespace Hmcr.Data.Repositories
                                             .ThenInclude(x => x.Permission)
                                 .Include(x => x.HmrServiceAreaUsers)
                                     .ThenInclude(x => x.ServiceAreaNumberNavigation)
-                                .FirstAsync(u => u.UserGuid == _currentUser.UserGuid);
+                                .FirstAsync(u => u.UserGuid == _currentUser.UserGuid);            
 
             var currentUser = Mapper.Map<UserCurrentDto>(userEntity);
 
@@ -75,6 +75,8 @@ namespace Hmcr.Data.Repositories
                 .Select(s => s.ServiceAreaNumberNavigation);
 
             currentUser.ServiceAreas = new List<ServiceAreaDto>(Mapper.Map<IEnumerable<ServiceAreaDto>>(serviceAreas));
+
+            currentUser.IsSystemAdmin = userEntity.HmrUserRoles.Any(x => x.Role.Name == Constants.SystemAdmin);
 
             return currentUser;
         }

@@ -5,13 +5,13 @@ using Hmcr.Model.Dtos;
 using Hmcr.Model.Dtos.Role;
 using Hmcr.Model.Utils;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace Hmcr.Domain.Services
 {
     public interface IRoleService
     {
-        Task<IEnumerable<RoleDto>> GetActiveRolesAsync();
         Task<int> CountActiveRoleIdsAsync(IEnumerable<decimal> roles);
         Task<PagedDto<RoleSearchDto>> GetRolesAync(string searchText, bool? isActive, int pageSize, int pageNumber, string orderBy, string direction);
         Task<RoleDto> GetRoleAsync(decimal roleId);
@@ -26,14 +26,17 @@ namespace Hmcr.Domain.Services
         private IUnitOfWork _unitOfWork;
         private IFieldValidatorService _validator;
         private IPermissionRepository _permRepo;
+        private HmcrCurrentUser _currentUser;
 
-        public RoleService(IRoleRepository roleRepo, IUserRoleRepository userRoleRepo, IPermissionRepository permRepo, IUnitOfWork unitOfWork, IFieldValidatorService validator)
+        public RoleService(IRoleRepository roleRepo, IUserRoleRepository userRoleRepo, IPermissionRepository permRepo, IUnitOfWork unitOfWork, 
+            IFieldValidatorService validator, HmcrCurrentUser currentUser)
         {
             _roleRepo = roleRepo;
             _userRoleRepo = userRoleRepo;
             _unitOfWork = unitOfWork;
             _validator = validator;
             _permRepo = permRepo;
+            _currentUser = currentUser;
         }
 
         public async Task<int> CountActiveRoleIdsAsync(IEnumerable<decimal> roles)
@@ -105,11 +108,6 @@ namespace Hmcr.Domain.Services
             return (false, errors);
         }
 
-        public async Task<IEnumerable<RoleDto>> GetActiveRolesAsync()
-        {
-            return await _roleRepo.GetActiveRolesAsync();
-        }
-
         public async Task<RoleDto> GetRoleAsync(decimal roleId)
         {
             return await _roleRepo.GetRoleAsync(roleId);
@@ -117,7 +115,39 @@ namespace Hmcr.Domain.Services
 
         public async Task<PagedDto<RoleSearchDto>> GetRolesAync(string searchText, bool? isActive, int pageSize, int pageNumber, string orderBy, string direction)
         {
-            return await _roleRepo.GetRolesAync(searchText, isActive, pageSize, pageNumber, orderBy, direction);
+            var dto = await _roleRepo.GetRolesAync(searchText, isActive, pageSize, pageNumber, orderBy, direction);
+
+            if (_currentUser.UserInfo.IsSystemAdmin)
+                return dto;
+
+            var roles = dto.SourceList.ToList();
+            var count = roles.Count() - 1;
+
+            for(var i = count; i >= 0; i--)
+            {
+                var role = roles[i];
+                if (!await CurrentUserHasAllThePermissions(role.RoleId))
+                {
+                    roles.Remove(role);
+                    continue;
+                }
+            }
+
+            dto.SourceList = roles;
+            return dto;
+        }
+
+        private async Task<bool> CurrentUserHasAllThePermissions(decimal roleId)
+        {
+            var permissionsInRole = await _roleRepo.GetRolePermissionsAsync(roleId);
+
+            foreach (var permission in permissionsInRole.Permissions)
+            {
+                if (!_currentUser.UserInfo.Permissions.Any(x => x == permission))
+                    return false;
+            }
+
+            return true;
         }
 
         public async Task<(bool NotFound, Dictionary<string, List<string>> Errors)> UpdateRoleAsync(RoleUpdateDto role)

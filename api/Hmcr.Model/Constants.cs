@@ -11,6 +11,7 @@ namespace Hmcr.Model
         public static decimal MaxFileSize = 2097152;
         public const string VancouverTimeZone = "America/Vancouver";
         public const string PacificTimeZone = "Pacific Standard Time";
+        public const string SystemAdmin = "SYSTEM_ADMIN";
     }
 
     public static class ExportQuery
