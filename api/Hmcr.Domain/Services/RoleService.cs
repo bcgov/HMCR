@@ -12,7 +12,6 @@ namespace Hmcr.Domain.Services
 {
     public interface IRoleService
     {
-        Task<IEnumerable<RoleDto>> GetActiveRolesAsync();
         Task<int> CountActiveRoleIdsAsync(IEnumerable<decimal> roles);
         Task<PagedDto<RoleSearchDto>> GetRolesAync(string searchText, bool? isActive, int pageSize, int pageNumber, string orderBy, string direction);
         Task<RoleDto> GetRoleAsync(decimal roleId);
@@ -107,11 +106,6 @@ namespace Hmcr.Domain.Services
             await _unitOfWork.CommitAsync();
 
             return (false, errors);
-        }
-
-        public async Task<IEnumerable<RoleDto>> GetActiveRolesAsync()
-        {
-            return await _roleRepo.GetActiveRolesAsync();
         }
 
         public async Task<RoleDto> GetRoleAsync(decimal roleId)
