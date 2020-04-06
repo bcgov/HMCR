@@ -32,7 +32,7 @@ namespace Hmcr.Domain.Hangfire
 
         public WildlifeReportJobService(IUnitOfWork unitOfWork, ILogger<IWildlifeReportJobService> logger,
             ISubmissionStatusRepository statusRepo, ISubmissionObjectRepository submissionRepo, IServiceAreaRepository serviceAreaRepo,
-            ISumbissionRowRepository submissionRowRepo, IWildlifeReportRepository wildlifeReportRepo, IFieldValidatorService validator, 
+            ISumbissionRowRepository submissionRowRepo, IWildlifeReportRepository wildlifeReportRepo, IFieldValidatorService validator,
             IEmailService emailService, IConfiguration config, EmailBody emailBody, IFeebackMessageRepository feedbackRepo,
             ISpatialService spatialService, ILookupCodeService lookupService)
              : base(unitOfWork, statusRepo, submissionRepo, serviceAreaRepo, submissionRowRepo, emailService, logger, config, validator, spatialService, emailBody, feedbackRepo, lookupService)
@@ -313,7 +313,7 @@ namespace Hmcr.Domain.Hangfire
         private string GetValidationEntityName(WildlifeReportCsvDto untypedRow)
         {
             string entityName;
-            if (untypedRow.Latitude.IsEmpty() || untypedRow.Longitude.IsEmpty())
+            if ((untypedRow.Latitude.IsEmpty() || untypedRow.Longitude.IsEmpty()) && !untypedRow.Offset.IsEmpty())
             {
                 entityName = Entities.WildlifeReportLrs;
                 untypedRow.SpatialData = SpatialData.Lrs;

@@ -473,7 +473,8 @@ namespace Hmcr.Domain.Hangfire
         private string GetValidationEntityName(RockfallReportCsvDto untypedRow)
         {
             string entityName;
-            if (untypedRow.StartLatitude.IsEmpty() || untypedRow.StartLongitude.IsEmpty())
+            if (untypedRow.StartLatitude.IsEmpty() || untypedRow.StartLongitude.IsEmpty() &&
+                !(untypedRow.StartOffset.IsEmpty() || untypedRow.EndOffset.IsEmpty()))
             {
                 entityName = Entities.RockfallReportLrs;
                 untypedRow.SpatialData = SpatialData.Lrs;

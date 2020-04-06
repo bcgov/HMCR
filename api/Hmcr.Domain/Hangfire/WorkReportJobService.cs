@@ -281,7 +281,7 @@ namespace Hmcr.Domain.Hangfire
 
             var count = 0;
             foreach (var typedRow in typedRows)
-            {                
+            {
                 currentGroup.Add(typedRow);
                 count++;
 
@@ -340,7 +340,7 @@ namespace Hmcr.Domain.Hangfire
             {
                 await PerformSpatialLrsValidation(workReport, submissionRow);
 
-                SetVarianceWarningDetail(submissionRow, typedRow.HighwayUnique, 
+                SetVarianceWarningDetail(submissionRow, typedRow.HighwayUnique,
                     GetOffsetString(typedRow.StartOffset),
                     GetOffsetString(typedRow.EndOffset),
                     typedRow.SpThresholdLevel);
@@ -374,7 +374,7 @@ namespace Hmcr.Domain.Hangfire
                     workReport.Geometry = _geometryFactory.CreatePoint(result.lrsResult.SnappedPoint.ToTopologyCoordinate());
                     submissionRow.StartVariance = result.lrsResult.Variance;
                 }
-            }  
+            }
             else if (typedRow.FeatureType == FeatureType.Line)
             {
                 var end = new Chris.Models.Point((decimal)typedRow.EndLongitude, (decimal)typedRow.EndLatitude);
@@ -642,7 +642,8 @@ namespace Hmcr.Domain.Hangfire
             string entityName;
             if (locationCode.LocationCode == "C")
             {
-                if (untypedRow.StartLatitude.IsEmpty() || untypedRow.StartLongitude.IsEmpty())
+                if ((untypedRow.StartLatitude.IsEmpty() || untypedRow.StartLongitude.IsEmpty()) &&
+                    !(untypedRow.StartOffset.IsEmpty() || untypedRow.EndOffset.IsEmpty()))
                 {
                     entityName = Entities.WorkReportD4;
                     untypedRow.SpatialData = SpatialData.Lrs;
