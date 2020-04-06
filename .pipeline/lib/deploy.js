@@ -75,7 +75,8 @@ module.exports = settings => {
         param: {
           ENV: phases[phase].phase,
           SUBMISSION_URL: `https://${phases[phase].url_prefix}hmcr.th.gov.bc.ca/workreporting?serviceArea={0}&showResult={1}`,
-          BCEID_SERVICE: phases[phase].bceid_service
+          BCEID_SERVICE: `https://gws1${phases[phase].bceid_service}.bceid.ca/webservices/client/v10/bceidservice.asmx`,
+          EXPORT_URL: `https://${phases[phase].export_server}.apps.th.gov.bc.ca`
         }
       }
     )

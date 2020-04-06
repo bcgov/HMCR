@@ -56,7 +56,7 @@ objects:
                 "MapPath": "geoV05/wfs?",
                 "OASUrl": "https://prdoas2.apps.th.gov.bc.ca",
                 "OASPath": "ogs-geoV06/wfs?",
-                "ExportUrl": "https://devoas1.apps.th.gov.bc.ca",
+                "ExportUrl": "${EXPORT_URL}",
                 "ExportPath": "ogs-geoV06/ows?service=WFS&version=2.0.0&request=GetFeature"
             },
             "JWT": {
@@ -103,3 +103,8 @@ parameters:
     name: BCEID_SERVICE
     required: true
     value: "https://gws1.test.bceid.ca/webservices/client/v10/bceidservice.asmx"
+  - description: GeoServer Report Export URL
+    displayName: EXPORT_URL
+    name: EXPORT_URL
+    required: true
+    value: "https://devoas1.apps.th.gov.bc.ca"
