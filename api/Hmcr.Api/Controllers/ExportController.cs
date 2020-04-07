@@ -44,7 +44,7 @@ namespace Hmcr.Api.Controllers
         /// <returns></returns>
         [HttpGet("report", Name = "Export")]
         [RequiresPermission(Permissions.Export)]        
-        public async Task<IActionResult> ExportReport(string serviceAreas, string typeName, string format, DateTime fromDate, DateTime toDate, string cql_filter)
+        public async Task<IActionResult> ExportReport(string serviceAreas, string typeName, string format, DateTime fromDate, DateTime toDate, string cql_filter, string propertyName)
         {
             var serviceAreaNumbers = serviceAreas.ToDecimalArray();
 
