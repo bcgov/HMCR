@@ -50,7 +50,7 @@ namespace Hmcr.Domain.Services
             LoadWildlifeReportLrsRules();
 
             LoadActivityCodeRules();
-            LoadActivityCodeFeatureTypeRequiredRule();
+            LoadActivityCodeForLocationCRules();
         }
 
 
@@ -66,17 +66,18 @@ namespace Hmcr.Domain.Services
             _rules.Add(new FieldValidationRule(Entities.ActivityCode, Fields.UnitOfMeasure, FieldTypes.String, true, null, null, null, null, null, null, null, CodeSet.UnitOfMeasure));
             _rules.Add(new FieldValidationRule(Entities.ActivityCode, Fields.MaintenanceType, FieldTypes.String, true, null, null, null, null, null, null, null, CodeSet.WrkRptMaintType));
             _rules.Add(new FieldValidationRule(Entities.ActivityCode, Fields.FeatureType, FieldTypes.String, false, null, null, null, null, null, null, null, CodeSet.FeatureType));
-            _rules.Add(new FieldValidationRule(Entities.ActivityCode, Fields.SpThresholdLevel, FieldTypes.String, true, null, null, null, null, null, null, null, CodeSet.ThresholdSp, LookupItem.Name));
+            _rules.Add(new FieldValidationRule(Entities.ActivityCode, Fields.SpThresholdLevel, FieldTypes.String, false, null, null, null, null, null, null, null, CodeSet.ThresholdSp, LookupItem.Name));
         }
 
         /// <summary>
-        /// When Location Code is C, point line feature is required
+        /// When Location Code is C, point line feature and tolerance levle is required
         /// </summary>
-        private void LoadActivityCodeFeatureTypeRequiredRule()
+        private void LoadActivityCodeForLocationCRules()
         {
-            var rule = _rules.First(x => x.EntityName == Entities.ActivityCode && x.FieldName == Fields.FeatureType).ShallowCopy(Entities.ActivityCodeFeatureTypeUnique);
-            _rules.Add(rule);
-            rule.Required = true;
+            _rules.AddRange(_rules.Where(x => x.EntityName == Entities.ActivityCode).Select(x => x.ShallowCopy(Entities.ActivityCodeLocationCodeC)).ToArray());
+
+            _rules.First(x => x.EntityName == Entities.ActivityCodeLocationCodeC && x.FieldName == Fields.FeatureType).Required = true;
+            _rules.First(x => x.EntityName == Entities.ActivityCodeLocationCodeC && x.FieldName == Fields.SpThresholdLevel).Required = true;
         }
 
         private void LoadUserEntityRules()

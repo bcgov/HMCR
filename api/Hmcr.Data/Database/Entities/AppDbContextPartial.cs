@@ -72,16 +72,6 @@ namespace Hmcr.Data.Database.Entities
             catch (Exception e)
             {
                 Console.WriteLine(e);
-
-                if (!e.InnerException.Message.Contains(" Cannot insert duplicate key in object."))
-                {
-                    throw new Exception("This record already exists.");
-                }
-                else if (e.InnerException.Message.StartsWith("20180"))
-                {
-                    throw new Exception("This record has been updated by another user.");
-                }
-
                 throw;
             }
 

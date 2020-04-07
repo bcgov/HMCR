@@ -40,10 +40,7 @@ namespace Hmcr.Domain.Services
         public async Task<(decimal id, Dictionary<string, List<string>> Errors)> CreateActivityCodeAsync(ActivityCodeCreateDto activityCode)
         {
             var errors = new Dictionary<string, List<string>>();
-            var entityName = Entities.ActivityCode;
-            
-            _validatorService.Validate(entityName, activityCode, errors);
-            
+
             if (await _activityCodeRepo.DoesActivityNumberExistAsync(activityCode.ActivityNumber))
             {
                 errors.AddItem(Fields.ActivityNumber, $"ActivityNumber [{activityCode.ActivityNumber})] already exists.");
@@ -56,18 +53,18 @@ namespace Hmcr.Domain.Services
 
             var newLocationCode = (await _locationCodeRepo.GetLocationCode(activityCode.LocationCodeId)).LocationCode;
 
+            var entityName = GetEntityName(newLocationCode);
+
+            _validatorService.Validate(entityName, activityCode, errors);
+
             // location code is C validate FeatureType
             // location code is A or B, FeatureType is forced to null and SiteNumRequired is forced to false
-            if (newLocationCode == "C")
-            {
-                _validatorService.Validate(Entities.ActivityCodeFeatureTypeUnique, Fields.FeatureType, activityCode.FeatureType, errors);
-            }
-            else //if (newLocationCode == "A" || newLocationCode == "B")
+            if (newLocationCode != "C")
             {
                 activityCode.FeatureType = null;
+                activityCode.SpThresholdLevel = null;
                 activityCode.IsSiteNumRequired = false;
             }
-
 
             if (errors.Count > 0)
             {
@@ -129,10 +126,7 @@ namespace Hmcr.Domain.Services
             var originalLocationCode = (await _locationCodeRepo.GetLocationCode(activityCodeFromDb.LocationCodeId)).LocationCode;
 
             var errors = new Dictionary<string, List<string>>();
-            var entityName = Entities.ActivityCode;
-                        
-            _validatorService.Validate(entityName, activityCode, errors);
-            
+
             if (await _locationCodeRepo.DoesExistAsync(activityCode.LocationCodeId) == false)
             {
                 errors.AddItem(Fields.LocationCodeId, $"LocationCodeId [{activityCode.LocationCodeId}] does not exist.");
@@ -149,14 +143,16 @@ namespace Hmcr.Domain.Services
                 errors.AddItem(Fields.LocationCodeId, $"LocationCode can only be changed to A");
             }
 
+            var entityName = GetEntityName(newLocationCode);
+
+            _validatorService.Validate(entityName, activityCode, errors);
+
             // location code is C validate FeatureType
             // location code is A or B, FeatureType is forced to null and SiteNumRequired is forced to false
-            if (newLocationCode == "C")
-            {
-                _validatorService.Validate(Entities.ActivityCodeFeatureTypeUnique, Fields.FeatureType, activityCode.FeatureType, errors);
-            } else //if (newLocationCode == "A" || newLocationCode == "B")
+            if (newLocationCode != "C")
             {
                 activityCode.FeatureType = null;
+                activityCode.SpThresholdLevel = null;
                 activityCode.IsSiteNumRequired = false;
             }
 
@@ -169,6 +165,11 @@ namespace Hmcr.Domain.Services
             await _unitOfWork.CommitAsync();
 
             return (false, errors);
+        }
+
+        private string GetEntityName(string locationCode)
+        {
+            return locationCode == "C" ? Entities.ActivityCodeLocationCodeC : Entities.ActivityCode;
         }
 
         public async Task<IEnumerable<ActivityCodeLiteDto>> GetActivityCodesLiteAsync()
