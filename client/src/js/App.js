@@ -68,7 +68,7 @@ const Unauthorized = () => {
   return <p>Unauthorized</p>;
 };
 
-const Routes = currentUser => {
+const Routes = (currentUser) => {
   switch (currentUser.userType) {
     case Constants.USER_TYPE.INTERNAL:
       return AdminRoutes(currentUser);
@@ -79,7 +79,7 @@ const Routes = currentUser => {
   }
 };
 
-const defaultPath = currentUser => {
+const defaultPath = (currentUser) => {
   if (currentUser.permissions.includes(Constants.PERMISSIONS.CODE_R)) return Constants.PATHS.ADMIN_ACTIVITIES;
 
   if (currentUser.permissions.includes(Constants.PERMISSIONS.USER_R)) return Constants.PATHS.ADMIN_USERS;
@@ -91,7 +91,7 @@ const defaultPath = currentUser => {
   return Constants.PATHS.UNAUTHORIZED;
 };
 
-const getLastVistedPath = currentUser => {
+const getLastVistedPath = (currentUser) => {
   const lastVisitedPath = localStorage.getItem('lastVisitedPath');
 
   if (lastVisitedPath) return lastVisitedPath;
@@ -99,7 +99,7 @@ const getLastVistedPath = currentUser => {
   return defaultPath(currentUser);
 };
 
-const ContractorRoutes = currentUser => {
+const ContractorRoutes = (currentUser) => {
   return (
     <Switch>
       <Route path={Constants.PATHS.ADMIN}>
@@ -124,7 +124,7 @@ const ContractorRoutes = currentUser => {
   );
 };
 
-const AdminRoutes = currentUser => {
+const AdminRoutes = (currentUser) => {
   return (
     <Switch>
       <Route path={Constants.PATHS.HOME} exact>
@@ -172,7 +172,7 @@ const AdminRoutes = currentUser => {
   );
 };
 
-const mapStateToProps = state => {
+const mapStateToProps = (state) => {
   return {
     currentUser: state.user.current,
   };

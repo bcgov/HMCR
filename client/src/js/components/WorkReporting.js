@@ -45,7 +45,7 @@ const WorkReporting = ({ currentUser }) => {
                   items={_.orderBy(currentUser.serviceAreas, ['id'])}
                   defaultTitle="Select Service Area"
                   value={serviceArea}
-                  handleOnChange={serviceArea => {
+                  handleOnChange={(serviceArea) => {
                     setServiceArea(serviceArea);
                     history.push('?' + queryString.stringify({ serviceArea }));
                   }}
@@ -77,7 +77,7 @@ const WorkReporting = ({ currentUser }) => {
   );
 };
 
-const mapStateToProps = state => {
+const mapStateToProps = (state) => {
   return {
     currentUser: state.user.current,
   };

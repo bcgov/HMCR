@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { DropdownToggle, DropdownMenu, UncontrolledDropdown, DropdownItem, FormFeedback } from 'reactstrap';
 
-const SingleDropdown = props => {
+const SingleDropdown = (props) => {
   const {
     items,
     defaultTitle,
@@ -16,7 +16,7 @@ const SingleDropdown = props => {
   const [title, setTitle] = useState(defaultTitle);
 
   useEffect(() => {
-    const item = items.find(o => {
+    const item = items.find((o) => {
       // disable strict type checking
       // eslint-disable-next-line
       return o.id == value;
@@ -29,7 +29,7 @@ const SingleDropdown = props => {
     setTitle(defaultTitle);
   }, [defaultTitle]);
 
-  const handleOnSelect = item => {
+  const handleOnSelect = (item) => {
     if (handleOnChange) handleOnChange(item.id);
 
     setTitle(item.name);

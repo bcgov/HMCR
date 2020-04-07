@@ -92,7 +92,7 @@ export const ACTIVE_STATUS = {
   INACTIVE: 'INACTIVE',
 };
 
-export const ACTIVE_STATUS_ARRAY = Object.keys(ACTIVE_STATUS).map(key => ({
+export const ACTIVE_STATUS_ARRAY = Object.keys(ACTIVE_STATUS).map((key) => ({
   id: ACTIVE_STATUS[key],
   name: ACTIVE_STATUS[key],
 }));
@@ -102,7 +102,7 @@ export const SORT_DIRECTION = {
   DESCENDING: 'desc',
 };
 
-export const DEFAULT_PAGE_SIZE_OPTIONS = process.env.REACT_APP_DEFAULT_PAGE_SIZE_OPTIONS.split(',').map(o =>
+export const DEFAULT_PAGE_SIZE_OPTIONS = process.env.REACT_APP_DEFAULT_PAGE_SIZE_OPTIONS.split(',').map((o) =>
   parseInt(o)
 );
 

@@ -12,8 +12,8 @@ const keycloakConfig = {
 
 const keycloak = Keycloak(keycloakConfig);
 
-export const init = onSuccess => {
-  keycloak.init({ onLoad: 'login-required', promiseType: 'native' }).then(authenticated => {
+export const init = (onSuccess) => {
+  keycloak.init({ onLoad: 'login-required', promiseType: 'native' }).then((authenticated) => {
     if (authenticated && onSuccess) {
       onSuccess();
     }
@@ -24,8 +24,8 @@ export const init = onSuccess => {
   };
 
   api.instance.interceptors.request.use(
-    config =>
-      new Promise(resolve =>
+    (config) =>
+      new Promise((resolve) =>
         keycloak
           .updateToken(5)
           .then(() => {

@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Popover, PopoverBody } from 'reactstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
-const MouseoverTooltip = props => {
+const MouseoverTooltip = (props) => {
   const [isOpen, setIsOpen] = useState(false);
 
   return (

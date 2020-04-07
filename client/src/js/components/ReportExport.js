@@ -28,12 +28,8 @@ const filterContainerStyle = {
 
 const defaultSearchFormValues = {
   reportTypeId: '',
-  dateFrom: moment()
-    .subtract(1, 'months')
-    .startOf('month'),
-  dateTo: moment()
-    .subtract(1, 'months')
-    .endOf('month'),
+  dateFrom: moment().subtract(1, 'months').startOf('month'),
+  dateTo: moment().subtract(1, 'months').endOf('month'),
   serviceAreaNumbers: [],
   highwayUnique: '',
   maintenanceTypeIds: [],
@@ -42,9 +38,7 @@ const defaultSearchFormValues = {
 };
 
 const validationSchema = Yup.object({
-  reportTypeId: Yup.string()
-    .required('Required')
-    .trim(),
+  reportTypeId: Yup.string().required('Required').trim(),
   dateFrom: Yup.object().required('Required'),
   dateTo: Yup.object().required('Required'),
   outputFormat: Yup.string().required('Reuired'),
@@ -75,8 +69,8 @@ const ReportExport = ({
   const [supportedFormats, setSupportedFormats] = useState([]);
 
   useEffect(() => {
-    const currentUserSAIds = currentUser.serviceAreas.map(sa => sa.id);
-    setValidServiceAreas(serviceAreas.filter(sa => currentUserSAIds.includes(sa.id)));
+    const currentUserSAIds = currentUser.serviceAreas.map((sa) => sa.id);
+    setValidServiceAreas(serviceAreas.filter((sa) => currentUserSAIds.includes(sa.id)));
 
     if (activityCodes.length === 0) {
       fetchActivityCodesDropdown();
@@ -84,15 +78,15 @@ const ReportExport = ({
 
     api
       .getExportSupportedFormats()
-      .then(response => setSupportedFormats(response.data))
+      .then((response) => setSupportedFormats(response.data))
       .finally(() => setLoading(false));
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const disableFutureDates = date => date.isAfter(moment().endOf('day'));
+  const disableFutureDates = (date) => date.isAfter(moment().endOf('day'));
 
-  const isRequiredFieldsSet = formikProps =>
+  const isRequiredFieldsSet = (formikProps) =>
     formikProps.values.reportTypeId && formikProps.values.dateFrom && formikProps.values.dateTo;
 
   const buildExportParams = (values, dateFrom, dateTo) => {
@@ -119,8 +113,8 @@ const ReportExport = ({
     if (values.reportTypeId === 'HMR_WORK_REPORT') {
       // Maintenance Type is stored as Record Type in the table/view
       // Maintenance Type and Record Type are used interchangeably elsewhere
-      const recordTypes = values.maintenanceTypeIds.map(value => `'${value}'`).join(',');
-      const activityNumbers = values.activityNumberIds.map(value => `'${value}'`).join(',');
+      const recordTypes = values.maintenanceTypeIds.map((value) => `'${value}'`).join(',');
+      const activityNumbers = values.activityNumberIds.map((value) => `'${value}'`).join(',');
 
       if (values.maintenanceTypeIds.length > 0) {
         cql_filters.push(`RECORD_TYPE IN (${recordTypes})`);
@@ -138,7 +132,7 @@ const ReportExport = ({
     return queryParams;
   };
 
-  const submitExport = values => {
+  const submitExport = (values) => {
     setSubmitting(true);
     setShowModal(true);
     setExportStage(EXPORT_STAGE.WAIT);
@@ -148,7 +142,7 @@ const ReportExport = ({
 
     api
       .getReportExport(buildExportParams(values, dateFrom, dateTo))
-      .then(response => {
+      .then((response) => {
         const fileExtensionHeaders = response.headers['content-disposition'].match(/.csv|.json|.gml|.kml|.kmz/i);
 
         let fileName = `${values.reportTypeId}_Export_${dateFrom}-${dateTo}`;
@@ -162,7 +156,7 @@ const ReportExport = ({
         setExportResult({ fileName });
         setExportStage(EXPORT_STAGE.DONE);
       })
-      .catch(error => {
+      .catch((error) => {
         if (error.response) {
           const response = error.response;
 
@@ -236,7 +230,7 @@ const ReportExport = ({
         onReset={() => {}}
         validationSchema={validationSchema}
       >
-        {formikProps => (
+        {(formikProps) => (
           <React.Fragment>
             <MaterialCard>
               <UIHeader>Report Export</UIHeader>
@@ -341,13 +335,13 @@ const ReportExport = ({
   );
 };
 
-const mapStateToProps = state => {
+const mapStateToProps = (state) => {
   return {
-    reportTypes: Object.values(state.submissions.streams).map(item => ({ ...item, id: item.stagingTableName })),
+    reportTypes: Object.values(state.submissions.streams).map((item) => ({ ...item, id: item.stagingTableName })),
     maintenanceTypes: state.codeLookups.maintenanceTypes,
     serviceAreas: Object.values(state.serviceAreas),
     currentUser: state.user.current,
-    activityCodes: state.codeLookups.activityCodes.map(item => ({ ...item, id: item.activityNumber })),
+    activityCodes: state.codeLookups.activityCodes.map((item) => ({ ...item, id: item.activityNumber })),
   };
 };
 

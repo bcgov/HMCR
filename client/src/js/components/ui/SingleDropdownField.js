@@ -3,18 +3,18 @@ import { useFormikContext, useField } from 'formik';
 
 import SingleDropdown from './SingleDropdown';
 
-const SingleDropdownField = props => {
+const SingleDropdownField = (props) => {
   const { items, name, defaultTitle, disabled } = props;
   const { values, setFieldValue, setFieldTouched } = useFormikContext();
   const [title, setTitle] = useState(values[name] && values[name].length > 0 ? values[name] : defaultTitle);
   const [field, meta] = useField(props);
 
   useEffect(() => {
-    if (field.value) setTitle(items.find(o => o.id === field.value).name);
+    if (field.value) setTitle(items.find((o) => o.id === field.value).name);
     else setTitle(defaultTitle);
   }, [field.value, items, defaultTitle]);
 
-  const handleOnSelect = item => {
+  const handleOnSelect = (item) => {
     setFieldValue(name, item);
   };
 

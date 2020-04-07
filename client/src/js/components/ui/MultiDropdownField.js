@@ -13,13 +13,13 @@ const MultiDropdownField = ({ values, setFieldValue, items, name, title, searcha
   const updateTitle = () => {
     if (selectedValues.length === 0) return title;
     else if (selectedValues.length > maxSelectedItemDisplay) return `(${selectedValues.length}) selected`;
-    else return selectedValues.map(v => items.find(o => o.id === v).name).join(', ');
+    else return selectedValues.map((v) => items.find((o) => o.id === v).name).join(', ');
   };
 
   const displayItems = useMemo(() => {
     if (textFilter.trim().length > 0) {
       const pattern = new RegExp(textFilter.trim(), 'i');
-      const filteredItems = items.filter(item => pattern.test(item.name));
+      const filteredItems = items.filter((item) => pattern.test(item.name));
 
       return filteredItems;
     }
@@ -27,13 +27,13 @@ const MultiDropdownField = ({ values, setFieldValue, items, name, title, searcha
     return items;
   }, [items, textFilter]);
 
-  const handleSelectedAllChecked = checked => {
+  const handleSelectedAllChecked = (checked) => {
     setSelectAll(checked);
 
     if (checked)
       setFieldValue(
         name,
-        displayItems.map(o => o.id),
+        displayItems.map((o) => o.id),
         true
       );
     else setFieldValue(name, [], true);
@@ -60,7 +60,7 @@ const MultiDropdownField = ({ values, setFieldValue, items, name, title, searcha
               type="textbox"
               placeholder="Search"
               value={textFilter}
-              onChange={e => {
+              onChange={(e) => {
                 setTextFilter(e.target.value);
               }}
             />
@@ -72,7 +72,7 @@ const MultiDropdownField = ({ values, setFieldValue, items, name, title, searcha
               name={name}
               type="checkbox"
               checked={selectAll}
-              onChange={e => {
+              onChange={(e) => {
                 handleSelectedAllChecked(e.target.checked);
               }}
             />
@@ -82,7 +82,7 @@ const MultiDropdownField = ({ values, setFieldValue, items, name, title, searcha
         <FieldArray name={name}>
           {({ push, remove }) => (
             <div className="multi-menu">
-              {displayItems.map(item => {
+              {displayItems.map((item) => {
                 const displayName = item.name;
                 return (
                   <div key={item.id} className="multi-item">
@@ -92,7 +92,7 @@ const MultiDropdownField = ({ values, setFieldValue, items, name, title, searcha
                         type="checkbox"
                         value={item.id}
                         checked={values[name].includes(item.id)}
-                        onChange={e => {
+                        onChange={(e) => {
                           handleItemSelected(e.target.checked, item.id, push, remove);
                         }}
                       />

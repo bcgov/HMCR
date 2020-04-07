@@ -10,7 +10,7 @@ const DateRangePickerWithFormik = ({ name, fromName, toName, isOutsideRange, for
   const [focusedInput, setFocusedInput] = useState(null);
   const [touched, setTouched] = useState(false);
 
-  const handleFocused = focusedInput => {
+  const handleFocused = (focusedInput) => {
     setFocusedInput(focusedInput);
     setTouched(true);
   };
@@ -47,7 +47,7 @@ const DateRangePickerWithFormik = ({ name, fromName, toName, isOutsideRange, for
   );
 };
 
-const DateRangeField = props => {
+const DateRangeField = (props) => {
   return <Field component={DateRangePickerWithFormik} {...props} />;
 };
 
