@@ -16,7 +16,7 @@ export default (state = defaultState, action) => {
         ...state,
         streams: {
           ..._.mapKeys(
-            action.payload.map(stream => ({
+            action.payload.map((stream) => ({
               ...stream,
               fileSizeLimitMb: stream.fileSizeLimit / 1024 / 1024,
             })),

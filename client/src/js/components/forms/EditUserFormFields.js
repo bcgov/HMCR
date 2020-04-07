@@ -28,7 +28,7 @@ const EditUserFormFields = ({
 
     api
       .getUser(userId)
-      .then(response => {
+      .then((response) => {
         setInitialValues({
           ...response.data,
           endDate: response.data.endDate ? moment(response.data.endDate) : null,
@@ -36,12 +36,12 @@ const EditUserFormFields = ({
 
         const userType = response.data.userType;
 
-        return api.getRoles().then(response => {
+        return api.getRoles().then((response) => {
           const data = response.data.sourceList
-            .filter(r => r.isActive === true)
-            .map(r => ({ ...r, description: r.name }));
+            .filter((r) => r.isActive === true)
+            .map((r) => ({ ...r, description: r.name }));
 
-          if (userType === Constants.USER_TYPE.BUSINESS) setRoles(data.filter(r => r.isInternal === false));
+          if (userType === Constants.USER_TYPE.BUSINESS) setRoles(data.filter((r) => r.isInternal === false));
           else setRoles(data);
         });
       })
@@ -73,7 +73,7 @@ const EditUserFormFields = ({
   );
 };
 
-const mapStateToProps = state => {
+const mapStateToProps = (state) => {
   return {
     serviceAreas: Object.values(state.serviceAreas),
     userTypes: Object.values(state.user.types),

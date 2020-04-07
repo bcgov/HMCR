@@ -22,7 +22,7 @@ const ErrorDialogModal = ({
     setClicked(false);
   }, []);
 
-  const handleOnClick = reload => {
+  const handleOnClick = (reload) => {
     setClicked(true);
 
     if (reload) window.location.reload();

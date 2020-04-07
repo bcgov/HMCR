@@ -20,12 +20,12 @@ const errorTableColumns = [
   { heading: 'Message', key: 'message', nosort: true },
 ];
 
-const parseErrorDetailJson = json => JSON.parse(json).fieldMessages;
+const parseErrorDetailJson = (json) => JSON.parse(json).fieldMessages;
 
 const submissionRowErrors = (rowNum, errorDetail) => {
   return (
     <ul style={{ paddingInlineStart: '20px' }}>
-      {parseErrorDetailJson(errorDetail).map(error => (
+      {parseErrorDetailJson(errorDetail).map((error) => (
         <li key={`${rowNum}_${error.field}`}>
           <strong className="mr-1">{error.field}:</strong>
           <ul>
@@ -46,8 +46,8 @@ const createRowString = (json, rowNum, recordNumber, serviceAreaNumber) => {
     const errorDetail = parseErrorDetailJson(json);
 
     result += errorDetail
-      .map(field =>
-        field.messages.map(msg => `${rowNum}\t${serviceAreaNumber}\t${recordNumber}\t${field.field}\t"${msg}"`)
+      .map((field) =>
+        field.messages.map((msg) => `${rowNum}\t${serviceAreaNumber}\t${recordNumber}\t${field.field}\t"${msg}"`)
       )
       .join('\n');
     result += '\n';
@@ -56,7 +56,7 @@ const createRowString = (json, rowNum, recordNumber, serviceAreaNumber) => {
   return result;
 };
 
-const createClipboardText = data => {
+const createClipboardText = (data) => {
   let clipboardData = '';
 
   clipboardData += 'submission #\tsubmission date\tservice area\n';
@@ -71,7 +71,7 @@ const createClipboardText = data => {
     clipboardData += '\nstatus detail\n';
 
     clipboardData += parseErrorDetailJson(data.errorDetail)
-      .map(field => field.messages.map(msg => `${field.field}\t${msg}`))
+      .map((field) => field.messages.map((msg) => `${field.field}\t${msg}`))
       .join('\n');
   }
 
@@ -79,7 +79,7 @@ const createClipboardText = data => {
     let errorRows = '';
     let warningRows = '';
 
-    data.submissionRows.forEach(row => {
+    data.submissionRows.forEach((row) => {
       errorRows += createRowString(row.errorDetail, row.rowNum, row.recordNumber, data.serviceAreaNumber);
       warningRows += createRowString(row.warningDetail, row.rowNum, row.recordNumber, data.serviceAreaNumber);
     });
@@ -108,7 +108,7 @@ const WorkReportingSubmissionDetail = ({ toggle, submission }) => {
   useEffect(() => {
     api
       .getSubmissionResult(submission)
-      .then(response => {
+      .then((response) => {
         setSubmissionResultData(response.data);
 
         if (response.data.submissionRows.length > 0) setModalSize('modal-xl');
@@ -163,7 +163,7 @@ const WorkReportingSubmissionDetail = ({ toggle, submission }) => {
               onClick={() =>
                 api
                   .getSubmissionFile(submissionResultData.id)
-                  .then(response => FileSaver.saveAs(new Blob([response.data]), submissionResultData.fileName))
+                  .then((response) => FileSaver.saveAs(new Blob([response.data]), submissionResultData.fileName))
               }
               title="Download original submission"
             >
@@ -189,7 +189,7 @@ const WorkReportingSubmissionDetail = ({ toggle, submission }) => {
     const result = [];
 
     if (json)
-      parseErrorDetailJson(json).forEach(field =>
+      parseErrorDetailJson(json).forEach((field) =>
         result.push({
           rowNum,
           recordNumber,
@@ -208,7 +208,7 @@ const WorkReportingSubmissionDetail = ({ toggle, submission }) => {
     let rowErrorData = [];
     let rowWarningData = [];
 
-    submissionResultData.submissionRows.forEach(row => {
+    submissionResultData.submissionRows.forEach((row) => {
       rowErrorData = rowErrorData.concat(constructTableRow(row.errorDetail, row.rowNum, row.recordNumber));
       rowWarningData = rowWarningData.concat(constructTableRow(row.warningDetail, row.rowNum, row.recordNumber));
     });

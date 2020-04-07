@@ -19,14 +19,8 @@ const defaultValues = {
 };
 
 const validationSchema = Yup.object({
-  name: Yup.string()
-    .required('Required')
-    .max(30)
-    .trim(),
-  description: Yup.string()
-    .required('Required')
-    .max(150)
-    .trim(),
+  name: Yup.string().required('Required').max(30).trim(),
+  description: Yup.string().required('Required').max(150).trim(),
   permissions: Yup.array().required('Require at least one permission'),
 });
 
@@ -38,14 +32,14 @@ const EditRoleFormFields = ({ setInitialValues, formValues, setValidationSchema,
   useEffect(() => {
     setValidationSchema(validationSchema);
 
-    api.getPermissions().then(response => {
+    api.getPermissions().then((response) => {
       setInitialValues(defaultValues);
       setPermissionIds(response.data);
 
       if (formType === Constants.FORM_TYPE.ADD) {
         setLoading(false);
       } else {
-        return api.getRole(roleId).then(response => {
+        return api.getRole(roleId).then((response) => {
           setInitialValues({
             ...response.data,
             endDate: response.data.endDate ? moment(response.data.endDate) : null,

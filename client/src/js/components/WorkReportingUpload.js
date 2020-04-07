@@ -16,9 +16,9 @@ import * as api from '../Api';
 
 const defaultFormValues = { reportTypeId: null, reportFile: null };
 
-const isFileCsvType = file => file && file.name.endsWith('.csv');
+const isFileCsvType = (file) => file && file.name.endsWith('.csv');
 
-const updateUploadStatusIcon = status => {
+const updateUploadStatusIcon = (status) => {
   switch (status) {
     case Constants.UPLOAD_STATE_STATUS.COMPLETE:
       return <FontAwesomeIcon icon="check-circle" className="fa-color-success" />;
@@ -60,7 +60,7 @@ const WorkReportingUpload = ({
   const [reportTypes, setReportTypes] = useState([]);
 
   useEffect(() => {
-    setReportTypes(Object.values(submissionStreams).filter(o => o.isActive));
+    setReportTypes(Object.values(submissionStreams).filter((o) => o.isActive));
   }, [submissionStreams]);
 
   const resetUploadStatus = () => {
@@ -76,7 +76,7 @@ const WorkReportingUpload = ({
   };
 
   const handleSubmit = (values, setFieldValue) => {
-    const stagingTableName = reportTypes.find(type => values.reportTypeId === type.id).stagingTableName;
+    const stagingTableName = reportTypes.find((type) => values.reportTypeId === type.id).stagingTableName;
     const apiPath = Constants.REPORT_TYPES[stagingTableName].api;
     if (!apiPath) return;
 
@@ -101,7 +101,7 @@ const WorkReportingUpload = ({
     );
     api.instance
       .post(`${apiPath}/resubmissions`, data)
-      .then(response => {
+      .then((response) => {
         if (response.data && response.data.length > 0) {
           setResubCheckStatus(
             <React.Fragment>
@@ -151,7 +151,7 @@ const WorkReportingUpload = ({
           handleUploadFile(apiPath, data, resetCallback);
         }
       })
-      .catch(error => {
+      .catch((error) => {
         setResubCheckStatus(
           updateUploadStatusMessage(Constants.UPLOAD_STATE.RESUB_CHECK, Constants.UPLOAD_STATE_STATUS.ERROR)
         );
@@ -165,14 +165,14 @@ const WorkReportingUpload = ({
     setSavingStatus(updateUploadStatusMessage(Constants.UPLOAD_STATE.SAVING, Constants.UPLOAD_STATE_STATUS.START));
     api.instance
       .post(apiPath, data)
-      .then(response => {
+      .then((response) => {
         setSavingStatus(
           updateUploadStatusMessage(Constants.UPLOAD_STATE.SAVING, Constants.UPLOAD_STATE_STATUS.COMPLETE)
         );
         setCompleteMessage(response.data);
         resetCallback();
       })
-      .catch(error => {
+      .catch((error) => {
         setSavingStatus(updateUploadStatusMessage(Constants.UPLOAD_STATE.SAVING, Constants.UPLOAD_STATE_STATUS.ERROR));
         setErrorMessages(error.response.data.errors);
       })
@@ -224,7 +224,7 @@ const WorkReportingUpload = ({
                         <ul>
                           <li>.csv files only</li>
                           <li>
-                            Up to {reportTypes.find(o => o.id === values.reportTypeId).fileSizeLimitMb}MB per file
+                            Up to {reportTypes.find((o) => o.id === values.reportTypeId).fileSizeLimitMb}MB per file
                           </li>
                         </ul>
                       </Alert>
@@ -234,13 +234,13 @@ const WorkReportingUpload = ({
                         name="reportFile"
                         label="Select Report File"
                         accept=".csv"
-                        onChange={e =>
+                        onChange={(e) =>
                           validateFile(
                             e,
                             setFieldValue,
                             setFieldError,
                             'reportFile',
-                            reportTypes.find(o => o.id === values.reportTypeId).fileSizeLimitMb
+                            reportTypes.find((o) => o.id === values.reportTypeId).fileSizeLimitMb
                           )
                         }
                         key={fileInputKey}
@@ -284,7 +284,7 @@ const WorkReportingUpload = ({
           <Alert color="danger">
             <p>Upload unsuccessful. The following errors were found:</p>
             <ul style={{ marginLeft: '-40px' }}>
-              {Object.keys(errorMessages).map(key => {
+              {Object.keys(errorMessages).map((key) => {
                 return (
                   <li key={key} style={{ listStyleType: 'none' }}>
                     {key}:
@@ -306,7 +306,7 @@ const WorkReportingUpload = ({
               <li>Submission ID: {completeMessage.id}</li>
               <li>Filename: {completeMessage.fileName}</li>
               <li>Service Area: {completeMessage.serviceAreaNumber}</li>
-              <li>Type: {reportTypes.find(o => o.id === completeMessage.submissionStreamId).name}</li>
+              <li>Type: {reportTypes.find((o) => o.id === completeMessage.submissionStreamId).name}</li>
             </ul>
           </Alert>
         )}
@@ -315,7 +315,7 @@ const WorkReportingUpload = ({
   );
 };
 
-const mapStateToProps = state => {
+const mapStateToProps = (state) => {
   return {
     currentUser: state.user.current,
     submissionStreams: state.submissions.streams,

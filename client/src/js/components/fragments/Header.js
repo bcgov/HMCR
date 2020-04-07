@@ -31,7 +31,7 @@ const Header = ({ currentUser }) => {
   const [version, setVersion] = useState(null);
 
   useEffect(() => {
-    api.getVersion().then(response => setVersion(response.data.environment.toLowerCase()));
+    api.getVersion().then((response) => setVersion(response.data.environment.toLowerCase()));
   }, []);
 
   useEffect(() => {
@@ -124,7 +124,7 @@ const Header = ({ currentUser }) => {
   );
 };
 
-const mapStateToProps = state => {
+const mapStateToProps = (state) => {
   return {
     currentUser: state.user.current,
   };

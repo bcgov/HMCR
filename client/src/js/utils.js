@@ -8,7 +8,7 @@ export const buildActionWithParam = (action, param) => {
   return { action, param };
 };
 
-export const buildApiErrorObject = response => {
+export const buildApiErrorObject = (response) => {
   try {
     const method = response.config.method.toUpperCase();
     const path = response.config.url.replace(response.config.baseURL, '');
@@ -32,7 +32,7 @@ export const updateQueryParamsFromHistory = (history, newParam, overwrite) => {
   const params = queryString.parse(history.location.search);
 
   let processedParams = { ..._.pickBy(newParam, _.identity) };
-  Object.keys(processedParams).forEach(key => {
+  Object.keys(processedParams).forEach((key) => {
     if (moment.isMoment(processedParams[key]))
       processedParams[key] = processedParams[key].format(Constants.DATE_DISPLAY_FORMAT);
   });
@@ -49,11 +49,11 @@ export const updateQueryParamsFromHistory = (history, newParam, overwrite) => {
   return queryString.stringify(processedParams);
 };
 
-export const stringifyQueryParams = newParam => {
+export const stringifyQueryParams = (newParam) => {
   return queryString.stringify(newParam);
 };
 
-export const buildStatusIdArray = isActive => {
+export const buildStatusIdArray = (isActive) => {
   if (isActive === true || isActive === 'true') return [Constants.ACTIVE_STATUS.ACTIVE];
 
   if (isActive === false || isActive === 'false') return [Constants.ACTIVE_STATUS.INACTIVE];

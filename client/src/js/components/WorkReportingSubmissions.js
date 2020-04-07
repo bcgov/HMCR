@@ -121,7 +121,7 @@ const WorkReportingSubmissions = ({ serviceArea, submissionStatuses }, ref) => {
                   handleDateChanged(startDate, endDate);
                 }}
                 focusedInput={focusedInput}
-                onFocusChange={focusedInput => setFocusedInput(focusedInput)}
+                onFocusChange={(focusedInput) => setFocusedInput(focusedInput)}
                 showDefaultInputIcon
                 hideKeyboardShortcutsPanel
                 inputIconPosition="after"
@@ -129,12 +129,7 @@ const WorkReportingSubmissions = ({ serviceArea, submissionStatuses }, ref) => {
                 displayFormat={Constants.DATE_DISPLAY_FORMAT}
                 startDatePlaceholderText="Date From"
                 endDatePlaceholderText="Date To"
-                isOutsideRange={date =>
-                  date.isBefore(startDateLimit) ||
-                  moment()
-                    .endOf('day')
-                    .isBefore(date)
-                }
+                isOutsideRange={(date) => date.isBefore(startDateLimit) || moment().endOf('day').isBefore(date)}
                 minimumNights={0}
               />
               <div
@@ -151,8 +146,8 @@ const WorkReportingSubmissions = ({ serviceArea, submissionStatuses }, ref) => {
                   style={{ position: 'absolute', top: '15px' }}
                   placeholder="Name"
                   value={searchText}
-                  onChange={e => setSearchText(e.target.value)}
-                  onKeyDown={e => {
+                  onChange={(e) => setSearchText(e.target.value)}
+                  onKeyDown={(e) => {
                     if (e.key === 'Enter') {
                       handleSearchFormSubmit();
                     }
@@ -184,7 +179,7 @@ const WorkReportingSubmissions = ({ serviceArea, submissionStatuses }, ref) => {
           <Col>
             {searchData.data.length > 0 && (
               <DataTableWithPaginaionControl
-                dataList={searchData.data.map(item => ({
+                dataList={searchData.data.map((item) => ({
                   ...item,
                   name: `${item.firstName} ${item.lastName}`,
                   date: moment(item.appCreateTimestamp)
@@ -241,7 +236,7 @@ const WorkReportingSubmissions = ({ serviceArea, submissionStatuses }, ref) => {
 
 const refWorkReportingSubmissions = forwardRef(WorkReportingSubmissions);
 
-const mapStateToProps = state => {
+const mapStateToProps = (state) => {
   return {
     submissionStatuses: state.submissions.statuses,
   };

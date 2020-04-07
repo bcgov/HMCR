@@ -30,7 +30,7 @@ const DeleteButton = ({
 
   const togglePopover = () => setPopoverOpen(!popoverOpen);
 
-  const handleDatePickerFocusChange = focused => {
+  const handleDatePickerFocusChange = (focused) => {
     setFocusedInput(focused);
 
     focused ? setFocusClassName('focused') : setFocusClassName('');
@@ -58,7 +58,7 @@ const DeleteButton = ({
               <SingleDatePicker
                 id={`${buttonId}_endDate`}
                 date={date}
-                onDateChange={date => setDate(date)}
+                onDateChange={(date) => setDate(date)}
                 focused={focusedInput}
                 onFocusChange={({ focused }) => handleDatePickerFocusChange(focused)}
                 hideKeyboardShortcutsPanel={true}

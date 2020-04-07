@@ -29,16 +29,9 @@ const validationSchema = Yup.object({
     .required('Required')
     .max(6)
     .trim(),
-  activityName: Yup.string()
-    .required('Required')
-    .max(150)
-    .trim(),
-  unitOfMeasure: Yup.string()
-    .required('Required')
-    .max(12),
-  maintenanceType: Yup.string()
-    .required('Required')
-    .max(12),
+  activityName: Yup.string().required('Required').max(150).trim(),
+  unitOfMeasure: Yup.string().required('Required').max(12),
+  maintenanceType: Yup.string().required('Required').max(12),
   locationCodeId: Yup.number().required('Required'),
 });
 
@@ -58,7 +51,7 @@ const EditActivityFormFields = ({
   const [validLocationCodeValues, setValidLocationCodeValues] = useState(locationCodes);
   const [disableLocationCodeEdit, setDisableLocationCodeEdit] = useState(false);
   const [validFeatureTypeValues, setValidFeatureTypeValues] = useState(featureTypes);
-  const locationCodeCId = locationCodes.find(code => code.name === 'C').id;
+  const locationCodeCId = locationCodes.find((code) => code.name === 'C').id;
 
   useEffect(() => {
     // Add validation for point line feature when location code is C.
@@ -68,9 +61,7 @@ const EditActivityFormFields = ({
         .nullable()
         .when('locationCodeId', {
           is: locationCodeCId,
-          then: Yup.string()
-            .required('Required')
-            .max(12),
+          then: Yup.string().required('Required').max(12),
         }),
       spThresholdLevel: Yup.string()
         .nullable()
@@ -92,7 +83,7 @@ const EditActivityFormFields = ({
       setInitialValues(defaultValues);
       setLoading(false);
     } else {
-      api.getActivityCode(activityId).then(response => {
+      api.getActivityCode(activityId).then((response) => {
         setInitialValues({
           ...response.data,
           endDate: response.data.endDate ? moment(response.data.endDate) : null,
@@ -100,8 +91,8 @@ const EditActivityFormFields = ({
 
         setValidLocationCodeValues(() => {
           if (formType === Constants.FORM_TYPE.EDIT) {
-            if (response.data.locationCodeId === locationCodes.find(code => code.name === 'B').id)
-              return locationCodes.filter(location => location.name !== 'C');
+            if (response.data.locationCodeId === locationCodes.find((code) => code.name === 'B').id)
+              return locationCodes.filter((location) => location.name !== 'C');
           }
 
           return locationCodes;
@@ -109,7 +100,7 @@ const EditActivityFormFields = ({
 
         setDisableLocationCodeEdit(() => {
           if (formType === Constants.FORM_TYPE.EDIT) {
-            if (response.data.locationCodeId === locationCodes.find(code => code.name === 'A').id) return true;
+            if (response.data.locationCodeId === locationCodes.find((code) => code.name === 'A').id) return true;
           }
           return false;
         });
@@ -119,11 +110,11 @@ const EditActivityFormFields = ({
 
           if (formType === Constants.FORM_TYPE.EDIT) {
             if (response.data.featureType === pointLineType)
-              return featureTypes.filter(feature => feature.id === pointLineType);
+              return featureTypes.filter((feature) => feature.id === pointLineType);
 
             if (response.data.featureType)
               return featureTypes.filter(
-                feature => feature.id === pointLineType || feature.id === response.data.featureType
+                (feature) => feature.id === pointLineType || feature.id === response.data.featureType
               );
           }
 
@@ -200,7 +191,7 @@ const EditActivityFormFields = ({
   );
 };
 
-const mapStateToProps = state => {
+const mapStateToProps = (state) => {
   return {
     maintenanceTypes: state.codeLookups.maintenanceTypes,
     unitOfMeasures: state.codeLookups.unitOfMeasures,

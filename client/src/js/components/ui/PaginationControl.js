@@ -27,12 +27,13 @@ const PaginationControl = ({
     );
   }
 
-  const handlePageSizeChange = e => onPageSizeChange(e.target.value);
+  const handlePageSizeChange = (e) => onPageSizeChange(e.target.value);
 
   return (
     <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between' }}>
-      <span>{`${(currentPage - 1) * pageSize + 1} - ${(currentPage - 1) * pageSize +
-        itemCount} of ${totalCount}`}</span>
+      <span>{`${(currentPage - 1) * pageSize + 1} - ${
+        (currentPage - 1) * pageSize + itemCount
+      } of ${totalCount}`}</span>
       {!(pageCount <= 1 && pageSize === pageSizeOptions[0]) && (
         <Pagination size="sm" aria-label="Pagination">
           <Input
@@ -44,7 +45,7 @@ const PaginationControl = ({
             onChange={handlePageSizeChange}
             value={pageSize}
           >
-            {pageSizeOptions.map(count => (
+            {pageSizeOptions.map((count) => (
               <option key={count} value={count}>{`Show ${count}`}</option>
             ))}
           </Input>

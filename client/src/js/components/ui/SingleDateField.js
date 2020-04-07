@@ -9,7 +9,7 @@ const SingleDatePickerWithFormik = ({ field: { name }, placeholder, style, isOut
   const [focusClassName, setFocusClassName] = useState('');
   const { values, setFieldValue } = useFormikContext();
 
-  const handleFocusChanged = focused => {
+  const handleFocusChanged = (focused) => {
     setFocusedInput(focused);
 
     focused ? setFocusClassName('focused') : setFocusClassName('');
@@ -20,7 +20,7 @@ const SingleDatePickerWithFormik = ({ field: { name }, placeholder, style, isOut
       <SingleDatePicker
         id={name}
         date={values[name]}
-        onDateChange={date => setFieldValue(name, date)}
+        onDateChange={(date) => setFieldValue(name, date)}
         focused={focusedInput}
         onFocusChange={({ focused }) => handleFocusChanged(focused)}
         hideKeyboardShortcutsPanel={true}
@@ -39,7 +39,7 @@ const SingleDatePickerWithFormik = ({ field: { name }, placeholder, style, isOut
   );
 };
 
-const SingleDateField = props => {
+const SingleDateField = (props) => {
   return <Field component={SingleDatePickerWithFormik} {...props} />;
 };
 

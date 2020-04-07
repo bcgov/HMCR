@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { CustomInput, FormFeedback } from 'reactstrap';
 import { FieldArray, useField, useFormikContext } from 'formik';
 
-const MultiSelect = props => {
+const MultiSelect = (props) => {
   const { items, name, handleBlur, showSelectAll } = props;
   // eslint-disable-next-line
   const [field, meta] = useField(props);
@@ -21,13 +21,13 @@ const MultiSelect = props => {
     else if (selectedValues.length !== items.length && selectAll) setSelectAll(false);
   };
 
-  const handleSelectedAllChecked = checked => {
+  const handleSelectedAllChecked = (checked) => {
     setSelectAll(checked);
 
     if (checked)
       setFieldValue(
         name,
-        items.map(o => o.id),
+        items.map((o) => o.id),
         true
       );
     else setFieldValue(name, [], true);
@@ -50,7 +50,7 @@ const MultiSelect = props => {
             value="select_all"
             checked={selectAll}
             onBlur={handleBlur}
-            onChange={e => {
+            onChange={(e) => {
               handleSelectedAllChecked(e.target.checked);
             }}
             className="multiselect-all"
@@ -58,7 +58,7 @@ const MultiSelect = props => {
         )}
         <FieldArray name={name}>
           {({ push, remove }) =>
-            items.map(item => {
+            items.map((item) => {
               const description = item.description ? item.description : item.name;
               const displayName = description;
               return (
@@ -70,7 +70,7 @@ const MultiSelect = props => {
                   value={item.id}
                   checked={values[name].includes(item.id)}
                   onBlur={handleBlur}
-                  onChange={e => {
+                  onChange={(e) => {
                     handleItemSelected(e.target.checked, item.id, push, remove);
                   }}
                 />

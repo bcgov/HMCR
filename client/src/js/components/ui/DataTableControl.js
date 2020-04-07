@@ -15,7 +15,7 @@ const DataTableControl = ({
   onDeleteClicked,
   onHeadingSortClicked,
 }) => {
-  const handleEditClicked = id => {
+  const handleEditClicked = (id) => {
     if (onEditClicked) onEditClicked(id);
   };
 
@@ -24,7 +24,7 @@ const DataTableControl = ({
       <Table size="sm" responsive hover>
         <thead className="thead-dark">
           <tr>
-            {tableColumns.map(column => {
+            {tableColumns.map((column) => {
               let style = { whiteSpace: 'nowrap' };
 
               if (column.maxWidth) style.maxWidth = column.maxWidth;
@@ -47,7 +47,7 @@ const DataTableControl = ({
           {dataList.map((item, index) => {
             return (
               <tr key={index}>
-                {tableColumns.map(column => {
+                {tableColumns.map((column) => {
                   if (column.key === 'isActive')
                     return (
                       <td key={column.key}>

@@ -60,7 +60,7 @@ const Main = ({
   );
 };
 
-const mapStateToProps = state => {
+const mapStateToProps = (state) => {
   return {
     errorDialog: state.errorDialog,
   };

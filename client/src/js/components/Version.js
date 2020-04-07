@@ -10,7 +10,7 @@ const Version = () => {
   const [versionInfo, setVersionInfo] = useState({});
 
   useEffect(() => {
-    api.getVersion().then(response => setVersionInfo(response.data));
+    api.getVersion().then((response) => setVersionInfo(response.data));
   }, []);
 
   return (
