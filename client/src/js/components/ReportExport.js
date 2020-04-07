@@ -95,6 +95,9 @@ const ReportExport = ({
 
     queryParams.typeName = `hmr:${values.reportTypeId}_VW`;
     queryParams.format = values.outputFormat;
+    queryParams.propertyName = Constants.REPORT_EXPORT_FIELDS[values.reportTypeId].join(',');
+
+    if (values.outputFormat !== 'csv') queryParams.propertyName += ',GEOMETRY';
 
     const serviceAreas = values.serviceAreaNumbers.join(',');
     const highwayUnique = values.highwayUnique.trim().replace(/\*/g, '%');
