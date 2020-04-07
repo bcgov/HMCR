@@ -50,7 +50,7 @@ const AddUserSearch = ({ userTypes, submitting, toggle, values, handleSubmit }) 
                 type="text"
                 name="username"
                 placeholder="User Id"
-                onKeyDown={e => {
+                onKeyDown={(e) => {
                   if (e.key === 'Enter' && values.userType && values.username) {
                     e.preventDefault();
                     handleSubmit(values);
@@ -97,7 +97,7 @@ const AddUserSearchResult = ({ status, data, userTypes, setWizardState }) => {
           <strong>User {status !== WIZARD_STATE.SEARCH_SUCCESS && 'Not'} Found</strong>
           <hr />
           {displayRow('User ID', data.username)}
-          {displayRow('User Type', userTypes.find(o => o.id === data.userType).name)}
+          {displayRow('User Type', userTypes.find((o) => o.id === data.userType).name)}
           {status === WIZARD_STATE.SEARCH_SUCCESS && (
             <React.Fragment>
               {displayRow('First Name', data.firstName)}
@@ -137,12 +137,12 @@ const AddUserSetupUser = ({ serviceAreas, values, submitting, setWizardState }) 
   useEffect(() => {
     api
       .getRoles()
-      .then(response => {
+      .then((response) => {
         const data = response.data.sourceList
-          .filter(r => r.isActive === true)
-          .map(r => ({ ...r, description: r.name }));
+          .filter((r) => r.isActive === true)
+          .map((r) => ({ ...r, description: r.name }));
 
-        if (values.userType === Constants.USER_TYPE.BUSINESS) setRoles(data.filter(r => r.isInternal === false));
+        if (values.userType === Constants.USER_TYPE.BUSINESS) setRoles(data.filter((r) => r.isInternal === false));
         else setRoles(data);
       })
       .finally(() => setLoading(false));
@@ -215,15 +215,15 @@ const AddUserWizard = ({
   const [submitting, setSubmitting] = useState(false);
   const [bceidAccount, setBceidAccount] = useState(null);
 
-  const handleBceidSearchSubmit = values => {
+  const handleBceidSearchSubmit = (values) => {
     setSubmitting(true);
     api
       .getUserBceidAccount(values.userType, values.username)
-      .then(response => {
+      .then((response) => {
         setBceidAccount(response.data);
         setWizardState(WIZARD_STATE.SEARCH_SUCCESS);
       })
-      .catch(error => {
+      .catch((error) => {
         if (!error.response || error.response.status === 404) hideErrorDialog();
 
         setBceidAccount(values);
@@ -232,21 +232,21 @@ const AddUserWizard = ({
       .finally(() => setSubmitting(false));
   };
 
-  const handleFinalFormSubmit = values => {
+  const handleFinalFormSubmit = (values) => {
     if (!submitting) {
       setSubmitting(true);
 
       api
         .postUser(values)
         .then(() => setWizardState(WIZARD_STATE.USER_SETUP_CONFIRM))
-        .catch(error => {
-          showValidationErrorDialog(error.response.data.errors);
+        .catch((error) => {
+          showValidationErrorDialog(error.response.data);
         })
         .finally(() => setSubmitting(false));
     }
   };
 
-  const renderState = values => {
+  const renderState = (values) => {
     switch (wizardState) {
       case WIZARD_STATE.SEARCH_SUCCESS:
       case WIZARD_STATE.SEARCH_FAIL:
@@ -293,7 +293,7 @@ const AddUserWizard = ({
   );
 };
 
-const mapStateToProps = state => {
+const mapStateToProps = (state) => {
   return {
     serviceAreas: Object.values(state.serviceAreas),
     userTypes: Object.values(state.user.types),

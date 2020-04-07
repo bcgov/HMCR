@@ -58,7 +58,7 @@ const RoleAdmin = ({ showValidationErrorDialog }) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const handleSearchFormSubmit = values => {
+  const handleSearchFormSubmit = (values) => {
     const searchText = values.searchText.trim() || null;
 
     let isActive = null;
@@ -75,7 +75,7 @@ const RoleAdmin = ({ showValidationErrorDialog }) => {
     searchData.refresh(true);
   };
 
-  const onEditClicked = roleId => {
+  const onEditClicked = (roleId) => {
     formModal.openForm(Constants.FORM_TYPE.EDIT, { roleId });
   };
 
@@ -94,7 +94,7 @@ const RoleAdmin = ({ showValidationErrorDialog }) => {
             formModal.closeForm();
             searchData.refresh();
           })
-          .catch(error => showValidationErrorDialog(error.response.data.errors))
+          .catch((error) => showValidationErrorDialog(error.response.data))
           .finally(() => formModal.setSubmitting(false));
       } else {
         api
@@ -103,7 +103,7 @@ const RoleAdmin = ({ showValidationErrorDialog }) => {
             formModal.closeForm();
             searchData.refresh();
           })
-          .catch(error => showValidationErrorDialog(error.response.data.errors))
+          .catch((error) => showValidationErrorDialog(error.response.data))
           .finally(() => formModal.setSubmitting(false));
       }
     }
@@ -118,10 +118,10 @@ const RoleAdmin = ({ showValidationErrorDialog }) => {
         <Formik
           initialValues={searchInitialValues}
           enableReinitialize={true}
-          onSubmit={values => handleSearchFormSubmit(values)}
+          onSubmit={(values) => handleSearchFormSubmit(values)}
           onReset={handleSearchFormReset}
         >
-          {formikProps => (
+          {(formikProps) => (
             <Form>
               <Row form>
                 <Col>
