@@ -19,8 +19,8 @@ namespace Hmcr.Model.Dtos
             return new OutputFormatDto[4]
             {
                 new OutputFormatDto {Format = Csv, Name = "CSV", Description = "Comma Separated Values"},
-                new OutputFormatDto {Format = Json, Name = "GeoJSON", Description = "GeoJSON"},
                 new OutputFormatDto {Format = Kml, Name = "KML", Description = "KML(Keyhole Markup Language)"},
+                new OutputFormatDto {Format = Json, Name = "GeoJSON", Description = "GeoJSON"},
                 new OutputFormatDto {Format = Gml, Name = "GML", Description = "GML(Geography Markup Language)"}
             };
         }
