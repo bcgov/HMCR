@@ -51,14 +51,8 @@ const tableColumns = [
 ];
 
 const validationSchema = Yup.object({
-  userType: Yup.string()
-    .required('Required')
-    .max(30)
-    .trim(),
-  username: Yup.string()
-    .required('Required')
-    .max(32)
-    .trim(),
+  userType: Yup.string().required('Required').max(30).trim(),
+  username: Yup.string().required('Required').max(32).trim(),
   userRoleIds: Yup.array().required('Require at least one role'),
   serviceAreaNumbers: Yup.array().when('userType', {
     is: Constants.USER_TYPE.BUSINESS,
@@ -85,7 +79,7 @@ const UserAdmin = ({ serviceAreas, userStatuses, userTypes, showValidationErrorD
 
     const searchText = options.searchText || '';
     const serviceAreaIds = options.serviceAreas
-      ? options.serviceAreas.split(',').map(id => parseInt(id))
+      ? options.serviceAreas.split(',').map((id) => parseInt(id))
       : defaultSearchFormValues.serviceAreaIds;
     const userTypeIds = options.userTypes ? options.userTypes.split(',') : defaultSearchFormValues.userTypeIds;
 
@@ -100,7 +94,7 @@ const UserAdmin = ({ serviceAreas, userStatuses, userTypes, showValidationErrorD
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const handleSearchFormSubmit = values => {
+  const handleSearchFormSubmit = (values) => {
     const serviceAreas = values.serviceAreaIds.join(',') || null;
     const userTypeIds = values.userTypeIds.join(',') || null;
     const searchText = values.searchText.trim() || null;
@@ -126,7 +120,7 @@ const UserAdmin = ({ serviceAreas, userStatuses, userTypes, showValidationErrorD
     searchData.refresh(true);
   };
 
-  const onEditClicked = userId => {
+  const onEditClicked = (userId) => {
     formModal.openForm(Constants.FORM_TYPE.EDIT, { userId });
   };
 
@@ -134,7 +128,7 @@ const UserAdmin = ({ serviceAreas, userStatuses, userTypes, showValidationErrorD
     api.deleteUser(userId, endDate).then(() => searchData.refresh());
   };
 
-  const handleAddUserWizardClose = refresh => {
+  const handleAddUserWizardClose = (refresh) => {
     if (refresh === true) {
       searchData.refresh();
     }
@@ -142,7 +136,7 @@ const UserAdmin = ({ serviceAreas, userStatuses, userTypes, showValidationErrorD
     setAddUserWizardIsOpen(false);
   };
 
-  const handleEditFormSubmit = values => {
+  const handleEditFormSubmit = (values) => {
     if (!formModal.submitting) {
       formModal.setSubmitting(true);
 
@@ -152,7 +146,7 @@ const UserAdmin = ({ serviceAreas, userStatuses, userTypes, showValidationErrorD
           formModal.closeForm();
           searchData.refresh();
         })
-        .catch(error => showValidationErrorDialog(error.response.data.errors))
+        .catch((error) => showValidationErrorDialog(error.response.data))
         .finally(() => formModal.setSubmitting(false));
     }
   };
@@ -163,9 +157,9 @@ const UserAdmin = ({ serviceAreas, userStatuses, userTypes, showValidationErrorD
     handleEditFormSubmit
   );
 
-  const data = Object.values(searchData.data).map(user => ({
+  const data = Object.values(searchData.data).map((user) => ({
     ...user,
-    userType: userTypes.find(type => type.id === user.userType).name,
+    userType: userTypes.find((type) => type.id === user.userType).name,
   }));
 
   return (
@@ -175,10 +169,10 @@ const UserAdmin = ({ serviceAreas, userStatuses, userTypes, showValidationErrorD
         <Formik
           initialValues={searchInitialValues}
           enableReinitialize={true}
-          onSubmit={values => handleSearchFormSubmit(values)}
+          onSubmit={(values) => handleSearchFormSubmit(values)}
           onReset={handleSearchFormReset}
         >
-          {formikProps => (
+          {(formikProps) => (
             <Form>
               <Row form>
                 <Col>
@@ -258,7 +252,7 @@ const UserAdmin = ({ serviceAreas, userStatuses, userTypes, showValidationErrorD
   );
 };
 
-const mapStateToProps = state => {
+const mapStateToProps = (state) => {
   const userTypes = Object.values(state.user.types);
   return {
     serviceAreas: Object.values(state.serviceAreas),

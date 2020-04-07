@@ -63,7 +63,7 @@ const ActivityAdmin = ({ maintenanceTypes, locationCodes, unitOfMeasures, showVa
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const handleSearchFormSubmit = values => {
+  const handleSearchFormSubmit = (values) => {
     const searchText = values.searchText.trim() || null;
     const maintenanceTypes = values.maintenanceTypeIds.join(',') || null;
 
@@ -81,7 +81,7 @@ const ActivityAdmin = ({ maintenanceTypes, locationCodes, unitOfMeasures, showVa
     searchData.refresh(true);
   };
 
-  const onEditClicked = activityId => {
+  const onEditClicked = (activityId) => {
     formModal.openForm(Constants.FORM_TYPE.EDIT, { activityId });
   };
 
@@ -91,7 +91,7 @@ const ActivityAdmin = ({ maintenanceTypes, locationCodes, unitOfMeasures, showVa
     } else {
       api
         .getActivityCode(activityId)
-        .then(response =>
+        .then((response) =>
           api.putActivityCode(activityId, { ...response.data, endDate }).then(() => searchData.refresh())
         );
     }
@@ -101,7 +101,7 @@ const ActivityAdmin = ({ maintenanceTypes, locationCodes, unitOfMeasures, showVa
     if (!formModal.submitting) {
       formModal.setSubmitting(true);
 
-      if (values.locationCodeId !== locationCodes.find(location => location.name === 'C').id) {
+      if (values.locationCodeId !== locationCodes.find((location) => location.name === 'C').id) {
         values.featureType = null;
         values.isSiteNumRequired = false;
         values.thresholdLevels = null;
@@ -114,7 +114,7 @@ const ActivityAdmin = ({ maintenanceTypes, locationCodes, unitOfMeasures, showVa
             formModal.closeForm();
             searchData.refresh();
           })
-          .catch(error => showValidationErrorDialog(error.response.data.errors))
+          .catch((error) => showValidationErrorDialog(error.response.data))
           .finally(() => formModal.setSubmitting(false));
       } else {
         api
@@ -123,7 +123,7 @@ const ActivityAdmin = ({ maintenanceTypes, locationCodes, unitOfMeasures, showVa
             formModal.closeForm();
             searchData.refresh();
           })
-          .catch(error => showValidationErrorDialog(error.response.data.errors))
+          .catch((error) => showValidationErrorDialog(error.response.data))
           .finally(() => formModal.setSubmitting(false));
       }
     }
@@ -131,11 +131,11 @@ const ActivityAdmin = ({ maintenanceTypes, locationCodes, unitOfMeasures, showVa
 
   const formModal = useFormModal('Activity', <EditActivityFormFields />, handleEditFormSubmit);
 
-  const data = searchData.data.map(item => ({
+  const data = searchData.data.map((item) => ({
     ...item,
-    locationCode: locationCodes.find(code => code.id === item.locationCodeId).name,
-    maintenanceType: maintenanceTypes.find(type => type.id === item.maintenanceType).name,
-    unitOfMeasures: unitOfMeasures.find(uom => uom.id === item.unitOfMeasure).name,
+    locationCode: locationCodes.find((code) => code.id === item.locationCodeId).name,
+    maintenanceType: maintenanceTypes.find((type) => type.id === item.maintenanceType).name,
+    unitOfMeasures: unitOfMeasures.find((uom) => uom.id === item.unitOfMeasure).name,
     canDelete: !item.isReferenced,
   }));
 
@@ -146,10 +146,10 @@ const ActivityAdmin = ({ maintenanceTypes, locationCodes, unitOfMeasures, showVa
         <Formik
           initialValues={searchInitialValues}
           enableReinitialize={true}
-          onSubmit={values => handleSearchFormSubmit(values)}
+          onSubmit={(values) => handleSearchFormSubmit(values)}
           onReset={handleSearchFormReset}
         >
-          {formikProps => (
+          {(formikProps) => (
             <Form>
               <Row form>
                 <Col>
@@ -224,7 +224,7 @@ const ActivityAdmin = ({ maintenanceTypes, locationCodes, unitOfMeasures, showVa
   );
 };
 
-const mapStateToProps = state => {
+const mapStateToProps = (state) => {
   return {
     maintenanceTypes: state.codeLookups.maintenanceTypes,
     locationCodes: state.codeLookups.locationCodes,
