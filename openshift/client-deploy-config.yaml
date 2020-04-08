@@ -92,6 +92,8 @@ objects:
   - apiVersion: route.openshift.io/v1
     kind: Route
     metadata:
+      annotations:
+        haproxy.router.openshift.io/timeout: 1h
       creationTimestamp: null
       name: ${NAME}${SUFFIX}
     spec:
