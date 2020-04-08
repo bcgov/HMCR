@@ -112,38 +112,35 @@ namespace Hmcr.Api.Extensions
 
         public static void AddHmcrSwagger(this IServiceCollection services, IWebHostEnvironment env)
         {
-            if (env.IsDevelopment())
+            services.AddSwaggerGen(options =>
             {
-                services.AddSwaggerGen(options =>
+                options.SwaggerDoc("v1", new OpenApiInfo
                 {
-                    options.SwaggerDoc("v1", new OpenApiInfo
-                    {
-                        Version = "v1",
-                        Title = "HMCR REST API",
-                        Description = "Highway Maintenance Contract Reporting System"
-                    });
-
-                    var securitySchema = new OpenApiSecurityScheme
-                    {
-                        Description = "JWT Authorization header using the Bearer scheme. Example: \"Authorization: Bearer {token}\"",
-                        Name = "Authorization",
-                        In = ParameterLocation.Header,
-                        Type = SecuritySchemeType.Http,
-                        Scheme = "bearer",
-                        Reference = new OpenApiReference
-                        {
-                            Type = ReferenceType.SecurityScheme,
-                            Id = "Bearer"
-                        }
-                    };
-
-                    options.AddSecurityDefinition("Bearer", securitySchema);
-
-                    var securityRequirement = new OpenApiSecurityRequirement();
-                    securityRequirement.Add(securitySchema, new[] { "Bearer" });
-                    options.AddSecurityRequirement(securityRequirement);
+                    Version = "v1",
+                    Title = "HMCR REST API",
+                    Description = "Highway Maintenance Contract Reporting System"
                 });
-            }
+
+                var securitySchema = new OpenApiSecurityScheme
+                {
+                    Description = "JWT Authorization header using the Bearer scheme. Example: \"Authorization: Bearer {token}\"",
+                    Name = "Authorization",
+                    In = ParameterLocation.Header,
+                    Type = SecuritySchemeType.Http,
+                    Scheme = "bearer",
+                    Reference = new OpenApiReference
+                    {
+                        Type = ReferenceType.SecurityScheme,
+                        Id = "Bearer"
+                    }
+                };
+
+                options.AddSecurityDefinition("Bearer", securitySchema);
+
+                var securityRequirement = new OpenApiSecurityRequirement();
+                securityRequirement.Add(securitySchema, new[] { "Bearer" });
+                options.AddSecurityRequirement(securityRequirement);
+            });
         }
 
         public static void AddHmcrTypes(this IServiceCollection services)
