@@ -93,6 +93,7 @@ namespace Hmcr.Domain.Services.Base
             {
                 submission.ErrorDetail = errors.GetErrorDetail();
                 submission.SubmissionRows = new List<SubmissionRowDto>();
+                submission.DigitalRepresentation = null;
                 await _submissionRepo.CreateSubmissionObjectAsync(submission);
                 await _unitOfWork.CommitAsync();
             }
@@ -140,10 +141,13 @@ namespace Hmcr.Domain.Services.Base
             }
 
             using var stream = upload.ReportFile.OpenReadStream();
-            using var streamReader = new StreamReader(stream, Encoding.UTF8);
+            using TextReader textReader = new StreamReader(stream, Encoding.UTF8);
 
-            var text = streamReader.ReadToEnd();
-            submission.FileHash = text.GetSha256Hash();
+            if (CheckFileContents(submission, reportType, stream, errors))
+            {
+                return (errors, submission);
+            }
+
             if (await _submissionRepo.IsDuplicateFileAsync(submission))
             {
                 errors.AddItem("File", "Duplicate file exists");
@@ -151,12 +155,7 @@ namespace Hmcr.Domain.Services.Base
                 return (errors, submission);
             }
 
-            if (IsInvalidFileSize(submission, reportType, text, errors))
-            {
-                return (errors, submission);
-            }
-
-            if (!await ParseRowsAsync(submission, text, errors))
+            if (!await ParseRowsAsync(submission, textReader, errors))
             {
                 return (errors, submission);
             }
@@ -194,7 +193,6 @@ namespace Hmcr.Domain.Services.Base
             //set IsResubmitted
             await foreach (var resubmittedRecordNumber in _rowRepo.UpdateIsResubmitAsync(submission.SubmissionStreamId, (decimal)submission.ContractTermId, submission.SubmissionRows)) { }
 
-            submission.DigitalRepresentation = stream.ToBytes();
             submission.SubmissionStatusId = await _statusRepo.GetStatusIdByTypeAndCodeAsync(StatusType.File, FileStatus.FileReceived);
 
             return (errors, submission);
@@ -254,9 +252,11 @@ namespace Hmcr.Domain.Services.Base
             }
         }
 
-        private bool IsInvalidFileSize(SubmissionObjectCreateDto submission, SubmissionStreamDto reportType, string text, Dictionary<string, List<string>> errors)
+        private bool CheckFileContents(SubmissionObjectCreateDto submission, SubmissionStreamDto reportType, Stream stream, Dictionary<string, List<string>> errors)
         {
-            var size = text.Length;
+            var bytes = stream.ToBytes();
+            var size = bytes.Length;
+
             var maxSize = reportType.FileSizeLimit ?? Constants.MaxFileSize;
             if (size > maxSize)
             {
@@ -264,9 +264,12 @@ namespace Hmcr.Domain.Services.Base
                 return true;
             }
 
+            submission.FileHash = bytes.GetSha256Hash();
+            submission.DigitalRepresentation = bytes;
+
             return false;
         }
-        protected virtual Task<bool> ParseRowsAsync(SubmissionObjectCreateDto submission, string text, Dictionary<string, List<string>> errors)
+        protected virtual Task<bool> ParseRowsAsync(SubmissionObjectCreateDto submission, TextReader textReader, Dictionary<string, List<string>> errors)
         {
             throw new NotImplementedException();
         }

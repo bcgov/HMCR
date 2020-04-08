@@ -43,10 +43,9 @@ namespace Hmcr.Domain.Services
             _logger = logger;
         }
 
-        protected override async Task<bool> ParseRowsAsync(SubmissionObjectCreateDto submission, string text, Dictionary<string, List<string>> errors)
+        protected override async Task<bool> ParseRowsAsync(SubmissionObjectCreateDto submission, TextReader textReader, Dictionary<string, List<string>> errors)
         {
-            using var stringReader = new StringReader(text);
-            using var csv = new CsvReader(stringReader, CultureInfo.InvariantCulture);
+            using var csv = new CsvReader(textReader, CultureInfo.InvariantCulture);
 
             CsvHelperUtils.Config(errors, csv, false);
             csv.Configuration.RegisterClassMap<WorkRptInitCsvDtoMap>();
