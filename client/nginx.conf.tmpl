@@ -65,6 +65,8 @@ http {
         add_header Last-Modified $date_gmt;
         add_header Cache-Control "private, no-store, no-cache, must-revalidate";
 
+        client_max_body_size 5M;
+
         location /api/ {
             proxy_connect_timeout 1800;
             proxy_send_timeout 1800;
