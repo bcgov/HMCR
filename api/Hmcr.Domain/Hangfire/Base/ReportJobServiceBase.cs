@@ -213,18 +213,6 @@ namespace Hmcr.Domain.Hangfire.Base
                 _submission.SubmissionStatusId = _errorFileStatusId;
             }
         }
-        protected string GetHeader(string text)
-        {
-            MethodLogger.LogEntry(_logger, _enableMethodLog, _methodLogHeader);
-
-            if (text.IsEmpty())
-                return "";
-
-            using var reader = new StringReader(text);
-            var header = reader.ReadLine().Replace("\"", "");
-
-            return header ?? "";
-        }
 
         protected async Task CommitAndSendEmailAsync()
         {

@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Text;
+﻿using System.IO;
 
 namespace Hmcr.Model.Utils
 {
@@ -12,6 +9,7 @@ namespace Hmcr.Model.Utils
             stream.Position = 0;
             using var ms = new MemoryStream();
             stream.CopyTo(ms);
+            stream.Position = 0;
             return ms.ToArray();
         }
     }

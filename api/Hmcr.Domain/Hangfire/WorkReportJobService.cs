@@ -667,10 +667,8 @@ namespace Hmcr.Domain.Hangfire
         {
             MethodLogger.LogEntry(_logger, _enableMethodLog, _methodLogHeader);
 
-            var text = Encoding.UTF8.GetString(_submission.DigitalRepresentation);
-
-            using var stringReader = new StringReader(text);
-            using var csv = new CsvReader(stringReader, CultureInfo.InvariantCulture);
+            using TextReader textReader = new StreamReader(new MemoryStream(_submission.DigitalRepresentation), Encoding.UTF8);
+            using var csv = new CsvReader(textReader, CultureInfo.InvariantCulture);
 
             CsvHelperUtils.Config(errors, csv, false);
             csv.Configuration.RegisterClassMap<WorkReportCsvDtoMap>();
@@ -681,7 +679,7 @@ namespace Hmcr.Domain.Hangfire
                 rows[i].RowNum = i + 2;
             }
 
-            return (rows, GetHeader(text));
+            return (rows, string.Join(',', csv.Context.HeaderRecord).Replace("\"", ""));
         }
 
         private (decimal rowNum, List<WorkReportTyped> rows) ParseRowsTyped(string text, Dictionary<string, List<string>> errors)
