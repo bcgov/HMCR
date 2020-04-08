@@ -51,15 +51,12 @@ namespace Hmcr.Api.Extensions
 
         public static void UseHmcrSwagger(this IApplicationBuilder app, IWebHostEnvironment env, string url)
         {
-            if (env.IsDevelopment())
+            app.UseSwagger();
+            app.UseSwaggerUI(options =>
             {
-                app.UseSwagger();
-                app.UseSwaggerUI(options =>
-                {
-                    options.SwaggerEndpoint(url, "HMCR REST API v1");
-                    options.DocExpansion(DocExpansion.None);
-                });
-            }
+                options.SwaggerEndpoint(url, "HMCR REST API v1");
+                options.DocExpansion(DocExpansion.None);
+            });
         }
 
         public static void UseHmcrHealthCheck(this IApplicationBuilder app)
