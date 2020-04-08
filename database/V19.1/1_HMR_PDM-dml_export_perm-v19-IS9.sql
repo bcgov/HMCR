@@ -1,5 +1,17 @@
-USE HMR_DEV;
+
+
+/* Updates
+1. Added a new Export permission
+*/
+
+
+USE HMR_DEV; -- uncomment appropriate instance
+--USE HMR_TST;
+--USE HMR_UAT;
+--USE HMR_PRD;
 GO
+
+
 
 DECLARE @utcdate DATETIME = (SELECT getutcdate() AS utcdate)
 DECLARE @app_guid UNIQUEIDENTIFIER = (SELECT CASE WHEN SUSER_SID() IS NOT NULL THEN SUSER_SID() ELSE (SELECT CONVERT(uniqueidentifier,STUFF(STUFF(STUFF(STUFF('B00D00A0AC0A0D0C00DD00F0D0C00000',9,0,'-'),14,0,'-'),19,0,'-'),24,0,'-'))) END AS  app_guid)

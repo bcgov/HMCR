@@ -8,7 +8,11 @@
 /* Created on:            2020-04-06 15:24                                */
 /* ---------------------------------------------------------------------- */
 
-USE HMR_DEV;
+USE HMR_DEV; -- uncomment appropriate instance
+--USE HMR_TST;
+--USE HMR_UAT;
+--USE HMR_PRD;
+GO
 
 /* Updates 
   1. added a new column: [HIGHWAY_UNIQUE_PREFIX]
@@ -69,8 +73,6 @@ GO
 ALTER TABLE [dbo].[HMR_ROCKFALL_REPORT] DROP CONSTRAINT [HMR_RCKFL_RPT_HMR_SRV_ARA_FK]
 GO
 
-
-
 /* ---------------------------------------------------------------------- */
 /* Drop and recreate table "dbo.HMR_SERVICE_AREA"                         */
 /* ---------------------------------------------------------------------- */
@@ -101,18 +103,11 @@ GO
 
 
 INSERT INTO [dbo].[HMR_SERVICE_AREA_TMP]
-    ([SERVICE_AREA_ID],[SERVICE_AREA_NUMBER],[SERVICE_AREA_NAME],[DISTRICT_NUMBER],[CONCURRENCY_CONTROL_NUMBER],[DB_AUDIT_CREATE_USERID],[DB_AUDIT_CREATE_TIMESTAMP],[DB_AUDIT_LAST_UPDATE_USERID],[DB_AUDIT_LAST_UPDATE_TIMESTAMP])
+    ([SERVICE_AREA_ID],[SERVICE_AREA_NUMBER],[SERVICE_AREA_NAME],[DISTRICT_NUMBER],[HIGHWAY_UNIQUE_PREFIX],[CONCURRENCY_CONTROL_NUMBER],[DB_AUDIT_CREATE_USERID],[DB_AUDIT_CREATE_TIMESTAMP],[DB_AUDIT_LAST_UPDATE_USERID],[DB_AUDIT_LAST_UPDATE_TIMESTAMP])
 SELECT
-    [SERVICE_AREA_ID],[SERVICE_AREA_NUMBER],[SERVICE_AREA_NAME],[DISTRICT_NUMBER], [DB_AUDIT_CREATE_USERID],[DB_AUDIT_CREATE_TIMESTAMP],[DB_AUDIT_LAST_UPDATE_USERID],[DB_AUDIT_LAST_UPDATE_TIMESTAMP]
+    [SERVICE_AREA_ID],[SERVICE_AREA_NUMBER],[SERVICE_AREA_NAME],[DISTRICT_NUMBER],(SELECT '06,43,44' WHERE SERVICE_AREA_NUMBER = 6), [CONCURRENCY_CONTROL_NUMBER],[DB_AUDIT_CREATE_USERID],[DB_AUDIT_CREATE_TIMESTAMP],[DB_AUDIT_LAST_UPDATE_USERID],[DB_AUDIT_LAST_UPDATE_TIMESTAMP]
 FROM [dbo].[HMR_SERVICE_AREA]
 
-
-INSERT INTO [dbo].[HMR_SERVICE_AREA_TMP] 
-	([CONCURRENCY_CONTROL_NUMBER])
-SELECT 
-	'06,43,44' 
-FROM [dbo].[HMR_SERVICE_AREA] 
-WHERE SERVICE_AREA_NUMBER = 6
 GO
 
 DROP TABLE [dbo].[HMR_SERVICE_AREA]
@@ -133,8 +128,42 @@ ALTER TABLE [dbo].[HMR_SERVICE_AREA] ADD CONSTRAINT [HMR_SRV_ARA_UK]
 GO
 
 
-EXECUTE sp_addextendedproperty N'MS_Description', N'Determines the tolerated spatial variance allowed between submitted activity coordinates and the related Highway Unique road segment', 'SCHEMA', N'dbo', 'TABLE', N'HMR_SERVICE_AREA', 'COLUMN', N'HIGHWAY_UNIQUE_PREFIX'
+/* ---------------------------------------------------------------------- */
+/* MODIFIED - Reinstate field description                                 */
+/* ---------------------------------------------------------------------- */
+
+EXECUTE sp_addextendedproperty N'MS_Description', N'Service Area lookup values', 'SCHEMA', N'dbo', 'TABLE', N'HMR_SERVICE_AREA', NULL, NULL
 GO
+
+EXECUTE sp_addextendedproperty N'MS_Description', N'Unique idenifier for table records', 'SCHEMA', N'dbo', 'TABLE', N'HMR_SERVICE_AREA', 'COLUMN', N'SERVICE_AREA_ID'
+GO
+
+EXECUTE sp_addextendedproperty N'MS_Description', N'Assigned number of the Service Area', 'SCHEMA', N'dbo', 'TABLE', N'HMR_SERVICE_AREA', 'COLUMN', N'SERVICE_AREA_NUMBER'
+GO
+
+EXECUTE sp_addextendedproperty N'MS_Description', N'Name of the service area', 'SCHEMA', N'dbo', 'TABLE', N'HMR_SERVICE_AREA', 'COLUMN', N'SERVICE_AREA_NAME'
+GO
+
+EXECUTE sp_addextendedproperty N'MS_Description', N'Unique identifier for DISTRICT.', 'SCHEMA', N'dbo', 'TABLE', N'HMR_SERVICE_AREA', 'COLUMN', N'DISTRICT_NUMBER'
+GO
+
+EXECUTE sp_addextendedproperty N'MS_Description', N'Record under edit indicator used for optomisitc record contention management.  If number differs from start of edit, then user will be prompted to that record has been updated by someone else.', 'SCHEMA', N'dbo', 'TABLE', N'HMR_SERVICE_AREA', 'COLUMN', N'CONCURRENCY_CONTROL_NUMBER'
+GO
+
+EXECUTE sp_addextendedproperty N'MS_Description', N'Named database user who created record', 'SCHEMA', N'dbo', 'TABLE', N'HMR_SERVICE_AREA', 'COLUMN', N'DB_AUDIT_CREATE_USERID'
+GO
+
+EXECUTE sp_addextendedproperty N'MS_Description', N'Date and time record created in the database', 'SCHEMA', N'dbo', 'TABLE', N'HMR_SERVICE_AREA', 'COLUMN', N'DB_AUDIT_CREATE_TIMESTAMP'
+GO
+
+EXECUTE sp_addextendedproperty N'MS_Description', N'Named database user who last updated record', 'SCHEMA', N'dbo', 'TABLE', N'HMR_SERVICE_AREA', 'COLUMN', N'DB_AUDIT_LAST_UPDATE_USERID'
+GO
+
+EXECUTE sp_addextendedproperty N'MS_Description', N'Date and time record was last updated in the database.', 'SCHEMA', N'dbo', 'TABLE', N'HMR_SERVICE_AREA', 'COLUMN', N'DB_AUDIT_LAST_UPDATE_TIMESTAMP'
+GO
+
+EXECUTE sp_addextendedproperty N'MS_Description', N'Determines the tolerated spatial variance allowed between submitted activity coordinates and the related Highway Unique road segment', 'SCHEMA', N'dbo', 'TABLE', N'HMR_SERVICE_AREA', 'COLUMN', N'HIGHWAY_UNIQUE_PREFIX'
+GO 
 
 
 /* ---------------------------------------------------------------------- */
