@@ -13,13 +13,13 @@ namespace Hmcr.Api.Controllers
     [Route("api/rockfallreports")]
     public class RockfallReportsController : HmcrControllerBase
     {
-        private IRockfallReportService _rockfallRptSerivce;
+        private IRockfallReportService _rockfallRptService;
         private ISubmissionObjectService _submissionService;
         private HmcrCurrentUser _currentUser;
 
-        public RockfallReportsController(IRockfallReportService rockfallRptSerivce, ISubmissionObjectService submissionService, HmcrCurrentUser currentUser)
+        public RockfallReportsController(IRockfallReportService rockfallRptService, ISubmissionObjectService submissionService, HmcrCurrentUser currentUser)
         {
-            _rockfallRptSerivce = rockfallRptSerivce;
+            _rockfallRptService = rockfallRptService;
             _submissionService = submissionService;
             _currentUser = currentUser;
         }
@@ -34,7 +34,7 @@ namespace Hmcr.Api.Controllers
                 return Unauthorized(problem);
             }
 
-            var (SubmissionObjectId, Errors) = await _rockfallRptSerivce.CreateReportAsync(upload);
+            var (SubmissionObjectId, Errors) = await _rockfallRptService.CreateReportAsync(upload);
 
             if (Errors.Count > 0)
             {
@@ -54,7 +54,7 @@ namespace Hmcr.Api.Controllers
                 return Unauthorized(problem);
             }
 
-            var (Errors, DuplicateRecordNumbers) = await _rockfallRptSerivce.CheckResubmitAsync(upload);
+            var (Errors, DuplicateRecordNumbers) = await _rockfallRptService.CheckResubmitAsync(upload);
 
             if (Errors.Count > 0)
             {
