@@ -123,7 +123,7 @@ const WorkReportingSubmissionDetail = ({ toggle, submission }) => {
         <span className="ml-3 mr-3">
           Submission Date: {moment(submissionResultData.appCreateTimestamp).format(Constants.DATE_DISPLAY_FORMAT)}
         </span>
-        <span>Serivce Area: {submissionResultData.serviceAreaNumber}</span>
+        <span>Service Area: {submissionResultData.serviceAreaNumber}</span>
       </React.Fragment>
     );
   };
