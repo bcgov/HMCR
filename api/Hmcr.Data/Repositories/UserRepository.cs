@@ -225,9 +225,9 @@ namespace Hmcr.Data.Repositories
                     userEntity.Party = new HmrParty
                     {
                         BusinessGuid = account.BusinessGuid,
-                        BusinessLegalName = account.BusinessLegalName.Trim(),
+                        BusinessLegalName = account.BusinessLegalName?.Trim(),
                         BusinessNumber = account.BusinessNumber,
-                        DisplayName = account.BusinessLegalName.Trim()
+                        DisplayName = account.DisplayName?.Trim()
                     };
                 }
                 else
