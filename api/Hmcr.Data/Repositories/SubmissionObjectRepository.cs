@@ -27,7 +27,7 @@ namespace Hmcr.Data.Repositories
         Task<SubmissionObjectFileDto> GetSubmissionFileAsync(decimal submissionObjectId);
         Task<HmrSubmissionObject> GetSubmissionObjecForBackgroundJobAsync(decimal submissionObjectId);
         Task<SubmissionDto> GetSubmissionInfoForExportAsync(decimal submissionObjectId);
-        Task<SubmissionInfoForEmailDto> GetSubmissionInfoForEmail(decimal submissionObjectId);
+        Task<SubmissionInfoForEmailDto> GetSubmissionInfoForEmailAsync(decimal submissionObjectId);
         Task<bool> UpdateSubmissionStatusAsync(decimal submissionObjectId, decimal submissionStatusId, long concurrencyControlNumber);
     }
     public class SubmissionObjectRepository : HmcrRepositoryBase<HmrSubmissionObject>, ISubmissionObjectRepository
@@ -169,7 +169,7 @@ namespace Hmcr.Data.Repositories
             return await Page<SubmissionObjectSearchDto, SubmissionObjectSearchDto>(query, pageSize, pageNumber, orderBy, direction);
         }
 
-        public async Task<SubmissionInfoForEmailDto> GetSubmissionInfoForEmail(decimal submissionObjectId)
+        public async Task<SubmissionInfoForEmailDto> GetSubmissionInfoForEmailAsync(decimal submissionObjectId)
         {
             var query = await DbSet.AsNoTracking()
                  .Select(x => new SubmissionInfoForEmailDto

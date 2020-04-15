@@ -37,8 +37,6 @@ namespace Hmcr.Domain.Hangfire.Base
 
         protected IEmailService _emailService;
         protected IConfiguration _config;
-        protected EmailBody _emailBody;
-        protected IFeebackMessageRepository _feedbackRepo;
         protected ILookupCodeService _lookupService;
         protected decimal _duplicateRowStatusId;
         protected decimal _errorRowStatusId;
@@ -61,7 +59,7 @@ namespace Hmcr.Domain.Hangfire.Base
         public ReportJobServiceBase(IUnitOfWork unitOfWork,
             ISubmissionStatusRepository statusRepo, ISubmissionObjectRepository submissionRepo, IServiceAreaRepository serviceAreaRepo,
             ISumbissionRowRepository submissionRowRepo, IEmailService emailService, ILogger logger, IConfiguration config, IFieldValidatorService validator,
-            ISpatialService spatialService, EmailBody emailBody, IFeebackMessageRepository feedbackRepo, ILookupCodeService lookupService)
+            ISpatialService spatialService, ILookupCodeService lookupService)
         {
             _unitOfWork = unitOfWork;
             _statusRepo = statusRepo;
@@ -71,8 +69,6 @@ namespace Hmcr.Domain.Hangfire.Base
             _emailService = emailService;
             _logger = logger;
             _config = config;
-            _emailBody = emailBody;
-            _feedbackRepo = feedbackRepo;
             _lookupService = lookupService;
             _validator = validator;
             _spatialService = spatialService;
@@ -220,57 +216,7 @@ namespace Hmcr.Domain.Hangfire.Base
 
             _unitOfWork.Commit();
 
-            var submissionInfo = await _submissionRepo.GetSubmissionInfoForEmail(_submission.SubmissionObjectId);
-            submissionInfo.SubmissionDate = DateUtils.ConvertUtcToPacificTime(submissionInfo.SubmissionDate);
-
-            var submissionId = _submission.SubmissionObjectId;
-            var resultUrl = string.Format(_config.GetValue<string>("Smtp:SubmissionResult"), _submission.ServiceAreaNumber, submissionId);
-
-            var env = _config.GetEnvironment();
-            var environment = env == HmcrEnvironments.Prod ? " " : $" [{env}] ";
-            var result = submissionInfo.Success ? "SUCCESS" : "ERROR";
-            var subject = $"HMCR{environment}report submission({submissionId}) result - {result}";
-
-            var htmlBodyTemplate = submissionInfo.Success ? _emailBody.SuccessHtmlBody() : _emailBody.ErrorHtmlBody(submissionInfo);
-            var htmlBody = string.Format(htmlBodyTemplate, 
-                submissionInfo.FileName, submissionInfo.FileType, submissionInfo.ServiceAreaNumber, submissionInfo.SubmissionDate.ToString("yyyy-MM-dd HH:mm:ss"), 
-                submissionId, submissionInfo.NumOfRecords, submissionInfo.NumOfDuplicateRecords, submissionInfo.NumOfReplacedRecords,
-                submissionInfo.NumOfErrorRecords, submissionInfo.NumOfWarningRecords, resultUrl);
-
-            var textBody = htmlBody.HtmlToPlainText();
-
-            var isSent = true;
-            var isError = false;
-            var errorText = "";
-
-            try
-            {
-                _emailService.SendEmailToUsersInServiceArea(_submission.ServiceAreaNumber, subject, htmlBody, textBody);
-            }
-            catch (Exception ex)
-            {
-                isSent = false;
-                isError = true;
-                errorText = ex.Message;
-
-                _logger.LogError(ex.ToString());
-            }
-
-            var feedback = new FeedbackMessageDto
-            {
-                SubmissionObjectId = _submission.SubmissionObjectId,
-                CommunicationSubject = subject,
-                CommunicationText = htmlBody,
-                CommunicationDate = DateTime.UtcNow,
-                IsSent = isSent,
-                IsError = isError,
-                SendErrorText = errorText
-            };
-
-            await _feedbackRepo.CreateFeedbackMessage(feedback);
-            await _unitOfWork.CommitAsync();
-
-            _logger.LogInformation("[Hangfire] Finishing submission {submissionObjectId}", submissionId);
+            await _emailService.SendStatusEmailAsync(_submission.SubmissionObjectId);
         }
 
         protected void LogRowParseException(decimal rowNum, string exception, ReadingContext context)

@@ -35,9 +35,9 @@ namespace Hmcr.Domain.Hangfire
         public RockfallReportJobService(IUnitOfWork unitOfWork, ILogger<IRockfallReportJobService> logger, 
             ISubmissionStatusRepository statusRepo, ISubmissionObjectRepository submissionRepo, IServiceAreaRepository serviceAreaRepo,
             ISumbissionRowRepository submissionRowRepo, IRockfallReportRepository rockfallReportRepo, IFieldValidatorService validator, 
-            IEmailService emailService, IConfiguration config, EmailBody emailBody, IFeebackMessageRepository feedbackRepo,
+            IEmailService emailService, IConfiguration config,
             ISpatialService spatialService, ILookupCodeService lookupService)
-            : base(unitOfWork, statusRepo, submissionRepo, serviceAreaRepo, submissionRowRepo, emailService, logger, config, validator, spatialService, emailBody, feedbackRepo, lookupService)
+            : base(unitOfWork, statusRepo, submissionRepo, serviceAreaRepo, submissionRowRepo, emailService, logger, config, validator, spatialService, lookupService)
         {
             _logger = logger;
             _rockfallReportRepo = rockfallReportRepo;
