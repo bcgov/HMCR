@@ -109,8 +109,9 @@ namespace Hmcr.Data.Mappings
             CreateMap<HmrCodeLookup, CodeLookupDto>();
 
             CreateMap<HmrFeedbackMessage, FeedbackMessageDto>();
+            CreateMap<HmrFeedbackMessage, FeedbackMessageUpdateDto>();
 
-            
+
         }
     }
 }
