@@ -76,6 +76,9 @@ http {
             proxy_set_header HOST $host;
             proxy_set_header X-Forwarded-Proto $scheme;
             proxy_set_header X-Real-IP $remote_addr;
+
+            proxy_hide_header WWW-Authenticate;
+            
             proxy_pass http://hmcr-api${HMCR_DEPLOY_SUFFIX}:8080;
         }
 
