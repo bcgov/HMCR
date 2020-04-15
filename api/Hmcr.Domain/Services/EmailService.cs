@@ -17,7 +17,7 @@ namespace Hmcr.Domain.Services
 {
     public interface IEmailService
     {
-        Task SendStatusEmailAsync(decimal submissionObjectId);
+        Task SendStatusEmailAsync(decimal submissionObjectId, FeedbackMessageUpdateDto feedbackDto = null);
     }
 
     public class EmailService : IEmailService
@@ -56,7 +56,7 @@ namespace Hmcr.Domain.Services
             _unitOfWork = unitOfWork;
         }
 
-        public async Task SendStatusEmailAsync(decimal submissionObjectId)
+        public async Task SendStatusEmailAsync(decimal submissionObjectId, FeedbackMessageUpdateDto feedbackMessage = null)
         {
             var submissionInfo = await _submissionRepo.GetSubmissionInfoForEmailAsync(submissionObjectId);
             submissionInfo.SubmissionDate = DateUtils.ConvertUtcToPacificTime(submissionInfo.SubmissionDate);
@@ -77,7 +77,7 @@ namespace Hmcr.Domain.Services
             var textBody = htmlBody.HtmlToPlainText();
 
             var isSent = true;
-            var isError = false;
+            var isError = !submissionInfo.Success;
             var errorText = "";
 
             try
@@ -87,27 +87,46 @@ namespace Hmcr.Domain.Services
             catch (Exception ex)
             {
                 isSent = false;
-                isError = true;
                 errorText = ex.Message;
 
+                _logger.LogError($"Email for the submission {submissionObjectId} failed.");
                 _logger.LogError(ex.ToString());
             }
 
-            var feedback = new FeedbackMessageDto
+            if (feedbackMessage == null)
             {
-                SubmissionObjectId = submissionObjectId,
-                CommunicationSubject = subject,
-                CommunicationText = htmlBody,
-                CommunicationDate = DateTime.UtcNow,
-                IsSent = isSent,
-                IsError = isError,
-                SendErrorText = errorText
-            };
+                var feedback = new FeedbackMessageDto
+                {
+                    SubmissionObjectId = submissionObjectId,
+                    CommunicationSubject = subject,
+                    CommunicationText = htmlBody,
+                    CommunicationDate = DateTime.UtcNow,
+                    IsSent = isSent,
+                    IsError = isError,
+                    SendErrorText = errorText
+                };
 
-            await _feedbackRepo.CreateFeedbackMessage(feedback);
+                await _feedbackRepo.CreateFeedbackMessageAsync(feedback);
+            }
+            else
+            {
+                feedbackMessage.SubmissionObjectId = submissionObjectId;
+                feedbackMessage.CommunicationSubject = subject;
+                feedbackMessage.CommunicationText = htmlBody;
+                feedbackMessage.CommunicationDate = DateTime.UtcNow;
+                feedbackMessage.IsSent = isSent;
+                feedbackMessage.IsError = isError;
+                feedbackMessage.SendErrorText = errorText;
+
+                await _feedbackRepo.UpdateFeedbackMessageAsync(feedbackMessage);
+            }
+
             await _unitOfWork.CommitAsync();
 
-            _logger.LogInformation("[Hangfire] Finishing submission {submissionObjectId}", submissionObjectId);
+            var finished = isSent ? "Finished" : "Failed";
+            var sending = feedbackMessage == null ? "sending" : "resending";
+
+            _logger.LogInformation($"[Hangfire] {finished} {sending} email for submission {submissionObjectId}", submissionObjectId);
         }
 
         private void SendEmailToUsersInServiceArea(decimal serviceAreaNumber, string subject, string htmlBody, string textBody)
