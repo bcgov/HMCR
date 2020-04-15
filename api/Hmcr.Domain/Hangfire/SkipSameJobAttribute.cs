@@ -64,7 +64,14 @@ namespace Hmcr.Domain.Hangfire
 
         private string GetJobFingerprint(Job job)
         {
-            return $"{job.Type.FullName}-{job.Method.Name}-{JsonConvert.SerializeObject(job.Args)}";
+            var args = "";
+
+            if (job.Args.Count > 0)
+            {
+                args = "-" + JsonConvert.SerializeObject(job.Args);
+            }
+
+            return $"{job.Type.FullName}-{job.Method.Name}{args}";
         }
     }
 }

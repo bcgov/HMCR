@@ -217,6 +217,8 @@ namespace Hmcr.Domain.Hangfire.Base
             _unitOfWork.Commit();
 
             await _emailService.SendStatusEmailAsync(_submission.SubmissionObjectId);
+
+            _logger.LogInformation("[Hangfire] Finishing submission {submissionObjectId}", _submission.SubmissionObjectId);
         }
 
         protected void LogRowParseException(decimal rowNum, string exception, ReadingContext context)
