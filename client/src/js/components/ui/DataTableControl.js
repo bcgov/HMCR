@@ -1,7 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { Table } from 'reactstrap';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { Table, Badge } from 'reactstrap';
 
 import Authorize from '../fragments/Authorize';
 import FontAwesomeButton from './FontAwesomeButton';
@@ -16,21 +15,27 @@ const DataTableControl = ({
   onDeleteClicked,
   onHeadingSortClicked,
 }) => {
-  const handleEditClicked = id => {
+  const handleEditClicked = (id) => {
     if (onEditClicked) onEditClicked(id);
   };
 
   return (
     <React.Fragment>
-      <Table size="sm" responsive>
+      <Table size="sm" responsive hover>
         <thead className="thead-dark">
           <tr>
-            {tableColumns.map(column => (
-              <th key={column.heading}>
-                {column.heading}
-                {!column.nosort && <FontAwesomeButton icon="sort" onClick={() => onHeadingSortClicked(column.key)} />}
-              </th>
-            ))}
+            {tableColumns.map((column) => {
+              let style = { whiteSpace: 'nowrap' };
+
+              if (column.maxWidth) style.maxWidth = column.maxWidth;
+
+              return (
+                <th key={column.heading} style={style}>
+                  {column.heading}
+                  {!column.nosort && <FontAwesomeButton icon="sort" onClick={() => onHeadingSortClicked(column.key)} />}
+                </th>
+              );
+            })}
             {editable && (
               <Authorize requires={editPermissionName}>
                 <th></th>
@@ -39,31 +44,48 @@ const DataTableControl = ({
           </tr>
         </thead>
         <tbody>
-          {dataList.map(item => {
+          {dataList.map((item, index) => {
             return (
-              <tr key={item.id}>
-                {tableColumns.map(column =>
-                  column.key === 'isActive' ? (
-                    <td key={column.key}>
-                      {item[column.key] ? (
-                        <FontAwesomeIcon icon="check-circle" className="fa-color-primary" />
-                      ) : (
-                        <FontAwesomeIcon icon="ban" className="fa-color-danger" />
-                      )}
+              <tr key={index}>
+                {tableColumns.map((column) => {
+                  if (column.key === 'isActive')
+                    return (
+                      <td key={column.key}>
+                        {item[column.key] ? (
+                          <Badge color="success">Active</Badge>
+                        ) : (
+                          <Badge color="danger">Inactive</Badge>
+                        )}
+                      </td>
+                    );
+
+                  let style = {};
+                  if (column.maxWidth) {
+                    style.maxWidth = column.maxWidth;
+                  }
+
+                  return (
+                    <td key={column.key} className={column.maxWidth ? 'text-overflow-hiden' : ''} style={style}>
+                      {item[column.key]}
                     </td>
-                  ) : (
-                    <td key={column.key}>{item[column.key]}</td>
-                  )
-                )}
+                  );
+                })}
                 {editable && (
                   <Authorize requires={editPermissionName}>
                     <td style={{ width: '1%', whiteSpace: 'nowrap' }}>
-                      <FontAwesomeButton icon="edit" className="mr-1" onClick={() => handleEditClicked(item.id)} />
+                      <FontAwesomeButton
+                        icon="edit"
+                        className="mr-1"
+                        onClick={() => handleEditClicked(item.id)}
+                        title="Edit Record"
+                      />
                       <DeleteButton
                         itemId={item.id}
                         buttonId={`item_${item.id}_delete`}
                         defaultEndDate={item.endDate}
                         onDeleteClicked={onDeleteClicked}
+                        permanentDelete={item.canDelete}
+                        title={item.canDelete ? 'Delete Record' : 'Disable Record'}
                       ></DeleteButton>
                     </td>
                   </Authorize>

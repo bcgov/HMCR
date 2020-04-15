@@ -17,6 +17,7 @@ namespace Hmcr.Data.Database.Entities
         public decimal StatusId { get; set; }
         public string StatusCode { get; set; }
         public string Description { get; set; }
+        public string LongDescription { get; set; }
         public string StatusType { get; set; }
         public long ConcurrencyControlNumber { get; set; }
         public string AppCreateUserid { get; set; }

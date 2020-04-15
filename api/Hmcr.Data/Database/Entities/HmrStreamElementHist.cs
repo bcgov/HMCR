@@ -10,9 +10,10 @@ namespace Hmcr.Data.Database.Entities
         public DateTime? EndDateHist { get; set; }
         public decimal StreamElementId { get; set; }
         public decimal SubmissionStreamId { get; set; }
-        public string ElementValue { get; set; }
-        public string DataType { get; set; }
-        public string IsRequired { get; set; }
+        public string ElementName { get; set; }
+        public string ElementType { get; set; }
+        public string StagingColumnName { get; set; }
+        public bool? IsRequired { get; set; }
         public decimal? MaxLength { get; set; }
         public decimal? MinLength { get; set; }
         public decimal? MaxValue { get; set; }

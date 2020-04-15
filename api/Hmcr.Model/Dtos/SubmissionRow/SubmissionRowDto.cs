@@ -12,6 +12,14 @@ namespace Hmcr.Model.Dtos.SubmissionRow
         public string RecordNumber { get; set; }
         public string RowValue { get; set; }
         public string RowHash { get; set; }
+        public string ErrorDetail { get; set; }
+        public string WarningDetail { get; set; }
+        public decimal? RowNum { get; set; }
+        public bool IsResubmitted { get; set; }
+        public decimal? StartVariance { get; set; }
+        public decimal? EndVariance { get; set; }
+
+        //this filed doesn't exist in the entity.
         public DateTime EndDate { get; set; }
     }
 }

@@ -18,6 +18,11 @@ export const FormSwitchInput = ({ children, ...props }) => {
   return <CustomInput type="switch" id={props.name} {...field} {...props} />;
 };
 
+export const FormCheckboxInput = ({ children, ...props }) => {
+  const [field] = useField({ ...props, type: 'checkbox' });
+  return <CustomInput type="checkbox" id={props.name} {...field} {...props} />;
+};
+
 export const FormInput = ({ children, ...props }) => {
   const [field, meta] = useField({ ...props, type: 'checkbox' });
   return (

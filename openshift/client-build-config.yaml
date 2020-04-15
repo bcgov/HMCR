@@ -11,62 +11,11 @@ objects:
     metadata:
       creationTimestamp: null
       labels:
-        shared: true
-      name: ${NAME}-artifacts
-    spec:
-      lookupPolicy:
-        local: false
-  - apiVersion: v1
-    kind: ImageStream
-    metadata:
-      creationTimestamp: null
+        shared: "true"
       name: ${NAME}
     spec:
       lookupPolicy:
         local: false
-  # Build artifacts
-  - apiVersion: v1
-    kind: BuildConfig
-    metadata:
-      creationTimestamp: null
-      labels:
-        build: ${NAME}-artifacts${SUFFIX}
-      name: ${NAME}-artifacts${SUFFIX}
-    spec:
-      completionDeadlineSeconds: 600
-      nodeSelector: null
-      output:
-        to:
-          kind: ImageStreamTag
-          name: ${NAME}-artifacts:${VERSION}
-      resources:
-        limits:
-          cpu: 2
-          memory: 4Gi
-        requests:
-          cpu: 1
-          memory: 2Gi
-      postCommit: {}
-      source:
-        git:
-          uri: ${SOURCE_REPOSITORY_URL}
-          ref: ${SOURCE_REPOSITORY_REF}
-        type: Git
-        contextDir: client
-      strategy:
-        sourceStrategy:
-          from:
-            kind: ImageStreamTag
-            name: nodejs-8-rhel7:1
-          env:
-            - name: DEPLOY_SUBDIRECTORY
-              value: ${DEPLOY_SUBDIRECTORY}
-        type: Source
-      triggers:
-        - type: ConfigChange
-        - imageChange: {}
-          type: ImageChange
-  # Create runtime image
   - apiVersion: v1
     kind: BuildConfig
     metadata:
@@ -95,40 +44,15 @@ objects:
         limits:
           cpu: 2
       source:
-        dockerfile: |-
-          FROM nodejs/build-output:latest
-
-          COPY src/src/build /usr/share/nginx/html
-          COPY src/src/env2js.sh /env2js.sh
-
-          USER 0
-          RUN chmod +x /env2js.sh
-          USER nginx:nginx
-
-          CMD /env2js.sh > /usr/share/nginx/html/js/env.config.js && nginx -g "daemon off;"
-        images:
-          - from:
-              kind: ImageStreamTag
-              name: "${NAME}-artifacts:${VERSION}"
-            paths:
-              - destinationDir: src
-                sourcePath: /opt/app-root/src/
-        type: Dockerfile
+        git:
+          uri: ${SOURCE_REPOSITORY_URL}
+          ref: ${SOURCE_REPOSITORY_REF}
+        type: Git
+        contextDir: client
       strategy:
         dockerStrategy:
-          from:
-            kind: ImageStreamTag
-            name: "${PROJECT_NAME}-nginx:${VERSION}"
+          noCache: true
         type: Docker
-      triggers:
-        - imageChange:
-            from:
-              kind: ImageStreamTag
-              name: ${NAME}:${VERSION}
-          type: ImageChange
-        - type: ConfigChange
-        - imageChange: {}
-          type: ImageChange
 parameters:
   - description: Name of the project (HMCR)
     displayName: PROJECT_NAME

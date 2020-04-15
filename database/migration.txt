@@ -1,0 +1,4 @@
+1. delete all tables
+2. run v01
+3. apply incrementals (V14...)
+4. run Hangfire scripts

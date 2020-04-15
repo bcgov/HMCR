@@ -30,7 +30,7 @@ AuthorizedRoute.propTypes = {
   userType: PropTypes.string.isRequired,
 };
 
-const mapStateToProps = state => {
+const mapStateToProps = (state) => {
   return {
     currentUser: state.user.current,
   };

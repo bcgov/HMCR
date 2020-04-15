@@ -51,5 +51,70 @@ namespace Hmcr.Api
                 ContentTypes = { "application/problem+json" }
             };
         }
+
+        public static UnprocessableEntityObjectResult GetServiceAreasMissingErrorResult(ActionContext context)
+        {
+            var problem = new ValidationProblemDetails(context.ModelState)
+            {
+                Type = "https://hmcr.bc.gov.ca/model-validation-error",
+                Title = "Service areas missing",
+                Status = StatusCodes.Status422UnprocessableEntity,
+                Detail = "Please include service areas in the query string as comma separated string.",
+                Instance = context.HttpContext.Request.Path
+            };
+
+            problem.Extensions.Add("traceId", context.HttpContext.TraceIdentifier);
+
+            return new UnprocessableEntityObjectResult(problem)
+            {
+                ContentTypes = { "application/problem+json" }
+            };
+        }
+
+        public static UnprocessableEntityObjectResult GetValidationErrorResult(ActionContext context, string title, string detail)
+        {
+            var problem = new ValidationProblemDetails(context.ModelState)
+            {
+                Type = "https://hmcr.bc.gov.ca/model-validation-error",
+                Title = title,
+                Status = StatusCodes.Status422UnprocessableEntity,
+                Detail = detail,
+                Instance = context.HttpContext.Request.Path
+            };
+
+            problem.Extensions.Add("traceId", context.HttpContext.TraceIdentifier);
+
+            return new UnprocessableEntityObjectResult(problem)
+            {
+                ContentTypes = { "application/problem+json" }
+            };
+        }
+
+        public static UnprocessableEntityObjectResult GetValidationErrorResult(ActionContext context, int status, string title, string detail)
+        {
+            var problem = new ValidationProblemDetails(context.ModelState)
+            {
+                Type = "https://hmcr.bc.gov.ca/model-validation-error",
+                Title = title,
+                Status = status,
+                Detail = detail,
+                Instance = context.HttpContext.Request.Path
+            };
+
+            problem.Extensions.Add("traceId", context.HttpContext.TraceIdentifier);
+
+            return new UnprocessableEntityObjectResult(problem)
+            {
+                ContentTypes = { "application/problem+json" }
+            };
+        }
+
+        public static UnprocessableEntityObjectResult GetValidationErrorResult(ValidationProblemDetails problem)
+        {
+            return new UnprocessableEntityObjectResult(problem)
+            {
+                ContentTypes = { "application/problem+json" }
+            };
+        }
     }
 }

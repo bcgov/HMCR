@@ -4,7 +4,7 @@ import { NavLink as RRNavLink } from 'react-router-dom';
 import { NavItem, NavLink } from 'reactstrap';
 
 const NavLinkWithMatch = ({ to, text, hideNavbar }) => {
-  const exactPathMatch = match => {
+  const exactPathMatch = (match) => {
     return match && match.isExact;
   };
 

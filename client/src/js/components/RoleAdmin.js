@@ -1,85 +1,148 @@
 import React, { useState, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import { connect } from 'react-redux';
 import { Row, Col, Button } from 'reactstrap';
 import { Formik, Form, Field } from 'formik';
+import queryString from 'query-string';
 
 import Authorize from './fragments/Authorize';
 import MaterialCard from './ui/MaterialCard';
-import SingleDropdown from './ui/SingleDropdown';
-import EditRoleForm from './forms/EditRoleForm';
-import DataTableControl from './ui/DataTableControl';
+import UIHeader from './ui/UIHeader';
+import MultiDropdownField from './ui/MultiDropdownField';
+import DataTableWithPaginaionControl from './ui/DataTableWithPaginaionControl';
+import SubmitButton from './ui/SubmitButton';
+import PageSpinner from './ui/PageSpinner';
+import useSearchData from './hooks/useSearchData';
+import useFormModal from './hooks/useFormModal';
+import EditRoleFormFields from './forms/EditRoleFormFields';
 
-import { setSingleRoleSeachCriteria, searchRoles } from '../actions';
+import { showValidationErrorDialog } from '../actions';
 
 import * as Constants from '../Constants';
 import * as api from '../Api';
+import { buildStatusIdArray } from '../utils';
 
-const defaultSearchFormValues = { searchText: '', isActive: 'ACTIVE' };
+const defaultSearchFormValues = { searchText: '', statusId: [Constants.ACTIVE_STATUS.ACTIVE] };
+
+const defaultSearchOptions = {
+  searchText: '',
+  isActive: true,
+  dataPath: Constants.API_PATHS.ROLE,
+};
 
 const tableColumns = [
-  { heading: 'Role Name', key: 'name', nosort: true },
-  { heading: 'Role Description', key: 'description', nosort: true },
+  { heading: 'Role Name', key: 'name' },
+  { heading: 'Role Description', key: 'description' },
   { heading: 'Active', key: 'isActive', nosort: true },
 ];
 
-const RoleAdmin = ({ roleStatuses, setSingleRoleSeachCriteria, searchRoles, searchResult }) => {
-  const [editRoleForm, setEditRoleForm] = useState({ isOpen: false });
+const RoleAdmin = ({ showValidationErrorDialog }) => {
+  const location = useLocation();
+  const searchData = useSearchData(defaultSearchOptions);
+  const [searchInitialValues, setSearchInitialValues] = useState(defaultSearchFormValues);
 
+  // Run on load, parse URL query params
   useEffect(() => {
-    searchRoles();
-    // eslint-disable-next-line
+    const params = queryString.parse(location.search);
+
+    const options = {
+      ...defaultSearchOptions,
+      ...params,
+    };
+
+    const searchText = options.searchText || '';
+
+    searchData.updateSearchOptions(options);
+    setSearchInitialValues({ ...searchInitialValues, searchText, statusId: buildStatusIdArray(options.isActive) });
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const handleSearchFormSubmit = values => {
+  const handleSearchFormSubmit = (values) => {
     const searchText = values.searchText.trim() || null;
-    setSingleRoleSeachCriteria('searchText', searchText);
 
-    setSingleRoleSeachCriteria('isActive', values.isActive === 'ACTIVE');
+    let isActive = null;
+    if (values.statusId.length === 1) {
+      isActive = values.statusId[0] === 'ACTIVE';
+    }
 
-    searchRoles();
+    const options = { ...searchData.searchOptions, isActive, searchText, pageNumber: 1 };
+    searchData.updateSearchOptions(options);
   };
 
-  const onEditClicked = roleId => {
-    setEditRoleForm({ isOpen: true, formType: Constants.FORM_TYPE.EDIT, roleId });
+  const handleSearchFormReset = () => {
+    setSearchInitialValues(defaultSearchFormValues);
+    searchData.refresh(true);
+  };
+
+  const onEditClicked = (roleId) => {
+    formModal.openForm(Constants.FORM_TYPE.EDIT, { roleId });
   };
 
   const onDeleteClicked = (roleId, endDate) => {
-    api.deleteRole(roleId, endDate).then(() => searchRoles());
+    api.deleteRole(roleId, endDate).then(() => searchData.refresh());
   };
 
-  const handleEditUserFormClose = refresh => {
-    if (refresh) {
-      searchRoles();
+  const handleEditFormSubmit = (values, formType) => {
+    if (!formModal.submitting) {
+      formModal.setSubmitting(true);
+
+      if (formType === Constants.FORM_TYPE.ADD) {
+        api
+          .postRole(values)
+          .then(() => {
+            formModal.closeForm();
+            searchData.refresh();
+          })
+          .catch((error) => showValidationErrorDialog(error.response.data))
+          .finally(() => formModal.setSubmitting(false));
+      } else {
+        api
+          .putRole(values.id, values)
+          .then(() => {
+            formModal.closeForm();
+            searchData.refresh();
+          })
+          .catch((error) => showValidationErrorDialog(error.response.data))
+          .finally(() => formModal.setSubmitting(false));
+      }
     }
-    setEditRoleForm({ isOpen: false });
   };
+
+  const formModal = useFormModal('Role', <EditRoleFormFields />, handleEditFormSubmit);
 
   return (
     <React.Fragment>
       <MaterialCard>
+        <UIHeader>Role and Permissions Management</UIHeader>
         <Formik
-          initialValues={defaultSearchFormValues}
-          onSubmit={values => {
-            handleSearchFormSubmit(values);
-          }}
+          initialValues={searchInitialValues}
+          enableReinitialize={true}
+          onSubmit={(values) => handleSearchFormSubmit(values)}
+          onReset={handleSearchFormReset}
         >
-          {formikProps => (
+          {(formikProps) => (
             <Form>
               <Row form>
                 <Col>
                   <Field type="text" name="searchText" placeholder="Role/Description" className="form-control" />
                 </Col>
                 <Col>
-                  <SingleDropdown {...formikProps} defaultTitle="Select Status" items={roleStatuses} name="isActive" />
+                  <MultiDropdownField
+                    {...formikProps}
+                    title="Role Status"
+                    items={Constants.ACTIVE_STATUS_ARRAY}
+                    name="statusId"
+                  />
                 </Col>
                 <Col />
                 <Col />
                 <Col>
                   <div className="float-right">
-                    <Button type="submit" color="primary" className="mr-2">
+                    <SubmitButton className="mr-2" disabled={searchData.loading} submitting={searchData.loading}>
                       Search
-                    </Button>
-                    <Button type="reset">Clear</Button>
+                    </SubmitButton>
+                    <Button type="reset">Reset</Button>
                   </div>
                 </Col>
               </Row>
@@ -94,35 +157,36 @@ const RoleAdmin = ({ roleStatuses, setSingleRoleSeachCriteria, searchRoles, sear
               size="sm"
               color="primary"
               className="float-right mb-3"
-              onClick={() => setEditRoleForm({ isOpen: true, formType: Constants.FORM_TYPE.ADD })}
+              onClick={() => formModal.openForm(Constants.FORM_TYPE.ADD)}
             >
               Add Role
             </Button>
           </Col>
         </Row>
       </Authorize>
-      {searchResult.length > 0 && (
+      {searchData.loading && <PageSpinner />}
+      {!searchData.loading && (
         <MaterialCard>
-          <DataTableControl
-            dataList={searchResult}
-            tableColumns={tableColumns}
-            editable
-            editPermissionName={Constants.PERMISSIONS.ROLE_W}
-            onEditClicked={onEditClicked}
-            onDeleteClicked={onDeleteClicked}
-          />
+          {searchData.data.length > 0 && (
+            <DataTableWithPaginaionControl
+              dataList={searchData.data}
+              tableColumns={tableColumns}
+              searchPagination={searchData.pagination}
+              onPageNumberChange={searchData.handleChangePage}
+              onPageSizeChange={searchData.handleChangePageSize}
+              editable
+              editPermissionName={Constants.PERMISSIONS.ROLE_W}
+              onEditClicked={onEditClicked}
+              onDeleteClicked={onDeleteClicked}
+              onHeadingSortClicked={searchData.handleHeadingSortClicked}
+            />
+          )}
+          {searchData.data.length <= 0 && <div>No records found</div>}
         </MaterialCard>
       )}
-      {editRoleForm.isOpen && <EditRoleForm {...editRoleForm} toggle={handleEditUserFormClose} />}
+      {formModal.formElement}
     </React.Fragment>
   );
 };
 
-const mapStateToProps = state => {
-  return {
-    roleStatuses: Object.values(state.roles.statuses),
-    searchResult: Object.values(state.roles.list),
-  };
-};
-
-export default connect(mapStateToProps, { setSingleRoleSeachCriteria, searchRoles })(RoleAdmin);
+export default connect(null, { showValidationErrorDialog })(RoleAdmin);

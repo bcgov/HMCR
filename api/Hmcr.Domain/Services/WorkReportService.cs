@@ -1,166 +1,60 @@
 ﻿using CsvHelper;
-using CsvHelper.Configuration;
+using CsvHelper.TypeConversion;
 using Hmcr.Data.Database;
 using Hmcr.Data.Repositories;
 using Hmcr.Domain.CsvHelpers;
+using Hmcr.Domain.Services.Base;
 using Hmcr.Model;
-using Hmcr.Model.Dtos.ServiceArea;
 using Hmcr.Model.Dtos.SubmissionObject;
 using Hmcr.Model.Dtos.SubmissionRow;
-using Hmcr.Model.Dtos.SubmissionStream;
 using Hmcr.Model.Dtos.WorkReport;
 using Hmcr.Model.Utils;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
-using System.Text;
-using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace Hmcr.Domain.Services
 {
     public interface IWorkReportService
     {
-        Task<(Dictionary<string, List<string>> Errors, List<string> DuplicateRecordNumbers)> CheckDuplicatesAsync(WorkRptUploadDto upload);
-        Task<(decimal SubmissionObjectId, Dictionary<string, List<string>> Errors)> CreateWorkReportAsync(WorkRptUploadDto upload);
+        Task<(Dictionary<string, List<string>> errors, List<string> resubmittedRecordNumbers)> CheckResubmitAsync(FileUploadDto upload);
+        Task<(decimal submissionObjectId, Dictionary<string, List<string>> errors)> CreateReportAsync(FileUploadDto upload);
     }
-    public class WorkReportService : IWorkReportService
+    public class WorkReportService : ReportServiceBase, IWorkReportService
     {
-        private IUnitOfWork _unitOfWork;
-        private HmcrCurrentUser _currentUser;
-        private IFieldValidatorService _validator;
-        private ISubmissionStreamService _streamService;
-        private ISubmissionObjectRepository _submissionRepo;
-        private ISumbissionRowRepository _rowRepo;
+        private IWorkReportRepository _workRptRepo;
+        private ILogger<WorkReportService> _logger;
 
-        public WorkReportService(IUnitOfWork unitOfWork, HmcrCurrentUser currentUser, IFieldValidatorService validator, 
-            ISubmissionStreamService streamService, ISubmissionObjectRepository submissionRepo, ISumbissionRowRepository rowRepo)
+        public WorkReportService(IUnitOfWork unitOfWork, 
+            ISubmissionStreamService streamService, ISubmissionObjectRepository submissionRepo, ISumbissionRowRepository rowRepo, 
+            IContractTermRepository contractRepo, ISubmissionStatusRepository statusRepo, IWorkReportRepository workRptRepo, IFieldValidatorService validator,
+            ILogger<WorkReportService> logger) 
+            : base(unitOfWork, streamService, submissionRepo, rowRepo, contractRepo, statusRepo, validator)
         {
-            _unitOfWork = unitOfWork;
-            _currentUser = currentUser;
-            _validator = validator;
-            _streamService = streamService;
-            _submissionRepo = submissionRepo;
-            _rowRepo = rowRepo;
-        }
-        public async Task<(Dictionary<string, List<string>> Errors, List<string> DuplicateRecordNumbers)> CheckDuplicatesAsync(WorkRptUploadDto upload)
-        {
-            var errors = new Dictionary<string, List<string>>();
-            var dupRows = new List<string>();
-
-            var (Errors, Submission) = await ValidateAndParseUploadFileAsync(upload);
-
-            if (Errors.Count > 0)
-                return (Errors, dupRows);
-
-            //todo: find duplicate rows to overwrite
-
-            return (errors, dupRows);
+            TableName = TableNames.WorkReport;
+            HasRowIdentifier = true;
+            RecordNumberFieldName = Fields.RecordNumber;
+            DateFieldName = Fields.EndDate;
+            _workRptRepo = workRptRepo;
+            _logger = logger;
         }
 
-        private static List<string> GetLines(WorkRptUploadDto upload, Stream stream)
+        protected override async Task<bool> ParseRowsAsync(SubmissionObjectCreateDto submission, TextReader textReader, Dictionary<string, List<string>> errors)
         {
-            using var text = new StreamReader(stream, Encoding.UTF8);
+            using var csv = new CsvReader(textReader, CultureInfo.InvariantCulture);
 
-            var lines = new List<string>();
-            while (!text.EndOfStream)
-            {
-                lines.Add(text.ReadLine());
-            }
-
-            return lines;
-        }
-
-        private bool IsCsvFile(string fileName)
-        {
-            if (!Path.HasExtension(fileName))
-                return false;
-
-            return Path.GetExtension(fileName).ToLowerInvariant() == ".csv";
-        }
-
-        private string SanitizeFileName(string fileName)
-        {
-            var invalids = Path.GetInvalidFileNameChars();
-            var newFileName = String.Join("_", fileName.Split(invalids, StringSplitOptions.RemoveEmptyEntries)).TrimEnd('.');
-            newFileName = Path.GetFileNameWithoutExtension(newFileName);
-
-            if (newFileName.Length > 100)
-            {
-                newFileName = newFileName.Substring(0, 100);
-            }
-
-            return newFileName;
-        }
-
-        private bool HasDuplicateRecordNumberInFile(IEnumerable<SubmissionRowDto> rows, Dictionary<string, List<string>> errors)
-        {
-            foreach(var row in rows)
-            {
-                if (rows.Count(x => x.RecordNumber == row.RecordNumber) > 1)
-                {
-                    errors.AddItem("RecordNumber", $"The file contains multiple rows with the same record number {row.RecordNumber}.");
-                    return true;
-                }
-            }
-
-            return false;
-        }
-
-        private async Task<(Dictionary<string, List<string>> Errors, SubmissionObjectCreateDto Submission)> ValidateAndParseUploadFileAsync(WorkRptUploadDto upload)
-        {
-            var submission = new SubmissionObjectCreateDto();
-            submission.FileName = SanitizeFileName(Path.GetFileName(upload.ReportFile.FileName));
-            submission.MimeTypeId = 1;
-            submission.ServiceAreaNumber = upload.ServiceAreaNumber;
-
-            var errors = new Dictionary<string, List<string>>();
-
-            var reportType = await _streamService.GetSubmissionStreamByTableNameAsync(TableNames.WorkReport);
-            if (reportType == null)
-            {
-                throw new Exception($"The submission stream for {TableNames.WorkReport} is not defined.");
-            }
-
-            if (!IsCsvFile(upload.ReportFile.FileName))
-            {
-                errors.AddItem("FileName", $"The file is not a CSV file.");
-                return (errors, submission);
-            }
-
-            var serviceArea = _currentUser.UserInfo.ServiceAreas.FirstOrDefault(x => x.ServiceAreaNumber == upload.ServiceAreaNumber);
-            if (serviceArea == null)
-            {
-                errors.AddItem("SerivceArea", $"The user has no access to the service area {upload.ServiceAreaNumber}.");
-                return (errors, submission);
-            }
-
-            using var stream = upload.ReportFile.OpenReadStream();
-            using var text = new StreamReader(stream, Encoding.UTF8);
-            using var csv = new CsvReader(text);
-
-            //file size
-            var size = stream.Length;
-            var maxSize = reportType.FileSizeLimit ?? Constants.MaxFileSize;
-            if (size > maxSize)
-            {
-                errors.AddItem("FileSize", $"The file size exceeds the maximum size {maxSize / 1024 / 1024}MB.");
-                return (errors, submission);
-            }
-
-            csv.Configuration.PrepareHeaderForMatch = (string header, int index) => Regex.Replace(header.ToLower(), @"\s", string.Empty);
-            csv.Configuration.CultureInfo = CultureInfo.GetCultureInfo("en-CA");
+            CsvHelperUtils.Config(errors, csv, false);
             csv.Configuration.RegisterClassMap<WorkRptInitCsvDtoMap>();
 
-            csv.Configuration.TrimOptions = TrimOptions.Trim;
-            csv.Configuration.HeaderValidated = (bool valid, string[] column, int row, ReadingContext context) =>
-            {
-                if (valid) return;
+            var serviceAreastrings = ConvertServiceAreaToStrings(submission.ServiceAreaNumber);
 
-                errors.AddItem($"{column[0]}", $"The header [{column[0].WordToWords()}] is missing.");
-            };
+            var headerValidated = false;
+            var rows = new List<WorkRptInitCsvDto>();
+            var rowNum = 1;
 
             while (csv.Read())
             {
@@ -169,16 +63,52 @@ namespace Hmcr.Domain.Services
                 try
                 {
                     row = csv.GetRecord<WorkRptInitCsvDto>();
+
+                    if (!headerValidated)
+                    {
+                        if (!CheckCommonMandatoryFields(csv.Context.HeaderRecord, WorkReportHeaders.MandatoryFields, errors))
+                        {
+                            return false;
+                        }
+                        else
+                        {
+                            headerValidated = true;
+                        }
+                    }
+
+                    row.RowNum = ++rowNum;
+                    rows.Add(row);
                 }
-                catch (CsvHelperException)
+                catch (TypeConverterException ex)
                 {
+                    errors.AddItem(ex.MemberMapData.Member.Name, ex.Message);
                     break;
                 }
-
-                if (row.ServiceArea != serviceArea.ServiceAreaNumber.ToString())
+                catch (CsvHelper.MissingFieldException)
                 {
-                    errors.AddItem("ServiceArea", $"The file contains service area which is not {serviceArea.ServiceAreaName} ({serviceArea.ServiceAreaNumber}).");
-                    return (errors, submission);
+                    break; //handled in CsvHelperUtils
+                }
+                catch (CsvHelper.ReaderException ex)
+                {
+                    _logger.LogWarning(ex.Message);
+                    errors.AddItem("Report Type", "Please make sure the report type selected is correct.");
+                    return false;
+                }
+                catch (CsvHelperException ex)
+                {
+                    _logger.LogInformation(ex.ToString());
+                    throw;
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex.ToString());
+                    throw;
+                }
+
+                if (!serviceAreastrings.Contains(row.ServiceArea))
+                {
+                    errors.AddItem("ServiceArea", $"The file contains service area which is not {serviceAreastrings[0]}.");
+                    return false;
                 }
 
                 var line = csv.Context.RawRecord.RemoveLineBreak();
@@ -188,33 +118,18 @@ namespace Hmcr.Domain.Services
                     RecordNumber = row.RecordNumber,
                     RowValue = line,
                     RowHash = line.GetSha256Hash(),
-                    RowStatusId = RowStatus.Accepted,
-                    EndDate = row.EndDate
+                    RowStatusId = await _statusRepo.GetStatusIdByTypeAndCodeAsync(StatusType.Row, RowStatus.RowReceived),
+                    EndDate = row.EndDate ?? Constants.MinDate,
+                    RowNum = csv.Context.Row
                 });
             }
 
-            HasDuplicateRecordNumberInFile(submission.SubmissionRows, errors);
-
-            await foreach (var row in _rowRepo.FindDuplicateRowsAsync(submission.SubmissionRows))
+            if (errors.Count == 0)
             {
-                row.RowStatusId = RowStatus.Duplicate;
+                Validate(rows, Entities.WorkReportInit, errors);
             }
 
-            return (errors, submission); 
+            return errors.Count == 0;
         }
-
-        public async Task<(decimal SubmissionObjectId, Dictionary<string, List<string>> Errors)> CreateWorkReportAsync(WorkRptUploadDto upload)
-        {
-            var (Errors, Submission) = await ValidateAndParseUploadFileAsync(upload);
-
-            if (Errors.Count > 0)
-                return (0, Errors);
-
-            var submissionEntity = await _submissionRepo.CreateSubmissionObjectAsync(Submission);
-            await _unitOfWork.CommitAsync();
-
-            return (submissionEntity.SubmissionObjectId, null);
-        }
-
     }
 }

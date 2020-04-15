@@ -1,9 +1,13 @@
 import React from 'react';
+import { connect } from 'react-redux';
 import { BrowserRouter, Route, Switch, Redirect } from 'react-router-dom';
 import { Container } from 'reactstrap';
+import { toast } from 'react-toastify';
 
 import 'react-dates/initialize';
 import 'react-dates/lib/css/_datepicker.css';
+
+import 'react-toastify/dist/ReactToastify.css';
 
 import AuthorizedRoute from './components/fragments/AuthorizedRoute';
 import Main from './components/Main';
@@ -12,16 +16,27 @@ import Header from './components/fragments/Header';
 import ActivityAdmin from './components/ActivityAdmin';
 import UserAdmin from './components/UserAdmin';
 import RoleAdmin from './components/RoleAdmin';
+import ReportExport from './components/ReportExport';
 import WorkReporting from './components/WorkReporting';
-import WorkReportingSubmission from './components/WorkReportingSubmission';
-// import Home from './components/Home';
+import Version from './components/Version';
+import WorkReportingSubmissionDetail from './components/WorkReportingSubmissionDetail';
+import ErrorBoundary from './components/ErrorBoundary';
 
 import addIconsToLibrary from './fontAwesome';
 import * as Constants from './Constants';
 
 import '../scss/app.scss';
 
-const App = () => {
+toast.configure({
+  position: 'top-center',
+  autoClose: 2000,
+  hideProgressBar: true,
+  closeOnClick: true,
+  pauseOnHover: true,
+  draggable: true,
+});
+
+const App = ({ currentUser }) => {
   addIconsToLibrary();
 
   return (
@@ -30,22 +45,13 @@ const App = () => {
         <React.Fragment>
           <Header />
           <Container>
-            <Switch>
-              {/* <Route path={Constants.PATHS.HOME} exact component={Home} /> */}
-              <Route path={Constants.PATHS.HOME} exact>
-                <Redirect to={Constants.PATHS.ADMIN_USERS} />
-              </Route>
-              <AdminRoutes />
-              <AuthorizedRoute
-                path={Constants.PATHS.WORK_REPORTING}
-                requires={Constants.PERMISSIONS.FILE_R}
-                userType={Constants.USER_TYPE.BUSINESS}
-              >
-                <WorkReportingRoutes />
-              </AuthorizedRoute>
-              <Route path={Constants.PATHS.UNAUTHORIZED} exact component={Unauthorized} />
-              <Route path="*" component={NoMatch} />
-            </Switch>
+            <ErrorBoundary>
+              <Switch>
+                {Routes(currentUser)}
+                <Route path={Constants.PATHS.UNAUTHORIZED} exact component={Unauthorized} />
+                <Route path="*" component={NoMatch} />
+              </Switch>
+            </ErrorBoundary>
           </Container>
           <Footer />
         </React.Fragment>
@@ -62,23 +68,71 @@ const Unauthorized = () => {
   return <p>Unauthorized</p>;
 };
 
-const WorkReportingRoutes = () => {
+const Routes = (currentUser) => {
+  switch (currentUser.userType) {
+    case Constants.USER_TYPE.INTERNAL:
+      return AdminRoutes(currentUser);
+    case Constants.USER_TYPE.BUSINESS:
+      return ContractorRoutes(currentUser);
+    default:
+      return <Redirect to={Constants.PATHS.UNAUTHORIZED} />;
+  }
+};
+
+const defaultPath = (currentUser) => {
+  if (currentUser.permissions.includes(Constants.PERMISSIONS.CODE_R)) return Constants.PATHS.ADMIN_ACTIVITIES;
+
+  if (currentUser.permissions.includes(Constants.PERMISSIONS.USER_R)) return Constants.PATHS.ADMIN_USERS;
+
+  if (currentUser.permissions.includes(Constants.PERMISSIONS.ROLE_R)) return Constants.PATHS.ADMIN_ROLES;
+
+  if (currentUser.permissions.includes(Constants.PERMISSIONS.FILE_R)) return Constants.PATHS.WORK_REPORTING;
+
+  return Constants.PATHS.UNAUTHORIZED;
+};
+
+const getLastVistedPath = (currentUser) => {
+  const lastVisitedPath = localStorage.getItem('lastVisitedPath');
+
+  if (lastVisitedPath) return lastVisitedPath;
+
+  return defaultPath(currentUser);
+};
+
+const ContractorRoutes = (currentUser) => {
   return (
     <Switch>
+      <Route path={Constants.PATHS.ADMIN}>
+        <Redirect to={Constants.PATHS.UNAUTHORIZED} />
+      </Route>
+      <Route path={Constants.PATHS.HOME} exact>
+        <Redirect to={getLastVistedPath(currentUser)} />
+      </Route>
+      <AuthorizedRoute
+        path={Constants.PATHS.REPORT_EXPORT}
+        requires={Constants.PERMISSIONS.EXPORT}
+        userType={Constants.USER_TYPE.BUSINESS}
+      >
+        <Route path={Constants.PATHS.REPORT_EXPORT} exact component={ReportExport} />
+      </AuthorizedRoute>
       <Route path={Constants.PATHS.WORK_REPORTING} exact component={WorkReporting} />
-      <Route path={`${Constants.PATHS.WORK_REPORTING}/:submissionId`} component={WorkReportingSubmission} />
+      <Route path={`${Constants.PATHS.WORK_REPORTING}/:submissionId`} component={WorkReportingSubmissionDetail} />
+      <Route path={Constants.PATHS.VERSION} exact component={Version} />
+      <Route path={Constants.PATHS.UNAUTHORIZED} exact component={Unauthorized} />
+      <Route path="*" component={NoMatch} />
     </Switch>
   );
 };
 
-const AdminRoutes = () => {
+const AdminRoutes = (currentUser) => {
   return (
     <Switch>
-      <Route path={Constants.PATHS.ADMIN} exact component={ActivityAdmin} />
-
+      <Route path={Constants.PATHS.HOME} exact>
+        <Redirect to={getLastVistedPath(currentUser)} />
+      </Route>
       <AuthorizedRoute
         path={Constants.PATHS.ADMIN_ACTIVITIES}
-        requires={Constants.PERMISSIONS.FILE_R}
+        requires={Constants.PERMISSIONS.CODE_R}
         userType={Constants.USER_TYPE.INTERNAL}
       >
         <Route path={Constants.PATHS.ADMIN_ACTIVITIES} exact component={ActivityAdmin} />
@@ -97,10 +151,31 @@ const AdminRoutes = () => {
       >
         <Route path={Constants.PATHS.ADMIN_ROLES} exact component={RoleAdmin} />
       </AuthorizedRoute>
+      <AuthorizedRoute
+        path={Constants.PATHS.REPORT_EXPORT}
+        requires={Constants.PERMISSIONS.EXPORT}
+        userType={Constants.USER_TYPE.INTERNAL}
+      >
+        <Route path={Constants.PATHS.REPORT_EXPORT} exact component={ReportExport} />
+      </AuthorizedRoute>
+      <AuthorizedRoute
+        path={Constants.PATHS.WORK_REPORTING}
+        requires={Constants.PERMISSIONS.FILE_R}
+        userType={Constants.USER_TYPE.INTERNAL}
+      >
+        <Route path={Constants.PATHS.WORK_REPORTING} exact component={WorkReporting} />
+      </AuthorizedRoute>
+      <Route path={Constants.PATHS.VERSION} exact component={Version} />
       <Route path={Constants.PATHS.UNAUTHORIZED} exact component={Unauthorized} />
       <Route path="*" component={NoMatch} />
     </Switch>
   );
 };
 
-export default App;
+const mapStateToProps = (state) => {
+  return {
+    currentUser: state.user.current,
+  };
+};
+
+export default connect(mapStateToProps, null)(App);

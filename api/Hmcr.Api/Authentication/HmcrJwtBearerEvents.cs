@@ -1,4 +1,6 @@
 ﻿using Hmcr.Api.Extensions;
+using Hmcr.Bceid;
+using Hmcr.Data.Database.Entities;
 using Hmcr.Domain.Services;
 using Hmcr.Model;
 using Hmcr.Model.Dtos.User;
@@ -7,6 +9,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -19,12 +22,16 @@ namespace Hmcr.Api.Authentication
     {
         private IUserService _userService;
         private HmcrCurrentUser _curentUser;
+        private IBceidApi _bceid;
+        private ILogger<HmcrJwtBearerEvents> _logger;
 
         public HmcrJwtBearerEvents(IWebHostEnvironment env, IUserService userService,
-            HmcrCurrentUser currentUser) : base()
+            HmcrCurrentUser currentUser, IBceidApi bceid, ILogger<HmcrJwtBearerEvents> logger) : base()
         {
             _userService = userService;
             _curentUser = currentUser;
+            _bceid = bceid;
+            _logger = logger;
         }
 
         public override async Task AuthenticationFailed(AuthenticationFailedContext context)
@@ -48,57 +55,64 @@ namespace Hmcr.Api.Authentication
 
         public override async Task TokenValidated(TokenValidatedContext context)
         {
-            PopulateCurrentUser(context.Principal);
-
-            if (_curentUser.UserGuid == null)
+            if (!(await PopulateCurrentUserFromDb(context.Principal)))
             {
                 context.Fail("Access Denied");
-                return;
-            }
-
-            var userExists = await _userService.ProcessFirstUserLoginAsync();
-
-            if (!userExists)
-            {
-                context.Fail($"Access Denied - User[{_curentUser.UniversalId}] does not exist");
                 return;
             }
 
             _curentUser.UserInfo = await _userService.GetCurrentUserAsync();
 
             AddClaimsFromUserInfo(context.Principal, _curentUser.UserInfo);
-
-            await Task.CompletedTask;
         }
 
-        private void PopulateCurrentUser(ClaimsPrincipal principal)
+        private async Task<bool> PopulateCurrentUserFromDb(ClaimsPrincipal principal)
         {
-            _curentUser.UserName = principal.FindFirstValue(HmcrClaimTypes.UserName);
-            var username = _curentUser.UserName.Split("@");
-            var directory = username[1];
+            _curentUser.UserName = principal.FindFirstValue(HmcrClaimTypes.KcUsername);
+            var usernames = _curentUser.UserName.Split("@");
+            var username = usernames[0].ToUpperInvariant();
+            var directory = usernames[1].ToUpperInvariant();
 
-            if (directory.ToUpperInvariant() == "IDIR")
+            var userGuidClaim = directory.ToUpperInvariant() == UserTypeDto.IDIR ? HmcrClaimTypes.KcIdirGuid : HmcrClaimTypes.KcBceidGuid;
+            var userGuid = new Guid(principal.FindFirstValue(userGuidClaim));
+
+            var user = await _userService.GetActiveUserEntityAsync(userGuid);
+            var email = principal.FindFirstValue(ClaimTypes.Email).ToUpperInvariant();
+
+            if (user == null)
             {
-                _curentUser.UserGuid = new Guid(principal.FindFirstValue(HmcrClaimTypes.UserGuid));
+                _logger.LogWarning($"Access Denied - User[{username}/{userGuid}] does not exist");
+                return false;
+            }
+
+            if (directory == "IDIR")
+            {
+                _curentUser.UserGuid = userGuid;
                 _curentUser.UserType = UserTypeDto.INTERNAL;
             }
             else
             {
-                //todo: set UserGuid and BusinessGuid
-                //_curentUser.UserGuid = new Guid(principal.FindFirstValue(HmcrClaimTypes.BceidGuid));
-                //_curentUser.BusinessGuid = new Guid(principal.FindFirstValue(HmcrClaimTypes.BizGuid));
-                //_curentUser.BusinessLegalName = principal.FindFirstValue(HmcrClaimTypes.BizLegalName);
-                //_curentUser.BusinessNumber = principal.FindFirstValue(HmcrClaimTypes.BizNumber);
-
+                _curentUser.UserGuid = userGuid;
+                _curentUser.BusinessGuid = user.BusinessGuid;
+                _curentUser.BusinessLegalName = user.Party.BusinessLegalName;
+                _curentUser.BusinessNumber = user.Party.BusinessNumber ?? 0;
                 _curentUser.UserType = UserTypeDto.BUSINESS;
             }
 
-            _curentUser.UniversalId = username[0].ToUpperInvariant();
-            _curentUser.AuthDirName = directory.ToUpperInvariant();
-            _curentUser.Email = principal.FindFirstValue(ClaimTypes.Email);
-            _curentUser.UserName = principal.FindFirstValue(HmcrClaimTypes.UserName);
-            _curentUser.FirstName = principal.FindFirstValue(ClaimTypes.GivenName);
-            _curentUser.LastName = principal.FindFirstValue(ClaimTypes.Surname);
+            _curentUser.UniversalId = username;
+            _curentUser.AuthDirName = directory;
+            _curentUser.Email = email;
+            _curentUser.UserName = username;
+            _curentUser.FirstName = user.FirstName;
+            _curentUser.LastName = user.LastName;
+
+            if (user.Username.ToUpperInvariant() != username || user.Email.ToUpperInvariant() != email)
+            {
+                _logger.LogWarning($"Username/Email changed from {user.Username}/{user.Email} to {user.Email}/{email}.");
+                await _userService.UpdateUserFromBceidAsync(userGuid, username, user.UserType, user.ConcurrencyControlNumber);
+            }
+
+            return true;
         }
 
         private void AddClaimsFromUserInfo(ClaimsPrincipal principal, UserCurrentDto user)

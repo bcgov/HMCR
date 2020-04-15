@@ -1,4 +1,5 @@
 ﻿using Hmcr.Api.Authorization;
+using Hmcr.Api.Controllers.Base;
 using Hmcr.Domain.Services;
 using Hmcr.Model;
 using Hmcr.Model.Dtos;
@@ -15,7 +16,7 @@ namespace Hmcr.Api.Controllers
     [ApiVersion("1.0")]
     [Route("api/users")]
     [ApiController]
-    public class UsersController : ControllerBase
+    public class UsersController : HmcrControllerBase
     {
         private IUserService _userService;
         private HmcrCurrentUser _currentUser;
@@ -40,12 +41,12 @@ namespace Hmcr.Api.Controllers
                 new UserTypeDto
                 {
                     UserTypeId = UserTypeDto.INTERNAL,
-                    UserType = UserTypeDto.INTERNAL
+                    UserType = UserTypeDto.IDIR
                 },
                 new UserTypeDto
                 {
                     UserTypeId = UserTypeDto.BUSINESS,
-                    UserType = UserTypeDto.BUSINESS
+                    UserType = UserTypeDto.BCeId
                 }
             };
 
@@ -87,18 +88,33 @@ namespace Hmcr.Api.Controllers
         [RequiresPermission(Permissions.UserRead)]
         public async Task<ActionResult<PagedDto<UserSearchDto>>> GetUsersAsync(
             [FromQuery]string? serviceAreas, [FromQuery]string? userTypes, [FromQuery]string searchText, [FromQuery]bool? isActive,
-            [FromQuery]int pageSize, [FromQuery]int pageNumber, [FromQuery]string orderBy)
+            [FromQuery]int pageSize, [FromQuery]int pageNumber, [FromQuery]string orderBy = "username", [FromQuery]string direction = "")
         {
-            orderBy ??= "Username";
-
-            return Ok(await _userService.GetUsersAsync(serviceAreas.ToDecimalArray(), userTypes.ToStringArray(), searchText, isActive, pageSize, pageNumber, orderBy));
+            return Ok(await _userService.GetUsersAsync(serviceAreas.ToDecimalArray(), userTypes.ToStringArray(), searchText, isActive, pageSize, pageNumber, orderBy, direction));
         }
 
         [HttpGet("{id}", Name = "GetUser")]
         [RequiresPermission(Permissions.UserRead)]
         public async Task<ActionResult<UserDto>> GetUsersAsync(decimal id)
         {
-            return await _userService.GetUserAsync(id);
+            var user = await _userService.GetUserAsync(id); 
+
+            if (user == null)
+                return NotFound();
+
+            return user;
+        }
+
+        [HttpGet("bceidaccount/{userType}/{username}", Name = "GetBceidAccount")]
+        [RequiresPermission(Permissions.UserWrite)]
+        public async Task<ActionResult<UserBceidAccountDto>> GetBceidAccountAsync(string username, string userType)
+        {
+            var bceidAccount = await _userService.GetBceidAccountAsync(username, userType);
+
+            if (bceidAccount == null)
+                return NotFound();
+
+            return bceidAccount;
         }
 
         [HttpPost]

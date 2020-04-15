@@ -11,7 +11,7 @@ objects:
     metadata:
       creationTimestamp: null
       labels:
-        shared: true
+        shared: "true"
       name: ${NAME}
     spec:
       lookupPolicy:
@@ -49,7 +49,7 @@ objects:
               value: Hmcr.Api/Hmcr.Api.csproj
           from:
             kind: ImageStreamTag
-            name: "dotnet-30-rhel7:3.0"
+            name: "dotnet-31-rhel7:3.1"
         type: Source
 parameters:
   - description: Name of the project (HMCR)

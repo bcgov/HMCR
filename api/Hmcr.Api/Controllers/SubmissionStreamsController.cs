@@ -1,5 +1,7 @@
 ﻿using Hmcr.Api.Authorization;
+using Hmcr.Api.Controllers.Base;
 using Hmcr.Domain.Services;
+using Hmcr.Model;
 using Hmcr.Model.Dtos.SubmissionStream;
 using Microsoft.AspNetCore.Mvc;
 using System;
@@ -12,7 +14,7 @@ namespace Hmcr.Api.Controllers
     [ApiVersion("1.0")]
     [Route("api/submissionstreams")]
     [ApiController]
-    public class SubmissionStreamsController : ControllerBase
+    public class SubmissionStreamsController : HmcrControllerBase
     {
         private ISubmissionStreamService _streamService;
 

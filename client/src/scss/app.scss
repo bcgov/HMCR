@@ -9,6 +9,30 @@ body {
   background-color: #e2e1e0;
 }
 
+h1 {
+  font-size: 1.25rem;
+}
+
+h2 {
+  font-size: 1.2rem;
+}
+
+h3 {
+  font-size: 1.15rem;
+}
+
+h4 {
+  font-size: 1.1rem;
+}
+
+h5 {
+  font-size: 1.05rem;
+}
+
+h6 {
+  font-size: 1rem;
+}
+
 .util-bar {
   width: 100%;
   background-color: white;
@@ -17,6 +41,16 @@ body {
 .table-sm th,
 .table-sm td {
   padding: 0.1rem 0.3rem;
+}
+
+.text-overflow-hiden {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.text-overflow-hiden:hover {
+  overflow: visible;
+  word-wrap: break-word;
 }
 
 .btn-xs {
@@ -44,4 +78,46 @@ body {
 
 .fa-color-danger {
   color: theme-color(danger);
+}
+
+.fa-color-warning {
+  color: theme-color(warning);
+}
+
+.modal-dialog.modal-xl {
+  max-width: 1140px;
+}
+
+ul.no-bullet {
+  list-style-type: none;
+  padding-inline-start: 0;
+}
+
+.Toastify__toast--info {
+  background-color: theme-color(primary);
+}
+
+.Toastify__toast--success {
+  background-color: theme-color(success);
+}
+
+.Toastify__toast--warning {
+  background-color: theme-color(warning);
+}
+
+.Toastify__toast--error {
+  background-color: theme-color(danger);
+}
+
+.popover {
+  background: #fff;
+  border-radius: 2px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
+  margin-bottom: 16px;
+}
+
+.ui-header {
+  border-bottom: 1px solid #eee;
+  margin-bottom: 16px;
+  color: theme-color(primary-nav);
 }

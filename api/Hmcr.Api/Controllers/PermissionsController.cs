@@ -1,4 +1,5 @@
 ﻿using Hmcr.Api.Authorization;
+using Hmcr.Api.Controllers.Base;
 using Hmcr.Domain.Services;
 using Hmcr.Model;
 using Hmcr.Model.Dtos.Permission;
@@ -13,7 +14,7 @@ namespace Hmcr.Api.Controllers
     [ApiVersion("1.0")]
     [Route("api/permissions")]
     [ApiController]
-    public class PermissionsController : ControllerBase
+    public class PermissionsController : HmcrControllerBase
     {
         private IPermissionService _permissionService;
 
@@ -22,7 +23,7 @@ namespace Hmcr.Api.Controllers
             _permissionService = permissionService;
         }
 
-        [HttpGet("")]
+        [HttpGet]
         [RequiresPermission(Permissions.RoleRead)]
         public async Task<ActionResult<IEnumerable<PermissionDto>>> GetActivePermissionsAsync()
         {

@@ -76,5 +76,60 @@
         border: 1px double theme-color(primary);
       }
     }
+
+    .SingleDatePickerInput__showClearDate {
+      padding-right: 0;
+
+      .SingleDatePickerInput_clearDate {
+        right: 30px;
+      }
+    }
+  }
+}
+
+.DatePickerWrapper.is-invalid {
+  .DateRangePickerInput__withBorder {
+    border: 1px solid theme-color(danger);
+  }
+}
+
+.DateRangePicker {
+  .DateRangePickerInput__withBorder {
+    border-radius: 0.25rem;
+    height: calc(1.5em + 0.75rem + 2px);
+  }
+
+  .DateRangePickerInput_calendarIcon {
+    margin-right: 0;
+    background-color: theme-color(primary);
+
+    border-radius: 0;
+    border-top-right-radius: $input-border-radius;
+    border-bottom-right-radius: $input-border-radius;
+    height: 100%;
+
+    .DateRangePickerInput_calendarIcon_svg {
+      fill: white;
+      margin-bottom: 10px;
+    }
+  }
+
+  .DateInput_input__focused {
+    border-bottom: 2px solid theme-color(primary);
+  }
+
+  .CalendarDay__selected,
+  .CalendarDay__selected:active,
+  .CalendarDay__selected:hover {
+    background: theme-color(primary);
+    border: 1px double theme-color(primary);
+  }
+
+  .CalendarDay__selected_span,
+  .CalendarDay__hovered_span,
+  .CalendarDay__hovered_span:hover {
+    background: theme-color(info);
+    border: 1px double theme-color(info);
+    color: white;
   }
 }

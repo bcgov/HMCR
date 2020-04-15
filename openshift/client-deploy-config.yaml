@@ -7,27 +7,6 @@ labels:
   template: client-config
 objects:
   - apiVersion: v1
-    data:
-      client: |-
-        server {
-            listen       8080 default_server;
-            listen       [::]:8080 default_server;
-            server_name  _;
-
-            add_header Last-Modified $date_gmt;
-            add_header Cache-Control "private, no-store, no-cache, must-revalidate";
-
-            location / {
-                root   /usr/share/nginx/html;
-                index  index.html index.htm;
-
-                try_files $uri /index.html =404;
-            }
-        }
-    kind: ConfigMap
-    metadata:
-      name: client-configmap-${SUFFIX}
-  - apiVersion: v1
     kind: ImageStream
     metadata:
       creationTimestamp: null
@@ -46,14 +25,7 @@ objects:
       replicas: 1
       selector:
         deploymentconfig: ${NAME}${SUFFIX}
-      strategy:
-        resources:
-          requests:
-            cpu: 250m
-            memory: 32Mi
-          limits:
-            cpu: 250m
-            memory: 64Mi
+      strategy: {}
       template:
         metadata:
           creationTimestamp: null
@@ -77,32 +49,22 @@ objects:
                 - name: REACT_APP_SSO_HOST
                   valueFrom:
                     secretKeyRef:
-                      name: sso-configs
+                      name: sso-configs-${ENV}
                       key: CLIENT_SSO_HOST
                 - name: REACT_APP_SSO_REALM
                   valueFrom:
                     secretKeyRef:
-                      name: sso-configs
+                      name: sso-configs-${ENV}
                       key: CLIENT_SSO_REALM
                 - name: REACT_APP_SSO_CLIENT
                   valueFrom:
                     secretKeyRef:
-                      name: sso-configs
+                      name: sso-configs-${ENV}
                       key: CLIENT_SSO_CLIENTID
                 - name: REACT_APP_API_HOST
-                  value: ${HOST}
-              volumeMounts:
-                - name: ${NAME}${SUFFIX}-volume
-                  mountPath: /etc/nginx/conf.d/
-                  readOnly: true
-          volumes:
-            - name: ${NAME}${SUFFIX}-volume
-              configMap:
-                defaultMode: 420
-                items:
-                  - key: client
-                    path: default.conf
-                name: client-configmap-${SUFFIX}
+                  value: ${HOST}                
+                - name: HMCR_DEPLOY_SUFFIX
+                  value: ${SUFFIX}
       test: false
       triggers:
         - imageChangeParams:
@@ -130,6 +92,8 @@ objects:
   - apiVersion: route.openshift.io/v1
     kind: Route
     metadata:
+      annotations:
+        haproxy.router.openshift.io/timeout: 1h
       creationTimestamp: null
       name: ${NAME}${SUFFIX}
     spec:
@@ -160,6 +124,11 @@ parameters:
     name: SUFFIX
     required: false
     value: "-dev"
+  - description: Environment short name (dev,test,uat,prod)
+    displayName: ENV
+    name: ENV
+    required: false
+    value: "dev"
   - description: A version used for the image tags
     displayName: version
     name: VERSION

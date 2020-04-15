@@ -1,7 +1,10 @@
 ﻿using AutoMapper;
 using Hmcr.Data.Database.Entities;
 using Hmcr.Data.Repositories.Base;
+using Hmcr.Model.Dtos;
+using Hmcr.Model.Dtos.Permission;
 using Hmcr.Model.Dtos.Role;
+using Hmcr.Model.Dtos.RolePermission;
 using Hmcr.Model.Utils;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -14,19 +17,23 @@ namespace Hmcr.Data.Repositories
     public interface IRoleRepository : IHmcrRepositoryBase<HmrRole>
     {
         Task<int> CountActiveRoleIdsAsync(IEnumerable<decimal> roles);
-        Task<IEnumerable<RoleDto>> GetActiveRolesAsync();
-        Task<IEnumerable<RoleSearchDto>> GetRolesAync(string searchText, bool? isActive = null);
+        Task<PagedDto<RoleSearchDto>> GetRolesAync(string searchText, bool? isActive, int pageSize, int pageNumber, string orderBy, string direction);
         Task<RoleDto> GetRoleAsync(decimal roleId);
+        Task<PermissionsInRoleDto> GetRolePermissionsAsync(decimal roleId);
         Task<HmrRole> CreateRoleAsync(RoleCreateDto role);
         Task UpdateRoleAsync(RoleUpdateDto role);
         Task DeleteRoleAsync(RoleDeleteDto role);
         Task<bool> DoesNameExistAsync(string name);
+        IAsyncEnumerable<RoleDto> FindInternalOnlyRolesAsync(IEnumerable<decimal> roleIds);
     }
     public class RoleRepository : HmcrRepositoryBase<HmrRole>, IRoleRepository
     {
-        public RoleRepository(AppDbContext dbContext, IMapper mapper)
+        private IUserRoleRepository _userRoleRepo;
+
+        public RoleRepository(AppDbContext dbContext, IMapper mapper, IUserRoleRepository userRoleRepo)
             : base(dbContext, mapper)
         {
+            _userRoleRepo = userRoleRepo;
         }
 
         public async Task<int> CountActiveRoleIdsAsync(IEnumerable<decimal> roles)
@@ -34,21 +41,14 @@ namespace Hmcr.Data.Repositories
             return await DbSet.CountAsync(r => roles.Contains(r.RoleId) && (r.EndDate == null || r.EndDate > DateTime.Today));
         }
 
-        public async Task<IEnumerable<RoleDto>> GetActiveRolesAsync()
-        {
-            var roleEntity = await DbSet.AsNoTracking()
-                .Where(x => x.EndDate == null || x.EndDate > DateTime.Today)
-                .ToListAsync();
-
-            return Mapper.Map<IEnumerable<RoleDto>>(roleEntity);
-        } 
-
-        public async Task<IEnumerable<RoleSearchDto>> GetRolesAync(string searchText, bool? isActive = null)
+        public async Task<PagedDto<RoleSearchDto>> GetRolesAync(string searchText, bool? isActive, int pageSize, int pageNumber, string orderBy, string direction)
         {
             var query = DbSet.AsNoTracking();
 
             if (searchText.IsNotEmpty())
             {
+                searchText = searchText.Trim();
+
                 query = query
                     .Where(x => x.Name.Contains(searchText) || x.Description.Contains(searchText));
             }
@@ -57,18 +57,52 @@ namespace Hmcr.Data.Repositories
             {
                 query = (bool)isActive
                     ? query.Where(x => x.EndDate == null || x.EndDate > DateTime.Today)
-                    : query.Where(x => x.EndDate != null || x.EndDate <= DateTime.Today.AddDays(1));
+                    : query.Where(x => x.EndDate != null && x.EndDate <= DateTime.Today);
             }
 
-            var roles = Mapper.Map<IEnumerable<RoleSearchDto>>(await query.ToListAsync());
+            var pagedEntity = await Page<HmrRole, HmrRole>(query, pageSize, pageNumber, orderBy, direction);
 
-            return roles;
+            var roles = Mapper.Map<IEnumerable<RoleSearchDto>>(pagedEntity.SourceList);
+
+            // Find out which roles are in use
+            await foreach (var roleId in FindRolesInUseAync(roles.Select(x => x.RoleId))){
+                roles.FirstOrDefault(x => x.RoleId == roleId).IsReferenced = true;
+            }
+
+            var pagedDTO = new PagedDto<RoleSearchDto>
+            {
+                PageNumber = pageNumber,
+                PageSize = pageSize,
+                TotalCount = pagedEntity.TotalCount,
+                SourceList = roles,
+                OrderBy = orderBy,
+                Direction = direction
+            };
+
+            return pagedDTO;
+        }
+
+        public async Task<PermissionsInRoleDto> GetRolePermissionsAsync(decimal roleId)
+        {
+            var role = await DbSet.AsNoTracking()
+                .Include(x => x.HmrRolePermissions)
+                    .ThenInclude(x => x.Permission)
+                .FirstAsync(x => x.RoleId == roleId);
+
+            return new PermissionsInRoleDto
+            {
+                RoleName = role.Name,
+                Permissions = role.HmrRolePermissions
+                    .Where(x => x.EndDate == null || x.EndDate > DateTime.Today)
+                    .Select(x => x.Permission.Name).ToArray()
+            };
         }
 
         public async Task<RoleDto> GetRoleAsync(decimal roleId)
         {
             var roleEntity = await DbSet.AsNoTracking()
                     .Include(x => x.HmrRolePermissions)
+                    .Include(x => x.HmrUserRoles)
                     .FirstOrDefaultAsync(x => x.RoleId == roleId);
 
             if (roleEntity == null)
@@ -84,6 +118,8 @@ namespace Hmcr.Data.Repositories
                 .ToList();
 
             role.Permissions = permissionIds;
+
+            role.IsReferenced = await _userRoleRepo.IsRoleInUseAsync(role.RoleId);
 
             return role;
         }
@@ -158,6 +194,25 @@ namespace Hmcr.Data.Repositories
         {
             return await DbSet.AnyAsync(x => x.Name == name);
         }
+        
+        private async IAsyncEnumerable<decimal> FindRolesInUseAync(IEnumerable<decimal> roleIds)
+        {
+            foreach (var roleId in roleIds)
+            {
+                if (await _userRoleRepo.IsRoleInUseAsync(roleId))
+                    yield return roleId;
+            }
+        }
 
+        public async IAsyncEnumerable<RoleDto> FindInternalOnlyRolesAsync(IEnumerable<decimal> roleIds)
+        {
+            foreach (var roleId in roleIds)
+            {
+                var role = await GetByIdAsync<RoleDto>(roleId);
+
+                if (role.IsInternal)
+                    yield return role;
+            }
+        }
     }
 }

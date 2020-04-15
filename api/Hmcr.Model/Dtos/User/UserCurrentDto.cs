@@ -29,6 +29,7 @@ namespace Hmcr.Model.Dtos.User
         public string Email { get; set; }
         public string BusinessLegalName { get; set; }
         public DateTime? EndDate { get; set; }
+        public bool IsSystemAdmin { get; set; }
 
         public virtual IList<ServiceAreaDto> ServiceAreas { get; set; }
         public virtual IList<string> Permissions { get; set; }       

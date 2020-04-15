@@ -1,14 +1,18 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netcoreapp3.0</TargetFramework>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="CsvHelper" Version="12.2.1" />
+    <PackageReference Include="CsvHelper" Version="15.0.0" />
+    <PackageReference Include="Hangfire.Core" Version="1.7.9" />
+    <PackageReference Include="MailKit" Version="2.5.1" />
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Hmcr.Bceid\Hmcr.Bceid.csproj" />
+    <ProjectReference Include="..\Hmcr.Chris\Hmcr.Chris.csproj" />
     <ProjectReference Include="..\Hmcr.Data\Hmcr.Data.csproj" />
     <ProjectReference Include="..\Hmcr.Model\Hmcr.Model.csproj" />
   </ItemGroup>

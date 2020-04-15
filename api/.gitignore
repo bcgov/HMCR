@@ -282,9 +282,15 @@ __pycache__/
 *.sonarqube
 
 **/*.Local.json
+**/appsettings.Development.json
 
 *.DotSettings
 *.DotSettings.user
 
 # Ignore Serilog files
 log*.txt
+
+.env.local
+
+# Override .s2i/bin
+!.s2i/bin

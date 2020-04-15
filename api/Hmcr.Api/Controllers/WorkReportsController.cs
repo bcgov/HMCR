@@ -1,54 +1,67 @@
 ﻿using Hmcr.Api.Authorization;
+using Hmcr.Api.Controllers.Base;
 using Hmcr.Domain.Services;
 using Hmcr.Model;
-using Hmcr.Model.Dtos.WorkReport;
+using Hmcr.Model.Dtos.SubmissionObject;
 using Microsoft.AspNetCore.Mvc;
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text.Json;
 using System.Threading.Tasks;
 
 namespace Hmcr.Api.Controllers
 {
     [ApiVersion("1.0")]
     [Route("api/workreports")]
-    public class WorkReportsController : ControllerBase
+    public class WorkReportsController : HmcrControllerBase
     {
         private IWorkReportService _workRptService;
+        private ISubmissionObjectService _submissionService;
+        private HmcrCurrentUser _currentUser;
 
-        public WorkReportsController(IWorkReportService workRptService)
+        public WorkReportsController(IWorkReportService workRptService, ISubmissionObjectService submissionService, HmcrCurrentUser currentUser)
         {
             _workRptService = workRptService;
-        }
-
-        [HttpPost("duplicates")]
-        [RequiresPermission(Permissions.FileUploadWrite)]
-        public async Task<IActionResult> CreateWorkReportAsync([FromForm] WorkRptUploadDto upload)
-        {
-            var result = await _workRptService.CreateWorkReportAsync(upload);
-
-            if (result.SubmissionObjectId == 0)
-            {
-                return ValidationUtils.GetValidationErrorResult(result.Errors, ControllerContext);
-            }
-
-            return Ok();
+            _submissionService = submissionService;
+            _currentUser = currentUser;
         }
 
         [HttpPost]
         [RequiresPermission(Permissions.FileUploadWrite)]
-        public async Task<IActionResult> CheckDuplicateAsync([FromForm] WorkRptUploadDto upload)
+        public async Task<IActionResult> CreateWorkReportAsync([FromForm] FileUploadDto upload)
         {
-            var (Errors, DuplicateRecordNumbers) = await _workRptService.CheckDuplicatesAsync(upload);
-
-            if (Errors.Count > 0)
+            var problem = IsServiceAreaAuthorized(_currentUser, upload.ServiceAreaNumber);
+            if (problem != null)
             {
-                return ValidationUtils.GetValidationErrorResult(Errors, ControllerContext);
+                return Unauthorized(problem);
             }
 
-            //return Ok(JsonSerializer.Serialize(DuplicateRecordNumbers));
-            return Ok(DuplicateRecordNumbers);
+            var (submissionObjectId, errors) = await _workRptService.CreateReportAsync(upload);
+
+            if (errors.Count > 0)
+            {
+                return ValidationUtils.GetValidationErrorResult(errors, ControllerContext);
+            }
+
+            return CreatedAtRoute("GetSubmissionObject", new { id = submissionObjectId }, await _submissionService.GetSubmissionObjectAsync(submissionObjectId));
+        }
+
+        [HttpPost("resubmissions")]
+        [RequiresPermission(Permissions.FileUploadWrite)]
+        public async Task<ActionResult<List<string>>> CheckResubmitAsync([FromForm] FileUploadDto upload)
+        {
+            var problem = IsServiceAreaAuthorized(_currentUser, upload.ServiceAreaNumber);
+            if (problem != null)
+            {
+                return Unauthorized(problem);
+            }
+
+            var (errors, resubmittedRecordNumbers) = await _workRptService.CheckResubmitAsync(upload);
+
+            if (errors.Count > 0)
+            {
+                return ValidationUtils.GetValidationErrorResult(errors, ControllerContext);
+            }
+
+            return Ok(resubmittedRecordNumbers);
         }
     }
 }

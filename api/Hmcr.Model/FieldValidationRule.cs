@@ -16,10 +16,11 @@ namespace Hmcr.Model
         public decimal? MaxValue { get; set; }
         public DateTime? MinDate { get; set; }
         public DateTime? MaxDate { get; set; }
-        public string Regex { get; set; }
-        public string LookUpCode { get; set; }
+        public RegexInfo Regex { get; private set; }
+        public string CodeSet { get; set; }
+        public LookupItem LookupItem { get; set; }
 
-        public FieldValidationRule(string entityName, string fieldName, string fieldType, bool required, int? minLength, int? maxLength, decimal? minValue, decimal? maxValue, DateTime? minDate, DateTime? maxDate, string regex, string lookUpCode)
+        public FieldValidationRule(string entityName, string fieldName, string fieldType, bool required, int? minLength, int? maxLength, decimal? minValue, decimal? maxValue, DateTime? minDate, DateTime? maxDate, RegexInfo regex, string codeSet, LookupItem lookupItem = LookupItem.Value)
         {
             EntityName = entityName;
             FieldName = fieldName;
@@ -32,7 +33,21 @@ namespace Hmcr.Model
             MinDate = minDate;
             MaxDate = maxDate;
             Regex = regex;
-            LookUpCode = lookUpCode;
+            CodeSet = codeSet;
+            LookupItem = lookupItem;
         }
+
+        public FieldValidationRule ShallowCopy(string entityName)
+        {
+            var rule = (FieldValidationRule)this.MemberwiseClone();
+            rule.EntityName = entityName;
+            return rule;
+        }
+    }
+
+
+    public enum LookupItem
+    {
+        Value, Name
     }
 }

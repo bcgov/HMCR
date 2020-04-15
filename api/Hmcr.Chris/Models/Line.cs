@@ -17,5 +17,19 @@ namespace Hmcr.Chris.Models
                 Points.Add(new Point(coordinates[i]));
             }
         }
+
+        public Line(params Point[] points)
+        {
+            Coordinates = new decimal[points.Length][];
+            Points = new List<Point>();
+
+            var i = 0;
+            foreach(var point in points)
+            {
+                Points.Add(point);
+                Coordinates[i] = point.Coordinates;
+                i++;
+            }
+        }
     }
 }

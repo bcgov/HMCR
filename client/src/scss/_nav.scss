@@ -1,11 +1,11 @@
 @import './vendor/bootstrap-theme.scss';
 
-$nav-link-active-bg: lighten(theme-color(secondary-nav), 10%);
+@mixin main-nav-colors($background-color) {
+  $nav-link-active-bg: lighten($background-color, 10%);
 
-.main-nav {
   padding: 0 1rem;
   border-bottom: 0;
-  background-color: theme-color(secondary-nav);
+  background-color: $background-color;
   font-size: 0.85rem;
 
   .nav-link {
@@ -24,6 +24,44 @@ $nav-link-active-bg: lighten(theme-color(secondary-nav), 10%);
     text-decoration: none;
     font-size: 0.85rem;
   }
+
+  .navbar-nav {
+    .dropdown {
+      .dropdown-menu {
+        background-color: $background-color;
+
+        .dropdown-item {
+          color: $navbar-dark-color;
+          text-decoration: none;
+        }
+      }
+
+      @include hover-focus() {
+        .dropdown-item {
+          text-decoration: underline;
+          background-color: $background-color;
+          color: $navbar-dark-hover-color;
+        }
+      }
+    }
+  }
+}
+
+.main-nav {
+  @include main-nav-colors(theme-color(secondary-nav));
+}
+
+.main-nav.dev,
+.main-nav.unknown {
+  @include main-nav-colors(#448a38);
+}
+
+.main-nav.tst {
+  @include main-nav-colors(#f9a825);
+}
+
+.main-nav.uat {
+  @include main-nav-colors(#744e91);
 }
 
 .navbar-brand {

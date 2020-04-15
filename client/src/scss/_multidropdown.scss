@@ -13,6 +13,8 @@
     background-color: unset;
     border: 1px solid #ced4da;
     text-align: left;
+    text-overflow: ellipsis;
+    overflow-x: hidden;
   }
 
   .btn-secondary.dropdown-toggle,
@@ -48,6 +50,7 @@
 
   .dropdown-menu.multi {
     padding: 0;
+    max-width: 400px;
   }
 
   .multi-item-label {
@@ -88,4 +91,10 @@
   .dropdown-toggle {
     border: unset;
   }
+}
+
+.form-control.multi-select.is-invalid,
+.form-control.form-input.dropdown.is-invalid {
+  // background-position: right 22px center;
+  background: unset;
 }

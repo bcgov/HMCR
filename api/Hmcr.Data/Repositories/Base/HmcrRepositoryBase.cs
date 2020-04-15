@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Hmcr.Data.Database.Entities;
 using Microsoft.EntityFrameworkCore;
 using System.Linq;
+using NetTopologySuite.Geometries;
 
 namespace Hmcr.Data.Repositories.Base
 {
@@ -21,13 +22,15 @@ namespace Hmcr.Data.Repositories.Base
         void Delete(Expression<Func<TEntity, bool>> where);
         TDto GetById<TDto>(long id);
         TDto GetById<TDto>(string id);
+        Task<TDto> GetByIdAsync<TDto>(object id);
         IEnumerable<TDto> GetAll<TDto>();
         IEnumerable<TDto> GetAll<TDto>(Expression<Func<TEntity, bool>> where);
         Task<IEnumerable<TDto>> GetAllAsync<TDto>();
         Task<IEnumerable<TDto>> GetAllAsync<TDto>(Expression<Func<TEntity, bool>> where);
         Task<TDto> GetFirstOrDefaultAsync<TDto>(Expression<Func<TEntity, bool>> where);
-        Task<PagedDto<TOutput>> Page<TInput, TOutput>(IQueryable<TInput> list, int pageSize, int pageNumber, string orderBy);
+        Task<PagedDto<TOutput>> Page<TInput, TOutput>(IQueryable<TInput> list, int pageSize, int pageNumber, string orderBy,string orderDir);
         Task<bool> ExistsAsync(object id);
+        void RollBackEntities();
     }
 
     public class HmcrRepositoryBase<TEntity> : IHmcrRepositoryBase<TEntity>
@@ -102,6 +105,10 @@ namespace Hmcr.Data.Repositories.Base
             return Mapper.Map<TDto>(DbSet.Find(id));
         }
 
+        public virtual async Task<TDto> GetByIdAsync<TDto>(object id)
+        {
+            return Mapper.Map<TDto>(await DbSet.FindAsync(id));
+        }
         public virtual IEnumerable<TDto> GetAll<TDto>()
         {
             return Mapper.Map<IEnumerable<TDto>>(DbSet.ToList());
@@ -122,6 +129,11 @@ namespace Hmcr.Data.Repositories.Base
             return Mapper.Map<IEnumerable<TDto>>(await DbSet.Where(where).ToListAsync());
         }
 
+        public virtual async Task<IEnumerable<TDto>> GetAllNoTrackAsync<TDto>(Expression<Func<TEntity, bool>> where)
+        {
+            return Mapper.Map<IEnumerable<TDto>>(await DbSet.AsNoTracking().Where(where).ToListAsync());
+        }
+
         public async Task<TDto> GetFirstOrDefaultAsync<TDto>(Expression<Func<TEntity, bool>> where)
         {
             return Mapper.Map<TDto>(await DbSet.Where(where).FirstOrDefaultAsync<TEntity>());
@@ -132,13 +144,13 @@ namespace Hmcr.Data.Repositories.Base
             return await DbSet.FindAsync(id) != null;
         }
 
-        public async Task<PagedDto<TOutput>> Page<TInput, TOutput>(IQueryable<TInput> list, int pageSize, int pageNumber, string orderBy)
+        public async Task<PagedDto<TOutput>> Page<TInput, TOutput>(IQueryable<TInput> list, int pageSize, int pageNumber, string orderBy, string direction = "")
         {
             var totalRecords = list.Count();
 
             if (pageNumber <= 0) pageNumber = 1;
 
-            var pagedList = list.DynamicOrderBy(orderBy) as IQueryable<TInput>;
+            var pagedList = list.DynamicOrderBy($"{orderBy} {direction}") as IQueryable<TInput>;
 
             if (pageSize > 0)
             {
@@ -161,12 +173,36 @@ namespace Hmcr.Data.Repositories.Base
                 PageNumber = pageNumber,
                 PageSize = pageSize,
                 TotalCount = totalRecords,
-                SourceList = outputList
+                SourceList = outputList,
+                OrderBy = orderBy,
+                Direction = direction
             };
 
             return pagedDTO;
         }
 
+        public void RollBackEntities()
+        {
+            var changedEntries = DbContext.ChangeTracker.Entries()
+                .Where(x => x.State != EntityState.Unchanged).ToList();
+
+            foreach (var entry in changedEntries)
+            {
+                switch (entry.State)
+                {
+                    case EntityState.Modified:
+                        entry.CurrentValues.SetValues(entry.OriginalValues);
+                        entry.State = EntityState.Unchanged;
+                        break;
+                    case EntityState.Added:
+                        entry.State = EntityState.Detached;
+                        break;
+                    case EntityState.Deleted:
+                        entry.State = EntityState.Unchanged;
+                        break;
+                }
+            }
+        }
         #endregion
     }
 }

@@ -1,36 +1,81 @@
 import React, { useState, useEffect } from 'react';
 import { connect } from 'react-redux';
 
-import Spinner from './ui/Spinner';
+import PageSpinner from './ui/PageSpinner';
 import ErrorDialogModal from './ui/ErrorDialogModal';
 
-import { fetchCurrentUser, fetchServiceAreas, fetchUserStatuses, fetchUserTypes } from '../actions';
+import {
+  fetchCurrentUser,
+  fetchServiceAreas,
+  fetchUserStatuses,
+  fetchUserTypes,
+  fetchMaintenanceTypes,
+  fetchUnitOfMeasures,
+  fetchLocationCodes,
+  fetchFeatureTypes,
+  fetchSubmissionStatuses,
+  fetchSubmissionStreams,
+  fetchThresholdLevels,
+} from '../actions';
 
-const Main = ({ errorDialog, children, fetchCurrentUser, fetchServiceAreas, fetchUserStatuses, fetchUserTypes }) => {
+const Main = ({
+  errorDialog,
+  children,
+  fetchCurrentUser,
+  fetchServiceAreas,
+  fetchUserStatuses,
+  fetchUserTypes,
+  fetchMaintenanceTypes,
+  fetchUnitOfMeasures,
+  fetchLocationCodes,
+  fetchFeatureTypes,
+  fetchSubmissionStatuses,
+  fetchSubmissionStreams,
+  fetchThresholdLevels,
+}) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    Promise.all([fetchServiceAreas(), fetchCurrentUser(), fetchUserStatuses(), fetchUserTypes()]).then(() =>
-      setLoading(false)
-    );
+    Promise.all([
+      fetchServiceAreas(),
+      fetchCurrentUser(),
+      fetchUserStatuses(),
+      fetchUserTypes(),
+      fetchMaintenanceTypes(),
+      fetchUnitOfMeasures(),
+      fetchLocationCodes(),
+      fetchFeatureTypes(),
+      fetchSubmissionStatuses(),
+      fetchSubmissionStreams(),
+      fetchThresholdLevels(),
+    ]).then(() => setLoading(false));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (
     <React.Fragment>
-      {loading ? <Spinner /> : children}
+      {loading ? <PageSpinner /> : children}
       {errorDialog.show && <ErrorDialogModal isOpen={errorDialog.show} {...errorDialog} />}
     </React.Fragment>
   );
 };
 
-const mapStateToProps = state => {
+const mapStateToProps = (state) => {
   return {
     errorDialog: state.errorDialog,
   };
 };
 
-export default connect(
-  mapStateToProps,
-  { fetchCurrentUser, fetchServiceAreas, fetchUserStatuses, fetchUserTypes }
-)(Main);
+export default connect(mapStateToProps, {
+  fetchCurrentUser,
+  fetchServiceAreas,
+  fetchUserStatuses,
+  fetchUserTypes,
+  fetchMaintenanceTypes,
+  fetchUnitOfMeasures,
+  fetchLocationCodes,
+  fetchFeatureTypes,
+  fetchSubmissionStatuses,
+  fetchSubmissionStreams,
+  fetchThresholdLevels,
+})(Main);

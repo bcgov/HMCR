@@ -1,11 +1,15 @@
 ﻿using AutoMapper;
 using Hmcr.Data.Database.Entities;
+using Hmcr.Model.Dtos.LocationCode;
+using Hmcr.Model.Dtos.CodeLookup;
 using Hmcr.Model.Dtos.ContractTerm;
 using Hmcr.Model.Dtos.District;
+using Hmcr.Model.Dtos.FeedbackMessage;
 using Hmcr.Model.Dtos.MimeType;
 using Hmcr.Model.Dtos.Party;
 using Hmcr.Model.Dtos.Permission;
 using Hmcr.Model.Dtos.Region;
+using Hmcr.Model.Dtos.RockfallReport;
 using Hmcr.Model.Dtos.Role;
 using Hmcr.Model.Dtos.RolePermission;
 using Hmcr.Model.Dtos.ServiceArea;
@@ -16,6 +20,9 @@ using Hmcr.Model.Dtos.SubmissionStatus;
 using Hmcr.Model.Dtos.SubmissionStream;
 using Hmcr.Model.Dtos.User;
 using Hmcr.Model.Dtos.UserRole;
+using Hmcr.Model.Dtos.WildlifeReport;
+using Hmcr.Model.Dtos.WorkReport;
+using Hmcr.Model.Dtos.ActivityCode;
 
 namespace Hmcr.Data.Mappings
 {
@@ -71,6 +78,23 @@ namespace Hmcr.Data.Mappings
             CreateMap<UserRoleDto, HmrUserRole>();
 
             CreateMap<SubmissionStreamDto, HmrSubmissionStream>();
+
+            CreateMap<ActivityCodeDto, HmrActivityCode>();
+            CreateMap<ActivityCodeSearchDto, HmrActivityCode>();
+            CreateMap<ActivityCodeCreateDto, HmrActivityCode>();
+            CreateMap<ActivityCodeUpdateDto, HmrActivityCode>();
+            CreateMap<LocationCodeDto, HmrLocationCode>();
+
+            CreateMap<WorkReportTyped, HmrWorkReport>();
+
+            CreateMap<RockfallReportTyped, HmrRockfallReport>()
+                .ForMember(dst => dst.ReporterName, opt => opt.MapFrom(src => src.Name));
+
+            CreateMap<WildlifeReportTyped, HmrWildlifeReport>();
+
+            CreateMap<CodeLookupDto, HmrCodeLookup>();
+
+            CreateMap<FeedbackMessageDto, HmrFeedbackMessage>();
         }
     }
 }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using NetTopologySuite.Geometries;
 
 namespace Hmcr.Data.Database.Entities
 {
@@ -7,8 +8,11 @@ namespace Hmcr.Data.Database.Entities
     {
         public decimal WorkReportId { get; set; }
         public decimal SubmissionObjectId { get; set; }
+        public decimal RowId { get; set; }
+        public decimal? RowNum { get; set; }
         public decimal? ValidationStatusId { get; set; }
         public string RecordType { get; set; }
+        public decimal ServiceArea { get; set; }
         public string RecordNumber { get; set; }
         public string TaskNumber { get; set; }
         public string ActivityNumber { get; set; }
@@ -18,6 +22,8 @@ namespace Hmcr.Data.Database.Entities
         public string UnitOfMeasure { get; set; }
         public DateTime? PostedDate { get; set; }
         public string HighwayUnique { get; set; }
+        public string HighwayUniqueName { get; set; }
+        public decimal? HighwayUniqueLength { get; set; }
         public string Landmark { get; set; }
         public decimal? StartOffset { get; set; }
         public decimal? EndOffset { get; set; }
@@ -25,10 +31,12 @@ namespace Hmcr.Data.Database.Entities
         public decimal? StartLongitude { get; set; }
         public decimal? EndLatitude { get; set; }
         public decimal? EndLongitude { get; set; }
+        public decimal? WorkLength { get; set; }
         public string StructureNumber { get; set; }
         public string SiteNumber { get; set; }
         public decimal? ValueOfWork { get; set; }
         public string Comments { get; set; }
+        public Geometry Geometry { get; set; }
         public long ConcurrencyControlNumber { get; set; }
         public string AppCreateUserid { get; set; }
         public DateTime AppCreateTimestamp { get; set; }
@@ -43,6 +51,8 @@ namespace Hmcr.Data.Database.Entities
         public string DbAuditLastUpdateUserid { get; set; }
         public DateTime DbAuditLastUpdateTimestamp { get; set; }
 
+        public virtual HmrSubmissionRow Row { get; set; }
+        public virtual HmrServiceArea ServiceAreaNavigation { get; set; }
         public virtual HmrSubmissionObject SubmissionObject { get; set; }
         public virtual HmrSubmissionStatu ValidationStatus { get; set; }
     }

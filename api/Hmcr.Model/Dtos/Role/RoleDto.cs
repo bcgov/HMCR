@@ -18,6 +18,8 @@ namespace Hmcr.Model.Dtos.Role
         public string Name { get; set; }
         public string Description { get; set; }
         public DateTime? EndDate { get; set; }
+        public bool IsInternal { get; set; }
+        public bool IsReferenced { get; set; }
         public IList<decimal> Permissions { get; set; }
     }
 }

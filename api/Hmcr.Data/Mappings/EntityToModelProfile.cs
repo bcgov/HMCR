@@ -1,11 +1,17 @@
 ﻿using AutoMapper;
 using Hmcr.Data.Database.Entities;
+using Hmcr.Model;
+using Hmcr.Model.Dtos.ActivityCode;
+using Hmcr.Model.Dtos.CodeLookup;
 using Hmcr.Model.Dtos.ContractTerm;
 using Hmcr.Model.Dtos.District;
+using Hmcr.Model.Dtos.FeedbackMessage;
+using Hmcr.Model.Dtos.LocationCode;
 using Hmcr.Model.Dtos.MimeType;
 using Hmcr.Model.Dtos.Party;
 using Hmcr.Model.Dtos.Permission;
 using Hmcr.Model.Dtos.Region;
+using Hmcr.Model.Dtos.RockfallReport;
 using Hmcr.Model.Dtos.Role;
 using Hmcr.Model.Dtos.RolePermission;
 using Hmcr.Model.Dtos.ServiceArea;
@@ -16,6 +22,8 @@ using Hmcr.Model.Dtos.SubmissionStatus;
 using Hmcr.Model.Dtos.SubmissionStream;
 using Hmcr.Model.Dtos.User;
 using Hmcr.Model.Dtos.UserRole;
+using Hmcr.Model.Dtos.WildlifeReport;
+using Hmcr.Model.Dtos.WorkReport;
 
 namespace Hmcr.Data.Mappings
 {
@@ -53,6 +61,11 @@ namespace Hmcr.Data.Mappings
 
             CreateMap<HmrSubmissionObject, SubmissionObjectDto>();
             CreateMap<HmrSubmissionObject, SubmissionObjectCreateDto>();
+            CreateMap<HmrSubmissionObject, SubmissionObjectFileDto>()
+                .ForMember(dst => dst.MimeTypeCode, opt => opt.MapFrom(src => src.MimeType.MimeTypeCode));
+            CreateMap<HmrSubmissionObject, SubmissionDto>()
+                .ForMember(dst => dst.StagingTableName, opt => opt.MapFrom(src => src.SubmissionStream.StagingTableName))
+                .ForMember(dst => dst.MimeTypeCode, opt => opt.MapFrom(src => src.MimeType.MimeTypeCode));
 
             CreateMap<HmrSubmissionRow, SubmissionRowDto>();
 
@@ -65,9 +78,39 @@ namespace Hmcr.Data.Mappings
             CreateMap<HmrSystemUser, UserUpdateDto>();
             CreateMap<HmrSystemUser, UserDeleteDto>();
 
+            CreateMap<BceidAccount, UserBceidAccountDto>();
+
             CreateMap<HmrUserRole, UserRoleDto>();
 
             CreateMap<HmrSubmissionStream, SubmissionStreamDto>();
+
+            CreateMap<HmrActivityCode, ActivityCodeDto>();
+            CreateMap<HmrActivityCode, ActivityCodeSearchDto>();
+            CreateMap<HmrActivityCode, ActivityCodeCreateDto>();
+            CreateMap<HmrActivityCode, ActivityCodeUpdateDto>();
+
+            CreateMap<HmrLocationCode, LocationCodeDto>();
+            CreateMap<HmrLocationCode, LocationCodeDropDownDto>();
+            
+            CreateMap<HmrWorkReport, WorkReportTyped>();
+            CreateMap<HmrWorkReport, WorkReportExportDto>();
+
+            CreateMap<HmrRockfallReport, RockfallReportTyped>()
+                .ForMember(dst => dst.Name, opt => opt.MapFrom(src => src.ReporterName))
+                .ForMember(dst => dst.McName, opt => opt.MapFrom(src => src.SubmissionObject.Party.BusinessLegalName));
+
+            CreateMap<HmrRockfallReport, RockfallReportExportDto>()
+                .ForMember(dst => dst.Name, opt => opt.MapFrom(src => src.ReporterName))
+                .ForMember(dst => dst.McName, opt => opt.MapFrom(src => src.SubmissionObject.Party.BusinessLegalName));
+
+            CreateMap<HmrWildlifeReport, WildlifeReportTyped>();
+            CreateMap<HmrWildlifeReport, WildlifeReportExportDto>();
+
+            CreateMap<HmrCodeLookup, CodeLookupDto>();
+
+            CreateMap<HmrFeedbackMessage, FeedbackMessageDto>();
+
+            
         }
     }
 }

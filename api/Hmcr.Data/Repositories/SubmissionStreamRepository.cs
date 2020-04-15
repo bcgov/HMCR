@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using Hmcr.Data.Database.Entities;
 using Hmcr.Data.Repositories.Base;
+using Hmcr.Model;
 using Hmcr.Model.Dtos.SubmissionRow;
 using Hmcr.Model.Dtos.SubmissionStream;
 using Microsoft.EntityFrameworkCore;
@@ -41,14 +42,27 @@ namespace Hmcr.Data.Repositories
                 }
             }
 
-            return Mapper.Map<IEnumerable<SubmissionStreamDto>>(await query.ToListAsync());
+            var reportTypes = Mapper.Map<IEnumerable<SubmissionStreamDto>>(await query.ToListAsync());
+            
+            foreach(var reportType in reportTypes)
+            {
+                if (reportType.FileSizeLimit == null)
+                    reportType.FileSizeLimit = Constants.MaxFileSize;
+            }
+
+            return reportTypes;
         }
 
         public async Task<SubmissionStreamDto> GetSubmissionStreamByTableNameAsync(string tableName)
         {
             var stream = await DbSet.AsNoTracking().FirstAsync(x => x.StagingTableName == tableName);
 
-            return Mapper.Map<SubmissionStreamDto>(stream);
+            var reportType = Mapper.Map<SubmissionStreamDto>(stream);
+
+            if (reportType.FileSizeLimit == null)
+                reportType.FileSizeLimit = Constants.MaxFileSize;
+
+            return reportType;
         }
     }
 }
