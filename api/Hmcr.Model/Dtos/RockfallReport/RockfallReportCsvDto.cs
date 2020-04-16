@@ -5,7 +5,7 @@
         public decimal RowId { get; set; }
         public string McrrIncidentNumber { get; set; }
         public string RecordType { get; set; }
-        public decimal ServiceArea { get; set; }
+        public string ServiceArea { get; set; }
         public string EstimatedRockfallDate { get; set; }
         public string EstimatedRockfallTime { get; set; }
         public string StartLatitude { get; set; }
@@ -22,8 +22,8 @@
         public string LocationDescription { get; set; }
         public string DitchVolume { get; set; }
         public string TravelledLanesVolume { get; set; }
-        public decimal? OtherTravelledLanesVolume { get; set; }
-        public decimal? OtherDitchVolume { get; set; }
+        public string OtherTravelledLanesVolume { get; set; }
+        public string OtherDitchVolume { get; set; }
         public string HeavyPrecip { get; set; }
         public string FreezeThaw { get; set; }
         public string DitchSnowIce { get; set; }

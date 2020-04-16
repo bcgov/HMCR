@@ -32,8 +32,8 @@ namespace Hmcr.Domain.Services
         public RockfallReportService(IUnitOfWork unitOfWork, 
             ISubmissionStreamService streamService, ISubmissionObjectRepository submissionRepo, ISumbissionRowRepository rowRepo,
             IContractTermRepository contractRepo, ISubmissionStatusRepository statusRepo, IRockfallReportRepository rockfallRepo, IFieldValidatorService validator,
-            ILogger<RockfallReportService> logger)
-            : base(unitOfWork, streamService, submissionRepo, rowRepo, contractRepo, statusRepo, validator)
+            ILogger<RockfallReportService> logger, IServiceAreaService saService)
+            : base(unitOfWork, streamService, submissionRepo, rowRepo, contractRepo, statusRepo, validator, saService)
         {
             TableName = TableNames.RockfallReport;
             HasRowIdentifier = true;
@@ -51,6 +51,7 @@ namespace Hmcr.Domain.Services
             csv.Configuration.RegisterClassMap<RockfallRptInitCsvDtoMap>();
 
             var serviceAreastrings = ConvertServiceAreaToStrings(submission.ServiceAreaNumber);
+            var serviceArea = await _saService.GetServiceAreaByServiceAreaNumberAsyc(submission.ServiceAreaNumber);
 
             var headerValidated = false;
             var rows = new List<RockfallRptInitCsvDto>();
@@ -77,6 +78,7 @@ namespace Hmcr.Domain.Services
                     }
 
                     row.RowNum = ++rowNum;
+                    row.ServiceArea = serviceArea.ConvertToServiceAreaString(row.ServiceArea);
                     rows.Add(row);
                 }
                 catch (TypeConverterException ex)

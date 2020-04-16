@@ -35,11 +35,11 @@ namespace Hmcr.Domain.Hangfire
         private IWorkReportRepository _workReportRepo;
 
         public WorkReportJobService(IUnitOfWork unitOfWork, ILogger<IWorkReportJobService> logger,
-            IActivityCodeRepository activityRepo, ISubmissionStatusRepository statusRepo, ISubmissionObjectRepository submissionRepo, IServiceAreaRepository serviceAreaRepo,
+            IActivityCodeRepository activityRepo, ISubmissionStatusRepository statusRepo, ISubmissionObjectRepository submissionRepo, IServiceAreaService serviceAreaService,
             ISumbissionRowRepository submissionRowRepo, IWorkReportRepository workReportRepo, IFieldValidatorService validator,
             IEmailService emailService, IConfiguration config, 
             ISpatialService spatialService, ILookupCodeService lookupService)
-            : base(unitOfWork, statusRepo, submissionRepo, serviceAreaRepo, submissionRowRepo, emailService, logger, config, validator, spatialService, lookupService)
+            : base(unitOfWork, statusRepo, submissionRepo, serviceAreaService, submissionRowRepo, emailService, logger, config, validator, spatialService, lookupService)
         {
             _activityRepo = activityRepo;
             _workReportRepo = workReportRepo;
@@ -677,6 +677,7 @@ namespace Hmcr.Domain.Hangfire
             for (var i = 0; i < rows.Count; i++)
             {
                 rows[i].RowNum = i + 2;
+                rows[i].ServiceArea = _serviceArea.ConvertToServiceAreaString(rows[i].ServiceArea);
             }
 
             return (rows, string.Join(',', csv.Context.HeaderRecord).Replace("\"", ""));
@@ -701,6 +702,7 @@ namespace Hmcr.Domain.Hangfire
                     var row = csv.GetRecord<WorkReportTyped>();
                     rows.Add(row);
                     rowNum = (decimal)row.RowNum;
+                    row.ServiceArea = _serviceArea.ConvertToServiceAreaNumber(row.ServiceArea);
                 }
                 catch (CsvHelper.TypeConversion.TypeConverterException ex)
                 {

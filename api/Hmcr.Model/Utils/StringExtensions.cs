@@ -11,6 +11,8 @@ namespace Hmcr.Model.Utils
 {
     public static class StringExtensions
     {
+        private static readonly Regex numeric = new Regex(@"^\d+(\.\d+)?$");
+        private static readonly Regex integer = new Regex(@"^\d+$");
         public static bool IsNotEmpty(this string str)
         {
             return !string.IsNullOrWhiteSpace(str);
@@ -64,7 +66,12 @@ namespace Hmcr.Model.Utils
 
         public static bool IsInteger(this string str)
         {
-            return Regex.IsMatch(str, @"^\d+$");
+            return integer.IsMatch(str);
+        }
+
+        public static bool IsNumeric(this string str)
+        {
+            return numeric.IsMatch(str);
         }
 
         public static void AddItem(this Dictionary<string, List<string>> dictionary, string keyName, string item)

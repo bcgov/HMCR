@@ -19,6 +19,7 @@ namespace Hmcr.Domain.Services.Base
     {
         protected IUnitOfWork _unitOfWork;
         protected IFieldValidatorService _validator;
+        protected IServiceAreaService _saService;
         protected ISubmissionStreamService _streamService;
         protected ISubmissionObjectRepository _submissionRepo;
         protected ISumbissionRowRepository _rowRepo;
@@ -44,7 +45,8 @@ namespace Hmcr.Domain.Services.Base
 
         public ReportServiceBase(IUnitOfWork unitOfWork,
             ISubmissionStreamService streamService, ISubmissionObjectRepository submissionRepo, ISumbissionRowRepository rowRepo,
-            IContractTermRepository contractRepo, ISubmissionStatusRepository statusRepo, IFieldValidatorService validator)
+            IContractTermRepository contractRepo, ISubmissionStatusRepository statusRepo, IFieldValidatorService validator, 
+            IServiceAreaService saService)
         {
             _unitOfWork = unitOfWork;
             _streamService = streamService;
@@ -53,6 +55,7 @@ namespace Hmcr.Domain.Services.Base
             _contractRepo = contractRepo;
             _statusRepo = statusRepo;
             _validator = validator;
+            _saService = saService;
         }
         public async Task<(Dictionary<string, List<string>> errors, List<string> resubmittedRecordNumbers)> CheckResubmitAsync(FileUploadDto upload)
         {

@@ -29,7 +29,7 @@ namespace Hmcr.Domain.Hangfire.Base
         protected ISubmissionStatusRepository _statusRepo;
         protected ISubmissionObjectRepository _submissionRepo;
         protected ISumbissionRowRepository _submissionRowRepo;
-        private IServiceAreaRepository _serviceAreaRepo;
+        private IServiceAreaService _serviceAreaService;
         protected ILogger _logger;
         protected IFieldValidatorService _validator;
         protected ISpatialService _spatialService;
@@ -57,7 +57,7 @@ namespace Hmcr.Domain.Hangfire.Base
 
 
         public ReportJobServiceBase(IUnitOfWork unitOfWork,
-            ISubmissionStatusRepository statusRepo, ISubmissionObjectRepository submissionRepo, IServiceAreaRepository serviceAreaRepo,
+            ISubmissionStatusRepository statusRepo, ISubmissionObjectRepository submissionRepo, IServiceAreaService serviceAreaService,
             ISumbissionRowRepository submissionRowRepo, IEmailService emailService, ILogger logger, IConfiguration config, IFieldValidatorService validator,
             ISpatialService spatialService, ILookupCodeService lookupService)
         {
@@ -65,7 +65,7 @@ namespace Hmcr.Domain.Hangfire.Base
             _statusRepo = statusRepo;
             _submissionRepo = submissionRepo;
             _submissionRowRepo = submissionRowRepo;
-            _serviceAreaRepo = serviceAreaRepo;
+            _serviceAreaService = serviceAreaService;
             _emailService = emailService;
             _logger = logger;
             _config = config;
@@ -133,7 +133,7 @@ namespace Hmcr.Domain.Hangfire.Base
             _methodLogHeader = $"[Hangfire] Submission ({_submission.SubmissionObjectId}): ";
             _enableMethodLog = _config.GetValue<string>("DISABLE_METHOD_LOGGER") != "Y"; //enabled by default
 
-            _serviceArea = await _serviceAreaRepo.GetServiceAreaByServiceAreaNumberAsyc(_submission.ServiceAreaNumber);
+            _serviceArea = await _serviceAreaService.GetServiceAreaByServiceAreaNumberAsyc(_submission.ServiceAreaNumber);
 
             return true;
         }
