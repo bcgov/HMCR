@@ -37,9 +37,9 @@ namespace Hmcr.Data.Repositories
 
         public async Task<IEnumerable<FeedbackMessageUpdateDto>> GetFailedFeedbackMessagesAsync()
         {
-            var hourAgo = DateTime.UtcNow.AddHours(-1);
+            var minuteAgo = DateTime.UtcNow.AddMinutes(-1);
 
-            return await GetAllAsync<FeedbackMessageUpdateDto>(x => x.IsSent == false && x.CommunicationDate < hourAgo);
+            return await GetAllAsync<FeedbackMessageUpdateDto>(x => x.IsSent == false && x.CommunicationDate < minuteAgo);
         }
     }
 }

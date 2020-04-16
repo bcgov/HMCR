@@ -67,7 +67,10 @@ namespace Hmcr.Hangfire
             //Inject Code Lookup
             validator.CodeLookup = codeLookupRepo.LoadCodeLookupCache();
 
-            RecurringJob.AddOrUpdate<EmailJobService>("ResendEmails", x => x.ResendEmails(), Cron.Minutely);
+            minutes = Configuration.GetValue<int>("Hangfire:EmailJobIntervalInMinutes");
+            minutes = minutes < 1 ? 30 : minutes;
+
+            RecurringJob.AddOrUpdate<EmailJobService>("ResendEmails", x => x.ResendEmails(), $"*/{minutes} * * * *");
         }
     }
 }
