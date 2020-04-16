@@ -94,7 +94,7 @@ Use the following steps to run the local development environment
    cd api/Hmcr.Api
    dotnet restore
    dotnet build
-   dotne
+   dotnet run
    ```
 
 3. Run the React frontend
