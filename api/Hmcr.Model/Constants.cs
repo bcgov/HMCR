@@ -216,10 +216,8 @@ namespace Hmcr.Model
         public static string[] MandatoryFields = new string[]
         {
             Fields.RecordType, Fields.ServiceArea, Fields.McrrIncidentNumber, Fields.EstimatedRockfallDate, Fields.EstimatedRockfallTime,
-            Fields.StartLatitude, Fields.StartLongitude, Fields.EndLatitude, Fields.EndLongitude, Fields.HighwayUnique, Fields.HighwayUniqueName, Fields.Landmark,
-            Fields.LandmarkName, Fields.StartOffset, Fields.DirectionFromLandmark, Fields.DitchVolume, Fields.TravelledLanesVolume,
-            Fields.HeavyPrecip, Fields.FreezeThaw, Fields.DitchSnowIce, Fields.VehicleDamage, Fields.Name,
-            Fields.McPhoneNumber, Fields.McName, Fields.ReportDate
+            Fields.HighwayUnique, Fields.DitchVolume, Fields.TravelledLanesVolume, Fields.HeavyPrecip, Fields.FreezeThaw, Fields.DitchSnowIce, 
+            Fields.VehicleDamage, Fields.Name, Fields.McPhoneNumber, Fields.ReportDate
         };
         public string[] CommonMandatoryFields => MandatoryFields;
     }
