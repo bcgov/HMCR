@@ -49,6 +49,7 @@ objects:
             "Hangfire": {
                 "EnableServer": true,
                 "ReportJobIntervalInMinutes": 1,
+                "EmailJobIntervalInMinutes": 30,
                 "WorkerCount": 1
             },
             "CHRIS": {
