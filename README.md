@@ -91,7 +91,7 @@ Use the following steps to run the local development environment
    - Or from console
 
    ```
-   cd api/Hmcr.Api
+   cd api/Hmcr.Hangfire
    dotnet restore
    dotnet build
    dotnet run
