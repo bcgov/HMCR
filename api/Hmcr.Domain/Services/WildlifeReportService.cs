@@ -32,8 +32,8 @@ namespace Hmcr.Domain.Services
         public WildlifeReportService(IUnitOfWork unitOfWork,
             ISubmissionStreamService streamService, ISubmissionObjectRepository submissionRepo, ISumbissionRowRepository rowRepo,
             IContractTermRepository contractRepo, ISubmissionStatusRepository statusRepo, IWildlifeReportRepository wildlifeRepo, IFieldValidatorService validator,
-            ILogger<WildlifeReportService> logger)
-            : base(unitOfWork, streamService, submissionRepo, rowRepo, contractRepo, statusRepo, validator)
+            ILogger<WildlifeReportService> logger, IServiceAreaService saService)
+            : base(unitOfWork, streamService, submissionRepo, rowRepo, contractRepo, statusRepo, validator, saService)
         {
             TableName = TableNames.WildlifeReport;
             HasRowIdentifier = false;
@@ -49,6 +49,7 @@ namespace Hmcr.Domain.Services
             csv.Configuration.RegisterClassMap<WildlifeRptInitCsvDtoMap>();
 
             var serviceAreastrings = ConvertServiceAreaToStrings(submission.ServiceAreaNumber);
+            var serviceArea = await _saService.GetServiceAreaByServiceAreaNumberAsyc(submission.ServiceAreaNumber);
 
             var headerValidated = false;
             var rows = new List<WildlifeRptInitCsvDto>();
@@ -75,6 +76,7 @@ namespace Hmcr.Domain.Services
                     }
 
                     row.RowNum = ++rowNum;
+                    row.ServiceArea = serviceArea.ConvertToServiceAreaString(row.ServiceArea);
                     rows.Add(row);
                 }
                 catch (TypeConverterException ex)
