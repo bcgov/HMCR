@@ -182,7 +182,7 @@ namespace Hmcr.Data.Repositories
                      NumOfRecords = x.HmrSubmissionRows.Count(),
                      NumOfErrorRecords = x.HmrSubmissionRows.Count(y => y.ErrorDetail != null),
                      Success = x.ErrorDetail == null,
-                     NumOfDuplicateRecords = x.HmrSubmissionRows.Count(y => y.RowStatus.StatusCode == "DR"),
+                     NumOfDuplicateRecords = x.HmrSubmissionRows.Count(y => y.RowStatus.StatusCode == RowStatus.DuplicateRow),
                      NumOfReplacedRecords = x.HmrSubmissionRows.Count(y => y.IsResubmitted == true),
                      NumOfWarningRecords = x.HmrSubmissionRows.Count(y => y.WarningDetail != null),
                      SubmissionStatus = x.SubmissionStatus.StatusCode,
