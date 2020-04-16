@@ -50,7 +50,8 @@ namespace Hmcr.Domain.Hangfire
 
             foreach (var feedbackMessage in feedbackMessages)
             {
-                await _emailService.SendStatusEmailAsync(feedbackMessage.SubmissionObjectId, feedbackMessage);
+                if (!await _emailService.SendStatusEmailAsync(feedbackMessage.SubmissionObjectId, feedbackMessage))
+                    return;
             }
         }
     }

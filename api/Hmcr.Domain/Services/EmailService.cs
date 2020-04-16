@@ -17,7 +17,7 @@ namespace Hmcr.Domain.Services
 {
     public interface IEmailService
     {
-        Task SendStatusEmailAsync(decimal submissionObjectId, FeedbackMessageUpdateDto feedbackDto = null);
+        Task<bool> SendStatusEmailAsync(decimal submissionObjectId, FeedbackMessageUpdateDto feedbackMessage = null);
     }
 
     public class EmailService : IEmailService
@@ -56,7 +56,7 @@ namespace Hmcr.Domain.Services
             _unitOfWork = unitOfWork;
         }
 
-        public async Task SendStatusEmailAsync(decimal submissionObjectId, FeedbackMessageUpdateDto feedbackMessage = null)
+        public async Task<bool> SendStatusEmailAsync(decimal submissionObjectId, FeedbackMessageUpdateDto feedbackMessage = null)
         {
             var submissionInfo = await _submissionRepo.GetSubmissionInfoForEmailAsync(submissionObjectId);
             submissionInfo.SubmissionDate = DateUtils.ConvertUtcToPacificTime(submissionInfo.SubmissionDate);
@@ -127,6 +127,8 @@ namespace Hmcr.Domain.Services
             var sending = feedbackMessage == null ? "sending" : "resending";
 
             _logger.LogInformation($"[Hangfire] {finished} {sending} email for submission {submissionObjectId}", submissionObjectId);
+
+            return isSent;
         }
 
         private void SendEmailToUsersInServiceArea(decimal serviceAreaNumber, string subject, string htmlBody, string textBody)
