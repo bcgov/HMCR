@@ -26,7 +26,7 @@ namespace Hmcr.Domain.Hangfire.Base
     public class ReportJobServiceBase
     {
         protected IUnitOfWork _unitOfWork;
-        protected ISubmissionStatusRepository _statusRepo;
+        protected ISubmissionStatusService _statusService;
         protected ISubmissionObjectRepository _submissionRepo;
         protected ISumbissionRowRepository _submissionRowRepo;
         private IServiceAreaService _serviceAreaService;
@@ -38,31 +38,23 @@ namespace Hmcr.Domain.Hangfire.Base
         protected IEmailService _emailService;
         protected IConfiguration _config;
         protected ILookupCodeService _lookupService;
-        protected decimal _duplicateRowStatusId;
-        protected decimal _errorRowStatusId;
-        protected decimal _successRowStatusId;
-        protected decimal _errorFileStatusId;
-        protected decimal _successFileStatusId;
-        protected decimal _inProgressRowStatusId;
-        protected decimal _duplicateFileStatusId;
 
         protected HmrSubmissionObject _submission;
         protected Dictionary<decimal, HmrSubmissionRow> _submissionRows;
 
         protected ServiceAreaNumberDto _serviceArea;
 
-
         protected bool _enableMethodLog;
         protected string _methodLogHeader;
 
 
         public ReportJobServiceBase(IUnitOfWork unitOfWork,
-            ISubmissionStatusRepository statusRepo, ISubmissionObjectRepository submissionRepo, IServiceAreaService serviceAreaService,
+            ISubmissionStatusService statusService, ISubmissionObjectRepository submissionRepo, IServiceAreaService serviceAreaService,
             ISumbissionRowRepository submissionRowRepo, IEmailService emailService, ILogger logger, IConfiguration config, IFieldValidatorService validator,
             ISpatialService spatialService, ILookupCodeService lookupService)
         {
             _unitOfWork = unitOfWork;
-            _statusRepo = statusRepo;
+            _statusService = statusService;
             _submissionRepo = submissionRepo;
             _submissionRowRepo = submissionRowRepo;
             _serviceAreaService = serviceAreaService;
@@ -92,7 +84,7 @@ namespace Hmcr.Domain.Hangfire.Base
                     ((HmcrRepositoryBase<HmrSubmissionObject>)_submissionRepo).RollBackEntities();
 
                     _submission.ErrorDetail = FileError.UnknownException;
-                    _submission.SubmissionStatusId = _errorFileStatusId;
+                    _submission.SubmissionStatusId = _statusService.FileDataError;
                     await CommitAndSendEmailAsync();
                 }
             }
@@ -105,27 +97,12 @@ namespace Hmcr.Domain.Hangfire.Base
             throw new NotImplementedException();
         }
 
-        protected async Task SetMemberVariablesAsync()
-        {
-            var statuses = await _statusRepo.GetActiveStatuses();
-
-            _duplicateRowStatusId = statuses.First(x => x.StatusType == StatusType.Row && x.StatusCode == RowStatus.DuplicateRow).StatusId;
-            _errorRowStatusId = statuses.First(x => x.StatusType == StatusType.Row && x.StatusCode == RowStatus.RowError).StatusId;
-            _successRowStatusId = statuses.First(x => x.StatusType == StatusType.Row && x.StatusCode == RowStatus.Success).StatusId;
-
-            _errorFileStatusId = statuses.First(x => x.StatusType == StatusType.File && x.StatusCode == FileStatus.DataError).StatusId;
-            _successFileStatusId = statuses.First(x => x.StatusType == StatusType.File && x.StatusCode == FileStatus.Success).StatusId;
-            _duplicateFileStatusId = statuses.First(x => x.StatusType == StatusType.File && x.StatusCode == FileStatus.DuplicateSubmission).StatusId;
-
-            _inProgressRowStatusId = statuses.First(x => x.StatusType == StatusType.File && x.StatusCode == FileStatus.InProgress).StatusId;
-        }
-
         protected async Task<bool> SetSubmissionAsync(SubmissionDto submissionDto)
         {
             _logger.LogInformation("[Hangfire] Starting submission {submissionObjectId}", (long)submissionDto.SubmissionObjectId);
 
             _submission = await _submissionRepo.GetSubmissionObjecForBackgroundJobAsync(submissionDto.SubmissionObjectId);
-            _submission.SubmissionStatusId = _inProgressRowStatusId;
+            _submission.SubmissionStatusId = _statusService.FileInProgress;
             _unitOfWork.Commit();
 
             _submissionRows = new Dictionary<decimal, HmrSubmissionRow>();
@@ -178,7 +155,7 @@ namespace Hmcr.Domain.Hangfire.Base
                 var rowNum = (decimal)untypedRow.RowNum;
                 var entity = await _submissionRowRepo.GetSubmissionRowByRowNumAsync(_submission.SubmissionObjectId, rowNum);
 
-                if (entity.RowStatusId == _duplicateRowStatusId)
+                if (entity.RowStatusId == _statusService.RowDuplicate)
                 {
                     untypedRows.RemoveAt(i);
                     continue;
@@ -198,15 +175,15 @@ namespace Hmcr.Domain.Hangfire.Base
         {
             if (submissionRow != null)
             {
-                submissionRow.RowStatusId = _errorRowStatusId;
+                submissionRow.RowStatusId = _statusService.RowError;
                 submissionRow.ErrorDetail = errors.GetErrorDetail();
                 _submission.ErrorDetail = FileError.ReferToRowErrors;
-                _submission.SubmissionStatusId = _errorFileStatusId;
+                _submission.SubmissionStatusId = _statusService.FileDataError;
             }
             else
             {
                 _submission.ErrorDetail = errors.GetErrorDetail();
-                _submission.SubmissionStatusId = _errorFileStatusId;
+                _submission.SubmissionStatusId = _statusService.FileDataError;
             }
         }
 

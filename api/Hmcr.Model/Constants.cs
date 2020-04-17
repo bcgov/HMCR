@@ -94,19 +94,19 @@ namespace Hmcr.Model
     public static class RowStatus
     {
         public const string RowReceived = "RR";
-        public const string DuplicateRow = "DR";
+        public const string RowDuplicate = "DR";
         public const string RowError = "RE";
-        public const string Success = "RS";
+        public const string RowSuccess = "RS";
     }
 
     public static class FileStatus
     {
         public const string FileReceived = "FR";
         public const string FileError = "FE";
-        public const string DuplicateSubmission = "DS";
-        public const string InProgress = "DP";
-        public const string DataError = "DE";
-        public const string Success = "VS";
+        public const string FileDuplicate = "DS";
+        public const string FileInProgress = "DP";
+        public const string FileDataError = "DE";
+        public const string FileSuccess = "VS";
     }
 
     public static class Fields

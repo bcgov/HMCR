@@ -33,11 +33,11 @@ namespace Hmcr.Domain.Hangfire
         private IRockfallReportRepository _rockfallReportRepo;
 
         public RockfallReportJobService(IUnitOfWork unitOfWork, ILogger<IRockfallReportJobService> logger, 
-            ISubmissionStatusRepository statusRepo, ISubmissionObjectRepository submissionRepo, IServiceAreaService serviceAreaService,
+            ISubmissionStatusService statusService, ISubmissionObjectRepository submissionRepo, IServiceAreaService serviceAreaService,
             ISumbissionRowRepository submissionRowRepo, IRockfallReportRepository rockfallReportRepo, IFieldValidatorService validator, 
             IEmailService emailService, IConfiguration config,
             ISpatialService spatialService, ILookupCodeService lookupService)
-            : base(unitOfWork, statusRepo, submissionRepo, serviceAreaService, submissionRowRepo, emailService, logger, config, validator, spatialService, lookupService)
+            : base(unitOfWork, statusService, submissionRepo, serviceAreaService, submissionRowRepo, emailService, logger, config, validator, spatialService, lookupService)
         {
             _logger = logger;
             _rockfallReportRepo = rockfallReportRepo;
@@ -54,8 +54,6 @@ namespace Hmcr.Domain.Hangfire
         {
             var errors = new Dictionary<string, List<string>>();
 
-            await SetMemberVariablesAsync();
-
             if (!await SetSubmissionAsync(submissionDto))
                 return false;
 
@@ -66,7 +64,7 @@ namespace Hmcr.Domain.Hangfire
                 if (errors.Count > 0)
                 {
                     _submission.ErrorDetail = errors.GetErrorDetail();
-                    _submission.SubmissionStatusId = _errorFileStatusId;
+                    _submission.SubmissionStatusId = _statusService.FileDataError;
                     await CommitAndSendEmailAsync();
                     return true;
                 }
@@ -79,7 +77,7 @@ namespace Hmcr.Domain.Hangfire
             {
                 errors.AddItem("File", "No new records were found in the file; all records were already processed in the past submission.");
                 _submission.ErrorDetail = errors.GetErrorDetail();
-                _submission.SubmissionStatusId = _duplicateFileStatusId;
+                _submission.SubmissionStatusId = _statusService.FileDuplicate;
                 await CommitAndSendEmailAsync();
                 return true;
             }
@@ -90,7 +88,7 @@ namespace Hmcr.Domain.Hangfire
 
                 var submissionRow = _submissionRows[(decimal)untypedRow.RowNum];
 
-                submissionRow.RowStatusId = _successRowStatusId; //set the initial row status as success 
+                submissionRow.RowStatusId = _statusService.RowSuccess; //set the initial row status as success 
 
                 var entityName = GetValidationEntityName(untypedRow);
 
@@ -104,7 +102,7 @@ namespace Hmcr.Domain.Hangfire
 
             var typedRows = new List<RockfallReportTyped>();
 
-            if (_submission.SubmissionStatusId != _errorFileStatusId)
+            if (_submission.SubmissionStatusId != _statusService.FileDataError)
             {
                 var (rowNum, rows) = ParseRowsTyped(text, errors);
 
@@ -123,7 +121,7 @@ namespace Hmcr.Domain.Hangfire
                 PerformAdditionalValidation(typedRows);
             }
 
-            if (_submission.SubmissionStatusId == _errorFileStatusId)
+            if (_submission.SubmissionStatusId == _statusService.FileDataError)
             {
                 await CommitAndSendEmailAsync();
                 return true;
@@ -133,13 +131,13 @@ namespace Hmcr.Domain.Hangfire
 
             _logger.LogInformation($"{_methodLogHeader} PerformSpatialValidationAndConversionAsync 100%");
 
-            if (_submission.SubmissionStatusId == _errorFileStatusId)
+            if (_submission.SubmissionStatusId == _statusService.FileDataError)
             {
                 await CommitAndSendEmailAsync();
                 return true;
             }
 
-            _submission.SubmissionStatusId = _successFileStatusId;
+            _submission.SubmissionStatusId = _statusService.FileSuccess;
 
             await foreach (var entity in _rockfallReportRepo.SaveRockfallReportAsnyc(_submission, rockfallReports)) { }
 

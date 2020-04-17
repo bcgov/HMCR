@@ -37,7 +37,7 @@ namespace Hmcr.Data.Repositories
                     .Where(x => x.SubmissionObject.SubmissionStreamId == submissionStreamId 
                         && x.RecordNumber == row.RecordNumber
                         && x.SubmissionObject.ContractTermId == contractTermId
-                        && x.SubmissionObject.SubmissionStatus.StatusCode == FileStatus.Success)
+                        && x.SubmissionObject.SubmissionStatus.StatusCode == FileStatus.FileSuccess)
                     .OrderByDescending(x => x.RowId)
                     .FirstOrDefaultAsync();
 
@@ -53,7 +53,7 @@ namespace Hmcr.Data.Repositories
                 var duplicate = await DbSet
                     .Where(x => x.SubmissionObject.SubmissionStreamId == submissionStreamId
                         && x.RowHash == row.RowHash
-                        && x.SubmissionObject.SubmissionStatus.StatusCode == FileStatus.Success)
+                        && x.SubmissionObject.SubmissionStatus.StatusCode == FileStatus.FileSuccess)
                     .FirstOrDefaultAsync();
 
                 if (duplicate != null)
@@ -63,7 +63,7 @@ namespace Hmcr.Data.Repositories
 
         public async IAsyncEnumerable<string> UpdateIsResubmitAsync(decimal submissionStreamId, decimal contractTermId, IEnumerable<SubmissionRowDto> rows)
         {
-            var duplicate = await _statusRepo.GetStatusIdByTypeAndCodeAsync(StatusType.Row, RowStatus.DuplicateRow);
+            var duplicate = await _statusRepo.GetStatusIdByTypeAndCodeAsync(StatusType.Row, RowStatus.RowDuplicate);
 
             foreach (var row in rows.Where(x => x.RowStatusId != duplicate))
             {
@@ -71,7 +71,7 @@ namespace Hmcr.Data.Repositories
                     .Where(x => x.SubmissionObject.SubmissionStreamId == submissionStreamId
                         && x.RecordNumber == row.RecordNumber
                         && x.SubmissionObject.ContractTermId == contractTermId
-                        && x.SubmissionObject.SubmissionStatus.StatusCode == FileStatus.Success)
+                        && x.SubmissionObject.SubmissionStatus.StatusCode == FileStatus.FileSuccess)
                     .OrderByDescending(x => x.RowId)
                     .FirstOrDefaultAsync();
                 

@@ -31,9 +31,9 @@ namespace Hmcr.Domain.Services
 
         public RockfallReportService(IUnitOfWork unitOfWork, 
             ISubmissionStreamService streamService, ISubmissionObjectRepository submissionRepo, ISumbissionRowRepository rowRepo,
-            IContractTermRepository contractRepo, ISubmissionStatusRepository statusRepo, IRockfallReportRepository rockfallRepo, IFieldValidatorService validator,
+            IContractTermRepository contractRepo, ISubmissionStatusService statusService, IRockfallReportRepository rockfallRepo, IFieldValidatorService validator,
             ILogger<RockfallReportService> logger, IServiceAreaService saService)
-            : base(unitOfWork, streamService, submissionRepo, rowRepo, contractRepo, statusRepo, validator, saService)
+            : base(unitOfWork, streamService, submissionRepo, rowRepo, contractRepo, statusService, validator, saService)
         {
             TableName = TableNames.RockfallReport;
             HasRowIdentifier = true;
@@ -120,7 +120,7 @@ namespace Hmcr.Domain.Services
                     RecordNumber = row.McrrIncidentNumber,
                     RowValue = line,
                     RowHash = line.GetSha256Hash(),
-                    RowStatusId = await _statusRepo.GetStatusIdByTypeAndCodeAsync(StatusType.Row, RowStatus.RowReceived),
+                    RowStatusId = _statusService.RowReceived,
                     EndDate = row.ReportDate ?? Constants.MinDate,
                     RowNum = csv.Context.Row
                 });

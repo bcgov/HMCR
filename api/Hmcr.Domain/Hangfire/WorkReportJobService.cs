@@ -35,11 +35,11 @@ namespace Hmcr.Domain.Hangfire
         private IWorkReportRepository _workReportRepo;
 
         public WorkReportJobService(IUnitOfWork unitOfWork, ILogger<IWorkReportJobService> logger,
-            IActivityCodeRepository activityRepo, ISubmissionStatusRepository statusRepo, ISubmissionObjectRepository submissionRepo, IServiceAreaService serviceAreaService,
+            IActivityCodeRepository activityRepo, ISubmissionStatusService statusService, ISubmissionObjectRepository submissionRepo, IServiceAreaService serviceAreaService,
             ISumbissionRowRepository submissionRowRepo, IWorkReportRepository workReportRepo, IFieldValidatorService validator,
             IEmailService emailService, IConfiguration config, 
             ISpatialService spatialService, ILookupCodeService lookupService)
-            : base(unitOfWork, statusRepo, submissionRepo, serviceAreaService, submissionRowRepo, emailService, logger, config, validator, spatialService, lookupService)
+            : base(unitOfWork, statusService, submissionRepo, serviceAreaService, submissionRowRepo, emailService, logger, config, validator, spatialService, lookupService)
         {
             _activityRepo = activityRepo;
             _workReportRepo = workReportRepo;
@@ -56,8 +56,6 @@ namespace Hmcr.Domain.Hangfire
         {
             var errors = new Dictionary<string, List<string>>();
 
-            await SetMemberVariablesAsync();
-
             if (!await SetSubmissionAsync(submissionDto))
                 return false;
 
@@ -70,7 +68,7 @@ namespace Hmcr.Domain.Hangfire
                 if (errors.Count > 0)
                 {
                     _submission.ErrorDetail = errors.GetErrorDetail();
-                    _submission.SubmissionStatusId = _errorFileStatusId;
+                    _submission.SubmissionStatusId = _statusService.FileDataError;
                     await CommitAndSendEmailAsync();
                     return true;
                 }
@@ -83,7 +81,7 @@ namespace Hmcr.Domain.Hangfire
             {
                 errors.AddItem("File", "No new records were found in the file; all records were already processed in the past submission.");
                 _submission.ErrorDetail = errors.GetErrorDetail();
-                _submission.SubmissionStatusId = _duplicateFileStatusId;
+                _submission.SubmissionStatusId = _statusService.FileDuplicate;
                 await CommitAndSendEmailAsync();
                 return true;
             }
@@ -94,7 +92,7 @@ namespace Hmcr.Domain.Hangfire
 
                 var submissionRow = _submissionRows[(decimal)untypedRow.RowNum];
 
-                submissionRow.RowStatusId = _successRowStatusId; //set the initial row status as success 
+                submissionRow.RowStatusId = _statusService.RowSuccess; //set the initial row status as success 
 
                 var activityCode = activityCodes.FirstOrDefault(x => x.ActivityNumber == untypedRow.ActivityNumber);
 
@@ -123,7 +121,7 @@ namespace Hmcr.Domain.Hangfire
 
             var typedRows = new List<WorkReportTyped>();
 
-            if (_submission.SubmissionStatusId != _errorFileStatusId)
+            if (_submission.SubmissionStatusId != _statusService.FileDataError)
             {
                 var (rowNum, rows) = ParseRowsTyped(text, errors);
 
@@ -142,7 +140,7 @@ namespace Hmcr.Domain.Hangfire
                 PerformAdditionalValidation(typedRows);
             }
 
-            if (_submission.SubmissionStatusId == _errorFileStatusId)
+            if (_submission.SubmissionStatusId == _statusService.FileDataError)
             {
                 await CommitAndSendEmailAsync();
                 return true;
@@ -152,13 +150,13 @@ namespace Hmcr.Domain.Hangfire
 
             _logger.LogInformation($"{_methodLogHeader} PerformSpatialValidationAndConversionAsync 100%");
 
-            if (_submission.SubmissionStatusId == _errorFileStatusId)
+            if (_submission.SubmissionStatusId == _statusService.FileDataError)
             {
                 await CommitAndSendEmailAsync();
                 return true;
             }
 
-            _submission.SubmissionStatusId = _successFileStatusId;
+            _submission.SubmissionStatusId = _statusService.FileSuccess;
 
             await foreach (var entity in _workReportRepo.SaveWorkReportAsnyc(_submission, workReports)) { }
 
