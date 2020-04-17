@@ -6,6 +6,21 @@ metadata:
 labels:
   template: hangfire-build
 objects:
+  - apiVersion: "v1"
+    kind: ImageStream
+    metadata:
+      name: dotnet-31-rhel7
+    spec:
+      lookupPolicy:
+        local: false
+      tags:
+        - annotations: null
+          from:
+            kind: DockerImage
+            name: registry.redhat.io/dotnet/dotnet-31-rhel7:3.1-5
+          name: "3.1"
+          referencePolicy:
+            type: Local
   - apiVersion: v1
     kind: ImageStream
     metadata:

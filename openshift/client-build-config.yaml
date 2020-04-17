@@ -6,6 +6,21 @@ metadata:
 labels:
   template: client-build
 objects:
+  - apiVersion: "v1"
+    kind: ImageStream
+    metadata:
+      name: nginx-116-rhel8
+    spec:
+      lookupPolicy:
+        local: false
+      tags:
+        - annotations: null
+          from:
+            kind: DockerImage
+            name: registry.redhat.io/rhel8/nginx-116:1-39
+          name: "1"
+          referencePolicy:
+            type: Local
   - apiVersion: v1
     kind: ImageStream
     metadata:
