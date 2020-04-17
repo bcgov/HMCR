@@ -11,7 +11,8 @@ namespace Hmcr.Data.Repositories
     public interface ISubmissionStatusRepository
     {
         Task<decimal> GetStatusIdByTypeAndCodeAsync(string type, string code);
-        Task<IEnumerable<SubmissionStatusDto>> GetActiveStatuses();
+        decimal GetStatusIdByTypeAndCode(string type, string code);
+        Task<IEnumerable<SubmissionStatusDto>> GetActiveStatusesAsync();
     }
     public class SubmissionStatusRepository : HmcrRepositoryBase<HmrSubmissionStatu>, ISubmissionStatusRepository
     {
@@ -24,8 +25,13 @@ namespace Hmcr.Data.Repositories
         {
             return (await DbSet.FirstAsync(x => x.StatusCode == code && x.StatusType == type)).StatusId;
         }
-        
-        public async Task<IEnumerable<SubmissionStatusDto>> GetActiveStatuses()
+
+        public decimal GetStatusIdByTypeAndCode(string type, string code)
+        {
+            return GetFirst<SubmissionStatusDto>(x => x.StatusCode == code && x.StatusType == type).StatusId;
+        }
+
+        public async Task<IEnumerable<SubmissionStatusDto>> GetActiveStatusesAsync()
         {
             return await GetAllAsync<SubmissionStatusDto>();
         }
