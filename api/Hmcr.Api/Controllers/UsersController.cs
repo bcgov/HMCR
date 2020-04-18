@@ -5,6 +5,7 @@ using Hmcr.Model;
 using Hmcr.Model.Dtos;
 using Hmcr.Model.Dtos.User;
 using Hmcr.Model.Utils;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections;
@@ -19,11 +20,13 @@ namespace Hmcr.Api.Controllers
     public class UsersController : HmcrControllerBase
     {
         private IUserService _userService;
+        private IKeyCloakService _keyCloakService;
         private HmcrCurrentUser _currentUser;
 
-        public UsersController(IUserService userService, HmcrCurrentUser currentUser)
+        public UsersController(IUserService userService, IKeyCloakService keyCloakService, HmcrCurrentUser currentUser)
         {
             _userService = userService;
+            _keyCloakService = keyCloakService;
             _currentUser = currentUser;
         }
 
@@ -97,7 +100,7 @@ namespace Hmcr.Api.Controllers
         [RequiresPermission(Permissions.UserRead)]
         public async Task<ActionResult<UserDto>> GetUsersAsync(decimal id)
         {
-            var user = await _userService.GetUserAsync(id); 
+            var user = await _userService.GetUserAsync(id);
 
             if (user == null)
                 return NotFound();
@@ -115,6 +118,33 @@ namespace Hmcr.Api.Controllers
                 return NotFound();
 
             return bceidAccount;
+        }
+
+        [HttpGet("{keyCloakUserId}/api-password")]
+        [ApiExplorerSettings(IgnoreApi = true)]
+        public async Task<ActionResult> ResetUserApiPassword(string keyCloakUserId)
+        {
+            var verifyResponse = await _keyCloakService.VerifyUserIdAsync(keyCloakUserId);
+
+            if (verifyResponse.NotFound)
+            {
+                return NotFound();
+            }
+
+            if (!verifyResponse.Valid)
+            {
+                return Unauthorized();
+            }
+
+            var response = await _keyCloakService.ResetUserPasswordAsync(keyCloakUserId);
+
+            if (!string.IsNullOrEmpty(response.Error))
+            {
+                return ValidationUtils.GetValidationErrorResult(ControllerContext,
+                     StatusCodes.Status500InternalServerError, "KeyCloak API Error", response.Error);
+            }
+
+            return Ok(new UserApiPasswordDto() { ApiPassword = response.Password });
         }
 
         [HttpPost]
@@ -154,6 +184,7 @@ namespace Hmcr.Api.Controllers
 
             return NoContent();
         }
+
 
         [HttpDelete("{id}")]
         [RequiresPermission(Permissions.UserWrite)]
