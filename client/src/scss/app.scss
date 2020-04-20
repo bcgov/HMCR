@@ -121,3 +121,10 @@ ul.no-bullet {
   margin-bottom: 16px;
   color: theme-color(primary-nav);
 }
+
+.thin-underline.progress {
+  height: 4px;
+  position: absolute;
+  width: 100%;
+  bottom: 0px;
+}

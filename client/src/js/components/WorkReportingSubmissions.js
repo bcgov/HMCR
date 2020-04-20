@@ -1,7 +1,7 @@
 import React, { useState, useEffect, forwardRef, useImperativeHandle } from 'react';
 import { useHistory } from 'react-router-dom';
 import { connect } from 'react-redux';
-import { Button, Row, Col, Input, UncontrolledPopover, PopoverBody, PopoverHeader } from 'reactstrap';
+import { Button, Row, Col, Input, UncontrolledPopover, PopoverBody, PopoverHeader, Progress } from 'reactstrap';
 import moment from 'moment';
 import { DateRangePicker } from 'react-dates';
 import queryString from 'query-string';
@@ -35,6 +35,12 @@ const defaultSearchOptions = {
   direction: Constants.SORT_DIRECTION.DESCENDING,
   dataPath: Constants.API_PATHS.SUBMISSIONS,
 };
+
+const tmepStages = [
+  <Progress className="thin-underline" color="success" value={100}></Progress>,
+  <Progress className="thin-underline" color="warning" value={80}></Progress>,
+  <Progress className="thin-underline" color="danger" value={40}></Progress>,
+];
 
 const WorkReportingSubmissions = ({ serviceArea, submissionStatuses }, ref) => {
   const history = useHistory();
@@ -194,6 +200,12 @@ const WorkReportingSubmissions = ({ serviceArea, submissionStatuses }, ref) => {
                     >
                       {item.id}
                     </Button>
+                  ),
+                  description: (
+                    <React.Fragment>
+                      {item.description}
+                      {tmepStages[Math.floor(Math.random() * 3)]}
+                    </React.Fragment>
                   ),
                   longDescription: (
                     <React.Fragment>
