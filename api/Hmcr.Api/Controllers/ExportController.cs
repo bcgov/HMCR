@@ -37,7 +37,7 @@ namespace Hmcr.Api.Controllers
         /// </summary>
         /// <param name="serviceAreas">1 ~ 28</param>
         /// <param name="typeName">hmr:HMR_WORK_REPORT_VW, hmr:HMR_WILDLIFE_REPORT_VW, hmr:HMR_ROCKFALL_REPORT_VW</param>
-        /// <param name="format">csv, application/json, application/vnd.google-earth.kml+xml</param>
+        /// <param name="format">Supported formats: CSV, JSON, KML, GML</param>
         /// <param name="fromDate">From date in yyyy-MM-dd format</param>
         /// <param name="toDate">To date in yyyy-MM-dd format</param>
         /// <param name="cql_filter">Filter</param>
@@ -103,10 +103,11 @@ namespace Hmcr.Api.Controllers
         /// csv: csv format
         /// json: geo-json format
         /// kml: kml format
-        /// gml: gml foramt
+        /// gml: gml format
         /// </summary>
         /// <returns></returns>
         [HttpGet("supportedformats", Name = "SupportedFormats")]
+        [ProducesResponseType(typeof(OutputFormatDto), 200)]
         public IActionResult GetSupportedFormats()
         {
             return Ok(OutputFormatDto.GetSupportedFormats());
