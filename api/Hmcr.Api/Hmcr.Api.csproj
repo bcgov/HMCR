@@ -17,6 +17,16 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="Hmcr.Api.xml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="Hmcr.Api.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="AspNetCore.HealthChecks.SqlServer" Version="3.0.0" />
     <PackageReference Include="AutoMapper" Version="9.0.0" />
     <PackageReference Include="Bricelam.EntityFrameworkCore.Pluralizer" Version="1.0.0">
