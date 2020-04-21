@@ -19,6 +19,8 @@ namespace Hmcr.Domain.CsvHelpers
         public RockfallReportCsvDtoMap()
         {
             AutoMap(CultureInfo.InvariantCulture);
+            Map(m => m.ReportDate).TypeConverter<DateTypeConverter>();
+            Map(m => m.EstimatedRockfallDate).TypeConverter<DateTypeConverter>();
         }
     }
 

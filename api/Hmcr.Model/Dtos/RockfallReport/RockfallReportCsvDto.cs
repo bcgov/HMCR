@@ -1,4 +1,6 @@
-﻿namespace Hmcr.Model.Dtos.RockfallReport
+﻿using System;
+
+namespace Hmcr.Model.Dtos.RockfallReport
 {
     public class RockfallReportCsvDto : IReportCsvDto
     {
@@ -6,7 +8,7 @@
         public string McrrIncidentNumber { get; set; }
         public string RecordType { get; set; }
         public string ServiceArea { get; set; }
-        public string EstimatedRockfallDate { get; set; }
+        public DateTime? EstimatedRockfallDate { get; set; }
         public string EstimatedRockfallTime { get; set; }
         public string StartLatitude { get; set; }
         public string StartLongitude { get; set; }
@@ -32,7 +34,7 @@
         public string Name { get; set; }
         public string McName { get; set; }
         public string McPhoneNumber { get; set; }
-        public string ReportDate { get; set; }
+        public DateTime? ReportDate { get; set; }
         public decimal? RowNum { get; set; }
         public SpatialData SpatialData { get; set; }
     }

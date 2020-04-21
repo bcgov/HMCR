@@ -17,6 +17,7 @@ namespace Hmcr.Domain.CsvHelpers
         public WildlifeReportCsvDtoMap()
         {
             AutoMap(CultureInfo.InvariantCulture);
+            Map(m => m.AccidentDate).TypeConverter<DateTypeConverter>();
         }
     }
 

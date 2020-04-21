@@ -1,4 +1,6 @@
-﻿namespace Hmcr.Model.Dtos.WorkReport
+﻿using System;
+
+namespace Hmcr.Model.Dtos.WorkReport
 {
     public class WorkReportCsvDto : IReportCsvDto
     {
@@ -8,11 +10,11 @@
         public string RecordNumber { get; set; }
         public string TaskNumber { get; set; }
         public string ActivityNumber { get; set; }
-        public string StartDate { get; set; }
-        public string EndDate { get; set; }
+        public DateTime? StartDate { get; set; }
+        public DateTime? EndDate { get; set; }
         public string Accomplishment { get; set; }
         public string UnitOfMeasure { get; set; }
-        public string PostedDate { get; set; }
+        public DateTime? PostedDate { get; set; }
         public string HighwayUnique { get; set; }
         public string Landmark { get; set; }
         public string StartOffset { get; set; }
