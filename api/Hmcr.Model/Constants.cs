@@ -6,7 +6,7 @@ namespace Hmcr.Model
 {
     public static class Constants
     {
-        public static DateTime MaxDate = new DateTime(9999, 12, 31); 
+        public static DateTime MaxDate = new DateTime(9999, 12, 31);
         public static DateTime MinDate = new DateTime(1900, 1, 1);
         public static decimal MaxFileSize = 2097152;
         public const string VancouverTimeZone = "America/Vancouver";
@@ -149,7 +149,7 @@ namespace Hmcr.Model
         public const string SiteNumber = "SiteNumber";
         public const string ValueOfWork = "ValueOfWork";
         public const string Comments = "Comments";
-        
+
         public const string McrrIncidentNumber = "McrrIncidentNumber";
         public const string EstimatedRockfallDate = "EstimatedRockfallDate";
         public const string EstimatedRockfallTime = "EstimatedRockfallTime";
@@ -194,6 +194,8 @@ namespace Hmcr.Model
         public const string FeatureType = "FeatureType";
         public const string LocationCodeId = "LocationCodeId";
         public const string SpThresholdLevel = "SpThresholdLevel";
+
+        public const string ApiClientId = "ApiClientId";
     }
 
     public interface IReportHeaders
@@ -216,7 +218,7 @@ namespace Hmcr.Model
         public static string[] MandatoryFields = new string[]
         {
             Fields.RecordType, Fields.ServiceArea, Fields.McrrIncidentNumber, Fields.EstimatedRockfallDate, Fields.EstimatedRockfallTime,
-            Fields.HighwayUnique, Fields.DitchVolume, Fields.TravelledLanesVolume, Fields.HeavyPrecip, Fields.FreezeThaw, Fields.DitchSnowIce, 
+            Fields.HighwayUnique, Fields.DitchVolume, Fields.TravelledLanesVolume, Fields.HeavyPrecip, Fields.FreezeThaw, Fields.DitchSnowIce,
             Fields.VehicleDamage, Fields.Name, Fields.McPhoneNumber, Fields.ReportDate
         };
         public string[] CommonMandatoryFields => MandatoryFields;
@@ -311,8 +313,8 @@ namespace Hmcr.Model
     /// </summary>
     public enum SpatialData
     {
-        None, 
-        Gps, 
+        None,
+        Gps,
         Lrs
     }
 
@@ -332,5 +334,19 @@ namespace Hmcr.Model
         public const decimal MinLongitude = -141;
         public const decimal MaxLatitude = 62;
         public const decimal MinLatitude = 47;
+    }
+
+    public static class KeycloakMapperConfig
+    {
+        public const string DefaultProtocol = "openid-connect";
+        public const string OidcAudienceMapper = "oidc-audience-mapper";
+        public const string OidcHardcodedClaimMapper = "oidc-hardcoded-claim-mapper";
+        public const string IncludedClientAudience = "included.client.audience";
+        public const string IncludedCustomAudience = "included.custom.audience";
+        public const string AccessTokenClaim = "access.token.claim";
+        public const string ClaimName = "claim.name";
+        public const string ClaimValue = "claim.value";
+        public const string JsonTypeLabel = "jsonType.label";
+        public const string ApiClient = "api_client";
     }
 }

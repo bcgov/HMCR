@@ -2,26 +2,26 @@
 
 namespace Hmcr.Model
 {
-    public class KeyCloakTokenResponse
+    public class KeycloakTokenResponse
     {
         [JsonPropertyName("access_token")]
         public string AccessToken { get; set; }
     }
 
-    public class KeyCloakUserResponse
+    public class KeycloakUserResponse
     {
         [JsonPropertyName("id")]
         public string UserId { get; set; }
         public string Email { get; set; }
     }
 
-    public class KeyCloakUserPasswordResetRequest
+    public class KeycloakUserPasswordResetRequest
     {
         public string Type => "password";
         public string Value { get; set; }
         public bool Temporary => false;
 
-        public KeyCloakUserPasswordResetRequest(string value)
+        public KeycloakUserPasswordResetRequest(string value)
         {
             Value = value;
         }

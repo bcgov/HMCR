@@ -3,12 +3,12 @@ using Hmcr.Api.Controllers.Base;
 using Hmcr.Domain.Services;
 using Hmcr.Model;
 using Hmcr.Model.Dtos;
+using Hmcr.Model.Dtos.Keycloak;
 using Hmcr.Model.Dtos.User;
 using Hmcr.Model.Utils;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -20,10 +20,10 @@ namespace Hmcr.Api.Controllers
     public class UsersController : HmcrControllerBase
     {
         private IUserService _userService;
-        private IKeyCloakService _keyCloakService;
+        private IKeycloakService _keyCloakService;
         private HmcrCurrentUser _currentUser;
 
-        public UsersController(IUserService userService, IKeyCloakService keyCloakService, HmcrCurrentUser currentUser)
+        public UsersController(IUserService userService, IKeycloakService keyCloakService, HmcrCurrentUser currentUser)
         {
             _userService = userService;
             _keyCloakService = keyCloakService;
@@ -86,6 +86,7 @@ namespace Hmcr.Api.Controllers
         /// <param name="pageSize">Page size</param>
         /// <param name="pageNumber">Page number</param>
         /// <param name="orderBy">Order by column(s). Example: orderby=username</param>
+        /// <param name="direction">Oder by direction.  Example: asc, desc</param>
         /// <returns></returns>
         [HttpGet]
         [RequiresPermission(Permissions.UserRead)]
@@ -118,33 +119,6 @@ namespace Hmcr.Api.Controllers
                 return NotFound();
 
             return bceidAccount;
-        }
-
-        [HttpGet("{keyCloakUserId}/api-password")]
-        [ApiExplorerSettings(IgnoreApi = true)]
-        public async Task<ActionResult> ResetUserApiPassword(string keyCloakUserId)
-        {
-            var verifyResponse = await _keyCloakService.VerifyUserIdAsync(keyCloakUserId);
-
-            if (verifyResponse.NotFound)
-            {
-                return NotFound();
-            }
-
-            if (!verifyResponse.Valid)
-            {
-                return Unauthorized();
-            }
-
-            var response = await _keyCloakService.ResetUserPasswordAsync(keyCloakUserId);
-
-            if (!string.IsNullOrEmpty(response.Error))
-            {
-                return ValidationUtils.GetValidationErrorResult(ControllerContext,
-                     StatusCodes.Status500InternalServerError, "KeyCloak API Error", response.Error);
-            }
-
-            return Ok(new UserApiPasswordDto() { ApiPassword = response.Password });
         }
 
         [HttpPost]
@@ -209,5 +183,52 @@ namespace Hmcr.Api.Controllers
 
             return NoContent();
         }
+
+        #region Keycloak Client
+        [HttpGet("keycloak-client")]
+        public async Task<ActionResult<KeycloakClientDto>> GetUserKeycloakClient()
+        {
+            var response = await _keyCloakService.GetUserClientAsync();
+
+            if (response.NotFound)
+            {
+                return NotFound();
+            }
+
+            return Ok(response.Client);
+        }
+
+        [HttpPost("keycloak-client")]
+        public async Task<ActionResult<KeycloakClientDto>> CreateUserKeycloakClient()
+        {
+            var response = await _keyCloakService.CreateUserClientAsync();
+
+            if (response.Errors.Count > 0)
+            {
+                return ValidationUtils.GetValidationErrorResult(response.Errors, ControllerContext);
+            }
+
+            return CreatedAtRoute("GetUserKeycloakClient", await _keyCloakService.GetUserClientAsync());
+        }
+
+        [HttpPut("keycloak-client/regenerate-secret")]
+        public async Task<ActionResult> RegenerateUserKeycloakClientSecret()
+        {
+            var response = await _keyCloakService.RegenerateUserClientSecretAsync();
+
+            if (response.NotFound)
+            {
+                return NotFound();
+            }
+
+            if (!string.IsNullOrEmpty(response.Error))
+            {
+                return ValidationUtils.GetValidationErrorResult(ControllerContext,
+                     StatusCodes.Status500InternalServerError, "Unable to regenerate Keycloak client secret", response.Error);
+            }
+
+            return NoContent();
+        }
+        #endregion
     }
 }

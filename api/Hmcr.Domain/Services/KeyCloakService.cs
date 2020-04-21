@@ -1,4 +1,5 @@
 ﻿using Hmcr.Model;
+using Hmcr.Model.Dtos.Keycloak;
 using Hmcr.Model.Utils;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
@@ -13,13 +14,16 @@ using System.Threading.Tasks;
 
 namespace Hmcr.Domain.Services
 {
-    public interface IKeyCloakService
+    public interface IKeycloakService
     {
-        Task<(bool Valid, bool NotFound)> VerifyUserIdAsync(string userId);
-        Task<(string Error, string Password)> ResetUserPasswordAsync(string userId);
+        //Task<(bool Valid, bool NotFound)> VerifyUserIdAsync(string userId);
+        //Task<(string Error, string Password)> ResetUserPasswordAsync(string userId);
+        Task<(bool NotFound, KeycloakClientDto Client)> GetUserClientAsync(string newId = null);
+        Task<(Dictionary<string, List<string>> Errors, KeycloakClientDto Client)> CreateUserClientAsync();
+        Task<(bool NotFound, string Error)> RegenerateUserClientSecretAsync();
     }
 
-    public class KeyCloakService : IKeyCloakService
+    public class KeyCloakService : IKeycloakService
     {
         private IConfiguration _config;
         private IHttpClientFactory _httpClientFactory;
@@ -29,9 +33,10 @@ namespace Hmcr.Domain.Services
 
         private string _serviceClientId;
         private string _serviceClientSecret;
-        private string _authHost;
+        private string _authority;
+        private string _audience;
 
-        private static JsonSerializerOptions _jsonOptions = new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase };
+        private static JsonSerializerOptions _jsonOptions = new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase, PropertyNameCaseInsensitive = true };
 
         public KeyCloakService(IConfiguration config, IHttpClientFactory httpClientFactory, HmcrCurrentUser currentUser, ILogger<KeyCloakService> logger)
         {
@@ -40,71 +45,153 @@ namespace Hmcr.Domain.Services
             _currentUser = currentUser;
             _logger = logger;
 
-            _serviceClientId = config.GetValue<string>("KeyCloak:ServiceClientId");
-            _serviceClientSecret = config.GetValue<string>("KeyCloak:ServiceClientSecret");
-            _authHost = config.GetValue<string>("JWT:Authority");
+            _serviceClientId = config.GetValue<string>("Keycloak:ServiceClientId");
+            _serviceClientSecret = config.GetValue<string>("Keycloak:ServiceClientSecret");
+            _authority = config.GetValue<string>("JWT:Authority");
+            _audience = config.GetValue<string>("JWT:Audience");
         }
 
-        public async Task<(bool Valid, bool NotFound)> VerifyUserIdAsync(string userId)
+        //public async Task<(bool Valid, bool NotFound)> VerifyUserIdAsync(string userId)
+        //{
+        //    try
+        //    {
+        //        if (_httpClient == null)
+        //            _httpClient = await CreateHttpClientWithTokenAsync();
+
+        //        var response = await _httpClient.GetAsync(userId);
+
+
+        //        if (response.IsSuccessStatusCode)
+        //        {
+        //            var content = await response.Content.ReadAsStringAsync();
+        //            var keycloakUser = JsonSerializer.Deserialize<KeycloakUserResponse>(content, _jsonOptions);
+
+        //            if (keycloakUser.Email == _currentUser.Email.ToLowerInvariant())
+        //            {
+        //                return (true, false);
+        //            }
+
+        //            return (false, false);
+        //        }
+        //        else
+        //        {
+        //            return (false, true);
+        //        }
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        _logger.LogError($"Exception - VerifyUserIdAsync: {ex}");
+        //        throw ex;
+        //    }
+        //}
+
+        //public async Task<(string Error, string Password)> ResetUserPasswordAsync(string userId)
+        //{
+        //    try
+        //    {
+        //        if (_httpClient == null)
+        //            _httpClient = await CreateHttpClientWithTokenAsync();
+
+        //        var password = GetUniqueToken(32);
+
+        //        var payload = JsonSerializer.Serialize(new KeycloakUserPasswordResetRequest(password), _jsonOptions);
+        //        var response = await _httpClient.PutAsync($"{userId}/reset-password", new StringContent(payload, Encoding.UTF8, "application/json"));
+
+        //        if (response.IsSuccessStatusCode)
+        //        {
+        //            return ("", password);
+        //        }
+        //        else
+        //        {
+        //            return (response.ReasonPhrase, "");
+        //        }
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        _logger.LogError($"Exception - ResetUserPasswordAsync: {ex}");
+        //        throw ex;
+        //    }
+        //}
+
+        public async Task<(bool NotFound, KeycloakClientDto Client)> GetUserClientAsync(string newId = null)
         {
             try
             {
                 if (_httpClient == null)
                     _httpClient = await CreateHttpClientWithTokenAsync();
 
-                var response = await _httpClient.GetAsync(userId);
-
+                var notFound = true;
+                var clientId = !string.IsNullOrEmpty(newId) ? newId : _currentUser.ApiClientId;
+                KeycloakClientDto keycloakClient = null;
+                var response = await _httpClient.GetAsync($"clients/{clientId}");
 
                 if (response.IsSuccessStatusCode)
                 {
                     var content = await response.Content.ReadAsStringAsync();
-                    var keycloakUser = JsonSerializer.Deserialize<KeyCloakUserResponse>(content, _jsonOptions);
 
-                    if (keycloakUser.Email == _currentUser.Email.ToLowerInvariant())
-                    {
-                        return (true, false);
-                    }
+                    notFound = false;
+                    keycloakClient = JsonSerializer.Deserialize<KeycloakClientDto>(content, _jsonOptions);
+                }
 
-                    return (false, false);
-                }
-                else
-                {
-                    return (false, true);
-                }
+                return (notFound, keycloakClient);
             }
             catch (Exception ex)
             {
-                _logger.LogError($"Exception - VerifyUserIdAsync: {ex}");
+                _logger.LogError($"Exception - GetUserClientAsync: {ex}");
+                throw ex;
+            }
+        }
+        public async Task<(Dictionary<string, List<string>> Errors, KeycloakClientDto Client)> CreateUserClientAsync()
+        {
+            // https://sso-dev.pathfinder.gov.bc.ca/auth/admin/realms/fygf50pt/clients
+            try
+            {
+                var errors = new Dictionary<string, List<string>>();
+
+                if (_httpClient == null)
+                    _httpClient = await CreateHttpClientWithTokenAsync();
+
+                var existingClient = await GetUserClientAsync();
+
+                if (existingClient.Client != null)
+                {
+                    errors.AddItem(Fields.ApiClientId, "Api client already exists for this user.");
+                }
+
+                if (errors.Count > 0)
+                    return (errors, existingClient.Client);
+
+                var createDto = new KeycloakClientCreateDto();
+                createDto.ClientId = Guid.NewGuid().ToString().ToLowerInvariant();
+                createDto.AddAudienceMapper(_audience);
+                createDto.AddApiClientClaimMapper();
+                createDto.AddHardcodedClaimMapper("email", _currentUser.Email.ToLowerInvariant(), "String");
+                createDto.AddHardcodedClaimMapper("username", _currentUser.UniversalId.ToLowerInvariant(), "String");
+                createDto.AddHardcodedClaimMapper("guid", _currentUser.UserGuid.ToString(), "String");
+
+                var payload = JsonSerializer.Serialize(createDto, _jsonOptions);
+                var response = await _httpClient.PostAsync("clients", new StringContent(payload, Encoding.UTF8, "application/json"));
+
+                if (!response.IsSuccessStatusCode)
+                    errors.AddItem(Fields.ApiClientId, response.ReasonPhrase);
+
+                var newId = response.Headers.Location.Segments[response.Headers.Location.Segments.Length - 1];
+
+                existingClient = await GetUserClientAsync(newId);
+
+                return (errors, existingClient.Client);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"Exception - CreateUserClientAsync: {ex}");
                 throw ex;
             }
         }
 
-        public async Task<(string Error, string Password)> ResetUserPasswordAsync(string userId)
+        public async Task<(bool NotFound, string Error)> RegenerateUserClientSecretAsync()
         {
-            try
-            {
-                if (_httpClient == null)
-                    _httpClient = await CreateHttpClientWithTokenAsync();
-
-                var password = GetUniqueToken(32);
-
-                var payload = JsonSerializer.Serialize(new KeyCloakUserPasswordResetRequest(password), _jsonOptions);
-                var response = await _httpClient.PutAsync($"{userId}/reset-password", new StringContent(payload, Encoding.UTF8, "application/json"));
-
-                if (response.IsSuccessStatusCode)
-                {
-                    return ("", password);
-                }
-                else
-                {
-                    return (response.ReasonPhrase, "");
-                }
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError($"Exception - ResetUserPasswordAsync: {ex}");
-                throw ex;
-            }
+            await Task.Delay(0);
+            throw new NotImplementedException();
         }
 
         private async Task<HttpClient> CreateHttpClientWithTokenAsync()
@@ -114,7 +201,7 @@ namespace Hmcr.Domain.Services
             var requestToken = new HttpRequestMessage
             {
                 Method = HttpMethod.Post,
-                RequestUri = new Uri($"{_authHost}/protocol/openid-connect/token"),
+                RequestUri = new Uri($"{_authority}/protocol/openid-connect/token"),
                 Content = new FormUrlEncodedContent(new Dictionary<string, string> { { "grant_type", "client_credentials" } })
             };
             requestToken.Headers.Authorization = new AuthenticationHeaderValue("Basic", basicAuth);
@@ -125,7 +212,7 @@ namespace Hmcr.Domain.Services
                 var response = await httpClient.SendAsync(requestToken);
 
                 content = await response.Content.ReadAsStringAsync();
-                var keyCloakToken = JsonSerializer.Deserialize<KeyCloakTokenResponse>(content);
+                var keyCloakToken = JsonSerializer.Deserialize<KeycloakTokenDto>(content);
 
                 return BuildHttpClient(keyCloakToken.AccessToken);
             }
@@ -140,7 +227,7 @@ namespace Hmcr.Domain.Services
         {
             var httpClient = _httpClientFactory.CreateClient();
             httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
-            httpClient.BaseAddress = new Uri($"{_authHost.Replace("auth/realms", "auth/admin/realms")}/users/");
+            httpClient.BaseAddress = new Uri($"{_authority.Replace("auth/realms", "auth/admin/realms")}/");
 
             return httpClient;
         }
