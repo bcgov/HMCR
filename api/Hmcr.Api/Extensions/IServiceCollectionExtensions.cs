@@ -23,6 +23,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
 using NetCore.AutoRegisterDi;
 using System;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text.Json;
@@ -120,6 +121,9 @@ namespace Hmcr.Api.Extensions
                     Title = "HMCR REST API",
                     Description = "Highway Maintenance Contract Reporting System"
                 });
+
+                var filePath = Path.Combine(System.AppContext.BaseDirectory, "Hmcr.Api.xml");
+                options.IncludeXmlComments(filePath);
 
                 var securitySchema = new OpenApiSecurityScheme
                 {
