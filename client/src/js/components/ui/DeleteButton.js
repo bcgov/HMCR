@@ -46,7 +46,7 @@ const DeleteButton = ({
   return (
     <React.Fragment>
       <FontAwesomeButton color="danger" icon={iconName} id={buttonId} {...props} />
-      <Popover placement="bottom" isOpen={popoverOpen} target={buttonId} toggle={togglePopover}>
+      <Popover placement="bottom" isOpen={popoverOpen} target={buttonId} toggle={togglePopover} trigger="legacy">
         <PopoverHeader>Are you sure?</PopoverHeader>
         <PopoverBody>
           {permanentDelete ? (
