@@ -1,5 +1,8 @@
-﻿using Hmcr.Model;
+﻿using Hmcr.Data.Database;
+using Hmcr.Data.Repositories;
+using Hmcr.Model;
 using Hmcr.Model.Dtos.Keycloak;
+using Hmcr.Model.Dtos.User;
 using Hmcr.Model.Utils;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
@@ -16,9 +19,7 @@ namespace Hmcr.Domain.Services
 {
     public interface IKeycloakService
     {
-        //Task<(bool Valid, bool NotFound)> VerifyUserIdAsync(string userId);
-        //Task<(string Error, string Password)> ResetUserPasswordAsync(string userId);
-        Task<(bool NotFound, KeycloakClientDto Client)> GetUserClientAsync(string newId = null);
+        Task<KeycloakClientDto> GetUserClientAsync();
         Task<(Dictionary<string, List<string>> Errors, KeycloakClientDto Client)> CreateUserClientAsync();
         Task<(bool NotFound, string Error)> RegenerateUserClientSecretAsync();
     }
@@ -30,110 +31,65 @@ namespace Hmcr.Domain.Services
         private HttpClient _httpClient;
         private HmcrCurrentUser _currentUser;
         private ILogger<KeyCloakService> _logger;
+        private IUserRepository _userRepo;
+        private IUnitOfWork _unitOfWork;
 
         private string _serviceClientId;
         private string _serviceClientSecret;
         private string _authority;
         private string _audience;
+        private string _realm;
 
         private static JsonSerializerOptions _jsonOptions = new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase, PropertyNameCaseInsensitive = true };
 
-        public KeyCloakService(IConfiguration config, IHttpClientFactory httpClientFactory, HmcrCurrentUser currentUser, ILogger<KeyCloakService> logger)
+        public KeyCloakService(IConfiguration config, IHttpClientFactory httpClientFactory, HmcrCurrentUser currentUser, ILogger<KeyCloakService> logger, IUserRepository userRepo, IUnitOfWork unitOfWork)
         {
             _config = config;
             _httpClientFactory = httpClientFactory;
             _currentUser = currentUser;
             _logger = logger;
+            _userRepo = userRepo;
+            _unitOfWork = unitOfWork;
 
             _serviceClientId = config.GetValue<string>("Keycloak:ServiceClientId");
             _serviceClientSecret = config.GetValue<string>("Keycloak:ServiceClientSecret");
             _authority = config.GetValue<string>("JWT:Authority");
             _audience = config.GetValue<string>("JWT:Audience");
+
+            var authorityUri = new Uri(_authority);
+            _realm = authorityUri.Segments[authorityUri.Segments.Length - 1];
         }
 
-        //public async Task<(bool Valid, bool NotFound)> VerifyUserIdAsync(string userId)
-        //{
-        //    try
-        //    {
-        //        if (_httpClient == null)
-        //            _httpClient = await CreateHttpClientWithTokenAsync();
-
-        //        var response = await _httpClient.GetAsync(userId);
-
-
-        //        if (response.IsSuccessStatusCode)
-        //        {
-        //            var content = await response.Content.ReadAsStringAsync();
-        //            var keycloakUser = JsonSerializer.Deserialize<KeycloakUserResponse>(content, _jsonOptions);
-
-        //            if (keycloakUser.Email == _currentUser.Email.ToLowerInvariant())
-        //            {
-        //                return (true, false);
-        //            }
-
-        //            return (false, false);
-        //        }
-        //        else
-        //        {
-        //            return (false, true);
-        //        }
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        _logger.LogError($"Exception - VerifyUserIdAsync: {ex}");
-        //        throw ex;
-        //    }
-        //}
-
-        //public async Task<(string Error, string Password)> ResetUserPasswordAsync(string userId)
-        //{
-        //    try
-        //    {
-        //        if (_httpClient == null)
-        //            _httpClient = await CreateHttpClientWithTokenAsync();
-
-        //        var password = GetUniqueToken(32);
-
-        //        var payload = JsonSerializer.Serialize(new KeycloakUserPasswordResetRequest(password), _jsonOptions);
-        //        var response = await _httpClient.PutAsync($"{userId}/reset-password", new StringContent(payload, Encoding.UTF8, "application/json"));
-
-        //        if (response.IsSuccessStatusCode)
-        //        {
-        //            return ("", password);
-        //        }
-        //        else
-        //        {
-        //            return (response.ReasonPhrase, "");
-        //        }
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        _logger.LogError($"Exception - ResetUserPasswordAsync: {ex}");
-        //        throw ex;
-        //    }
-        //}
-
-        public async Task<(bool NotFound, KeycloakClientDto Client)> GetUserClientAsync(string newId = null)
+        public async Task<KeycloakClientDto> GetUserClientAsync()
         {
             try
             {
                 if (_httpClient == null)
                     _httpClient = await CreateHttpClientWithTokenAsync();
 
-                var notFound = true;
-                var clientId = !string.IsNullOrEmpty(newId) ? newId : _currentUser.ApiClientId;
+                var clientId = _currentUser.ApiClientId;
                 KeycloakClientDto keycloakClient = null;
-                var response = await _httpClient.GetAsync($"clients/{clientId}");
 
-                if (response.IsSuccessStatusCode)
+                if (!string.IsNullOrEmpty(clientId))
                 {
-                    var content = await response.Content.ReadAsStringAsync();
+                    var response = await _httpClient.GetAsync($"clients/{clientId}");
 
-                    notFound = false;
-                    keycloakClient = JsonSerializer.Deserialize<KeycloakClientDto>(content, _jsonOptions);
+                    if (response.IsSuccessStatusCode)
+                    {
+                        var content = await response.Content.ReadAsStringAsync();
+                        keycloakClient = JsonSerializer.Deserialize<KeycloakClientDto>(content, _jsonOptions);
+                    }
+
+                    if (keycloakClient != null)
+                    {
+                        response = await _httpClient.GetAsync($"clients/{clientId}/client-secret");
+                        var content = await response.Content.ReadAsStringAsync();
+                        var keycloakSecret = JsonSerializer.Deserialize<KeycloakClientSecretDto>(content, _jsonOptions);
+                        keycloakClient.ClientSecret = keycloakSecret.Value;
+                    }
                 }
 
-                return (notFound, keycloakClient);
+                return keycloakClient;
             }
             catch (Exception ex)
             {
@@ -143,7 +99,6 @@ namespace Hmcr.Domain.Services
         }
         public async Task<(Dictionary<string, List<string>> Errors, KeycloakClientDto Client)> CreateUserClientAsync()
         {
-            // https://sso-dev.pathfinder.gov.bc.ca/auth/admin/realms/fygf50pt/clients
             try
             {
                 var errors = new Dictionary<string, List<string>>();
@@ -151,23 +106,24 @@ namespace Hmcr.Domain.Services
                 if (_httpClient == null)
                     _httpClient = await CreateHttpClientWithTokenAsync();
 
+                // Verify if user already has a Keycloak client
                 var existingClient = await GetUserClientAsync();
-
-                if (existingClient.Client != null)
+                if (existingClient != null)
                 {
                     errors.AddItem(Fields.ApiClientId, "Api client already exists for this user.");
                 }
 
                 if (errors.Count > 0)
-                    return (errors, existingClient.Client);
+                    return (errors, existingClient);
 
-                var createDto = new KeycloakClientCreateDto();
-                createDto.ClientId = Guid.NewGuid().ToString().ToLowerInvariant();
-                createDto.AddAudienceMapper(_audience);
-                createDto.AddApiClientClaimMapper();
-                createDto.AddHardcodedClaimMapper("email", _currentUser.Email.ToLowerInvariant(), "String");
-                createDto.AddHardcodedClaimMapper("username", _currentUser.UniversalId.ToLowerInvariant(), "String");
-                createDto.AddHardcodedClaimMapper("guid", _currentUser.UserGuid.ToString(), "String");
+
+                var directoryType = _currentUser.UserType == UserTypeDto.INTERNAL ? "idir" : "bceid";
+                var username = $"{_currentUser.UniversalId.ToLowerInvariant()}@{directoryType}";
+                var email = _currentUser.Email.ToLowerInvariant();
+                var guidClaimValue = _currentUser.UserGuid.ToString();
+
+                var createDto = new KeycloakClientCreateDto(_audience, username, email, $"{directoryType}_userid", guidClaimValue);
+                createDto.ClientId = $"api.{_currentUser.UserName.ToLowerInvariant()}.{GetUniqueToken(3)}";
 
                 var payload = JsonSerializer.Serialize(createDto, _jsonOptions);
                 var response = await _httpClient.PostAsync("clients", new StringContent(payload, Encoding.UTF8, "application/json"));
@@ -175,11 +131,17 @@ namespace Hmcr.Domain.Services
                 if (!response.IsSuccessStatusCode)
                     errors.AddItem(Fields.ApiClientId, response.ReasonPhrase);
 
+                // Get newly created Keycloak client INTERNAL id
                 var newId = response.Headers.Location.Segments[response.Headers.Location.Segments.Length - 1];
+                _currentUser.ApiClientId = newId;
 
-                existingClient = await GetUserClientAsync(newId);
+                // Write new Keycloak client INTERNAL id to database 
+                await _userRepo.UpdateUserApiClientId(newId);
+                await _unitOfWork.CommitAsync();
 
-                return (errors, existingClient.Client);
+                existingClient = await GetUserClientAsync();
+
+                return (errors, existingClient);
             }
             catch (Exception ex)
             {
@@ -190,8 +152,37 @@ namespace Hmcr.Domain.Services
 
         public async Task<(bool NotFound, string Error)> RegenerateUserClientSecretAsync()
         {
-            await Task.Delay(0);
-            throw new NotImplementedException();
+            try
+            {
+                if (_httpClient == null)
+                    _httpClient = await CreateHttpClientWithTokenAsync();
+
+                var clientId = _currentUser.ApiClientId;
+                var notFound = false;
+                var error = "";
+
+                var existingClient = await GetUserClientAsync();
+                if (existingClient == null)
+                {
+                    notFound = true;
+                }
+                else
+                {
+                    var payload = JsonSerializer.Serialize(new { Realm = _realm, Client = clientId }, _jsonOptions);
+                    var response = await _httpClient.PostAsync($"clients/{clientId}/client-secret", new StringContent(payload, Encoding.UTF8, "application/json"));
+                    if (!response.IsSuccessStatusCode)
+                    {
+                        error = response.ReasonPhrase;
+                    }
+                }
+
+                return (notFound, error);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"Exception - RegenerateUserClientSecretAsync: {ex}");
+                throw ex;
+            }
         }
 
         private async Task<HttpClient> CreateHttpClientWithTokenAsync()
@@ -233,7 +224,7 @@ namespace Hmcr.Domain.Services
         }
 
         // https://blog.bitscry.com/2018/04/13/cryptographically-secure-random-string/
-        private string GetUniqueToken(int length, string chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890-_!@#$%^&*")
+        private string GetUniqueToken(int length, string chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890")
         {
             using (RNGCryptoServiceProvider crypto = new RNGCryptoServiceProvider())
             {

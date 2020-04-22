@@ -184,21 +184,21 @@ namespace Hmcr.Api.Controllers
             return NoContent();
         }
 
-        #region Keycloak Client
-        [HttpGet("keycloak-client")]
+        #region API Client
+        [HttpGet("api-client", Name = "GetUserKeycloakClient")]
         public async Task<ActionResult<KeycloakClientDto>> GetUserKeycloakClient()
         {
-            var response = await _keyCloakService.GetUserClientAsync();
+            var client = await _keyCloakService.GetUserClientAsync();
 
-            if (response.NotFound)
+            if (client == null)
             {
                 return NotFound();
             }
 
-            return Ok(response.Client);
+            return Ok(client);
         }
 
-        [HttpPost("keycloak-client")]
+        [HttpPost("api-client")]
         public async Task<ActionResult<KeycloakClientDto>> CreateUserKeycloakClient()
         {
             var response = await _keyCloakService.CreateUserClientAsync();
@@ -211,7 +211,7 @@ namespace Hmcr.Api.Controllers
             return CreatedAtRoute("GetUserKeycloakClient", await _keyCloakService.GetUserClientAsync());
         }
 
-        [HttpPut("keycloak-client/regenerate-secret")]
+        [HttpPost("api-client/secret")]
         public async Task<ActionResult> RegenerateUserKeycloakClientSecret()
         {
             var response = await _keyCloakService.RegenerateUserClientSecretAsync();

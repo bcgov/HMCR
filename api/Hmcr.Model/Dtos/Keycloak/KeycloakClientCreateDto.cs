@@ -7,6 +7,7 @@ namespace Hmcr.Model.Dtos.Keycloak
         public bool Enabled { get; set; } = true;
         public string ClientId { get; set; }
         public string Protocol { get; set; } = KeycloakMapperConfig.DefaultProtocol;
+        public bool FullScopeAllowed { get; set; } = false;
         public bool StandardFlowEnabled { get; set; } = false;
         public bool ImplicitFlowEnabled { get; set; } = false;
         public bool DirectAccessGrantsEnabled { get; set; } = false;
@@ -17,6 +18,17 @@ namespace Hmcr.Model.Dtos.Keycloak
         public KeycloakClientCreateDto()
         {
             ProtocolMappers = new List<KeycloakProtocolMapperDto>();
+        }
+
+        public KeycloakClientCreateDto(string audience, string username, string email, string guidClaimName, string guidClaimValue)
+        {
+            ProtocolMappers = new List<KeycloakProtocolMapperDto>();
+
+            AddAudienceMapper(audience);
+            AddApiClientClaimMapper();
+            AddHardcodedClaimMapper("email", email.ToLowerInvariant(), "String");
+            AddHardcodedClaimMapper("username", username.ToLowerInvariant(), "String");
+            AddHardcodedClaimMapper(guidClaimName, guidClaimValue, "String");
         }
 
         public void AddAudienceMapper(string audience)
