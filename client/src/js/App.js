@@ -19,6 +19,7 @@ import RoleAdmin from './components/RoleAdmin';
 import ReportExport from './components/ReportExport';
 import WorkReporting from './components/WorkReporting';
 import Version from './components/Version';
+import ApiAccess from './components/ApiAccess';
 import WorkReportingSubmissionDetail from './components/WorkReportingSubmissionDetail';
 import ErrorBoundary from './components/ErrorBoundary';
 
@@ -46,11 +47,7 @@ const App = ({ currentUser }) => {
           <Header />
           <Container>
             <ErrorBoundary>
-              <Switch>
-                {Routes(currentUser)}
-                <Route path={Constants.PATHS.UNAUTHORIZED} exact component={Unauthorized} />
-                <Route path="*" component={NoMatch} />
-              </Switch>
+              <Switch>{Routes(currentUser)}</Switch>
             </ErrorBoundary>
           </Container>
           <Footer />
@@ -99,6 +96,17 @@ const getLastVistedPath = (currentUser) => {
   return defaultPath(currentUser);
 };
 
+const CommonRoutes = () => {
+  return (
+    <Switch>
+      <Route path={Constants.PATHS.API_ACCESS} exact component={ApiAccess} />
+      <Route path={Constants.PATHS.VERSION} exact component={Version} />
+      <Route path={Constants.PATHS.UNAUTHORIZED} exact component={Unauthorized} />
+      <Route path="*" component={NoMatch} />
+    </Switch>
+  );
+};
+
 const ContractorRoutes = (currentUser) => {
   return (
     <Switch>
@@ -117,9 +125,7 @@ const ContractorRoutes = (currentUser) => {
       </AuthorizedRoute>
       <Route path={Constants.PATHS.WORK_REPORTING} exact component={WorkReporting} />
       <Route path={`${Constants.PATHS.WORK_REPORTING}/:submissionId`} component={WorkReportingSubmissionDetail} />
-      <Route path={Constants.PATHS.VERSION} exact component={Version} />
-      <Route path={Constants.PATHS.UNAUTHORIZED} exact component={Unauthorized} />
-      <Route path="*" component={NoMatch} />
+      {CommonRoutes()}
     </Switch>
   );
 };
@@ -165,9 +171,7 @@ const AdminRoutes = (currentUser) => {
       >
         <Route path={Constants.PATHS.WORK_REPORTING} exact component={WorkReporting} />
       </AuthorizedRoute>
-      <Route path={Constants.PATHS.VERSION} exact component={Version} />
-      <Route path={Constants.PATHS.UNAUTHORIZED} exact component={Unauthorized} />
-      <Route path="*" component={NoMatch} />
+      {CommonRoutes()}
     </Switch>
   );
 };

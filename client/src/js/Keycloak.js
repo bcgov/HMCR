@@ -10,7 +10,7 @@ const keycloakConfig = {
     : process.env.REACT_APP_SSO_CLIENT,
 };
 
-const keycloak = Keycloak(keycloakConfig);
+export const keycloak = Keycloak(keycloakConfig);
 
 export const init = (onSuccess) => {
   keycloak.init({ onLoad: 'login-required', promiseType: 'native' }).then((authenticated) => {
