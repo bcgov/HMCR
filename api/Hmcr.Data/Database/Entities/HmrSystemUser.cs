@@ -23,6 +23,7 @@ namespace Hmcr.Data.Database.Entities
         public string Email { get; set; }
         public Guid? BusinessGuid { get; set; }
         public string BusinessLegalName { get; set; }
+        public string ApiClientId { get; set; }
         public DateTime? EndDate { get; set; }
         public long ConcurrencyControlNumber { get; set; }
         public string AppCreateUserid { get; set; }
