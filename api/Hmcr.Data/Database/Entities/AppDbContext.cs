@@ -72,7 +72,6 @@ namespace Hmcr.Data.Database.Entities
         public virtual DbSet<Server> Servers { get; set; }
         public virtual DbSet<Set> Sets { get; set; }
         public virtual DbSet<State> States { get; set; }
-
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<AggregatedCounter>(entity =>
@@ -3963,7 +3962,7 @@ namespace Hmcr.Data.Database.Entities
 
                 entity.Property(e => e.ErrorSpThreshold)
                     .HasColumnName("ERROR_SP_THRESHOLD")
-                    .HasColumnType("numeric(12, 0)")
+                    .HasColumnType("numeric(12, 6)")
                     .HasComment("Spatial error threshold beyond which an error is raised, when comparing input and actual values");
 
                 entity.Property(e => e.IsResubmitted)
@@ -4016,7 +4015,7 @@ namespace Hmcr.Data.Database.Entities
 
                 entity.Property(e => e.WarningSpThreshold)
                     .HasColumnName("WARNING_SP_THRESHOLD")
-                    .HasColumnType("numeric(12, 0)")
+                    .HasColumnType("numeric(12, 6)")
                     .HasComment("Spatial warning threshold beyond which a warning is raised, when comparing input and actual values");
 
                 entity.HasOne(d => d.RowStatus)
