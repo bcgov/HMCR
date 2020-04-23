@@ -294,5 +294,3 @@ log*.txt
 
 # Override .s2i/bin
 !.s2i/bin
-
-**/Hmcr.Api.xml
