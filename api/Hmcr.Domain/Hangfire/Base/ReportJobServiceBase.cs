@@ -236,6 +236,9 @@ namespace Hmcr.Domain.Hangfire.Base
             var threshold = _lookupService.GetThresholdLevel(thresholdLevel);
             var threasholdInKm = threshold.Warning / 1000M;
 
+            row.ErrorSpThreshold = threshold.Error / 1000M;
+            row.WarningSpThreshold = threshold.Warning / 1000M;
+
             if (row.StartVariance != null && row.StartVariance > threasholdInKm)
             {
                 row.WarningDetail = string.Format(RowWarning.VarianceWarning, "Start", start, rfiSegment, threshold.Warning);
