@@ -59,7 +59,7 @@ const DataTableControl = ({
                       </td>
                     );
 
-                  let style = {};
+                  let style = { position: 'relative' };
                   if (column.maxWidth) {
                     style.maxWidth = column.maxWidth;
                   }

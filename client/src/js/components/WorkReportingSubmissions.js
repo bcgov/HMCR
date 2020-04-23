@@ -1,7 +1,7 @@
 import React, { useState, useEffect, forwardRef, useImperativeHandle } from 'react';
 import { useHistory } from 'react-router-dom';
 import { connect } from 'react-redux';
-import { Button, Row, Col, Input, UncontrolledPopover, PopoverBody, PopoverHeader } from 'reactstrap';
+import { Button, Row, Col, Input, UncontrolledPopover, PopoverBody, PopoverHeader, Progress } from 'reactstrap';
 import moment from 'moment';
 import { DateRangePicker } from 'react-dates';
 import queryString from 'query-string';
@@ -34,6 +34,15 @@ const defaultSearchOptions = {
   searchText: '',
   direction: Constants.SORT_DIRECTION.DESCENDING,
   dataPath: Constants.API_PATHS.SUBMISSIONS,
+};
+
+const maxValidationStages = 5;
+const stageColors = (stage) => {
+  if (stage >= 1 && stage <= maxValidationStages - 1) return 'danger';
+
+  if (stage === maxValidationStages) return 'success';
+
+  return 'warning';
 };
 
 const WorkReportingSubmissions = ({ serviceArea, submissionStatuses }, ref) => {
@@ -179,37 +188,51 @@ const WorkReportingSubmissions = ({ serviceArea, submissionStatuses }, ref) => {
           <Col>
             {searchData.data.length > 0 && (
               <DataTableWithPaginaionControl
-                dataList={searchData.data.map((item) => ({
-                  ...item,
-                  name: `${item.firstName} ${item.lastName}`,
-                  date: moment(item.appCreateTimestamp)
-                    .utc(item.appCreateTimestamp, Constants.MESSAGE_DATE_FORMAT)
-                    .local()
-                    .format(Constants.DATE_DISPLAY_FORMAT),
-                  id: (
-                    <Button
-                      color="link"
-                      size="sm"
-                      onClick={() => setShowResultScreen({ isOpen: true, submission: item.id })}
-                    >
-                      {item.id}
-                    </Button>
-                  ),
-                  longDescription: (
-                    <React.Fragment>
-                      <FontAwesomeButton
-                        id={`tooltip_${item.id}`}
-                        className="fa-color-primary"
+                dataList={searchData.data.map((item) => {
+                  const itemStatus = submissionStatuses[item.submissionStatusCode];
+
+                  return {
+                    ...item,
+                    name: `${item.firstName} ${item.lastName}`,
+                    date: moment(item.appCreateTimestamp)
+                      .utc(item.appCreateTimestamp, Constants.MESSAGE_DATE_FORMAT)
+                      .local()
+                      .format(Constants.DATE_DISPLAY_FORMAT),
+                    id: (
+                      <Button
                         color="link"
-                        icon="question-circle"
-                      />
-                      <UncontrolledPopover trigger="focus" placement="auto" target={`tooltip_${item.id}`}>
-                        <PopoverHeader>{submissionStatuses[item.submissionStatusCode].description}</PopoverHeader>
-                        <PopoverBody>{submissionStatuses[item.submissionStatusCode].longDescription}</PopoverBody>
-                      </UncontrolledPopover>
-                    </React.Fragment>
-                  ),
-                }))}
+                        size="sm"
+                        onClick={() => setShowResultScreen({ isOpen: true, submission: item.id })}
+                      >
+                        {item.id}
+                      </Button>
+                    ),
+                    description: (
+                      <React.Fragment>
+                        {item.description}
+                        <Progress
+                          className="thin-underline"
+                          color={stageColors(itemStatus.stage)}
+                          value={(itemStatus.stage / maxValidationStages) * 100}
+                        ></Progress>
+                      </React.Fragment>
+                    ),
+                    longDescription: (
+                      <React.Fragment>
+                        <FontAwesomeButton
+                          id={`tooltip_${item.id}`}
+                          className="fa-color-primary"
+                          color="link"
+                          icon="question-circle"
+                        />
+                        <UncontrolledPopover trigger="focus" placement="auto" target={`tooltip_${item.id}`}>
+                          <PopoverHeader>{itemStatus.description}</PopoverHeader>
+                          <PopoverBody>{itemStatus.longDescription}</PopoverBody>
+                        </UncontrolledPopover>
+                      </React.Fragment>
+                    ),
+                  };
+                })}
                 tableColumns={tableColumns}
                 searchPagination={searchData.pagination}
                 onPageNumberChange={searchData.handleChangePage}
