@@ -23,13 +23,13 @@ const ApiAccess = ({ hideErrorDialog }) => {
 
   useEffect(() => {
     api
-      .getApiClient()
+      .getVersion()
       .then((response) => {
-        setApiClient(response.data);
+        setVersion(response.data);
 
-        return api.getVersion();
+        return api.getApiClient();
       })
-      .then((response) => setVersion(response.data))
+      .then((response) => setApiClient(response.data))
       .catch((error) => {
         if (error.response.status === 404) hideErrorDialog();
       })
