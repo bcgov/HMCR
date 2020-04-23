@@ -14,6 +14,7 @@
             <param name="fromDate">From date in yyyy-MM-dd format</param>
             <param name="toDate">To date in yyyy-MM-dd format</param>
             <param name="cql_filter">Filter</param>
+            <param name="propertyName">Property names of the columns to export</param>
             <returns></returns>
         </member>
         <member name="M:Hmcr.Api.Controllers.ExportController.GetSupportedFormats">
@@ -36,6 +37,7 @@
             <param name="pageSize">Page size</param>
             <param name="pageNumber">Page number</param>
             <param name="orderBy">Order by column(s). Example: orderby=username</param>
+            <param name="direction">Oder by direction.  Example: asc, desc</param>
             <returns></returns>
         </member>
     </members>
