@@ -13,7 +13,7 @@
     "formik": "^2.1.4",
     "http-proxy-middleware": "^1.0.3",
     "jquery": "^3.4.1",
-    "keycloak-js": "^9.0.0",
+    "keycloak-js": "^9.0.3",
     "lodash": "^4.17.15",
     "moment": "^2.24.0",
     "node-sass": "^4.13.1",

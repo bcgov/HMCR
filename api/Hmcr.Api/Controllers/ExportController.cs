@@ -41,6 +41,7 @@ namespace Hmcr.Api.Controllers
         /// <param name="fromDate">From date in yyyy-MM-dd format</param>
         /// <param name="toDate">To date in yyyy-MM-dd format</param>
         /// <param name="cql_filter">Filter</param>
+        /// <param name="propertyName">Property names of the columns to export</param>
         /// <returns></returns>
         [HttpGet("report", Name = "Export")]
         [RequiresPermission(Permissions.Export)]        

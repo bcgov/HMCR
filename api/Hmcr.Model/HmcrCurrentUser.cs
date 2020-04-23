@@ -16,6 +16,7 @@ namespace Hmcr.Model
         public decimal BusinessNumber { get; set; }
         public string FirstName { get; set; }
         public string LastName { get; set; }
+        public string ApiClientId { get; set; }
         public UserCurrentDto UserInfo { get; set; }
     }
 }

@@ -104,6 +104,9 @@ const Header = ({ currentUser }) => {
                   Quick Links
                 </DropdownToggle>
                 <DropdownMenu right>
+                  <DropdownItem tag={Link} to={Constants.PATHS.API_ACCESS}>
+                    API Access
+                  </DropdownItem>
                   <DropdownItem tag={Link} to={Constants.PATHS.VERSION}>
                     Version
                   </DropdownItem>

@@ -28,6 +28,7 @@ namespace Hmcr.Data.Repositories
         Task<HmrSystemUser> GetActiveUserEntityAsync(Guid userGuid);
         Task UpdateUserFromBceidAsync(BceidAccount user, long concurrencyControlNumber);
         IEnumerable<UserDto> GetActiveUsersByServiceAreaNumber(decimal serviceAreaNumber);
+        Task UpdateUserApiClientId(string clientId);
     }
 
     public class UserRepository : HmcrRepositoryBase<HmrSystemUser>, IUserRepository
@@ -51,7 +52,7 @@ namespace Hmcr.Data.Repositories
                                             .ThenInclude(x => x.Permission)
                                 .Include(x => x.HmrServiceAreaUsers)
                                     .ThenInclude(x => x.ServiceAreaNumberNavigation)
-                                .FirstAsync(u => u.UserGuid == _currentUser.UserGuid);            
+                                .FirstAsync(u => u.UserGuid == _currentUser.UserGuid);
 
             var currentUser = Mapper.Map<UserCurrentDto>(userEntity);
 
@@ -341,6 +342,13 @@ namespace Hmcr.Data.Repositories
         public IEnumerable<UserDto> GetActiveUsersByServiceAreaNumber(decimal serviceAreaNumber)
         {
             return GetAll<UserDto>(x => (x.EndDate == null || x.EndDate > DateTime.Today) && x.HmrServiceAreaUsers.Any(y => y.ServiceAreaNumber == serviceAreaNumber));
+        }
+
+        public async Task UpdateUserApiClientId(string apiClientId)
+        {
+            var userEntity = await DbSet.FirstAsync(u => u.UserGuid == _currentUser.UserGuid);
+
+            userEntity.ApiClientId = apiClientId;
         }
     }
 }

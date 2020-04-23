@@ -7,5 +7,12 @@ module.exports = function (app) {
       target: process.env.REACT_APP_API_HOST || 'http://localhost:27238',
       changeOrigin: true,
     })
-  );
+  ),
+    app.use(
+      '/swagger',
+      createProxyMiddleware({
+        target: process.env.REACT_APP_API_HOST || 'http://localhost:27238',
+        changeOrigin: true,
+      })
+    );
 };
