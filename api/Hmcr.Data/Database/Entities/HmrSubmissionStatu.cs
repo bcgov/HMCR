@@ -19,6 +19,7 @@ namespace Hmcr.Data.Database.Entities
         public string Description { get; set; }
         public string LongDescription { get; set; }
         public string StatusType { get; set; }
+        public decimal Stage { get; set; }
         public long ConcurrencyControlNumber { get; set; }
         public string AppCreateUserid { get; set; }
         public DateTime AppCreateTimestamp { get; set; }

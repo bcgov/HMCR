@@ -3676,53 +3676,67 @@ namespace Hmcr.Data.Database.Entities
 
                 entity.ToTable("HMR_SUBMISSION_OBJECT");
 
+                entity.HasComment("Digital file containing a batch of records being submitted for validation,  ingestion and reporting.");
+
                 entity.HasIndex(e => new { e.SubmissionStatusId, e.ServiceAreaNumber, e.SubmissionStreamId })
                     .HasName("HMR_SUBM_OBJ_FK_I");
 
                 entity.Property(e => e.SubmissionObjectId)
                     .HasColumnName("SUBMISSION_OBJECT_ID")
                     .HasColumnType("numeric(9, 0)")
-                    .HasDefaultValueSql("(NEXT VALUE FOR [HMR_SUBM_OBJ_ID_SEQ])");
+                    .HasDefaultValueSql("(NEXT VALUE FOR [HMR_SUBM_OBJ_ID_SEQ])")
+                    .HasComment("Unique identifier for a record");
 
                 entity.Property(e => e.AppCreateTimestamp)
                     .HasColumnName("APP_CREATE_TIMESTAMP")
-                    .HasColumnType("datetime");
+                    .HasColumnType("datetime")
+                    .HasComment("Date and time of record creation");
 
                 entity.Property(e => e.AppCreateUserDirectory)
                     .IsRequired()
                     .HasColumnName("APP_CREATE_USER_DIRECTORY")
                     .HasMaxLength(12)
-                    .IsUnicode(false);
+                    .IsUnicode(false)
+                    .HasComment("Active Directory which retains source of truth for user idenifiers.");
 
-                entity.Property(e => e.AppCreateUserGuid).HasColumnName("APP_CREATE_USER_GUID");
+                entity.Property(e => e.AppCreateUserGuid)
+                    .HasColumnName("APP_CREATE_USER_GUID")
+                    .HasComment("Unique idenifier of user who created record");
 
                 entity.Property(e => e.AppCreateUserid)
                     .IsRequired()
                     .HasColumnName("APP_CREATE_USERID")
                     .HasMaxLength(30)
-                    .IsUnicode(false);
+                    .IsUnicode(false)
+                    .HasComment("Unique idenifier of user who created record");
 
                 entity.Property(e => e.AppLastUpdateTimestamp)
                     .HasColumnName("APP_LAST_UPDATE_TIMESTAMP")
-                    .HasColumnType("datetime");
+                    .HasColumnType("datetime")
+                    .HasComment("Date and time of last record update");
 
                 entity.Property(e => e.AppLastUpdateUserDirectory)
                     .IsRequired()
                     .HasColumnName("APP_LAST_UPDATE_USER_DIRECTORY")
                     .HasMaxLength(12)
-                    .IsUnicode(false);
+                    .IsUnicode(false)
+                    .HasComment("Active Directory which retains source of truth for user idenifiers.");
 
-                entity.Property(e => e.AppLastUpdateUserGuid).HasColumnName("APP_LAST_UPDATE_USER_GUID");
+                entity.Property(e => e.AppLastUpdateUserGuid)
+                    .HasColumnName("APP_LAST_UPDATE_USER_GUID")
+                    .HasComment("Unique idenifier of user who last updated record");
 
                 entity.Property(e => e.AppLastUpdateUserid)
                     .IsRequired()
                     .HasColumnName("APP_LAST_UPDATE_USERID")
                     .HasMaxLength(30)
-                    .IsUnicode(false);
+                    .IsUnicode(false)
+                    .HasComment("Unique idenifier of user who last updated record");
 
                 entity.Property(e => e.ConcurrencyControlNumber)
                     .HasColumnName("CONCURRENCY_CONTROL_NUMBER")
-                    .HasDefaultValueSql("((1))");
+                    .HasDefaultValueSql("((1))")
+                    .HasComment("Record under edit indicator used for optomisitc record contention management.  If number differs from start of edit, then user will be prompted to that record has been updated by someone else.");
 
                 entity.Property(e => e.ContractTermId)
                     .HasColumnName("CONTRACT_TERM_ID")
@@ -3732,66 +3746,79 @@ namespace Hmcr.Data.Database.Entities
                 entity.Property(e => e.DbAuditCreateTimestamp)
                     .HasColumnName("DB_AUDIT_CREATE_TIMESTAMP")
                     .HasColumnType("datetime")
-                    .HasDefaultValueSql("(getutcdate())");
+                    .HasDefaultValueSql("(getutcdate())")
+                    .HasComment("Date and time record created in the database");
 
                 entity.Property(e => e.DbAuditCreateUserid)
                     .IsRequired()
                     .HasColumnName("DB_AUDIT_CREATE_USERID")
                     .HasMaxLength(30)
                     .IsUnicode(false)
-                    .HasDefaultValueSql("(user_name())");
+                    .HasDefaultValueSql("(user_name())")
+                    .HasComment("Named database user who created record");
 
                 entity.Property(e => e.DbAuditLastUpdateTimestamp)
                     .HasColumnName("DB_AUDIT_LAST_UPDATE_TIMESTAMP")
                     .HasColumnType("datetime")
-                    .HasDefaultValueSql("(getutcdate())");
+                    .HasDefaultValueSql("(getutcdate())")
+                    .HasComment("Date and time record was last updated in the database.");
 
                 entity.Property(e => e.DbAuditLastUpdateUserid)
                     .IsRequired()
                     .HasColumnName("DB_AUDIT_LAST_UPDATE_USERID")
                     .HasMaxLength(30)
                     .IsUnicode(false)
-                    .HasDefaultValueSql("(user_name())");
+                    .HasDefaultValueSql("(user_name())")
+                    .HasComment("Named database user who last updated record");
 
                 entity.Property(e => e.DigitalRepresentation)
                     .IsRequired()
-                    .HasColumnName("DIGITAL_REPRESENTATION");
+                    .HasColumnName("DIGITAL_REPRESENTATION")
+                    .HasComment("Raw file storage within the database.");
 
                 entity.Property(e => e.ErrorDetail)
                     .HasColumnName("ERROR_DETAIL")
                     .HasMaxLength(4000)
-                    .IsUnicode(false);
+                    .IsUnicode(false)
+                    .HasComment("Error descriptions applicable to an early stage file validation error (eg: missing mandatory column).");
 
                 entity.Property(e => e.FileHash)
                     .HasColumnName("FILE_HASH")
                     .HasMaxLength(256)
-                    .IsUnicode(false);
+                    .IsUnicode(false)
+                    .HasComment("Cryptographic hash for each submission object received. The hash total is used to compare with subsequently submitted data to check for duplicate submissions. If a match exists, newly matched data is not processed further.");
 
                 entity.Property(e => e.FileName)
                     .IsRequired()
                     .HasColumnName("FILE_NAME")
                     .HasMaxLength(100)
-                    .IsUnicode(false);
+                    .IsUnicode(false)
+                    .HasComment("The name of the document file name as was supplied by the user.");
 
                 entity.Property(e => e.MimeTypeId)
                     .HasColumnName("MIME_TYPE_ID")
-                    .HasColumnType("numeric(9, 0)");
+                    .HasColumnType("numeric(9, 0)")
+                    .HasComment("Multipurpose Internet Mail Extensions (MIME) type of the submitted file");
 
                 entity.Property(e => e.PartyId)
                     .HasColumnName("PARTY_ID")
-                    .HasColumnType("numeric(9, 0)");
+                    .HasColumnType("numeric(9, 0)")
+                    .HasComment("Unique identifier of related PARTY record");
 
                 entity.Property(e => e.ServiceAreaNumber)
                     .HasColumnName("SERVICE_AREA_NUMBER")
-                    .HasColumnType("numeric(9, 0)");
+                    .HasColumnType("numeric(9, 0)")
+                    .HasComment("Unique identifier for SERVICE AREA");
 
                 entity.Property(e => e.SubmissionStatusId)
                     .HasColumnName("SUBMISSION_STATUS_ID")
-                    .HasColumnType("numeric(9, 0)");
+                    .HasColumnType("numeric(9, 0)")
+                    .HasComment("Unique identifier relecting the current status of the submission.");
 
                 entity.Property(e => e.SubmissionStreamId)
                     .HasColumnName("SUBMISSION_STREAM_ID")
-                    .HasColumnType("numeric(9, 0)");
+                    .HasColumnType("numeric(9, 0)")
+                    .HasComment("Unique identifier for SUBMISSION STREAM");
 
                 entity.HasOne(d => d.ContractTerm)
                     .WithMany(p => p.HmrSubmissionObjects)
@@ -3831,7 +3858,8 @@ namespace Hmcr.Data.Database.Entities
             modelBuilder.Entity<HmrSubmissionRow>(entity =>
             {
                 entity.HasKey(e => e.RowId)
-                    .HasName("HMR_SUBM_RW_PK");
+                    .HasName("HMR_SUBM_RW_PK")
+                    .IsClustered(false);
 
                 entity.ToTable("HMR_SUBMISSION_ROW");
 
@@ -3933,6 +3961,11 @@ namespace Hmcr.Data.Database.Entities
                     .IsUnicode(false)
                     .HasComment("Full listing of validation errors in JSON format for the submitted row.");
 
+                entity.Property(e => e.ErrorSpThreshold)
+                    .HasColumnName("ERROR_SP_THRESHOLD")
+                    .HasColumnType("numeric(12, 0)")
+                    .HasComment("Spatial error threshold beyond which an error is raised, when comparing input and actual values");
+
                 entity.Property(e => e.IsResubmitted)
                     .HasColumnName("IS_RESUBMITTED")
                     .HasComment("Indicates if the RECORD_NUMBER for the same CONTRACT_TERM and PARTY has been previously processed successfully and is being overwritten by a subsequent submission row.");
@@ -3980,6 +4013,11 @@ namespace Hmcr.Data.Database.Entities
                     .HasMaxLength(4000)
                     .IsUnicode(false)
                     .HasComment("Full listing of validation warnings for the submitted row.  Thresholds can be  established whereby data will not be rejected, but a warning will be noted.");
+
+                entity.Property(e => e.WarningSpThreshold)
+                    .HasColumnName("WARNING_SP_THRESHOLD")
+                    .HasColumnType("numeric(12, 0)")
+                    .HasComment("Spatial warning threshold beyond which a warning is raised, when comparing input and actual values");
 
                 entity.HasOne(d => d.RowStatus)
                     .WithMany(p => p.HmrSubmissionRows)
@@ -4084,6 +4122,10 @@ namespace Hmcr.Data.Database.Entities
                     .HasMaxLength(4000)
                     .IsUnicode(false);
 
+                entity.Property(e => e.ErrorSpThreshold)
+                    .HasColumnName("ERROR_SP_THRESHOLD")
+                    .HasColumnType("numeric(12, 0)");
+
                 entity.Property(e => e.IsResubmitted).HasColumnName("IS_RESUBMITTED");
 
                 entity.Property(e => e.RecordNumber)
@@ -4125,6 +4167,10 @@ namespace Hmcr.Data.Database.Entities
                     .HasColumnName("WARNING_DETAIL")
                     .HasMaxLength(4000)
                     .IsUnicode(false);
+
+                entity.Property(e => e.WarningSpThreshold)
+                    .HasColumnName("WARNING_SP_THRESHOLD")
+                    .HasColumnType("numeric(12, 0)");
             });
 
             modelBuilder.Entity<HmrSubmissionStatu>(entity =>
@@ -4234,6 +4280,11 @@ namespace Hmcr.Data.Database.Entities
                     .HasMaxLength(255)
                     .IsUnicode(false)
                     .HasComment("Full description of the status code.");
+
+                entity.Property(e => e.Stage)
+                    .HasColumnName("STAGE")
+                    .HasColumnType("numeric(9, 0)")
+                    .HasComment("Stages in the processing/parsing of a submitted file");
 
                 entity.Property(e => e.StatusCode)
                     .IsRequired()
@@ -5607,7 +5658,7 @@ namespace Hmcr.Data.Database.Entities
 
                 entity.Property(e => e.HighwayUniqueName)
                     .HasColumnName("HIGHWAY_UNIQUE_NAME")
-                    .HasMaxLength(40)
+                    .HasMaxLength(255)
                     .IsUnicode(false);
 
                 entity.Property(e => e.IsOverSpTolerance)
