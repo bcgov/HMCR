@@ -10,6 +10,7 @@ namespace Hmcr.Data.Database.Entities
         public DateTime? EndDateHist { get; set; }
         public decimal SystemUserId { get; set; }
         public decimal? PartyId { get; set; }
+        public string ApiClientId { get; set; }
         public Guid? UserGuid { get; set; }
         public string Username { get; set; }
         public string UserDirectory { get; set; }

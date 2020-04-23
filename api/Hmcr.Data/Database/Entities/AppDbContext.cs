@@ -72,6 +72,7 @@ namespace Hmcr.Data.Database.Entities
         public virtual DbSet<Server> Servers { get; set; }
         public virtual DbSet<Set> Sets { get; set; }
         public virtual DbSet<State> States { get; set; }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<AggregatedCounter>(entity =>
@@ -4539,6 +4540,12 @@ namespace Hmcr.Data.Database.Entities
                     .HasDefaultValueSql("(NEXT VALUE FOR [SYS_USR_ID_SEQ])")
                     .HasComment("A system generated unique identifier.");
 
+                entity.Property(e => e.ApiClientId)
+                    .HasColumnName("API_CLIENT_ID")
+                    .HasMaxLength(40)
+                    .IsUnicode(false)
+                    .HasComment("This ID is used to track Keycloak client ID created for the users");
+
                 entity.Property(e => e.AppCreateTimestamp)
                     .HasColumnName("APP_CREATE_TIMESTAMP")
                     .HasColumnType("datetime")
@@ -4593,8 +4600,7 @@ namespace Hmcr.Data.Database.Entities
                     .HasColumnName("BUSINESS_LEGAL_NAME")
                     .HasMaxLength(200)
                     .IsUnicode(false)
-                    .HasComment(@"Lega lName assigned to the business and derived from BC Registry via BCeID (SMGOV_BUSINESSLEGALNAME)
-");
+                    .HasComment("Lega lName assigned to the business and derived from BC Registry via BCeID (SMGOV_BUSINESSLEGALNAME)");
 
                 entity.Property(e => e.ConcurrencyControlNumber)
                     .HasColumnName("CONCURRENCY_CONTROL_NUMBER")
@@ -4671,8 +4677,7 @@ namespace Hmcr.Data.Database.Entities
                     .HasColumnName("USER_TYPE")
                     .HasMaxLength(30)
                     .IsUnicode(false)
-                    .HasComment(@"Defined attribute within IDIR Active directory (UserType = SMGOV_USERTYPE)
-");
+                    .HasComment("Defined attribute within IDIR Active directory (UserType = SMGOV_USERTYPE)");
 
                 entity.Property(e => e.Username)
                     .IsRequired()
@@ -4701,6 +4706,11 @@ namespace Hmcr.Data.Database.Entities
                 entity.Property(e => e.SystemUserHistId)
                     .HasColumnName("SYSTEM_USER_HIST_ID")
                     .HasDefaultValueSql("(NEXT VALUE FOR [HMR_SYSTEM_USER_H_ID_SEQ])");
+
+                entity.Property(e => e.ApiClientId)
+                    .HasColumnName("API_CLIENT_ID")
+                    .HasMaxLength(40)
+                    .IsUnicode(false);
 
                 entity.Property(e => e.AppCreateTimestamp)
                     .HasColumnName("APP_CREATE_TIMESTAMP")
