@@ -19,11 +19,17 @@ const ApiAccess = ({ hideErrorDialog }) => {
   const [apiClient, setApiClient] = useState(null);
   const [showSecret, setShowSecret] = useState(false);
   const [createClicked, setCreateClicked] = useState(false);
+  const [version, setVersion] = useState('');
 
   useEffect(() => {
     api
       .getApiClient()
-      .then((response) => setApiClient(response.data))
+      .then((response) => {
+        setApiClient(response.data);
+
+        return api.getVersion();
+      })
+      .then((response) => setVersion(response.data))
       .catch((error) => {
         if (error.response.status === 404) hideErrorDialog();
       })
@@ -97,20 +103,6 @@ const ApiAccess = ({ hideErrorDialog }) => {
       `$headers.Add("Authorization", "Bearer aaaabbbbccccdddd...")\n\n` +
       `$response = Invoke-RestMethod '${sampleUrl}' -Method 'GET' -Headers $headers -Body $body\n` +
       `$response | ConvertTo-Json\n`;
-    const versionResponse =
-      '{\n' +
-      '    "name": "Hmcr.Api",\n' +
-      '    "version": "1.2.0.0",\n' +
-      '    "description": "The API server for the Highway Maintenance Contract Reporting System",\n' +
-      '    "copyright": "Copyright© 2019, Province of British Columbia.",\n' +
-      '    "fileVersion": "1.0.0.0",\n' +
-      '    "fileCreationTime": "2020-04-22T22:48:26.3434354Z",\n' +
-      '    "informationalVersion": "1.0.0",\n' +
-      '    "targetFramework": ".NETCoreApp,Version=v3.1",\n' +
-      '    "imageRuntimeVersion": "v4.0.30319",\n' +
-      '    "commit": null,\n' +
-      '    "environment": "DEV"\n' +
-      '}';
 
     return (
       <React.Fragment>
@@ -151,7 +143,7 @@ const ApiAccess = ({ hideErrorDialog }) => {
         </div>
         <small>Sample Response</small>
         <div className="code-block">
-          <pre>{versionResponse}</pre>
+          <pre>{JSON.stringify(version, null, 4)}</pre>
         </div>
       </React.Fragment>
     );
