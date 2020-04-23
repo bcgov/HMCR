@@ -1,8 +1,4 @@
-﻿using Hmcr.Model.Dtos.SubmissionObject;
-using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Text.Json.Serialization;
+﻿using System.Text.Json.Serialization;
 
 namespace Hmcr.Model.Dtos.SubmissionStatus
 {
@@ -14,5 +10,6 @@ namespace Hmcr.Model.Dtos.SubmissionStatus
         public string Description { get; set; }
         public string LongDescription { get; set; }
         public string StatusType { get; set; }
+        public decimal Stage { get; set; }
     }
 }
