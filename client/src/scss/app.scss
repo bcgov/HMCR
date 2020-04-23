@@ -128,3 +128,13 @@ ul.no-bullet {
   width: 100%;
   bottom: 0px;
 }
+
+.code-block {
+  background-color: #f6f8fa;
+  padding: 16px;
+  margin-bottom: 16px;
+
+  pre {
+    margin: 0;
+  }
+}

@@ -227,7 +227,7 @@ namespace Hmcr.Api.Controllers
                      StatusCodes.Status500InternalServerError, "Unable to regenerate Keycloak client secret", response.Error);
             }
 
-            return NoContent();
+            return CreatedAtRoute("GetUserKeycloakClient", await _keyCloakService.GetUserClientAsync());
         }
         #endregion
     }
