@@ -68,7 +68,7 @@ namespace Hmcr.Domain.Hangfire
                 if (errors.Count > 0)
                 {
                     _submission.ErrorDetail = errors.GetErrorDetail();
-                    _submission.SubmissionStatusId = _statusService.FileDataError;
+                    _submission.SubmissionStatusId = _statusService.FileBasicError;
                     await CommitAndSendEmailAsync();
                     return true;
                 }
@@ -99,7 +99,7 @@ namespace Hmcr.Domain.Hangfire
                 if (activityCode == null)
                 {
                     errors.AddItem(Fields.ActivityNumber, $"Invalid activity number[{untypedRow.ActivityNumber}]");
-                    SetErrorDetail(submissionRow, errors);
+                    SetErrorDetail(submissionRow, errors, _statusService.FileBasicError);
                     continue;
                 }
 
@@ -115,20 +115,20 @@ namespace Hmcr.Domain.Hangfire
 
                 if (errors.Count > 0)
                 {
-                    SetErrorDetail(submissionRow, errors);
+                    SetErrorDetail(submissionRow, errors, _statusService.FileBasicError);
                 }
             }
 
             var typedRows = new List<WorkReportTyped>();
 
-            if (_submission.SubmissionStatusId != _statusService.FileDataError)
+            if (errors.Count == 0)
             {
                 var (rowNum, rows) = ParseRowsTyped(text, errors);
 
                 if (rowNum != 0)
                 {
                     var submissionRow = _submissionRows[rowNum];
-                    SetErrorDetail(submissionRow, errors);
+                    SetErrorDetail(submissionRow, errors, _statusService.FileConflictionError);
                     await CommitAndSendEmailAsync();
                     return true;
                 }
@@ -140,7 +140,7 @@ namespace Hmcr.Domain.Hangfire
                 PerformAdditionalValidation(typedRows);
             }
 
-            if (_submission.SubmissionStatusId == _statusService.FileDataError)
+            if (errors.Count > 0)
             {
                 await CommitAndSendEmailAsync();
                 return true;
@@ -150,7 +150,7 @@ namespace Hmcr.Domain.Hangfire
 
             _logger.LogInformation($"{_methodLogHeader} PerformSpatialValidationAndConversionAsync 100%");
 
-            if (_submission.SubmissionStatusId == _statusService.FileDataError)
+            if (errors.Count > 0)
             {
                 await CommitAndSendEmailAsync();
                 return true;
@@ -250,7 +250,7 @@ namespace Hmcr.Domain.Hangfire
 
                 if (errors.Count > 0)
                 {
-                    SetErrorDetail(submissionRow, errors);
+                    SetErrorDetail(submissionRow, errors, _statusService.FileLocationError);
                 }
             }
         }
@@ -361,7 +361,7 @@ namespace Hmcr.Domain.Hangfire
 
                 if (result.result == SpValidationResult.Fail)
                 {
-                    SetErrorDetail(submissionRow, errors);
+                    SetErrorDetail(submissionRow, errors, _statusService.FileLocationError);
                 }
                 else if (result.result == SpValidationResult.Success)
                 {
@@ -380,7 +380,7 @@ namespace Hmcr.Domain.Hangfire
 
                 if (result.result == SpValidationResult.Fail)
                 {
-                    SetErrorDetail(submissionRow, errors);
+                    SetErrorDetail(submissionRow, errors, _statusService.FileLocationError);
                 }
                 else if (result.result == SpValidationResult.Success)
                 {
@@ -435,7 +435,7 @@ namespace Hmcr.Domain.Hangfire
 
                 if (result.result == SpValidationResult.Fail)
                 {
-                    SetErrorDetail(submissionRow, errors);
+                    SetErrorDetail(submissionRow, errors, _statusService.FileLocationError);
                 }
                 else if (result.result == SpValidationResult.Success)
                 {
@@ -455,7 +455,7 @@ namespace Hmcr.Domain.Hangfire
 
                 if (result.result == SpValidationResult.Fail)
                 {
-                    SetErrorDetail(submissionRow, errors);
+                    SetErrorDetail(submissionRow, errors, _statusService.FileLocationError);
                 }
                 else if (result.result == SpValidationResult.Success)
                 {
@@ -520,7 +520,7 @@ namespace Hmcr.Domain.Hangfire
             {
                 var errors = new Dictionary<string, List<string>>();
                 errors.AddItem($"{Fields.EndLatitude}/{Fields.EndLongitude}", "Start GPS coordinates must be the same as end GPS coordinate");
-                SetErrorDetail(submissionRow, errors);
+                SetErrorDetail(submissionRow, errors, _statusService.FileLocationError);
             }
         }
 
@@ -535,14 +535,14 @@ namespace Hmcr.Domain.Hangfire
                 {
                     var errors = new Dictionary<string, List<string>>();
                     errors.AddItem($"{Fields.EndLatitude}/{Fields.EndLongitude}", "The start GPS coordinates must not be the same as the end GPS coordinates");
-                    SetErrorDetail(submissionRow, errors);
+                    SetErrorDetail(submissionRow, errors, _statusService.FileLocationError);
                 }
             }
             else
             {
                 var errors = new Dictionary<string, List<string>>();
                 errors.AddItem($"{Fields.EndLatitude},{Fields.EndLongitude}", "The end GPS coordinates must be provided");
-                SetErrorDetail(submissionRow, errors);
+                SetErrorDetail(submissionRow, errors, _statusService.FileLocationError);
             }
         }
 
@@ -582,7 +582,7 @@ namespace Hmcr.Domain.Hangfire
                 {
                     var errors = new Dictionary<string, List<string>>();
                     errors.AddItem($"{Fields.EndOffset}", "End offset must be the same as start offset");
-                    SetErrorDetail(submissionRow, errors);
+                    SetErrorDetail(submissionRow, errors, _statusService.FileLocationError);
                 }
             }
             else
@@ -602,14 +602,14 @@ namespace Hmcr.Domain.Hangfire
                 {
                     var errors = new Dictionary<string, List<string>>();
                     errors.AddItem($"{Fields.EndOffset}", "End offset must be greater than start offset");
-                    SetErrorDetail(submissionRow, errors);
+                    SetErrorDetail(submissionRow, errors, _statusService.FileLocationError);
                 }
             }
             else
             {
                 var errors = new Dictionary<string, List<string>>();
                 errors.AddItem($"{Fields.EndOffset}", "End offset must be provided");
-                SetErrorDetail(submissionRow, errors);
+                SetErrorDetail(submissionRow, errors, _statusService.FileLocationError);
             }
         }
 

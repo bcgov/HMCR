@@ -84,7 +84,7 @@ namespace Hmcr.Domain.Hangfire.Base
                     ((HmcrRepositoryBase<HmrSubmissionObject>)_submissionRepo).RollBackEntities();
 
                     _submission.ErrorDetail = FileError.UnknownException;
-                    _submission.SubmissionStatusId = _statusService.FileDataError;
+                    _submission.SubmissionStatusId = _statusService.FileBasicError;
                     await CommitAndSendEmailAsync();
                 }
             }
@@ -171,19 +171,19 @@ namespace Hmcr.Domain.Hangfire.Base
             return (rowCount, text.ToString());
         }
 
-        protected void SetErrorDetail(HmrSubmissionRow submissionRow, Dictionary<string, List<string>> errors)
+        protected void SetErrorDetail(HmrSubmissionRow submissionRow, Dictionary<string, List<string>> errors, decimal submissionStatusId)
         {
             if (submissionRow != null)
             {
                 submissionRow.RowStatusId = _statusService.RowError;
                 submissionRow.ErrorDetail = errors.GetErrorDetail();
                 _submission.ErrorDetail = FileError.ReferToRowErrors;
-                _submission.SubmissionStatusId = _statusService.FileDataError;
+                _submission.SubmissionStatusId = submissionStatusId;
             }
             else
             {
                 _submission.ErrorDetail = errors.GetErrorDetail();
-                _submission.SubmissionStatusId = _statusService.FileDataError;
+                _submission.SubmissionStatusId = submissionStatusId;
             }
         }
 

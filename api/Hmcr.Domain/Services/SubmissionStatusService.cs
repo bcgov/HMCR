@@ -12,7 +12,10 @@ namespace Hmcr.Domain.Services
         decimal FileError { get; }
         decimal FileDuplicate { get; }
         decimal FileInProgress { get; }
-        decimal FileDataError { get; }
+        decimal FileBasicError { get; }
+        decimal FileConflictionError { get; }
+        decimal FileLocationError { get; }
+        decimal FileUnexpectedError { get; }
         decimal FileSuccess { get; }
 
         decimal RowReceived { get; }
@@ -41,7 +44,16 @@ namespace Hmcr.Domain.Services
         public decimal FileInProgress => _fileInProgress ??= _statusRepo.GetStatusIdByTypeAndCode(StatusType.File, FileStatus.FileInProgress);
 
         private decimal? _fileDataError;
-        public decimal FileDataError => _fileDataError ??= _statusRepo.GetStatusIdByTypeAndCode(StatusType.File, FileStatus.FileDataError);
+        public decimal FileBasicError => _fileDataError ??= _statusRepo.GetStatusIdByTypeAndCode(StatusType.File, FileStatus.FileBasicError);
+
+        private decimal? _fileConflictError;
+        public decimal FileConflictionError => _fileConflictError ??= _statusRepo.GetStatusIdByTypeAndCode(StatusType.File, FileStatus.FileConflictionError);
+
+        private decimal? _fileLocationError;
+        public decimal FileLocationError => _fileLocationError ??= _statusRepo.GetStatusIdByTypeAndCode(StatusType.File, FileStatus.FileLocationError);
+
+        private decimal? _fileUnexpectedError;
+        public decimal FileUnexpectedError => _fileUnexpectedError ??= _statusRepo.GetStatusIdByTypeAndCode(StatusType.File, FileStatus.FileUnexpectedError);
 
         private decimal? _fileSuccess;
         public decimal FileSuccess => _fileSuccess ??= _statusRepo.GetStatusIdByTypeAndCode(StatusType.File, FileStatus.FileSuccess);
