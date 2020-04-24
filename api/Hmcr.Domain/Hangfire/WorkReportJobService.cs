@@ -250,7 +250,7 @@ namespace Hmcr.Domain.Hangfire
 
                 if (errors.Count > 0)
                 {
-                    SetErrorDetail(submissionRow, errors, _statusService.FileLocationError);
+                    SetErrorDetail(submissionRow, errors, _statusService.FileConflictionError);
                 }
             }
         }
