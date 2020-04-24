@@ -406,7 +406,7 @@ namespace Hmcr.Domain.Services
                 if (!Regex.IsMatch(value, rule.Regex.Regex))
                 {
                     var message = string.Format(rule.Regex.ErrorMessage, val.ToString());
-                    messages.Add($"{rowNumPrefix}{field} {message}.");
+                    messages.Add($"{rowNumPrefix}{message}.");
                 }
             }
 
