@@ -43,7 +43,7 @@ export const PATHS = {
   HOME: '/',
   ABOUT: '/admin/about',
   API_ACCESS: '/admin/api-access',
-  WORK_REPORTING: '/work-reporting',
+  WORK_REPORTING: '/workreporting',
   ADMIN: '/admin',
   ADMIN_ACTIVITIES: '/admin/activities',
   ADMIN_USERS: '/admin/users',
