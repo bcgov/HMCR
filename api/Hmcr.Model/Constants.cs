@@ -105,7 +105,10 @@ namespace Hmcr.Model
         public const string FileError = "FE";
         public const string FileDuplicate = "DS";
         public const string FileInProgress = "DP";
-        public const string FileDataError = "DE";
+        public const string FileBasicError = "DE";
+        public const string FileConflictionError = "S3";
+        public const string FileLocationError = "S4";
+        public const string FileUnexpectedError = "UE";
         public const string FileSuccess = "VS";
     }
 
