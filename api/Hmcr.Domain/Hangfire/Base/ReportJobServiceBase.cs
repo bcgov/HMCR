@@ -209,6 +209,9 @@ namespace Hmcr.Domain.Hangfire.Base
 
         protected void ValidateHighwayUniqueAgainstServiceArea(string highwayUnique, Dictionary<string, List<string>> errors)
         {
+            if (highwayUnique.IsEmpty())
+                return;
+
             var huPrefix = highwayUnique.Substring(0, 2);
 
             if (!_serviceArea.HighwayUniquePrefixes.Contains(huPrefix))
