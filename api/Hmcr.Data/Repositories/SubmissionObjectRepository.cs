@@ -210,6 +210,7 @@ namespace Hmcr.Data.Repositories
             //  The net result should be file #1 submission error instead of duplicate file error.
 
             var latestFile = await DbSet
+                .Include(x => x.SubmissionStatus)
                 .Where(x => x.SubmissionStreamId == submission.SubmissionStreamId &&
                     x.ServiceAreaNumber == submission.ServiceAreaNumber)
                 .OrderByDescending(x => x.SubmissionObjectId)
@@ -219,7 +220,7 @@ namespace Hmcr.Data.Repositories
                 return false;
 
             //if it was internal error, the user should be able to upload again.
-            if (latestFile.ErrorDetail == FileError.UnknownException)
+            if (latestFile.SubmissionStatus.StatusCode == FileStatus.FileUnexpectedError)
                 return false;
 
             return latestFile.FileHash == submission.FileHash;
