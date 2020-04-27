@@ -121,7 +121,7 @@ namespace Hmcr.Domain.Hangfire
 
             var typedRows = new List<WorkReportTyped>();
 
-            if (errors.Count == 0)
+            if (_submission.SubmissionStatusId == _statusService.FileInProgress)
             {
                 var (rowNum, rows) = ParseRowsTyped(text, errors);
 
@@ -140,7 +140,7 @@ namespace Hmcr.Domain.Hangfire
                 PerformAdditionalValidation(typedRows);
             }
 
-            if (errors.Count > 0)
+            if (_submission.SubmissionStatusId != _statusService.FileInProgress)
             {
                 await CommitAndSendEmailAsync();
                 return true;
@@ -150,7 +150,7 @@ namespace Hmcr.Domain.Hangfire
 
             _logger.LogInformation($"{_methodLogHeader} PerformSpatialValidationAndConversionAsync 100%");
 
-            if (errors.Count > 0)
+            if (_submission.SubmissionStatusId != _statusService.FileInProgress)
             {
                 await CommitAndSendEmailAsync();
                 return true;
