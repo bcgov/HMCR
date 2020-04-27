@@ -56,17 +56,6 @@ namespace Hmcr.Domain.Hangfire
 
             var (untypedRows, headers) = ParseRowsUnTyped(errors);
 
-            if (!CheckCommonMandatoryHeaders(untypedRows, new WildlifeReportHeaders(), errors))
-            {
-                if (errors.Count > 0)
-                {
-                    _submission.ErrorDetail = errors.GetErrorDetail();
-                    _submission.SubmissionStatusId = _statusService.FileBasicError;
-                    await CommitAndSendEmailAsync();
-                    return true;
-                }
-            }
-
             //text after duplicate lines are removed. Will be used for importing to typed DTO.
             var (rowCount, text) = await SetRowIdAndRemoveDuplicate(untypedRows, headers);
 
