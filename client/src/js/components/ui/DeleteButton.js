@@ -28,7 +28,12 @@ const DeleteButton = ({
     }
   }, [defaultEndDate]);
 
-  const togglePopover = () => setPopoverOpen(!popoverOpen);
+  const togglePopover = (keepDate) => {
+    // clear selected date if user cancels out of the popup and no default date set
+    if (popoverOpen && defaultEndDate === null) setDate(null);
+
+    setPopoverOpen(!popoverOpen);
+  };
 
   const handleDatePickerFocusChange = (focused) => {
     setFocusedInput(focused);
