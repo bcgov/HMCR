@@ -26,9 +26,9 @@ const DeleteButton = ({
       setDate(moment(defaultEndDate));
       setButtonText('Update');
     }
-  }, [defaultEndDate]);
+  }, [defaultEndDate, popoverOpen]);
 
-  const togglePopover = (keepDate) => {
+  const togglePopover = () => {
     // clear selected date if user cancels out of the popup and no default date set
     if (popoverOpen && defaultEndDate === null) setDate(null);
 
