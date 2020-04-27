@@ -111,6 +111,18 @@ namespace Hmcr.Data.Database.Entities
                         entry.Member(ConcurrencyControlNumber).CurrentValue = controlNumber;
                     }
                 }
+                else if (entry.Members.Any(m => m.Metadata.Name == ConcurrencyControlNumber))
+                {
+                    if (entry.State == EntityState.Added)
+                    {
+                        entry.Member(ConcurrencyControlNumber).CurrentValue = (long)1;
+                    }
+                    else
+                    {
+                        var controlNumber = (long)entry.Member(ConcurrencyControlNumber).CurrentValue + 1;
+                        entry.Member(ConcurrencyControlNumber).CurrentValue = controlNumber;
+                    }
+                }
             }
         }
         #endregion
