@@ -115,31 +115,6 @@ namespace Hmcr.Domain.Hangfire.Base
             return true;
         }
 
-        protected bool CheckCommonMandatoryHeaders<T1, T2>(List<T1> rows, T2 headers, Dictionary<string, List<string>> errors) where T2 : IReportHeaders
-        {
-            MethodLogger.LogEntry(_logger, _enableMethodLog, _methodLogHeader);
-
-            if (rows.Count == 0) //not possible since it's already validated in the ReportServiceBase.
-                throw new Exception("File has no rows.");
-
-            var row = rows[0];
-
-            var fields = typeof(T1).GetProperties();
-
-            foreach (var field in fields)
-            {
-                if (!headers.CommonMandatoryFields.Any(x => x == field.Name))
-                    continue;
-
-                if (field.GetValue(row) == null)
-                {
-                    errors.AddItem("File", $"Header [{field.Name.WordToWords()}] is missing");
-                }
-            }
-
-            return errors.Count == 0;
-        }
-
         protected async Task<(int rowCount, string text)> SetRowIdAndRemoveDuplicate<T>(List<T> untypedRows, string headers) where T : IReportCsvDto
         {
             MethodLogger.LogEntry(_logger, _enableMethodLog, _methodLogHeader);
