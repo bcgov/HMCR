@@ -18,10 +18,11 @@ namespace Hmcr.Domain.CsvHelpers
         public WorkReportCsvDtoMap()
         {
             AutoMap(CultureInfo.InvariantCulture);
-            Map(m => m.ValueOfWork).TypeConverter<DollarValueToStringConverter>();
-            Map(m => m.Accomplishment).TypeConverter<DollarValueToStringConverter>();
+            Map(m => m.StartDate).TypeConverter<DateTypeConverter>();
             Map(m => m.EndDate).TypeConverter<DateTypeConverter>();
             Map(m => m.PostedDate).TypeConverter<DateTypeConverter>();
+            Map(m => m.ValueOfWork).TypeConverter<DollarValueToStringConverter>();
+            Map(m => m.Accomplishment).TypeConverter<DollarValueToStringConverter>();
         }
     }
 
