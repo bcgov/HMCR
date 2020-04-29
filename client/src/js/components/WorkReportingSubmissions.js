@@ -190,6 +190,8 @@ const WorkReportingSubmissions = ({ serviceArea, submissionStatuses }, ref) => {
               <DataTableWithPaginaionControl
                 dataList={searchData.data.map((item) => {
                   const itemStatus = submissionStatuses[item.submissionStatusCode];
+                  const progressBarLength =
+                    (itemStatus.stage < 0 ? maxValidationStages : itemStatus.stage / maxValidationStages) * 100;
 
                   return {
                     ...item,
@@ -213,7 +215,7 @@ const WorkReportingSubmissions = ({ serviceArea, submissionStatuses }, ref) => {
                         <Progress
                           className="thin-underline"
                           color={stageColors(itemStatus.stage)}
-                          value={(itemStatus.stage / maxValidationStages) * 100}
+                          value={progressBarLength}
                         ></Progress>
                       </React.Fragment>
                     ),
