@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Hosting;
 
 namespace Hmcr.Hangfire
@@ -38,7 +39,7 @@ namespace Hmcr.Hangfire
             services.AddChrisHttpClient(Configuration);
             services.AddBceidSoapClient(Configuration);
             services.AddHmcrHangfire(connectionString, runHangfireServer, workerCount);
-            services.AddHealthChecks();
+            services.AddHealthChecks().AddTypeActivatedCheck<HangfireHealthCheck>("Hangfire", HealthStatus.Degraded, 29);
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env, ISubmissionObjectJobService jobService,
