@@ -21,9 +21,16 @@ namespace Hmcr.Model
         public const string OutputFormat = "outputFormat";
         public const string Format = "format";
         public const string TypeName = "typeName";
+        public const string Layers = "layers";
         public const string FromDate = "fromDate";
         public const string ToDate = "toDate";
         public const string Count = "count";
+    }
+
+    public static class ExportQueryEndpointConfigName
+    {
+        public const string WFS = "WFSExportPath";
+        public const string WMS = "KMLExportPath";
     }
 
     public static class Permissions

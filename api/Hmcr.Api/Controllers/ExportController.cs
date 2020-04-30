@@ -61,7 +61,7 @@ namespace Hmcr.Api.Controllers
                 return invalidResult;
             }
 
-            var (mimeType, fileName, outputFormat) = GetContentType(format);
+            var (mimeType, fileName, outputFormat, endpointConfigName) = GetContentType(format);
 
             if (mimeType == null)
             {
@@ -71,7 +71,7 @@ namespace Hmcr.Api.Controllers
 
             var dateColName = GetDateColName(typeName);
 
-            var (result, exists) = await MatchExists(serviceAreaNumbers, fromDate, toDate, outputFormat, dateColName);
+            var (result, exists) = await MatchExists(serviceAreaNumbers, fromDate, toDate, "text/csv;charset=UTF-8", dateColName, ExportQueryEndpointConfigName.WFS);
 
             if (result != null)
             {
@@ -83,9 +83,9 @@ namespace Hmcr.Api.Controllers
                 return NotFound();
             }
 
-            var query = BuildQuery(serviceAreaNumbers, fromDate, toDate, outputFormat, dateColName, false);
+            var query = BuildQuery(serviceAreaNumbers, fromDate, toDate, outputFormat, dateColName, endpointConfigName, false);
 
-            var responseMessage = await _exportApi.ExportReport(query, GetExportEndpointConfigName(outputFormat));
+            var responseMessage = await _exportApi.ExportReport(query, endpointConfigName);
 
             var bytes = await responseMessage.Content.ReadAsByteArrayAsync();
 
@@ -114,10 +114,10 @@ namespace Hmcr.Api.Controllers
             return Ok(OutputFormatDto.GetSupportedFormats());
         }
 
-        private async Task<(UnprocessableEntityObjectResult result, bool exists)> MatchExists(decimal[] serviceAreaNumbers, DateTime fromDate, DateTime toDate, string outputFormat, string dateColName)
+        private async Task<(UnprocessableEntityObjectResult result, bool exists)> MatchExists(decimal[] serviceAreaNumbers, DateTime fromDate, DateTime toDate, string outputFormat, string dateColName, string endpointConfigName)
         {
-            var query = BuildQuery(serviceAreaNumbers, fromDate, toDate, outputFormat, dateColName, true);
-            var responseMessage = await _exportApi.ExportReport(query, GetExportEndpointConfigName(outputFormat));
+            var query = BuildQuery(serviceAreaNumbers, fromDate, toDate, outputFormat, dateColName, ExportQueryEndpointConfigName.WFS, true);
+            var responseMessage = await _exportApi.ExportReport(query, endpointConfigName);
 
             if (responseMessage.StatusCode != HttpStatusCode.OK)
             {
@@ -176,11 +176,11 @@ namespace Hmcr.Api.Controllers
             return null;
         }
 
-        private (string mimeType, string fileName, string format) GetContentType(string outputFormat)
+        private (string mimeType, string fileName, string format, string endpointConfigName) GetContentType(string outputFormat)
         {
             if (outputFormat == null)
             {
-                return (null, null, null);
+                return (null, null, null, null);
             }
 
             outputFormat = outputFormat.ToLowerInvariant();
@@ -188,19 +188,19 @@ namespace Hmcr.Api.Controllers
             switch (outputFormat)
             {
                 case OutputFormatDto.Csv:
-                    return ("text/csv;charset=UTF-8", "export.csv", "csv");
+                    return ("text/csv;charset=UTF-8", "export.csv", "csv", ExportQueryEndpointConfigName.WFS);
                 case OutputFormatDto.Json:
-                    return ("application/json;charset=UTF-8", "export.json", "application/json");
+                    return ("application/json;charset=UTF-8", "export.json", "application/json", ExportQueryEndpointConfigName.WFS);
                 case OutputFormatDto.Kml:
-                    return ("application/vnd.google-earth.kml+xml;charset=UTF-8", "export.kml", "application/vnd.google-earth.kml+xml");
+                    return ("application/vnd.google-earth.kml+xml;charset=UTF-8", "export.kml", "application/vnd.google-earth.kml+xml", ExportQueryEndpointConfigName.WMS);
                 case OutputFormatDto.Gml:
-                    return ("application/gml+xml; version=3.2;charset=UTF-8", "export.gml", "application/gml+xml; version=3.2");
+                    return ("application/gml+xml; version=3.2;charset=UTF-8", "export.gml", "application/gml+xml; version=3.2", ExportQueryEndpointConfigName.WFS);
                 default:
-                    return (null, null, null);
+                    return (null, null, null, null);
             }
         }
 
-        private string BuildQuery(decimal[] serviceAreaNumbers, DateTime fromDate, DateTime toDate, string outputFormat, string dateColName, bool count)
+        private string BuildQuery(decimal[] serviceAreaNumbers, DateTime fromDate, DateTime toDate, string outputFormat, string dateColName, string endpointConfigName, bool count)
         {
             var saCql = BuildCsqlFromParameters(serviceAreaNumbers, fromDate, toDate, dateColName);
 
@@ -226,6 +226,12 @@ namespace Hmcr.Api.Controllers
             pq.Remove(ExportQuery.FromDate);
             pq.Remove(ExportQuery.ToDate);
             pq.Remove(ExportQuery.Format);
+
+            if (endpointConfigName == ExportQueryEndpointConfigName.WMS)
+            {
+                pq.Add(ExportQuery.Layers, pq[ExportQuery.TypeName]);
+                pq.Remove(ExportQuery.TypeName);
+            }
 
             if (count)
             {
@@ -277,20 +283,6 @@ namespace Hmcr.Api.Controllers
                     return DateColNames.ReportDate;
                 default:
                     return null;
-            }
-        }
-
-        private string GetExportEndpointConfigName(string outputFormat)
-        {
-            switch (outputFormat)
-            {
-                case OutputFormatDto.Kml:
-                    return "KMLExportPath";
-                case OutputFormatDto.Csv:
-                case OutputFormatDto.Json:
-                case OutputFormatDto.Gml:
-                default:
-                    return "WFSExportPath";
             }
         }
     }
