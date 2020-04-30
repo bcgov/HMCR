@@ -44,7 +44,7 @@ namespace Hmcr.Api.Controllers
         /// <param name="propertyName">Property names of the columns to export</param>
         /// <returns></returns>
         [HttpGet("report", Name = "Export")]
-        [RequiresPermission(Permissions.Export)]        
+        [RequiresPermission(Permissions.Export)]
         public async Task<IActionResult> ExportReport(string serviceAreas, string typeName, string format, DateTime fromDate, DateTime toDate, string cql_filter, string propertyName)
         {
             var serviceAreaNumbers = serviceAreas.ToDecimalArray();
@@ -53,7 +53,7 @@ namespace Hmcr.Api.Controllers
             {
                 serviceAreaNumbers = _currentUser.UserInfo.ServiceAreas.Select(x => x.ServiceAreaNumber).ToArray();
             }
-            
+
             var invalidResult = ValidateQueryParameters(serviceAreaNumbers, typeName, format, fromDate, toDate);
 
             if (invalidResult != null)
@@ -83,9 +83,9 @@ namespace Hmcr.Api.Controllers
                 return NotFound();
             }
 
-            var query = BuildQuery(serviceAreaNumbers, fromDate, toDate, outputFormat, dateColName, false);           
+            var query = BuildQuery(serviceAreaNumbers, fromDate, toDate, outputFormat, dateColName, false);
 
-            var responseMessage = await _exportApi.ExportReport(query);            
+            var responseMessage = await _exportApi.ExportReport(query, GetExportEndpointConfigName(outputFormat));
 
             var bytes = await responseMessage.Content.ReadAsByteArrayAsync();
 
@@ -117,7 +117,7 @@ namespace Hmcr.Api.Controllers
         private async Task<(UnprocessableEntityObjectResult result, bool exists)> MatchExists(decimal[] serviceAreaNumbers, DateTime fromDate, DateTime toDate, string outputFormat, string dateColName)
         {
             var query = BuildQuery(serviceAreaNumbers, fromDate, toDate, outputFormat, dateColName, true);
-            var responseMessage = await _exportApi.ExportReport(query);
+            var responseMessage = await _exportApi.ExportReport(query, GetExportEndpointConfigName(outputFormat));
 
             if (responseMessage.StatusCode != HttpStatusCode.OK)
             {
@@ -255,7 +255,7 @@ namespace Hmcr.Api.Controllers
 
             csql.Append("SERVICE_AREA IN (");
 
-            foreach(var serviceAreaNumber in serviceAreaNumbers)
+            foreach (var serviceAreaNumber in serviceAreaNumbers)
             {
                 csql.Append($"{(int)serviceAreaNumber},");
             }
@@ -277,6 +277,20 @@ namespace Hmcr.Api.Controllers
                     return DateColNames.ReportDate;
                 default:
                     return null;
+            }
+        }
+
+        private string GetExportEndpointConfigName(string outputFormat)
+        {
+            switch (outputFormat)
+            {
+                case OutputFormatDto.Kml:
+                    return "KMLExportPath";
+                case OutputFormatDto.Csv:
+                case OutputFormatDto.Json:
+                case OutputFormatDto.Gml:
+                default:
+                    return "WFSExportPath";
             }
         }
     }
