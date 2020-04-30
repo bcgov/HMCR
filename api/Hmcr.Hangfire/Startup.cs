@@ -38,7 +38,6 @@ namespace Hmcr.Hangfire
             services.AddChrisHttpClient(Configuration);
             services.AddBceidSoapClient(Configuration);
             services.AddHmcrHangfire(connectionString, runHangfireServer, workerCount);
-            services.AddHmcrHealthCheck(connectionString);
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env, ISubmissionObjectJobService jobService,
@@ -50,7 +49,6 @@ namespace Hmcr.Hangfire
             }
 
             app.UseExceptionMiddleware();
-            app.UseHmcrHealthCheck();
             app.UseHangfireDashboard();
 
             //Register Hangfire Recurring Jobs 
