@@ -446,7 +446,7 @@ namespace Hmcr.Domain.Services
 
             if (!parsed)
             {
-                messages.Add($"{rowNumPrefix}Cannot convert {field} field to date");
+                messages.Add($"{rowNumPrefix}Invalid value. [{val.ToString()}] cannot be converted to a date");
                 return messages;
             }
 
