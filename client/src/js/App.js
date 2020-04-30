@@ -29,7 +29,7 @@ import * as Constants from './Constants';
 import '../scss/app.scss';
 
 toast.configure({
-  position: 'top-center',
+  position: 'bottom-center',
   autoClose: 2000,
   hideProgressBar: true,
   closeOnClick: true,

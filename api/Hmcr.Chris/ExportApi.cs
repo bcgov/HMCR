@@ -6,24 +6,25 @@ namespace Hmcr.Chris
 {
     public interface IExportApi
     {
-        Task<HttpResponseMessage> ExportReport(string query);
+        Task<HttpResponseMessage> ExportReport(string query, string exportEndpointConfig);
     }
     public class ExportApi : IExportApi
     {
         private HttpClient _client;
         private IApi _api;
-        private string _path;
+        private IConfiguration _config;
 
         public ExportApi(HttpClient client, IApi api, IConfiguration config)
         {
             _client = client;
             _api = api;
-            _path = config.GetValue<string>("CHRIS:ExportPath");
+            _config = config;
         }
 
-        public async Task<HttpResponseMessage> ExportReport(string query)
+        public async Task<HttpResponseMessage> ExportReport(string query, string exportEndpointConfig)
         {
-            return await _api.Get(_client, _path + "&" + query);
+            string path = _config.GetValue<string>($"CHRIS:{exportEndpointConfig}");
+            return await _api.Get(_client, path + "&" + query);
         }
     }
 }

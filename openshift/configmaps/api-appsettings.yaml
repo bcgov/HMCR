@@ -58,7 +58,8 @@ objects:
                 "OASUrl": "https://prdoas2.apps.th.gov.bc.ca",
                 "OASPath": "ogs-geoV06/wfs?",
                 "ExportUrl": "${EXPORT_URL}",
-                "ExportPath": "ogs-geoV06/ows?service=WFS&version=2.0.0&request=GetFeature"
+                "WFSExportPath": "ogs-geoV06/ows?service=WFS&version=2.0.0&request=GetFeature",
+                "KMLExportPath": "ogs-geoV06/wms/kml?mode=download&styles=HMR_GENERIC_FOR_KML"
             },
             "JWT": {
                 "Authority": "https://sso-dev.pathfinder.gov.bc.ca/auth/realms/<realmid>",
