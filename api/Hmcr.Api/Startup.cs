@@ -49,8 +49,6 @@ namespace Hmcr.Api
             if (env.IsDevelopment())
                 app.UseDeveloperExceptionPage();            
 
-            app.UseHttpsRedirection();
-            app.UseHmcrCors();
             app.UseExceptionMiddleware();
             app.UseHmcrHealthCheck();
             app.UseAuthorization();
