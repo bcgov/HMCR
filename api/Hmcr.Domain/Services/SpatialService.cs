@@ -29,13 +29,7 @@ namespace Hmcr.Domain.Services
         private ILookupCodeService _lookupService;
 
         private IEnumerable<string> _nonSpHighwayUniques = null;
-        private IEnumerable<string> NonSpHighwayUniques
-        {
-            get
-            {
-                return _nonSpHighwayUniques ??= _validator.CodeLookup.Where(x => x.CodeSet == CodeSet.NonSpHighwayUnique).Select(x => x.CodeValue).ToArray().ToLowercase();
-            }
-        }
+        private IEnumerable<string> NonSpHighwayUniques => _nonSpHighwayUniques ??= _validator.CodeLookup.Where(x => x.CodeSet == CodeSet.NonSpHighwayUnique).Select(x => x.CodeValue).ToArray().ToLowercase();
 
         public SpatialService(IOasApi oasApi, IFieldValidatorService validator, ILookupCodeService lookupService)
         {

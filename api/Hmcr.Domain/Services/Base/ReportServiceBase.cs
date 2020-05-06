@@ -19,11 +19,12 @@ namespace Hmcr.Domain.Services.Base
     {
         protected IUnitOfWork _unitOfWork;
         protected IFieldValidatorService _validator;
+        protected IServiceAreaService _saService;
         protected ISubmissionStreamService _streamService;
         protected ISubmissionObjectRepository _submissionRepo;
         protected ISumbissionRowRepository _rowRepo;
         protected IContractTermRepository _contractRepo;
-        protected ISubmissionStatusRepository _statusRepo;
+        protected ISubmissionStatusService _statusService;
 
         protected string TableName;
 
@@ -44,15 +45,17 @@ namespace Hmcr.Domain.Services.Base
 
         public ReportServiceBase(IUnitOfWork unitOfWork,
             ISubmissionStreamService streamService, ISubmissionObjectRepository submissionRepo, ISumbissionRowRepository rowRepo,
-            IContractTermRepository contractRepo, ISubmissionStatusRepository statusRepo, IFieldValidatorService validator)
+            IContractTermRepository contractRepo, ISubmissionStatusService statusService, IFieldValidatorService validator, 
+            IServiceAreaService saService)
         {
             _unitOfWork = unitOfWork;
             _streamService = streamService;
             _submissionRepo = submissionRepo;
             _rowRepo = rowRepo;
             _contractRepo = contractRepo;
-            _statusRepo = statusRepo;
+            _statusService = statusService;
             _validator = validator;
+            _saService = saService;
         }
         public async Task<(Dictionary<string, List<string>> errors, List<string> resubmittedRecordNumbers)> CheckResubmitAsync(FileUploadDto upload)
         {
@@ -115,7 +118,7 @@ namespace Hmcr.Domain.Services.Base
             submission.MimeTypeId = 1;
             submission.ServiceAreaNumber = upload.ServiceAreaNumber;
             submission.SubmissionStreamId = reportType.SubmissionStreamId;
-            submission.SubmissionStatusId = await _statusRepo.GetStatusIdByTypeAndCodeAsync(StatusType.File, FileStatus.FileError);
+            submission.SubmissionStatusId = _statusService.FileError;
             submission.FileName = "";
 
             if (upload.ReportFile == null)
@@ -136,7 +139,7 @@ namespace Hmcr.Domain.Services.Base
             {
                 submission.FileName = submission.FileName.Substring(0, 90) + ".csv";
                 errors.AddItem("File", "the filename needs to be shorter than 100 characters");
-                submission.SubmissionStatusId = await _statusRepo.GetStatusIdByTypeAndCodeAsync(StatusType.File, FileStatus.FileError);
+                submission.SubmissionStatusId = _statusService.FileError;
                 return (errors, submission);
             }
 
@@ -151,7 +154,7 @@ namespace Hmcr.Domain.Services.Base
             if (await _submissionRepo.IsDuplicateFileAsync(submission))
             {
                 errors.AddItem("File", "Duplicate file exists");
-                submission.SubmissionStatusId = await _statusRepo.GetStatusIdByTypeAndCodeAsync(StatusType.File, FileStatus.DuplicateSubmission);
+                submission.SubmissionStatusId = _statusService.FileDuplicate;
                 return (errors, submission);
             }
 
@@ -193,7 +196,7 @@ namespace Hmcr.Domain.Services.Base
             //set IsResubmitted
             await foreach (var resubmittedRecordNumber in _rowRepo.UpdateIsResubmitAsync(submission.SubmissionStreamId, (decimal)submission.ContractTermId, submission.SubmissionRows)) { }
 
-            submission.SubmissionStatusId = await _statusRepo.GetStatusIdByTypeAndCodeAsync(StatusType.File, FileStatus.FileReceived);
+            submission.SubmissionStatusId = _statusService.FileReceived;
 
             return (errors, submission);
         }
@@ -240,14 +243,14 @@ namespace Hmcr.Domain.Services.Base
             {
                 await foreach (var row in _rowRepo.FindDuplicateFromLatestRecordsAsync(submission.SubmissionStreamId, (decimal)submission.ContractTermId, submission.SubmissionRows))
                 {
-                    row.RowStatusId = await _statusRepo.GetStatusIdByTypeAndCodeAsync(StatusType.Row, RowStatus.DuplicateRow);
+                    row.RowStatusId = _statusService.RowDuplicate;
                 }
             }
             else
             {
                 await foreach (var row in _rowRepo.FindDuplicateFromAllRecordsAsync(submission.SubmissionStreamId, submission.SubmissionRows))
                 {
-                    row.RowStatusId = await _statusRepo.GetStatusIdByTypeAndCodeAsync(StatusType.Row, RowStatus.DuplicateRow);
+                    row.RowStatusId = _statusService.RowDuplicate;
                 }
             }
         }

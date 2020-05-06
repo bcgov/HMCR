@@ -15,9 +15,6 @@ namespace Hmcr.Data.Database.Entities
         {
         }
 
-        public virtual DbSet<AggregatedCounter> AggregatedCounters { get; set; }
-        public virtual DbSet<Counter> Counters { get; set; }
-        public virtual DbSet<Hash> Hashes { get; set; }
         public virtual DbSet<HmrActivityCode> HmrActivityCodes { get; set; }
         public virtual DbSet<HmrActivityCodeHist> HmrActivityCodeHists { get; set; }
         public virtual DbSet<HmrCodeLookup> HmrCodeLookups { get; set; }
@@ -64,66 +61,9 @@ namespace Hmcr.Data.Database.Entities
         public virtual DbSet<HmrWorkReport> HmrWorkReports { get; set; }
         public virtual DbSet<HmrWorkReportHist> HmrWorkReportHists { get; set; }
         public virtual DbSet<HmrWorkReportVw> HmrWorkReportVws { get; set; }
-        public virtual DbSet<Job> Jobs { get; set; }
-        public virtual DbSet<JobParameter> JobParameters { get; set; }
-        public virtual DbSet<JobQueue> JobQueues { get; set; }
-        public virtual DbSet<List> Lists { get; set; }
-        public virtual DbSet<Schema> Schemas { get; set; }
-        public virtual DbSet<Server> Servers { get; set; }
-        public virtual DbSet<Set> Sets { get; set; }
-        public virtual DbSet<State> States { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<AggregatedCounter>(entity =>
-            {
-                entity.HasKey(e => e.Key)
-                    .HasName("PK_HangFire_CounterAggregated");
-
-                entity.ToTable("AggregatedCounter", "HangFire");
-
-                entity.HasIndex(e => e.ExpireAt)
-                    .HasName("IX_HangFire_AggregatedCounter_ExpireAt")
-                    .HasFilter("([ExpireAt] IS NOT NULL)");
-
-                entity.Property(e => e.Key).HasMaxLength(100);
-
-                entity.Property(e => e.ExpireAt).HasColumnType("datetime");
-            });
-
-            modelBuilder.Entity<Counter>(entity =>
-            {
-                entity.HasNoKey();
-
-                entity.ToTable("Counter", "HangFire");
-
-                entity.HasIndex(e => e.Key)
-                    .HasName("CX_HangFire_Counter")
-                    .IsClustered();
-
-                entity.Property(e => e.ExpireAt).HasColumnType("datetime");
-
-                entity.Property(e => e.Key)
-                    .IsRequired()
-                    .HasMaxLength(100);
-            });
-
-            modelBuilder.Entity<Hash>(entity =>
-            {
-                entity.HasKey(e => new { e.Key, e.Field })
-                    .HasName("PK_HangFire_Hash");
-
-                entity.ToTable("Hash", "HangFire");
-
-                entity.HasIndex(e => e.ExpireAt)
-                    .HasName("IX_HangFire_Hash_ExpireAt")
-                    .HasFilter("([ExpireAt] IS NOT NULL)");
-
-                entity.Property(e => e.Key).HasMaxLength(100);
-
-                entity.Property(e => e.Field).HasMaxLength(100);
-            });
-
             modelBuilder.Entity<HmrActivityCode>(entity =>
             {
                 entity.HasKey(e => e.ActivityCodeId)
@@ -1349,7 +1289,7 @@ namespace Hmcr.Data.Database.Entities
 
                 entity.Property(e => e.DisplayName)
                     .HasColumnName("DISPLAY_NAME")
-                    .HasMaxLength(30)
+                    .HasMaxLength(200)
                     .IsUnicode(false)
                     .HasComment("Organization name displayed to users if different from the legal name.");
 
@@ -1463,7 +1403,7 @@ namespace Hmcr.Data.Database.Entities
 
                 entity.Property(e => e.DisplayName)
                     .HasColumnName("DISPLAY_NAME")
-                    .HasMaxLength(30)
+                    .HasMaxLength(200)
                     .IsUnicode(false);
 
                 entity.Property(e => e.EffectiveDateHist)
@@ -3676,53 +3616,67 @@ namespace Hmcr.Data.Database.Entities
 
                 entity.ToTable("HMR_SUBMISSION_OBJECT");
 
+                entity.HasComment("Digital file containing a batch of records being submitted for validation,  ingestion and reporting.");
+
                 entity.HasIndex(e => new { e.SubmissionStatusId, e.ServiceAreaNumber, e.SubmissionStreamId })
                     .HasName("HMR_SUBM_OBJ_FK_I");
 
                 entity.Property(e => e.SubmissionObjectId)
                     .HasColumnName("SUBMISSION_OBJECT_ID")
                     .HasColumnType("numeric(9, 0)")
-                    .HasDefaultValueSql("(NEXT VALUE FOR [HMR_SUBM_OBJ_ID_SEQ])");
+                    .HasDefaultValueSql("(NEXT VALUE FOR [HMR_SUBM_OBJ_ID_SEQ])")
+                    .HasComment("Unique identifier for a record");
 
                 entity.Property(e => e.AppCreateTimestamp)
                     .HasColumnName("APP_CREATE_TIMESTAMP")
-                    .HasColumnType("datetime");
+                    .HasColumnType("datetime")
+                    .HasComment("Date and time of record creation");
 
                 entity.Property(e => e.AppCreateUserDirectory)
                     .IsRequired()
                     .HasColumnName("APP_CREATE_USER_DIRECTORY")
                     .HasMaxLength(12)
-                    .IsUnicode(false);
+                    .IsUnicode(false)
+                    .HasComment("Active Directory which retains source of truth for user idenifiers.");
 
-                entity.Property(e => e.AppCreateUserGuid).HasColumnName("APP_CREATE_USER_GUID");
+                entity.Property(e => e.AppCreateUserGuid)
+                    .HasColumnName("APP_CREATE_USER_GUID")
+                    .HasComment("Unique idenifier of user who created record");
 
                 entity.Property(e => e.AppCreateUserid)
                     .IsRequired()
                     .HasColumnName("APP_CREATE_USERID")
                     .HasMaxLength(30)
-                    .IsUnicode(false);
+                    .IsUnicode(false)
+                    .HasComment("Unique idenifier of user who created record");
 
                 entity.Property(e => e.AppLastUpdateTimestamp)
                     .HasColumnName("APP_LAST_UPDATE_TIMESTAMP")
-                    .HasColumnType("datetime");
+                    .HasColumnType("datetime")
+                    .HasComment("Date and time of last record update");
 
                 entity.Property(e => e.AppLastUpdateUserDirectory)
                     .IsRequired()
                     .HasColumnName("APP_LAST_UPDATE_USER_DIRECTORY")
                     .HasMaxLength(12)
-                    .IsUnicode(false);
+                    .IsUnicode(false)
+                    .HasComment("Active Directory which retains source of truth for user idenifiers.");
 
-                entity.Property(e => e.AppLastUpdateUserGuid).HasColumnName("APP_LAST_UPDATE_USER_GUID");
+                entity.Property(e => e.AppLastUpdateUserGuid)
+                    .HasColumnName("APP_LAST_UPDATE_USER_GUID")
+                    .HasComment("Unique idenifier of user who last updated record");
 
                 entity.Property(e => e.AppLastUpdateUserid)
                     .IsRequired()
                     .HasColumnName("APP_LAST_UPDATE_USERID")
                     .HasMaxLength(30)
-                    .IsUnicode(false);
+                    .IsUnicode(false)
+                    .HasComment("Unique idenifier of user who last updated record");
 
                 entity.Property(e => e.ConcurrencyControlNumber)
                     .HasColumnName("CONCURRENCY_CONTROL_NUMBER")
-                    .HasDefaultValueSql("((1))");
+                    .HasDefaultValueSql("((1))")
+                    .HasComment("Record under edit indicator used for optomisitc record contention management.  If number differs from start of edit, then user will be prompted to that record has been updated by someone else.");
 
                 entity.Property(e => e.ContractTermId)
                     .HasColumnName("CONTRACT_TERM_ID")
@@ -3732,66 +3686,79 @@ namespace Hmcr.Data.Database.Entities
                 entity.Property(e => e.DbAuditCreateTimestamp)
                     .HasColumnName("DB_AUDIT_CREATE_TIMESTAMP")
                     .HasColumnType("datetime")
-                    .HasDefaultValueSql("(getutcdate())");
+                    .HasDefaultValueSql("(getutcdate())")
+                    .HasComment("Date and time record created in the database");
 
                 entity.Property(e => e.DbAuditCreateUserid)
                     .IsRequired()
                     .HasColumnName("DB_AUDIT_CREATE_USERID")
                     .HasMaxLength(30)
                     .IsUnicode(false)
-                    .HasDefaultValueSql("(user_name())");
+                    .HasDefaultValueSql("(user_name())")
+                    .HasComment("Named database user who created record");
 
                 entity.Property(e => e.DbAuditLastUpdateTimestamp)
                     .HasColumnName("DB_AUDIT_LAST_UPDATE_TIMESTAMP")
                     .HasColumnType("datetime")
-                    .HasDefaultValueSql("(getutcdate())");
+                    .HasDefaultValueSql("(getutcdate())")
+                    .HasComment("Date and time record was last updated in the database.");
 
                 entity.Property(e => e.DbAuditLastUpdateUserid)
                     .IsRequired()
                     .HasColumnName("DB_AUDIT_LAST_UPDATE_USERID")
                     .HasMaxLength(30)
                     .IsUnicode(false)
-                    .HasDefaultValueSql("(user_name())");
+                    .HasDefaultValueSql("(user_name())")
+                    .HasComment("Named database user who last updated record");
 
                 entity.Property(e => e.DigitalRepresentation)
                     .IsRequired()
-                    .HasColumnName("DIGITAL_REPRESENTATION");
+                    .HasColumnName("DIGITAL_REPRESENTATION")
+                    .HasComment("Raw file storage within the database.");
 
                 entity.Property(e => e.ErrorDetail)
                     .HasColumnName("ERROR_DETAIL")
                     .HasMaxLength(4000)
-                    .IsUnicode(false);
+                    .IsUnicode(false)
+                    .HasComment("Error descriptions applicable to an early stage file validation error (eg: missing mandatory column).");
 
                 entity.Property(e => e.FileHash)
                     .HasColumnName("FILE_HASH")
                     .HasMaxLength(256)
-                    .IsUnicode(false);
+                    .IsUnicode(false)
+                    .HasComment("Cryptographic hash for each submission object received. The hash total is used to compare with subsequently submitted data to check for duplicate submissions. If a match exists, newly matched data is not processed further.");
 
                 entity.Property(e => e.FileName)
                     .IsRequired()
                     .HasColumnName("FILE_NAME")
                     .HasMaxLength(100)
-                    .IsUnicode(false);
+                    .IsUnicode(false)
+                    .HasComment("The name of the document file name as was supplied by the user.");
 
                 entity.Property(e => e.MimeTypeId)
                     .HasColumnName("MIME_TYPE_ID")
-                    .HasColumnType("numeric(9, 0)");
+                    .HasColumnType("numeric(9, 0)")
+                    .HasComment("Multipurpose Internet Mail Extensions (MIME) type of the submitted file");
 
                 entity.Property(e => e.PartyId)
                     .HasColumnName("PARTY_ID")
-                    .HasColumnType("numeric(9, 0)");
+                    .HasColumnType("numeric(9, 0)")
+                    .HasComment("Unique identifier of related PARTY record");
 
                 entity.Property(e => e.ServiceAreaNumber)
                     .HasColumnName("SERVICE_AREA_NUMBER")
-                    .HasColumnType("numeric(9, 0)");
+                    .HasColumnType("numeric(9, 0)")
+                    .HasComment("Unique identifier for SERVICE AREA");
 
                 entity.Property(e => e.SubmissionStatusId)
                     .HasColumnName("SUBMISSION_STATUS_ID")
-                    .HasColumnType("numeric(9, 0)");
+                    .HasColumnType("numeric(9, 0)")
+                    .HasComment("Unique identifier relecting the current status of the submission.");
 
                 entity.Property(e => e.SubmissionStreamId)
                     .HasColumnName("SUBMISSION_STREAM_ID")
-                    .HasColumnType("numeric(9, 0)");
+                    .HasColumnType("numeric(9, 0)")
+                    .HasComment("Unique identifier for SUBMISSION STREAM");
 
                 entity.HasOne(d => d.ContractTerm)
                     .WithMany(p => p.HmrSubmissionObjects)
@@ -3831,7 +3798,8 @@ namespace Hmcr.Data.Database.Entities
             modelBuilder.Entity<HmrSubmissionRow>(entity =>
             {
                 entity.HasKey(e => e.RowId)
-                    .HasName("HMR_SUBM_RW_PK");
+                    .HasName("HMR_SUBM_RW_PK")
+                    .IsClustered(false);
 
                 entity.ToTable("HMR_SUBMISSION_ROW");
 
@@ -3933,6 +3901,11 @@ namespace Hmcr.Data.Database.Entities
                     .IsUnicode(false)
                     .HasComment("Full listing of validation errors in JSON format for the submitted row.");
 
+                entity.Property(e => e.ErrorSpThreshold)
+                    .HasColumnName("ERROR_SP_THRESHOLD")
+                    .HasColumnType("numeric(12, 6)")
+                    .HasComment("Spatial error threshold beyond which an error is raised, when comparing input and actual values");
+
                 entity.Property(e => e.IsResubmitted)
                     .HasColumnName("IS_RESUBMITTED")
                     .HasComment("Indicates if the RECORD_NUMBER for the same CONTRACT_TERM and PARTY has been previously processed successfully and is being overwritten by a subsequent submission row.");
@@ -3980,6 +3953,11 @@ namespace Hmcr.Data.Database.Entities
                     .HasMaxLength(4000)
                     .IsUnicode(false)
                     .HasComment("Full listing of validation warnings for the submitted row.  Thresholds can be  established whereby data will not be rejected, but a warning will be noted.");
+
+                entity.Property(e => e.WarningSpThreshold)
+                    .HasColumnName("WARNING_SP_THRESHOLD")
+                    .HasColumnType("numeric(12, 6)")
+                    .HasComment("Spatial warning threshold beyond which a warning is raised, when comparing input and actual values");
 
                 entity.HasOne(d => d.RowStatus)
                     .WithMany(p => p.HmrSubmissionRows)
@@ -4084,6 +4062,10 @@ namespace Hmcr.Data.Database.Entities
                     .HasMaxLength(4000)
                     .IsUnicode(false);
 
+                entity.Property(e => e.ErrorSpThreshold)
+                    .HasColumnName("ERROR_SP_THRESHOLD")
+                    .HasColumnType("numeric(12, 0)");
+
                 entity.Property(e => e.IsResubmitted).HasColumnName("IS_RESUBMITTED");
 
                 entity.Property(e => e.RecordNumber)
@@ -4125,6 +4107,10 @@ namespace Hmcr.Data.Database.Entities
                     .HasColumnName("WARNING_DETAIL")
                     .HasMaxLength(4000)
                     .IsUnicode(false);
+
+                entity.Property(e => e.WarningSpThreshold)
+                    .HasColumnName("WARNING_SP_THRESHOLD")
+                    .HasColumnType("numeric(12, 0)");
             });
 
             modelBuilder.Entity<HmrSubmissionStatu>(entity =>
@@ -4234,6 +4220,11 @@ namespace Hmcr.Data.Database.Entities
                     .HasMaxLength(255)
                     .IsUnicode(false)
                     .HasComment("Full description of the status code.");
+
+                entity.Property(e => e.Stage)
+                    .HasColumnName("STAGE")
+                    .HasColumnType("numeric(9, 0)")
+                    .HasComment("Stages in the processing/parsing of a submitted file");
 
                 entity.Property(e => e.StatusCode)
                     .IsRequired()
@@ -4489,6 +4480,12 @@ namespace Hmcr.Data.Database.Entities
                     .HasDefaultValueSql("(NEXT VALUE FOR [SYS_USR_ID_SEQ])")
                     .HasComment("A system generated unique identifier.");
 
+                entity.Property(e => e.ApiClientId)
+                    .HasColumnName("API_CLIENT_ID")
+                    .HasMaxLength(40)
+                    .IsUnicode(false)
+                    .HasComment("This ID is used to track Keycloak client ID created for the users");
+
                 entity.Property(e => e.AppCreateTimestamp)
                     .HasColumnName("APP_CREATE_TIMESTAMP")
                     .HasColumnType("datetime")
@@ -4543,8 +4540,7 @@ namespace Hmcr.Data.Database.Entities
                     .HasColumnName("BUSINESS_LEGAL_NAME")
                     .HasMaxLength(200)
                     .IsUnicode(false)
-                    .HasComment(@"Lega lName assigned to the business and derived from BC Registry via BCeID (SMGOV_BUSINESSLEGALNAME)
-");
+                    .HasComment("Lega lName assigned to the business and derived from BC Registry via BCeID (SMGOV_BUSINESSLEGALNAME)");
 
                 entity.Property(e => e.ConcurrencyControlNumber)
                     .HasColumnName("CONCURRENCY_CONTROL_NUMBER")
@@ -4621,8 +4617,7 @@ namespace Hmcr.Data.Database.Entities
                     .HasColumnName("USER_TYPE")
                     .HasMaxLength(30)
                     .IsUnicode(false)
-                    .HasComment(@"Defined attribute within IDIR Active directory (UserType = SMGOV_USERTYPE)
-");
+                    .HasComment("Defined attribute within IDIR Active directory (UserType = SMGOV_USERTYPE)");
 
                 entity.Property(e => e.Username)
                     .IsRequired()
@@ -4651,6 +4646,11 @@ namespace Hmcr.Data.Database.Entities
                 entity.Property(e => e.SystemUserHistId)
                     .HasColumnName("SYSTEM_USER_HIST_ID")
                     .HasDefaultValueSql("(NEXT VALUE FOR [HMR_SYSTEM_USER_H_ID_SEQ])");
+
+                entity.Property(e => e.ApiClientId)
+                    .HasColumnName("API_CLIENT_ID")
+                    .HasMaxLength(40)
+                    .IsUnicode(false);
 
                 entity.Property(e => e.AppCreateTimestamp)
                     .HasColumnName("APP_CREATE_TIMESTAMP")
@@ -5607,7 +5607,7 @@ namespace Hmcr.Data.Database.Entities
 
                 entity.Property(e => e.HighwayUniqueName)
                     .HasColumnName("HIGHWAY_UNIQUE_NAME")
-                    .HasMaxLength(40)
+                    .HasMaxLength(255)
                     .IsUnicode(false);
 
                 entity.Property(e => e.IsOverSpTolerance)
@@ -6369,142 +6369,6 @@ namespace Hmcr.Data.Database.Entities
                 entity.Property(e => e.WorkReportId)
                     .HasColumnName("WORK_REPORT_ID")
                     .HasColumnType("numeric(9, 0)");
-            });
-
-            modelBuilder.Entity<Job>(entity =>
-            {
-                entity.ToTable("Job", "HangFire");
-
-                entity.HasIndex(e => e.StateName)
-                    .HasName("IX_HangFire_Job_StateName")
-                    .HasFilter("([StateName] IS NOT NULL)");
-
-                entity.HasIndex(e => new { e.StateName, e.ExpireAt })
-                    .HasName("IX_HangFire_Job_ExpireAt")
-                    .HasFilter("([ExpireAt] IS NOT NULL)");
-
-                entity.Property(e => e.Arguments).IsRequired();
-
-                entity.Property(e => e.CreatedAt).HasColumnType("datetime");
-
-                entity.Property(e => e.ExpireAt).HasColumnType("datetime");
-
-                entity.Property(e => e.InvocationData).IsRequired();
-
-                entity.Property(e => e.StateName).HasMaxLength(20);
-            });
-
-            modelBuilder.Entity<JobParameter>(entity =>
-            {
-                entity.HasKey(e => new { e.JobId, e.Name })
-                    .HasName("PK_HangFire_JobParameter");
-
-                entity.ToTable("JobParameter", "HangFire");
-
-                entity.Property(e => e.Name).HasMaxLength(40);
-
-                entity.HasOne(d => d.Job)
-                    .WithMany(p => p.JobParameters)
-                    .HasForeignKey(d => d.JobId)
-                    .HasConstraintName("FK_HangFire_JobParameter_Job");
-            });
-
-            modelBuilder.Entity<JobQueue>(entity =>
-            {
-                entity.HasKey(e => new { e.Queue, e.Id })
-                    .HasName("PK_HangFire_JobQueue");
-
-                entity.ToTable("JobQueue", "HangFire");
-
-                entity.Property(e => e.Queue).HasMaxLength(50);
-
-                entity.Property(e => e.Id).ValueGeneratedOnAdd();
-
-                entity.Property(e => e.FetchedAt).HasColumnType("datetime");
-            });
-
-            modelBuilder.Entity<List>(entity =>
-            {
-                entity.HasKey(e => new { e.Key, e.Id })
-                    .HasName("PK_HangFire_List");
-
-                entity.ToTable("List", "HangFire");
-
-                entity.HasIndex(e => e.ExpireAt)
-                    .HasName("IX_HangFire_List_ExpireAt")
-                    .HasFilter("([ExpireAt] IS NOT NULL)");
-
-                entity.Property(e => e.Key).HasMaxLength(100);
-
-                entity.Property(e => e.Id).ValueGeneratedOnAdd();
-
-                entity.Property(e => e.ExpireAt).HasColumnType("datetime");
-            });
-
-            modelBuilder.Entity<Schema>(entity =>
-            {
-                entity.HasKey(e => e.Version)
-                    .HasName("PK_HangFire_Schema");
-
-                entity.ToTable("Schema", "HangFire");
-
-                entity.Property(e => e.Version).ValueGeneratedNever();
-            });
-
-            modelBuilder.Entity<Server>(entity =>
-            {
-                entity.ToTable("Server", "HangFire");
-
-                entity.HasIndex(e => e.LastHeartbeat)
-                    .HasName("IX_HangFire_Server_LastHeartbeat");
-
-                entity.Property(e => e.Id).HasMaxLength(100);
-
-                entity.Property(e => e.LastHeartbeat).HasColumnType("datetime");
-            });
-
-            modelBuilder.Entity<Set>(entity =>
-            {
-                entity.HasKey(e => new { e.Key, e.Value })
-                    .HasName("PK_HangFire_Set");
-
-                entity.ToTable("Set", "HangFire");
-
-                entity.HasIndex(e => e.ExpireAt)
-                    .HasName("IX_HangFire_Set_ExpireAt")
-                    .HasFilter("([ExpireAt] IS NOT NULL)");
-
-                entity.HasIndex(e => new { e.Key, e.Score })
-                    .HasName("IX_HangFire_Set_Score");
-
-                entity.Property(e => e.Key).HasMaxLength(100);
-
-                entity.Property(e => e.Value).HasMaxLength(256);
-
-                entity.Property(e => e.ExpireAt).HasColumnType("datetime");
-            });
-
-            modelBuilder.Entity<State>(entity =>
-            {
-                entity.HasKey(e => new { e.JobId, e.Id })
-                    .HasName("PK_HangFire_State");
-
-                entity.ToTable("State", "HangFire");
-
-                entity.Property(e => e.Id).ValueGeneratedOnAdd();
-
-                entity.Property(e => e.CreatedAt).HasColumnType("datetime");
-
-                entity.Property(e => e.Name)
-                    .IsRequired()
-                    .HasMaxLength(20);
-
-                entity.Property(e => e.Reason).HasMaxLength(100);
-
-                entity.HasOne(d => d.Job)
-                    .WithMany(p => p.States)
-                    .HasForeignKey(d => d.JobId)
-                    .HasConstraintName("FK_HangFire_State_Job");
             });
 
             modelBuilder.HasSequence("FDBK_MSG_ID_SEQ")

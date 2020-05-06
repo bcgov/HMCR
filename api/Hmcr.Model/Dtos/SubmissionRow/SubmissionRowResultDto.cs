@@ -13,7 +13,8 @@
         public decimal? RowNum { get; set; }
         public decimal? StartVariance { get; set; }
         public decimal? EndVariance { get; set; }
-
+        public decimal? WarningSpThreshold { get; set; }
+        public decimal? ErrorSpThreshold { get; set; }
         public bool IsResubmitted { get; set; }
     }
 }

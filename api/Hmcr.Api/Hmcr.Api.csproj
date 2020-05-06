@@ -11,6 +11,21 @@
     <Copyright>Copyright© 2019, Province of British Columbia.</Copyright>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <DocumentationFile>C:\Work\HMCR\git\api\Hmcr.Api\Hmcr.Api.xml</DocumentationFile>
+    <NoWarn>1701;1702;1591</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="Hmcr.Api.xml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="Hmcr.Api.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
   <ItemGroup>
     <PackageReference Include="AspNetCore.HealthChecks.SqlServer" Version="3.0.0" />
     <PackageReference Include="AutoMapper" Version="9.0.0" />

@@ -3,11 +3,12 @@ using Hmcr.Api.Controllers.Base;
 using Hmcr.Domain.Services;
 using Hmcr.Model;
 using Hmcr.Model.Dtos;
+using Hmcr.Model.Dtos.Keycloak;
 using Hmcr.Model.Dtos.User;
 using Hmcr.Model.Utils;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -19,11 +20,13 @@ namespace Hmcr.Api.Controllers
     public class UsersController : HmcrControllerBase
     {
         private IUserService _userService;
+        private IKeycloakService _keyCloakService;
         private HmcrCurrentUser _currentUser;
 
-        public UsersController(IUserService userService, HmcrCurrentUser currentUser)
+        public UsersController(IUserService userService, IKeycloakService keyCloakService, HmcrCurrentUser currentUser)
         {
             _userService = userService;
+            _keyCloakService = keyCloakService;
             _currentUser = currentUser;
         }
 
@@ -83,6 +86,7 @@ namespace Hmcr.Api.Controllers
         /// <param name="pageSize">Page size</param>
         /// <param name="pageNumber">Page number</param>
         /// <param name="orderBy">Order by column(s). Example: orderby=username</param>
+        /// <param name="direction">Oder by direction.  Example: asc, desc</param>
         /// <returns></returns>
         [HttpGet]
         [RequiresPermission(Permissions.UserRead)]
@@ -97,7 +101,7 @@ namespace Hmcr.Api.Controllers
         [RequiresPermission(Permissions.UserRead)]
         public async Task<ActionResult<UserDto>> GetUsersAsync(decimal id)
         {
-            var user = await _userService.GetUserAsync(id); 
+            var user = await _userService.GetUserAsync(id);
 
             if (user == null)
                 return NotFound();
@@ -155,6 +159,7 @@ namespace Hmcr.Api.Controllers
             return NoContent();
         }
 
+
         [HttpDelete("{id}")]
         [RequiresPermission(Permissions.UserWrite)]
         public async Task<ActionResult> DeleteUser(decimal id, UserDeleteDto user)
@@ -178,5 +183,52 @@ namespace Hmcr.Api.Controllers
 
             return NoContent();
         }
+
+        #region API Client
+        [HttpGet("api-client", Name = "GetUserKeycloakClient")]
+        public async Task<ActionResult<KeycloakClientDto>> GetUserKeycloakClient()
+        {
+            var client = await _keyCloakService.GetUserClientAsync();
+
+            if (client == null)
+            {
+                return NotFound();
+            }
+
+            return Ok(client);
+        }
+
+        [HttpPost("api-client")]
+        public async Task<ActionResult<KeycloakClientDto>> CreateUserKeycloakClient()
+        {
+            var response = await _keyCloakService.CreateUserClientAsync();
+
+            if (response.Errors.Count > 0)
+            {
+                return ValidationUtils.GetValidationErrorResult(response.Errors, ControllerContext);
+            }
+
+            return CreatedAtRoute("GetUserKeycloakClient", await _keyCloakService.GetUserClientAsync());
+        }
+
+        [HttpPost("api-client/secret")]
+        public async Task<ActionResult> RegenerateUserKeycloakClientSecret()
+        {
+            var response = await _keyCloakService.RegenerateUserClientSecretAsync();
+
+            if (response.NotFound)
+            {
+                return NotFound();
+            }
+
+            if (!string.IsNullOrEmpty(response.Error))
+            {
+                return ValidationUtils.GetValidationErrorResult(ControllerContext,
+                     StatusCodes.Status500InternalServerError, "Unable to regenerate Keycloak client secret", response.Error);
+            }
+
+            return CreatedAtRoute("GetUserKeycloakClient", await _keyCloakService.GetUserClientAsync());
+        }
+        #endregion
     }
 }

@@ -24,6 +24,8 @@ namespace Hmcr.Data.Database.Entities
         public bool? IsResubmitted { get; set; }
         public string ErrorDetail { get; set; }
         public string WarningDetail { get; set; }
+        public decimal? WarningSpThreshold { get; set; }
+        public decimal? ErrorSpThreshold { get; set; }
         public long ConcurrencyControlNumber { get; set; }
         public string AppCreateUserid { get; set; }
         public DateTime AppCreateTimestamp { get; set; }

@@ -1,4 +1,6 @@
-﻿namespace Hmcr.Model.Dtos.WorkReport
+﻿using System;
+
+namespace Hmcr.Model.Dtos.WorkReport
 {
     public class WorkReportCsvDto : IReportCsvDto
     {

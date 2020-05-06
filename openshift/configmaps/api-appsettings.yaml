@@ -9,7 +9,7 @@ objects:
         {
             "AllowedHosts": "*",
             "Constants": {
-                "Version": "1.1.0.0",
+                "Version": "1.2.1.0",
                 "SwaggerApiUrl": "/swagger/v1/swagger.json"
             },
             "Serilog": {
@@ -49,6 +49,7 @@ objects:
             "Hangfire": {
                 "EnableServer": true,
                 "ReportJobIntervalInMinutes": 1,
+                "EmailJobIntervalInMinutes": 30,
                 "WorkerCount": 1
             },
             "CHRIS": {
@@ -57,7 +58,8 @@ objects:
                 "OASUrl": "https://prdoas2.apps.th.gov.bc.ca",
                 "OASPath": "ogs-geoV06/wfs?",
                 "ExportUrl": "${EXPORT_URL}",
-                "ExportPath": "ogs-geoV06/ows?service=WFS&version=2.0.0&request=GetFeature"
+                "WFSExportPath": "ogs-geoV06/ows?service=WFS&version=2.0.0&request=GetFeature",
+                "KMLExportPath": "ogs-geoV06/wms/kml?mode=download&styles=HMR_GENERIC_FOR_KML"
             },
             "JWT": {
                 "Authority": "https://sso-dev.pathfinder.gov.bc.ca/auth/realms/<realmid>",
@@ -80,6 +82,10 @@ objects:
                 "Server": "apps.smtp.gov.bc.ca",
                 "Port": 25,
                 "SubmissionResult": "${SUBMISSION_URL}"
+            },
+            "DefaultThresholdSpLevel": {
+              "Wildlife": "Level 2",
+              "Rockfall": "Level 1"
             }
         }
     kind: ConfigMap

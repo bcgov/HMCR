@@ -19,6 +19,8 @@ namespace Hmcr.Model.Dtos.SubmissionRow
         public decimal? StartVariance { get; set; }
         public decimal? EndVariance { get; set; }
 
+        public decimal? WarningSpThreshold { get; set; }
+        public decimal? ErrorSpThreshold { get; set; }
         //this filed doesn't exist in the entity.
         public DateTime EndDate { get; set; }
     }

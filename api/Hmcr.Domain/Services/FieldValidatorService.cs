@@ -405,7 +405,8 @@ namespace Hmcr.Domain.Services
             {
                 if (!Regex.IsMatch(value, rule.Regex.Regex))
                 {
-                    messages.Add($"{rowNumPrefix}{field} {rule.Regex.ErrorMessage}.");
+                    var message = string.Format(rule.Regex.ErrorMessage, val.ToString());
+                    messages.Add($"{rowNumPrefix}{message}.");
                 }
             }
 
@@ -445,7 +446,7 @@ namespace Hmcr.Domain.Services
 
             if (!parsed)
             {
-                messages.Add($"{rowNumPrefix}Cannot convert {field} field to date");
+                messages.Add($"{rowNumPrefix}Invalid value. [{val.ToString()}] cannot be converted to a date");
                 return messages;
             }
 

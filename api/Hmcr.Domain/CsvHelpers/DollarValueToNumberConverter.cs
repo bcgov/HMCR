@@ -10,7 +10,7 @@ namespace Hmcr.Domain.CsvHelpers
     {
         public object ConvertFromString(string text, IReaderRow row, MemberMapData memberMapData)
         {
-            var value = text.Replace("$", "").Replace(",", "");
+            var value = text.Replace("$", "").Replace(",", "").Trim();
 
             if (value.IsEmpty())
             {

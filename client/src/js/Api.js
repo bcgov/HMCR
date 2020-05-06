@@ -68,4 +68,8 @@ export const deleteActivityCode = (id) => instance.delete(`${Constants.API_PATHS
 export const getReportExport = (params) => instance.get(Constants.API_PATHS.REPORT_EXPORT, { params: { ...params } });
 export const getExportSupportedFormats = () => instance.get(Constants.API_PATHS.SUPPORTED_FORMATS);
 
+export const getApiClient = () => instance.get(`${Constants.API_PATHS.USER}/api-client`);
+export const createApiClient = () => instance.post(`${Constants.API_PATHS.USER}/api-client`);
+export const resetApiClientSecret = () => instance.post(`${Constants.API_PATHS.USER}/api-client/secret`);
+
 export const getVersion = () => instance.get(Constants.API_PATHS.VERSION);

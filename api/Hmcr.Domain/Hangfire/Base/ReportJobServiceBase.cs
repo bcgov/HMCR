@@ -26,10 +26,10 @@ namespace Hmcr.Domain.Hangfire.Base
     public class ReportJobServiceBase
     {
         protected IUnitOfWork _unitOfWork;
-        protected ISubmissionStatusRepository _statusRepo;
+        protected ISubmissionStatusService _statusService;
         protected ISubmissionObjectRepository _submissionRepo;
         protected ISumbissionRowRepository _submissionRowRepo;
-        private IServiceAreaRepository _serviceAreaRepo;
+        private IServiceAreaService _serviceAreaService;
         protected ILogger _logger;
         protected IFieldValidatorService _validator;
         protected ISpatialService _spatialService;
@@ -38,34 +38,26 @@ namespace Hmcr.Domain.Hangfire.Base
         protected IEmailService _emailService;
         protected IConfiguration _config;
         protected ILookupCodeService _lookupService;
-        protected decimal _duplicateRowStatusId;
-        protected decimal _errorRowStatusId;
-        protected decimal _successRowStatusId;
-        protected decimal _errorFileStatusId;
-        protected decimal _successFileStatusId;
-        protected decimal _inProgressRowStatusId;
-        protected decimal _duplicateFileStatusId;
 
         protected HmrSubmissionObject _submission;
         protected Dictionary<decimal, HmrSubmissionRow> _submissionRows;
 
         protected ServiceAreaNumberDto _serviceArea;
 
-
         protected bool _enableMethodLog;
         protected string _methodLogHeader;
 
 
         public ReportJobServiceBase(IUnitOfWork unitOfWork,
-            ISubmissionStatusRepository statusRepo, ISubmissionObjectRepository submissionRepo, IServiceAreaRepository serviceAreaRepo,
+            ISubmissionStatusService statusService, ISubmissionObjectRepository submissionRepo, IServiceAreaService serviceAreaService,
             ISumbissionRowRepository submissionRowRepo, IEmailService emailService, ILogger logger, IConfiguration config, IFieldValidatorService validator,
             ISpatialService spatialService, ILookupCodeService lookupService)
         {
             _unitOfWork = unitOfWork;
-            _statusRepo = statusRepo;
+            _statusService = statusService;
             _submissionRepo = submissionRepo;
             _submissionRowRepo = submissionRowRepo;
-            _serviceAreaRepo = serviceAreaRepo;
+            _serviceAreaService = serviceAreaService;
             _emailService = emailService;
             _logger = logger;
             _config = config;
@@ -92,7 +84,7 @@ namespace Hmcr.Domain.Hangfire.Base
                     ((HmcrRepositoryBase<HmrSubmissionObject>)_submissionRepo).RollBackEntities();
 
                     _submission.ErrorDetail = FileError.UnknownException;
-                    _submission.SubmissionStatusId = _errorFileStatusId;
+                    _submission.SubmissionStatusId = _statusService.FileUnexpectedError;
                     await CommitAndSendEmailAsync();
                 }
             }
@@ -105,27 +97,12 @@ namespace Hmcr.Domain.Hangfire.Base
             throw new NotImplementedException();
         }
 
-        protected async Task SetMemberVariablesAsync()
-        {
-            var statuses = await _statusRepo.GetActiveStatuses();
-
-            _duplicateRowStatusId = statuses.First(x => x.StatusType == StatusType.Row && x.StatusCode == RowStatus.DuplicateRow).StatusId;
-            _errorRowStatusId = statuses.First(x => x.StatusType == StatusType.Row && x.StatusCode == RowStatus.RowError).StatusId;
-            _successRowStatusId = statuses.First(x => x.StatusType == StatusType.Row && x.StatusCode == RowStatus.Success).StatusId;
-
-            _errorFileStatusId = statuses.First(x => x.StatusType == StatusType.File && x.StatusCode == FileStatus.DataError).StatusId;
-            _successFileStatusId = statuses.First(x => x.StatusType == StatusType.File && x.StatusCode == FileStatus.Success).StatusId;
-            _duplicateFileStatusId = statuses.First(x => x.StatusType == StatusType.File && x.StatusCode == FileStatus.DuplicateSubmission).StatusId;
-
-            _inProgressRowStatusId = statuses.First(x => x.StatusType == StatusType.File && x.StatusCode == FileStatus.InProgress).StatusId;
-        }
-
         protected async Task<bool> SetSubmissionAsync(SubmissionDto submissionDto)
         {
             _logger.LogInformation("[Hangfire] Starting submission {submissionObjectId}", (long)submissionDto.SubmissionObjectId);
 
             _submission = await _submissionRepo.GetSubmissionObjecForBackgroundJobAsync(submissionDto.SubmissionObjectId);
-            _submission.SubmissionStatusId = _inProgressRowStatusId;
+            _submission.SubmissionStatusId = _statusService.FileInProgress;
             _unitOfWork.Commit();
 
             _submissionRows = new Dictionary<decimal, HmrSubmissionRow>();
@@ -133,34 +110,9 @@ namespace Hmcr.Domain.Hangfire.Base
             _methodLogHeader = $"[Hangfire] Submission ({_submission.SubmissionObjectId}): ";
             _enableMethodLog = _config.GetValue<string>("DISABLE_METHOD_LOGGER") != "Y"; //enabled by default
 
-            _serviceArea = await _serviceAreaRepo.GetServiceAreaByServiceAreaNumberAsyc(_submission.ServiceAreaNumber);
+            _serviceArea = await _serviceAreaService.GetServiceAreaByServiceAreaNumberAsyc(_submission.ServiceAreaNumber);
 
             return true;
-        }
-
-        protected bool CheckCommonMandatoryHeaders<T1, T2>(List<T1> rows, T2 headers, Dictionary<string, List<string>> errors) where T2 : IReportHeaders
-        {
-            MethodLogger.LogEntry(_logger, _enableMethodLog, _methodLogHeader);
-
-            if (rows.Count == 0) //not possible since it's already validated in the ReportServiceBase.
-                throw new Exception("File has no rows.");
-
-            var row = rows[0];
-
-            var fields = typeof(T1).GetProperties();
-
-            foreach (var field in fields)
-            {
-                if (!headers.CommonMandatoryFields.Any(x => x == field.Name))
-                    continue;
-
-                if (field.GetValue(row) == null)
-                {
-                    errors.AddItem("File", $"Header [{field.Name.WordToWords()}] is missing");
-                }
-            }
-
-            return errors.Count == 0;
         }
 
         protected async Task<(int rowCount, string text)> SetRowIdAndRemoveDuplicate<T>(List<T> untypedRows, string headers) where T : IReportCsvDto
@@ -178,7 +130,7 @@ namespace Hmcr.Domain.Hangfire.Base
                 var rowNum = (decimal)untypedRow.RowNum;
                 var entity = await _submissionRowRepo.GetSubmissionRowByRowNumAsync(_submission.SubmissionObjectId, rowNum);
 
-                if (entity.RowStatusId == _duplicateRowStatusId)
+                if (entity.RowStatusId == _statusService.RowDuplicate)
                 {
                     untypedRows.RemoveAt(i);
                     continue;
@@ -194,19 +146,19 @@ namespace Hmcr.Domain.Hangfire.Base
             return (rowCount, text.ToString());
         }
 
-        protected void SetErrorDetail(HmrSubmissionRow submissionRow, Dictionary<string, List<string>> errors)
+        protected void SetErrorDetail(HmrSubmissionRow submissionRow, Dictionary<string, List<string>> errors, decimal submissionStatusId)
         {
             if (submissionRow != null)
             {
-                submissionRow.RowStatusId = _errorRowStatusId;
+                submissionRow.RowStatusId = _statusService.RowError;
                 submissionRow.ErrorDetail = errors.GetErrorDetail();
                 _submission.ErrorDetail = FileError.ReferToRowErrors;
-                _submission.SubmissionStatusId = _errorFileStatusId;
+                _submission.SubmissionStatusId = submissionStatusId;
             }
             else
             {
                 _submission.ErrorDetail = errors.GetErrorDetail();
-                _submission.SubmissionStatusId = _errorFileStatusId;
+                _submission.SubmissionStatusId = submissionStatusId;
             }
         }
 
@@ -232,6 +184,9 @@ namespace Hmcr.Domain.Hangfire.Base
 
         protected void ValidateHighwayUniqueAgainstServiceArea(string highwayUnique, Dictionary<string, List<string>> errors)
         {
+            if (highwayUnique.IsEmpty())
+                return;
+
             var huPrefix = highwayUnique.Substring(0, 2);
 
             if (!_serviceArea.HighwayUniquePrefixes.Contains(huPrefix))
@@ -258,6 +213,9 @@ namespace Hmcr.Domain.Hangfire.Base
         {
             var threshold = _lookupService.GetThresholdLevel(thresholdLevel);
             var threasholdInKm = threshold.Warning / 1000M;
+
+            row.ErrorSpThreshold = threshold.Error / 1000M;
+            row.WarningSpThreshold = threshold.Warning / 1000M;
 
             if (row.StartVariance != null && row.StartVariance > threasholdInKm)
             {
@@ -289,6 +247,28 @@ namespace Hmcr.Domain.Hangfire.Base
                 return true;
 
             return false;
+        }
+
+        protected string GetDefaultThresholdSpLevel(string report)
+        {
+            var level = _config.GetValue<string>($"DefaultThresholdSpLevel:{report}");
+
+            if (level.IsEmpty())
+                throw new Exception($"Cannot find the configuration of the default spatial threshold level for {report} report.");
+
+            if (level.ToLowerInvariant() == ThresholdSpLevels.Level1.ToLowerInvariant())
+                return ThresholdSpLevels.Level1;
+
+            if (level.ToLowerInvariant() == ThresholdSpLevels.Level2.ToLowerInvariant())
+                return ThresholdSpLevels.Level2;
+
+            if (level.ToLowerInvariant() == ThresholdSpLevels.Level3.ToLowerInvariant())
+                return ThresholdSpLevels.Level3;
+
+            if (level.ToLowerInvariant() == ThresholdSpLevels.Level4.ToLowerInvariant())
+                return ThresholdSpLevels.Level4;
+
+            throw new Exception($"The configured spatial threshold level {level} is not valid.");
         }
     }
 }

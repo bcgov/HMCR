@@ -1,0 +1,44 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Hmcr.Api</name>
+    </assembly>
+    <members>
+        <member name="M:Hmcr.Api.Controllers.ExportController.ExportReport(System.String,System.String,System.String,System.DateTime,System.DateTime,System.String,System.String)">
+            <summary>
+            Search report records and export in the specified output format
+            </summary>
+            <param name="serviceAreas">1 ~ 28</param>
+            <param name="typeName">hmr:HMR_WORK_REPORT_VW, hmr:HMR_WILDLIFE_REPORT_VW, hmr:HMR_ROCKFALL_REPORT_VW</param>
+            <param name="format">Supported formats: CSV, JSON, KML, GML</param>
+            <param name="fromDate">From date in yyyy-MM-dd format</param>
+            <param name="toDate">To date in yyyy-MM-dd format</param>
+            <param name="cql_filter">Filter</param>
+            <param name="propertyName">Property names of the columns to export</param>
+            <returns></returns>
+        </member>
+        <member name="M:Hmcr.Api.Controllers.ExportController.GetSupportedFormats">
+            <summary>
+            csv: csv format
+            json: geo-json format
+            kml: kml format
+            gml: gml format
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Hmcr.Api.Controllers.UsersController.GetUsersAsync(System.String,System.String,System.String,System.Nullable{System.Boolean},System.Int32,System.Int32,System.String,System.String)">
+            <summary>
+            Search users
+            </summary>
+            <param name="serviceAreas">Comma separated service area numbers. Example: serviceareas=1,2</param>
+            <param name="userTypes">Comma separated user types. Example: usertypes=INTERNAL,BUSINESS</param>
+            <param name="searchText">Search text for first name, last name, orgnization name, username</param>
+            <param name="isActive">True or false</param>
+            <param name="pageSize">Page size</param>
+            <param name="pageNumber">Page number</param>
+            <param name="orderBy">Order by column(s). Example: orderby=username</param>
+            <param name="direction">Oder by direction.  Example: asc, desc</param>
+            <returns></returns>
+        </member>
+    </members>
+</doc>

@@ -25,10 +25,14 @@ const DeleteButton = ({
     if (defaultEndDate) {
       setDate(moment(defaultEndDate));
       setButtonText('Update');
+    } else {
+      setDate(null);
     }
-  }, [defaultEndDate]);
+  }, [defaultEndDate, popoverOpen]);
 
-  const togglePopover = () => setPopoverOpen(!popoverOpen);
+  const togglePopover = () => {
+    setPopoverOpen(!popoverOpen);
+  };
 
   const handleDatePickerFocusChange = (focused) => {
     setFocusedInput(focused);
@@ -46,7 +50,7 @@ const DeleteButton = ({
   return (
     <React.Fragment>
       <FontAwesomeButton color="danger" icon={iconName} id={buttonId} {...props} />
-      <Popover placement="bottom" isOpen={popoverOpen} target={buttonId} toggle={togglePopover}>
+      <Popover placement="auto-start" isOpen={popoverOpen} target={buttonId} toggle={togglePopover} trigger="legacy">
         <PopoverHeader>Are you sure?</PopoverHeader>
         <PopoverBody>
           {permanentDelete ? (

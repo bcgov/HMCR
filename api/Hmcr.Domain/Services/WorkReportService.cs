@@ -31,9 +31,9 @@ namespace Hmcr.Domain.Services
 
         public WorkReportService(IUnitOfWork unitOfWork, 
             ISubmissionStreamService streamService, ISubmissionObjectRepository submissionRepo, ISumbissionRowRepository rowRepo, 
-            IContractTermRepository contractRepo, ISubmissionStatusRepository statusRepo, IWorkReportRepository workRptRepo, IFieldValidatorService validator,
-            ILogger<WorkReportService> logger) 
-            : base(unitOfWork, streamService, submissionRepo, rowRepo, contractRepo, statusRepo, validator)
+            IContractTermRepository contractRepo, ISubmissionStatusService statusService, IWorkReportRepository workRptRepo, IFieldValidatorService validator,
+            ILogger<WorkReportService> logger, IServiceAreaService saService)
+            : base(unitOfWork, streamService, submissionRepo, rowRepo, contractRepo, statusService, validator, saService)
         {
             TableName = TableNames.WorkReport;
             HasRowIdentifier = true;
@@ -51,6 +51,7 @@ namespace Hmcr.Domain.Services
             csv.Configuration.RegisterClassMap<WorkRptInitCsvDtoMap>();
 
             var serviceAreastrings = ConvertServiceAreaToStrings(submission.ServiceAreaNumber);
+            var serviceArea = await _saService.GetServiceAreaByServiceAreaNumberAsyc(submission.ServiceAreaNumber);
 
             var headerValidated = false;
             var rows = new List<WorkRptInitCsvDto>();
@@ -77,6 +78,7 @@ namespace Hmcr.Domain.Services
                     }
 
                     row.RowNum = ++rowNum;
+                    row.ServiceArea = serviceArea.ConvertToServiceAreaString(row.ServiceArea);
                     rows.Add(row);
                 }
                 catch (TypeConverterException ex)
@@ -118,7 +120,7 @@ namespace Hmcr.Domain.Services
                     RecordNumber = row.RecordNumber,
                     RowValue = line,
                     RowHash = line.GetSha256Hash(),
-                    RowStatusId = await _statusRepo.GetStatusIdByTypeAndCodeAsync(StatusType.Row, RowStatus.RowReceived),
+                    RowStatusId = _statusService.RowReceived,
                     EndDate = row.EndDate ?? Constants.MinDate,
                     RowNum = csv.Context.Row
                 });

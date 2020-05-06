@@ -35,11 +35,11 @@ namespace Hmcr.Domain.Hangfire
         private IWorkReportRepository _workReportRepo;
 
         public WorkReportJobService(IUnitOfWork unitOfWork, ILogger<IWorkReportJobService> logger,
-            IActivityCodeRepository activityRepo, ISubmissionStatusRepository statusRepo, ISubmissionObjectRepository submissionRepo, IServiceAreaRepository serviceAreaRepo,
+            IActivityCodeRepository activityRepo, ISubmissionStatusService statusService, ISubmissionObjectRepository submissionRepo, IServiceAreaService serviceAreaService,
             ISumbissionRowRepository submissionRowRepo, IWorkReportRepository workReportRepo, IFieldValidatorService validator,
             IEmailService emailService, IConfiguration config, 
             ISpatialService spatialService, ILookupCodeService lookupService)
-            : base(unitOfWork, statusRepo, submissionRepo, serviceAreaRepo, submissionRowRepo, emailService, logger, config, validator, spatialService, lookupService)
+            : base(unitOfWork, statusService, submissionRepo, serviceAreaService, submissionRowRepo, emailService, logger, config, validator, spatialService, lookupService)
         {
             _activityRepo = activityRepo;
             _workReportRepo = workReportRepo;
@@ -56,25 +56,12 @@ namespace Hmcr.Domain.Hangfire
         {
             var errors = new Dictionary<string, List<string>>();
 
-            await SetMemberVariablesAsync();
-
             if (!await SetSubmissionAsync(submissionDto))
                 return false;
 
             var activityCodes = await _activityRepo.GetActiveActivityCodesAsync();
 
             var (untypedRows, headers) = ParseRowsUnTyped(errors);
-
-            if (!CheckCommonMandatoryHeaders(untypedRows, new WorkReportHeaders(), errors))
-            {
-                if (errors.Count > 0)
-                {
-                    _submission.ErrorDetail = errors.GetErrorDetail();
-                    _submission.SubmissionStatusId = _errorFileStatusId;
-                    await CommitAndSendEmailAsync();
-                    return true;
-                }
-            }
 
             //text after duplicate lines are removed. Will be used for importing to typed DTO.
             var (rowCount, text) = await SetRowIdAndRemoveDuplicate(untypedRows, headers);
@@ -83,7 +70,7 @@ namespace Hmcr.Domain.Hangfire
             {
                 errors.AddItem("File", "No new records were found in the file; all records were already processed in the past submission.");
                 _submission.ErrorDetail = errors.GetErrorDetail();
-                _submission.SubmissionStatusId = _duplicateFileStatusId;
+                _submission.SubmissionStatusId = _statusService.FileDuplicate;
                 await CommitAndSendEmailAsync();
                 return true;
             }
@@ -94,14 +81,14 @@ namespace Hmcr.Domain.Hangfire
 
                 var submissionRow = _submissionRows[(decimal)untypedRow.RowNum];
 
-                submissionRow.RowStatusId = _successRowStatusId; //set the initial row status as success 
+                submissionRow.RowStatusId = _statusService.RowSuccess; //set the initial row status as success 
 
                 var activityCode = activityCodes.FirstOrDefault(x => x.ActivityNumber == untypedRow.ActivityNumber);
 
                 if (activityCode == null)
                 {
                     errors.AddItem(Fields.ActivityNumber, $"Invalid activity number[{untypedRow.ActivityNumber}]");
-                    SetErrorDetail(submissionRow, errors);
+                    SetErrorDetail(submissionRow, errors, _statusService.FileBasicError);
                     continue;
                 }
 
@@ -117,20 +104,20 @@ namespace Hmcr.Domain.Hangfire
 
                 if (errors.Count > 0)
                 {
-                    SetErrorDetail(submissionRow, errors);
+                    SetErrorDetail(submissionRow, errors, _statusService.FileBasicError);
                 }
             }
 
             var typedRows = new List<WorkReportTyped>();
 
-            if (_submission.SubmissionStatusId != _errorFileStatusId)
+            if (_submission.SubmissionStatusId == _statusService.FileInProgress)
             {
                 var (rowNum, rows) = ParseRowsTyped(text, errors);
 
                 if (rowNum != 0)
                 {
                     var submissionRow = _submissionRows[rowNum];
-                    SetErrorDetail(submissionRow, errors);
+                    SetErrorDetail(submissionRow, errors, _statusService.FileConflictionError);
                     await CommitAndSendEmailAsync();
                     return true;
                 }
@@ -142,7 +129,7 @@ namespace Hmcr.Domain.Hangfire
                 PerformAdditionalValidation(typedRows);
             }
 
-            if (_submission.SubmissionStatusId == _errorFileStatusId)
+            if (_submission.SubmissionStatusId != _statusService.FileInProgress)
             {
                 await CommitAndSendEmailAsync();
                 return true;
@@ -152,13 +139,13 @@ namespace Hmcr.Domain.Hangfire
 
             _logger.LogInformation($"{_methodLogHeader} PerformSpatialValidationAndConversionAsync 100%");
 
-            if (_submission.SubmissionStatusId == _errorFileStatusId)
+            if (_submission.SubmissionStatusId != _statusService.FileInProgress)
             {
                 await CommitAndSendEmailAsync();
                 return true;
             }
 
-            _submission.SubmissionStatusId = _successFileStatusId;
+            _submission.SubmissionStatusId = _statusService.FileSuccess;
 
             await foreach (var entity in _workReportRepo.SaveWorkReportAsnyc(_submission, workReports)) { }
 
@@ -252,7 +239,7 @@ namespace Hmcr.Domain.Hangfire
 
                 if (errors.Count > 0)
                 {
-                    SetErrorDetail(submissionRow, errors);
+                    SetErrorDetail(submissionRow, errors, _statusService.FileConflictionError);
                 }
             }
         }
@@ -363,7 +350,7 @@ namespace Hmcr.Domain.Hangfire
 
                 if (result.result == SpValidationResult.Fail)
                 {
-                    SetErrorDetail(submissionRow, errors);
+                    SetErrorDetail(submissionRow, errors, _statusService.FileLocationError);
                 }
                 else if (result.result == SpValidationResult.Success)
                 {
@@ -382,7 +369,7 @@ namespace Hmcr.Domain.Hangfire
 
                 if (result.result == SpValidationResult.Fail)
                 {
-                    SetErrorDetail(submissionRow, errors);
+                    SetErrorDetail(submissionRow, errors, _statusService.FileLocationError);
                 }
                 else if (result.result == SpValidationResult.Success)
                 {
@@ -437,7 +424,7 @@ namespace Hmcr.Domain.Hangfire
 
                 if (result.result == SpValidationResult.Fail)
                 {
-                    SetErrorDetail(submissionRow, errors);
+                    SetErrorDetail(submissionRow, errors, _statusService.FileLocationError);
                 }
                 else if (result.result == SpValidationResult.Success)
                 {
@@ -457,7 +444,7 @@ namespace Hmcr.Domain.Hangfire
 
                 if (result.result == SpValidationResult.Fail)
                 {
-                    SetErrorDetail(submissionRow, errors);
+                    SetErrorDetail(submissionRow, errors, _statusService.FileLocationError);
                 }
                 else if (result.result == SpValidationResult.Success)
                 {
@@ -522,7 +509,7 @@ namespace Hmcr.Domain.Hangfire
             {
                 var errors = new Dictionary<string, List<string>>();
                 errors.AddItem($"{Fields.EndLatitude}/{Fields.EndLongitude}", "Start GPS coordinates must be the same as end GPS coordinate");
-                SetErrorDetail(submissionRow, errors);
+                SetErrorDetail(submissionRow, errors, _statusService.FileLocationError);
             }
         }
 
@@ -537,14 +524,14 @@ namespace Hmcr.Domain.Hangfire
                 {
                     var errors = new Dictionary<string, List<string>>();
                     errors.AddItem($"{Fields.EndLatitude}/{Fields.EndLongitude}", "The start GPS coordinates must not be the same as the end GPS coordinates");
-                    SetErrorDetail(submissionRow, errors);
+                    SetErrorDetail(submissionRow, errors, _statusService.FileLocationError);
                 }
             }
             else
             {
                 var errors = new Dictionary<string, List<string>>();
                 errors.AddItem($"{Fields.EndLatitude},{Fields.EndLongitude}", "The end GPS coordinates must be provided");
-                SetErrorDetail(submissionRow, errors);
+                SetErrorDetail(submissionRow, errors, _statusService.FileLocationError);
             }
         }
 
@@ -584,7 +571,7 @@ namespace Hmcr.Domain.Hangfire
                 {
                     var errors = new Dictionary<string, List<string>>();
                     errors.AddItem($"{Fields.EndOffset}", "End offset must be the same as start offset");
-                    SetErrorDetail(submissionRow, errors);
+                    SetErrorDetail(submissionRow, errors, _statusService.FileLocationError);
                 }
             }
             else
@@ -604,14 +591,14 @@ namespace Hmcr.Domain.Hangfire
                 {
                     var errors = new Dictionary<string, List<string>>();
                     errors.AddItem($"{Fields.EndOffset}", "End offset must be greater than start offset");
-                    SetErrorDetail(submissionRow, errors);
+                    SetErrorDetail(submissionRow, errors, _statusService.FileLocationError);
                 }
             }
             else
             {
                 var errors = new Dictionary<string, List<string>>();
                 errors.AddItem($"{Fields.EndOffset}", "End offset must be provided");
-                SetErrorDetail(submissionRow, errors);
+                SetErrorDetail(submissionRow, errors, _statusService.FileLocationError);
             }
         }
 
@@ -677,6 +664,7 @@ namespace Hmcr.Domain.Hangfire
             for (var i = 0; i < rows.Count; i++)
             {
                 rows[i].RowNum = i + 2;
+                rows[i].ServiceArea = _serviceArea.ConvertToServiceAreaString(rows[i].ServiceArea);
             }
 
             return (rows, string.Join(',', csv.Context.HeaderRecord).Replace("\"", ""));
@@ -701,6 +689,7 @@ namespace Hmcr.Domain.Hangfire
                     var row = csv.GetRecord<WorkReportTyped>();
                     rows.Add(row);
                     rowNum = (decimal)row.RowNum;
+                    row.ServiceArea = _serviceArea.ConvertToServiceAreaNumber(row.ServiceArea);
                 }
                 catch (CsvHelper.TypeConversion.TypeConverterException ex)
                 {

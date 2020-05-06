@@ -31,9 +31,9 @@ namespace Hmcr.Domain.Services
 
         public WildlifeReportService(IUnitOfWork unitOfWork,
             ISubmissionStreamService streamService, ISubmissionObjectRepository submissionRepo, ISumbissionRowRepository rowRepo,
-            IContractTermRepository contractRepo, ISubmissionStatusRepository statusRepo, IWildlifeReportRepository wildlifeRepo, IFieldValidatorService validator,
-            ILogger<WildlifeReportService> logger)
-            : base(unitOfWork, streamService, submissionRepo, rowRepo, contractRepo, statusRepo, validator)
+            IContractTermRepository contractRepo, ISubmissionStatusService statusService, IWildlifeReportRepository wildlifeRepo, IFieldValidatorService validator,
+            ILogger<WildlifeReportService> logger, IServiceAreaService saService)
+            : base(unitOfWork, streamService, submissionRepo, rowRepo, contractRepo, statusService, validator, saService)
         {
             TableName = TableNames.WildlifeReport;
             HasRowIdentifier = false;
@@ -49,6 +49,7 @@ namespace Hmcr.Domain.Services
             csv.Configuration.RegisterClassMap<WildlifeRptInitCsvDtoMap>();
 
             var serviceAreastrings = ConvertServiceAreaToStrings(submission.ServiceAreaNumber);
+            var serviceArea = await _saService.GetServiceAreaByServiceAreaNumberAsyc(submission.ServiceAreaNumber);
 
             var headerValidated = false;
             var rows = new List<WildlifeRptInitCsvDto>();
@@ -75,6 +76,7 @@ namespace Hmcr.Domain.Services
                     }
 
                     row.RowNum = ++rowNum;
+                    row.ServiceArea = serviceArea.ConvertToServiceAreaString(row.ServiceArea);
                     rows.Add(row);
                 }
                 catch (TypeConverterException ex)
@@ -116,7 +118,7 @@ namespace Hmcr.Domain.Services
                     RecordNumber = null,
                     RowValue = line,
                     RowHash = line.GetSha256Hash(),
-                    RowStatusId = await _statusRepo.GetStatusIdByTypeAndCodeAsync(StatusType.Row, RowStatus.RowReceived),
+                    RowStatusId = _statusService.RowReceived,
                     EndDate = row.AccidentDate ?? Constants.MinDate,
                     RowNum = csv.Context.Row
                 });

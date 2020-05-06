@@ -14,19 +14,19 @@ h1 {
 }
 
 h2 {
-  font-size: 1.2rem;
-}
-
-h3 {
   font-size: 1.15rem;
 }
 
-h4 {
+h3 {
   font-size: 1.1rem;
 }
 
-h5 {
+h4 {
   font-size: 1.05rem;
+}
+
+h5 {
+  font-size: 1.025rem;
 }
 
 h6 {
@@ -120,4 +120,21 @@ ul.no-bullet {
   border-bottom: 1px solid #eee;
   margin-bottom: 16px;
   color: theme-color(primary-nav);
+}
+
+.thin-underline.progress {
+  height: 4px;
+  position: absolute;
+  width: 100%;
+  bottom: 0px;
+}
+
+.code-block {
+  background-color: #f6f8fa;
+  padding: 16px;
+  margin-bottom: 16px;
+
+  pre {
+    margin: 0;
+  }
 }

@@ -1,4 +1,6 @@
-﻿namespace Hmcr.Model.Dtos.WildlifeReport
+﻿using System;
+
+namespace Hmcr.Model.Dtos.WildlifeReport
 {
     public class WildlifeReportCsvDto : IReportCsvDto
     {

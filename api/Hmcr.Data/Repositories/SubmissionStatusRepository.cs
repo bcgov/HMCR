@@ -3,10 +3,8 @@ using Hmcr.Data.Database.Entities;
 using Hmcr.Data.Repositories.Base;
 using Hmcr.Model.Dtos.SubmissionStatus;
 using Microsoft.EntityFrameworkCore;
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace Hmcr.Data.Repositories
@@ -14,7 +12,8 @@ namespace Hmcr.Data.Repositories
     public interface ISubmissionStatusRepository
     {
         Task<decimal> GetStatusIdByTypeAndCodeAsync(string type, string code);
-        Task<IEnumerable<SubmissionStatusDto>> GetActiveStatuses();
+        Task<IEnumerable<SubmissionStatusDto>> GetActiveStatusesAsync();
+        IEnumerable<SubmissionStatusDto> GetActiveStatuses();
     }
     public class SubmissionStatusRepository : HmcrRepositoryBase<HmrSubmissionStatu>, ISubmissionStatusRepository
     {
@@ -27,10 +26,15 @@ namespace Hmcr.Data.Repositories
         {
             return (await DbSet.FirstAsync(x => x.StatusCode == code && x.StatusType == type)).StatusId;
         }
-        
-        public async Task<IEnumerable<SubmissionStatusDto>> GetActiveStatuses()
+
+        public async Task<IEnumerable<SubmissionStatusDto>> GetActiveStatusesAsync()
         {
             return await GetAllAsync<SubmissionStatusDto>();
+        }
+
+        public IEnumerable<SubmissionStatusDto> GetActiveStatuses()
+        {
+            return GetAll<SubmissionStatusDto>();
         }
     }
 }

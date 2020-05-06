@@ -1,9 +1,7 @@
 ﻿using Hmcr.Data.Database;
 using Hmcr.Data.Repositories;
 using Hmcr.Model.Dtos.ServiceArea;
-using System;
 using System.Collections.Generic;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace Hmcr.Domain.Services
@@ -14,6 +12,7 @@ namespace Hmcr.Domain.Services
         Task<IEnumerable<ServiceAreaNumberDto>> GetAllServiceAreasAsync();
         IEnumerable<ServiceAreaNumberDto> GetAllServiceAreas();
         Task<int> CountServiceAreaNumbersAsync(IEnumerable<decimal> serviceAreaNumbers);
+        Task<ServiceAreaNumberDto> GetServiceAreaByServiceAreaNumberAsyc(decimal serviceAreaNumber);
     }
 
     public class ServiceAreaService : IServiceAreaService
@@ -45,6 +44,11 @@ namespace Hmcr.Domain.Services
         public async Task<int> CountServiceAreaNumbersAsync(IEnumerable<decimal> serviceAreaNumbers)
         {
             return await _svcAreaRepo.CountServiceAreaNumbersAsync(serviceAreaNumbers);
+        }
+
+        public async Task<ServiceAreaNumberDto> GetServiceAreaByServiceAreaNumberAsyc(decimal serviceAreaNumber)
+        {
+            return await _svcAreaRepo.GetServiceAreaByServiceAreaNumberAsyc(serviceAreaNumber);
         }
     }
 }

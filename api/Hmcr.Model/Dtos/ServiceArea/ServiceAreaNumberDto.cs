@@ -1,5 +1,7 @@
 ﻿using Hmcr.Model.Utils;
+using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text.Json.Serialization;
 
 namespace Hmcr.Model.Dtos.ServiceArea
@@ -38,6 +40,34 @@ namespace Hmcr.Model.Dtos.ServiceArea
             }
 
             return prefixes.ToArray();
+        }
+
+        public string ServiceArea => ((long)ServiceAreaNumber).ToString();
+
+        public string ConvertToServiceAreaString(string text)
+        {
+            if (text.IsEmpty())
+                return null;
+
+            if (!text.IsInteger())
+                return text;
+
+            var value = string.Format("{0, 2:00}", Convert.ToInt32(text));
+
+            if (HighwayUniquePrefixes.Contains(value))
+                return ServiceArea;
+
+            return text;
+        }
+
+        public decimal ConvertToServiceAreaNumber(decimal number)
+        {
+            var value = string.Format("{0, 2:00}", Convert.ToInt32(number));
+
+            if (HighwayUniquePrefixes.Contains(value))
+                return ServiceAreaNumber;
+
+            return number;
         }
     }
 }

@@ -68,7 +68,10 @@ namespace Hmcr.Api.Authentication
 
         private async Task<bool> PopulateCurrentUserFromDb(ClaimsPrincipal principal)
         {
-            _curentUser.UserName = principal.FindFirstValue(HmcrClaimTypes.KcUsername);
+            var isApiClient = false;
+            bool.TryParse(principal.FindFirstValue(HmcrClaimTypes.KcIsApiClient), out isApiClient);
+
+            _curentUser.UserName = isApiClient ? principal.FindFirstValue(HmcrClaimTypes.KcApiUsername) : principal.FindFirstValue(HmcrClaimTypes.KcUsername);
             var usernames = _curentUser.UserName.Split("@");
             var username = usernames[0].ToUpperInvariant();
             var directory = usernames[1].ToUpperInvariant();
@@ -105,8 +108,9 @@ namespace Hmcr.Api.Authentication
             _curentUser.UserName = username;
             _curentUser.FirstName = user.FirstName;
             _curentUser.LastName = user.LastName;
+            _curentUser.ApiClientId = user.ApiClientId;
 
-            if (user.Username.ToUpperInvariant() != username || user.Email.ToUpperInvariant() != email)
+            if (!isApiClient && user.Username.ToUpperInvariant() != username || user.Email.ToUpperInvariant() != email)
             {
                 _logger.LogWarning($"Username/Email changed from {user.Username}/{user.Email} to {user.Email}/{email}.");
                 await _userService.UpdateUserFromBceidAsync(userGuid, username, user.UserType, user.ConcurrencyControlNumber);

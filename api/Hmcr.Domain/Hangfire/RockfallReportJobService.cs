@@ -31,16 +31,18 @@ namespace Hmcr.Domain.Hangfire
     public class RockfallReportJobService : ReportJobServiceBase, IRockfallReportJobService
     {        
         private IRockfallReportRepository _rockfallReportRepo;
+        private readonly string _thresholdSpLevel = ThresholdSpLevels.Level1;
 
         public RockfallReportJobService(IUnitOfWork unitOfWork, ILogger<IRockfallReportJobService> logger, 
-            ISubmissionStatusRepository statusRepo, ISubmissionObjectRepository submissionRepo, IServiceAreaRepository serviceAreaRepo,
+            ISubmissionStatusService statusService, ISubmissionObjectRepository submissionRepo, IServiceAreaService serviceAreaService,
             ISumbissionRowRepository submissionRowRepo, IRockfallReportRepository rockfallReportRepo, IFieldValidatorService validator, 
             IEmailService emailService, IConfiguration config,
             ISpatialService spatialService, ILookupCodeService lookupService)
-            : base(unitOfWork, statusRepo, submissionRepo, serviceAreaRepo, submissionRowRepo, emailService, logger, config, validator, spatialService, lookupService)
+            : base(unitOfWork, statusService, submissionRepo, serviceAreaService, submissionRowRepo, emailService, logger, config, validator, spatialService, lookupService)
         {
             _logger = logger;
             _rockfallReportRepo = rockfallReportRepo;
+            _thresholdSpLevel = GetDefaultThresholdSpLevel(Reports.Rockfall);
         }
 
         /// <summary>
@@ -54,23 +56,10 @@ namespace Hmcr.Domain.Hangfire
         {
             var errors = new Dictionary<string, List<string>>();
 
-            await SetMemberVariablesAsync();
-
             if (!await SetSubmissionAsync(submissionDto))
                 return false;
 
             var (untypedRows, headers) = ParseRowsUnTyped(errors);
-
-            if (!CheckCommonMandatoryHeaders(untypedRows, new RockfallReportHeaders(), errors))
-            {
-                if (errors.Count > 0)
-                {
-                    _submission.ErrorDetail = errors.GetErrorDetail();
-                    _submission.SubmissionStatusId = _errorFileStatusId;
-                    await CommitAndSendEmailAsync();
-                    return true;
-                }
-            }
 
             //text after duplicate lines are removed. Will be used for importing to typed DTO.
             var (rowCount, text) = await SetRowIdAndRemoveDuplicate(untypedRows, headers);
@@ -79,7 +68,7 @@ namespace Hmcr.Domain.Hangfire
             {
                 errors.AddItem("File", "No new records were found in the file; all records were already processed in the past submission.");
                 _submission.ErrorDetail = errors.GetErrorDetail();
-                _submission.SubmissionStatusId = _duplicateFileStatusId;
+                _submission.SubmissionStatusId = _statusService.FileDuplicate;
                 await CommitAndSendEmailAsync();
                 return true;
             }
@@ -90,7 +79,7 @@ namespace Hmcr.Domain.Hangfire
 
                 var submissionRow = _submissionRows[(decimal)untypedRow.RowNum];
 
-                submissionRow.RowStatusId = _successRowStatusId; //set the initial row status as success 
+                submissionRow.RowStatusId = _statusService.RowSuccess; //set the initial row status as success 
 
                 var entityName = GetValidationEntityName(untypedRow);
 
@@ -98,20 +87,20 @@ namespace Hmcr.Domain.Hangfire
 
                 if (errors.Count > 0)
                 {
-                    SetErrorDetail(submissionRow, errors);
+                    SetErrorDetail(submissionRow, errors, _statusService.FileBasicError);
                 }
             }
 
             var typedRows = new List<RockfallReportTyped>();
 
-            if (_submission.SubmissionStatusId != _errorFileStatusId)
+            if (_submission.SubmissionStatusId == _statusService.FileInProgress)
             {
                 var (rowNum, rows) = ParseRowsTyped(text, errors);
 
                 if (rowNum != 0)
                 {
                     var submissionRow = _submissionRows[rowNum];
-                    SetErrorDetail(submissionRow, errors);
+                    SetErrorDetail(submissionRow, errors, _statusService.FileConflictionError);
                     await CommitAndSendEmailAsync();
                     return true;
                 }
@@ -123,7 +112,7 @@ namespace Hmcr.Domain.Hangfire
                 PerformAdditionalValidation(typedRows);
             }
 
-            if (_submission.SubmissionStatusId == _errorFileStatusId)
+            if (_submission.SubmissionStatusId != _statusService.FileInProgress)
             {
                 await CommitAndSendEmailAsync();
                 return true;
@@ -133,13 +122,13 @@ namespace Hmcr.Domain.Hangfire
 
             _logger.LogInformation($"{_methodLogHeader} PerformSpatialValidationAndConversionAsync 100%");
 
-            if (_submission.SubmissionStatusId == _errorFileStatusId)
+            if (_submission.SubmissionStatusId != _statusService.FileInProgress)
             {
                 await CommitAndSendEmailAsync();
                 return true;
             }
 
-            _submission.SubmissionStatusId = _successFileStatusId;
+            _submission.SubmissionStatusId = _statusService.FileSuccess;
 
             await foreach (var entity in _rockfallReportRepo.SaveRockfallReportAsnyc(_submission, rockfallReports)) { }
 
@@ -196,7 +185,7 @@ namespace Hmcr.Domain.Hangfire
 
                 if (errors.Count > 0)
                 {
-                    SetErrorDetail(submissionRow, errors);
+                    SetErrorDetail(submissionRow, errors, _statusService.FileConflictionError);
                 }
             }
         }
@@ -276,7 +265,7 @@ namespace Hmcr.Domain.Hangfire
                 SetVarianceWarningDetail(submissionRow, typedRow.HighwayUnique,
                     GetGpsString(typedRow.StartLatitude, typedRow.StartLongitude),
                     GetGpsString(typedRow.EndLatitude, typedRow.EndLongitude),
-                    ThresholdSpLevels.Level1);
+                    _thresholdSpLevel);
             }
             else if (typedRow.SpatialData == SpatialData.Lrs)
             {
@@ -285,7 +274,7 @@ namespace Hmcr.Domain.Hangfire
                 SetVarianceWarningDetail(submissionRow, typedRow.HighwayUnique,
                     GetOffsetString(typedRow.StartOffset),
                     GetOffsetString(typedRow.EndOffset),
-                    ThresholdSpLevels.Level1);
+                    _thresholdSpLevel);
             }
 
             return rockfallReport;
@@ -324,11 +313,11 @@ namespace Hmcr.Domain.Hangfire
 
             if (IsPoint(typedRow))
             {
-                var result = await _spatialService.ValidateGpsPointAsync(start, typedRow.HighwayUnique, Fields.HighwayUnique, ThresholdSpLevels.Level1, errors);
+                var result = await _spatialService.ValidateGpsPointAsync(start, typedRow.HighwayUnique, Fields.HighwayUnique, _thresholdSpLevel, errors);
 
                 if (result.result == SpValidationResult.Fail)
                 {
-                    SetErrorDetail(submissionRow, errors);
+                    SetErrorDetail(submissionRow, errors, _statusService.FileLocationError);
                 }
                 else if (result.result == SpValidationResult.Success)
                 {
@@ -344,11 +333,11 @@ namespace Hmcr.Domain.Hangfire
             else
             {
                 var end = new Chris.Models.Point((decimal)typedRow.EndLongitude, (decimal)typedRow.EndLatitude);
-                var result = await _spatialService.ValidateGpsLineAsync(start, end, typedRow.HighwayUnique, Fields.HighwayUnique, ThresholdSpLevels.Level1, errors);
+                var result = await _spatialService.ValidateGpsLineAsync(start, end, typedRow.HighwayUnique, Fields.HighwayUnique, _thresholdSpLevel, errors);
 
                 if (result.result == SpValidationResult.Fail)
                 {
-                    SetErrorDetail(submissionRow, errors);
+                    SetErrorDetail(submissionRow, errors, _statusService.FileLocationError);
                 }
                 else if (result.result == SpValidationResult.Success)
                 {
@@ -399,11 +388,11 @@ namespace Hmcr.Domain.Hangfire
             //remeber that feature type line/point has been replaced either line or point in PerformGpsEitherLineOrPointValidation().
             if (IsPoint(typedRow))
             {
-                var result = await _spatialService.ValidateLrsPointAsync((decimal)typedRow.StartOffset, typedRow.HighwayUnique, Fields.HighwayUnique, ThresholdSpLevels.Level1, errors);
+                var result = await _spatialService.ValidateLrsPointAsync((decimal)typedRow.StartOffset, typedRow.HighwayUnique, Fields.HighwayUnique, _thresholdSpLevel, errors);
 
                 if (result.result == SpValidationResult.Fail)
                 {
-                    SetErrorDetail(submissionRow, errors);
+                    SetErrorDetail(submissionRow, errors, _statusService.FileLocationError);
                 }
                 else if (result.result == SpValidationResult.Success)
                 {
@@ -421,11 +410,11 @@ namespace Hmcr.Domain.Hangfire
             }
             else
             {
-                var result = await _spatialService.ValidateLrsLineAsync((decimal)typedRow.StartOffset, (decimal)typedRow.EndOffset, typedRow.HighwayUnique, Fields.HighwayUnique, ThresholdSpLevels.Level1, errors);
+                var result = await _spatialService.ValidateLrsLineAsync((decimal)typedRow.StartOffset, (decimal)typedRow.EndOffset, typedRow.HighwayUnique, Fields.HighwayUnique, _thresholdSpLevel, errors);
 
                 if (result.result == SpValidationResult.Fail)
                 {
-                    SetErrorDetail(submissionRow, errors);
+                    SetErrorDetail(submissionRow, errors, _statusService.FileLocationError);
                 }
                 else if (result.result == SpValidationResult.Success)
                 {
@@ -502,6 +491,7 @@ namespace Hmcr.Domain.Hangfire
             for (var i = 0; i < rows.Count; i++)
             {
                 rows[i].RowNum = i + 2;
+                rows[i].ServiceArea = _serviceArea.ConvertToServiceAreaString(rows[i].ServiceArea);
             }
 
             return (rows, string.Join(',', csv.Context.HeaderRecord).Replace("\"", ""));
@@ -527,6 +517,7 @@ namespace Hmcr.Domain.Hangfire
                     var row = csv.GetRecord<RockfallReportTyped>();
                     rows.Add(row);
                     rowNum = (decimal)row.RowNum;
+                    row.ServiceArea = _serviceArea.ConvertToServiceAreaNumber(row.ServiceArea);
                 }
                 catch (CsvHelper.TypeConversion.TypeConverterException ex)
                 {

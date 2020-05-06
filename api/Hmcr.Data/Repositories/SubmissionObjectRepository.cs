@@ -64,7 +64,7 @@ namespace Hmcr.Data.Repositories
         {
             var submissions = DbSet.AsNoTracking()
                 .Where(x => x.ServiceAreaNumber == serviceAreaNumber && x.DigitalRepresentation != null && x.SubmissionStatus.StatusType == StatusType.File &&
-                    (x.SubmissionStatus.StatusCode == FileStatus.FileReceived || x.SubmissionStatus.StatusCode == FileStatus.InProgress))
+                    (x.SubmissionStatus.StatusCode == FileStatus.FileReceived || x.SubmissionStatus.StatusCode == FileStatus.FileInProgress))
                 .Include(x => x.MimeType)
                 .Include(x => x.SubmissionStream)
                 .OrderBy(x => x.SubmissionObjectId) //must be ascending order
@@ -182,7 +182,7 @@ namespace Hmcr.Data.Repositories
                      NumOfRecords = x.HmrSubmissionRows.Count(),
                      NumOfErrorRecords = x.HmrSubmissionRows.Count(y => y.ErrorDetail != null),
                      Success = x.ErrorDetail == null,
-                     NumOfDuplicateRecords = x.HmrSubmissionRows.Count(y => y.RowStatus.StatusCode == "DR"),
+                     NumOfDuplicateRecords = x.HmrSubmissionRows.Count(y => y.RowStatus.StatusCode == RowStatus.RowDuplicate),
                      NumOfReplacedRecords = x.HmrSubmissionRows.Count(y => y.IsResubmitted == true),
                      NumOfWarningRecords = x.HmrSubmissionRows.Count(y => y.WarningDetail != null),
                      SubmissionStatus = x.SubmissionStatus.StatusCode,
@@ -210,6 +210,7 @@ namespace Hmcr.Data.Repositories
             //  The net result should be file #1 submission error instead of duplicate file error.
 
             var latestFile = await DbSet
+                .Include(x => x.SubmissionStatus)
                 .Where(x => x.SubmissionStreamId == submission.SubmissionStreamId &&
                     x.ServiceAreaNumber == submission.ServiceAreaNumber)
                 .OrderByDescending(x => x.SubmissionObjectId)
@@ -219,7 +220,7 @@ namespace Hmcr.Data.Repositories
                 return false;
 
             //if it was internal error, the user should be able to upload again.
-            if (latestFile.ErrorDetail == FileError.UnknownException)
+            if (latestFile.SubmissionStatus.StatusCode == FileStatus.FileUnexpectedError)
                 return false;
 
             return latestFile.FileHash == submission.FileHash;

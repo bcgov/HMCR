@@ -6,12 +6,19 @@ namespace Hmcr.Model
 {
     public static class Constants
     {
-        public static DateTime MaxDate = new DateTime(9999, 12, 31); 
+        public static DateTime MaxDate = new DateTime(9999, 12, 31);
         public static DateTime MinDate = new DateTime(1900, 1, 1);
         public static decimal MaxFileSize = 2097152;
         public const string VancouverTimeZone = "America/Vancouver";
         public const string PacificTimeZone = "Pacific Standard Time";
         public const string SystemAdmin = "SYSTEM_ADMIN";
+    }
+
+    public static class Reports
+    {
+        public const string Work = "Work";
+        public const string Rockfall = "Rockfall";
+        public const string Wildlife = "Wildlife";
     }
 
     public static class ExportQuery
@@ -21,9 +28,16 @@ namespace Hmcr.Model
         public const string OutputFormat = "outputFormat";
         public const string Format = "format";
         public const string TypeName = "typeName";
+        public const string Layers = "layers";
         public const string FromDate = "fromDate";
         public const string ToDate = "toDate";
         public const string Count = "count";
+    }
+
+    public static class ExportQueryEndpointConfigName
+    {
+        public const string WFS = "WFSExportPath";
+        public const string WMS = "KMLExportPath";
     }
 
     public static class Permissions
@@ -94,19 +108,22 @@ namespace Hmcr.Model
     public static class RowStatus
     {
         public const string RowReceived = "RR";
-        public const string DuplicateRow = "DR";
+        public const string RowDuplicate = "DR";
         public const string RowError = "RE";
-        public const string Success = "RS";
+        public const string RowSuccess = "RS";
     }
 
     public static class FileStatus
     {
         public const string FileReceived = "FR";
         public const string FileError = "FE";
-        public const string DuplicateSubmission = "DS";
-        public const string InProgress = "DP";
-        public const string DataError = "DE";
-        public const string Success = "VS";
+        public const string FileDuplicate = "DS";
+        public const string FileInProgress = "DP";
+        public const string FileBasicError = "DE";
+        public const string FileConflictionError = "S3";
+        public const string FileLocationError = "S4";
+        public const string FileUnexpectedError = "UE";
+        public const string FileSuccess = "VS";
     }
 
     public static class Fields
@@ -149,7 +166,7 @@ namespace Hmcr.Model
         public const string SiteNumber = "SiteNumber";
         public const string ValueOfWork = "ValueOfWork";
         public const string Comments = "Comments";
-        
+
         public const string McrrIncidentNumber = "McrrIncidentNumber";
         public const string EstimatedRockfallDate = "EstimatedRockfallDate";
         public const string EstimatedRockfallTime = "EstimatedRockfallTime";
@@ -194,6 +211,8 @@ namespace Hmcr.Model
         public const string FeatureType = "FeatureType";
         public const string LocationCodeId = "LocationCodeId";
         public const string SpThresholdLevel = "SpThresholdLevel";
+
+        public const string ApiClientId = "ApiClientId";
     }
 
     public interface IReportHeaders
@@ -216,10 +235,8 @@ namespace Hmcr.Model
         public static string[] MandatoryFields = new string[]
         {
             Fields.RecordType, Fields.ServiceArea, Fields.McrrIncidentNumber, Fields.EstimatedRockfallDate, Fields.EstimatedRockfallTime,
-            Fields.StartLatitude, Fields.StartLongitude, Fields.EndLatitude, Fields.EndLongitude, Fields.HighwayUnique, Fields.HighwayUniqueName, Fields.Landmark,
-            Fields.LandmarkName, Fields.StartOffset, Fields.DirectionFromLandmark, Fields.DitchVolume, Fields.TravelledLanesVolume,
-            Fields.HeavyPrecip, Fields.FreezeThaw, Fields.DitchSnowIce, Fields.VehicleDamage, Fields.Name,
-            Fields.McPhoneNumber, Fields.McName, Fields.ReportDate
+            Fields.HighwayUnique, Fields.DitchVolume, Fields.TravelledLanesVolume, Fields.HeavyPrecip, Fields.FreezeThaw, Fields.DitchSnowIce,
+            Fields.VehicleDamage, Fields.Name, Fields.McPhoneNumber, Fields.ReportDate
         };
         public string[] CommonMandatoryFields => MandatoryFields;
     }
@@ -313,8 +330,8 @@ namespace Hmcr.Model
     /// </summary>
     public enum SpatialData
     {
-        None, 
-        Gps, 
+        None,
+        Gps,
         Lrs
     }
 
@@ -334,5 +351,19 @@ namespace Hmcr.Model
         public const decimal MinLongitude = -141;
         public const decimal MaxLatitude = 62;
         public const decimal MinLatitude = 47;
+    }
+
+    public static class KeycloakMapperConfig
+    {
+        public const string DefaultProtocol = "openid-connect";
+        public const string OidcAudienceMapper = "oidc-audience-mapper";
+        public const string OidcHardcodedClaimMapper = "oidc-hardcoded-claim-mapper";
+        public const string IncludedClientAudience = "included.client.audience";
+        public const string IncludedCustomAudience = "included.custom.audience";
+        public const string AccessTokenClaim = "access.token.claim";
+        public const string ClaimName = "claim.name";
+        public const string ClaimValue = "claim.value";
+        public const string JsonTypeLabel = "jsonType.label";
+        public const string ApiClient = "api_client";
     }
 }

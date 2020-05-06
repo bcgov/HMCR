@@ -28,6 +28,7 @@ namespace Hmcr.Data.Repositories.Base
         Task<IEnumerable<TDto>> GetAllAsync<TDto>();
         Task<IEnumerable<TDto>> GetAllAsync<TDto>(Expression<Func<TEntity, bool>> where);
         Task<TDto> GetFirstOrDefaultAsync<TDto>(Expression<Func<TEntity, bool>> where);
+        TDto GetFirst<TDto>(Expression<Func<TEntity, bool>> where);
         Task<PagedDto<TOutput>> Page<TInput, TOutput>(IQueryable<TInput> list, int pageSize, int pageNumber, string orderBy,string orderDir);
         Task<bool> ExistsAsync(object id);
         void RollBackEntities();
@@ -137,6 +138,11 @@ namespace Hmcr.Data.Repositories.Base
         public async Task<TDto> GetFirstOrDefaultAsync<TDto>(Expression<Func<TEntity, bool>> where)
         {
             return Mapper.Map<TDto>(await DbSet.Where(where).FirstOrDefaultAsync<TEntity>());
+        }
+
+        public TDto GetFirst<TDto>(Expression<Func<TEntity, bool>> where)
+        {
+            return Mapper.Map<TDto>(DbSet.Where(where).First<TEntity>());
         }
 
         public async Task<bool> ExistsAsync(object id)

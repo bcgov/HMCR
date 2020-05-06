@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Hosting;
 
 namespace Hmcr.Hangfire
@@ -38,7 +39,7 @@ namespace Hmcr.Hangfire
             services.AddChrisHttpClient(Configuration);
             services.AddBceidSoapClient(Configuration);
             services.AddHmcrHangfire(connectionString, runHangfireServer, workerCount);
-            services.AddHmcrHealthCheck(connectionString);
+            services.AddHealthChecks().AddTypeActivatedCheck<HangfireHealthCheck>("Hangfire", HealthStatus.Unhealthy, connectionString);
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env, ISubmissionObjectJobService jobService,
@@ -49,7 +50,6 @@ namespace Hmcr.Hangfire
                 app.UseDeveloperExceptionPage();
             }
 
-            app.UseExceptionMiddleware();
             app.UseHmcrHealthCheck();
             app.UseHangfireDashboard();
 
@@ -67,7 +67,10 @@ namespace Hmcr.Hangfire
             //Inject Code Lookup
             validator.CodeLookup = codeLookupRepo.LoadCodeLookupCache();
 
-            RecurringJob.AddOrUpdate<EmailJobService>("ResendEmails", x => x.ResendEmails(), Cron.Minutely);
+            minutes = Configuration.GetValue<int>("Hangfire:EmailJobIntervalInMinutes");
+            minutes = minutes < 1 ? 30 : minutes;
+
+            RecurringJob.AddOrUpdate<EmailJobService>("ResendEmails", x => x.ResendEmails(), $"*/{minutes} * * * *");
         }
     }
 }
