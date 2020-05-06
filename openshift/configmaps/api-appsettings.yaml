@@ -9,7 +9,7 @@ objects:
         {
             "AllowedHosts": "*",
             "Constants": {
-                "Version": "1.2.1.0",
+                "Version": "1.3.0.0",
                 "SwaggerApiUrl": "/swagger/v1/swagger.json"
             },
             "Serilog": {
