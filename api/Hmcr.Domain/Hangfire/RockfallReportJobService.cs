@@ -42,6 +42,7 @@ namespace Hmcr.Domain.Hangfire
         {
             _logger = logger;
             _rockfallReportRepo = rockfallReportRepo;
+            _thresholdSpLevel = GetDefaultThresholdSpLevel(Reports.Rockfall);
         }
 
         /// <summary>

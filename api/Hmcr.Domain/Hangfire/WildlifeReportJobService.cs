@@ -39,6 +39,7 @@ namespace Hmcr.Domain.Hangfire
              : base(unitOfWork, statusService, submissionRepo, serviceAreaService, submissionRowRepo, emailService, logger, config, validator, spatialService, lookupService)
         {
             _wildlifeReportRepo = wildlifeReportRepo;
+            _thresholdSpLevel = GetDefaultThresholdSpLevel(Reports.Wildlife);
         }
 
         /// <summary>
