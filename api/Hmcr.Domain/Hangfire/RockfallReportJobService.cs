@@ -31,6 +31,7 @@ namespace Hmcr.Domain.Hangfire
     public class RockfallReportJobService : ReportJobServiceBase, IRockfallReportJobService
     {        
         private IRockfallReportRepository _rockfallReportRepo;
+        private readonly string _thresholdSpLevel = ThresholdSpLevels.Level1;
 
         public RockfallReportJobService(IUnitOfWork unitOfWork, ILogger<IRockfallReportJobService> logger, 
             ISubmissionStatusService statusService, ISubmissionObjectRepository submissionRepo, IServiceAreaService serviceAreaService,
@@ -263,7 +264,7 @@ namespace Hmcr.Domain.Hangfire
                 SetVarianceWarningDetail(submissionRow, typedRow.HighwayUnique,
                     GetGpsString(typedRow.StartLatitude, typedRow.StartLongitude),
                     GetGpsString(typedRow.EndLatitude, typedRow.EndLongitude),
-                    ThresholdSpLevels.Level1);
+                    _thresholdSpLevel);
             }
             else if (typedRow.SpatialData == SpatialData.Lrs)
             {
@@ -272,7 +273,7 @@ namespace Hmcr.Domain.Hangfire
                 SetVarianceWarningDetail(submissionRow, typedRow.HighwayUnique,
                     GetOffsetString(typedRow.StartOffset),
                     GetOffsetString(typedRow.EndOffset),
-                    ThresholdSpLevels.Level1);
+                    _thresholdSpLevel);
             }
 
             return rockfallReport;
@@ -311,7 +312,7 @@ namespace Hmcr.Domain.Hangfire
 
             if (IsPoint(typedRow))
             {
-                var result = await _spatialService.ValidateGpsPointAsync(start, typedRow.HighwayUnique, Fields.HighwayUnique, ThresholdSpLevels.Level1, errors);
+                var result = await _spatialService.ValidateGpsPointAsync(start, typedRow.HighwayUnique, Fields.HighwayUnique, _thresholdSpLevel, errors);
 
                 if (result.result == SpValidationResult.Fail)
                 {
@@ -331,7 +332,7 @@ namespace Hmcr.Domain.Hangfire
             else
             {
                 var end = new Chris.Models.Point((decimal)typedRow.EndLongitude, (decimal)typedRow.EndLatitude);
-                var result = await _spatialService.ValidateGpsLineAsync(start, end, typedRow.HighwayUnique, Fields.HighwayUnique, ThresholdSpLevels.Level1, errors);
+                var result = await _spatialService.ValidateGpsLineAsync(start, end, typedRow.HighwayUnique, Fields.HighwayUnique, _thresholdSpLevel, errors);
 
                 if (result.result == SpValidationResult.Fail)
                 {
@@ -386,7 +387,7 @@ namespace Hmcr.Domain.Hangfire
             //remeber that feature type line/point has been replaced either line or point in PerformGpsEitherLineOrPointValidation().
             if (IsPoint(typedRow))
             {
-                var result = await _spatialService.ValidateLrsPointAsync((decimal)typedRow.StartOffset, typedRow.HighwayUnique, Fields.HighwayUnique, ThresholdSpLevels.Level1, errors);
+                var result = await _spatialService.ValidateLrsPointAsync((decimal)typedRow.StartOffset, typedRow.HighwayUnique, Fields.HighwayUnique, _thresholdSpLevel, errors);
 
                 if (result.result == SpValidationResult.Fail)
                 {
@@ -408,7 +409,7 @@ namespace Hmcr.Domain.Hangfire
             }
             else
             {
-                var result = await _spatialService.ValidateLrsLineAsync((decimal)typedRow.StartOffset, (decimal)typedRow.EndOffset, typedRow.HighwayUnique, Fields.HighwayUnique, ThresholdSpLevels.Level1, errors);
+                var result = await _spatialService.ValidateLrsLineAsync((decimal)typedRow.StartOffset, (decimal)typedRow.EndOffset, typedRow.HighwayUnique, Fields.HighwayUnique, _thresholdSpLevel, errors);
 
                 if (result.result == SpValidationResult.Fail)
                 {
