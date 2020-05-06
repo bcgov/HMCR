@@ -248,5 +248,27 @@ namespace Hmcr.Domain.Hangfire.Base
 
             return false;
         }
+
+        protected string GetDefaultThresholdSpLevel(string report)
+        {
+            var level = _config.GetValue<string>($"DefaultThresholdSpLevel:{report}");
+
+            if (level.IsEmpty())
+                throw new Exception($"Cannot find the configuration of the default spatial threshold level for {report} report.");
+
+            if (level.ToLowerInvariant() == ThresholdSpLevels.Level1.ToLowerInvariant())
+                return ThresholdSpLevels.Level1;
+
+            if (level.ToLowerInvariant() == ThresholdSpLevels.Level2.ToLowerInvariant())
+                return ThresholdSpLevels.Level2;
+
+            if (level.ToLowerInvariant() == ThresholdSpLevels.Level3.ToLowerInvariant())
+                return ThresholdSpLevels.Level3;
+
+            if (level.ToLowerInvariant() == ThresholdSpLevels.Level4.ToLowerInvariant())
+                return ThresholdSpLevels.Level4;
+
+            throw new Exception($"The configured spatial threshold level {level} is not valid.");
+        }
     }
 }

@@ -29,6 +29,7 @@ namespace Hmcr.Domain.Hangfire
     public class WildlifeReportJobService : ReportJobServiceBase, IWildlifeReportJobService
     {
         private IWildlifeReportRepository _wildlifeReportRepo;
+        private readonly string _thresholdSpLevel = ThresholdSpLevels.Level2;
 
         public WildlifeReportJobService(IUnitOfWork unitOfWork, ILogger<IWildlifeReportJobService> logger,
             ISubmissionStatusService statusService, ISubmissionObjectRepository submissionRepo, IServiceAreaService serviceAreaService,
@@ -38,6 +39,7 @@ namespace Hmcr.Domain.Hangfire
              : base(unitOfWork, statusService, submissionRepo, serviceAreaService, submissionRowRepo, emailService, logger, config, validator, spatialService, lookupService)
         {
             _wildlifeReportRepo = wildlifeReportRepo;
+            _thresholdSpLevel = GetDefaultThresholdSpLevel(Reports.Wildlife);
         }
 
         /// <summary>
@@ -235,7 +237,7 @@ namespace Hmcr.Domain.Hangfire
                 SetVarianceWarningDetail(submissionRow, typedRow.HighwayUnique,
                     GetGpsString(typedRow.Latitude, typedRow.Longitude),
                     GetGpsString(typedRow.Latitude, typedRow.Longitude),
-                    ThresholdSpLevels.Level1);
+                    _thresholdSpLevel);
             }
             else if (typedRow.SpatialData == SpatialData.Lrs)
             {
@@ -244,7 +246,7 @@ namespace Hmcr.Domain.Hangfire
                 SetVarianceWarningDetail(submissionRow, typedRow.HighwayUnique,
                     GetOffsetString(typedRow.Offset),
                     GetOffsetString(typedRow.Offset),
-                    ThresholdSpLevels.Level1);
+                    _thresholdSpLevel);
             }
 
             return wildlifeReport;
@@ -257,7 +259,7 @@ namespace Hmcr.Domain.Hangfire
 
             var start = new Chris.Models.Point((decimal)typedRow.Longitude, (decimal)typedRow.Latitude);
 
-            var result = await _spatialService.ValidateGpsPointAsync(start, typedRow.HighwayUnique, Fields.HighwayUnique, ThresholdSpLevels.Level1, errors);
+            var result = await _spatialService.ValidateGpsPointAsync(start, typedRow.HighwayUnique, Fields.HighwayUnique, _thresholdSpLevel, errors);
 
             if (result.result == SpValidationResult.Fail)
             {
@@ -279,7 +281,7 @@ namespace Hmcr.Domain.Hangfire
             var errors = new Dictionary<string, List<string>>();
             var typedRow = wildlifeReport.WildlifeReportTyped;
 
-            var result = await _spatialService.ValidateLrsPointAsync((decimal)typedRow.Offset, typedRow.HighwayUnique, Fields.HighwayUnique, ThresholdSpLevels.Level1, errors);
+            var result = await _spatialService.ValidateLrsPointAsync((decimal)typedRow.Offset, typedRow.HighwayUnique, Fields.HighwayUnique, _thresholdSpLevel, errors);
 
             if (result.result == SpValidationResult.Fail)
             {

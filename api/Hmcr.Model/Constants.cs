@@ -14,6 +14,13 @@ namespace Hmcr.Model
         public const string SystemAdmin = "SYSTEM_ADMIN";
     }
 
+    public static class Reports
+    {
+        public const string Work = "Work";
+        public const string Rockfall = "Rockfall";
+        public const string Wildlife = "Wildlife";
+    }
+
     public static class ExportQuery
     {
         public const string CqlFilter = "cql_filter";
