@@ -79,7 +79,7 @@ namespace Hmcr.Api.Extensions
 
         public static void AddHmcrDbContext(this IServiceCollection services, string connectionString)
         {
-            services.AddDbContext<AppDbContext>(options => options.UseSqlServer(connectionString, x => x.UseNetTopologySuite()));
+            services.AddDbContext<AppDbContext>(options => options.UseSqlServer(connectionString, x => x.UseNetTopologySuite().CommandTimeout(600)));
         }
 
         public static void AddHmcrAutoMapper(this IServiceCollection services)
