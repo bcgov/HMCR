@@ -19,6 +19,10 @@ namespace Hmcr.Domain.CsvHelpers
         public RockfallReportCsvDtoMap()
         {
             AutoMap(CultureInfo.InvariantCulture);
+            Map(m => m.StartLatitude).TypeConverter<GpsCoordsToStringConverter>();
+            Map(m => m.EndLatitude).TypeConverter<GpsCoordsToStringConverter>();
+            Map(m => m.StartLongitude).TypeConverter<GpsCoordsToStringConverter>();
+            Map(m => m.EndLongitude).TypeConverter<GpsCoordsToStringConverter>();
         }
     }
 
@@ -30,10 +34,10 @@ namespace Hmcr.Domain.CsvHelpers
             Map(m => m.ReportDate).TypeConverter<DateTypeConverter>();
             Map(m => m.EstimatedRockfallDate).TypeConverter<DateTypeConverter>();
             Map(m => m.McPhoneNumber).TypeConverter<PhoneNumberConverter>();
-            Map(m => m.StartLatitude).TypeConverter<GpsCoordsConverter>();
-            Map(m => m.EndLatitude).TypeConverter<GpsCoordsConverter>();
-            Map(m => m.StartLongitude).TypeConverter<GpsCoordsConverter>();
-            Map(m => m.EndLongitude).TypeConverter<GpsCoordsConverter>();
+            Map(m => m.StartLatitude).TypeConverter<GpsCoordsToNumberConverter>();
+            Map(m => m.EndLatitude).TypeConverter<GpsCoordsToNumberConverter>();
+            Map(m => m.StartLongitude).TypeConverter<GpsCoordsToNumberConverter>();
+            Map(m => m.EndLongitude).TypeConverter<GpsCoordsToNumberConverter>();
         }
     }
 }

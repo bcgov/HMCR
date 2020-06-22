@@ -20,6 +20,10 @@ namespace Hmcr.Domain.CsvHelpers
             AutoMap(CultureInfo.InvariantCulture);
             Map(m => m.ValueOfWork).TypeConverter<DollarValueToStringConverter>();
             Map(m => m.Accomplishment).TypeConverter<DollarValueToStringConverter>();
+            Map(m => m.StartLatitude).TypeConverter<GpsCoordsToStringConverter>();
+            Map(m => m.EndLatitude).TypeConverter<GpsCoordsToStringConverter>();
+            Map(m => m.StartLongitude).TypeConverter<GpsCoordsToStringConverter>();
+            Map(m => m.EndLongitude).TypeConverter<GpsCoordsToStringConverter>();
         }
     }
 
@@ -33,10 +37,10 @@ namespace Hmcr.Domain.CsvHelpers
             Map(m => m.PostedDate).TypeConverter<DateTypeConverter>();
             Map(m => m.ValueOfWork).TypeConverter<DollarValueToNumberConverter>();
             Map(m => m.Accomplishment).TypeConverter<DollarValueToNumberConverter>();
-            Map(m => m.StartLatitude).TypeConverter<GpsCoordsConverter>();
-            Map(m => m.EndLatitude).TypeConverter<GpsCoordsConverter>();
-            Map(m => m.StartLongitude).TypeConverter<GpsCoordsConverter>();
-            Map(m => m.EndLongitude).TypeConverter<GpsCoordsConverter>();
+            Map(m => m.StartLatitude).TypeConverter<GpsCoordsToNumberConverter>();
+            Map(m => m.EndLatitude).TypeConverter<GpsCoordsToNumberConverter>();
+            Map(m => m.StartLongitude).TypeConverter<GpsCoordsToNumberConverter>();
+            Map(m => m.EndLongitude).TypeConverter<GpsCoordsToNumberConverter>();
         }
     }
 }
