@@ -17,6 +17,8 @@ namespace Hmcr.Domain.CsvHelpers
         public WildlifeReportCsvDtoMap()
         {
             AutoMap(CultureInfo.InvariantCulture);
+            Map(m => m.Latitude).TypeConverter<GpsCoordsToStringConverter>();
+            Map(m => m.Longitude).TypeConverter<GpsCoordsToStringConverter>();
         }
     }
 
@@ -26,8 +28,8 @@ namespace Hmcr.Domain.CsvHelpers
         {
             AutoMap(CultureInfo.InvariantCulture);
             Map(m => m.AccidentDate).TypeConverter<DateTypeConverter>();
-            Map(m => m.Latitude).TypeConverter<GpsCoordsConverter>();
-            Map(m => m.Longitude).TypeConverter<GpsCoordsConverter>();
+            Map(m => m.Latitude).TypeConverter<GpsCoordsToNumberConverter>();
+            Map(m => m.Longitude).TypeConverter<GpsCoordsToNumberConverter>();
         }
     }
 }
