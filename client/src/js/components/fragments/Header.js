@@ -112,6 +112,12 @@ const Header = ({ currentUser }) => {
                   <DropdownItem tag={Link} to={Constants.PATHS.VERSION}>
                     Version
                   </DropdownItem>
+                  <DropdownItem href={Constants.PATHS.DATA_ROOM} target="_blank">
+                    Data Room
+                  </DropdownItem>
+                  <DropdownItem href={Constants.PATHS.MANUAL_AND_TEMPLATES} target="_blank">
+                    Manual and Templates
+                  </DropdownItem>
                 </DropdownMenu>
               </UncontrolledDropdown>
             </Nav>
