@@ -50,6 +50,9 @@ export const PATHS = {
   ADMIN_ROLES: '/admin/roles',
   REPORT_EXPORT: '/export',
   VERSION: '/version',
+  DATA_ROOM: 'https://engineering.sp.th.gov.bc.ca/sites/service-areas-portal',
+  MANUAL_AND_TEMPLATES:
+    'https://www2.gov.bc.ca/gov/content/transportation/transportation-infrastructure/contracting-to-transportation/highway-bridge-maintenance/highway-maintenance/reporting',
 };
 
 export const MESSAGE_DATE_FORMAT = 'YYYY-MM-DD hh:mmA';
