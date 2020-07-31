@@ -121,7 +121,7 @@ namespace Hmcr.Domain.Services
                 await _feedbackRepo.UpdateFeedbackMessageAsync(feedbackMessage);
             }
 
-            await _unitOfWork.CommitAsync();
+            _unitOfWork.Commit();
 
             var finished = isSent ? "Finished" : "Failed";
             var sending = feedbackMessage == null ? "sending" : "resending";
