@@ -6,7 +6,7 @@ using System;
 
 namespace Hmcr.Domain.CsvHelpers
 {
-    public class GpsCoordsConverter : ITypeConverter
+    public class GpsCoordsToNumberConverter : ITypeConverter
     {
         public object ConvertFromString(string text, IReaderRow row, MemberMapData memberMapData)
         {

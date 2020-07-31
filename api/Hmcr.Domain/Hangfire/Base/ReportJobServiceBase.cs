@@ -187,6 +187,12 @@ namespace Hmcr.Domain.Hangfire.Base
             if (highwayUnique.IsEmpty())
                 return;
 
+            if (highwayUnique.Length < 2)
+            {
+                errors.AddItem(Fields.HighwayUnique, $"Highway Unique [{highwayUnique}] does not belong to the service area [{_serviceArea.Name}]");
+                return;
+            }
+
             var huPrefix = highwayUnique.Substring(0, 2);
 
             if (!_serviceArea.HighwayUniquePrefixes.Contains(huPrefix))

@@ -215,15 +215,15 @@ namespace Hmcr.Domain.Hangfire
 
                 if (typedRow.SpatialData == SpatialData.Gps)
                 {
-                    PerformGpsPointValidation(typedRow, submissionRow);
-                    PerformGpsLineValidation(typedRow, submissionRow);
+                    PerformGpsPointValidation(typedRow, errors);
+                    PerformGpsLineValidation(typedRow, errors);
                     PerformGpsEitherLineOrPointValidation(typedRow);
                 }
 
                 if (typedRow.SpatialData == SpatialData.Lrs)
                 {
-                    PerformOffsetPointValidation(typedRow, submissionRow);
-                    PerformOffsetLineValidation(typedRow, submissionRow);
+                    PerformOffsetPointValidation(typedRow, errors);
+                    PerformOffsetLineValidation(typedRow, errors);
                     PerformOffsetEitherLineOrPointValidation(typedRow);
                 }
 
@@ -489,7 +489,7 @@ namespace Hmcr.Domain.Hangfire
             }
         }
 
-        private void PerformGpsPointValidation(WorkReportTyped typedRow, HmrSubmissionRow submissionRow)
+        private void PerformGpsPointValidation(WorkReportTyped typedRow, Dictionary<string, List<string>> errors)
         {
             //if start is null, it's already set to invalid, no more validation
             if (typedRow.StartLatitude == null || typedRow.StartLongitude == null || typedRow.FeatureType != FeatureType.Point)
@@ -507,13 +507,11 @@ namespace Hmcr.Domain.Hangfire
 
             if (typedRow.EndLatitude != typedRow.StartLatitude || typedRow.EndLongitude != typedRow.StartLongitude)
             {
-                var errors = new Dictionary<string, List<string>>();
                 errors.AddItem($"{Fields.EndLatitude}/{Fields.EndLongitude}", "Start GPS coordinates must be the same as end GPS coordinate");
-                SetErrorDetail(submissionRow, errors, _statusService.FileLocationError);
             }
         }
 
-        private void PerformGpsLineValidation(WorkReportTyped typedRow, HmrSubmissionRow submissionRow)
+        private void PerformGpsLineValidation(WorkReportTyped typedRow, Dictionary<string, List<string>> errors)
         {
             if (typedRow.StartLatitude == null || typedRow.StartLongitude == null || typedRow.FeatureType != FeatureType.Line)
                 return;
@@ -522,16 +520,12 @@ namespace Hmcr.Domain.Hangfire
             {
                 if (typedRow.EndLatitude == typedRow.StartLatitude && typedRow.EndLongitude == typedRow.StartLongitude)
                 {
-                    var errors = new Dictionary<string, List<string>>();
                     errors.AddItem($"{Fields.EndLatitude}/{Fields.EndLongitude}", "The start GPS coordinates must not be the same as the end GPS coordinates");
-                    SetErrorDetail(submissionRow, errors, _statusService.FileLocationError);
                 }
             }
             else
             {
-                var errors = new Dictionary<string, List<string>>();
                 errors.AddItem($"{Fields.EndLatitude},{Fields.EndLongitude}", "The end GPS coordinates must be provided");
-                SetErrorDetail(submissionRow, errors, _statusService.FileLocationError);
             }
         }
 
@@ -560,7 +554,7 @@ namespace Hmcr.Domain.Hangfire
             }
         }
 
-        private void PerformOffsetPointValidation(WorkReportTyped typedRow, HmrSubmissionRow submissionRow)
+        private void PerformOffsetPointValidation(WorkReportTyped typedRow, Dictionary<string, List<string>> errors)
         {
             if (typedRow.StartOffset == null || typedRow.FeatureType != FeatureType.Point)
                 return;
@@ -569,9 +563,7 @@ namespace Hmcr.Domain.Hangfire
             {
                 if (typedRow.EndOffset != typedRow.StartOffset)
                 {
-                    var errors = new Dictionary<string, List<string>>();
                     errors.AddItem($"{Fields.EndOffset}", "End offset must be the same as start offset");
-                    SetErrorDetail(submissionRow, errors, _statusService.FileLocationError);
                 }
             }
             else
@@ -580,7 +572,7 @@ namespace Hmcr.Domain.Hangfire
             }
         }
 
-        private void PerformOffsetLineValidation(WorkReportTyped typedRow, HmrSubmissionRow submissionRow)
+        private void PerformOffsetLineValidation(WorkReportTyped typedRow, Dictionary<string, List<string>> errors)
         {
             if (typedRow.StartOffset == null || typedRow.FeatureType != FeatureType.Line)
                 return;
@@ -589,16 +581,12 @@ namespace Hmcr.Domain.Hangfire
             {
                 if (typedRow.StartOffset >= typedRow.EndOffset)
                 {
-                    var errors = new Dictionary<string, List<string>>();
                     errors.AddItem($"{Fields.EndOffset}", "End offset must be greater than start offset");
-                    SetErrorDetail(submissionRow, errors, _statusService.FileLocationError);
                 }
             }
             else
             {
-                var errors = new Dictionary<string, List<string>>();
                 errors.AddItem($"{Fields.EndOffset}", "End offset must be provided");
-                SetErrorDetail(submissionRow, errors, _statusService.FileLocationError);
             }
         }
 
