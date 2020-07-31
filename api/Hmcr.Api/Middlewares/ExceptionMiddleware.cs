@@ -1,12 +1,8 @@
 ﻿using Hmcr.Api.Extensions;
-using Hmcr.Model;
-using Hmcr.Model.Dtos;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 
@@ -29,20 +25,14 @@ namespace Hmcr.Api.Middlewares
             {
                 await _next(httpContext);
             }
-            catch (InvalidOperationException ex)
+            catch (Exception ex)
             {
-                if (ex.Message != "StatusCode cannot be set because the response has already started.")
+                if (!httpContext.Response.HasStarted)
                 {
                     var guid = Guid.NewGuid();
                     _logger.LogError($"HMCR Exception{guid}: {ex}");
                     await HandleExceptionAsync(httpContext, guid);
                 }
-            }
-            catch (Exception ex)
-            {
-                var guid = Guid.NewGuid();
-                _logger.LogError($"HMCR Exception{guid}: {ex}");
-                await HandleExceptionAsync(httpContext, guid);
             }
         }
 
