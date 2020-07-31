@@ -63,7 +63,7 @@ namespace Hmcr.Domain.Services
 
             var roleEntity = await _roleRepo.CreateRoleAsync(role);
 
-            await _unitOfWork.CommitAsync();
+            _unitOfWork.Commit();
 
             return (roleEntity.RoleId, errors);
         }
@@ -103,7 +103,7 @@ namespace Hmcr.Domain.Services
 
             await _roleRepo.DeleteRoleAsync(role);
 
-            await _unitOfWork.CommitAsync();
+            _unitOfWork.Commit();
 
             return (false, errors);
         }
@@ -186,7 +186,7 @@ namespace Hmcr.Domain.Services
 
             await _roleRepo.UpdateRoleAsync(role);
 
-            await _unitOfWork.CommitAsync();
+            _unitOfWork.Commit();
 
             return (false, errors);
         }

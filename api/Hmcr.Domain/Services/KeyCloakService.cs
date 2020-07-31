@@ -137,7 +137,7 @@ namespace Hmcr.Domain.Services
 
                 // Write new Keycloak client INTERNAL id to database 
                 await _userRepo.UpdateUserApiClientId(newId);
-                await _unitOfWork.CommitAsync();
+                _unitOfWork.Commit();
 
                 existingClient = await GetUserClientAsync();
 

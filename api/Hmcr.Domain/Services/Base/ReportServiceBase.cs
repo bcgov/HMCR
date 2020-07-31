@@ -83,7 +83,7 @@ namespace Hmcr.Domain.Services.Base
             }
 
             var submissionEntity = await _submissionRepo.CreateSubmissionObjectAsync(submission);
-            await _unitOfWork.CommitAsync();
+            _unitOfWork.Commit();
 
             return (submissionEntity.SubmissionObjectId, errors);
         }
@@ -98,7 +98,7 @@ namespace Hmcr.Domain.Services.Base
                 submission.SubmissionRows = new List<SubmissionRowDto>();
                 submission.DigitalRepresentation = null;
                 await _submissionRepo.CreateSubmissionObjectAsync(submission);
-                await _unitOfWork.CommitAsync();
+                _unitOfWork.Commit();
             }
 
             return (errors, submission);
