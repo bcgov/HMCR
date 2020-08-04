@@ -50,6 +50,7 @@ namespace Hmcr.Hangfire
                 app.UseDeveloperExceptionPage();
             }
 
+            app.UseExceptionMiddleware();
             app.UseHmcrHealthCheck();
             app.UseHangfireDashboard();
 
