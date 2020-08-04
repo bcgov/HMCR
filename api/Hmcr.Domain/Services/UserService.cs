@@ -111,7 +111,7 @@ namespace Hmcr.Domain.Services
             }
 
             var userEntity = await _userRepo.CreateUserAsync(user, account);
-            await _unitOfWork.CommitAsync();
+            _unitOfWork.Commit();
 
             return (userEntity.SystemUserId, errors);
         }
@@ -133,7 +133,7 @@ namespace Hmcr.Domain.Services
             }
 
             await _userRepo.UpdateUserAsync(user);
-            await _unitOfWork.CommitAsync();
+            _unitOfWork.Commit();
 
             return (false, errors);
         }
@@ -217,7 +217,7 @@ namespace Hmcr.Domain.Services
 
             await _userRepo.DeleteUserAsync(user);
 
-            await _unitOfWork.CommitAsync();
+            _unitOfWork.Commit();
 
             return (false, errors);
         }

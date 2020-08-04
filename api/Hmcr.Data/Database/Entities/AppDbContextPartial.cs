@@ -36,38 +36,11 @@ namespace Hmcr.Data.Database.Entities
         {
             PerformAudit();
 
-            int result = 0;
+            int result;
+
             try
             {
                 result = base.SaveChanges();
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e);
-
-                if (e.InnerException.Message.Contains(" Cannot insert duplicate key in object."))
-                {
-                    throw new Exception("This record already exists.", e);
-                }
-                else if (e.InnerException.Message.StartsWith("20180"))
-                {
-                    throw new Exception("This record has been updated by another user.", e);
-                }
-
-                throw;
-            }
-
-            return result;
-        }
-
-        public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
-        {
-            PerformAudit();
-
-            int result = 0;
-            try
-            {
-                result = await base.SaveChangesAsync();
             }
             catch (Exception e)
             {

@@ -72,7 +72,7 @@ namespace Hmcr.Domain.Services
             }
 
             var activityCodeEntity = await _activityCodeRepo.CreateActivityCodeAsync(activityCode);
-            await _unitOfWork.CommitAsync();
+            _unitOfWork.Commit();
 
             return (activityCodeEntity.ActivityCodeId, errors);
         }
@@ -99,7 +99,7 @@ namespace Hmcr.Domain.Services
             }
 
             await _activityCodeRepo.DeleteActivityCodeAsync(id);
-            await _unitOfWork.CommitAsync();
+            _unitOfWork.Commit();
 
             return (false, errors);
         }
@@ -162,7 +162,7 @@ namespace Hmcr.Domain.Services
             }
 
             await _activityCodeRepo.UpdateActivityCodeAsync(activityCode);
-            await _unitOfWork.CommitAsync();
+            _unitOfWork.Commit();
 
             return (false, errors);
         }
