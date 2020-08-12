@@ -112,7 +112,7 @@ namespace Hmcr.Api.Authentication
 
             if (!isApiClient && user.Username.ToUpperInvariant() != username || user.Email.ToUpperInvariant() != email)
             {
-                _logger.LogWarning($"Username/Email changed from {user.Username}/{user.Email} to {user.Email}/{email}.");
+                _logger.LogWarning($"Username/Email changed from {user.Username}/{user.Email} to {username}/{email}.");
                 await _userService.UpdateUserFromBceidAsync(userGuid, username, user.UserType, user.ConcurrencyControlNumber);
             }
 
