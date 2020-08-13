@@ -79,10 +79,9 @@ namespace Hmcr.Api.Authentication
 
             var userGuidClaim = directory.ToUpperInvariant() == UserTypeDto.IDIR ? HmcrClaimTypes.KcIdirGuid : HmcrClaimTypes.KcBceidGuid;
             var userGuid = new Guid(principal.FindFirstValue(userGuidClaim));
-
-            var user = await _userService.GetActiveUserEntityAsync(userGuid);
             var email = principal.FindFirstValue(ClaimTypes.Email).ToUpperInvariant();
 
+            var user = await _userService.GetActiveUserEntityAsync(userGuid);
             if (user == null)
             {
                 _logger.LogWarning($"Access Denied - User[{username}/{userGuid}] does not exist");
@@ -94,6 +93,7 @@ namespace Hmcr.Api.Authentication
             if (isApiClient)
             {
                 username = user.Username;
+                email = user.Email;
             }
 
             if (directory == "IDIR")
@@ -117,7 +117,13 @@ namespace Hmcr.Api.Authentication
             _curentUser.LastName = user.LastName;
             _curentUser.ApiClientId = user.ApiClientId;
 
-            if (!isApiClient && user.Username.ToUpperInvariant() != username || user.Email.ToUpperInvariant() != email)
+            if (isApiClient) //no db update, so everything's done.
+            {
+                _logger.LogInformation($"ApiClient Login - {preferredUsername}/{username}");
+                return true;
+            }
+            
+            if (user.Username.ToUpperInvariant() != username || user.Email.ToUpperInvariant() != email) //when the info changed, update db with the latest info from bceid web service
             {
                 _logger.LogWarning($"Username/Email changed from {user.Username}/{user.Email} to {username}/{email}.");
                 await _userService.UpdateUserFromBceidAsync(userGuid, username, user.UserType, user.ConcurrencyControlNumber);
