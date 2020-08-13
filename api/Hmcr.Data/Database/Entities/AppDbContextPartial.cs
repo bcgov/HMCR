@@ -65,14 +65,14 @@ namespace Hmcr.Data.Database.Entities
             {
                 if (entry.Members.Any(m => m.Metadata.Name == AppCreateUserGuid)) //auditable entity
                 {
-                    entry.Member(AppLastUpdateUserid).CurrentValue = _currentUser.UniversalId;
+                    entry.Member(AppLastUpdateUserid).CurrentValue = _currentUser.Username;
                     entry.Member(AppLastUpdateUserDirectory).CurrentValue = _currentUser.AuthDirName;
                     entry.Member(AppLastUpdateUserGuid).CurrentValue = _currentUser.UserGuid;
                     entry.Member(AppLastUpdateTimestamp).CurrentValue = currentTime; 
 
                     if (entry.State == EntityState.Added)
                     {
-                        entry.Member(AppCreateUserid).CurrentValue = _currentUser.UniversalId;
+                        entry.Member(AppCreateUserid).CurrentValue = _currentUser.Username;
                         entry.Member(AppCreateUserDirectory).CurrentValue = _currentUser.AuthDirName;
                         entry.Member(AppCreateUserGuid).CurrentValue = _currentUser.UserGuid;
                         entry.Member(AppCreateTimestamp).CurrentValue = currentTime;

@@ -72,8 +72,8 @@ namespace Hmcr.Api.Authentication
             bool.TryParse(principal.FindFirstValue(HmcrClaimTypes.KcIsApiClient), out isApiClient);
 
             //preferred_username token has a form of "{username}@{directory}".
-            _curentUser.UserName = isApiClient ? principal.FindFirstValue(HmcrClaimTypes.KcApiUsername) : principal.FindFirstValue(HmcrClaimTypes.KcUsername);
-            var usernames = _curentUser.UserName.Split("@");
+            var preferredUsername = isApiClient ? principal.FindFirstValue(HmcrClaimTypes.KcApiUsername) : principal.FindFirstValue(HmcrClaimTypes.KcUsername);
+            var usernames = preferredUsername.Split("@");
             var username = usernames[0].ToUpperInvariant();
             var directory = usernames[1].ToUpperInvariant();
 
@@ -94,7 +94,6 @@ namespace Hmcr.Api.Authentication
             if (isApiClient)
             {
                 username = user.Username;
-                _curentUser.UserName = $"{username}@{directory}";
             }
 
             if (directory == "IDIR")
@@ -111,10 +110,9 @@ namespace Hmcr.Api.Authentication
                 _curentUser.UserType = UserTypeDto.BUSINESS;
             }
 
-            _curentUser.UniversalId = username;
+            _curentUser.Username = username;
             _curentUser.AuthDirName = directory;
             _curentUser.Email = email;
-            _curentUser.UserName = username;
             _curentUser.FirstName = user.FirstName;
             _curentUser.LastName = user.LastName;
             _curentUser.ApiClientId = user.ApiClientId;
@@ -142,7 +140,7 @@ namespace Hmcr.Api.Authentication
                 claims.Add(new Claim(HmcrClaimTypes.ServiceAreaNumber, serviceArea.ServiceAreaNumber.ToString()));
             }
 
-            claims.Add(new Claim(ClaimTypes.Name, _curentUser.UniversalId));
+            claims.Add(new Claim(ClaimTypes.Name, _curentUser.Username));
 
             principal.AddIdentity(new ClaimsIdentity(claims));
         }
