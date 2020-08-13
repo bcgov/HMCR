@@ -71,6 +71,7 @@ namespace Hmcr.Api.Authentication
             var isApiClient = false;
             bool.TryParse(principal.FindFirstValue(HmcrClaimTypes.KcIsApiClient), out isApiClient);
 
+            //preferred_username token has a form of "{username}@{directory}".
             _curentUser.UserName = isApiClient ? principal.FindFirstValue(HmcrClaimTypes.KcApiUsername) : principal.FindFirstValue(HmcrClaimTypes.KcUsername);
             var usernames = _curentUser.UserName.Split("@");
             var username = usernames[0].ToUpperInvariant();
@@ -86,6 +87,14 @@ namespace Hmcr.Api.Authentication
             {
                 _logger.LogWarning($"Access Denied - User[{username}/{userGuid}] does not exist");
                 return false;
+            }
+
+            //When it's an Api client, we don't want to use the username from the token because it's a hard-code value.
+            //This is to support the scenario where username has changed for the GUID. Note GUID never changes and unique but username can change.
+            if (isApiClient)
+            {
+                username = user.Username;
+                _curentUser.UserName = $"{username}@{directory}";
             }
 
             if (directory == "IDIR")
