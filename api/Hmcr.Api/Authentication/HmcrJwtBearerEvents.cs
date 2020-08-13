@@ -71,8 +71,9 @@ namespace Hmcr.Api.Authentication
             var isApiClient = false;
             bool.TryParse(principal.FindFirstValue(HmcrClaimTypes.KcIsApiClient), out isApiClient);
 
-            _curentUser.UserName = isApiClient ? principal.FindFirstValue(HmcrClaimTypes.KcApiUsername) : principal.FindFirstValue(HmcrClaimTypes.KcUsername);
-            var usernames = _curentUser.UserName.Split("@");
+            //preferred_username token has a form of "{username}@{directory}".
+            var preferredUsername = isApiClient ? principal.FindFirstValue(HmcrClaimTypes.KcApiUsername) : principal.FindFirstValue(HmcrClaimTypes.KcUsername);
+            var usernames = preferredUsername.Split("@");
             var username = usernames[0].ToUpperInvariant();
             var directory = usernames[1].ToUpperInvariant();
 
@@ -86,6 +87,13 @@ namespace Hmcr.Api.Authentication
             {
                 _logger.LogWarning($"Access Denied - User[{username}/{userGuid}] does not exist");
                 return false;
+            }
+
+            //When it's an Api client, we don't want to use the username from the token because it's a hard-code value.
+            //This is to support the scenario where username has changed for the GUID. Note GUID never changes and unique but username can change.
+            if (isApiClient)
+            {
+                username = user.Username;
             }
 
             if (directory == "IDIR")
@@ -102,10 +110,9 @@ namespace Hmcr.Api.Authentication
                 _curentUser.UserType = UserTypeDto.BUSINESS;
             }
 
-            _curentUser.UniversalId = username;
+            _curentUser.Username = username;
             _curentUser.AuthDirName = directory;
             _curentUser.Email = email;
-            _curentUser.UserName = username;
             _curentUser.FirstName = user.FirstName;
             _curentUser.LastName = user.LastName;
             _curentUser.ApiClientId = user.ApiClientId;
@@ -133,7 +140,7 @@ namespace Hmcr.Api.Authentication
                 claims.Add(new Claim(HmcrClaimTypes.ServiceAreaNumber, serviceArea.ServiceAreaNumber.ToString()));
             }
 
-            claims.Add(new Claim(ClaimTypes.Name, _curentUser.UniversalId));
+            claims.Add(new Claim(ClaimTypes.Name, _curentUser.Username));
 
             principal.AddIdentity(new ClaimsIdentity(claims));
         }

@@ -118,12 +118,12 @@ namespace Hmcr.Domain.Services
 
 
                 var directoryType = _currentUser.UserType == UserTypeDto.INTERNAL ? "idir" : "bceid";
-                var username = $"{_currentUser.UniversalId.ToLowerInvariant()}@{directoryType}";
+                var username = $"{_currentUser.Username.ToLowerInvariant()}@{directoryType}";
                 var email = _currentUser.Email.ToLowerInvariant();
                 var guidClaimValue = _currentUser.UserGuid.ToString();
 
                 var createDto = new KeycloakClientCreateDto(_audience, username, email, $"{directoryType}_userid", guidClaimValue);
-                createDto.ClientId = $"api.{_currentUser.UserName.ToLowerInvariant()}.{GetUniqueToken(3)}";
+                createDto.ClientId = $"api.{_currentUser.Username.ToLowerInvariant()}.{GetUniqueToken(3)}";
 
                 var payload = JsonSerializer.Serialize(createDto, _jsonOptions);
                 var response = await _httpClient.PostAsync("clients", new StringContent(payload, Encoding.UTF8, "application/json"));
