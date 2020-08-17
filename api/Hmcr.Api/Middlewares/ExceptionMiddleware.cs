@@ -31,7 +31,7 @@ namespace Hmcr.Api.Middlewares
                     return;
 
                 var guid = Guid.NewGuid();
-                _logger.LogError($"HMCR Exception{guid}: {ex}");
+                _logger.LogError($"HMCR Exception {guid}: {ex}");
                 await HandleExceptionAsync(httpContext, guid);
             }
         }
