@@ -109,7 +109,13 @@ namespace Hmcr.Domain.Services
 
                 if (!serviceAreastrings.Contains(row.ServiceArea))
                 {
-                    errors.AddItem("ServiceArea", $"The file contains service area which is not {serviceAreastrings[0]}.");
+                    errors.AddItem(Fields.ServiceArea, $"The file contains service area which is not {serviceAreastrings[0]}.");
+                    return false;
+                }
+
+                if (row.McrrIncidentNumber.IsEmpty())
+                {
+                    errors.AddItem(Fields.McrrIncidentNumber, $"MCRR Incident Number is missing for row [{csv.Context.Row}].");
                     return false;
                 }
 
