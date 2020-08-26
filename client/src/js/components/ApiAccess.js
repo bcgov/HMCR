@@ -72,7 +72,7 @@ const ApiAccess = ({ hideErrorDialog }) => {
       `--header 'Content-Type: application/x-www-form-urlencoded' \\\n` +
       `--data-urlencode 'grant_type=client_credentials' \\\n` +
       `--data-urlencode 'client_id=${apiClient ? apiClient.clientId : '<client_id>'}' \\\n` +
-      `--data-urlencode 'client_secret='<client_secret>'`;
+      `--data-urlencode 'client_secret=<client_secret>'`;
 
     const accessTokenPowershell =
       `$headers = New-Object "System.Collections.Generic.Dictionary[[String],[String]]"\n` +
