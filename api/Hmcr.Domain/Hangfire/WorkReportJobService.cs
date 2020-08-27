@@ -1,4 +1,5 @@
 ﻿using CsvHelper;
+using CsvHelper.TypeConversion;
 using Hmcr.Data.Database;
 using Hmcr.Data.Database.Entities;
 using Hmcr.Data.Repositories;
@@ -19,6 +20,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Reflection.Metadata.Ecma335;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -648,14 +650,35 @@ namespace Hmcr.Domain.Hangfire
             CsvHelperUtils.Config(errors, csv, false);
             csv.Configuration.RegisterClassMap<WorkReportCsvDtoMap>();
 
-            var rows = csv.GetRecords<WorkReportCsvDto>().ToList();
-            for (var i = 0; i < rows.Count; i++)
-            {
-                rows[i].RowNum = i + 2;
-                rows[i].ServiceArea = _serviceArea.ConvertToServiceAreaString(rows[i].ServiceArea);
-            }
+            var rows = GetRecords(csv);
 
             return (rows, string.Join(',', csv.Context.HeaderRecord).Replace("\"", ""));
+        }
+
+        private List<WorkReportCsvDto> GetRecords(CsvReader csv)
+        {
+            var rows = new List<WorkReportCsvDto>();
+
+            while (csv.Read())
+            {
+                WorkReportCsvDto row = null;
+
+                try
+                {
+                    row = csv.GetRecord<WorkReportCsvDto>();
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex.ToString());
+                    throw;
+                }
+
+                row.RowNum = csv.Context.Row;
+                row.ServiceArea = _serviceArea.ConvertToServiceAreaString(row.ServiceArea);
+                rows.Add(row);
+            }
+
+            return rows;
         }
 
         private (decimal rowNum, List<WorkReportTyped> rows) ParseRowsTyped(string text, Dictionary<string, List<string>> errors)
