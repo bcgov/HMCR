@@ -3,6 +3,7 @@ using CsvHelper.Configuration;
 using Hmcr.Model.Utils;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Linq;
 using System.Text.RegularExpressions;
 
 namespace Hmcr.Domain.CsvHelpers
@@ -32,6 +33,7 @@ namespace Hmcr.Domain.CsvHelpers
             }
 
             csv.Configuration.IgnoreBlankLines = true;
+            csv.Configuration.ShouldSkipRecord = (record) => record.All(field => field.IsEmpty());
         }
     }
 }

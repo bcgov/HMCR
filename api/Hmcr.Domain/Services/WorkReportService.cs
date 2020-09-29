@@ -55,7 +55,6 @@ namespace Hmcr.Domain.Services
 
             var headerValidated = false;
             var rows = new List<WorkRptInitCsvDto>();
-            var rowNum = 1;
 
             while (csv.Read())
             {
@@ -77,7 +76,6 @@ namespace Hmcr.Domain.Services
                         }
                     }
 
-                    row.RowNum = ++rowNum;
                     row.ServiceArea = serviceArea.ConvertToServiceAreaString(row.ServiceArea);
                     rows.Add(row);
                 }
@@ -109,7 +107,13 @@ namespace Hmcr.Domain.Services
 
                 if (!serviceAreastrings.Contains(row.ServiceArea))
                 {
-                    errors.AddItem("ServiceArea", $"The file contains service area which is not {serviceAreastrings[0]}.");
+                    errors.AddItem(Fields.ServiceArea, $"The file contains service area which is not {serviceAreastrings[0]}.");
+                    return false;
+                }
+
+                if (row.RecordNumber.IsEmpty())
+                {
+                    errors.AddItem(Fields.RecordNumber, $"Record Number is missing for row [{csv.Context.Row}].");
                     return false;
                 }
 

@@ -37,7 +37,7 @@ namespace Hmcr.Domain.Hangfire
         public async Task ResendEmails()
         {
             _user.AuthDirName = UserTypeDto.IDIR;
-            _user.UniversalId = "hangfire";
+            _user.Username = "hangfire";
             _user.UserGuid = new Guid();
 
             var feedbackMessages = await _feedbackRepo.GetFailedFeedbackMessagesAsync();

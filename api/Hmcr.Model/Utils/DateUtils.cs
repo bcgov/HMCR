@@ -15,7 +15,7 @@ namespace Hmcr.Model.Utils
                 return (true, (DateTime)val);
             }
 
-            var formats = new string[] { "yyyyMMdd", "yyyy-MM-dd", "yyyy/MM/dd", "yyyy.MM.dd" };
+            var formats = new string[] { "yyyyMMdd", "yyyy-MM-dd", "yyyy/MM/dd", "yyyy.MM.dd", "yyyyMd", "yyyy-M-d", "yyyy/M/dd", "yyyy.M.d" };
             var dateStr = val.ToString();
 
             if (dateStr.IsEmpty())
