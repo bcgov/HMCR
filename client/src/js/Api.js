@@ -65,6 +65,10 @@ export const postActivityCode = (data) => instance.post(Constants.API_PATHS.ACTI
 export const putActivityCode = (id, data) => instance.put(`${Constants.API_PATHS.ACTIVITY_CODES}/${id}`, data);
 export const deleteActivityCode = (id) => instance.delete(`${Constants.API_PATHS.ACTIVITY_CODES}/${id}`);
 
+export const getRoadLengthRules = () => instance.get(Constants.API_PATHS.RULE_ROAD_LENGTH);
+export const getSurfaceTypeRules = () => instance.get(Constants.API_PATHS.RULE_SURFACE_TYPE);
+export const getRoadClassRules = () => instance.get(Constants.API_PATHS.RULE_ROAD_CLASS);
+
 export const getReportExport = (params) => instance.get(Constants.API_PATHS.REPORT_EXPORT, { params: { ...params } });
 export const getExportSupportedFormats = () => instance.get(Constants.API_PATHS.SUPPORTED_FORMATS);
 

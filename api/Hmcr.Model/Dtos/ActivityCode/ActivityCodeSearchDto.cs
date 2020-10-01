@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Text.Json.Serialization;
 
 namespace Hmcr.Model.Dtos.ActivityCode
@@ -19,5 +20,6 @@ namespace Hmcr.Model.Dtos.ActivityCode
         public DateTime? EndDate { get; set; }
         public bool IsActive => EndDate == null || EndDate > DateTime.Today;
         public bool IsReferenced { get; set; }
+        public virtual IList<decimal> ActivityRuleIds { get; set; }
     }
 }

@@ -3,10 +3,14 @@ export const API_URL = window.RUNTIME_REACT_APP_API_HOST
   : process.env.REACT_APP_API_HOST;
 
 const CODE_LOOKUP = '/codelookup';
+const ACTIVITY_RULE = '/activityrule';
 
 export const API_PATHS = {
   ACTIVITY_CODES: '/activitycodes',
   ACTIVITY_CODES_LITE: '/activitycodes/lite',
+  RULE_ROAD_LENGTH: `${ACTIVITY_RULE}/roadlength`,
+  RULE_SURFACE_TYPE: `${ACTIVITY_RULE}/surfacetype`,
+  RULE_ROAD_CLASS: `${ACTIVITY_RULE}/roadclass`,
   CODE_LOOKUP: CODE_LOOKUP,
   MAINTENANCE_TYPES: `${CODE_LOOKUP}/maintenancetypes`,
   UNIT_OF_MEASURES: `${CODE_LOOKUP}/unitofmeasures`,
