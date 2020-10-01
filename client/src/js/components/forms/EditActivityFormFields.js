@@ -19,6 +19,9 @@ const defaultValues = {
   locationCodeId: '',
   featureType: '',
   spThresholdLevel: '',
+  roadLengthRules: '',
+  surfaceTypeRules: '',
+  roadClassRules: '',
   isSiteNumRequired: false,
   endDate: null,
 };
@@ -46,6 +49,9 @@ const EditActivityFormFields = ({
   locationCodes,
   featureTypes,
   thresholdLevels,
+  roadLengthRules,
+  surfaceTypeRules,
+  roadClassRules
 }) => {
   const [loading, setLoading] = useState(true);
   const [validLocationCodeValues, setValidLocationCodeValues] = useState(locationCodes);
@@ -179,6 +185,27 @@ const EditActivityFormFields = ({
               name="spThresholdLevel"
             />
           </FormRow>
+          <FormRow name="roadLengthRules" label="Road Length Validation Rule">
+            <SingleDropdownField
+              defaultTitle="Not Applicable"
+              items={roadLengthRules}
+              name="roadLengthRules"
+            />
+          </FormRow>
+          <FormRow name="surfaceTypeRules" label="Surface Type Rule">
+            <SingleDropdownField
+              defaultTitle="Not Applicable"
+              items={surfaceTypeRules}
+              name="surfaceTypeRules"
+            />
+          </FormRow>
+            <FormRow name="roadClassRules" label="Road Class Rule">
+            <SingleDropdownField
+              defaultTitle="Not Applicable"
+              items={roadClassRules}
+              name="roadClassRules"
+            />
+          </FormRow>
           <FormRow name="isSiteNumRequired" label="Site Number Required">
             <FormCheckboxInput name="isSiteNumRequired" />
           </FormRow>
@@ -198,6 +225,9 @@ const mapStateToProps = (state) => {
     locationCodes: state.codeLookups.locationCodes,
     featureTypes: state.codeLookups.featureTypes,
     thresholdLevels: state.codeLookups.thresholdLevels,
+    roadLengthRules: state.codeLookups.roadLengthRules,
+    surfaceTypeRules: state.codeLookups.surfaceTypeRules,
+    roadClassRules: state.codeLookups.roadClassRules,
   };
 };
 

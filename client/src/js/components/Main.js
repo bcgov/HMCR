@@ -16,6 +16,9 @@ import {
   fetchSubmissionStatuses,
   fetchSubmissionStreams,
   fetchThresholdLevels,
+  fetchRoadLengthRules,
+  fetchSurfaceTypeRules,
+  fetchRoadClassRules
 } from '../actions';
 
 const Main = ({
@@ -32,6 +35,9 @@ const Main = ({
   fetchSubmissionStatuses,
   fetchSubmissionStreams,
   fetchThresholdLevels,
+  fetchRoadLengthRules,
+  fetchSurfaceTypeRules,
+  fetchRoadClassRules
 }) => {
   const [loading, setLoading] = useState(true);
 
@@ -48,6 +54,9 @@ const Main = ({
       fetchSubmissionStatuses(),
       fetchSubmissionStreams(),
       fetchThresholdLevels(),
+      fetchRoadLengthRules(),
+      fetchSurfaceTypeRules(),
+      fetchRoadClassRules()
     ]).then(() => setLoading(false));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -78,4 +87,7 @@ export default connect(mapStateToProps, {
   fetchSubmissionStatuses,
   fetchSubmissionStreams,
   fetchThresholdLevels,
+  fetchRoadLengthRules,
+  fetchSurfaceTypeRules,
+  fetchRoadClassRules
 })(Main);

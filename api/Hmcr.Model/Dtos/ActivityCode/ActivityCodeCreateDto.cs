@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace Hmcr.Model.Dtos.ActivityCode
 {
@@ -13,5 +14,6 @@ namespace Hmcr.Model.Dtos.ActivityCode
         public string SpThresholdLevel { get; set; }
         public bool IsSiteNumRequired { get; set; }
         public DateTime? EndDate { get; set; }
+        public virtual IList<decimal> ActivityRuleIds { get; set; }
     }
 }

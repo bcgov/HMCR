@@ -65,6 +65,10 @@ namespace Hmcr.Data.Repositories
 
             Mapper.Map(activityCode, activityCodeEntity);
 
+            //TODO: add in saving of Activity Rules
+
+            //TODO: add in saving of Service Areas
+
             await DbSet.AddAsync(activityCodeEntity);
 
             return activityCodeEntity;
@@ -81,6 +85,14 @@ namespace Hmcr.Data.Repositories
             var activityCode = Mapper.Map<ActivityCodeSearchDto>(activityCodeEntity);
 
             activityCode.IsReferenced = await _workReportRepo.IsActivityNumberInUseAsync(activityCode.ActivityNumber);
+
+            //TODO: pull the activity rules
+            var activityRules = new List<decimal>();
+            activityRules.Add(1);
+            activityRules.Add(3);
+            activityCode.ActivityRuleIds = activityRules;
+
+            //TODO: pull the service areas
 
             return activityCode;
         }
@@ -143,6 +155,9 @@ namespace Hmcr.Data.Repositories
             activityCode.EndDate = activityCode.EndDate?.Date;
 
             Mapper.Map(activityCode, activityCodeEntity);
+
+            //TODO: call function to sync activity rule changes
+            //TODO: call function to sync service area changes
         }
 
         public async Task DeleteActivityCodeAsync(decimal id)
