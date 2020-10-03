@@ -3,7 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Hmcr.Api.Controllers.Base;
+using Hmcr.Domain.Services;
+using Hmcr.Model;
 using Hmcr.Model.Dtos.ActivityRule;
+using Hmcr.Model.Dtos.User;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Hmcr.Api.Controllers
@@ -13,43 +17,28 @@ namespace Hmcr.Api.Controllers
     [ApiController]
     public class ActivityRuleController : HmcrControllerBase
     {
-        [HttpGet("roadlength")]
-        public ActionResult<IEnumerable<ActivityRuleDto>> GetRoadLengthRules()
+        private IActivityRuleService _activityRuleSvc;
+        public ActivityRuleController(IActivityRuleService activityRuleSvc)
         {
-            ActivityRuleDto[] activityRules = new ActivityRuleDto[3]
-            {
-                new ActivityRuleDto{ ActivityRuleId = 1, ActivityRuleName = "Road Length Rule 1" },
-                new ActivityRuleDto{ ActivityRuleId = 2, ActivityRuleName = "Road Length Rule 2" },
-                new ActivityRuleDto{ ActivityRuleId = 3, ActivityRuleName = "Road Length Rule 3" }
-            };
+            _activityRuleSvc = activityRuleSvc;
+        }
 
-            return activityRules;
+        [HttpGet("roadlength")]
+        public async Task<ActionResult<IEnumerable<ActivityRuleDto>>> GetRoadLengthRulesAsync()
+        {
+            return Ok(await _activityRuleSvc.GetRoadLengthRulesAsync());
         }
 
         [HttpGet("surfacetype")]
-        public ActionResult<IEnumerable<ActivityRuleDto>> GetSurfaceTypeRules()
+        public async Task<ActionResult<IEnumerable<ActivityRuleDto>>> GetSurfaceTypeRulesAsync()
         {
-            ActivityRuleDto[] activityRules = new ActivityRuleDto[3]
-            {
-                new ActivityRuleDto{ ActivityRuleId = 1, ActivityRuleName = "Surface Type Rule 1" },
-                new ActivityRuleDto{ ActivityRuleId = 2, ActivityRuleName = "Surface Type Rule 2" },
-                new ActivityRuleDto{ ActivityRuleId = 3, ActivityRuleName = "Surface Type Rule 3" }
-            };
-
-            return activityRules;
+            return Ok(await _activityRuleSvc.GetSurfaceTypeRulesAsync());
         }
 
         [HttpGet("roadclass")]
-        public ActionResult<IEnumerable<ActivityRuleDto>> GetRoadClassRules()
+        public async Task<ActionResult<IEnumerable<ActivityRuleDto>>> GetRoadClassRulesAsync()
         {
-            ActivityRuleDto[] activityRules = new ActivityRuleDto[3]
-            {
-                new ActivityRuleDto{ ActivityRuleId = 1, ActivityRuleName = "Road Class Rule 1" },
-                new ActivityRuleDto{ ActivityRuleId = 3, ActivityRuleName = "Road Class Rule 2" },
-                new ActivityRuleDto{ ActivityRuleId = 2, ActivityRuleName = "Road Class Rule 3" }
-            };
-
-            return activityRules;
+            return Ok(await _activityRuleSvc.GetRoadClassRulesAsync());
         }
     }
 }

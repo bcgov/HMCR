@@ -30,8 +30,8 @@ namespace Hmcr.Data.Mappings
     {
         public ModelToEntityProfile()
         {
-            SourceMemberNamingConvention = new PascalCaseNamingConvention();
-            DestinationMemberNamingConvention = new LowerUnderscoreNamingConvention();
+            //SourceMemberNamingConvention = new PascalCaseNamingConvention();
+            //DestinationMemberNamingConvention = new LowerUnderscoreNamingConvention();
 
             SourceMemberNamingConvention = new LowerUnderscoreNamingConvention();
             DestinationMemberNamingConvention = new PascalCaseNamingConvention();

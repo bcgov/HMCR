@@ -4,6 +4,7 @@ import * as Yup from 'yup';
 import moment from 'moment';
 
 import SingleDateField from '../ui/SingleDateField';
+import MultiSelect from '../ui/MultiSelect';
 import SingleDropdownField from '../ui/SingleDropdownField';
 import PageSpinner from '../ui/PageSpinner';
 import { FormRow, FormInput, FormCheckboxInput } from './FormInputs';
@@ -19,10 +20,11 @@ const defaultValues = {
   locationCodeId: '',
   featureType: '',
   spThresholdLevel: '',
-  roadLengthRules: '',
-  surfaceTypeRules: '',
-  roadClassRules: '',
+  roadLengthRule: '',
+  surfaceTypeRule: '',
+  roadClassRule: '',
   isSiteNumRequired: false,
+  serviceAreaNumbers: [],
   endDate: null,
 };
 
@@ -51,7 +53,8 @@ const EditActivityFormFields = ({
   thresholdLevels,
   roadLengthRules,
   surfaceTypeRules,
-  roadClassRules
+  roadClassRules,
+  serviceAreas,
 }) => {
   const [loading, setLoading] = useState(true);
   const [validLocationCodeValues, setValidLocationCodeValues] = useState(locationCodes);
@@ -135,7 +138,7 @@ const EditActivityFormFields = ({
   }, []);
 
   if (loading || formValues === null) return <PageSpinner />;
-
+  
   return (
     <React.Fragment>
       <FormRow name="activityNumber" label="Activity Code*">
@@ -185,25 +188,25 @@ const EditActivityFormFields = ({
               name="spThresholdLevel"
             />
           </FormRow>
-          <FormRow name="roadLengthRules" label="Road Length Validation Rule">
+          <FormRow name="roadLengthRule" label="Road Length Validation Rule">
             <SingleDropdownField
               defaultTitle="Not Applicable"
               items={roadLengthRules}
-              name="roadLengthRules"
+              name="roadLengthRule"
             />
           </FormRow>
-          <FormRow name="surfaceTypeRules" label="Surface Type Rule">
+          <FormRow name="surfaceTypeRule" label="Surface Type Rule">
             <SingleDropdownField
               defaultTitle="Not Applicable"
               items={surfaceTypeRules}
-              name="surfaceTypeRules"
+              name="surfaceTypeRule"
             />
           </FormRow>
-            <FormRow name="roadClassRules" label="Road Class Rule">
+            <FormRow name="roadClassRule" label="Road Class Rule">
             <SingleDropdownField
               defaultTitle="Not Applicable"
               items={roadClassRules}
-              name="roadClassRules"
+              name="roadClassRule"
             />
           </FormRow>
           <FormRow name="isSiteNumRequired" label="Site Number Required">
@@ -211,6 +214,9 @@ const EditActivityFormFields = ({
           </FormRow>
         </React.Fragment>
       )}
+      <FormRow name="serviceAreaNumbers" label="Service Areas*">
+        <MultiSelect items={serviceAreas} name="serviceAreaNumbers" showSelectAll={true} />
+      </FormRow>
       <FormRow name="endDate" label="End Date">
         <SingleDateField name="endDate" placeholder="End Date" />
       </FormRow>
@@ -228,6 +234,7 @@ const mapStateToProps = (state) => {
     roadLengthRules: state.codeLookups.roadLengthRules,
     surfaceTypeRules: state.codeLookups.surfaceTypeRules,
     roadClassRules: state.codeLookups.roadClassRules,
+    serviceAreas: Object.values(state.serviceAreas),
   };
 };
 

@@ -77,6 +77,9 @@ namespace Hmcr.Data.Repositories
         public async Task<ActivityCodeSearchDto> GetActivityCodeAsync(decimal id)
         {
             var activityCodeEntity = await DbSet.AsNoTracking()
+                //todo ServiceArea and activity rules
+                //.Include(x => x.HmrServiceAreaRules) //new table
+                //.Include(x => x.HmrRules) //new table
                 .FirstOrDefaultAsync(ac => ac.ActivityCodeId == id);
 
             if (activityCodeEntity == null)
@@ -87,12 +90,24 @@ namespace Hmcr.Data.Repositories
             activityCode.IsReferenced = await _workReportRepo.IsActivityNumberInUseAsync(activityCode.ActivityNumber);
 
             //TODO: pull the activity rules
-            var activityRules = new List<decimal>();
-            activityRules.Add(1);
-            activityRules.Add(3);
+            //var activityRules =
+            //    activityCodeEntity
+            //    .HmrServiceRules //new table
+            //    .Select(s => s.ActivityRuleId)
+            //    .ToList();
+            var activityRules = new List<decimal> { 1, 3 };
             activityCode.ActivityRuleIds = activityRules;
-
+            activityCode.RoadLengthRule = 2;
+            activityCode.SurfaceTypeRule = 3;
+            activityCode.RoadClassRule = 1;
             //TODO: pull the service areas
+            //var serviceAreasNumbers =
+            //    activityCodeEntity
+            //    .HmrServiceAreaRules //new table
+            //    .Select(s => s.ServiceAreaNumber)
+            //    .ToList();
+            var serviceAreasNumbers = new List<decimal> { 1, 9 };
+            activityCode.ServiceAreaNumbers = serviceAreasNumbers;
 
             return activityCode;
         }

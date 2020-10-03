@@ -64,7 +64,7 @@ namespace Hmcr.Domain.Services
                 activityCode.FeatureType = null;
                 activityCode.SpThresholdLevel = null;
                 activityCode.IsSiteNumRequired = false;
-                activityCode.ActivityRuleIds = [];
+                activityCode.ActivityRuleIds = null;
             }
 
             if (errors.Count > 0)
