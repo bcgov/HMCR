@@ -5,6 +5,11 @@ namespace Hmcr.Data.Database.Entities
 {
     public partial class HmrActivityCode
     {
+        public HmrActivityCode()
+        {
+            HmrActivityCodeRules = new HashSet<HmrActivityCodeRule>();
+        }
+
         public decimal ActivityCodeId { get; set; }
         public string ActivityNumber { get; set; }
         public string ActivityName { get; set; }
@@ -31,5 +36,6 @@ namespace Hmcr.Data.Database.Entities
         public DateTime DbAuditLastUpdateTimestamp { get; set; }
 
         public virtual HmrLocationCode LocationCode { get; set; }
+        public virtual ICollection<HmrActivityCodeRule> HmrActivityCodeRules { get; set; }
     }
 }

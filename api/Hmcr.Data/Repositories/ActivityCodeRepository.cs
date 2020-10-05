@@ -65,7 +65,15 @@ namespace Hmcr.Data.Repositories
 
             Mapper.Map(activityCode, activityCodeEntity);
 
-            //TODO: add in saving of Activity Rules
+            
+            foreach (var ruleId in activityCode.ActivityRuleIds)
+            {
+                activityCodeEntity.HmrActivityCodeRules
+                    .Add(new HmrActivityCodeRule
+                    {
+                        ActivityRuleId = ruleId
+                    });
+            }
 
             //TODO: add in saving of Service Areas
 
@@ -77,9 +85,9 @@ namespace Hmcr.Data.Repositories
         public async Task<ActivityCodeSearchDto> GetActivityCodeAsync(decimal id)
         {
             var activityCodeEntity = await DbSet.AsNoTracking()
-                //todo ServiceArea and activity rules
+                //todo ServiceArea
                 //.Include(x => x.HmrServiceAreaRules) //new table
-                //.Include(x => x.HmrRules) //new table
+                .Include(x => x.HmrActivityCodeRules) //new table
                 .FirstOrDefaultAsync(ac => ac.ActivityCodeId == id);
 
             if (activityCodeEntity == null)
@@ -88,18 +96,18 @@ namespace Hmcr.Data.Repositories
             var activityCode = Mapper.Map<ActivityCodeSearchDto>(activityCodeEntity);
 
             activityCode.IsReferenced = await _workReportRepo.IsActivityNumberInUseAsync(activityCode.ActivityNumber);
+            
+            var activityRules = activityCodeEntity
+                .HmrActivityCodeRules
+                .Select(s => s.ActivityCodeRuleId)
+                .ToList();
 
-            //TODO: pull the activity rules
-            //var activityRules =
-            //    activityCodeEntity
-            //    .HmrServiceRules //new table
-            //    .Select(s => s.ActivityRuleId)
-            //    .ToList();
-            var activityRules = new List<decimal> { 1, 3 };
+            /*var activityRules = new List<decimal> { 1, 3 };
             activityCode.ActivityRuleIds = activityRules;
             activityCode.RoadLengthRule = 2;
             activityCode.SurfaceTypeRule = 3;
-            activityCode.RoadClassRule = 1;
+            activityCode.RoadClassRule = 1;*/
+
             //TODO: pull the service areas
             //var serviceAreasNumbers =
             //    activityCodeEntity
@@ -171,7 +179,8 @@ namespace Hmcr.Data.Repositories
 
             Mapper.Map(activityCode, activityCodeEntity);
 
-            //TODO: call function to sync activity rule changes
+            SyncActivityRules(activityCode, activityCodeEntity);
+            
             //TODO: call function to sync service area changes
         }
 
@@ -194,6 +203,30 @@ namespace Hmcr.Data.Repositories
             {
                 if (await _workReportRepo.IsActivityNumberInUseAsync(activityNumber))
                     yield return activityNumber;
+            }
+        }
+
+        private void SyncActivityRules(ActivityCodeUpdateDto activityUpdateDto, HmrActivityCode activityCodeEntity)
+        {
+            var rulesToDelete =
+                activityCodeEntity.HmrActivityCodeRules.Where(r => !activityUpdateDto.ActivityRuleIds.Contains(r.ActivityRuleId)).ToList();
+
+            for (var i = rulesToDelete.Count() - 1; i >= 0; i--)
+            {
+                DbContext.Remove(rulesToDelete[i]);
+            }
+
+            var existingRuleIds = activityCodeEntity.HmrActivityCodeRules.Select(r => r.ActivityRuleId);
+
+            var newRuleIds = activityUpdateDto.ActivityRuleIds.Where(r => !existingRuleIds.Contains(r));
+
+            foreach (var ruleId in newRuleIds)
+            {
+                activityCodeEntity.HmrActivityCodeRules
+                    .Add(new HmrActivityCodeRule
+                    {
+                        ActivityRuleId = ruleId
+                    });
             }
         }
     }
