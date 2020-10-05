@@ -15,5 +15,6 @@ namespace Hmcr.Model.Dtos.ActivityCode
         public bool IsSiteNumRequired { get; set; }
         public DateTime? EndDate { get; set; }
         public virtual IList<decimal> ActivityRuleIds { get; set; }
+        public virtual IList<decimal> ServiceAreaNumbers { get; set; }
     }
 }
