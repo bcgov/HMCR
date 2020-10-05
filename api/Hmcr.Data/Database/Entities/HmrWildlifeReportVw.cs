@@ -14,7 +14,9 @@ namespace Hmcr.Data.Database.Entities
         public string TimeOfKill { get; set; }
         public decimal? Latitude { get; set; }
         public decimal? Longitude { get; set; }
-        public string IsOverSpTolerance { get; set; }
+        public decimal? SpatialVariance { get; set; }
+        public decimal? WarningSpThreshold { get; set; }
+        public string IsOverSpThreshold { get; set; }
         public string HighwayUnique { get; set; }
         public string HighwayUniqueName { get; set; }
         public decimal? HighwayUniqueLength { get; set; }

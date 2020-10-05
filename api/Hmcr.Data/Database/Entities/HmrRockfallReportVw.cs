@@ -15,8 +15,12 @@ namespace Hmcr.Data.Database.Entities
         public TimeSpan? EstimatedRockfallTime { get; set; }
         public decimal? StartLatitude { get; set; }
         public decimal? StartLongitude { get; set; }
+        public decimal? StartVariance { get; set; }
         public decimal? EndLatitude { get; set; }
         public decimal? EndLongitude { get; set; }
+        public decimal? EndVariance { get; set; }
+        public decimal? WarningSpThreshold { get; set; }
+        public string IsOverSpThreshold { get; set; }
         public string HighwayUnique { get; set; }
         public string HighwayUniqueName { get; set; }
         public decimal? HighwayUniqueLength { get; set; }
