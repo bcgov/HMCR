@@ -16,6 +16,7 @@ namespace Hmcr.Data.Repositories
         Task<IEnumerable<ActivityRuleDto>> GetRoadLengthRulesAsync();
         Task<IEnumerable<ActivityRuleDto>> GetSurfaceTypeRulesAsync();
         Task<IEnumerable<ActivityRuleDto>> GetRoadClassRulesAsync();
+        Task<IEnumerable<ActivityRuleDto>> GetDefaultRules();
     }
 
     public class ActivityRuleRepository : HmcrRepositoryBase<HmrActivityRule>, IActivityRuleRepository
@@ -32,16 +33,6 @@ namespace Hmcr.Data.Repositories
                 .ToListAsync();
 
             return Mapper.Map<IEnumerable<ActivityRuleDto>>(activityRules);
-
-            //fake data
-            /*ActivityRuleDto[] activityRules = new ActivityRuleDto[3]
-            {
-                new ActivityRuleDto{ ActivityRuleId = 1, ActivityRuleName = "Road Length Rule 1" },
-                new ActivityRuleDto{ ActivityRuleId = 2, ActivityRuleName = "Road Length Rule 2" },
-                new ActivityRuleDto{ ActivityRuleId = 3, ActivityRuleName = "Road Length Rule 3" }
-            };
-            await Task.Delay(1);
-            return activityRules;*/
         }
         public async Task<IEnumerable<ActivityRuleDto>> GetSurfaceTypeRulesAsync()
         {
@@ -50,16 +41,6 @@ namespace Hmcr.Data.Repositories
                 .ToListAsync();
 
             return Mapper.Map<IEnumerable<ActivityRuleDto>>(activityRules);
-
-            //fake data
-            /*ActivityRuleDto[] activityRules = new ActivityRuleDto[3]
-            {
-                new ActivityRuleDto{ ActivityRuleId = 1, ActivityRuleName = "Surface Type Rule 1" },
-                new ActivityRuleDto{ ActivityRuleId = 2, ActivityRuleName = "Surface Type Rule 2" },
-                new ActivityRuleDto{ ActivityRuleId = 3, ActivityRuleName = "Surface Type Rule 3" }
-            };
-            await Task.Delay(1);
-            return activityRules;*/
         }
         public async Task<IEnumerable<ActivityRuleDto>> GetRoadClassRulesAsync()
         {
@@ -68,16 +49,15 @@ namespace Hmcr.Data.Repositories
                 .ToListAsync();
 
             return Mapper.Map<IEnumerable<ActivityRuleDto>>(activityRules);
+        }
 
-            //fake data
-            /*ActivityRuleDto[] activityRules = new ActivityRuleDto[3]
-            {
-                new ActivityRuleDto{ ActivityRuleId = 1, ActivityRuleName = "Road Class Rule 1" },
-                new ActivityRuleDto{ ActivityRuleId = 2, ActivityRuleName = "Road Class Rule 2" },
-                new ActivityRuleDto{ ActivityRuleId = 3, ActivityRuleName = "Road Class Rule 3" }
-            };
-            await Task.Delay(1);
-            return activityRules;*/
+        public async Task<IEnumerable<ActivityRuleDto>> GetDefaultRules()
+        {
+            var activityRules = await DbSet.AsNoTracking()
+                .Where(s => s.ActivityRuleName.ToUpper() == "NOT APPLICABLE")
+                .ToListAsync();
+
+            return Mapper.Map<IEnumerable<ActivityRuleDto>>(activityRules);
         }
     }
 }

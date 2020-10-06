@@ -105,8 +105,11 @@ const ActivityAdmin = ({ maintenanceTypes, locationCodes, unitOfMeasures,showVal
         values.featureType = null;
         values.isSiteNumRequired = false;
         values.thresholdLevels = null;
+        values.roadClassRule = 0;
+        values.roadLengthRule = 0;
+        values.surfaceTypeRule = 0;
       }
-
+      
       if (formType === Constants.FORM_TYPE.ADD) {
         api
           .postActivityCode(values)

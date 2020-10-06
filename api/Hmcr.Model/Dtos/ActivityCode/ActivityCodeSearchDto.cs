@@ -20,10 +20,10 @@ namespace Hmcr.Model.Dtos.ActivityCode
         public DateTime? EndDate { get; set; }
         public bool IsActive => EndDate == null || EndDate > DateTime.Today;
         public bool IsReferenced { get; set; }
-        public virtual IList<decimal> ActivityRuleIds { get; set; }
-        public decimal? RoadLengthRule { get; set; }
-        public decimal? SurfaceTypeRule { get; set; }
-        public decimal? RoadClassRule { get; set; }
+
+        public decimal RoadLengthRule { get; set; }
+        public decimal SurfaceTypeRule { get; set; }
+        public decimal RoadClassRule { get; set; }
         public virtual IList<decimal> ServiceAreaNumbers { get; set; }
     }
 }
