@@ -64,17 +64,7 @@ namespace Hmcr.Data.Repositories
             var activityCodeEntity = new HmrActivityCode();
 
             Mapper.Map(activityCode, activityCodeEntity);
-
             
-            foreach (var ruleId in activityCode.ActivityRuleIds)
-            {
-                activityCodeEntity.HmrActivityCodeRules
-                    .Add(new HmrActivityCodeRule
-                    {
-                        ActivityRuleId = ruleId
-                    });
-            }
-
             //TODO: add in saving of Service Areas
 
             await DbSet.AddAsync(activityCodeEntity);
@@ -179,8 +169,6 @@ namespace Hmcr.Data.Repositories
 
             Mapper.Map(activityCode, activityCodeEntity);
 
-            SyncActivityRules(activityCode, activityCodeEntity);
-            
             //TODO: call function to sync service area changes
         }
 
@@ -206,28 +194,5 @@ namespace Hmcr.Data.Repositories
             }
         }
 
-        private void SyncActivityRules(ActivityCodeUpdateDto activityUpdateDto, HmrActivityCode activityCodeEntity)
-        {
-            var rulesToDelete =
-                activityCodeEntity.HmrActivityCodeRules.Where(r => !activityUpdateDto.ActivityRuleIds.Contains(r.ActivityRuleId)).ToList();
-
-            for (var i = rulesToDelete.Count() - 1; i >= 0; i--)
-            {
-                DbContext.Remove(rulesToDelete[i]);
-            }
-
-            var existingRuleIds = activityCodeEntity.HmrActivityCodeRules.Select(r => r.ActivityRuleId);
-
-            var newRuleIds = activityUpdateDto.ActivityRuleIds.Where(r => !existingRuleIds.Contains(r));
-
-            foreach (var ruleId in newRuleIds)
-            {
-                activityCodeEntity.HmrActivityCodeRules
-                    .Add(new HmrActivityCodeRule
-                    {
-                        ActivityRuleId = ruleId
-                    });
-            }
-        }
     }
 }
