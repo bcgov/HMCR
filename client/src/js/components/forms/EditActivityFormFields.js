@@ -11,6 +11,7 @@ import { FormRow, FormInput, FormCheckboxInput } from './FormInputs';
 
 import * as api from '../../Api';
 import * as Constants from '../../Constants';
+import { Row,Col} from 'reactstrap';
 
 const defaultValues = {
   activityNumber: '',
@@ -141,53 +142,95 @@ const EditActivityFormFields = ({
   
   return (
     <React.Fragment>
-      <FormRow name="activityNumber" label="Activity Code*">
-        <FormInput
-          type="text"
-          name="activityNumber"
-          placeholder="Activity Code"
-          disabled={formType === Constants.FORM_TYPE.EDIT}
-        />
-      </FormRow>
-      <FormRow name="activityName" label="Activity Name*">
-        <FormInput type="text" name="activityName" placeholder="Activity Name" />
-      </FormRow>
-      <FormRow name="unitOfMeasure" label="Unit*">
-        <SingleDropdownField
-          defaultTitle="Select Unit"
-          items={unitOfMeasures}
-          name="unitOfMeasure"
-          disabled={formType === Constants.FORM_TYPE.EDIT}
-        />
-      </FormRow>
-      <FormRow name="maintenanceType" label="Maintenance Type*">
-        <SingleDropdownField
-          defaultTitle="Select Maintenance Type"
-          items={maintenanceTypes}
-          name="maintenanceType"
-          disabled={formType === Constants.FORM_TYPE.EDIT}
-        />
-      </FormRow>
-      <FormRow name="locationCodeId" label="Location Code*">
-        <SingleDropdownField
-          defaultTitle="Select Location Code"
-          items={validLocationCodeValues}
-          name="locationCodeId"
-          disabled={disableLocationCodeEdit}
-        />
-      </FormRow>
-      {formValues.locationCodeId === locationCodeCId && (
-        <React.Fragment>
-          <FormRow name="featureType" label="Feature Type*">
-            <SingleDropdownField defaultTitle="Select Feature Type" items={validFeatureTypeValues} name="featureType" />
-          </FormRow>
-          <FormRow name="spThresholdLevel" label="Location Tolerance Level*">
-            <SingleDropdownField
-              defaultTitle="Select Location Tolerance Level"
-              items={thresholdLevels}
-              name="spThresholdLevel"
+      <Row>
+        <Col>
+          <FormRow name="activityNumber" label="Activity Code*">
+            <FormInput
+              type="text"
+              name="activityNumber"
+              placeholder="Activity Code"
+              disabled={formType === Constants.FORM_TYPE.EDIT}
             />
           </FormRow>
+        </Col>
+        <Col>
+          <FormRow name="activityName" label="Activity Name*">
+            <FormInput type="text" name="activityName" placeholder="Activity Name" />
+          </FormRow>
+        </Col>
+      </Row>
+      <Row>
+        <Col>
+          <FormRow name="unitOfMeasure" label="Unit*">
+            <SingleDropdownField
+              defaultTitle="Select Unit"
+              items={unitOfMeasures}
+              name="unitOfMeasure"
+              disabled={formType === Constants.FORM_TYPE.EDIT}
+            />
+          </FormRow>
+        </Col>
+        <Col>
+          <FormRow name="maintenanceType" label="Maintenance Type*">
+            <SingleDropdownField
+              defaultTitle="Select Maintenance Type"
+              items={maintenanceTypes}
+              name="maintenanceType"
+              disabled={formType === Constants.FORM_TYPE.EDIT}
+            />
+          </FormRow>
+        </Col>
+      </Row>
+      <Row>
+        <Col>
+          <FormRow name="serviceAreaNumbers" label="Service Areas*">
+            <MultiSelect items={serviceAreas} name="serviceAreaNumbers" showSelectAll={true} />
+          </FormRow>
+        </Col>
+        <Col>
+          <fieldset >
+           <legend>Analytical Validation</legend>
+            <FormRow name="minimumValue" label="Minimum Value">
+              <FormInput type="text" name="minimumValue" placeholder="Minimum Value" />
+            </FormRow>
+            <FormRow name="maximumValue" label="Maximum Value">
+              <FormInput type="text" name="maximumValue" placeholder="Maximum Value" />
+            </FormRow>
+            <FormRow name="reportingFrequency" label="Reporting Frequency (Minimum # Days)">
+              <FormInput type="text" name="reportingFrequency" placeholder="ReportingFrequency (Minimum # Days)" />
+            </FormRow>
+          </fieldset>
+        </Col>
+      </Row>
+      <Row>
+        <Col>
+          <FormRow name="locationCodeId" label="Location Code*">
+            <SingleDropdownField
+              defaultTitle="Select Location Code"
+              items={validLocationCodeValues}
+              name="locationCodeId"
+              disabled={disableLocationCodeEdit}
+            />
+          </FormRow>
+            {formValues.locationCodeId === locationCodeCId && (
+              <React.Fragment>
+                <FormRow name="featureType" label="Feature Type*">
+                  <SingleDropdownField defaultTitle="Select Feature Type" items={validFeatureTypeValues} name="featureType" />
+                </FormRow>
+                <FormRow name="spThresholdLevel" label="Location Tolerance Level*">
+                  <SingleDropdownField
+                    defaultTitle="Select Location Tolerance Level"
+                    items={thresholdLevels}
+                    name="spThresholdLevel"
+                  />
+                </FormRow>
+                </React.Fragment>
+            )}
+            </Col>
+            <Col>
+      {formValues.locationCodeId === locationCodeCId && (
+          <React.Fragment>
+            
           <FormRow name="roadLengthRule" label="Road Length Validation Rule">
             <SingleDropdownField
               defaultTitle="Not Applicable"
@@ -209,17 +252,28 @@ const EditActivityFormFields = ({
               name="roadClassRule"
             />
           </FormRow>
+         
+        </React.Fragment>
+      )}
+       </Col>
+       </Row>
+       <Row>
+        <Col>
+        {formValues.locationCodeId === locationCodeCId && (
+          <React.Fragment>
           <FormRow name="isSiteNumRequired" label="Site Number Required">
             <FormCheckboxInput name="isSiteNumRequired" />
           </FormRow>
-        </React.Fragment>
+          </React.Fragment>
       )}
-      <FormRow name="serviceAreaNumbers" label="Service Areas*">
-        <MultiSelect items={serviceAreas} name="serviceAreaNumbers" showSelectAll={true} />
-      </FormRow>
-      <FormRow name="endDate" label="End Date">
-        <SingleDateField name="endDate" placeholder="End Date" />
-      </FormRow>
+        </Col>
+         <Col>
+         
+          <FormRow name="endDate" label="End Date">
+            <SingleDateField name="endDate" placeholder="End Date" />
+          </FormRow>
+        </Col>
+      </Row>
     </React.Fragment>
   );
 };
