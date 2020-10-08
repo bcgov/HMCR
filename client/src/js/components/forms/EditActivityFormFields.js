@@ -21,6 +21,9 @@ const defaultValues = {
   locationCodeId: '',
   featureType: '',
   spThresholdLevel: '',
+  minimumValue: '',
+  maximumValue:'',
+  reportingFrequency: '',
   roadLengthRule: '',
   surfaceTypeRule: '',
   roadClassRule: '',
@@ -39,8 +42,29 @@ const validationSchema = Yup.object({
   unitOfMeasure: Yup.string().required('Required').max(12),
   maintenanceType: Yup.string().required('Required').max(12),
   locationCodeId: Yup.number().required('Required'),
-});
+  serviceAreaNumbers: Yup.array().required('At least one Service Area must be selected'),
+  minimumValue: Yup.number()
+    .min(0)
+    .typeError('Must be number')
+    .when('unitOfMeasure', {
+      is:'site',
+      then:Yup.number().integer(),
+    }),
+  maximumValue: Yup.number()
+    .min(0)
+    .typeError('Must be number')
+    .when('unitOfMeasure', {
+      is:'site',
+      then:Yup.number().integer(),
+    }),
+  reportingFrequency: Yup.number()
+    .min(0)
+    .max(365)
+    .typeError('Must be number')
+    .integer(),
 
+  
+});
 const EditActivityFormFields = ({
   setInitialValues,
   formValues,
@@ -182,14 +206,14 @@ const EditActivityFormFields = ({
         </Col>
       </Row>
       <Row>
-        <Col>
+        <Col className='col colmargin1'>
           <FormRow name="serviceAreaNumbers" label="Service Areas*">
-            <MultiSelect items={serviceAreas} name="serviceAreaNumbers" showSelectAll={true} />
+            <MultiSelect selectClass ="form-control servicearea-large" items={serviceAreas} name="serviceAreaNumbers" showSelectAll={true} />
           </FormRow>
         </Col>
         <Col>
-          <fieldset >
-           <legend>Analytical Validation</legend>
+          <fieldset className='form-control fieldset'>
+           <legend className='form-control legend'>Analytical Validation</legend>
             <FormRow name="minimumValue" label="Minimum Value">
               <FormInput type="text" name="minimumValue" placeholder="Minimum Value" />
             </FormRow>

@@ -31,7 +31,7 @@ const useFormModal = (formTitle, formFieldsChildElement, handleFormSubmit,modSiz
   const onFormSubmit = (values) => handleFormSubmit(values, formType);
 
   const title = formType === Constants.FORM_TYPE.ADD ? `Add ${formTitle}` : `Edit ${formTitle}`;
-  modSize = modSize===null?'sm':modSize;
+  modSize = (modSize===null )?'sm':modSize;
   const formModal = () => {
     return (
       <Modal isOpen={isOpen} toggle={toggle} backdrop="static" size={modSize}>
