@@ -62,8 +62,7 @@ namespace Hmcr.Data.Database.Entities
         public virtual DbSet<HmrWorkReport> HmrWorkReports { get; set; }
         public virtual DbSet<HmrWorkReportHist> HmrWorkReportHists { get; set; }
         public virtual DbSet<HmrWorkReportVw> HmrWorkReportVws { get; set; }
-        public virtual DbSet<HmrxTableDefinition> HmrxTableDefinitions { get; set; }
-
+        
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<HmrActivityCode>(entity =>
@@ -249,19 +248,19 @@ namespace Hmcr.Data.Database.Entities
                     .WithMany(p => p.HmrActivityCodeRoadClassRuleNavigations)
                     .HasForeignKey(d => d.RoadClassRule)
                     .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK__HMR_ACTIV__ROAD___17786E0C");
+                    .HasConstraintName("FK__HMR_ACTIV__ROAD___1C3D2329");
 
                 entity.HasOne(d => d.RoadLengthRuleNavigation)
                     .WithMany(p => p.HmrActivityCodeRoadLengthRuleNavigations)
                     .HasForeignKey(d => d.RoadLengthRule)
                     .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK__HMR_ACTIV__ROAD___186C9245");
+                    .HasConstraintName("FK__HMR_ACTIV__ROAD___1D314762");
 
                 entity.HasOne(d => d.SurfaceTypeRuleNavigation)
                     .WithMany(p => p.HmrActivityCodeSurfaceTypeRuleNavigations)
                     .HasForeignKey(d => d.SurfaceTypeRule)
                     .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK__HMR_ACTIV__SURFA__1960B67E");
+                    .HasConstraintName("FK__HMR_ACTIV__SURFA__1E256B9B");
             });
 
             modelBuilder.Entity<HmrActivityCodeHist>(entity =>
@@ -388,10 +387,22 @@ namespace Hmcr.Data.Database.Entities
                     .HasMaxLength(12)
                     .IsUnicode(false);
 
+                entity.Property(e => e.RoadClassRule)
+                    .HasColumnName("ROAD_CLASS_RULE")
+                    .HasColumnType("numeric(9, 0)");
+
+                entity.Property(e => e.RoadLengthRule)
+                    .HasColumnName("ROAD_LENGTH_RULE")
+                    .HasColumnType("numeric(9, 0)");
+
                 entity.Property(e => e.SpThresholdLevel)
                     .HasColumnName("SP_THRESHOLD_LEVEL")
                     .HasMaxLength(30)
                     .IsUnicode(false);
+
+                entity.Property(e => e.SurfaceTypeRule)
+                    .HasColumnName("SURFACE_TYPE_RULE")
+                    .HasColumnType("numeric(9, 0)");
 
                 entity.Property(e => e.UnitOfMeasure)
                     .IsRequired()
@@ -403,7 +414,7 @@ namespace Hmcr.Data.Database.Entities
             modelBuilder.Entity<HmrActivityCodeRule>(entity =>
             {
                 entity.HasKey(e => e.ActivityCodeRuleId)
-                    .HasName("PK__HMR_ACTI__E4140F7DF4DEC3AC");
+                    .HasName("PK__HMR_ACTI__E4140F7D39105D95");
 
                 entity.ToTable("HMR_ACTIVITY_CODE_RULE");
 
@@ -6497,27 +6508,6 @@ namespace Hmcr.Data.Database.Entities
                 entity.Property(e => e.WorkReportId)
                     .HasColumnName("WORK_REPORT_ID")
                     .HasColumnType("numeric(9, 0)");
-            });
-
-            modelBuilder.Entity<HmrxTableDefinition>(entity =>
-            {
-                entity.HasNoKey();
-
-                entity.ToTable("HMRX_TableDefinitions");
-
-                entity.Property(e => e.Description).HasColumnName("DESCRIPTION");
-
-                entity.Property(e => e.Hist)
-                    .HasColumnName("HIST")
-                    .HasMaxLength(1);
-
-                entity.Property(e => e.TableAlias)
-                    .HasColumnName("TABLE_ALIAS")
-                    .HasMaxLength(255);
-
-                entity.Property(e => e.TableName)
-                    .HasColumnName("TABLE_NAME")
-                    .HasMaxLength(255);
             });
 
             modelBuilder.HasSequence("FDBK_MSG_ID_SEQ")
