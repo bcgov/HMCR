@@ -8,9 +8,9 @@ namespace Hmcr.Domain.Services
 {
     public interface IActivityRuleService
     {
-        Task<IEnumerable<ActivityRuleDto>> GetRoadLengthRulesAsync();
-        Task<IEnumerable<ActivityRuleDto>> GetSurfaceTypeRulesAsync();
-        Task<IEnumerable<ActivityRuleDto>> GetRoadClassRulesAsync();
+        Task<IEnumerable<ActivityCodeRuleDto>> GetRoadLengthRulesAsync();
+        Task<IEnumerable<ActivityCodeRuleDto>> GetSurfaceTypeRulesAsync();
+        Task<IEnumerable<ActivityCodeRuleDto>> GetRoadClassRulesAsync();
     }
 
     public class ActivityRuleService : IActivityRuleService
@@ -24,17 +24,17 @@ namespace Hmcr.Domain.Services
             _unitOfWork = unitOfWork;
         }
 
-        public async Task<IEnumerable<ActivityRuleDto>> GetRoadLengthRulesAsync()
+        public async Task<IEnumerable<ActivityCodeRuleDto>> GetRoadLengthRulesAsync()
         {
             return await _activityRuleRepo.GetRoadLengthRulesAsync();
         }
 
-        public async Task<IEnumerable<ActivityRuleDto>> GetSurfaceTypeRulesAsync()
+        public async Task<IEnumerable<ActivityCodeRuleDto>> GetSurfaceTypeRulesAsync()
         {
             return await  _activityRuleRepo.GetSurfaceTypeRulesAsync();
         }
 
-        public async Task<IEnumerable<ActivityRuleDto>> GetRoadClassRulesAsync()
+        public async Task<IEnumerable<ActivityCodeRuleDto>> GetRoadClassRulesAsync()
         {
             return await _activityRuleRepo.GetRoadClassRulesAsync();
         }
