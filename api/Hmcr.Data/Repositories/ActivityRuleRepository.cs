@@ -13,51 +13,51 @@ namespace Hmcr.Data.Repositories
 {
     public interface IActivityRuleRepository
     {
-        Task<IEnumerable<ActivityRuleDto>> GetRoadLengthRulesAsync();
-        Task<IEnumerable<ActivityRuleDto>> GetSurfaceTypeRulesAsync();
-        Task<IEnumerable<ActivityRuleDto>> GetRoadClassRulesAsync();
-        Task<IEnumerable<ActivityRuleDto>> GetDefaultRules();
+        Task<IEnumerable<ActivityCodeRuleDto>> GetRoadLengthRulesAsync();
+        Task<IEnumerable<ActivityCodeRuleDto>> GetSurfaceTypeRulesAsync();
+        Task<IEnumerable<ActivityCodeRuleDto>> GetRoadClassRulesAsync();
+        Task<IEnumerable<ActivityCodeRuleDto>> GetDefaultRules();
     }
 
-    public class ActivityRuleRepository : HmcrRepositoryBase<HmrActivityRule>, IActivityRuleRepository
+    public class ActivityRuleRepository : HmcrRepositoryBase<HmrActivityCodeRule>, IActivityRuleRepository
     {
         public ActivityRuleRepository(AppDbContext dbContext, IMapper mapper)
             : base(dbContext, mapper)
         {
         }
 
-        public async Task<IEnumerable<ActivityRuleDto>> GetRoadLengthRulesAsync()
+        public async Task<IEnumerable<ActivityCodeRuleDto>> GetRoadLengthRulesAsync()
         {
             var activityRules = await DbSet.AsNoTracking()
                 .Where(s => s.ActivityRuleSet.ToUpper() == "ROAD_LENGTH")
                 .ToListAsync();
 
-            return Mapper.Map<IEnumerable<ActivityRuleDto>>(activityRules);
+            return Mapper.Map<IEnumerable<ActivityCodeRuleDto>>(activityRules);
         }
-        public async Task<IEnumerable<ActivityRuleDto>> GetSurfaceTypeRulesAsync()
+        public async Task<IEnumerable<ActivityCodeRuleDto>> GetSurfaceTypeRulesAsync()
         {
             var activityRules = await DbSet.AsNoTracking()
                 .Where(s => s.ActivityRuleSet.ToUpper() == "SURFACE_TYPE")
                 .ToListAsync();
 
-            return Mapper.Map<IEnumerable<ActivityRuleDto>>(activityRules);
+            return Mapper.Map<IEnumerable<ActivityCodeRuleDto>>(activityRules);
         }
-        public async Task<IEnumerable<ActivityRuleDto>> GetRoadClassRulesAsync()
+        public async Task<IEnumerable<ActivityCodeRuleDto>> GetRoadClassRulesAsync()
         {
             var activityRules = await DbSet.AsNoTracking()
                 .Where(s => s.ActivityRuleSet.ToUpper() == "ROAD_CLASS")
                 .ToListAsync();
 
-            return Mapper.Map<IEnumerable<ActivityRuleDto>>(activityRules);
+            return Mapper.Map<IEnumerable<ActivityCodeRuleDto>>(activityRules);
         }
 
-        public async Task<IEnumerable<ActivityRuleDto>> GetDefaultRules()
+        public async Task<IEnumerable<ActivityCodeRuleDto>> GetDefaultRules()
         {
             var activityRules = await DbSet.AsNoTracking()
                 .Where(s => s.ActivityRuleName.ToUpper() == "NOT APPLICABLE")
                 .ToListAsync();
 
-            return Mapper.Map<IEnumerable<ActivityRuleDto>>(activityRules);
+            return Mapper.Map<IEnumerable<ActivityCodeRuleDto>>(activityRules);
         }
     }
 }

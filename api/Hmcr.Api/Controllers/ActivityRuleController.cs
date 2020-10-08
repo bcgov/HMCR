@@ -24,19 +24,19 @@ namespace Hmcr.Api.Controllers
         }
 
         [HttpGet("roadlength")]
-        public async Task<ActionResult<IEnumerable<ActivityRuleDto>>> GetRoadLengthRulesAsync()
+        public async Task<ActionResult<IEnumerable<ActivityCodeRuleDto>>> GetRoadLengthRulesAsync()
         {
             return Ok(await _activityRuleSvc.GetRoadLengthRulesAsync());
         }
 
         [HttpGet("surfacetype")]
-        public async Task<ActionResult<IEnumerable<ActivityRuleDto>>> GetSurfaceTypeRulesAsync()
+        public async Task<ActionResult<IEnumerable<ActivityCodeRuleDto>>> GetSurfaceTypeRulesAsync()
         {
             return Ok(await _activityRuleSvc.GetSurfaceTypeRulesAsync());
         }
 
         [HttpGet("roadclass")]
-        public async Task<ActionResult<IEnumerable<ActivityRuleDto>>> GetRoadClassRulesAsync()
+        public async Task<ActionResult<IEnumerable<ActivityCodeRuleDto>>> GetRoadClassRulesAsync()
         {
             return Ok(await _activityRuleSvc.GetRoadClassRulesAsync());
         }

@@ -64,24 +64,24 @@ namespace Hmcr.Domain.Services
             // location code is A or B, FeatureType is forced to null and SiteNumRequired is forced to false
             if (newLocationCode != "C")
             {
-                IEnumerable<ActivityRuleDto> activityRuleDefaults = await _activityRuleRepo.GetDefaultRules();
+                IEnumerable<ActivityCodeRuleDto> activityRuleDefaults = await _activityRuleRepo.GetDefaultRules();
                 
                 activityCode.FeatureType = null;
                 activityCode.SpThresholdLevel = null;
                 activityCode.IsSiteNumRequired = false;
-                foreach (ActivityRuleDto activityRule in activityRuleDefaults)
+                foreach (ActivityCodeRuleDto activityRule in activityRuleDefaults)
                 {
                     if (activityRule.ActivityRuleSet == "ROAD_LENGTH")
                     {
-                        activityCode.RoadLengthRule = activityRule.ActivityRuleId;
+                        activityCode.RoadLengthRule = activityRule.ActivityCodeRuleId;
                     }
                     else if (activityRule.ActivityRuleSet == "ROAD_CLASS")
                     {
-                        activityCode.RoadClassRule = activityRule.ActivityRuleId;
+                        activityCode.RoadClassRule = activityRule.ActivityCodeRuleId;
                     }
                     else if (activityRule.ActivityRuleSet == "SURFACE_TYPE")
                     {
-                        activityCode.SurfaceTypeRule = activityRule.ActivityRuleId;
+                        activityCode.SurfaceTypeRule = activityRule.ActivityCodeRuleId;
                     }
                 }
             }
@@ -171,24 +171,24 @@ namespace Hmcr.Domain.Services
             // location code is A or B, FeatureType is forced to null and SiteNumRequired is forced to false
             if (newLocationCode != "C")
             {
-                IEnumerable<ActivityRuleDto> activityRuleDefaults = await _activityRuleRepo.GetDefaultRules();
+                IEnumerable<ActivityCodeRuleDto> activityRuleDefaults = await _activityRuleRepo.GetDefaultRules();
 
                 activityCode.FeatureType = null;
                 activityCode.SpThresholdLevel = null;
                 activityCode.IsSiteNumRequired = false;
-                foreach (ActivityRuleDto activityRule in activityRuleDefaults)
+                foreach (ActivityCodeRuleDto activityRule in activityRuleDefaults)
                 {
                     if (activityRule.ActivityRuleSet == "ROAD_LENGTH")
                     {
-                        activityCode.RoadLengthRule = activityRule.ActivityRuleId;
+                        activityCode.RoadLengthRule = activityRule.ActivityCodeRuleId;
                     }
                     else if (activityRule.ActivityRuleSet == "ROAD_CLASS")
                     {
-                        activityCode.RoadClassRule = activityRule.ActivityRuleId;
+                        activityCode.RoadClassRule = activityRule.ActivityCodeRuleId;
                     }
                     else if (activityRule.ActivityRuleSet == "SURFACE_TYPE")
                     {
-                        activityCode.SurfaceTypeRule = activityRule.ActivityRuleId;
+                        activityCode.SurfaceTypeRule = activityRule.ActivityCodeRuleId;
                     }
                 }
             }

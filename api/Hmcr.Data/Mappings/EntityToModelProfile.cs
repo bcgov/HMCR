@@ -112,7 +112,7 @@ namespace Hmcr.Data.Mappings
             CreateMap<HmrFeedbackMessage, FeedbackMessageDto>();
             CreateMap<HmrFeedbackMessage, FeedbackMessageUpdateDto>();
 
-            CreateMap<HmrActivityRule, ActivityRuleDto>();
+            CreateMap<HmrActivityCodeRule, ActivityCodeRuleDto>();
             
         }
     }

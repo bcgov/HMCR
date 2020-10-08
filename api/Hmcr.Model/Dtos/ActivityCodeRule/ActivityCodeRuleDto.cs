@@ -3,10 +3,10 @@ using System.Text.Json.Serialization;
 
 namespace Hmcr.Model.Dtos.ActivityRule
 {
-    public class ActivityRuleDto
+    public class ActivityCodeRuleDto
     {
         [JsonPropertyName("id")]
-        public decimal ActivityRuleId { get; set; }
+        public decimal ActivityCodeRuleId { get; set; }
         [JsonPropertyName("name")]
         public string ActivityRuleName { get; set; }
         public string ActivityRuleSet { get; set; }
