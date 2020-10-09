@@ -132,7 +132,7 @@ const ActivityAdmin = ({ maintenanceTypes, locationCodes, unitOfMeasures,showVal
     }
   };
 
-  const formModal = useFormModal('Activity', <EditActivityFormFields />, handleEditFormSubmit);
+  const formModal = useFormModal('Activity', <EditActivityFormFields />, handleEditFormSubmit,'xl');
 
   const data = searchData.data.map((item) => ({
     ...item,
