@@ -171,7 +171,6 @@ const EditActivityFormFields = ({
     });
 
     setValidationSchema(defaultValidationSchema);
-
     setLoading(true);
 
     if (formType === Constants.FORM_TYPE.ADD) {
@@ -182,6 +181,9 @@ const EditActivityFormFields = ({
         setInitialValues({
           ...response.data,
           endDate: response.data.endDate ? moment(response.data.endDate) : null,
+          minimumValue: response.data.minimumValue ? moment(response.data.minimumValue):'',
+          maximumValue: response.data.maximumValue? moment(response.data.maximumValue):'',
+          reportingFrequency: response.data.reportingFrequency? moment(response.data.reportingFrequency):'',
         });
 
         setValidLocationCodeValues(() => {
@@ -366,6 +368,9 @@ const mapStateToProps = (state) => {
     surfaceTypeRules: state.codeLookups.surfaceTypeRules,
     roadClassRules: state.codeLookups.roadClassRules,
     serviceAreas: Object.values(state.serviceAreas),
+    minimumValue: state.codeLookups.minimumValue,
+    maximumValue: state.codeLookups.maximumValue,
+    reportingFrequency: state.codeLookups.maximumValue,
   };
 };
 
