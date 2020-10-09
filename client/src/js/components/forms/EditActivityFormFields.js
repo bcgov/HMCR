@@ -52,13 +52,13 @@ const validationSchema = Yup.object({
     .test(
       'datamin',
       function() {
-        if (this.parent.minimumValue === null || this.parent.minimumValue ===undefined)
+        if (this.parent.minimumValue === null || this.parent.minimumValue === undefined || this.parent.minimumValue === '')
         {
           return true;
         }
-        if(this.parent.maximumValue !== null || this.parent.maximumValue !==undefined)
+        if(this.parent.maximumValue !== null || this.parent.maximumValue !== undefined || this.parent.maximumValue !== '')
         {
-          if(this.parent.maximumValue >0 && this.parent.maximumValue < this.parent.minimumValue)
+          if(this.parent.maximumValue > 0 && this.parent.maximumValue < this.parent.minimumValue)
         {
           return this.createError({
             message: 'Minimum value must be less than or equal to the Minimum value',
@@ -88,13 +88,13 @@ const validationSchema = Yup.object({
     .test(
       'datamax',
       function() {
-        if (this.parent.maximumValue === null || this.parent.maximumValue ===undefined)
+        if (this.parent.maximumValue === null || this.parent.maximumValue === undefined || this.parent.maximumValue === '')
         {
           return true;
         }
-        if (this.parent.minimumValue !== null || this.parent.minimumValue !==undefined)
+        if (this.parent.minimumValue !== null || this.parent.minimumValue !== undefined || this.parent.minimumValue === '')
         {
-          if(this.parent.maximumValue >0 && this.parent.maximumValue < this.parent.minimumValue)
+          if(this.parent.maximumValue > 0 && this.parent.maximumValue < this.parent.minimumValue)
           {
             return this.createError({
               message: 'Maximum value must be greater than or equal to the Minimum value',
