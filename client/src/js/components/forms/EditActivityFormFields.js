@@ -7,11 +7,14 @@ import SingleDateField from '../ui/SingleDateField';
 import MultiSelect from '../ui/MultiSelect';
 import SingleDropdownField from '../ui/SingleDropdownField';
 import PageSpinner from '../ui/PageSpinner';
+import FieldSet from '../ui/FieldSet';
+
 import { FormRow, FormInput, FormCheckboxInput } from './FormInputs';
 
 import * as api from '../../Api';
 import * as Constants from '../../Constants';
 import { Row,Col} from 'reactstrap';
+import { isInteger } from 'lodash';
 
 const defaultValues = {
   activityNumber: '',
@@ -46,17 +49,75 @@ const validationSchema = Yup.object({
   minimumValue: Yup.number()
     .min(0)
     .typeError('Must be number')
-    .when('unitOfMeasure', {
-      is:'site',
-      then:Yup.number().integer(),
-    }),
+    .test(
+      'datamin',
+      function() {
+        if (this.parent.minimumValue === null || this.parent.minimumValue ===undefined)
+        {
+          return true;
+        }
+        if(this.parent.maximumValue !== null || this.parent.maximumValue !==undefined)
+        {
+          if(this.parent.maximumValue >0 && this.parent.maximumValue < this.parent.minimumValue)
+        {
+          return this.createError({
+            message: 'Minimum value must be less than or equal to the Minimum value',
+            path: 'minimumValue',
+            });
+        }
+        }
+        if (
+          this.parent.unitOfMeasure === 'site'
+        ||this.parent.unitOfMeasure === 'num'
+        ||this.parent.unitOfMeasure === 'ea')
+        { 
+          if(!isInteger(this.parent.minimumValue))
+          {
+            return this.createError({
+              message: 'Minimum value must be whole number',
+              path: 'minimumValue',
+              });
+          }
+        }
+        return true;
+      }
+    ),
   maximumValue: Yup.number()
     .min(0)
     .typeError('Must be number')
-    .when('unitOfMeasure', {
-      is:'site',
-      then:Yup.number().integer(),
-    }),
+    .test(
+      'datamax',
+      function() {
+        if (this.parent.maximumValue === null || this.parent.maximumValue ===undefined)
+        {
+          return true;
+        }
+        if (this.parent.minimumValue !== null || this.parent.minimumValue !==undefined)
+        {
+          if(this.parent.maximumValue >0 && this.parent.maximumValue < this.parent.minimumValue)
+          {
+            return this.createError({
+              message: 'Maximum value must be greater than or equal to the Minimum value',
+              path: 'maximumValue',
+            });
+          }
+        }
+        if (
+          this.parent.unitOfMeasure === 'site'
+        ||this.parent.unitOfMeasure === 'num'
+        ||this.parent.unitOfMeasure === 'ea')
+        { 
+          if(!isInteger(this.parent.maximumValue))
+          {
+            return this.createError({
+            message: 'Maximum value must be whole number',
+            path: 'maximumValue',
+            });
+          }
+        }
+        return true;
+      }
+    ),
   reportingFrequency: Yup.number()
     .min(0)
     .max(365)
@@ -208,26 +269,8 @@ const EditActivityFormFields = ({
       <Row>
         <Col className='col colmargin1'>
           <FormRow name="serviceAreaNumbers" label="Service Areas*">
-            <MultiSelect selectClass ="form-control servicearea-large" items={serviceAreas} name="serviceAreaNumbers" showSelectAll={true} />
+            <MultiSelect items={serviceAreas} name="serviceAreaNumbers" showSelectAll={true} selectClass="form-control servicearea-large"/>
           </FormRow>
-        </Col>
-        <Col>
-          <fieldset className='form-control fieldset'>
-           <legend className='form-control legend'>Analytical Validation</legend>
-            <FormRow name="minimumValue" label="Minimum Value">
-              <FormInput type="text" name="minimumValue" placeholder="Minimum Value" />
-            </FormRow>
-            <FormRow name="maximumValue" label="Maximum Value">
-              <FormInput type="text" name="maximumValue" placeholder="Maximum Value" />
-            </FormRow>
-            <FormRow name="reportingFrequency" label="Reporting Frequency (Minimum # Days)">
-              <FormInput type="text" name="reportingFrequency" placeholder="ReportingFrequency (Minimum # Days)" />
-            </FormRow>
-          </fieldset>
-        </Col>
-      </Row>
-      <Row>
-        <Col>
           <FormRow name="locationCodeId" label="Location Code*">
             <SingleDropdownField
               defaultTitle="Select Location Code"
@@ -236,8 +279,25 @@ const EditActivityFormFields = ({
               disabled={disableLocationCodeEdit}
             />
           </FormRow>
-            {formValues.locationCodeId === locationCodeCId && (
-              <React.Fragment>
+        </Col>
+        <Col>
+          <FieldSet legendname = "Analytical Validation">
+            <FormRow name="minimumValue" label="Minimum Value">
+              <FormInput type="text" name="minimumValue" placeholder="Minimum Value"  />
+            </FormRow>
+            <FormRow name="maximumValue" label="Maximum Value">
+              <FormInput type="text" name="maximumValue" placeholder="Maximum Value" />
+            </FormRow>
+            <FormRow name="reportingFrequency" label="Reporting Frequency">
+              <FormInput type="text" name="reportingFrequency" placeholder="ReportingFrequency (Minimum # Days)" />
+            </FormRow>
+          </FieldSet>
+        </Col>
+      </Row>
+      {formValues.locationCodeId === locationCodeCId && (
+          <React.Fragment>
+            <Row>
+              <Col  className='col colmargin1'>           
                 <FormRow name="featureType" label="Feature Type*">
                   <SingleDropdownField defaultTitle="Select Feature Type" items={validFeatureTypeValues} name="featureType" />
                 </FormRow>
@@ -248,56 +308,49 @@ const EditActivityFormFields = ({
                     name="spThresholdLevel"
                   />
                 </FormRow>
-                </React.Fragment>
-            )}
-            </Col>
-            <Col>
-      {formValues.locationCodeId === locationCodeCId && (
-          <React.Fragment>
+                <FormRow name="isSiteNumRequired" label="Site Number Required">
+                  <FormCheckboxInput name="isSiteNumRequired" />
+                </FormRow>
+              </Col>
+              <Col>
+                <FieldSet legendname = "Highway Attribution Validation">
+                  <FormRow name="roadLengthRule" label="Road Length Validation Rule">
+                    <SingleDropdownField
+                      defaultTitle="Not Applicable"
+                      items={roadLengthRules}
+                      name="roadLengthRule"
+                    />
+                  </FormRow>
+                  <FormRow name="surfaceTypeRule" label="Surface Type Rule">
+                    <SingleDropdownField
+                      defaultTitle="Not Applicable"
+                      items={surfaceTypeRules}
+                      name="surfaceTypeRule"
+                    />
+                  </FormRow>
+                  <FormRow name="roadClassRule" label="Road Class Rule">
+                    <SingleDropdownField
+                      defaultTitle="Not Applicable"
+                      items={roadClassRules}
+                      name="roadClassRule"
+                    />
+                  </FormRow>
+                </FieldSet>
+              </Col>
+            </Row>
             
-          <FormRow name="roadLengthRule" label="Road Length Validation Rule">
-            <SingleDropdownField
-              defaultTitle="Not Applicable"
-              items={roadLengthRules}
-              name="roadLengthRule"
-            />
-          </FormRow>
-          <FormRow name="surfaceTypeRule" label="Surface Type Rule">
-            <SingleDropdownField
-              defaultTitle="Not Applicable"
-              items={surfaceTypeRules}
-              name="surfaceTypeRule"
-            />
-          </FormRow>
-            <FormRow name="roadClassRule" label="Road Class Rule">
-            <SingleDropdownField
-              defaultTitle="Not Applicable"
-              items={roadClassRules}
-              name="roadClassRule"
-            />
-          </FormRow>
-         
-        </React.Fragment>
-      )}
-       </Col>
-       </Row>
-       <Row>
-        <Col>
-        {formValues.locationCodeId === locationCodeCId && (
-          <React.Fragment>
-          <FormRow name="isSiteNumRequired" label="Site Number Required">
-            <FormCheckboxInput name="isSiteNumRequired" />
-          </FormRow>
           </React.Fragment>
-      )}
-        </Col>
-         <Col>
-         
-          <FormRow name="endDate" label="End Date">
-            <SingleDateField name="endDate" placeholder="End Date" />
-          </FormRow>
-        </Col>
-      </Row>
+         )}
+       
+       <Row>
+          <Col>
+          </Col>
+          <Col>
+            <FormRow name="endDate" label="End Date">
+              <SingleDateField name="endDate" placeholder="End Date" />
+            </FormRow>
+          </Col>
+        </Row>
     </React.Fragment>
   );
 };
