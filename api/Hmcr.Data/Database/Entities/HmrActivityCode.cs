@@ -29,7 +29,13 @@ namespace Hmcr.Data.Database.Entities
         public DateTime DbAuditCreateTimestamp { get; set; }
         public string DbAuditLastUpdateUserid { get; set; }
         public DateTime DbAuditLastUpdateTimestamp { get; set; }
+        public decimal RoadClassRule { get; set; }
+        public decimal RoadLengthRule { get; set; }
+        public decimal SurfaceTypeRule { get; set; }
 
         public virtual HmrLocationCode LocationCode { get; set; }
+        public virtual HmrActivityCodeRule RoadClassRuleNavigation { get; set; }
+        public virtual HmrActivityCodeRule RoadLengthRuleNavigation { get; set; }
+        public virtual HmrActivityCodeRule SurfaceTypeRuleNavigation { get; set; }
     }
 }
