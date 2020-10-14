@@ -147,6 +147,9 @@ const EditActivityFormFields = ({
   const [disableLocationCodeEdit, setDisableLocationCodeEdit] = useState(false);
   const [validFeatureTypeValues, setValidFeatureTypeValues] = useState(featureTypes);
   const locationCodeCId = locationCodes.find((code) => code.name === 'C').id;
+  const roadLengthRuleDefaultId = roadLengthRules.find((rlr) => rlr.name === 'Not Applicable').id;
+  const surfaceTypeRuleDefaultId = surfaceTypeRules.find((str) => str.name === 'Not Applicable').id;
+  const roadClassRuleDefaultId =roadClassRules.find((rcr) => rcr.name === 'Not Applicable').id;
 
   useEffect(() => {
     // Add validation for point line feature when location code is C.
@@ -169,11 +172,13 @@ const EditActivityFormFields = ({
         then: Yup.boolean().required('Required'),
       }),
     });
-
     setValidationSchema(defaultValidationSchema);
     setLoading(true);
 
     if (formType === Constants.FORM_TYPE.ADD) {
+      defaultValues.roadLengthRule = roadLengthRuleDefaultId;
+      defaultValues.surfaceTypeRule = surfaceTypeRuleDefaultId;
+      defaultValues.roadClassRule = roadClassRuleDefaultId;
       setInitialValues(defaultValues);
       setLoading(false);
     } else {
@@ -194,7 +199,7 @@ const EditActivityFormFields = ({
 
           return locationCodes;
         });
-
+        
         setDisableLocationCodeEdit(() => {
           if (formType === Constants.FORM_TYPE.EDIT) {
             if (response.data.locationCodeId === locationCodes.find((code) => code.name === 'A').id) return true;
@@ -291,7 +296,7 @@ const EditActivityFormFields = ({
               <FormInput type="text" name="maximumValue" placeholder="Maximum Value" />
             </FormRow>
             <FormRow name="reportingFrequency" label="Reporting Frequency">
-              <FormInput type="text" name="reportingFrequency" placeholder="ReportingFrequency (Minimum # Days)" />
+              <FormInput type="text" name="reportingFrequency" placeholder="Minimum # Days" />
             </FormRow>
           </FieldSet>
         </Col>
@@ -315,7 +320,7 @@ const EditActivityFormFields = ({
                 </FormRow>
               </Col>
               <Col>
-                <FieldSet legendname = "Highway Attribution Validation">
+                <FieldSet legendname = "Highway Attribute Validation">
                   <FormRow name="roadLengthRule" label="Road Length Validation Rule">
                     <SingleDropdownField
                       defaultTitle="Not Applicable"
