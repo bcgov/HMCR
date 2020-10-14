@@ -5,6 +5,11 @@ namespace Hmcr.Data.Database.Entities
 {
     public partial class HmrActivityCode
     {
+        public HmrActivityCode()
+        {
+            HmrServiceAreaActivities = new HashSet<HmrServiceAreaActivity>();
+        }
+
         public decimal ActivityCodeId { get; set; }
         public string ActivityNumber { get; set; }
         public string ActivityName { get; set; }
@@ -32,10 +37,14 @@ namespace Hmcr.Data.Database.Entities
         public decimal RoadClassRule { get; set; }
         public decimal RoadLengthRule { get; set; }
         public decimal SurfaceTypeRule { get; set; }
+        public decimal? MinValue { get; set; }
+        public decimal? MaxValue { get; set; }
+        public int? ReportingFrequency { get; set; }
 
         public virtual HmrLocationCode LocationCode { get; set; }
         public virtual HmrActivityCodeRule RoadClassRuleNavigation { get; set; }
         public virtual HmrActivityCodeRule RoadLengthRuleNavigation { get; set; }
         public virtual HmrActivityCodeRule SurfaceTypeRuleNavigation { get; set; }
+        public virtual ICollection<HmrServiceAreaActivity> HmrServiceAreaActivities { get; set; }
     }
 }
