@@ -41,7 +41,7 @@ const tableColumns = [
   { heading: 'Active', key: 'isActive', nosort: true },
 ];
 
-const ActivityAdmin = ({ maintenanceTypes, locationCodes, unitOfMeasures, showValidationErrorDialog }) => {
+const ActivityAdmin = ({ maintenanceTypes, locationCodes, unitOfMeasures,showValidationErrorDialog }) => {
   const location = useLocation();
   const searchData = useSearchData(defaultSearchOptions);
   const [searchInitialValues, setSearchInitialValues] = useState(defaultSearchFormValues);
@@ -105,8 +105,11 @@ const ActivityAdmin = ({ maintenanceTypes, locationCodes, unitOfMeasures, showVa
         values.featureType = null;
         values.isSiteNumRequired = false;
         values.thresholdLevels = null;
+        values.roadClassRule = 0;
+        values.roadLengthRule = 0;
+        values.surfaceTypeRule = 0;
       }
-
+      
       if (formType === Constants.FORM_TYPE.ADD) {
         api
           .postActivityCode(values)
@@ -129,7 +132,7 @@ const ActivityAdmin = ({ maintenanceTypes, locationCodes, unitOfMeasures, showVa
     }
   };
 
-  const formModal = useFormModal('Activity', <EditActivityFormFields />, handleEditFormSubmit);
+  const formModal = useFormModal('Activity', <EditActivityFormFields />, handleEditFormSubmit,'xl');
 
   const data = searchData.data.map((item) => ({
     ...item,

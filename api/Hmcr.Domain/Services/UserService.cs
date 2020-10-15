@@ -93,7 +93,7 @@ namespace Hmcr.Domain.Services
             var (error, account) = await _bceid.GetBceidAccountCachedAsync(null, user.Username, user.UserType, _currentUser.UserGuid, _currentUser.UserType);
             if (error.IsNotEmpty())
             {
-                throw new HmcrException($"Unable to retrieve User[{user.Username} ({user.UserType})] from BCeID Service.");
+                throw new HmcrException($"Unable to retrieve User[{user.Username}]-[{user.UserType}] from BCeID Service.");
             }
 
             user.Email = account.Email;
@@ -102,7 +102,7 @@ namespace Hmcr.Domain.Services
 
             if (await _userRepo.DoesUsernameExistAsync(user.Username, user.UserType))
             {
-                errors.AddItem(Fields.Username, $"Username [{user.Username} ({user.UserType})] already exists.");
+                errors.AddItem(Fields.Username, $"Username [{user.Username}]-[{user.UserType}] already exists.");
             }
 
             if (errors.Count > 0)

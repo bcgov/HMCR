@@ -64,6 +64,8 @@ namespace Hmcr.Data.Repositories
             var activityCodeEntity = new HmrActivityCode();
 
             Mapper.Map(activityCode, activityCodeEntity);
+            
+            //TODO: add in saving of Service Areas
 
             await DbSet.AddAsync(activityCodeEntity);
 
@@ -73,6 +75,8 @@ namespace Hmcr.Data.Repositories
         public async Task<ActivityCodeSearchDto> GetActivityCodeAsync(decimal id)
         {
             var activityCodeEntity = await DbSet.AsNoTracking()
+                //todo ServiceArea
+                //.Include(x => x.HmrServiceAreaRules) //new table
                 .FirstOrDefaultAsync(ac => ac.ActivityCodeId == id);
 
             if (activityCodeEntity == null)
@@ -81,6 +85,26 @@ namespace Hmcr.Data.Repositories
             var activityCode = Mapper.Map<ActivityCodeSearchDto>(activityCodeEntity);
 
             activityCode.IsReferenced = await _workReportRepo.IsActivityNumberInUseAsync(activityCode.ActivityNumber);
+
+            /*var activityRules = activityCodeEntity
+                .HmrActivityCodeRules
+                .Select(s => s.ActivityCodeRuleId)
+                .ToList();
+
+            var activityRules = new List<decimal> { 1, 3 };
+            activityCode.ActivityRuleIds = activityRules;
+            activityCode.RoadLengthRule = 2;
+            activityCode.SurfaceTypeRule = 3;
+            activityCode.RoadClassRule = 1;*/
+
+            //TODO: pull the service areas
+            //var serviceAreasNumbers =
+            //    activityCodeEntity
+            //    .HmrServiceAreaRules //new table
+            //    .Select(s => s.ServiceAreaNumber)
+            //    .ToList();
+            var serviceAreasNumbers = new List<decimal> { 1, 9 };
+            activityCode.ServiceAreaNumbers = serviceAreasNumbers;
 
             return activityCode;
         }
@@ -143,6 +167,8 @@ namespace Hmcr.Data.Repositories
             activityCode.EndDate = activityCode.EndDate?.Date;
 
             Mapper.Map(activityCode, activityCodeEntity);
+
+            //TODO: call function to sync service area changes
         }
 
         public async Task DeleteActivityCodeAsync(decimal id)
@@ -166,5 +192,6 @@ namespace Hmcr.Data.Repositories
                     yield return activityNumber;
             }
         }
+
     }
 }

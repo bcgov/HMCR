@@ -7,6 +7,9 @@ import {
   FETCH_LOCATION_CODES,
   FETCH_ACTIVITY_CODES_DROPDOWN,
   FETCH_THRESHOLD_LEVELS,
+  FETCH_ROAD_LENGTH_RULES,
+  FETCH_SURFACE_TYPE_RULES,
+  FETCH_ROAD_CLASS_RULES
 } from '../actions/types';
 
 const defaultState = {
@@ -16,6 +19,9 @@ const defaultState = {
   locationCodes: [],
   activityCodes: [],
   thresholdLevels: [],
+  roadLengthRules: [],
+  surfaceTypeRules: [],
+  roadClassRules: [],
 };
 
 export default (state = defaultState, action) => {
@@ -32,6 +38,12 @@ export default (state = defaultState, action) => {
       return { ...state, activityCodes: action.payload };
     case FETCH_THRESHOLD_LEVELS:
       return { ...state, thresholdLevels: action.payload };
+    case FETCH_ROAD_LENGTH_RULES:
+      return { ...state, roadLengthRules: _.orderBy(action.payload, ['displayOrder']) };
+    case FETCH_SURFACE_TYPE_RULES:
+        return { ...state, surfaceTypeRules: _.orderBy(action.payload, ['displayOrder']) };
+    case FETCH_ROAD_CLASS_RULES:
+        return { ...state, roadClassRules: _.orderBy(action.payload, ['displayOrder']) };
     default:
       return state;
   }

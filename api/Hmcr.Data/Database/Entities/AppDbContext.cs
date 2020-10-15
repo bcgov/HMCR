@@ -17,6 +17,7 @@ namespace Hmcr.Data.Database.Entities
 
         public virtual DbSet<HmrActivityCode> HmrActivityCodes { get; set; }
         public virtual DbSet<HmrActivityCodeHist> HmrActivityCodeHists { get; set; }
+        public virtual DbSet<HmrActivityCodeRule> HmrActivityCodeRules { get; set; }
         public virtual DbSet<HmrCodeLookup> HmrCodeLookups { get; set; }
         public virtual DbSet<HmrCodeLookupHist> HmrCodeLookupHists { get; set; }
         public virtual DbSet<HmrContractTerm> HmrContractTerms { get; set; }
@@ -39,6 +40,8 @@ namespace Hmcr.Data.Database.Entities
         public virtual DbSet<HmrRolePermission> HmrRolePermissions { get; set; }
         public virtual DbSet<HmrRolePermissionHist> HmrRolePermissionHists { get; set; }
         public virtual DbSet<HmrServiceArea> HmrServiceAreas { get; set; }
+        public virtual DbSet<HmrServiceAreaActivity> HmrServiceAreaActivities { get; set; }
+        public virtual DbSet<HmrServiceAreaActivityHist> HmrServiceAreaActivityHists { get; set; }
         public virtual DbSet<HmrServiceAreaHist> HmrServiceAreaHists { get; set; }
         public virtual DbSet<HmrServiceAreaUser> HmrServiceAreaUsers { get; set; }
         public virtual DbSet<HmrServiceAreaUserHist> HmrServiceAreaUserHists { get; set; }
@@ -61,7 +64,7 @@ namespace Hmcr.Data.Database.Entities
         public virtual DbSet<HmrWorkReport> HmrWorkReports { get; set; }
         public virtual DbSet<HmrWorkReportHist> HmrWorkReportHists { get; set; }
         public virtual DbSet<HmrWorkReportVw> HmrWorkReportVws { get; set; }
-
+        
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<HmrActivityCode>(entity =>
@@ -212,11 +215,33 @@ namespace Hmcr.Data.Database.Entities
                     .IsUnicode(false)
                     .HasComment(" Classification of maintenance activities which specifies detail of submission or reporting requirements (ie: Routine, Quantified, Additional).   Routine - reoccuring maintenace activities that require less detailed reporting  Quantified - maintenance activities that require more detailed reporting  Additional - activities that exceed agreement threasholds");
 
+                entity.Property(e => e.MaxValue)
+                    .HasColumnName("MAX_VALUE")
+                    .HasColumnType("numeric(11, 2)");
+
+                entity.Property(e => e.MinValue)
+                    .HasColumnName("MIN_VALUE")
+                    .HasColumnType("numeric(11, 2)");
+
+                entity.Property(e => e.ReportingFrequency).HasColumnName("REPORTING_FREQUENCY");
+
+                entity.Property(e => e.RoadClassRule)
+                    .HasColumnName("ROAD_CLASS_RULE")
+                    .HasColumnType("numeric(9, 0)");
+
+                entity.Property(e => e.RoadLengthRule)
+                    .HasColumnName("ROAD_LENGTH_RULE")
+                    .HasColumnType("numeric(9, 0)");
+
                 entity.Property(e => e.SpThresholdLevel)
                     .HasColumnName("SP_THRESHOLD_LEVEL")
                     .HasMaxLength(30)
                     .IsUnicode(false)
                     .HasComment("Determines the tolerated spatial variance allowed when comparing submitted activity coordinates vs the related Highway Unique road segment. Each level is defined within the CODE_LOOKUP table under the THRSHLD_SP_VAR code");
+
+                entity.Property(e => e.SurfaceTypeRule)
+                    .HasColumnName("SURFACE_TYPE_RULE")
+                    .HasColumnType("numeric(9, 0)");
 
                 entity.Property(e => e.UnitOfMeasure)
                     .IsRequired()
@@ -230,6 +255,24 @@ namespace Hmcr.Data.Database.Entities
                     .HasForeignKey(d => d.LocationCodeId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("HMR_ACT_CODE_LOC_CODE_FK");
+
+                entity.HasOne(d => d.RoadClassRuleNavigation)
+                    .WithMany(p => p.HmrActivityCodeRoadClassRuleNavigations)
+                    .HasForeignKey(d => d.RoadClassRule)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("FK__HMR_ACTIV__ROAD___1C3D2329");
+
+                entity.HasOne(d => d.RoadLengthRuleNavigation)
+                    .WithMany(p => p.HmrActivityCodeRoadLengthRuleNavigations)
+                    .HasForeignKey(d => d.RoadLengthRule)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("FK__HMR_ACTIV__ROAD___1D314762");
+
+                entity.HasOne(d => d.SurfaceTypeRuleNavigation)
+                    .WithMany(p => p.HmrActivityCodeSurfaceTypeRuleNavigations)
+                    .HasForeignKey(d => d.SurfaceTypeRule)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("FK__HMR_ACTIV__SURFA__1E256B9B");
             });
 
             modelBuilder.Entity<HmrActivityCodeHist>(entity =>
@@ -356,16 +399,95 @@ namespace Hmcr.Data.Database.Entities
                     .HasMaxLength(12)
                     .IsUnicode(false);
 
+                entity.Property(e => e.RoadClassRule)
+                    .HasColumnName("ROAD_CLASS_RULE")
+                    .HasColumnType("numeric(9, 0)");
+
+                entity.Property(e => e.RoadLengthRule)
+                    .HasColumnName("ROAD_LENGTH_RULE")
+                    .HasColumnType("numeric(9, 0)");
+
                 entity.Property(e => e.SpThresholdLevel)
                     .HasColumnName("SP_THRESHOLD_LEVEL")
                     .HasMaxLength(30)
                     .IsUnicode(false);
+
+                entity.Property(e => e.SurfaceTypeRule)
+                    .HasColumnName("SURFACE_TYPE_RULE")
+                    .HasColumnType("numeric(9, 0)");
 
                 entity.Property(e => e.UnitOfMeasure)
                     .IsRequired()
                     .HasColumnName("UNIT_OF_MEASURE")
                     .HasMaxLength(12)
                     .IsUnicode(false);
+            });
+
+            modelBuilder.Entity<HmrActivityCodeRule>(entity =>
+            {
+                entity.HasKey(e => e.ActivityCodeRuleId)
+                    .HasName("PK__HMR_ACTI__E4140F7D39105D95");
+
+                entity.ToTable("HMR_ACTIVITY_CODE_RULE");
+
+                entity.Property(e => e.ActivityCodeRuleId)
+                    .HasColumnName("ACTIVITY_CODE_RULE_ID")
+                    .HasColumnType("numeric(9, 0)")
+                    .HasDefaultValueSql("(NEXT VALUE FOR [HMR_ACTIVITY_CODE_RULE_ID_SEQ])");
+
+                entity.Property(e => e.ActivityRuleExecName)
+                    .IsRequired()
+                    .HasColumnName("ACTIVITY_RULE_EXEC_NAME")
+                    .HasMaxLength(150)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.ActivityRuleName)
+                    .IsRequired()
+                    .HasColumnName("ACTIVITY_RULE_NAME")
+                    .HasMaxLength(150);
+
+                entity.Property(e => e.ActivityRuleSet)
+                    .IsRequired()
+                    .HasColumnName("ACTIVITY_RULE_SET")
+                    .HasMaxLength(20)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.ConcurrencyControlNumber)
+                    .HasColumnName("CONCURRENCY_CONTROL_NUMBER")
+                    .HasDefaultValueSql("((1))");
+
+                entity.Property(e => e.DbAuditCreateTimestamp)
+                    .HasColumnName("DB_AUDIT_CREATE_TIMESTAMP")
+                    .HasColumnType("datetime")
+                    .HasDefaultValueSql("(getutcdate())");
+
+                entity.Property(e => e.DbAuditCreateUserid)
+                    .IsRequired()
+                    .HasColumnName("DB_AUDIT_CREATE_USERID")
+                    .HasMaxLength(30)
+                    .IsUnicode(false)
+                    .HasDefaultValueSql("(user_name())");
+
+                entity.Property(e => e.DbAuditLastUpdateTimestamp)
+                    .HasColumnName("DB_AUDIT_LAST_UPDATE_TIMESTAMP")
+                    .HasColumnType("datetime")
+                    .HasDefaultValueSql("(getutcdate())");
+
+                entity.Property(e => e.DbAuditLastUpdateUserid)
+                    .IsRequired()
+                    .HasColumnName("DB_AUDIT_LAST_UPDATE_USERID")
+                    .HasMaxLength(30)
+                    .IsUnicode(false)
+                    .HasDefaultValueSql("(user_name())");
+
+                entity.Property(e => e.DisplayOrder)
+                    .HasColumnName("DISPLAY_ORDER")
+                    .HasColumnType("numeric(3, 0)");
+
+                entity.Property(e => e.EndDate)
+                    .HasColumnName("END_DATE")
+                    .HasColumnType("datetime")
+                    .HasDefaultValueSql("(getutcdate())");
             });
 
             modelBuilder.Entity<HmrCodeLookup>(entity =>
@@ -462,6 +584,8 @@ namespace Hmcr.Data.Database.Entities
                     .HasColumnName("END_DATE")
                     .HasColumnType("datetime")
                     .HasComment("The latest date submissions will be accepted.");
+
+                entity.Property(e => e.IsIntegerOnly).HasColumnName("IS_INTEGER_ONLY");
             });
 
             modelBuilder.Entity<HmrCodeLookupHist>(entity =>
@@ -550,8 +674,7 @@ namespace Hmcr.Data.Database.Entities
             modelBuilder.Entity<HmrContractTerm>(entity =>
             {
                 entity.HasKey(e => e.ContractTermId)
-                    .HasName("HMR_CNRT_TRM_PK")
-                    .IsClustered(false);
+                    .HasName("HMR_CNRT_TRM_PK");
 
                 entity.ToTable("HMR_CONTRACT_TERM");
 
@@ -2319,6 +2442,10 @@ namespace Hmcr.Data.Database.Entities
                     .HasColumnName("END_OFFSET")
                     .HasColumnType("numeric(7, 3)");
 
+                entity.Property(e => e.EndVariance)
+                    .HasColumnName("END_VARIANCE")
+                    .HasColumnType("numeric(25, 20)");
+
                 entity.Property(e => e.EstimatedRockfallDate)
                     .HasColumnName("ESTIMATED_ROCKFALL_DATE")
                     .HasColumnType("date");
@@ -2356,6 +2483,12 @@ namespace Hmcr.Data.Database.Entities
                 entity.Property(e => e.HighwayUniqueName)
                     .HasColumnName("HIGHWAY_UNIQUE_NAME")
                     .HasMaxLength(255)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.IsOverSpThreshold)
+                    .IsRequired()
+                    .HasColumnName("IS_OVER_SP_THRESHOLD")
+                    .HasMaxLength(1)
                     .IsUnicode(false);
 
                 entity.Property(e => e.Landmark)
@@ -2440,6 +2573,10 @@ namespace Hmcr.Data.Database.Entities
                     .HasColumnName("START_OFFSET")
                     .HasColumnType("numeric(7, 3)");
 
+                entity.Property(e => e.StartVariance)
+                    .HasColumnName("START_VARIANCE")
+                    .HasColumnType("numeric(25, 20)");
+
                 entity.Property(e => e.SubmissionObjectId)
                     .HasColumnName("SUBMISSION_OBJECT_ID")
                     .HasColumnType("numeric(9, 0)");
@@ -2458,6 +2595,10 @@ namespace Hmcr.Data.Database.Entities
                     .HasColumnName("VEHICLE_DAMAGE")
                     .HasMaxLength(1)
                     .IsUnicode(false);
+
+                entity.Property(e => e.WarningSpThreshold)
+                    .HasColumnName("WARNING_SP_THRESHOLD")
+                    .HasColumnType("numeric(12, 6)");
             });
 
             modelBuilder.Entity<HmrRole>(entity =>
@@ -2992,6 +3133,218 @@ namespace Hmcr.Data.Database.Entities
                     .HasForeignKey(d => d.DistrictNumber)
                     .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("HMR_SRV_AREA_DISTRICT_FK");
+            });
+
+            modelBuilder.Entity<HmrServiceAreaActivity>(entity =>
+            {
+                entity.HasKey(e => e.ServiceAreaActivityId)
+                    .HasName("PK__HMR_SERV__56CBEAED34A3F264");
+
+                entity.ToTable("HMR_SERVICE_AREA_ACTIVITY");
+
+                entity.HasIndex(e => e.ActivityCodeId)
+                    .HasName("IDX_HMR_SVC_AR_ACT_ACT_CD");
+
+                entity.HasIndex(e => e.ServiceAreaNumber)
+                    .HasName("IDX_HMR_SVC_AR_ACT_SVC_AREA");
+
+                entity.HasIndex(e => new { e.ServiceAreaNumber, e.ActivityCodeId })
+                    .HasName("UQ__HMR_SERV__307B5DE25CCB5D28")
+                    .IsUnique();
+
+                entity.Property(e => e.ServiceAreaActivityId)
+                    .HasColumnName("SERVICE_AREA_ACTIVITY_ID")
+                    .HasColumnType("numeric(9, 0)")
+                    .HasDefaultValueSql("(NEXT VALUE FOR [HMR_SERVICE_AREA_ACTIVITY_ID_SEQ])");
+
+                entity.Property(e => e.ActivityCodeId)
+                    .HasColumnName("ACTIVITY_CODE_ID")
+                    .HasColumnType("numeric(9, 0)");
+
+                entity.Property(e => e.AppCreateTimestamp)
+                    .HasColumnName("APP_CREATE_TIMESTAMP")
+                    .HasColumnType("datetime");
+
+                entity.Property(e => e.AppCreateUserDirectory)
+                    .IsRequired()
+                    .HasColumnName("APP_CREATE_USER_DIRECTORY")
+                    .HasMaxLength(12)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.AppCreateUserGuid).HasColumnName("APP_CREATE_USER_GUID");
+
+                entity.Property(e => e.AppCreateUserid)
+                    .IsRequired()
+                    .HasColumnName("APP_CREATE_USERID")
+                    .HasMaxLength(30)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.AppLastUpdateTimestamp)
+                    .HasColumnName("APP_LAST_UPDATE_TIMESTAMP")
+                    .HasColumnType("datetime");
+
+                entity.Property(e => e.AppLastUpdateUserDirectory)
+                    .IsRequired()
+                    .HasColumnName("APP_LAST_UPDATE_USER_DIRECTORY")
+                    .HasMaxLength(12)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.AppLastUpdateUserGuid).HasColumnName("APP_LAST_UPDATE_USER_GUID");
+
+                entity.Property(e => e.AppLastUpdateUserid)
+                    .IsRequired()
+                    .HasColumnName("APP_LAST_UPDATE_USERID")
+                    .HasMaxLength(30)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.ConcurrencyControlNumber)
+                    .HasColumnName("CONCURRENCY_CONTROL_NUMBER")
+                    .HasDefaultValueSql("((1))");
+
+                entity.Property(e => e.DbAuditCreateTimestamp)
+                    .HasColumnName("DB_AUDIT_CREATE_TIMESTAMP")
+                    .HasColumnType("datetime")
+                    .HasDefaultValueSql("(getutcdate())");
+
+                entity.Property(e => e.DbAuditCreateUserid)
+                    .IsRequired()
+                    .HasColumnName("DB_AUDIT_CREATE_USERID")
+                    .HasMaxLength(30)
+                    .IsUnicode(false)
+                    .HasDefaultValueSql("(user_name())");
+
+                entity.Property(e => e.DbAuditLastUpdateTimestamp)
+                    .HasColumnName("DB_AUDIT_LAST_UPDATE_TIMESTAMP")
+                    .HasColumnType("datetime")
+                    .HasDefaultValueSql("(getutcdate())");
+
+                entity.Property(e => e.DbAuditLastUpdateUserid)
+                    .IsRequired()
+                    .HasColumnName("DB_AUDIT_LAST_UPDATE_USERID")
+                    .HasMaxLength(30)
+                    .IsUnicode(false)
+                    .HasDefaultValueSql("(user_name())");
+
+                entity.Property(e => e.EndDate)
+                    .HasColumnName("END_DATE")
+                    .HasColumnType("datetime");
+
+                entity.Property(e => e.ServiceAreaNumber)
+                    .HasColumnName("SERVICE_AREA_NUMBER")
+                    .HasColumnType("numeric(9, 0)");
+
+                entity.HasOne(d => d.ActivityCode)
+                    .WithMany(p => p.HmrServiceAreaActivities)
+                    .HasForeignKey(d => d.ActivityCodeId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("FK__HMR_SERVI__ACTIV__65AC084E");
+
+                entity.HasOne(d => d.ServiceAreaNumberNavigation)
+                    .WithMany(p => p.HmrServiceAreaActivities)
+                    .HasForeignKey(d => d.ServiceAreaNumber)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("FK__HMR_SERVI__SERVI__64B7E415");
+            });
+
+            modelBuilder.Entity<HmrServiceAreaActivityHist>(entity =>
+            {
+                entity.HasKey(e => e.ServiceAreaActivityHistId)
+                    .HasName("PK__HMR_SERV__08C5944CC6D91E3A");
+
+                entity.ToTable("HMR_SERVICE_AREA_ACTIVITY_HIST");
+
+                entity.Property(e => e.ServiceAreaActivityHistId)
+                    .HasColumnName("SERVICE_AREA_ACTIVITY_HIST_ID")
+                    .HasDefaultValueSql("(NEXT VALUE FOR [HMR_SERVICE_AREA_ACTIVITY_H_ID_SEQ])");
+
+                entity.Property(e => e.ActivityCodeId)
+                    .HasColumnName("ACTIVITY_CODE_ID")
+                    .HasColumnType("numeric(9, 0)");
+
+                entity.Property(e => e.AppCreateTimestamp)
+                    .HasColumnName("APP_CREATE_TIMESTAMP")
+                    .HasColumnType("datetime");
+
+                entity.Property(e => e.AppCreateUserDirectory)
+                    .IsRequired()
+                    .HasColumnName("APP_CREATE_USER_DIRECTORY")
+                    .HasMaxLength(12)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.AppCreateUserGuid).HasColumnName("APP_CREATE_USER_GUID");
+
+                entity.Property(e => e.AppCreateUserid)
+                    .IsRequired()
+                    .HasColumnName("APP_CREATE_USERID")
+                    .HasMaxLength(30)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.AppLastUpdateTimestamp)
+                    .HasColumnName("APP_LAST_UPDATE_TIMESTAMP")
+                    .HasColumnType("datetime");
+
+                entity.Property(e => e.AppLastUpdateUserDirectory)
+                    .IsRequired()
+                    .HasColumnName("APP_LAST_UPDATE_USER_DIRECTORY")
+                    .HasMaxLength(12)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.AppLastUpdateUserGuid).HasColumnName("APP_LAST_UPDATE_USER_GUID");
+
+                entity.Property(e => e.AppLastUpdateUserid)
+                    .IsRequired()
+                    .HasColumnName("APP_LAST_UPDATE_USERID")
+                    .HasMaxLength(30)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.ConcurrencyControlNumber)
+                    .HasColumnName("CONCURRENCY_CONTROL_NUMBER")
+                    .HasDefaultValueSql("((1))");
+
+                entity.Property(e => e.DbAuditCreateTimestamp)
+                    .HasColumnName("DB_AUDIT_CREATE_TIMESTAMP")
+                    .HasColumnType("datetime")
+                    .HasDefaultValueSql("(getutcdate())");
+
+                entity.Property(e => e.DbAuditCreateUserid)
+                    .IsRequired()
+                    .HasColumnName("DB_AUDIT_CREATE_USERID")
+                    .HasMaxLength(30)
+                    .IsUnicode(false)
+                    .HasDefaultValueSql("(user_name())");
+
+                entity.Property(e => e.DbAuditLastUpdateTimestamp)
+                    .HasColumnName("DB_AUDIT_LAST_UPDATE_TIMESTAMP")
+                    .HasColumnType("datetime")
+                    .HasDefaultValueSql("(getutcdate())");
+
+                entity.Property(e => e.DbAuditLastUpdateUserid)
+                    .IsRequired()
+                    .HasColumnName("DB_AUDIT_LAST_UPDATE_USERID")
+                    .HasMaxLength(30)
+                    .IsUnicode(false)
+                    .HasDefaultValueSql("(user_name())");
+
+                entity.Property(e => e.EffectiveDateHist)
+                    .HasColumnName("EFFECTIVE_DATE_HIST")
+                    .HasColumnType("datetime")
+                    .HasDefaultValueSql("(getutcdate())");
+
+                entity.Property(e => e.EndDate)
+                    .HasColumnName("END_DATE")
+                    .HasColumnType("datetime");
+
+                entity.Property(e => e.EndDateHist)
+                    .HasColumnName("END_DATE_HIST")
+                    .HasColumnType("datetime");
+
+                entity.Property(e => e.ServiceAreaActivityId)
+                    .HasColumnName("SERVICE_AREA_ACTIVITY_ID")
+                    .HasColumnType("numeric(9, 0)");
+
+                entity.Property(e => e.ServiceAreaNumber)
+                    .HasColumnName("SERVICE_AREA_NUMBER")
+                    .HasColumnType("numeric(9, 0)");
             });
 
             modelBuilder.Entity<HmrServiceAreaHist>(entity =>
@@ -5610,9 +5963,9 @@ namespace Hmcr.Data.Database.Entities
                     .HasMaxLength(255)
                     .IsUnicode(false);
 
-                entity.Property(e => e.IsOverSpTolerance)
+                entity.Property(e => e.IsOverSpThreshold)
                     .IsRequired()
-                    .HasColumnName("IS_OVER_SP_TOLERANCE")
+                    .HasColumnName("IS_OVER_SP_THRESHOLD")
                     .HasMaxLength(1)
                     .IsUnicode(false);
 
@@ -5666,6 +6019,10 @@ namespace Hmcr.Data.Database.Entities
                     .HasMaxLength(1)
                     .IsUnicode(false);
 
+                entity.Property(e => e.SpatialVariance)
+                    .HasColumnName("SPATIAL_VARIANCE")
+                    .HasColumnType("numeric(25, 20)");
+
                 entity.Property(e => e.Species)
                     .HasColumnName("SPECIES")
                     .HasColumnType("numeric(2, 0)");
@@ -5683,6 +6040,10 @@ namespace Hmcr.Data.Database.Entities
                     .HasColumnName("VALIDATION_STATUS")
                     .HasMaxLength(30)
                     .IsUnicode(false);
+
+                entity.Property(e => e.WarningSpThreshold)
+                    .HasColumnName("WARNING_SP_THRESHOLD")
+                    .HasColumnType("numeric(12, 6)");
 
                 entity.Property(e => e.WildlifeRecordId)
                     .HasColumnName("WILDLIFE_RECORD_ID")
@@ -5892,7 +6253,7 @@ namespace Hmcr.Data.Database.Entities
                     .HasColumnName("SITE_NUMBER")
                     .HasMaxLength(8)
                     .IsUnicode(false)
-                    .HasComment("Contains a site type code followed by a The Ministry site number. Site types are provided by the Province, are four to six digits preceded by: A – Avalanche B – Arrestor Bed/Dragnet Barrier D – Debris and/or Rockfall L – Landscape R – Rest Area S – Signalized Intersection T – Traffic Patrol W – Weather Station X – Railway Crossing");
+                    .HasComment("Contains a site type code followed by a The Ministry site number. Site types are provided by the Province, are four to six digits preceded by: A � Avalanche B � Arrestor Bed/Dragnet Barrier D � Debris and/or Rockfall L � Landscape R � Rest Area S � Signalized Intersection T � Traffic Patrol W � Weather Station X � Railway Crossing");
 
                 entity.Property(e => e.StartDate)
                     .HasColumnName("START_DATE")
@@ -5916,7 +6277,7 @@ namespace Hmcr.Data.Database.Entities
 
                 entity.Property(e => e.StructureNumber)
                     .HasColumnName("STRUCTURE_NUMBER")
-                    .HasMaxLength(30)
+                    .HasMaxLength(5)
                     .IsUnicode(false)
                     .HasComment("From list of Bridge Structure Road (BSR) structures provided by the Province. Is only applicable at defined BSR structures.  BSR structures include; bridges, culverts over 3m, retaining walls.");
 
@@ -6160,7 +6521,7 @@ namespace Hmcr.Data.Database.Entities
 
                 entity.Property(e => e.StructureNumber)
                     .HasColumnName("STRUCTURE_NUMBER")
-                    .HasMaxLength(30)
+                    .HasMaxLength(5)
                     .IsUnicode(false);
 
                 entity.Property(e => e.SubmissionObjectId)
@@ -6270,9 +6631,9 @@ namespace Hmcr.Data.Database.Entities
                     .HasMaxLength(255)
                     .IsUnicode(false);
 
-                entity.Property(e => e.IsOverSpTolerance)
+                entity.Property(e => e.IsOverSpThreshold)
                     .IsRequired()
-                    .HasColumnName("IS_OVER_SP_TOLERANCE")
+                    .HasColumnName("IS_OVER_SP_THRESHOLD")
                     .HasMaxLength(1)
                     .IsUnicode(false);
 
@@ -6336,7 +6697,7 @@ namespace Hmcr.Data.Database.Entities
 
                 entity.Property(e => e.StructureNumber)
                     .HasColumnName("STRUCTURE_NUMBER")
-                    .HasMaxLength(30)
+                    .HasMaxLength(5)
                     .IsUnicode(false);
 
                 entity.Property(e => e.SubmissionObjectId)
@@ -6362,6 +6723,10 @@ namespace Hmcr.Data.Database.Entities
                     .HasColumnName("VALUE_OF_WORK")
                     .HasColumnType("numeric(9, 2)");
 
+                entity.Property(e => e.WarningSpThreshold)
+                    .HasColumnName("WARNING_SP_THRESHOLD")
+                    .HasColumnType("numeric(12, 6)");
+
                 entity.Property(e => e.WorkLength)
                     .HasColumnName("WORK_LENGTH")
                     .HasColumnType("numeric(25, 20)");
@@ -6382,6 +6747,10 @@ namespace Hmcr.Data.Database.Entities
             modelBuilder.HasSequence("HMR_ACTIVITY_CODE_H_ID_SEQ")
                 .HasMin(1)
                 .HasMax(2147483647);
+
+            modelBuilder.HasSequence("HMR_ACTIVITY_CODE_RULE_ID_SEQ")
+                .HasMin(1)
+                .HasMax(999999999);
 
             modelBuilder.HasSequence("HMR_CNT_TRM_ID_SEQ")
                 .HasMin(1)
@@ -6458,6 +6827,14 @@ namespace Hmcr.Data.Database.Entities
             modelBuilder.HasSequence("HMR_ROLE_PERMISSION_H_ID_SEQ")
                 .HasMin(1)
                 .HasMax(2147483647);
+
+            modelBuilder.HasSequence("HMR_SERVICE_AREA_ACTIVITY_H_ID_SEQ")
+                .HasMin(1)
+                .HasMax(999999999);
+
+            modelBuilder.HasSequence("HMR_SERVICE_AREA_ACTIVITY_ID_SEQ")
+                .HasMin(1)
+                .HasMax(999999999);
 
             modelBuilder.HasSequence("HMR_SERVICE_AREA_H_ID_SEQ")
                 .HasMin(1)

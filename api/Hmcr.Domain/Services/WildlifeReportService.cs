@@ -53,7 +53,6 @@ namespace Hmcr.Domain.Services
 
             var headerValidated = false;
             var rows = new List<WildlifeRptInitCsvDto>();
-            var rowNum = 1;
 
             while (csv.Read())
             {
@@ -75,7 +74,6 @@ namespace Hmcr.Domain.Services
                         }
                     }
 
-                    row.RowNum = ++rowNum;
                     row.ServiceArea = serviceArea.ConvertToServiceAreaString(row.ServiceArea);
                     rows.Add(row);
                 }

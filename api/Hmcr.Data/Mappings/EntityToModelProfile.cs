@@ -2,6 +2,7 @@
 using Hmcr.Data.Database.Entities;
 using Hmcr.Model;
 using Hmcr.Model.Dtos.ActivityCode;
+using Hmcr.Model.Dtos.ActivityRule;
 using Hmcr.Model.Dtos.CodeLookup;
 using Hmcr.Model.Dtos.ContractTerm;
 using Hmcr.Model.Dtos.District;
@@ -111,7 +112,8 @@ namespace Hmcr.Data.Mappings
             CreateMap<HmrFeedbackMessage, FeedbackMessageDto>();
             CreateMap<HmrFeedbackMessage, FeedbackMessageUpdateDto>();
 
-
+            CreateMap<HmrActivityCodeRule, ActivityCodeRuleDto>();
+            
         }
     }
 }

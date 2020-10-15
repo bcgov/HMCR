@@ -5,9 +5,33 @@ import {
   FETCH_LOCATION_CODES,
   FETCH_ACTIVITY_CODES_DROPDOWN,
   FETCH_THRESHOLD_LEVELS,
+  FETCH_ROAD_LENGTH_RULES,
+  FETCH_SURFACE_TYPE_RULES,
+  FETCH_ROAD_CLASS_RULES
 } from './types';
 
 import * as api from '../Api';
+
+export const fetchRoadLengthRules = () => (dispatch) => {
+  return api.getRoadLengthRules().then((response) => {
+    const data = response.data;
+    dispatch({ type: FETCH_ROAD_LENGTH_RULES, payload: data });
+  });
+};
+
+export const fetchSurfaceTypeRules = () => (dispatch) => {
+  return api.getSurfaceTypeRules().then((response) => {
+    const data = response.data;
+    dispatch({ type: FETCH_SURFACE_TYPE_RULES, payload: data });
+  });
+};
+
+export const fetchRoadClassRules = () => (dispatch) => {
+  return api.getRoadClassRules().then((response) => {
+    const data = response.data;
+    dispatch({ type: FETCH_ROAD_CLASS_RULES, payload: data });
+  });
+};
 
 export const fetchMaintenanceTypes = () => (dispatch) => {
   return api.getMaintenanceTypes().then((response) => {

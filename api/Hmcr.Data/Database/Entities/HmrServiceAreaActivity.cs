@@ -3,21 +3,11 @@ using System.Collections.Generic;
 
 namespace Hmcr.Data.Database.Entities
 {
-    public partial class HmrActivityCodeHist
+    public partial class HmrServiceAreaActivity
     {
-        public long ActivityCodeHistId { get; set; }
-        public DateTime EffectiveDateHist { get; set; }
-        public DateTime? EndDateHist { get; set; }
+        public decimal ServiceAreaActivityId { get; set; }
         public decimal ActivityCodeId { get; set; }
-        public string ActivityNumber { get; set; }
-        public string ActivityName { get; set; }
-        public string UnitOfMeasure { get; set; }
-        public string MaintenanceType { get; set; }
-        public decimal LocationCodeId { get; set; }
-        public string FeatureType { get; set; }
-        public string SpThresholdLevel { get; set; }
-        public bool? IsSiteNumRequired { get; set; }
-        public string ActivityApplication { get; set; }
+        public decimal ServiceAreaNumber { get; set; }
         public DateTime? EndDate { get; set; }
         public long ConcurrencyControlNumber { get; set; }
         public string AppCreateUserid { get; set; }
@@ -32,8 +22,8 @@ namespace Hmcr.Data.Database.Entities
         public DateTime DbAuditCreateTimestamp { get; set; }
         public string DbAuditLastUpdateUserid { get; set; }
         public DateTime DbAuditLastUpdateTimestamp { get; set; }
-        public decimal RoadClassRule { get; set; }
-        public decimal RoadLengthRule { get; set; }
-        public decimal SurfaceTypeRule { get; set; }
+
+        public virtual HmrActivityCode ActivityCode { get; set; }
+        public virtual HmrServiceArea ServiceAreaNumberNavigation { get; set; }
     }
 }

@@ -23,6 +23,7 @@ using Hmcr.Model.Dtos.UserRole;
 using Hmcr.Model.Dtos.WildlifeReport;
 using Hmcr.Model.Dtos.WorkReport;
 using Hmcr.Model.Dtos.ActivityCode;
+using Hmcr.Model.Dtos.ActivityRule;
 
 namespace Hmcr.Data.Mappings
 {
@@ -30,8 +31,8 @@ namespace Hmcr.Data.Mappings
     {
         public ModelToEntityProfile()
         {
-            SourceMemberNamingConvention = new PascalCaseNamingConvention();
-            DestinationMemberNamingConvention = new LowerUnderscoreNamingConvention();
+            //SourceMemberNamingConvention = new PascalCaseNamingConvention();
+            //DestinationMemberNamingConvention = new LowerUnderscoreNamingConvention();
 
             SourceMemberNamingConvention = new LowerUnderscoreNamingConvention();
             DestinationMemberNamingConvention = new PascalCaseNamingConvention();
@@ -96,6 +97,8 @@ namespace Hmcr.Data.Mappings
 
             CreateMap<FeedbackMessageDto, HmrFeedbackMessage>();
             CreateMap<FeedbackMessageUpdateDto, HmrFeedbackMessage>();
+
+            CreateMap<ActivityCodeRuleDto, HmrActivityCodeRule>();
         }
     }
 }
