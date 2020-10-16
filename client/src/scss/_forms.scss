@@ -56,3 +56,16 @@
 .form-control.servicearea-large.is-invalid {
   border-color: #d93e45;
 }
+.fieldset-tooltip [class$="inner"] {
+  background-color: #ffffca;
+  border: 1px solid #737373;
+  max-width: 160px;
+  color:black;
+  font-size: 12px;
+  text-align: left;
+}
+
+.fieldset-tooltip [class$="arrow"] {
+  border-top: 5px solid #ffffca !important;
+  background-color: #737373;
+}

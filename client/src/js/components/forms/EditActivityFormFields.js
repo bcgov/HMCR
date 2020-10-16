@@ -16,6 +16,9 @@ import * as Constants from '../../Constants';
 import { Row,Col} from 'reactstrap';
 import { isInteger } from 'lodash';
 
+const tipAnalyticalValidation = "Analytical Validation Help";
+const tipHighwayAttributeValidation = "Highway Attribute Validation Help";
+
 const defaultValues = {
   activityNumber: '',
   activityName: '',
@@ -47,7 +50,7 @@ const validationSchema = Yup.object({
   locationCodeId: Yup.number().required('Required'),
   serviceAreaNumbers: Yup.array().required('At least one Service Area must be selected'),
   minimumValue: Yup.number()
-    .min(0)
+    .min(0,'Must be greater than or equal to 0')
     .typeError('Must be number')
     .test(
       'datamin',
@@ -58,10 +61,10 @@ const validationSchema = Yup.object({
         }
         if(this.parent.maximumValue !== null || this.parent.maximumValue !== undefined || this.parent.maximumValue !== '')
         {
-          if(this.parent.maximumValue > 0 && this.parent.maximumValue < this.parent.minimumValue)
+          if(this.parent.maximumValue < this.parent.minimumValue)
         {
           return this.createError({
-            message: 'Minimum value must be less than or equal to the Minimum value',
+            message: 'Must be less than or equal to the Maximum value',
             path: 'minimumValue',
             });
         }
@@ -74,7 +77,7 @@ const validationSchema = Yup.object({
           if(!isInteger(this.parent.minimumValue))
           {
             return this.createError({
-              message: 'Minimum value must be whole number',
+              message: 'Must be whole number',
               path: 'minimumValue',
               });
           }
@@ -83,7 +86,7 @@ const validationSchema = Yup.object({
       }
     ),
   maximumValue: Yup.number()
-    .min(0)
+    .min(0,'Must be greater than or equal to 0')
     .typeError('Must be number')
     .test(
       'datamax',
@@ -92,12 +95,12 @@ const validationSchema = Yup.object({
         {
           return true;
         }
-        if (this.parent.minimumValue !== null || this.parent.minimumValue !== undefined || this.parent.minimumValue === '')
+        if (this.parent.minimumValue !== null || this.parent.minimumValue !== undefined || this.parent.minimumValue !== '')
         {
-          if(this.parent.maximumValue > 0 && this.parent.maximumValue < this.parent.minimumValue)
+          if(this.parent.maximumValue < this.parent.minimumValue)
           {
             return this.createError({
-              message: 'Maximum value must be greater than or equal to the Minimum value',
+              message: 'Must be greater than or equal to the Minimum value',
               path: 'maximumValue',
             });
           }
@@ -110,7 +113,7 @@ const validationSchema = Yup.object({
           if(!isInteger(this.parent.maximumValue))
           {
             return this.createError({
-            message: 'Maximum value must be whole number',
+            message: 'Must be whole number',
             path: 'maximumValue',
             });
           }
@@ -119,10 +122,10 @@ const validationSchema = Yup.object({
       }
     ),
   reportingFrequency: Yup.number()
-    .min(0)
-    .max(365)
-    .typeError('Must be number')
-    .integer(),
+    .min(0,'Must be greater than or equal to 0')
+    .max(365,'Must be less than or equal to 365')
+    .typeError('Must be whole number')
+    .integer('Must be whole number'),
 
   
 });
@@ -288,7 +291,7 @@ const EditActivityFormFields = ({
           </FormRow>
         </Col>
         <Col>
-          <FieldSet legendname = "Analytical Validation">
+          <FieldSet legendname = "Analytical Validation" tips={tipAnalyticalValidation} targetId='AnalyticalValidationTooltipForFieldsetId'>
             <FormRow name="minimumValue" label="Minimum Value">
               <FormInput type="text" name="minimumValue" placeholder="Minimum Value"  />
             </FormRow>
@@ -320,7 +323,7 @@ const EditActivityFormFields = ({
                 </FormRow>
               </Col>
               <Col>
-                <FieldSet legendname = "Highway Attribute Validation">
+                <FieldSet legendname = "Highway Attribute Validation" tips={tipHighwayAttributeValidation} targetId='HighwayAttributeValidationTooltipForFieldsetId'>
                   <FormRow name="roadLengthRule" label="Road Length Validation Rule">
                     <SingleDropdownField
                       defaultTitle="Not Applicable"
