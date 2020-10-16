@@ -61,7 +61,7 @@ const validationSchema = Yup.object({
         }
         if(this.parent.maximumValue !== null || this.parent.maximumValue !== undefined || this.parent.maximumValue !== '')
         {
-          if(this.parent.maximumValue > 0 && this.parent.maximumValue < this.parent.minimumValue)
+          if(this.parent.maximumValue < this.parent.minimumValue)
         {
           return this.createError({
             message: 'Must be less than or equal to the Maximum value',
@@ -95,9 +95,9 @@ const validationSchema = Yup.object({
         {
           return true;
         }
-        if (this.parent.minimumValue !== null || this.parent.minimumValue !== undefined || this.parent.minimumValue === '')
+        if (this.parent.minimumValue !== null || this.parent.minimumValue !== undefined || this.parent.minimumValue !== '')
         {
-          if(this.parent.maximumValue > 0 && this.parent.maximumValue < this.parent.minimumValue)
+          if(this.parent.maximumValue < this.parent.minimumValue)
           {
             return this.createError({
               message: 'Must be greater than or equal to the Minimum value',
