@@ -64,7 +64,7 @@ namespace Hmcr.Data.Database.Entities
         public virtual DbSet<HmrWorkReport> HmrWorkReports { get; set; }
         public virtual DbSet<HmrWorkReportHist> HmrWorkReportHists { get; set; }
         public virtual DbSet<HmrWorkReportVw> HmrWorkReportVws { get; set; }
-        
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<HmrActivityCode>(entity =>
@@ -399,6 +399,16 @@ namespace Hmcr.Data.Database.Entities
                     .HasMaxLength(12)
                     .IsUnicode(false);
 
+                entity.Property(e => e.MaxValue)
+                    .HasColumnName("MAX_VALUE")
+                    .HasColumnType("numeric(11, 2)");
+
+                entity.Property(e => e.MinValue)
+                    .HasColumnName("MIN_VALUE")
+                    .HasColumnType("numeric(11, 2)");
+
+                entity.Property(e => e.ReportingFrequency).HasColumnName("REPORTING_FREQUENCY");
+
                 entity.Property(e => e.RoadClassRule)
                     .HasColumnName("ROAD_CLASS_RULE")
                     .HasColumnType("numeric(9, 0)");
@@ -426,7 +436,7 @@ namespace Hmcr.Data.Database.Entities
             modelBuilder.Entity<HmrActivityCodeRule>(entity =>
             {
                 entity.HasKey(e => e.ActivityCodeRuleId)
-                    .HasName("PK__HMR_ACTI__E4140F7D39105D95");
+                    .HasName("PK__HMR_ACTI__E4140F7D40BB464E");
 
                 entity.ToTable("HMR_ACTIVITY_CODE_RULE");
 
@@ -669,6 +679,8 @@ namespace Hmcr.Data.Database.Entities
                 entity.Property(e => e.EndDateHist)
                     .HasColumnName("END_DATE_HIST")
                     .HasColumnType("datetime");
+
+                entity.Property(e => e.IsIntegerOnly).HasColumnName("IS_INTEGER_ONLY");
             });
 
             modelBuilder.Entity<HmrContractTerm>(entity =>
@@ -3138,7 +3150,7 @@ namespace Hmcr.Data.Database.Entities
             modelBuilder.Entity<HmrServiceAreaActivity>(entity =>
             {
                 entity.HasKey(e => e.ServiceAreaActivityId)
-                    .HasName("PK__HMR_SERV__56CBEAED34A3F264");
+                    .HasName("PK__HMR_SERV__56CBEAEDB516F420");
 
                 entity.ToTable("HMR_SERVICE_AREA_ACTIVITY");
 
@@ -3149,7 +3161,7 @@ namespace Hmcr.Data.Database.Entities
                     .HasName("IDX_HMR_SVC_AR_ACT_SVC_AREA");
 
                 entity.HasIndex(e => new { e.ServiceAreaNumber, e.ActivityCodeId })
-                    .HasName("UQ__HMR_SERV__307B5DE25CCB5D28")
+                    .HasName("UQ__HMR_SERV__307B5DE2F252A57E")
                     .IsUnique();
 
                 entity.Property(e => e.ServiceAreaActivityId)
@@ -3237,19 +3249,19 @@ namespace Hmcr.Data.Database.Entities
                     .WithMany(p => p.HmrServiceAreaActivities)
                     .HasForeignKey(d => d.ActivityCodeId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK__HMR_SERVI__ACTIV__65AC084E");
+                    .HasConstraintName("FK__HMR_SERVI__ACTIV__3AC1AA49");
 
                 entity.HasOne(d => d.ServiceAreaNumberNavigation)
                     .WithMany(p => p.HmrServiceAreaActivities)
                     .HasForeignKey(d => d.ServiceAreaNumber)
                     .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK__HMR_SERVI__SERVI__64B7E415");
+                    .HasConstraintName("FK__HMR_SERVI__SERVI__39CD8610");
             });
 
             modelBuilder.Entity<HmrServiceAreaActivityHist>(entity =>
             {
                 entity.HasKey(e => e.ServiceAreaActivityHistId)
-                    .HasName("PK__HMR_SERV__08C5944CC6D91E3A");
+                    .HasName("PK__HMR_SERV__08C5944CE2D33CB5");
 
                 entity.ToTable("HMR_SERVICE_AREA_ACTIVITY_HIST");
 
