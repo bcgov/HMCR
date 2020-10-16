@@ -27,8 +27,8 @@ const defaultValues = {
   locationCodeId: '',
   featureType: '',
   spThresholdLevel: '',
-  minimumValue: '',
-  maximumValue:'',
+  minValue: '',
+  maxValue: '',
   reportingFrequency: '',
   roadLengthRule: '',
   surfaceTypeRule: '',
@@ -49,59 +49,61 @@ const validationSchema = Yup.object({
   maintenanceType: Yup.string().required('Required').max(12),
   locationCodeId: Yup.number().required('Required'),
   serviceAreaNumbers: Yup.array().required('At least one Service Area must be selected'),
-  minimumValue: Yup.number()
+  minValue: Yup.number()
     .min(0,'Must be greater than or equal to 0')
+    .nullable()
     .typeError('Must be number')
     .test(
       'datamin',
       function() {
-        if (this.parent.minimumValue === null || this.parent.minimumValue === undefined || this.parent.minimumValue === '')
+        if (this.parent.minValue === null || this.parent.minValue === undefined || this.parent.minValue === '')
         {
           return true;
         }
-        if(this.parent.maximumValue !== null || this.parent.maximumValue !== undefined || this.parent.maximumValue !== '')
+        if(this.parent.maxValue !== null || this.parent.maxValue !== undefined || this.parent.maxValue !== '')
         {
-          if(this.parent.maximumValue > 0 && this.parent.maximumValue < this.parent.minimumValue)
-        {
-          return this.createError({
-            message: 'Must be less than or equal to the Maximum value',
-            path: 'minimumValue',
-            });
-        }
+          if(this.parent.maxValue < this.parent.minValue)
+          {
+            return this.createError({
+              message: 'Must be less than or equal to the Maximum value',
+              path: 'minValue',
+              });
+          }
         }
         if (
           this.parent.unitOfMeasure === 'site'
         ||this.parent.unitOfMeasure === 'num'
         ||this.parent.unitOfMeasure === 'ea')
         { 
-          if(!isInteger(this.parent.minimumValue))
+          if(!isInteger(this.parent.minValue))
           {
             return this.createError({
               message: 'Must be whole number',
-              path: 'minimumValue',
+              path: 'minValue',
               });
           }
         }
         return true;
       }
     ),
-  maximumValue: Yup.number()
+  maxValue: Yup.number()
     .min(0,'Must be greater than or equal to 0')
+    .nullable()
     .typeError('Must be number')
     .test(
       'datamax',
       function() {
-        if (this.parent.maximumValue === null || this.parent.maximumValue === undefined || this.parent.maximumValue === '')
+        if (this.parent.maxValue === null || this.parent.maxValue === undefined || this.parent.maxValue === '')
         {
           return true;
         }
-        if (this.parent.minimumValue !== null || this.parent.minimumValue !== undefined || this.parent.minimumValue === '')
+        if (this.parent.minValue !== null || this.parent.minValue !== undefined || this.parent.minValue !== '')
         {
-          if(this.parent.maximumValue > 0 && this.parent.maximumValue < this.parent.minimumValue)
+          if(this.parent.maxValue < this.parent.minValue)
           {
             return this.createError({
               message: 'Must be greater than or equal to the Minimum value',
-              path: 'maximumValue',
+              path: 'maxValue',
             });
           }
         }
@@ -110,11 +112,11 @@ const validationSchema = Yup.object({
         ||this.parent.unitOfMeasure === 'num'
         ||this.parent.unitOfMeasure === 'ea')
         { 
-          if(!isInteger(this.parent.maximumValue))
+          if(!isInteger(this.parent.maxValue))
           {
             return this.createError({
             message: 'Must be whole number',
-            path: 'maximumValue',
+            path: 'maxValue',
             });
           }
         }
@@ -124,6 +126,7 @@ const validationSchema = Yup.object({
   reportingFrequency: Yup.number()
     .min(0,'Must be greater than or equal to 0')
     .max(365,'Must be less than or equal to 365')
+    .nullable()
     .typeError('Must be whole number')
     .integer('Must be whole number'),
 
@@ -188,10 +191,10 @@ const EditActivityFormFields = ({
       api.getActivityCode(activityId).then((response) => {
         setInitialValues({
           ...response.data,
-          endDate: response.data.endDate ? moment(response.data.endDate) : null,
-          minimumValue: response.data.minimumValue ? moment(response.data.minimumValue):'',
-          maximumValue: response.data.maximumValue? moment(response.data.maximumValue):'',
-          reportingFrequency: response.data.reportingFrequency? moment(response.data.reportingFrequency):'',
+          endDate: response.data.endDate ? moment(response.data.endDate): null,
+          minValue: response.data.minValue ? moment(response.data.minValue): '',
+          maxValue: response.data.maxValue ? moment(response.data.maxValue): '',
+          reportingFrequency: response.data.reportingFrequency ? moment(response.data.reportingFrequency): '',
         });
 
         setValidLocationCodeValues(() => {
@@ -292,11 +295,11 @@ const EditActivityFormFields = ({
         </Col>
         <Col>
           <FieldSet legendname = "Analytical Validation" tips={tipAnalyticalValidation} targetId='AnalyticalValidationTooltipForFieldsetId'>
-            <FormRow name="minimumValue" label="Minimum Value">
-              <FormInput type="text" name="minimumValue" placeholder="Minimum Value"  />
+            <FormRow name="minValue" label="Minimum Value">
+              <FormInput type="text" name="minValue" placeholder="Minimum Value"  />
             </FormRow>
-            <FormRow name="maximumValue" label="Maximum Value">
-              <FormInput type="text" name="maximumValue" placeholder="Maximum Value" />
+            <FormRow name="maxValue" label="Maximum Value">
+              <FormInput type="text" name="maxValue" placeholder="Maximum Value" />
             </FormRow>
             <FormRow name="reportingFrequency" label="Reporting Frequency">
               <FormInput type="text" name="reportingFrequency" placeholder="Minimum # Days" />
@@ -376,9 +379,9 @@ const mapStateToProps = (state) => {
     surfaceTypeRules: state.codeLookups.surfaceTypeRules,
     roadClassRules: state.codeLookups.roadClassRules,
     serviceAreas: Object.values(state.serviceAreas),
-    minimumValue: state.codeLookups.minimumValue,
-    maximumValue: state.codeLookups.maximumValue,
-    reportingFrequency: state.codeLookups.maximumValue,
+    minValue: state.codeLookups.minValue,
+    maxValue: state.codeLookups.maxValue,
+    reportingFrequency: state.codeLookups.reportingFrequency,
   };
 };
 

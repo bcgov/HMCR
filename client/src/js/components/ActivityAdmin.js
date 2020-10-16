@@ -109,7 +109,7 @@ const ActivityAdmin = ({ maintenanceTypes, locationCodes, unitOfMeasures,showVal
         values.roadLengthRule = 0;
         values.surfaceTypeRule = 0;
       }
-      
+      console.log(values);
       if (formType === Constants.FORM_TYPE.ADD) {
         api
           .postActivityCode(values)
