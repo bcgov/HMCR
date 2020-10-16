@@ -21,6 +21,6 @@ namespace Hmcr.Model.Dtos.ActivityCode
 
         public decimal? MinValue { get; set; }
         public decimal? MaxValue { get; set; }
-        public decimal? ReportingFrequency { get; set; }
+        public int? ReportingFrequency { get; set; }
     }
 }

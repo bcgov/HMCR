@@ -56,13 +56,20 @@ const validationSchema = Yup.object({
     .test(
       'datamin',
       function() {
-        if (this.parent.minValue === null || this.parent.minValue === undefined || this.parent.minValue === '')
+        if (!this.parent.minValue)
         {
           return true;
         }
-        if(this.parent.maxValue !== null || this.parent.maxValue !== undefined || this.parent.maxValue !== '')
+        if(this.parent.minValue > 999999999.99)
         {
-          if(this.parent.maxValue < this.parent.minValue)
+          return this.createError({
+            message: 'Must be less than or equal to 999999999.99',
+            path: 'minValue',
+            });
+        }
+        if(this.parent.maxValue)
+        {
+          if(this.parent.maxValue !== 0 && this.parent.maxValue < this.parent.minValue)
           {
             return this.createError({
               message: 'Must be less than or equal to the Maximum value',
@@ -93,13 +100,20 @@ const validationSchema = Yup.object({
     .test(
       'datamax',
       function() {
-        if (this.parent.maxValue === null || this.parent.maxValue === undefined || this.parent.maxValue === '')
+        if (!this.parent.maxValue)
         {
           return true;
         }
-        if (this.parent.minValue !== null || this.parent.minValue !== undefined || this.parent.minValue !== '')
+        if(this.parent.maxValue > 999999999.99)
         {
-          if(this.parent.maxValue < this.parent.minValue)
+          return this.createError({
+            message: 'Must be less than or equal to 999999999.99',
+            path: 'maxValue',
+            });
+        }
+        if (this.parent.minValue)
+        {
+          if(this.parent.maxValue !== 0 && this.parent.maxValue < this.parent.minValue)
           {
             return this.createError({
               message: 'Must be greater than or equal to the Minimum value',
@@ -125,7 +139,7 @@ const validationSchema = Yup.object({
     ),
   reportingFrequency: Yup.number()
     .min(0,'Must be greater than or equal to 0')
-    .max(365,'Must be less than or equal to 365')
+    .max(366,'Must be less than or equal to 366')
     .nullable()
     .typeError('Must be whole number')
     .integer('Must be whole number'),
@@ -196,7 +210,7 @@ const EditActivityFormFields = ({
           maxValue: response.data.maxValue ? moment(response.data.maxValue): '',
           reportingFrequency: response.data.reportingFrequency ? moment(response.data.reportingFrequency): '',
         });
-
+        
         setValidLocationCodeValues(() => {
           if (formType === Constants.FORM_TYPE.EDIT) {
             if (response.data.locationCodeId === locationCodes.find((code) => code.name === 'B').id)
