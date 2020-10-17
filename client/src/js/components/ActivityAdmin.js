@@ -109,9 +109,9 @@ const ActivityAdmin = ({ maintenanceTypes, locationCodes, unitOfMeasures,showVal
         values.roadLengthRule = 0;
         values.surfaceTypeRule = 0;
       }
-      values.minValue = (values.minValue) ? Number(values.minValue): null;
-      values.maxValue = (values.maxValue)? Number(values.maxValue): null;
-      values.reportingFrequency = (values.reportingFrequency)? Number(values.reportingFrequency): null;
+      values.minValue = (values.minValue !== null || values.minValue !== undefined || values.minValue !== '') ? Number(values.minValue): null;
+      values.maxValue = (values.maxValue !== null || values.maxValue !== undefined || values.maxValue !== '') ? Number(values.maxValue): null;
+      values.reportingFrequency = (values.reportingFrequency !== null || values.reportingFrequency !== undefined || values.reportingFrequency !== '')? Number(values.reportingFrequency): null;
       if(values.minValue && values.maxValue === 0)
       {
         values.maxValue = 999999999.99;
@@ -120,9 +120,9 @@ const ActivityAdmin = ({ maintenanceTypes, locationCodes, unitOfMeasures,showVal
         api
           .postActivityCode(values)
           .then(() => {
-            values.minValue = (values.minValue) ? Number(values.minValue): '';
-            values.maxValue = (values.maxValue)? Number(values.maxValue): '';
-            values.reportingFrequency = (values.reportingFrequency)? Number(values.reportingFrequency): '';
+            values.minValue = (values.minValue !== null || values.minValue !== undefined || values.minValue !== '') ? Number(values.minValue): '';
+            values.maxValue = (values.maxValue !== null || values.maxValue !== undefined || values.maxValue !== '')? Number(values.maxValue): '';
+            values.reportingFrequency = (values.reportingFrequency !== null || values.reportingFrequency !== undefined || values.reportingFrequency !== '')? Number(values.reportingFrequency): '';
             formModal.closeForm();
             searchData.refresh();
           })
@@ -132,9 +132,9 @@ const ActivityAdmin = ({ maintenanceTypes, locationCodes, unitOfMeasures,showVal
         api
           .putActivityCode(values.id, values)
           .then(() => {
-            values.minValue = (values.minValue) ? Number(values.minValue): '';
-            values.maxValue = (values.maxValue)? Number(values.maxValue): '';
-            values.reportingFrequency = (values.reportingFrequency)? Number(values.reportingFrequency): '';
+            values.minValue = (values.minValue !== null || values.minValue !== undefined || values.minValue !== '') ? Number(values.minValue): '';
+            values.maxValue = (values.maxValue !== null || values.maxValue !== undefined || values.maxValue !== '')? Number(values.maxValue): '';
+            values.reportingFrequency = (values.reportingFrequency !== null || values.reportingFrequency !== undefined || values.reportingFrequency !== '')? Number(values.reportingFrequency): '';
             formModal.closeForm();
             searchData.refresh();
           })

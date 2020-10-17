@@ -56,7 +56,7 @@ const validationSchema = Yup.object({
     .test(
       'datamin',
       function() {
-        if (!this.parent.minValue)
+        if (this.parent.minValue === null || this.parent.minValue === undefined || this.parent.minValue === '')
         {
           return true;
         }
@@ -67,9 +67,9 @@ const validationSchema = Yup.object({
             path: 'minValue',
             });
         }
-        if(this.parent.maxValue)
+        if(this.parent.maxValue !== null || this.parent.maxValue !== undefined || this.parent.maxValue !== '')
         {
-          if(this.parent.maxValue !== 0 && this.parent.maxValue < this.parent.minValue)
+          if(Number(this.parent.maxValue) !== 0 && this.parent.maxValue < this.parent.minValue)
           {
             return this.createError({
               message: 'Must be less than or equal to the Maximum value',
@@ -100,20 +100,20 @@ const validationSchema = Yup.object({
     .test(
       'datamax',
       function() {
-        if (!this.parent.maxValue)
+        if (this.parent.maxValue === null || this.parent.maxValue === undefined || this.parent.maxValue === '')
         {
           return true;
         }
-        if(this.parent.maxValue > 999999999.99)
+        if(Number(this.parent.maxValue) > 999999999.99)
         {
           return this.createError({
             message: 'Must be less than or equal to 999999999.99',
             path: 'maxValue',
             });
         }
-        if (this.parent.minValue)
+        if (this.parent.minValue !== null || this.parent.minValue !== undefined || this.parent.minValue !== '')
         {
-          if(this.parent.maxValue !== 0 && this.parent.maxValue < this.parent.minValue)
+          if(Number(this.parent.maxValue) !== 0 && this.parent.maxValue < this.parent.minValue)
           {
             return this.createError({
               message: 'Must be greater than or equal to the Minimum value',
