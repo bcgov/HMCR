@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useFormikContext} from 'formik';
 import { connect } from 'react-redux';
 import * as Yup from 'yup';
 import moment from 'moment';
@@ -67,7 +68,7 @@ const validationSchema = Yup.object({
             path: 'minValue',
             });
         }
-        if(this.parent.maxValue !== null || this.parent.maxValue !== undefined || this.parent.maxValue !== '')
+        if(this.parent.maxValue !== null && this.parent.maxValue !== undefined && this.parent.maxValue !== '')
         {
           if(Number(this.parent.maxValue) !== 0 && this.parent.maxValue < this.parent.minValue)
           {
@@ -111,7 +112,7 @@ const validationSchema = Yup.object({
             path: 'maxValue',
             });
         }
-        if (this.parent.minValue !== null || this.parent.minValue !== undefined || this.parent.minValue !== '')
+        if (this.parent.minValue !== null && this.parent.minValue !== undefined && this.parent.minValue !== '')
         {
           if(Number(this.parent.maxValue) !== 0 && this.parent.maxValue < this.parent.minValue)
           {
@@ -163,6 +164,7 @@ const EditActivityFormFields = ({
   serviceAreas,
 }) => {
   const [loading, setLoading] = useState(true);
+  const { setFieldValue} = useFormikContext();
   const [validLocationCodeValues, setValidLocationCodeValues] = useState(locationCodes);
   const [disableLocationCodeEdit, setDisableLocationCodeEdit] = useState(false);
   const [validFeatureTypeValues, setValidFeatureTypeValues] = useState(featureTypes);
@@ -192,6 +194,8 @@ const EditActivityFormFields = ({
         then: Yup.boolean().required('Required'),
       }),
     });
+
+    
     setValidationSchema(defaultValidationSchema);
     setLoading(true);
 
@@ -252,6 +256,52 @@ const EditActivityFormFields = ({
 
   if (loading || formValues === null) return <PageSpinner />;
   
+  const handleOnBlurMinValue = (e) => {
+    const minval = e.target.value;
+    if(formValues)
+    {
+      let maxval = formValues.maxValue;
+      if (minval !== null
+          && minval !== undefined
+          && minval !== ''
+          && Number(minval) >=0
+          && maxval !== null
+          && maxval !== undefined
+          && maxval !== ''
+          && Number(maxval)===0)
+        {
+          setFieldValue('maxValue', 999999999);
+        }
+    }
+    setFieldValue('minValue', minval); 
+  };
+
+  const handleOnBlurMaxValue = (e) => {
+    const maxval = e.target.value;
+    if(formValues)
+    {
+      let minval = formValues.minValue;
+      if (minval !== null
+          && minval !== undefined
+          && minval !== ''
+          && Number(minval) >=0 
+          & maxval !== null
+          && maxval !== undefined
+          && maxval !== ''
+          && Number(maxval)===0)
+        {
+          setFieldValue('maxValue', 999999999);
+        }
+      else
+      {
+        setFieldValue('maxValue', maxval);
+      }
+    }
+    else{
+      setFieldValue('maxValue', maxval);
+    }   
+  };
+
   return (
     <React.Fragment>
       <Row>
@@ -310,10 +360,10 @@ const EditActivityFormFields = ({
         <Col>
           <FieldSet legendname = "Analytical Validation" tips={tipAnalyticalValidation} targetId='AnalyticalValidationTooltipForFieldsetId'>
             <FormRow name="minValue" label="Minimum Value">
-              <FormInput type="text" name="minValue" placeholder="Minimum Value"  />
+              <FormInput type="text" name="minValue" placeholder="Minimum Value"   onBlur= {handleOnBlurMinValue}/>
             </FormRow>
             <FormRow name="maxValue" label="Maximum Value">
-              <FormInput type="text" name="maxValue" placeholder="Maximum Value" />
+              <FormInput type="text" name="maxValue" placeholder="Maximum Value" onBlur= {handleOnBlurMaxValue} />
             </FormRow>
             <FormRow name="reportingFrequency" label="Reporting Frequency">
               <FormInput type="text" name="reportingFrequency" placeholder="Minimum # Days" />
