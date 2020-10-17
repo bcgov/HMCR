@@ -17,8 +17,13 @@ import * as Constants from '../../Constants';
 import { Row,Col} from 'reactstrap';
 import { isInteger } from 'lodash';
 
-const tipAnalyticalValidation = "Analytical Validation Help";
-const tipHighwayAttributeValidation = "Highway Attribute Validation Help";
+const tipAnalyticalValidation = [<ul key ='tipAnalyticalValidation_ul_key_1' style={{ paddingInlineStart: 10 }}>
+  <li>For Maintenance Work Reporting this refers to the <em>End Date</em></li>
+  <li>For Rockfall this refers to the <em>Report Date</em></li>
+  </ul>];
+const tipHighwayAttributeValidation = [<ul key ='tipHighwayAttributeValidation_ul_key_1' style={{ paddingInlineStart: 10 }}>
+  <li >Highway Attribute Validation Help</li>
+  </ul>];
 
 const defaultValues = {
   activityNumber: '',
