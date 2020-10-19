@@ -15,7 +15,7 @@ import { FormRow, FormInput, FormCheckboxInput } from './FormInputs';
 import * as api from '../../Api';
 import * as Constants from '../../Constants';
 import { Row,Col} from 'reactstrap';
-import { isInteger } from 'lodash';
+import { isInteger, toString } from 'lodash';
 
 const tipAnalyticalValidation = [<ul key ='tipAnalyticalValidation_ul_key_1' style={{ paddingInlineStart: 10 }}>
   <li>Analytical Validation <em>Help 1</em></li>
@@ -25,6 +25,14 @@ const tipHighwayAttributeValidation = [<ul key ='tipHighwayAttributeValidation_u
   <li >Highway Attribute Validation Help</li>
   </ul>];
 
+const isValueEmpty=(v)=>{
+  if(v === null || v === undefined || v === '') return true;
+  return false;
+}
+const isValueNotEmpty=(v)=>{
+  if(v !== null && v !== undefined && v !== '') return true;
+  return false;
+}
 const defaultValues = {
   activityNumber: '',
   activityName: '',
@@ -62,7 +70,7 @@ const validationSchema = Yup.object({
     .test(
       'datamin',
       function() {
-        if (this.parent.minValue === null || this.parent.minValue === undefined || this.parent.minValue === '')
+        if (isValueEmpty(this.parent.minValue))
         {
           return true;
         }
@@ -73,7 +81,7 @@ const validationSchema = Yup.object({
             path: 'minValue',
             });
         }
-        if(this.parent.maxValue !== null && this.parent.maxValue !== undefined && this.parent.maxValue !== '')
+        if(isValueNotEmpty(this.parent.maxValue))
         {
           if(Number(this.parent.maxValue) !== 0 && this.parent.maxValue < this.parent.minValue)
           {
@@ -106,7 +114,7 @@ const validationSchema = Yup.object({
     .test(
       'datamax',
       function() {
-        if (this.parent.maxValue === null || this.parent.maxValue === undefined || this.parent.maxValue === '')
+        if (isValueEmpty(this.parent.maxValue))
         {
           return true;
         }
@@ -117,7 +125,7 @@ const validationSchema = Yup.object({
             path: 'maxValue',
             });
         }
-        if (this.parent.minValue !== null && this.parent.minValue !== undefined && this.parent.minValue !== '')
+        if (isValueNotEmpty(this.parent.minValue))
         {
           if(Number(this.parent.maxValue) !== 0 && this.parent.maxValue < this.parent.minValue)
           {
@@ -214,9 +222,9 @@ const EditActivityFormFields = ({
         setInitialValues({
           ...response.data,
           endDate: response.data.endDate ? moment(response.data.endDate): null,
-          minValue: response.data.minValue ? moment(response.data.minValue): '',
-          maxValue: response.data.maxValue ? moment(response.data.maxValue): '',
-          reportingFrequency: response.data.reportingFrequency ? moment(response.data.reportingFrequency): '',
+          minValue: response.data.minValue ? toString(moment(response.data.minValue)): '',
+          maxValue: response.data.maxValue ? toString(moment(response.data.maxValue)): '',
+          reportingFrequency: response.data.reportingFrequency ? toString(moment(response.data.reportingFrequency)): '',
         });
         
         setValidLocationCodeValues(() => {
@@ -260,14 +268,12 @@ const EditActivityFormFields = ({
 
   if (loading || formValues === null) return <PageSpinner />;
   
-  const convertMaxValue = (minval,maxval)=>{
-    if (minval !== null
-      && minval !== undefined
-      && minval !== ''
+  const convertMaxValue = (minv,maxv)=>{
+    const minval = minv;
+    const maxval = maxv;
+    if (isValueNotEmpty(minval)
       && Number(minval) >=0
-      && maxval !== null
-      && maxval !== undefined
-      && maxval !== ''
+      && isValueNotEmpty(maxval)
       && Number(maxval)===0)
     {
       if (
@@ -275,28 +281,30 @@ const EditActivityFormFields = ({
       || formValues.unitOfMeasure === 'num'
       || formValues.unitOfMeasure === 'ea')
       { 
-        return 999999999;
+        return '999999999';
       }
       else
       {
-        return 999999999.99;
+        return '999999999.99';
       }
     }
-    return maxval;
+    if(maxval === null || maxval === undefined || maxval === '') return '';
+    return toString(maxval);
   };
 
   const handleMinValue = (e) => {
-    const minval = e.target.value;
+    const minv = e.target.value;
     if(formValues)
     {
-      let maxval = formValues.maxValue;
-      setFieldValue('maxValue',convertMaxValue(minval,maxval));
+      let maxv= formValues.maxValue;
+      maxv = convertMaxValue(minv,maxv);
+      setFieldValue('maxValue',maxv);
     }
-    setFieldValue('minValue', minval); 
+    setFieldValue('minValue', minv); 
   };
 
   const handleMaxValue = (e) => {
-   const maxval = e.target.value;
+    const maxval = e.target.value;
     if(formValues)
     {
       let minval = formValues.minValue;
@@ -368,8 +376,7 @@ const EditActivityFormFields = ({
               <FormInput type="text" name="minValue" placeholder="Minimum Value"   onChange= {handleMinValue}/>
             </FormRow>
             <FormRow name="maxValue" label="Maximum Value">
-              <FormInput type="text" name="maxValue" placeholder="Maximum Value"   onChange= {handleMaxValue}
-              />
+              <FormInput type="text" name="maxValue" placeholder="Maximum Value"   onChange= {handleMaxValue}/>
             </FormRow>
             <FormRow name="reportingFrequency" label="Reporting Frequency">
               <FormInput type="text" name="reportingFrequency" placeholder="Minimum # Days" />

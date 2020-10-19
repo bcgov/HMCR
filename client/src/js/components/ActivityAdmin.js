@@ -24,6 +24,11 @@ import { buildStatusIdArray } from '../utils';
 
 const defaultSearchFormValues = { searchText: '', maintenanceTypeIds: [], statusId: [Constants.ACTIVE_STATUS.ACTIVE] };
 
+const isValueNotEmpty=(v)=>{
+  if(v !== null && v !== undefined && v !== '') return true;
+  return false;
+}
+
 const defaultSearchOptions = {
   searchText: '',
   maintenanceTypes: '',
@@ -109,17 +114,17 @@ const ActivityAdmin = ({ maintenanceTypes, locationCodes, unitOfMeasures,showVal
         values.roadLengthRule = 0;
         values.surfaceTypeRule = 0;
       }
-      values.minValue = (values.minValue !== null && values.minValue !== undefined && values.minValue !== '') ? Number(values.minValue): null;
-      values.maxValue = (values.maxValue !== null && values.maxValue !== undefined && values.maxValue !== '') ? Number(values.maxValue): null;
-      values.reportingFrequency = (values.reportingFrequency !== null && values.reportingFrequency !== undefined && values.reportingFrequency !== '')? Number(values.reportingFrequency): null;
+      values.minValue = isValueNotEmpty(values.minValue) ? Number(values.minValue): null;
+      values.maxValue = isValueNotEmpty(values.maxValue) ? Number(values.maxValue): null;
+      values.reportingFrequency = isValueNotEmpty(values.reportingFrequency)? Number(values.reportingFrequency): null;
 
       if (formType === Constants.FORM_TYPE.ADD) {
         api
           .postActivityCode(values)
           .then(() => {
-            values.minValue = (values.minValue !== null && values.minValue !== undefined && values.minValue !== '') ? Number(values.minValue): '';
-            values.maxValue = (values.maxValue !== null && values.maxValue !== undefined && values.maxValue !== '')? Number(values.maxValue): '';
-            values.reportingFrequency = (values.reportingFrequency !== null && values.reportingFrequency !== undefined && values.reportingFrequency !== '')? Number(values.reportingFrequency): '';
+            values.minValue = isValueNotEmpty(values.minValue) ? Number(values.minValue): '';
+            values.maxValue = isValueNotEmpty(values.maxValue)? Number(values.maxValue): '';
+            values.reportingFrequency = isValueNotEmpty(values.reportingFrequency)? Number(values.reportingFrequency): '';
             formModal.closeForm();
             searchData.refresh();
           })
@@ -129,9 +134,9 @@ const ActivityAdmin = ({ maintenanceTypes, locationCodes, unitOfMeasures,showVal
         api
           .putActivityCode(values.id, values)
           .then(() => {
-            values.minValue = (values.minValue !== null && values.minValue !== undefined && values.minValue !== '') ? Number(values.minValue): '';
-            values.maxValue = (values.maxValue !== null && values.maxValue !== undefined && values.maxValue !== '')? Number(values.maxValue): '';
-            values.reportingFrequency = (values.reportingFrequency !== null && values.reportingFrequency !== undefined && values.reportingFrequency !== '')? Number(values.reportingFrequency): '';
+            values.minValue = isValueNotEmpty(values.minValue) ? Number(values.minValue): '';
+            values.maxValue = isValueNotEmpty(values.maxValue)? Number(values.maxValue): '';
+            values.reportingFrequency = isValueNotEmpty(values.reportingFrequency)? Number(values.reportingFrequency): '';
             formModal.closeForm();
             searchData.refresh();
           })
