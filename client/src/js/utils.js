@@ -60,3 +60,20 @@ export const buildStatusIdArray = (isActive) => {
 
   return [Constants.ACTIVE_STATUS.ACTIVE, Constants.ACTIVE_STATUS.INACTIVE];
 };
+
+export const isValueEmpty=(v)=>{
+  if(v === null || v === undefined || v === '') return true;
+  return false;
+};
+
+export const isValueNotEmpty=(v)=>{
+  if(v !== null && v !== undefined && v !== '') return true;
+  return false;
+};
+
+export const toNumberOrNull=(v)=>{
+  return isValueNotEmpty(v) ? _.toNumber(v): null;
+};
+export const toStringOrEmpty=(v)=>{
+  return isValueNotEmpty(v) ? _.toString(v): '';
+};

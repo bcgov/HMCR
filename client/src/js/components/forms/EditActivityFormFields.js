@@ -16,6 +16,7 @@ import * as api from '../../Api';
 import * as Constants from '../../Constants';
 import { Row,Col} from 'reactstrap';
 import { isInteger, toString } from 'lodash';
+import {isValueEmpty,isValueNotEmpty,toStringOrEmpty} from '../../utils'
 
 const tipAnalyticalValidation = [<ul key ='tipAnalyticalValidation_ul_key_1' style={{ paddingInlineStart: 10 }}>
   <li>Analytical Validation <em>Help 1</em></li>
@@ -25,14 +26,6 @@ const tipHighwayAttributeValidation = [<ul key ='tipHighwayAttributeValidation_u
   <li >Highway Attribute Validation Help</li>
   </ul>];
 
-const isValueEmpty=(v)=>{
-  if(v === null || v === undefined || v === '') return true;
-  return false;
-}
-const isValueNotEmpty=(v)=>{
-  if(v !== null && v !== undefined && v !== '') return true;
-  return false;
-}
 const defaultValues = {
   activityNumber: '',
   activityName: '',
@@ -91,10 +84,7 @@ const validationSchema = Yup.object({
               });
           }
         }
-        if (
-          this.parent.unitOfMeasure === 'site'
-        ||this.parent.unitOfMeasure === 'num'
-        ||this.parent.unitOfMeasure === 'ea')
+        if (['site','num','ea'].includes(this.parent.unitOfMeasure))
         { 
           if(!isInteger(this.parent.minValue))
           {
@@ -135,10 +125,7 @@ const validationSchema = Yup.object({
             });
           }
         }
-        if (
-          this.parent.unitOfMeasure === 'site'
-        ||this.parent.unitOfMeasure === 'num'
-        ||this.parent.unitOfMeasure === 'ea')
+        if (['site','num','ea'].includes(this.parent.unitOfMeasure))
         { 
           if(!isInteger(this.parent.maxValue))
           {
@@ -157,8 +144,6 @@ const validationSchema = Yup.object({
     .nullable()
     .typeError('Must be whole number')
     .integer('Must be whole number'),
-
-  
 });
 const EditActivityFormFields = ({
   setInitialValues,
@@ -222,9 +207,9 @@ const EditActivityFormFields = ({
         setInitialValues({
           ...response.data,
           endDate: response.data.endDate ? moment(response.data.endDate): null,
-          minValue: response.data.minValue ? toString(moment(response.data.minValue)): '',
-          maxValue: response.data.maxValue ? toString(moment(response.data.maxValue)): '',
-          reportingFrequency: response.data.reportingFrequency ? toString(moment(response.data.reportingFrequency)): '',
+          minValue: toStringOrEmpty(response.data.minValue),
+          maxValue: toStringOrEmpty(response.data.maxValue),
+          reportingFrequency: toStringOrEmpty(response.data.reportingFrequency),
         });
         
         setValidLocationCodeValues(() => {
@@ -271,24 +256,11 @@ const EditActivityFormFields = ({
   const convertMaxValue = (minv,maxv)=>{
     const minval = minv;
     const maxval = maxv;
-    if (isValueNotEmpty(minval)
-      && Number(minval) >=0
-      && isValueNotEmpty(maxval)
-      && Number(maxval)===0)
+    if (isValueNotEmpty(minval) && Number(minval) >=0 && isValueNotEmpty(maxval) && Number(maxval) === 0)
     {
-      if (
-        formValues.unitOfMeasure === 'site'
-      || formValues.unitOfMeasure === 'num'
-      || formValues.unitOfMeasure === 'ea')
-      { 
-        return '999999999';
-      }
-      else
-      {
-        return '999999999.99';
-      }
+      return (['site','num','ea'].includes(formValues.unitOfMeasure)) ? '999999999': '999999999.99';
     }
-    if(maxval === null || maxval === undefined || maxval === '') return '';
+    if(isValueEmpty(maxval)) return '';
     return toString(maxval);
   };
 

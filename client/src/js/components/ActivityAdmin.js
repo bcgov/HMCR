@@ -20,14 +20,10 @@ import { showValidationErrorDialog } from '../actions';
 
 import * as Constants from '../Constants';
 import * as api from '../Api';
-import { buildStatusIdArray } from '../utils';
+import { buildStatusIdArray,isValueNotEmpty,toNumberOrNull,toStringOrEmpty } from '../utils';
+import { toNumber } from 'lodash';
 
 const defaultSearchFormValues = { searchText: '', maintenanceTypeIds: [], statusId: [Constants.ACTIVE_STATUS.ACTIVE] };
-
-const isValueNotEmpty=(v)=>{
-  if(v !== null && v !== undefined && v !== '') return true;
-  return false;
-}
 
 const defaultSearchOptions = {
   searchText: '',
@@ -114,17 +110,20 @@ const ActivityAdmin = ({ maintenanceTypes, locationCodes, unitOfMeasures,showVal
         values.roadLengthRule = 0;
         values.surfaceTypeRule = 0;
       }
-      values.minValue = isValueNotEmpty(values.minValue) ? Number(values.minValue): null;
-      values.maxValue = isValueNotEmpty(values.maxValue) ? Number(values.maxValue): null;
-      values.reportingFrequency = isValueNotEmpty(values.reportingFrequency)? Number(values.reportingFrequency): null;
-
+      values.minValue = toNumberOrNull(values.minValue);
+      values.maxValue = toNumberOrNull(values.maxValue);
+      values.reportingFrequency = toNumberOrNull(values.reportingFrequency );
+      if(isValueNotEmpty(values.minValue) && toNumber(values.maxValue) === 0)
+      {
+        values.maxValue = (['site','num','ea'].includes(values.unitOfMeasure)) ? 999999999.99:999999999;
+      }
       if (formType === Constants.FORM_TYPE.ADD) {
         api
           .postActivityCode(values)
           .then(() => {
-            values.minValue = isValueNotEmpty(values.minValue) ? Number(values.minValue): '';
-            values.maxValue = isValueNotEmpty(values.maxValue)? Number(values.maxValue): '';
-            values.reportingFrequency = isValueNotEmpty(values.reportingFrequency)? Number(values.reportingFrequency): '';
+            values.minValue = toStringOrEmpty(values.minValue);
+            values.maxValue = toStringOrEmpty(values.maxValue);
+            values.reportingFrequency = toStringOrEmpty(values.reportingFrequency );
             formModal.closeForm();
             searchData.refresh();
           })
@@ -134,9 +133,9 @@ const ActivityAdmin = ({ maintenanceTypes, locationCodes, unitOfMeasures,showVal
         api
           .putActivityCode(values.id, values)
           .then(() => {
-            values.minValue = isValueNotEmpty(values.minValue) ? Number(values.minValue): '';
-            values.maxValue = isValueNotEmpty(values.maxValue)? Number(values.maxValue): '';
-            values.reportingFrequency = isValueNotEmpty(values.reportingFrequency)? Number(values.reportingFrequency): '';
+            values.minValue = toStringOrEmpty(values.minValue);
+            values.maxValue = toStringOrEmpty(values.maxValue);
+            values.reportingFrequency = toStringOrEmpty(values.reportingFrequency );
             formModal.closeForm();
             searchData.refresh();
           })
