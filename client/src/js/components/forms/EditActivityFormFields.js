@@ -18,8 +18,8 @@ import { Row,Col} from 'reactstrap';
 import { isInteger } from 'lodash';
 
 const tipAnalyticalValidation = [<ul key ='tipAnalyticalValidation_ul_key_1' style={{ paddingInlineStart: 10 }}>
-  <li>For Maintenance Work Reporting this refers to the <em>End Date</em></li>
-  <li>For Rockfall this refers to the <em>Report Date</em></li>
+  <li>Analytical Validation <em>Help 1</em></li>
+  <li>Analytical Validation <em>Help 2</em></li>
   </ul>];
 const tipHighwayAttributeValidation = [<ul key ='tipHighwayAttributeValidation_ul_key_1' style={{ paddingInlineStart: 10 }}>
   <li >Highway Attribute Validation Help</li>
@@ -169,7 +169,7 @@ const EditActivityFormFields = ({
   serviceAreas,
 }) => {
   const [loading, setLoading] = useState(true);
-  const { setFieldValue} = useFormikContext();
+  const {setFieldValue} = useFormikContext();
   const [validLocationCodeValues, setValidLocationCodeValues] = useState(locationCodes);
   const [disableLocationCodeEdit, setDisableLocationCodeEdit] = useState(false);
   const [validFeatureTypeValues, setValidFeatureTypeValues] = useState(featureTypes);
@@ -177,7 +177,6 @@ const EditActivityFormFields = ({
   const roadLengthRuleDefaultId = roadLengthRules.find((rlr) => rlr.name === 'Not Applicable').id;
   const surfaceTypeRuleDefaultId = surfaceTypeRules.find((str) => str.name === 'Not Applicable').id;
   const roadClassRuleDefaultId =roadClassRules.find((rcr) => rcr.name === 'Not Applicable').id;
-
   useEffect(() => {
     // Add validation for point line feature when location code is C.
     // Need to get the id value of location code C
@@ -261,50 +260,51 @@ const EditActivityFormFields = ({
 
   if (loading || formValues === null) return <PageSpinner />;
   
-  const handleOnBlurMinValue = (e) => {
+  const convertMaxValue = (minval,maxval)=>{
+    if (minval !== null
+      && minval !== undefined
+      && minval !== ''
+      && Number(minval) >=0
+      && maxval !== null
+      && maxval !== undefined
+      && maxval !== ''
+      && Number(maxval)===0)
+    {
+      if (
+        formValues.unitOfMeasure === 'site'
+      || formValues.unitOfMeasure === 'num'
+      || formValues.unitOfMeasure === 'ea')
+      { 
+        return 999999999;
+      }
+      else
+      {
+        return 999999999.99;
+      }
+    }
+    return maxval;
+  };
+
+  const handleMinValue = (e) => {
     const minval = e.target.value;
     if(formValues)
     {
       let maxval = formValues.maxValue;
-      if (minval !== null
-          && minval !== undefined
-          && minval !== ''
-          && Number(minval) >=0
-          && maxval !== null
-          && maxval !== undefined
-          && maxval !== ''
-          && Number(maxval)===0)
-        {
-          setFieldValue('maxValue', 999999999);
-        }
+      setFieldValue('maxValue',convertMaxValue(minval,maxval));
     }
     setFieldValue('minValue', minval); 
   };
 
-  const handleOnBlurMaxValue = (e) => {
-    const maxval = e.target.value;
+  const handleMaxValue = (e) => {
+   const maxval = e.target.value;
     if(formValues)
     {
       let minval = formValues.minValue;
-      if (minval !== null
-          && minval !== undefined
-          && minval !== ''
-          && Number(minval) >=0 
-          & maxval !== null
-          && maxval !== undefined
-          && maxval !== ''
-          && Number(maxval)===0)
-        {
-          setFieldValue('maxValue', 999999999);
-        }
-      else
-      {
-        setFieldValue('maxValue', maxval);
-      }
+      setFieldValue('maxValue',convertMaxValue(minval,maxval));
     }
     else{
       setFieldValue('maxValue', maxval);
-    }   
+    }    
   };
 
   return (
@@ -365,10 +365,11 @@ const EditActivityFormFields = ({
         <Col>
           <FieldSet legendname = "Analytical Validation" tips={tipAnalyticalValidation} targetId='AnalyticalValidationTooltipForFieldsetId'>
             <FormRow name="minValue" label="Minimum Value">
-              <FormInput type="text" name="minValue" placeholder="Minimum Value"   onBlur= {handleOnBlurMinValue}/>
+              <FormInput type="text" name="minValue" placeholder="Minimum Value"   onChange= {handleMinValue}/>
             </FormRow>
             <FormRow name="maxValue" label="Maximum Value">
-              <FormInput type="text" name="maxValue" placeholder="Maximum Value" onBlur= {handleOnBlurMaxValue} />
+              <FormInput type="text" name="maxValue" placeholder="Maximum Value"   onChange= {handleMaxValue}
+              />
             </FormRow>
             <FormRow name="reportingFrequency" label="Reporting Frequency">
               <FormInput type="text" name="reportingFrequency" placeholder="Minimum # Days" />
