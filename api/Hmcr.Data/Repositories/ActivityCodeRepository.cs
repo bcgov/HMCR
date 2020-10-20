@@ -156,13 +156,14 @@ namespace Hmcr.Data.Repositories
         public async Task UpdateActivityCodeAsync(ActivityCodeUpdateDto activityCode)
         {
             var activityCodeEntity = await DbSet
+                    .Include(x => x.HmrServiceAreaActivities)
                     .FirstAsync(ac => ac.ActivityCodeId == activityCode.ActivityCodeId);
 
             activityCode.EndDate = activityCode.EndDate?.Date;
 
             Mapper.Map(activityCode, activityCodeEntity);
 
-            //TODO: call function to sync service area changes
+            SyncActivityCodeServiceAreas(activityCode, activityCodeEntity);
         }
 
         public async Task DeleteActivityCodeAsync(decimal id)
@@ -184,6 +185,31 @@ namespace Hmcr.Data.Repositories
             {
                 if (await _workReportRepo.IsActivityNumberInUseAsync(activityNumber))
                     yield return activityNumber;
+            }
+        }
+
+        private void SyncActivityCodeServiceAreas(ActivityCodeUpdateDto activityCodeUpdateDto, HmrActivityCode activityCodeEntity)
+        {
+            var areasToDelete =
+                activityCodeEntity.HmrServiceAreaActivities.Where(s => !activityCodeUpdateDto.ServiceAreaNumbers.Contains(s.ServiceAreaNumber)).ToList();
+
+            for (var i = areasToDelete.Count() - 1; i >= 0; i--)
+            {
+                DbContext.Remove(areasToDelete[i]);
+            }
+
+            var existingAreaNumbers = activityCodeEntity.HmrServiceAreaActivities.Select(s => s.ServiceAreaNumber);
+
+            var newAreaNumbers = activityCodeUpdateDto.ServiceAreaNumbers.Where(r => !existingAreaNumbers.Contains(r));
+
+            foreach (var areaNumber in newAreaNumbers)
+            {
+                activityCodeEntity.HmrServiceAreaActivities
+                    .Add(new HmrServiceAreaActivity
+                    {
+                        ServiceAreaNumber = areaNumber,
+                        ActivityCodeId = activityCodeEntity.ActivityCodeId
+                    });
             }
         }
 

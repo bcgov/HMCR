@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react';
-import { useFormikContext} from 'formik';
 import { connect } from 'react-redux';
 import * as Yup from 'yup';
 import moment from 'moment';
@@ -15,7 +14,7 @@ import { FormRow, FormInput, FormCheckboxInput } from './FormInputs';
 import * as api from '../../Api';
 import * as Constants from '../../Constants';
 import { Row,Col} from 'reactstrap';
-import { isInteger, toString } from 'lodash';
+import { isInteger} from 'lodash';
 import {isValueEmpty,isValueNotEmpty,toStringOrEmpty} from '../../utils'
 
 const tipAnalyticalValidation = [<ul key ='tipAnalyticalValidation_ul_key_1' style={{ paddingInlineStart: 10 }}>
@@ -162,7 +161,6 @@ const EditActivityFormFields = ({
   serviceAreas,
 }) => {
   const [loading, setLoading] = useState(true);
-  const {setFieldValue} = useFormikContext();
   const [validLocationCodeValues, setValidLocationCodeValues] = useState(locationCodes);
   const [disableLocationCodeEdit, setDisableLocationCodeEdit] = useState(false);
   const [validFeatureTypeValues, setValidFeatureTypeValues] = useState(featureTypes);
@@ -192,7 +190,6 @@ const EditActivityFormFields = ({
       }),
     });
 
-    
     setValidationSchema(defaultValidationSchema);
     setLoading(true);
 
@@ -217,7 +214,6 @@ const EditActivityFormFields = ({
             if (response.data.locationCodeId === locationCodes.find((code) => code.name === 'B').id)
               return locationCodes.filter((location) => location.name !== 'C');
           }
-
           return locationCodes;
         });
         
@@ -240,7 +236,6 @@ const EditActivityFormFields = ({
                 (feature) => feature.id === pointLineType || feature.id === response.data.featureType
               );
           }
-
           return featureTypes;
         });
 
@@ -253,40 +248,6 @@ const EditActivityFormFields = ({
 
   if (loading || formValues === null) return <PageSpinner />;
   
-  const convertMaxValue = (minv,maxv)=>{
-    const minval = minv;
-    const maxval = maxv;
-    if (isValueNotEmpty(minval) && Number(minval) >=0 && isValueNotEmpty(maxval) && Number(maxval) === 0)
-    {
-      return (['site','num','ea'].includes(formValues.unitOfMeasure)) ? '999999999': '999999999.99';
-    }
-    if(isValueEmpty(maxval)) return '';
-    return toString(maxval);
-  };
-
-  const handleMinValue = (e) => {
-    const minv = e.target.value;
-    if(formValues)
-    {
-      let maxv= formValues.maxValue;
-      maxv = convertMaxValue(minv,maxv);
-      setFieldValue('maxValue',maxv);
-    }
-    setFieldValue('minValue', minv); 
-  };
-
-  const handleMaxValue = (e) => {
-    const maxval = e.target.value;
-    if(formValues)
-    {
-      let minval = formValues.minValue;
-      setFieldValue('maxValue',convertMaxValue(minval,maxval));
-    }
-    else{
-      setFieldValue('maxValue', maxval);
-    }    
-  };
-
   return (
     <React.Fragment>
       <Row>
@@ -345,10 +306,10 @@ const EditActivityFormFields = ({
         <Col>
           <FieldSet legendname = "Analytical Validation" tips={tipAnalyticalValidation} targetId='AnalyticalValidationTooltipForFieldsetId'>
             <FormRow name="minValue" label="Minimum Value">
-              <FormInput type="text" name="minValue" placeholder="Minimum Value"   onChange= {handleMinValue}/>
+              <FormInput type="text" name="minValue" placeholder="Minimum Value"/>
             </FormRow>
             <FormRow name="maxValue" label="Maximum Value">
-              <FormInput type="text" name="maxValue" placeholder="Maximum Value"   onChange= {handleMaxValue}/>
+              <FormInput type="text" name="maxValue" placeholder="Maximum Value"/>
             </FormRow>
             <FormRow name="reportingFrequency" label="Reporting Frequency">
               <FormInput type="text" name="reportingFrequency" placeholder="Minimum # Days" />
