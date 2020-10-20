@@ -14,6 +14,7 @@ using Hmcr.Model.Dtos.Role;
 using Hmcr.Model.Dtos.RolePermission;
 using Hmcr.Model.Dtos.ServiceArea;
 using Hmcr.Model.Dtos.ServiceAreaUser;
+using Hmcr.Model.Dtos.ServiceAreaActivity;
 using Hmcr.Model.Dtos.SubmissionObject;
 using Hmcr.Model.Dtos.SubmissionRow;
 using Hmcr.Model.Dtos.SubmissionStatus;
@@ -99,6 +100,8 @@ namespace Hmcr.Data.Mappings
             CreateMap<FeedbackMessageUpdateDto, HmrFeedbackMessage>();
 
             CreateMap<ActivityCodeRuleDto, HmrActivityCodeRule>();
+
+            CreateMap<ServiceAreaActivityDto, HmrServiceAreaActivity > ();
         }
     }
 }
