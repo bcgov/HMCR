@@ -18,9 +18,15 @@ import { isInteger} from 'lodash';
 import {isValueEmpty,isValueNotEmpty,toStringOrEmpty} from '../../utils'
 
 const tipAnalyticalValidation = [<ul key ='tipAnalyticalValidation_ul_key_1' style={{ paddingInlineStart: 10 }}>
-  <li>Analytical Validation <em>Help 1</em></li>
-  <li>Analytical Validation <em>Help 2</em></li>
+  Analytical Validations provide warnings when the activity accomplishment does not meet the defined parameters.
+  <li>Minimum Value and Maximum Value check the accomplishment for an activity is within numerical limits, as defined. 
+    No tolerances are added to the Minimum Value or Maximum Value calculations.</li>
+  <li>Reporting Frequency checks if the activity was reported in the same location, with locational specificity based on the activity location code, 
+    within the defined period. A tolerance of 100 metres is added to the start and end points for Location Code C activities to validate against previously 
+    reported instances. No time-based tolerance is added to the Reporting Frequency calculation. Users can manually incorporate into the defined Reporting 
+    Frequency a time-based tolerance (e.g. by setting the minimum number of days to ‘20’ for an activity that should be completed monthly).</li>
   </ul>];
+  
 const tipHighwayAttributeValidation = [<ul key ='tipHighwayAttributeValidation_ul_key_1' style={{ paddingInlineStart: 10 }}>
   <li >Highway Attribute Validation Help</li>
   </ul>];
@@ -69,7 +75,7 @@ const validationSchema = Yup.object({
         if(this.parent.minValue > 999999999.99)
         {
           return this.createError({
-            message: 'Must be less than or equal to 999999999.99',
+            message: 'Must be less than or equal to 999,999,999.99',
             path: 'minValue',
             });
         }
@@ -110,7 +116,7 @@ const validationSchema = Yup.object({
         if(Number(this.parent.maxValue) > 999999999.99)
         {
           return this.createError({
-            message: 'Must be less than or equal to 999999999.99',
+            message: 'Must be less than or equal to 999,999,999.99',
             path: 'maxValue',
             });
         }
