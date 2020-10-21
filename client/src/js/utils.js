@@ -72,8 +72,19 @@ export const isValueNotEmpty=(v)=>{
 };
 
 export const toNumberOrNull=(v)=>{
-  return isValueNotEmpty(v) ? _.toNumber(v): null;
+  return isValueNotEmpty(v) ? _.toNumber(v.replace(/,/g, '')): null;
 };
 export const toStringOrEmpty=(v)=>{
   return isValueNotEmpty(v) ? _.toString(v): '';
 };
+export const toStringWithCommasOrEmpty=(v)=>{
+  return isValueNotEmpty(v) ? _.toString(addCommasToNumber(v)): '';
+};
+export const addCommasToNumber=(n) =>{
+  if(isValueEmpty(n)) return n;
+  let s = n.toString().replace(/,/g, '').split('.');
+  if (s[0].length >= 4) {
+      s[0] = s[0].replace(/(\d)(?=(\d{3})+$)/g, '$1,');
+  }
+  return s.join('.');
+}

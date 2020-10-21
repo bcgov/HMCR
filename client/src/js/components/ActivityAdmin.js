@@ -20,7 +20,7 @@ import { showValidationErrorDialog } from '../actions';
 
 import * as Constants from '../Constants';
 import * as api from '../Api';
-import { buildStatusIdArray,isValueNotEmpty,toNumberOrNull,toStringOrEmpty,isValueEmpty } from '../utils';
+import { buildStatusIdArray,isValueNotEmpty,toNumberOrNull,toStringOrEmpty,toStringWithCommasOrEmpty,isValueEmpty } from '../utils';
 
 const defaultSearchFormValues = { searchText: '', maintenanceTypeIds: [], statusId: [Constants.ACTIVE_STATUS.ACTIVE] };
 
@@ -120,8 +120,8 @@ const ActivityAdmin = ({ maintenanceTypes, locationCodes, unitOfMeasures,showVal
         api
           .postActivityCode(values)
           .then(() => {
-            values.minValue = toStringOrEmpty(values.minValue);
-            values.maxValue = toStringOrEmpty(values.maxValue);
+            values.minValue = toStringWithCommasOrEmpty(values.minValue);
+            values.maxValue = toStringWithCommasOrEmpty(values.maxValue);
             values.reportingFrequency = toStringOrEmpty(values.reportingFrequency );
             formModal.closeForm();
             searchData.refresh();
@@ -132,8 +132,8 @@ const ActivityAdmin = ({ maintenanceTypes, locationCodes, unitOfMeasures,showVal
         api
           .putActivityCode(values.id, values)
           .then(() => {
-            values.minValue = toStringOrEmpty(values.minValue);
-            values.maxValue = toStringOrEmpty(values.maxValue);
+            values.minValue = toStringWithCommasOrEmpty(values.minValue);
+            values.maxValue = toStringWithCommasOrEmpty(values.maxValue);
             values.reportingFrequency = toStringOrEmpty(values.reportingFrequency );
             formModal.closeForm();
             searchData.refresh();

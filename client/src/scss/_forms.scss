@@ -56,7 +56,28 @@
 .form-control.servicearea-large.is-invalid {
   border-color: #d93e45;
 }
-.fieldset-tooltip{
-  max-width: 600px;
+.fieldset-tooltip [class$="inner"] {
+  padding:0.5rem 0.75rem;
+  background-color: #fff;
+  border: 1px solid #737373;
+  color:black;
+  max-width: 400px;
+  height: 160px;
+  font-family:Myriad-Pro,Calibri,Arial,sans serif;
+  font-size: 0.875rem;
+  font-weight: 400;
+  text-align: left;
+  text-decoration: none;
+  word-spacing: normal;
+  word-break: normal;
+  white-space: normal;
+}
 
+.fieldset-tooltip [class$="arrow"] {
+  border-top: 5px solid #fff !important;
+}
+.fieldset-tooltip-body {
+  overflow-y: auto;
+  max-width: 380px;
+  height: 140px;
 }

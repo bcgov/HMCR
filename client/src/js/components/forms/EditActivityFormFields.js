@@ -15,10 +15,10 @@ import * as api from '../../Api';
 import * as Constants from '../../Constants';
 import { Row,Col} from 'reactstrap';
 import { isInteger} from 'lodash';
-import {isValueEmpty,isValueNotEmpty,toStringOrEmpty} from '../../utils'
+import {isValueEmpty,isValueNotEmpty,toStringOrEmpty,toStringWithCommasOrEmpty} from '../../utils'
 
-const tipAnalyticalValidation = [<ul key ='tipAnalyticalValidation_ul_key_1' style={{ paddingInlineStart: 10 }}>
-  Analytical Validations provide warnings when the activity accomplishment does not meet the defined parameters.
+const tipAnalyticalValidation = [<ul key ='tipAnalyticalValidation_ul_key_1' >
+  <li style={{margin: '0 0 6px 0'}}>Analytical Validations provide warnings when the activity accomplishment does not meet the defined parameters.</li>
   <li>Minimum Value and Maximum Value check the accomplishment for an activity is within numerical limits, as defined. 
     No tolerances are added to the Minimum Value or Maximum Value calculations.</li>
   <li>Reporting Frequency checks if the activity was reported in the same location, with locational specificity based on the activity location code, 
@@ -27,8 +27,27 @@ const tipAnalyticalValidation = [<ul key ='tipAnalyticalValidation_ul_key_1' sty
     Frequency a time-based tolerance (e.g. by setting the minimum number of days to ‘20’ for an activity that should be completed monthly).</li>
   </ul>];
   
-const tipHighwayAttributeValidation = [<ul key ='tipHighwayAttributeValidation_ul_key_1' style={{ paddingInlineStart: 10 }}>
-  <li >Highway Attribute Validation Help</li>
+const tipHighwayAttributeValidation = [<ul key ='tipHighwayAttributeValidation_ul_key_1' >
+  <li style={{margin: '0 0 6px 0'}}>Highway Attribute Validations provide warnings for Location Code C activities when the features of the reported 
+  location and/or accomplishment do not meet the defined parameters.</li>
+  <li style={{margin: '0 0 6px 0'}}>Road Length checks the accomplishment against the road length (either Road KM or Lane KM), 
+    or against Guardrail Length [<b>NTD: to confirm Guardrail vs Barrier vernacular based on what types of 
+    guardrail/barrier will be included</b>], as defined in each individual rule. Several rules account for the road length 
+    to be multiplied by one or more factors to accommodate non kilometre-based units of measure. Multiplying factors 
+    include conversion factors (e.g. 1km=1,000m), application rates (e.g. 2.0 litres/m2) or lane width factors to calculate surface area
+     (e.g. lane width = 3.5m). A 10% tolerance is added to the Total Road KM (to a 200m maximum) and Total Lane KM (to a 500m maximum) 
+     and Barrier Length (to a 200m maximum) for the validation calculations. Point items are calculated with 
+     an estimated Road KM length of 40m (30m as permitted by the Reporting Manual and 10m tolerance), with Lane KM calculated based 
+     on the number of lanes at the point.</li>
+  <li  style={{margin: '0 0 6px 0'}}>Surface Type checks that the location of the record has the appropriate surface type based on the selected rule. 
+    For point items, the surface type must match the point exactly and no tolerance is incorporated. For line items, 
+    a tolerance of 80% is incorporated (i.e. if the rule is “GPS on Paved Surface” and 80% or more of the surface types 
+    within the start and end GPS points are paved, then the record is accepted). Paved surfaces include CHRIS surface types 1-4; 
+    non-paved surfaces include CHRIS surface types 5-6; unconstructed roads have a CHRIS surface type of E or F.</li>
+  <li >Road Class checks that the location of the record has the appropriate summer or winter road 
+    classifications based on the selected rule. For point items, the classification must match exactly and no tolerance 
+    is incorporated. For line items, a tolerance of 80% is incorporated (i.e. if the rule is “Not Class 8 or F” and 80% or 
+    more of the maintenance class within the start and end GPS points are not 8 or F, then the record is accepted).</li>
   </ul>];
 
 const defaultValues = {
@@ -62,6 +81,7 @@ const validationSchema = Yup.object({
   locationCodeId: Yup.number().required('Required'),
   serviceAreaNumbers: Yup.array().required('At least one Service Area must be selected'),
   minValue: Yup.number()
+    .transform((_value, originalValue) => Number(originalValue.replace(/,/g, '')))
     .min(0,'Must be greater than or equal to 0')
     .nullable()
     .typeError('Must be number')
@@ -103,9 +123,9 @@ const validationSchema = Yup.object({
       }
     ),
   maxValue: Yup.number()
+    .transform((_value, originalValue) => Number(originalValue.replace(/,/g, '')))
     .min(0,'Must be greater than or equal to 0')
     .nullable()
-    .typeError('Must be number')
     .test(
       'datamax',
       function() {
@@ -210,8 +230,8 @@ const EditActivityFormFields = ({
         setInitialValues({
           ...response.data,
           endDate: response.data.endDate ? moment(response.data.endDate): null,
-          minValue: toStringOrEmpty(response.data.minValue),
-          maxValue: toStringOrEmpty(response.data.maxValue),
+          minValue: toStringWithCommasOrEmpty(response.data.minValue),
+          maxValue: toStringWithCommasOrEmpty(response.data.maxValue),
           reportingFrequency: toStringOrEmpty(response.data.reportingFrequency),
         });
         
