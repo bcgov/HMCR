@@ -94,14 +94,15 @@ namespace Hmcr.Domain.Hangfire
                     continue;
                 }
 
-                untypedRow.FeatureType = activityCode.FeatureType ?? FeatureType.None;
-                untypedRow.SpThresholdLevel = activityCode.SpThresholdLevel;
-
+                //set activity code rules and location code
+                SetActivityCodeRulesIntoUntypedRow(untypedRow, activityCode);
+                
                 //this also sets RowType (D2, D3, D4)
                 var entityName = GetValidationEntityName(untypedRow, activityCode);
 
                 _validator.Validate(entityName, untypedRow, errors);
-
+                
+                //stage 2 validation
                 PerformFieldValidation(errors, untypedRow, activityCode);
 
                 if (errors.Count > 0)
@@ -128,6 +129,7 @@ namespace Hmcr.Domain.Hangfire
 
                 CopyCalculatedFieldsFormUntypedRow(typedRows, untypedRows);
 
+                //stage 3 validation?
                 PerformAdditionalValidation(typedRows);
             }
 
@@ -136,6 +138,8 @@ namespace Hmcr.Domain.Hangfire
                 await CommitAndSendEmailAsync();
                 return true;
             }
+
+            //stage 4 validation starts
 
             var workReports = PerformSpatialValidationAndConversionBatchAsync(typedRows);
 
@@ -147,13 +151,253 @@ namespace Hmcr.Domain.Hangfire
                 return true;
             }
 
+            //perform surfacetype lookup and validation
+            workReports = PerformSurfaceTypeValidationBatchAsync(workReports);
+
+            if (_submission.SubmissionStatusId != _statusService.FileInProgress)
+            {
+                await CommitAndSendEmailAsync();
+                return true;
+            }
+
             _submission.SubmissionStatusId = _statusService.FileSuccess;
+            //stage 4 validation ends
 
             await foreach (var entity in _workReportRepo.SaveWorkReportAsnyc(_submission, workReports)) { }
 
             await CommitAndSendEmailAsync();
 
             return true;
+        }
+
+        private List<WorkReportGeometry> PerformSurfaceTypeValidationBatchAsync(List<WorkReportGeometry> workReports)
+        {
+            MethodLogger.LogEntry(_logger, _enableMethodLog, _methodLogHeader, $"Total Record: {workReports.Count}");
+
+            //get surface type not applicable id
+            var notApplicableSurfaceTypeId = _validator.ActivityCodeRuleLookup
+                .Where(x => x.ActivityRuleSet == ActivityRuleType.SurfaceType)
+                .Where(x => x.ActivityRuleExecName == SurfaceTypeRules.NA)
+                .FirstOrDefault().ActivityCodeRuleId;
+
+            //grouping the rows
+            var groups = new List<List<WorkReportGeometry>>();
+            var currentGroup = new List<WorkReportGeometry>();
+
+            var count = 0;
+            foreach (var workReport in workReports)
+            {
+                currentGroup.Add(workReport);
+                count++;
+
+                if (count % 10 == 0)
+                {
+                    groups.Add(currentGroup);
+                    currentGroup = new List<WorkReportGeometry>();
+                }
+            }
+
+            if (currentGroup.Count > 0)
+            {
+                groups.Add(currentGroup);
+            }
+
+            var updatedWorkReports = new ConcurrentBag<WorkReportGeometry>();
+            var progress = 0;
+
+            foreach (var group in groups)
+            {
+                var tasklist = new List<Task>();
+                
+                //don't batch if not location code C
+                foreach (var row in group.Where(x => x.WorkReportTyped.ActivityCodeValidation.LocationCode == "C"))
+                {
+                    if (row.WorkReportTyped.ActivityCodeValidation.SurfaceTypeRuleId != notApplicableSurfaceTypeId)
+                    {
+                        tasklist.Add(Task.Run(async () => updatedWorkReports.Add(await PerformSurfaceTypeValidationAsync(row))));
+                    }
+                }
+
+                Task.WaitAll(tasklist.ToArray());
+
+                progress += 10;
+
+                if (progress % 500 == 0)
+                {
+                    _logger.LogInformation($"{_methodLogHeader} PerformSurfaceTypeValidationAsync {progress}");
+                }
+            }
+
+            return updatedWorkReports.ToList();
+        }
+
+        private async Task<WorkReportGeometry> PerformSurfaceTypeValidationAsync(WorkReportGeometry row)
+        {
+            var errors = new Dictionary<string, List<string>>();
+            var typedRow = row.WorkReportTyped;
+            var geometry = row.Geometry;
+            var submissionRow = _submissionRows[(decimal)typedRow.RowNum];
+            typedRow.RoadFeatures = new List<WorkReportRoadFeature>();
+
+            //build Geometry linestring
+            var geometryLineString = "";
+            foreach (Coordinate coordinate in geometry.Coordinates)
+            {
+                geometryLineString += coordinate.X + "\\," + coordinate.Y;
+                geometryLineString += (coordinate != geometry.Coordinates.Last()) ? "\\," : "";
+            }
+            
+            //surface type calls are different between Point & Line
+            if (typedRow.FeatureType == FeatureType.Point)
+            {
+                var result = await _spatialService.GetSurfaceTypeAssocWithPointAsync(geometryLineString);
+
+                if (result.result == SpValidationResult.Fail)
+                {
+                    SetErrorDetail(submissionRow, errors, _statusService.FileLocationError);
+                }
+                else if (result.result == SpValidationResult.Success)
+                {
+                    if (result.surfaceType.Type != null)    //only add if type was returned
+                    {
+                        typedRow.RoadFeatures.Add(new WorkReportRoadFeature(result.surfaceType.Type, result.surfaceType.Length));
+                    }
+
+                    PerformSurfaceTypeValidation(typedRow);
+                }
+            } 
+            else if (typedRow.FeatureType == FeatureType.Line)
+            {
+                var result = await _spatialService.GetSurfaceTypeAssocWithLineAsync(geometryLineString);
+
+                if (result.result == SpValidationResult.Fail)
+                {
+                    SetErrorDetail(submissionRow, errors, _statusService.FileLocationError);
+                }
+                else if (result.result == SpValidationResult.Success)
+                {
+                    var distinctTypes = result.surfaceTypes.Select(x => x.Type).Distinct().ToList();
+                    foreach (string type in distinctTypes)
+                    {
+                        var totalLengthOfType = result.surfaceTypes.Where(x => x.Type == type).Sum(x => x.Length);
+                        typedRow.RoadFeatures.Add(new WorkReportRoadFeature(type, totalLengthOfType));
+                    }
+
+                    PerformSurfaceTypeValidation(typedRow);
+                }
+            }
+
+
+            return row;
+        }
+
+        private void PerformSurfaceTypeValidation(WorkReportTyped typedRow)
+        {
+            //get total length of path
+            var totalLength = typedRow.RoadFeatures.Sum(x => x.SurfaceLength);
+            
+            //determine path length; paved, non-paved, unconstructed, other
+            var pavedLength = typedRow.RoadFeatures.Where(x => x.SurfaceType == RoadSurface.HOT_MIX ||
+                x.SurfaceType == RoadSurface.COLD_MIX || x.SurfaceType == RoadSurface.CONCRETE ||
+                x.SurfaceType == RoadSurface.SURFACE_TREATED).Sum(x => x.SurfaceLength);
+            
+            var unpavedLength = typedRow.RoadFeatures.Where(x => x.SurfaceType == RoadSurface.GRAVEL ||
+                x.SurfaceType == RoadSurface.DIRT).Sum(x => x.SurfaceLength);
+            
+            var unconstructedLength = typedRow.RoadFeatures.Where(x => x.SurfaceType == RoadSurface.CLEARED ||
+                x.SurfaceType == RoadSurface.UNCLEARED).Sum(x => x.SurfaceLength);
+            
+            var otherLength = typedRow.RoadFeatures.Where(x => x.SurfaceType == RoadSurface.OTHER ||
+                x.SurfaceType == RoadSurface.UNKNOWN).Sum(x => x.SurfaceLength);
+
+            var surfaceTypeRule = typedRow.ActivityCodeValidation.SurfaceTypeRuleExec;
+
+            if (typedRow.FeatureType == FeatureType.Line) {
+                switch (surfaceTypeRule) 
+                {
+                    case SurfaceTypeRules.PavedSurface:
+                    case SurfaceTypeRules.PavedStructure:
+                        if ((pavedLength / totalLength) >= .8)
+                        {
+                            //nothing wrong
+                        }
+                        else
+                        {
+                            if (surfaceTypeRule == SurfaceTypeRules.PavedStructure)
+                            {
+                                //structure checking
+                            }
+                            else if (surfaceTypeRule == SurfaceTypeRules.PavedSurface)
+                            {
+                                //warning 
+                            }
+                        }
+                        
+                        break;
+                    case SurfaceTypeRules.NonPavedSurface:
+                        if ((unpavedLength / totalLength) >= .8)
+                        {
+                            //nothing wrong
+                        }
+                        else
+                        {
+                            //warning
+                        }
+
+                        break;
+                    case SurfaceTypeRules.Unconstructed:
+                        if ((unconstructedLength / totalLength) >= .2)
+                        {
+                            //warning
+                        }
+
+                        break;
+                }
+
+            } else if (typedRow.FeatureType == FeatureType.Point)
+            {
+                switch (surfaceTypeRule)
+                {
+                    case SurfaceTypeRules.PavedSurface:
+                    case SurfaceTypeRules.PavedStructure:
+                        if (pavedLength > 0)
+                        {
+                            //nothign wrong
+                        }
+                        else
+                        {
+                            if (unpavedLength > 0 && surfaceTypeRule == SurfaceTypeRules.PavedStructure)
+                            {
+                                //structure checking
+                            }
+                            else if (unpavedLength > 0 && surfaceTypeRule == SurfaceTypeRules.PavedSurface)
+                            {
+                                //warning!
+                            }
+                        }
+
+                        break;
+                    case SurfaceTypeRules.NonPavedSurface:
+                        if (unpavedLength > 0)
+                        {
+                            //nothing wrong
+                        }
+                        else if (pavedLength > 0)
+                        {
+                            //warning?
+                        }
+
+                        break;
+                    case SurfaceTypeRules.Unconstructed:
+                        if (unconstructedLength > 0)
+                        {
+                            //warning
+                        }
+
+                        break;
+                }
+            }
+
         }
 
         private void PerformFieldValidation(Dictionary<string, List<string>> errors, WorkReportCsvDto untypedRow, ActivityCodeDto activityCode)
@@ -257,7 +501,39 @@ namespace Hmcr.Domain.Hangfire
                 typedRow.SpatialData = untypedRow.SpatialData;
                 typedRow.RowId = untypedRow.RowId;
                 typedRow.SpThresholdLevel = untypedRow.SpThresholdLevel;
+
+                //move activity rules and location code from untyped to typed
+                typedRow.ActivityCodeValidation.LocationCode = untypedRow.ActivityCodeValidation.LocationCode;
+                typedRow.ActivityCodeValidation.RoadLengthRuleId = untypedRow.ActivityCodeValidation.RoadLengthRuleId;
+                typedRow.ActivityCodeValidation.RoadLenghRuleExec = untypedRow.ActivityCodeValidation.RoadLenghRuleExec;
+                typedRow.ActivityCodeValidation.SurfaceTypeRuleId = untypedRow.ActivityCodeValidation.SurfaceTypeRuleId;
+                typedRow.ActivityCodeValidation.SurfaceTypeRuleExec = untypedRow.ActivityCodeValidation.SurfaceTypeRuleExec;
+                typedRow.ActivityCodeValidation.RoadClassRuleId = untypedRow.ActivityCodeValidation.RoadClassRuleId;
+                typedRow.ActivityCodeValidation.RoadClassRuleExec = untypedRow.ActivityCodeValidation.RoadClassRuleExec;
             }
+        }
+
+        private void SetActivityCodeRulesIntoUntypedRow(WorkReportCsvDto untypedRow, ActivityCodeDto activityCode)
+        {
+            untypedRow.FeatureType = activityCode.FeatureType ?? FeatureType.None;
+            untypedRow.SpThresholdLevel = activityCode.SpThresholdLevel;
+            //set activity code rules and location code
+            untypedRow.ActivityCodeValidation.LocationCode = activityCode.LocationCode.LocationCode;
+
+            untypedRow.ActivityCodeValidation.RoadLengthRuleId = activityCode.RoadLengthRule;
+            untypedRow.ActivityCodeValidation.RoadLenghRuleExec = _validator.ActivityCodeRuleLookup
+                .Where(x => x.ActivityCodeRuleId == activityCode.RoadLengthRule)
+                .FirstOrDefault().ActivityRuleExecName;
+
+            untypedRow.ActivityCodeValidation.SurfaceTypeRuleId = activityCode.SurfaceTypeRule;
+            untypedRow.ActivityCodeValidation.SurfaceTypeRuleExec = _validator.ActivityCodeRuleLookup
+                .Where(x => x.ActivityCodeRuleId == activityCode.SurfaceTypeRule)
+                .FirstOrDefault().ActivityRuleExecName;
+
+            untypedRow.ActivityCodeValidation.RoadClassRuleId = activityCode.RoadClassRule;
+            untypedRow.ActivityCodeValidation.RoadClassRuleExec = _validator.ActivityCodeRuleLookup
+                .Where(x => x.ActivityCodeRuleId == activityCode.RoadClassRule)
+                .FirstOrDefault().ActivityRuleExecName;
         }
 
         private List<WorkReportGeometry> PerformSpatialValidationAndConversionBatchAsync(List<WorkReportTyped> typedRows)
