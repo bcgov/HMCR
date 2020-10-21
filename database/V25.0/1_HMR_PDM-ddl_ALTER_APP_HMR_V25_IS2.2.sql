@@ -6,6 +6,12 @@
 
 -- We recommend backing up the database prior to executing the script.
 
+USE HMR_DEV; -- uncomment appropriate instance
+--USE HMR_TST;
+--USE HMR_UAT;
+--USE HMR_PRD;
+GO
+
 SET XACT_ABORT ON
 GO
 SET TRANSACTION ISOLATION LEVEL SERIALIZABLE
