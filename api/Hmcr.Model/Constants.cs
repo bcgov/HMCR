@@ -322,6 +322,36 @@ namespace Hmcr.Model
         public const string PointLine = "Point/Line";
     }
 
+    public static class ActivityRuleType
+    {
+        public const string RoadLength = "ROAD_LENGTH";
+        public const string SurfaceType = "SURFACE_TYPE";
+        public const string RoadClass = "ROAD_CLASS";
+    }
+
+    public static class SurfaceTypeRules
+    {
+        public const string NA = "NOT_APPLICABLE";
+        public const string PavedStructure = "GPS_PAVED_STRUCTURE";
+        public const string PavedSurface = "GPS_PAVED_SURFACE";
+        public const string NonPavedSurface = "GPS_NON_PAVED_SURFACE";
+        public const string Unconstructed = "GPS_NOT_UNCONSTRUCTED";
+    }
+
+    public static class RoadSurface
+    {
+        public const string HOT_MIX = "1";
+        public const string COLD_MIX = "2";
+        public const string CONCRETE = "3";
+        public const string SURFACE_TREATED = "4";
+        public const string GRAVEL = "5";
+        public const string DIRT = "6";
+        public const string CLEARED = "E";
+        public const string UNCLEARED = "F";
+        public const string OTHER = "7";
+        public const string UNKNOWN = "Z";
+    }
+
     /// <summary>
     /// Spatial Data
     /// None - Non-Location specific reporting Fields

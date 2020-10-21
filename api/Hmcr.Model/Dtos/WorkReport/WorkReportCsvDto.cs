@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Hmcr.Model.Dtos.ActivityCode;
+using System;
 
 namespace Hmcr.Model.Dtos.WorkReport
 {
@@ -43,5 +44,8 @@ namespace Hmcr.Model.Dtos.WorkReport
         /// </summary>
         public SpatialData SpatialData { get; set; }
         public string SpThresholdLevel { get; set; }
+
+        public ActivityCodeValidationDto ActivityCodeValidation { get; set; }
+
     }
 }

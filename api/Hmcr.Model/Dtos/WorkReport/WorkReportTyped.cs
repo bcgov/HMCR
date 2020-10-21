@@ -1,4 +1,6 @@
-﻿using System;
+﻿using Hmcr.Model.Dtos.ActivityCode;
+using System;
+using System.Collections.Generic;
 
 namespace Hmcr.Model.Dtos.WorkReport
 {
@@ -50,5 +52,11 @@ namespace Hmcr.Model.Dtos.WorkReport
         /// </summary>
         public SpatialData SpatialData { get; set; }
         public string SpThresholdLevel { get; set; }
+
+        /// <summary>
+        /// Road feature data retrieved from CHRIS
+        /// </summary>
+        public virtual IList<WorkReportRoadFeature> RoadFeatures { get; set; }
+        public ActivityCodeValidationDto ActivityCodeValidation { get; set; }
     }
 }

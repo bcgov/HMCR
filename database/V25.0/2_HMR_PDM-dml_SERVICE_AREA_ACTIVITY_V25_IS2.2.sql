@@ -7,7 +7,10 @@
 -- Doug Filteau  2020-Oct-14  Initial version.
 -- *****************************************************************************
 
-USE HMR_DEV;
+USE HMR_DEV; -- uncomment appropriate instance
+--USE HMR_TST;
+--USE HMR_UAT;
+--USE HMR_PRD;
 GO
 
 INSERT INTO [dbo].[HMR_SERVICE_AREA_ACTIVITY]

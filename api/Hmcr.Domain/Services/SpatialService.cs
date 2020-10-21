@@ -19,11 +19,14 @@ namespace Hmcr.Domain.Services
             (decimal offset, string rfiSegment, string rfiSegmentName, string thresholdLevel, Dictionary<string, List<string>> errors);
         Task<(SpValidationResult result, decimal snappedStartOffset, decimal snappedEndOffset, Point startPoint, Point endPoint, List<Line> lines, RfiSegment rfiSegment)> 
             ValidateLrsLineAsync(decimal startOffset, decimal endOffset, string rfiSegment, string rfiSegmentName, string thresholdLevel, Dictionary<string, List<string>> errors);
+        Task<(SpValidationResult result, List<SurfaceType> surfaceTypes)> GetSurfaceTypeAssocWithLineAsync(string geometryLineString);
+        Task<(SpValidationResult result, SurfaceType surfaceType)> GetSurfaceTypeAssocWithPointAsync(string geometryLineString);
     }
 
     public class SpatialService : ISpatialService
     {
         private IOasApi _oasApi;
+        private IInventoryApi _inventoryApi;
 
         private IFieldValidatorService _validator;
         private ILookupCodeService _lookupService;
@@ -31,11 +34,12 @@ namespace Hmcr.Domain.Services
         private IEnumerable<string> _nonSpHighwayUniques = null;
         private IEnumerable<string> NonSpHighwayUniques => _nonSpHighwayUniques ??= _validator.CodeLookup.Where(x => x.CodeSet == CodeSet.NonSpHighwayUnique).Select(x => x.CodeValue).ToArray().ToLowercase();
 
-        public SpatialService(IOasApi oasApi, IFieldValidatorService validator, ILookupCodeService lookupService)
+        public SpatialService(IOasApi oasApi, IFieldValidatorService validator, ILookupCodeService lookupService, IInventoryApi inventoryApi)
         {
             _oasApi = oasApi;
             _validator = validator;
             _lookupService = lookupService;
+            _inventoryApi = inventoryApi;
         }
 
         public async Task<(SpValidationResult result, LrsPointResult lrsResult, RfiSegment rfiSegment)> ValidateGpsPointAsync
@@ -158,7 +162,7 @@ namespace Hmcr.Domain.Services
             return (SpValidationResult.Success, snappedOffset, point, rfiResult.segment);
         }
 
-        public async Task<(SpValidationResult result, decimal snappedStartOffset, decimal snappedEndOffset, Point startPoint, Point endPoint, List<Line> lines, RfiSegment rfiSegment)> 
+        public async Task<(SpValidationResult result, decimal snappedStartOffset, decimal snappedEndOffset, Point startPoint, Point endPoint, List<Line> lines, RfiSegment rfiSegment)>
             ValidateLrsLineAsync(decimal startOffset, decimal endOffset, string rfiSegment, string rfiSegmentName, string thresholdLevel, Dictionary<string, List<string>> errors)
         {
             var snappedStartOffset = startOffset;
@@ -175,7 +179,7 @@ namespace Hmcr.Domain.Services
             {
                 return (SpValidationResult.Fail, rfiResult.segment.Length, rfiResult.segment.Length, null, null, null, rfiResult.segment);
             }
-            snappedStartOffset = startTolCheck.snappedOffset;            
+            snappedStartOffset = startTolCheck.snappedOffset;
 
             //Get point by snappedStartOffset. Otherwise, it will raise an exception when the offset is greater than length of the road
             var startPoint = await _oasApi.GetPointFromOffsetMeasureOnRfiSegmentAsync(rfiSegment, snappedStartOffset);
@@ -241,6 +245,20 @@ namespace Hmcr.Domain.Services
             return (SpValidationResult.Success, rfiDetail);
         }
 
+        public async Task<(SpValidationResult result, List<SurfaceType> surfaceTypes)> GetSurfaceTypeAssocWithLineAsync(string geometryLineString)
+        {
+            var surfaceTypes = await _inventoryApi.GetSurfaceTypeAssociatedWithLine(geometryLineString);
+
+            return (SpValidationResult.Success, surfaceTypes);
+        }
+
+        public async Task<(SpValidationResult result, SurfaceType surfaceType)> GetSurfaceTypeAssocWithPointAsync(string geometryLineString)
+        {
+            var surfaceType = await _inventoryApi.GetSurfaceTypeAssociatedWithPoint(geometryLineString);
+
+            return (SpValidationResult.Success, surfaceType);
+        }
+
         private (bool withinTolerance, decimal snappedOffset) GetSnappedOffset(RfiSegment segment, decimal offset, string rfiSegment,
             string rfiSegmentName, string thresholdLevel, Dictionary<string, List<string>> errors)
         {
@@ -250,7 +268,7 @@ namespace Hmcr.Domain.Services
             {
                 var threshold = _lookupService.GetThresholdLevel(thresholdLevel);
 
-                if (segment.Length + threshold.Error / 1000M < offset) 
+                if (segment.Length + threshold.Error / 1000M < offset)
                 {
                     errors.AddItem($"Offset", $"Offset [{offset}] is not on the {rfiSegmentName} [{rfiSegment}] within the tolerance [{threshold.Error}] metres");
                     return (false, snappedOffset);
