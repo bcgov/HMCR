@@ -15,7 +15,7 @@ import * as api from '../../Api';
 import * as Constants from '../../Constants';
 import { Row,Col} from 'reactstrap';
 import { isInteger} from 'lodash';
-import {isValueEmpty,isValueNotEmpty,toStringOrEmpty,toStringWithCommasOrEmpty} from '../../utils'
+import {isValueEmpty,isValueNotEmpty,toStringOrEmpty,toStringWithCommasOrEmpty,isValidDecimal} from '../../utils'
 
 const tipAnalyticalValidation = [<ul key ='tipAnalyticalValidation_ul_key_1' >
   <li style={{margin: '0 0 6px 0'}}>Analytical Validations provide warnings when the activity accomplishment does not meet the defined parameters.</li>
@@ -99,6 +99,13 @@ const validationSchema = Yup.object({
             path: 'minValue',
             });
         }
+        if(!isValidDecimal(this.parent.minValue,2))
+        {
+          return this.createError({
+            message: 'Must be less than or equal to 2 digits',
+            path: 'minValue',
+            });
+        }
         if(isValueNotEmpty(this.parent.maxValue))
         {
           if(Number(this.parent.maxValue) !== 0 && this.parent.maxValue < this.parent.minValue)
@@ -126,6 +133,7 @@ const validationSchema = Yup.object({
     .transform((_value, originalValue) => Number(originalValue.replace(/,/g, '')))
     .min(0,'Must be greater than or equal to 0')
     .nullable()
+    .typeError('Must be number')
     .test(
       'datamax',
       function() {
@@ -137,6 +145,13 @@ const validationSchema = Yup.object({
         {
           return this.createError({
             message: 'Must be less than or equal to 999,999,999.99',
+            path: 'maxValue',
+            });
+        }
+        if(!isValidDecimal(this.parent.maxValue,2))
+        {
+          return this.createError({
+            message: 'Must be less than or equal to 2 digits',
             path: 'maxValue',
             });
         }
