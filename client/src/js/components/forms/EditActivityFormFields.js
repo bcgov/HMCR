@@ -17,7 +17,7 @@ import { Row,Col} from 'reactstrap';
 import { isInteger} from 'lodash';
 import {isValueEmpty,isValueNotEmpty,toStringOrEmpty,toStringWithCommasOrEmpty,isValidDecimal} from '../../utils'
 
-const tipAnalyticalValidation = [<ul key ='tipAnalyticalValidation_ul_key_1' >
+const tipAnalyticalValidation = [<ul key ='tipAnalyticalValidation_ul_key_1' style={{ paddingInlineStart: '20px' }}>
   <li style={{margin: '0 0 6px 0'}}>Analytical Validations provide warnings when the activity accomplishment does not meet the defined parameters.</li>
   <li>Minimum Value and Maximum Value check the accomplishment for an activity is within numerical limits, as defined. 
     No tolerances are added to the Minimum Value or Maximum Value calculations.</li>
@@ -27,7 +27,7 @@ const tipAnalyticalValidation = [<ul key ='tipAnalyticalValidation_ul_key_1' >
     Frequency a time-based tolerance (e.g. by setting the minimum number of days to ‘20’ for an activity that should be completed monthly).</li>
   </ul>];
   
-const tipHighwayAttributeValidation = [<ul key ='tipHighwayAttributeValidation_ul_key_1' >
+const tipHighwayAttributeValidation = [<ul key ='tipHighwayAttributeValidation_ul_key_1' style={{ paddingInlineStart: '20px' }}>
   <li style={{margin: '0 0 6px 0'}}>Highway Attribute Validations provide warnings for Location Code C activities when the features of the reported 
   location and/or accomplishment do not meet the defined parameters.</li>
   <li style={{margin: '0 0 6px 0'}}>Road Length checks the accomplishment against the road length (either Road KM or Lane KM), 
@@ -81,7 +81,10 @@ const validationSchema = Yup.object({
   locationCodeId: Yup.number().required('Required'),
   serviceAreaNumbers: Yup.array().required('At least one Service Area must be selected'),
   minValue: Yup.number()
-    .transform((_value, originalValue) => Number(originalValue.replace(/,/g, '')))
+    .transform((_value, originalValue) => {
+      if(isValueEmpty(originalValue.replace(/,/g, ''))) return null;
+      return Number(originalValue.replace(/,/g, ''));
+    })
     .min(0,'Must be greater than or equal to 0')
     .nullable()
     .typeError('Must be number')
@@ -102,7 +105,7 @@ const validationSchema = Yup.object({
         if(!isValidDecimal(this.parent.minValue,2))
         {
           return this.createError({
-            message: 'Must be less than or equal to 2 digits',
+            message: 'Must be less than or equal to two decimal positions',
             path: 'minValue',
             });
         }
@@ -130,7 +133,10 @@ const validationSchema = Yup.object({
       }
     ),
   maxValue: Yup.number()
-    .transform((_value, originalValue) => Number(originalValue.replace(/,/g, '')))
+    .transform((_value, originalValue) => {
+      if(isValueEmpty(originalValue.replace(/,/g, ''))) return null;
+      return Number(originalValue.replace(/,/g, ''));
+    })
     .min(0,'Must be greater than or equal to 0')
     .nullable()
     .typeError('Must be number')
@@ -151,7 +157,7 @@ const validationSchema = Yup.object({
         if(!isValidDecimal(this.parent.maxValue,2))
         {
           return this.createError({
-            message: 'Must be less than or equal to 2 digits',
+            message: 'Must be less than or equal to two decimal positions',
             path: 'maxValue',
             });
         }

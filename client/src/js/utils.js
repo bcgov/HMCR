@@ -72,7 +72,7 @@ export const isValueNotEmpty=(v)=>{
 };
 
 export const toNumberOrNull=(v)=>{
-  return isValueNotEmpty(v) ? _.toNumber(removeStringCommas(v)): null;
+  return isValueNotEmpty(removeStringCommas(v)) ? _.toNumber(removeStringCommas(v)): null;
 };
 export const toStringOrEmpty=(v)=>{
   return isValueNotEmpty(v) ? _.toString(v): '';
@@ -86,15 +86,13 @@ export const removeStringCommas=(v)=>{
 export const addCommasToNumber=(n) =>{
   if(isValueEmpty(n)) return n;
   let s = removeStringCommas(n).split('.');
-  if (s[0].length >= 4) {
-      s[0] = s[0].replace(/(\d)(?=(\d{3})+$)/g, '$1,');
-  }
+  if (s[0].length >= 4) s[0] = s[0].replace(/(\d)(?=(\d{3})+$)/g, '$1,');
   return s.join('.');
 }
 export const isValidDecimal=(v,digits) =>{
   if(isValueEmpty(v)) return true;
   const d = _.toInteger(digits);
-  let s = removeStringCommas(v).split('.');
+  let s = Number(removeStringCommas(v)).toString().split('.');
   if(s.length <2) return true;
   if (s[1].length <= d) return true;
   return false;
