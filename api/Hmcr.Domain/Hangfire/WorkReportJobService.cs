@@ -287,12 +287,14 @@ namespace Hmcr.Domain.Hangfire
                 }
             }
 
-
             return row;
         }
 
         private void PerformSurfaceTypeValidation(WorkReportTyped typedRow)
         {
+            var warnings = new Dictionary<string, List<string>>();
+            var submissionRow = _submissionRows[(decimal)typedRow.RowNum];
+
             //get total length of path
             var totalLength = typedRow.RoadFeatures.Sum(x => x.SurfaceLength);
             
@@ -329,7 +331,7 @@ namespace Hmcr.Domain.Hangfire
                             }
                             else if (surfaceTypeRule == SurfaceTypeRules.PavedSurface)
                             {
-                                //warning 
+                                warnings.AddItem("Surface Type Validation", $"Rule is {SurfaceTypeRules.PavedSurface} on Line and paved surface less than 80%");
                             }
                         }
                         
@@ -341,14 +343,14 @@ namespace Hmcr.Domain.Hangfire
                         }
                         else
                         {
-                            //warning
+                            warnings.AddItem("Surface Type Validation", $"Rule is {SurfaceTypeRules.NonPavedSurface} on Line and unpaved surface less than 80%");
                         }
 
                         break;
                     case SurfaceTypeRules.Unconstructed:
                         if ((unconstructedLength / totalLength) >= .2)
                         {
-                            //warning
+                            warnings.AddItem("Surface Type Validation", $"Rule is {SurfaceTypeRules.Unconstructed} on Line and unconstructed surface is more than 20%");
                         }
 
                         break;
@@ -372,7 +374,7 @@ namespace Hmcr.Domain.Hangfire
                             }
                             else if (unpavedLength > 0 && surfaceTypeRule == SurfaceTypeRules.PavedSurface)
                             {
-                                //warning!
+                                warnings.AddItem("Surface Type Validation", $"Rule is {SurfaceTypeRules.NonPavedSurface}, unpaved surface found on Point");
                             }
                         }
 
@@ -384,20 +386,24 @@ namespace Hmcr.Domain.Hangfire
                         }
                         else if (pavedLength > 0)
                         {
-                            //warning?
+                            warnings.AddItem("Surface Type Validation", $"Rule is {SurfaceTypeRules.NonPavedSurface}, paved surface found on Point");
                         }
 
                         break;
                     case SurfaceTypeRules.Unconstructed:
                         if (unconstructedLength > 0)
                         {
-                            //warning
+                            warnings.AddItem("Surface Type Validation", $"Rule is {SurfaceTypeRules.Unconstructed}, unconstructed surface found on Point");
                         }
 
                         break;
                 }
             }
 
+            if (warnings.Count > 0)
+            {
+                SetWarningDetail(submissionRow, warnings);
+            }
         }
 
         private void PerformFieldValidation(Dictionary<string, List<string>> errors, WorkReportCsvDto untypedRow, ActivityCodeDto activityCode)

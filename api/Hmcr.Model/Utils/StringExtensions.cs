@@ -89,8 +89,14 @@ namespace Hmcr.Model.Utils
 
         public static string GetErrorDetail(this Dictionary<string, List<string>> errors)
         {
-            var fileErrorDetail = new ErrorDetail(errors);
+            var fileErrorDetail = new MessageDetail(errors);
             return fileErrorDetail.ToString();
+        }
+
+        public static string GetWarningDetail(this Dictionary<string, List<string>> warnings)
+        {
+            var fileWarningDetail = new MessageDetail(warnings);
+            return fileWarningDetail.ToString();
         }
 
         public static bool IsIdirUser(this string str)

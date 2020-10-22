@@ -44,7 +44,7 @@ namespace Hmcr.Chris
             services.AddHttpClient<IInventoryApi, InventoryApi>(client =>
             {
                 client.BaseAddress = new Uri(config.GetValue<string>("CHRIS:OASUrl"));
-                client.Timeout = new TimeSpan(0, 0, 15);
+                client.Timeout = new TimeSpan(0, 0, 45);
                 client.DefaultRequestHeaders.Clear();
 
                 var userId = config.GetValue<string>("ServiceAccount:User");
