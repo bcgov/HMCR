@@ -169,7 +169,12 @@ namespace Hmcr.Data.Repositories
         public async Task DeleteActivityCodeAsync(decimal id)
         {
             var activityCodeEntity = await DbSet
+                .Include(x => x.HmrServiceAreaActivities)
                 .FirstAsync(ac => ac.ActivityCodeId == id);
+
+            foreach( var areaToDelete in activityCodeEntity.HmrServiceAreaActivities)
+            {    DbContext.Remove(areaToDelete);
+            }
 
             DbSet.Remove(activityCodeEntity);
         }
