@@ -13,7 +13,7 @@ namespace Hmcr.Chris
             get
             {
                 var folder = Path.Combine(Path.GetDirectoryName(Assembly.GetEntryAssembly().Location), "XmlTemplates");
-                return _surfaceTypeAssocWithLineQuery ?? (_surfaceTypeAssocWithLineQuery = File.ReadAllText(Path.Combine(folder, "GetSurfaceTypeAssocWithLine.xml")));
+                return _surfaceTypeAssocWithLineQuery ?? (_surfaceTypeAssocWithLineQuery = File.ReadAllText(Path.Combine(folder, "GetInventoryAssocWithWorkActivity.xml")));
             }
         }
 
@@ -22,7 +22,7 @@ namespace Hmcr.Chris
             get
             {
                 var folder = Path.Combine(Path.GetDirectoryName(Assembly.GetEntryAssembly().Location), "XmlTemplates");
-                return _surfaceTypeAssocWithPointQuery ?? (_surfaceTypeAssocWithPointQuery = File.ReadAllText(Path.Combine(folder, "GetSurfaceTypeAssocWithPoint.xml")));
+                return _surfaceTypeAssocWithPointQuery ?? (_surfaceTypeAssocWithPointQuery = File.ReadAllText(Path.Combine(folder, "GetInventoryAssocWithWorkActivity.xml")));
             }
         }
 
