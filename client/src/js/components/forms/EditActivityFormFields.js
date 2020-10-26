@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react';
-import { useFormikContext} from 'formik';
 import { connect } from 'react-redux';
 import * as Yup from 'yup';
 import moment from 'moment';
@@ -15,14 +14,40 @@ import { FormRow, FormInput, FormCheckboxInput } from './FormInputs';
 import * as api from '../../Api';
 import * as Constants from '../../Constants';
 import { Row,Col} from 'reactstrap';
-import { isInteger } from 'lodash';
+import { isInteger} from 'lodash';
+import {isValueEmpty,isValueNotEmpty,toStringOrEmpty,toStringWithCommasOrEmpty,isValidDecimal} from '../../utils'
 
-const tipAnalyticalValidation = [<ul key ='tipAnalyticalValidation_ul_key_1' style={{ paddingInlineStart: 10 }}>
-  <li>Analytical Validation <em>Help 1</em></li>
-  <li>Analytical Validation <em>Help 2</em></li>
+const tipAnalyticalValidation = [<ul key ='tipAnalyticalValidation_ul_key_1' style={{ paddingInlineStart: '20px' }}>
+  <li style={{margin: '0 0 6px 0'}}>Analytical Validations provide warnings when the activity accomplishment does not meet the defined parameters.</li>
+  <li>Minimum Value and Maximum Value check the accomplishment for an activity is within numerical limits, as defined. 
+    No tolerances are added to the Minimum Value or Maximum Value calculations.</li>
+  <li>Reporting Frequency checks if the activity was reported in the same location, with locational specificity based on the activity location code, 
+    within the defined period. A tolerance of 100 metres is added to the start and end points for Location Code C activities to validate against previously 
+    reported instances. No time-based tolerance is added to the Reporting Frequency calculation. Users can manually incorporate into the defined Reporting 
+    Frequency a time-based tolerance (e.g. by setting the minimum number of days to ‘20’ for an activity that should be completed monthly).</li>
   </ul>];
-const tipHighwayAttributeValidation = [<ul key ='tipHighwayAttributeValidation_ul_key_1' style={{ paddingInlineStart: 10 }}>
-  <li >Highway Attribute Validation Help</li>
+  
+const tipHighwayAttributeValidation = [<ul key ='tipHighwayAttributeValidation_ul_key_1' style={{ paddingInlineStart: '20px' }}>
+  <li style={{margin: '0 0 6px 0'}}>Highway Attribute Validations provide warnings for Location Code C activities when the features of the reported 
+  location and/or accomplishment do not meet the defined parameters.</li>
+  <li style={{margin: '0 0 6px 0'}}>Road Length checks the accomplishment against the road length (either Road KM or Lane KM), 
+    or against Guardrail Length [<b>NTD: to confirm Guardrail vs Barrier vernacular based on what types of 
+    guardrail/barrier will be included</b>], as defined in each individual rule. Several rules account for the road length 
+    to be multiplied by one or more factors to accommodate non kilometre-based units of measure. Multiplying factors 
+    include conversion factors (e.g. 1km=1,000m), application rates (e.g. 2.0 litres/m2) or lane width factors to calculate surface area
+     (e.g. lane width = 3.5m). A 10% tolerance is added to the Total Road KM (to a 200m maximum) and Total Lane KM (to a 500m maximum) 
+     and Barrier Length (to a 200m maximum) for the validation calculations. Point items are calculated with 
+     an estimated Road KM length of 40m (30m as permitted by the Reporting Manual and 10m tolerance), with Lane KM calculated based 
+     on the number of lanes at the point.</li>
+  <li  style={{margin: '0 0 6px 0'}}>Surface Type checks that the location of the record has the appropriate surface type based on the selected rule. 
+    For point items, the surface type must match the point exactly and no tolerance is incorporated. For line items, 
+    a tolerance of 80% is incorporated (i.e. if the rule is “GPS on Paved Surface” and 80% or more of the surface types 
+    within the start and end GPS points are paved, then the record is accepted). Paved surfaces include CHRIS surface types 1-4; 
+    non-paved surfaces include CHRIS surface types 5-6; unconstructed roads have a CHRIS surface type of E or F.</li>
+  <li >Road Class checks that the location of the record has the appropriate summer or winter road 
+    classifications based on the selected rule. For point items, the classification must match exactly and no tolerance 
+    is incorporated. For line items, a tolerance of 80% is incorporated (i.e. if the rule is “Not Class 8 or F” and 80% or 
+    more of the maintenance class within the start and end GPS points are not 8 or F, then the record is accepted).</li>
   </ul>];
 
 const defaultValues = {
@@ -56,24 +81,35 @@ const validationSchema = Yup.object({
   locationCodeId: Yup.number().required('Required'),
   serviceAreaNumbers: Yup.array().required('At least one Service Area must be selected'),
   minValue: Yup.number()
+    .transform((_value, originalValue) => {
+      if(isValueEmpty(originalValue.replace(/,/g, ''))) return null;
+      return Number(originalValue.replace(/,/g, ''));
+    })
     .min(0,'Must be greater than or equal to 0')
     .nullable()
     .typeError('Must be number')
     .test(
       'datamin',
       function() {
-        if (this.parent.minValue === null || this.parent.minValue === undefined || this.parent.minValue === '')
+        if (isValueEmpty(this.parent.minValue))
         {
           return true;
         }
         if(this.parent.minValue > 999999999.99)
         {
           return this.createError({
-            message: 'Must be less than or equal to 999999999.99',
+            message: 'Must be less than or equal to 999,999,999.99',
             path: 'minValue',
             });
         }
-        if(this.parent.maxValue !== null && this.parent.maxValue !== undefined && this.parent.maxValue !== '')
+        if(!isValidDecimal(this.parent.minValue,2))
+        {
+          return this.createError({
+            message: 'Must be less than or equal to two decimal positions',
+            path: 'minValue',
+            });
+        }
+        if(isValueNotEmpty(this.parent.maxValue))
         {
           if(Number(this.parent.maxValue) !== 0 && this.parent.maxValue < this.parent.minValue)
           {
@@ -83,10 +119,7 @@ const validationSchema = Yup.object({
               });
           }
         }
-        if (
-          this.parent.unitOfMeasure === 'site'
-        ||this.parent.unitOfMeasure === 'num'
-        ||this.parent.unitOfMeasure === 'ea')
+        if (['site','num','ea'].includes(this.parent.unitOfMeasure))
         { 
           if(!isInteger(this.parent.minValue))
           {
@@ -100,24 +133,35 @@ const validationSchema = Yup.object({
       }
     ),
   maxValue: Yup.number()
+    .transform((_value, originalValue) => {
+      if(isValueEmpty(originalValue.replace(/,/g, ''))) return null;
+      return Number(originalValue.replace(/,/g, ''));
+    })
     .min(0,'Must be greater than or equal to 0')
     .nullable()
     .typeError('Must be number')
     .test(
       'datamax',
       function() {
-        if (this.parent.maxValue === null || this.parent.maxValue === undefined || this.parent.maxValue === '')
+        if (isValueEmpty(this.parent.maxValue))
         {
           return true;
         }
         if(Number(this.parent.maxValue) > 999999999.99)
         {
           return this.createError({
-            message: 'Must be less than or equal to 999999999.99',
+            message: 'Must be less than or equal to 999,999,999.99',
             path: 'maxValue',
             });
         }
-        if (this.parent.minValue !== null && this.parent.minValue !== undefined && this.parent.minValue !== '')
+        if(!isValidDecimal(this.parent.maxValue,2))
+        {
+          return this.createError({
+            message: 'Must be less than or equal to two decimal positions',
+            path: 'maxValue',
+            });
+        }
+        if (isValueNotEmpty(this.parent.minValue))
         {
           if(Number(this.parent.maxValue) !== 0 && this.parent.maxValue < this.parent.minValue)
           {
@@ -127,10 +171,7 @@ const validationSchema = Yup.object({
             });
           }
         }
-        if (
-          this.parent.unitOfMeasure === 'site'
-        ||this.parent.unitOfMeasure === 'num'
-        ||this.parent.unitOfMeasure === 'ea')
+        if (['site','num','ea'].includes(this.parent.unitOfMeasure))
         { 
           if(!isInteger(this.parent.maxValue))
           {
@@ -149,8 +190,6 @@ const validationSchema = Yup.object({
     .nullable()
     .typeError('Must be whole number')
     .integer('Must be whole number'),
-
-  
 });
 const EditActivityFormFields = ({
   setInitialValues,
@@ -169,7 +208,6 @@ const EditActivityFormFields = ({
   serviceAreas,
 }) => {
   const [loading, setLoading] = useState(true);
-  const {setFieldValue} = useFormikContext();
   const [validLocationCodeValues, setValidLocationCodeValues] = useState(locationCodes);
   const [disableLocationCodeEdit, setDisableLocationCodeEdit] = useState(false);
   const [validFeatureTypeValues, setValidFeatureTypeValues] = useState(featureTypes);
@@ -199,7 +237,6 @@ const EditActivityFormFields = ({
       }),
     });
 
-    
     setValidationSchema(defaultValidationSchema);
     setLoading(true);
 
@@ -214,9 +251,9 @@ const EditActivityFormFields = ({
         setInitialValues({
           ...response.data,
           endDate: response.data.endDate ? moment(response.data.endDate): null,
-          minValue: response.data.minValue ? moment(response.data.minValue): '',
-          maxValue: response.data.maxValue ? moment(response.data.maxValue): '',
-          reportingFrequency: response.data.reportingFrequency ? moment(response.data.reportingFrequency): '',
+          minValue: toStringWithCommasOrEmpty(response.data.minValue),
+          maxValue: toStringWithCommasOrEmpty(response.data.maxValue),
+          reportingFrequency: toStringOrEmpty(response.data.reportingFrequency),
         });
         
         setValidLocationCodeValues(() => {
@@ -224,7 +261,6 @@ const EditActivityFormFields = ({
             if (response.data.locationCodeId === locationCodes.find((code) => code.name === 'B').id)
               return locationCodes.filter((location) => location.name !== 'C');
           }
-
           return locationCodes;
         });
         
@@ -247,7 +283,6 @@ const EditActivityFormFields = ({
                 (feature) => feature.id === pointLineType || feature.id === response.data.featureType
               );
           }
-
           return featureTypes;
         });
 
@@ -260,53 +295,6 @@ const EditActivityFormFields = ({
 
   if (loading || formValues === null) return <PageSpinner />;
   
-  const convertMaxValue = (minval,maxval)=>{
-    if (minval !== null
-      && minval !== undefined
-      && minval !== ''
-      && Number(minval) >=0
-      && maxval !== null
-      && maxval !== undefined
-      && maxval !== ''
-      && Number(maxval)===0)
-    {
-      if (
-        formValues.unitOfMeasure === 'site'
-      || formValues.unitOfMeasure === 'num'
-      || formValues.unitOfMeasure === 'ea')
-      { 
-        return 999999999;
-      }
-      else
-      {
-        return 999999999.99;
-      }
-    }
-    return maxval;
-  };
-
-  const handleMinValue = (e) => {
-    const minval = e.target.value;
-    if(formValues)
-    {
-      let maxval = formValues.maxValue;
-      setFieldValue('maxValue',convertMaxValue(minval,maxval));
-    }
-    setFieldValue('minValue', minval); 
-  };
-
-  const handleMaxValue = (e) => {
-   const maxval = e.target.value;
-    if(formValues)
-    {
-      let minval = formValues.minValue;
-      setFieldValue('maxValue',convertMaxValue(minval,maxval));
-    }
-    else{
-      setFieldValue('maxValue', maxval);
-    }    
-  };
-
   return (
     <React.Fragment>
       <Row>
@@ -365,11 +353,10 @@ const EditActivityFormFields = ({
         <Col>
           <FieldSet legendname = "Analytical Validation" tips={tipAnalyticalValidation} targetId='AnalyticalValidationTooltipForFieldsetId'>
             <FormRow name="minValue" label="Minimum Value">
-              <FormInput type="text" name="minValue" placeholder="Minimum Value"   onChange= {handleMinValue}/>
+              <FormInput type="text" name="minValue" placeholder="Minimum Value"/>
             </FormRow>
             <FormRow name="maxValue" label="Maximum Value">
-              <FormInput type="text" name="maxValue" placeholder="Maximum Value"   onChange= {handleMaxValue}
-              />
+              <FormInput type="text" name="maxValue" placeholder="Maximum Value"/>
             </FormRow>
             <FormRow name="reportingFrequency" label="Reporting Frequency">
               <FormInput type="text" name="reportingFrequency" placeholder="Minimum # Days" />

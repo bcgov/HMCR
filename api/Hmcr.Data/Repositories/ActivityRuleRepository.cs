@@ -17,6 +17,7 @@ namespace Hmcr.Data.Repositories
         Task<IEnumerable<ActivityCodeRuleDto>> GetSurfaceTypeRulesAsync();
         Task<IEnumerable<ActivityCodeRuleDto>> GetRoadClassRulesAsync();
         Task<IEnumerable<ActivityCodeRuleDto>> GetDefaultRules();
+        IEnumerable<ActivityCodeRuleCache> LoadActivityCodeRuleCache();
     }
 
     public class ActivityRuleRepository : HmcrRepositoryBase<HmrActivityCodeRule>, IActivityRuleRepository
@@ -24,6 +25,21 @@ namespace Hmcr.Data.Repositories
         public ActivityRuleRepository(AppDbContext dbContext, IMapper mapper)
             : base(dbContext, mapper)
         {
+        }
+
+        public IEnumerable<ActivityCodeRuleCache> LoadActivityCodeRuleCache()
+        {
+            return DbSet.AsNoTracking()
+                .Where(x => x.EndDate == null || DateTime.Today < x.EndDate)
+                .Select(x =>
+                    new ActivityCodeRuleCache
+                    {
+                        ActivityCodeRuleId = x.ActivityCodeRuleId,
+                        ActivityRuleSet = x.ActivityRuleSet,
+                        ActivityRuleName = x.ActivityRuleName,
+                        ActivityRuleExecName = x.ActivityRuleExecName
+                    }
+                ).ToArray();
         }
 
         public async Task<IEnumerable<ActivityCodeRuleDto>> GetRoadLengthRulesAsync()

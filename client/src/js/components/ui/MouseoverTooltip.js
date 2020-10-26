@@ -10,7 +10,7 @@ const MouseoverTooltip = (props) => {
       <FontAwesomeIcon
         id={props.id}
         icon="question-circle"
-        className="fa-color-primary ml-1 mr-1"
+        className="fa-color-primary ml-1 mr-1 fieldset-tooltip"
         onMouseOver={() => setIsOpen(true)}
         onMouseOut={() => setIsOpen(false)}
         style={{ cursor: 'pointer' }}

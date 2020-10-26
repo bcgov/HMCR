@@ -3,6 +3,7 @@ using Hmcr.Data.Database.Entities;
 using Hmcr.Data.Repositories.Base;
 using Hmcr.Model.Dtos;
 using Hmcr.Model.Dtos.ActivityCode;
+using Hmcr.Model.Dtos.ServiceArea;
 using Hmcr.Model.Utils;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -64,19 +65,25 @@ namespace Hmcr.Data.Repositories
             var activityCodeEntity = new HmrActivityCode();
 
             Mapper.Map(activityCode, activityCodeEntity);
-            
+
             //TODO: add in saving of Service Areas
-
+            foreach (var areaNumber in activityCode.ServiceAreaNumbers)
+            {
+                activityCodeEntity.HmrServiceAreaActivities
+                    .Add(new HmrServiceAreaActivity
+                    {
+                        ServiceAreaNumber = areaNumber
+                    });
+            }
             await DbSet.AddAsync(activityCodeEntity);
-
+            
             return activityCodeEntity;
         }
 
         public async Task<ActivityCodeSearchDto> GetActivityCodeAsync(decimal id)
         {
             var activityCodeEntity = await DbSet.AsNoTracking()
-                //todo ServiceArea
-                //.Include(x => x.HmrServiceAreaRules) //new table
+                .Include(x => x.HmrServiceAreaActivities)
                 .FirstOrDefaultAsync(ac => ac.ActivityCodeId == id);
 
             if (activityCodeEntity == null)
@@ -86,24 +93,11 @@ namespace Hmcr.Data.Repositories
 
             activityCode.IsReferenced = await _workReportRepo.IsActivityNumberInUseAsync(activityCode.ActivityNumber);
 
-            /*var activityRules = activityCodeEntity
-                .HmrActivityCodeRules
-                .Select(s => s.ActivityCodeRuleId)
+            var serviceAreasNumbers =
+                activityCodeEntity
+                .HmrServiceAreaActivities //new table
+                .Select(s => s.ServiceAreaNumber)
                 .ToList();
-
-            var activityRules = new List<decimal> { 1, 3 };
-            activityCode.ActivityRuleIds = activityRules;
-            activityCode.RoadLengthRule = 2;
-            activityCode.SurfaceTypeRule = 3;
-            activityCode.RoadClassRule = 1;*/
-
-            //TODO: pull the service areas
-            //var serviceAreasNumbers =
-            //    activityCodeEntity
-            //    .HmrServiceAreaRules //new table
-            //    .Select(s => s.ServiceAreaNumber)
-            //    .ToList();
-            var serviceAreasNumbers = new List<decimal> { 1, 9 };
             activityCode.ServiceAreaNumbers = serviceAreasNumbers;
 
             return activityCode;
@@ -162,19 +156,25 @@ namespace Hmcr.Data.Repositories
         public async Task UpdateActivityCodeAsync(ActivityCodeUpdateDto activityCode)
         {
             var activityCodeEntity = await DbSet
+                    .Include(x => x.HmrServiceAreaActivities)
                     .FirstAsync(ac => ac.ActivityCodeId == activityCode.ActivityCodeId);
 
             activityCode.EndDate = activityCode.EndDate?.Date;
 
             Mapper.Map(activityCode, activityCodeEntity);
 
-            //TODO: call function to sync service area changes
+            SyncActivityCodeServiceAreas(activityCode, activityCodeEntity);
         }
 
         public async Task DeleteActivityCodeAsync(decimal id)
         {
             var activityCodeEntity = await DbSet
+                .Include(x => x.HmrServiceAreaActivities)
                 .FirstAsync(ac => ac.ActivityCodeId == id);
+
+            foreach( var areaToDelete in activityCodeEntity.HmrServiceAreaActivities)
+            {    DbContext.Remove(areaToDelete);
+            }
 
             DbSet.Remove(activityCodeEntity);
         }
@@ -190,6 +190,31 @@ namespace Hmcr.Data.Repositories
             {
                 if (await _workReportRepo.IsActivityNumberInUseAsync(activityNumber))
                     yield return activityNumber;
+            }
+        }
+
+        private void SyncActivityCodeServiceAreas(ActivityCodeUpdateDto activityCodeUpdateDto, HmrActivityCode activityCodeEntity)
+        {
+            var areasToDelete =
+                activityCodeEntity.HmrServiceAreaActivities.Where(s => !activityCodeUpdateDto.ServiceAreaNumbers.Contains(s.ServiceAreaNumber)).ToList();
+
+            for (var i = areasToDelete.Count() - 1; i >= 0; i--)
+            {
+                DbContext.Remove(areasToDelete[i]);
+            }
+
+            var existingAreaNumbers = activityCodeEntity.HmrServiceAreaActivities.Select(s => s.ServiceAreaNumber);
+
+            var newAreaNumbers = activityCodeUpdateDto.ServiceAreaNumbers.Where(r => !existingAreaNumbers.Contains(r));
+
+            foreach (var areaNumber in newAreaNumbers)
+            {
+                activityCodeEntity.HmrServiceAreaActivities
+                    .Add(new HmrServiceAreaActivity
+                    {
+                        ServiceAreaNumber = areaNumber,
+                        ActivityCodeId = activityCodeEntity.ActivityCodeId
+                    });
             }
         }
 

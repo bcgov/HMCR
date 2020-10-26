@@ -196,7 +196,7 @@ namespace Hmcr.Domain.Services
             if (errors.Count > 0)
             {
                 return (false, errors);
-            }
+            } 
 
             await _activityCodeRepo.UpdateActivityCodeAsync(activityCode);
             _unitOfWork.Commit();
