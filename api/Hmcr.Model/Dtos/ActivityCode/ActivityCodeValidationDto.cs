@@ -17,8 +17,8 @@ namespace Hmcr.Model.Dtos.ActivityCode
         public string RoadClassRuleExec { get; set; }
         public virtual IList<decimal> ServiceAreaNumbers { get; set; }
 
-        public decimal? MinimumValue { get; set; }
-        public decimal? MaximumValue { get; set; }
-        public decimal? ReportingFrequency { get; set; }
+        public decimal? MinValue { get; set; }
+        public decimal? MaxValue { get; set; }
+        public int? ReportingFrequency { get; set; }
     }
 }

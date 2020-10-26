@@ -61,9 +61,10 @@ namespace Hmcr.Domain.Hangfire
             if (!await SetSubmissionAsync(submissionDto))
                 return false;
 
-            var activityCodes = await _activityRepo.GetActiveActivityCodesAsync();
-
+            //var activityCodes = await _activityRepo.GetActiveActivityCodesAsync();
             var (untypedRows, headers) = ParseRowsUnTyped(errors);
+            List<string> untypedActivityNumbers = untypedRows.Select(o => o.ActivityNumber).Distinct().ToList();
+            var activityCodes = await _activityRepo.GetActiveActivityCodesByActivityNumbersAsync(untypedActivityNumbers);
 
             //text after duplicate lines are removed. Will be used for importing to typed DTO.
             var (rowCount, text) = await SetRowIdAndRemoveDuplicate(untypedRows, headers);
@@ -72,11 +73,11 @@ namespace Hmcr.Domain.Hangfire
             {
                 errors.AddItem("File", "No new records were found in the file; all records were already processed in the past submission.");
                 _submission.ErrorDetail = errors.GetErrorDetail();
-                _submission.SubmissionStatusId = _statusService.FileDuplicate;
+                _submission.SubmissionStatusId = _statusService.FileDuplicate; // Stage 1 - Duplicate Submission
                 await CommitAndSendEmailAsync();
                 return true;
             }
-
+            //stage 2 validation
             foreach (var untypedRow in untypedRows)
             {
                 errors = new Dictionary<string, List<string>>();
@@ -90,7 +91,7 @@ namespace Hmcr.Domain.Hangfire
                 if (activityCode == null)
                 {
                     errors.AddItem(Fields.ActivityNumber, $"Invalid activity number[{untypedRow.ActivityNumber}]");
-                    SetErrorDetail(submissionRow, errors, _statusService.FileBasicError);
+                    SetErrorDetail(submissionRow, errors, _statusService.FileBasicError); //Stage 2 - Basic Error
                     continue;
                 }
 
@@ -102,15 +103,16 @@ namespace Hmcr.Domain.Hangfire
 
                 _validator.Validate(entityName, untypedRow, errors);
                 
-                //stage 2 validation
+                
                 PerformFieldValidation(errors, untypedRow, activityCode);
 
                 if (errors.Count > 0)
                 {
-                    SetErrorDetail(submissionRow, errors, _statusService.FileBasicError);
+                    SetErrorDetail(submissionRow, errors, _statusService.FileBasicError); //Stage 2 - Basic Error
                 }
             }
 
+            //stage 3 validation
             var typedRows = new List<WorkReportTyped>();
 
             if (_submission.SubmissionStatusId == _statusService.FileInProgress)
@@ -120,7 +122,7 @@ namespace Hmcr.Domain.Hangfire
                 if (rowNum != 0)
                 {
                     var submissionRow = _submissionRows[rowNum];
-                    SetErrorDetail(submissionRow, errors, _statusService.FileConflictionError);
+                    SetErrorDetail(submissionRow, errors, _statusService.FileConflictionError); //Stage 3 - Confliction Error
                     await CommitAndSendEmailAsync();
                     return true;
                 }
@@ -129,8 +131,7 @@ namespace Hmcr.Domain.Hangfire
 
                 CopyCalculatedFieldsFormUntypedRow(typedRows, untypedRows);
 
-                //stage 3 validation?
-                PerformAdditionalValidation(typedRows);
+               PerformAdditionalValidation(typedRows);
             }
 
             if (_submission.SubmissionStatusId != _statusService.FileInProgress)
@@ -437,6 +438,25 @@ namespace Hmcr.Domain.Hangfire
             {
                 errors.AddItem(Fields.RecordType, $"Record type of the activity code [{activityCode.ActivityNumber}] must be [{activityCode.MaintenanceType}]");
             }
+
+            if ( !activityCode.ServiceAreaNumbers.Contains(decimal.Parse(untypedRow.ServiceArea)))
+            {
+                errors.AddItem(Fields.ServiceArea, $"Service area [{untypedRow.ServiceArea}] is not associated with the activity code [{activityCode.ActivityNumber}]");
+            }
+
+            if ((new [] {"site","num","ea"}).Contains(untypedRow.UnitOfMeasure.ToLowerInvariant()) && !untypedRow.Accomplishment.IsInteger())
+            {
+                errors.AddItem(Fields.Accomplishment, $"Accomplishment [{untypedRow.Accomplishment}] must be whole number when UnitOfMeasure is [{untypedRow.UnitOfMeasure}]");
+            }
+
+            if (untypedRow.Accomplishment.ConvertStrToDecimal() < activityCode.MinValue.ConvertNullableDecimal())
+            {
+                errors.AddItem(Fields.Accomplishment, $"Accomplishment [{untypedRow.Accomplishment}] must be greater than or equal to [{activityCode.MinValue}]");
+            }
+            if (untypedRow.Accomplishment.ConvertStrToDecimal() > activityCode.MaxValue.ConvertNullableDecimal())
+            {
+                errors.AddItem(Fields.Accomplishment, $"Accomplishment [{untypedRow.Accomplishment}] must be be less than or equal to  [{activityCode.MaxValue}]");
+            }
         }
 
         private void PerformAdditionalValidation(List<WorkReportTyped> typedRows)
@@ -540,6 +560,12 @@ namespace Hmcr.Domain.Hangfire
             untypedRow.ActivityCodeValidation.RoadClassRuleExec = _validator.ActivityCodeRuleLookup
                 .Where(x => x.ActivityCodeRuleId == activityCode.RoadClassRule)
                 .FirstOrDefault().ActivityRuleExecName;
+
+            untypedRow.ActivityCodeValidation.MinValue = activityCode.MinValue;
+            untypedRow.ActivityCodeValidation.MaxValue = activityCode.MaxValue;
+            untypedRow.ActivityCodeValidation.ReportingFrequency = activityCode.ReportingFrequency;
+            
+            untypedRow.ActivityCodeValidation.ServiceAreaNumbers = activityCode.ServiceAreaNumbers;
         }
 
         private List<WorkReportGeometry> PerformSpatialValidationAndConversionBatchAsync(List<WorkReportTyped> typedRows)
