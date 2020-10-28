@@ -137,7 +137,6 @@ const validationSchema = Yup.object({
       if(isValueEmpty(originalValue.replace(/,/g, ''))) return null;
       return Number(originalValue.replace(/,/g, ''));
     })
-    .min(0,'Must be greater than or equal to 0')
     .nullable()
     .typeError('Must be number')
     .test(
@@ -146,6 +145,13 @@ const validationSchema = Yup.object({
         if (isValueEmpty(this.parent.maxValue))
         {
           return true;
+        }
+        if(Number(this.parent.maxValue) <=0)
+        {
+          return this.createError({
+            message: 'Must be greater than 0',
+            path: 'maxValue',
+            });
         }
         if(Number(this.parent.maxValue) > 999999999.99)
         {
@@ -161,6 +167,7 @@ const validationSchema = Yup.object({
             path: 'maxValue',
             });
         }
+        
         if (isValueNotEmpty(this.parent.minValue))
         {
           if(Number(this.parent.maxValue) !== 0 && this.parent.maxValue < this.parent.minValue)
