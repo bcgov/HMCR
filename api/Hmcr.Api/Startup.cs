@@ -14,7 +14,6 @@ namespace Hmcr.Api
 {
     public class Startup
     {
-
         public IConfiguration Configuration { get; }
 
         private IWebHostEnvironment _env;
@@ -44,7 +43,8 @@ namespace Hmcr.Api
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env, ISubmissionObjectJobService jobService, 
-            IServiceScopeFactory serviceScopeFactory, IServiceAreaService svcAreaService, ICodeLookupRepository codeLookupRepo, IFieldValidatorService validator)
+            IServiceScopeFactory serviceScopeFactory, IServiceAreaService svcAreaService, ICodeLookupRepository codeLookupRepo, 
+            IActivityRuleRepository activityRuleRepo, IFieldValidatorService validator)
         {
             if (env.IsDevelopment())
                 app.UseDeveloperExceptionPage();            
@@ -58,6 +58,7 @@ namespace Hmcr.Api
             app.UseHmcrSwagger(env, Configuration.GetSection("Constants:SwaggerApiUrl").Value);
 
             validator.CodeLookup = codeLookupRepo.LoadCodeLookupCache();
+            validator.ActivityCodeRuleLookup = activityRuleRepo.LoadActivityCodeRuleCache();
         }
     }
 }

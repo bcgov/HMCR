@@ -39,7 +39,7 @@ namespace Hmcr.Domain.Hangfire
         public async Task RunReportingJob(decimal serviceAreaNumber)
         {
             _user.AuthDirName = UserTypeDto.IDIR;
-            _user.UniversalId = "hangfire";
+            _user.Username = "hangfire";
             _user.UserGuid = new Guid();
 
             var submissions = _submissionRepo.GetSubmissionObjecsForBackgroundJob(serviceAreaNumber);

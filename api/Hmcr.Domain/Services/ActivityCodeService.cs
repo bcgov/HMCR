@@ -3,6 +3,7 @@ using Hmcr.Data.Repositories;
 using Hmcr.Model;
 using Hmcr.Model.Dtos;
 using Hmcr.Model.Dtos.ActivityCode;
+using Hmcr.Model.Dtos.ActivityRule;
 using Hmcr.Model.Utils;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -26,15 +27,17 @@ namespace Hmcr.Domain.Services
         private IUnitOfWork _unitOfWork;
         private IWorkReportRepository _workReportRepo;
         private ILocationCodeRepository _locationCodeRepo;
+        private IActivityRuleRepository _activityRuleRepo;
 
         public ActivityCodeService(IActivityCodeRepository activityCodeRepo, IFieldValidatorService validatorService, IUnitOfWork unitOfWork,
-            IWorkReportRepository workReportRepo, ILocationCodeRepository locationCodeRepo)
+            IWorkReportRepository workReportRepo, ILocationCodeRepository locationCodeRepo, IActivityRuleRepository activityRuleRepo)
         {
             _activityCodeRepo = activityCodeRepo;
             _validatorService = validatorService;
             _unitOfWork = unitOfWork;
             _workReportRepo = workReportRepo;
             _locationCodeRepo = locationCodeRepo;
+            _activityRuleRepo = activityRuleRepo;
         }
 
         public async Task<(decimal id, Dictionary<string, List<string>> Errors)> CreateActivityCodeAsync(ActivityCodeCreateDto activityCode)
@@ -52,7 +55,7 @@ namespace Hmcr.Domain.Services
             }
 
             var newLocationCode = (await _locationCodeRepo.GetLocationCode(activityCode.LocationCodeId)).LocationCode;
-
+            
             var entityName = GetEntityName(newLocationCode);
 
             _validatorService.Validate(entityName, activityCode, errors);
@@ -61,9 +64,26 @@ namespace Hmcr.Domain.Services
             // location code is A or B, FeatureType is forced to null and SiteNumRequired is forced to false
             if (newLocationCode != "C")
             {
+                IEnumerable<ActivityCodeRuleDto> activityRuleDefaults = await _activityRuleRepo.GetDefaultRules();
+                
                 activityCode.FeatureType = null;
                 activityCode.SpThresholdLevel = null;
                 activityCode.IsSiteNumRequired = false;
+                foreach (ActivityCodeRuleDto activityRule in activityRuleDefaults)
+                {
+                    if (activityRule.ActivityRuleSet == "ROAD_LENGTH")
+                    {
+                        activityCode.RoadLengthRule = activityRule.ActivityCodeRuleId;
+                    }
+                    else if (activityRule.ActivityRuleSet == "ROAD_CLASS")
+                    {
+                        activityCode.RoadClassRule = activityRule.ActivityCodeRuleId;
+                    }
+                    else if (activityRule.ActivityRuleSet == "SURFACE_TYPE")
+                    {
+                        activityCode.SurfaceTypeRule = activityRule.ActivityCodeRuleId;
+                    }
+                }
             }
 
             if (errors.Count > 0)
@@ -142,7 +162,7 @@ namespace Hmcr.Domain.Services
             {
                 errors.AddItem(Fields.LocationCodeId, $"LocationCode can only be changed to A");
             }
-
+            
             var entityName = GetEntityName(newLocationCode);
 
             _validatorService.Validate(entityName, activityCode, errors);
@@ -151,15 +171,32 @@ namespace Hmcr.Domain.Services
             // location code is A or B, FeatureType is forced to null and SiteNumRequired is forced to false
             if (newLocationCode != "C")
             {
+                IEnumerable<ActivityCodeRuleDto> activityRuleDefaults = await _activityRuleRepo.GetDefaultRules();
+
                 activityCode.FeatureType = null;
                 activityCode.SpThresholdLevel = null;
                 activityCode.IsSiteNumRequired = false;
+                foreach (ActivityCodeRuleDto activityRule in activityRuleDefaults)
+                {
+                    if (activityRule.ActivityRuleSet == "ROAD_LENGTH")
+                    {
+                        activityCode.RoadLengthRule = activityRule.ActivityCodeRuleId;
+                    }
+                    else if (activityRule.ActivityRuleSet == "ROAD_CLASS")
+                    {
+                        activityCode.RoadClassRule = activityRule.ActivityCodeRuleId;
+                    }
+                    else if (activityRule.ActivityRuleSet == "SURFACE_TYPE")
+                    {
+                        activityCode.SurfaceTypeRule = activityRule.ActivityCodeRuleId;
+                    }
+                }
             }
 
             if (errors.Count > 0)
             {
                 return (false, errors);
-            }
+            } 
 
             await _activityCodeRepo.UpdateActivityCodeAsync(activityCode);
             _unitOfWork.Commit();

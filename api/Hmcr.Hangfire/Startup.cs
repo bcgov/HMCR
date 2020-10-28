@@ -43,7 +43,8 @@ namespace Hmcr.Hangfire
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env, ISubmissionObjectJobService jobService,
-            IServiceScopeFactory serviceScopeFactory, IServiceAreaService svcAreaService, ICodeLookupRepository codeLookupRepo, IFieldValidatorService validator)
+            IServiceScopeFactory serviceScopeFactory, IServiceAreaService svcAreaService, ICodeLookupRepository codeLookupRepo, 
+            IActivityRuleRepository activityRuleRepo, IFieldValidatorService validator)
         {
             if (env.IsDevelopment())
             {
@@ -67,6 +68,7 @@ namespace Hmcr.Hangfire
 
             //Inject Code Lookup
             validator.CodeLookup = codeLookupRepo.LoadCodeLookupCache();
+            validator.ActivityCodeRuleLookup = activityRuleRepo.LoadActivityCodeRuleCache();
 
             minutes = Configuration.GetValue<int>("Hangfire:EmailJobIntervalInMinutes");
             minutes = minutes < 1 ? 30 : minutes;

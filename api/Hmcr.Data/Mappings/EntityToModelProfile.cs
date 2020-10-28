@@ -2,6 +2,7 @@
 using Hmcr.Data.Database.Entities;
 using Hmcr.Model;
 using Hmcr.Model.Dtos.ActivityCode;
+using Hmcr.Model.Dtos.ActivityRule;
 using Hmcr.Model.Dtos.CodeLookup;
 using Hmcr.Model.Dtos.ContractTerm;
 using Hmcr.Model.Dtos.District;
@@ -16,6 +17,7 @@ using Hmcr.Model.Dtos.Role;
 using Hmcr.Model.Dtos.RolePermission;
 using Hmcr.Model.Dtos.ServiceArea;
 using Hmcr.Model.Dtos.ServiceAreaUser;
+using Hmcr.Model.Dtos.ServiceAreaActivity;
 using Hmcr.Model.Dtos.SubmissionObject;
 using Hmcr.Model.Dtos.SubmissionRow;
 using Hmcr.Model.Dtos.SubmissionStatus;
@@ -111,7 +113,9 @@ namespace Hmcr.Data.Mappings
             CreateMap<HmrFeedbackMessage, FeedbackMessageDto>();
             CreateMap<HmrFeedbackMessage, FeedbackMessageUpdateDto>();
 
+            CreateMap<HmrActivityCodeRule, ActivityCodeRuleDto>();
 
+            CreateMap<HmrServiceAreaActivity, ServiceAreaActivityDto>();
         }
     }
 }

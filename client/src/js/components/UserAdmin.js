@@ -152,7 +152,7 @@ const UserAdmin = ({ serviceAreas, userStatuses, userTypes, showValidationErrorD
   };
 
   const formModal = useFormModal(
-    'Role',
+    'User',
     <EditUserFormFields validationSchema={validationSchema} />,
     handleEditFormSubmit
   );

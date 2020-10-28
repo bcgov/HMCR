@@ -31,8 +31,9 @@ namespace Hmcr.Data.Database.Entities
         public decimal? EndLatitude { get; set; }
         public decimal? EndLongitude { get; set; }
         public decimal? EndVariance { get; set; }
+        public decimal? WarningSpThreshold { get; set; }
         public decimal? WorkLength { get; set; }
-        public string IsOverSpTolerance { get; set; }
+        public string IsOverSpThreshold { get; set; }
         public string StructureNumber { get; set; }
         public string SiteNumber { get; set; }
         public decimal? ValueOfWork { get; set; }

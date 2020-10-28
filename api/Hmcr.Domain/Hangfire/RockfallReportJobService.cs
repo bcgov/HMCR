@@ -487,14 +487,35 @@ namespace Hmcr.Domain.Hangfire
             CsvHelperUtils.Config(errors, csv, false);
             csv.Configuration.RegisterClassMap<RockfallReportCsvDtoMap>();
 
-            var rows = csv.GetRecords<RockfallReportCsvDto>().ToList();
-            for (var i = 0; i < rows.Count; i++)
-            {
-                rows[i].RowNum = i + 2;
-                rows[i].ServiceArea = _serviceArea.ConvertToServiceAreaString(rows[i].ServiceArea);
-            }
+            var rows = GetRecords(csv);
 
             return (rows, string.Join(',', csv.Context.HeaderRecord).Replace("\"", ""));
+        }
+
+        private List<RockfallReportCsvDto> GetRecords(CsvReader csv)
+        {
+            var rows = new List<RockfallReportCsvDto>();
+
+            while (csv.Read())
+            {
+                RockfallReportCsvDto row = null;
+
+                try
+                {
+                    row = csv.GetRecord<RockfallReportCsvDto>();
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex.ToString());
+                    throw;
+                }
+
+                row.RowNum = csv.Context.Row;
+                row.ServiceArea = _serviceArea.ConvertToServiceAreaString(row.ServiceArea);
+                rows.Add(row);
+            }
+
+            return rows;
         }
 
         private (decimal rowNum, List<RockfallReportTyped> rows) ParseRowsTyped(string text, Dictionary<string, List<string>> errors)

@@ -1,5 +1,6 @@
 ﻿using Hmcr.Model.Dtos.LocationCode;
 using System;
+using System.Collections.Generic;
 using System.Text.Json.Serialization;
 
 namespace Hmcr.Model.Dtos.ActivityCode
@@ -21,6 +22,15 @@ namespace Hmcr.Model.Dtos.ActivityCode
         public bool IsActive => EndDate == null || EndDate > DateTime.Today;
 
         public LocationCodeDto LocationCode { get; set; }
+        
+        public decimal RoadLengthRule { get; set; }
+        public decimal SurfaceTypeRule { get; set; }
+        public decimal RoadClassRule { get; set; }
+        public IList<decimal> ServiceAreaNumbers { get; set; }
+
+        public decimal? MinValue { get; set; }
+        public decimal? MaxValue { get; set; }
+        public int? ReportingFrequency { get; set; }
 
     }
 }

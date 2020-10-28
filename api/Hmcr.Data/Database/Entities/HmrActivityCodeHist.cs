@@ -32,5 +32,11 @@ namespace Hmcr.Data.Database.Entities
         public DateTime DbAuditCreateTimestamp { get; set; }
         public string DbAuditLastUpdateUserid { get; set; }
         public DateTime DbAuditLastUpdateTimestamp { get; set; }
+        public decimal RoadClassRule { get; set; }
+        public decimal RoadLengthRule { get; set; }
+        public decimal SurfaceTypeRule { get; set; }
+        public decimal? MinValue { get; set; }
+        public decimal? MaxValue { get; set; }
+        public int? ReportingFrequency { get; set; }
     }
 }
