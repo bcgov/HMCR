@@ -209,12 +209,5 @@ namespace Hmcr.Model.Utils
         {
             return value?? 0;
         }
-        public static int CheckDecimalPlace(this string value)
-        {
-            string[] vs = ConvertStrToDecimal(value).ToString("G29").Split(new char[] { '.' }); //removing trailing 0
-            //string[] vs = ConvertStrToDecimal(value).ToString().Split(new char[] { '.' });
-            if (vs.Length < 2) return 0;
-            return vs[1].Length;
-        }
     }
 }

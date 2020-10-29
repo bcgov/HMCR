@@ -130,7 +130,8 @@ namespace Hmcr.Domain.Hangfire
                 typedRows = rows;
 
                 CopyCalculatedFieldsFormUntypedRow(typedRows, untypedRows);
-                PerformAdditionalValidation(typedRows);
+
+               PerformAdditionalValidation(typedRows);
             }
 
             if (_submission.SubmissionStatusId != _statusService.FileInProgress)
@@ -290,65 +291,6 @@ namespace Hmcr.Domain.Hangfire
             return row;
         }
 
-        private void PerformAnalyticalFieldPreValidation(WorkReportCsvDto untypedRow)
-        {
-            var submissionRow = _submissionRows[(decimal)untypedRow.RowNum];
-            var warnings = new Dictionary<string, List<string>>();
-            
-            if (untypedRow.ActivityCodeValidation.MinValue != null && untypedRow.ActivityCodeValidation.MaxValue != null)
-            {
-                if ((new[] { "site", "num", "ea" }).Contains(untypedRow.UnitOfMeasure.ToLowerInvariant()) && !untypedRow.Accomplishment.IsInteger())
-                {
-                    warnings.AddItem("Accomplishment Validation", $"Accomplishment [{untypedRow.Accomplishment}] must be whole number when UnitOfMeasure is [{untypedRow.UnitOfMeasure}]");
-                }
-                if (untypedRow.Accomplishment.CheckDecimalPlace() > 2)
-                {
-                    warnings.AddItem("Accomplishment Validation", $"Accomplishment [{untypedRow.Accomplishment}] must be less than or equal to two decimal positions");
-                }
-                if (untypedRow.Accomplishment.ConvertStrToDecimal() < untypedRow.ActivityCodeValidation.MinValue.ConvertNullableDecimal())
-                {
-                    warnings.AddItem("Accomplishment Validation", $"Accomplishment [{untypedRow.Accomplishment}] must be greater than or equal to Minimum Value [{untypedRow.ActivityCodeValidation.MinValue}]");
-                }
-                if (untypedRow.Accomplishment.ConvertStrToDecimal() > untypedRow.ActivityCodeValidation.MaxValue.ConvertNullableDecimal())
-                {
-                    warnings.AddItem("Accomplishment Validation", $"Accomplishment [{untypedRow.Accomplishment}] must be be less than or equal to Maximum Value [{untypedRow.ActivityCodeValidation.MaxValue}]");
-                }
-            }
-            if (warnings.Count > 0)
-            {
-                SetWarningDetail(submissionRow, warnings);
-            }
-        }
-
-        private void PerformAnalyticalFieldValidation(WorkReportTyped typedRow)
-        {
-            var submissionRow = _submissionRows[(decimal)typedRow.RowNum];
-            var warnings = new Dictionary<string, List<string>>();
-            string acomplishment = typedRow.Accomplishment.ToString();
-            if (typedRow.ActivityCodeValidation.MinValue != null && typedRow.ActivityCodeValidation.MaxValue != null)
-            {
-                if ((new[] { "site", "num", "ea" }).Contains(typedRow.UnitOfMeasure.ToLowerInvariant()) && !acomplishment.IsInteger())
-                {
-                    warnings.AddItem("Accomplishment Validation", $"Accomplishment [{acomplishment}] must be whole number when UnitOfMeasure is [{typedRow.UnitOfMeasure}]");
-                }
-                if (acomplishment.CheckDecimalPlace() > 2)
-                {
-                    warnings.AddItem("Accomplishment Validation", $"Accomplishment [{acomplishment}] must be less than or equal to two decimal positions");
-                }
-                if (acomplishment.ConvertStrToDecimal() < typedRow.ActivityCodeValidation.MinValue.ConvertNullableDecimal())
-                {
-                    warnings.AddItem("Accomplishment Validation", $"Accomplishment [{acomplishment}] must be greater than or equal to Minimum Value [{typedRow.ActivityCodeValidation.MinValue}]");
-                }
-                if (acomplishment.ConvertStrToDecimal() > typedRow.ActivityCodeValidation.MaxValue.ConvertNullableDecimal())
-                {
-                    warnings.AddItem("Accomplishment Validation", $"Accomplishment [{acomplishment}] must be be less than or equal to Maximum Value [{typedRow.ActivityCodeValidation.MaxValue}]");
-                }
-            }
-            if (warnings.Count > 0)
-            {
-                SetWarningDetail(submissionRow, warnings);
-            }
-        }
         private void PerformSurfaceTypeValidation(WorkReportTyped typedRow)
         {
             var warnings = new Dictionary<string, List<string>>();
@@ -496,19 +438,25 @@ namespace Hmcr.Domain.Hangfire
             {
                 errors.AddItem(Fields.RecordType, $"Record type of the activity code [{activityCode.ActivityNumber}] must be [{activityCode.MaintenanceType}]");
             }
-            //if (string.IsNullOrWhiteSpace(untypedRow.ServiceArea) || activityCode.ServiceAreaNumbers == null)
-            //{
-            //    errors.AddItem(Fields.ServiceArea, $"Service area [{untypedRow.ServiceArea}] is not associated with the activity code [{activityCode.ActivityNumber}]");
-            //}
-            //else
-            //{
-            //    if (!activityCode.ServiceAreaNumbers.Contains(decimal.Parse(untypedRow.ServiceArea)))
-            //    {
-            //        errors.AddItem(Fields.ServiceArea, $"Service area [{untypedRow.ServiceArea}] is not associated with the activity code [{activityCode.ActivityNumber}]");
-            //    }
-            //}
 
-            PerformAnalyticalFieldPreValidation(untypedRow);
+            if ( !activityCode.ServiceAreaNumbers.Contains(decimal.Parse(untypedRow.ServiceArea)))
+            {
+                errors.AddItem(Fields.ServiceArea, $"Service area [{untypedRow.ServiceArea}] is not associated with the activity code [{activityCode.ActivityNumber}]");
+            }
+
+            if ((new [] {"site","num","ea"}).Contains(untypedRow.UnitOfMeasure.ToLowerInvariant()) && !untypedRow.Accomplishment.IsInteger())
+            {
+                errors.AddItem(Fields.Accomplishment, $"Accomplishment [{untypedRow.Accomplishment}] must be whole number when UnitOfMeasure is [{untypedRow.UnitOfMeasure}]");
+            }
+
+            if (untypedRow.Accomplishment.ConvertStrToDecimal() < activityCode.MinValue.ConvertNullableDecimal())
+            {
+                errors.AddItem(Fields.Accomplishment, $"Accomplishment [{untypedRow.Accomplishment}] must be greater than or equal to [{activityCode.MinValue}]");
+            }
+            if (untypedRow.Accomplishment.ConvertStrToDecimal() > activityCode.MaxValue.ConvertNullableDecimal())
+            {
+                errors.AddItem(Fields.Accomplishment, $"Accomplishment [{untypedRow.Accomplishment}] must be be less than or equal to  [{activityCode.MaxValue}]");
+            }
         }
 
         private void PerformAdditionalValidation(List<WorkReportTyped> typedRows)
@@ -560,7 +508,7 @@ namespace Hmcr.Domain.Hangfire
                 {
                     errors.AddItem($"{Fields.EndLongitude}/{Fields.EndLatitude}", "Invalid range of GPS coordinates.");
                 }
-                PerformAnalyticalFieldValidation(typedRow);
+
                 if (errors.Count > 0)
                 {
                     SetErrorDetail(submissionRow, errors, _statusService.FileConflictionError);
@@ -581,7 +529,13 @@ namespace Hmcr.Domain.Hangfire
                 typedRow.SpThresholdLevel = untypedRow.SpThresholdLevel;
 
                 //move activity rules and location code from untyped to typed
-                typedRow.ActivityCodeValidation= untypedRow.ActivityCodeValidation;
+                typedRow.ActivityCodeValidation.LocationCode = untypedRow.ActivityCodeValidation.LocationCode;
+                typedRow.ActivityCodeValidation.RoadLengthRuleId = untypedRow.ActivityCodeValidation.RoadLengthRuleId;
+                typedRow.ActivityCodeValidation.RoadLenghRuleExec = untypedRow.ActivityCodeValidation.RoadLenghRuleExec;
+                typedRow.ActivityCodeValidation.SurfaceTypeRuleId = untypedRow.ActivityCodeValidation.SurfaceTypeRuleId;
+                typedRow.ActivityCodeValidation.SurfaceTypeRuleExec = untypedRow.ActivityCodeValidation.SurfaceTypeRuleExec;
+                typedRow.ActivityCodeValidation.RoadClassRuleId = untypedRow.ActivityCodeValidation.RoadClassRuleId;
+                typedRow.ActivityCodeValidation.RoadClassRuleExec = untypedRow.ActivityCodeValidation.RoadClassRuleExec;
             }
         }
 
