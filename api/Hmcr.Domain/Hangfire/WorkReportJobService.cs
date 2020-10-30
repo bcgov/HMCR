@@ -301,21 +301,20 @@ namespace Hmcr.Domain.Hangfire
                 string maxValue = typedRow.ActivityCodeValidation.MaxValue.ConvertDecimalToStringAndRemoveTrailing();
                 if ((new[] { "site", "num", "ea" }).Contains(typedRow.UnitOfMeasure.ToLowerInvariant()) && !accomplishment.IsInteger())
                 {
-                    warnings.AddItem("Data Precision Validation: Accomplishment", $"Accomplishment value of [{accomplishment}] should be a whole number for Unit of Measure [{typedRow.UnitOfMeasure}]" +
+                    warnings.AddItem("Data Precision Validation: Accomplishment", 
+                        $"Accomplishment value of [{accomplishment}] should be a whole number for Unit of Measure [{typedRow.UnitOfMeasure}]" +
                         $" for Activity Code [{typedRow.ActivityNumber}]");
-                }
-                if (accomplishment.CheckDecimalPlace() > 2)
-                {
-                    warnings.AddItem("Minimum / Maximum Value Validation: Accomplishment", $"Accomplishment value of [{accomplishment}] should be <= two decimal positions");
                 }
                 if (accomplishment.ConvertStrToDecimal() < typedRow.ActivityCodeValidation.MinValue.ConvertNullableDecimal())
                 {
-                    warnings.AddItem("Minimum / Maximum Value Validation: Accomplishment", $"Accomplishment value of [{accomplishment}]" +
+                    warnings.AddItem("Minimum / Maximum Value Validation: Accomplishment", 
+                        $"Accomplishment value of [{accomplishment}]" +
                         $" should be >= the Minimum Value [{minValue}] allowed for the Activity [{typedRow.ActivityNumber}]");
                 }
                 if (accomplishment.ConvertStrToDecimal() > typedRow.ActivityCodeValidation.MaxValue.ConvertNullableDecimal())
                 {
-                    warnings.AddItem("Minimum / Maximum Value Validation: Accomplishment", $"Accomplishment value of [{accomplishment}]" +
+                    warnings.AddItem("Minimum / Maximum Value Validation: Accomplishment", 
+                        $"Accomplishment value of [{accomplishment}]" +
                         $" should be <= the Maximum Value [{maxValue}] allowed for the Activity [{typedRow.ActivityNumber}]");
                 }
             }
