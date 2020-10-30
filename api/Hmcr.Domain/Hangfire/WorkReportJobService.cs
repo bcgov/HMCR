@@ -470,17 +470,17 @@ namespace Hmcr.Domain.Hangfire
             {
                 errors.AddItem(Fields.RecordType, $"Record type of the activity code [{activityCode.ActivityNumber}] must be [{activityCode.MaintenanceType}]");
             }
-            //if (string.IsNullOrWhiteSpace(untypedRow.ServiceArea) || activityCode.ServiceAreaNumbers == null)
-            //{
-            //    errors.AddItem(Fields.ServiceArea, $"Service area [{untypedRow.ServiceArea}] is not associated with the activity code [{activityCode.ActivityNumber}]");
-            //}
-            //else
-            //{
-            //    if (!activityCode.ServiceAreaNumbers.Contains(decimal.Parse(untypedRow.ServiceArea)))
-            //    {
-            //        errors.AddItem(Fields.ServiceArea, $"Service area [{untypedRow.ServiceArea}] is not associated with the activity code [{activityCode.ActivityNumber}]");
-            //    }
-            //}
+            if (string.IsNullOrWhiteSpace(untypedRow.ServiceArea) || activityCode.ServiceAreaNumbers == null)
+            {
+                errors.AddItem(Fields.ServiceArea, $"Service area [{untypedRow.ServiceArea}] is not associated with the activity code [{activityCode.ActivityNumber}]");
+            }
+            else
+            {
+                if (!activityCode.ServiceAreaNumbers.Contains(decimal.Parse(untypedRow.ServiceArea)))
+                {
+                    errors.AddItem(Fields.ServiceArea, $"Service area [{untypedRow.ServiceArea}] is not associated with the activity code [{activityCode.ActivityNumber}]");
+                }
+            }
         }
 
         private void PerformAdditionalValidation(List<WorkReportTyped> typedRows)
