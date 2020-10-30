@@ -209,6 +209,11 @@ namespace Hmcr.Model.Utils
         {
             return value?? 0;
         }
+        public static string ConvertDecimalToStringAndRemoveTrailing(this decimal? value)
+        {
+            decimal val =  value ?? 0;
+            return val.ToString("G29");
+        }
         public static int CheckDecimalPlace(this string value)
         {
             string[] vs = ConvertStrToDecimal(value).ToString("G29").Split(new char[] { '.' }); //removing trailing 0
