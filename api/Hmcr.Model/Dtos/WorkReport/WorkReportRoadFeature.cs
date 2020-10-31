@@ -9,10 +9,8 @@ namespace Hmcr.Model.Dtos.WorkReport
         public string SurfaceType { get; set; }
         public double SurfaceLength { get; set; }
 
-        public WorkReportRoadFeature(string surfaceType, double surfaceLength)
-        {
-            SurfaceType = surfaceType;
-            SurfaceLength = surfaceLength;
-        }
+        public string SummerRating { get; set; }
+        public string WinterRating { get; set; }
+        public double RoadLength { get; set; }
     }
 }

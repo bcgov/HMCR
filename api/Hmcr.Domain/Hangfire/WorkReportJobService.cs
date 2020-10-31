@@ -231,6 +231,15 @@ namespace Hmcr.Domain.Hangfire
             return updatedWorkReports.ToList();
         }
 
+        /*private async Task<WorkReportGeometry> PerformMaintenanceClassValidationAsync(WorkReportGeometry row)
+        {
+            var errors = new Dictionary<string, List<string>>();
+            var typedRow = row.WorkReportTyped;
+            var geometry = row.Geometry;
+            var submissionRow = _submissionRows[(decimal)typedRow.RowNum];
+           // typedRow.RoadFeatures = new List<>();
+        }*/
+
         private async Task<WorkReportGeometry> PerformSurfaceTypeValidationAsync(WorkReportGeometry row)
         {
             var errors = new Dictionary<string, List<string>>();
@@ -260,7 +269,10 @@ namespace Hmcr.Domain.Hangfire
                 {
                     if (result.surfaceType.Type != null)    //only add if type was returned
                     {
-                        typedRow.RoadFeatures.Add(new WorkReportRoadFeature(result.surfaceType.Type, result.surfaceType.Length));
+                        WorkReportRoadFeature roadFeature = new WorkReportRoadFeature();
+                        roadFeature.SurfaceLength = result.surfaceType.Length;
+                        roadFeature.SurfaceType = result.surfaceType.Type;
+                        typedRow.RoadFeatures.Add(roadFeature);
                     }
 
                     PerformSurfaceTypeValidation(typedRow);
@@ -280,7 +292,11 @@ namespace Hmcr.Domain.Hangfire
                     foreach (string type in distinctTypes)
                     {
                         var totalLengthOfType = result.surfaceTypes.Where(x => x.Type == type).Sum(x => x.Length);
-                        typedRow.RoadFeatures.Add(new WorkReportRoadFeature(type, totalLengthOfType));
+                        
+                        WorkReportRoadFeature roadFeature = new WorkReportRoadFeature();
+                        roadFeature.SurfaceLength = totalLengthOfType;
+                        roadFeature.SurfaceType = type;
+                        typedRow.RoadFeatures.Add(roadFeature);
                     }
 
                     PerformSurfaceTypeValidation(typedRow);
@@ -358,17 +374,21 @@ namespace Hmcr.Domain.Hangfire
             var totalLength = typedRow.RoadFeatures.Sum(x => x.SurfaceLength);
             
             //determine path length; paved, non-paved, unconstructed, other
-            var pavedLength = typedRow.RoadFeatures.Where(x => x.SurfaceType == RoadSurface.HOT_MIX ||
+            var pavedLength = typedRow.RoadFeatures.Where(x => x.SurfaceLength > 0)
+                .Where(x => x.SurfaceType == RoadSurface.HOT_MIX ||
                 x.SurfaceType == RoadSurface.COLD_MIX || x.SurfaceType == RoadSurface.CONCRETE ||
                 x.SurfaceType == RoadSurface.SURFACE_TREATED).Sum(x => x.SurfaceLength);
             
-            var unpavedLength = typedRow.RoadFeatures.Where(x => x.SurfaceType == RoadSurface.GRAVEL ||
+            var unpavedLength = typedRow.RoadFeatures.Where(x => x.SurfaceLength > 0)
+                .Where(x => x.SurfaceType == RoadSurface.GRAVEL ||
                 x.SurfaceType == RoadSurface.DIRT).Sum(x => x.SurfaceLength);
             
-            var unconstructedLength = typedRow.RoadFeatures.Where(x => x.SurfaceType == RoadSurface.CLEARED ||
+            var unconstructedLength = typedRow.RoadFeatures.Where(x => x.SurfaceLength > 0)
+                .Where(x => x.SurfaceType == RoadSurface.CLEARED ||
                 x.SurfaceType == RoadSurface.UNCLEARED).Sum(x => x.SurfaceLength);
             
-            var otherLength = typedRow.RoadFeatures.Where(x => x.SurfaceType == RoadSurface.OTHER ||
+            var otherLength = typedRow.RoadFeatures.Where(x => x.SurfaceLength > 0)
+                .Where(x => x.SurfaceType == RoadSurface.OTHER ||
                 x.SurfaceType == RoadSurface.UNKNOWN).Sum(x => x.SurfaceLength);
 
             var surfaceTypeRule = typedRow.ActivityCodeValidation.SurfaceTypeRuleExec;
@@ -387,10 +407,11 @@ namespace Hmcr.Domain.Hangfire
                             if (surfaceTypeRule == SurfaceTypeRules.PavedStructure)
                             {
                                 //structure checking
+                                //warnings.AddItem("Surface Type Validation", $"GPS position from [{typedRow.StartLatitude},{typedRow.StartLongitude}] to [{typedRow.EndLatitude},{typedRow.EndLongitude}] should be >= 80% paved surface or or be within 100M of a Structure")
                             }
                             else if (surfaceTypeRule == SurfaceTypeRules.PavedSurface)
                             {
-                                warnings.AddItem("Surface Type Validation", $"Rule is {SurfaceTypeRules.PavedSurface} on Line and paved surface less than 80%");
+                                warnings.AddItem("Surface Type Validation", $"GPS position from [{typedRow.StartLatitude},{typedRow.StartLongitude}] to [{typedRow.EndLatitude},{typedRow.EndLongitude}] should be >= 80% paved surface");
                             }
                         }
                         
@@ -402,14 +423,15 @@ namespace Hmcr.Domain.Hangfire
                         }
                         else
                         {
-                            warnings.AddItem("Surface Type Validation", $"Rule is {SurfaceTypeRules.NonPavedSurface} on Line and unpaved surface less than 80%");
+                            warnings.AddItem("Surface Type Validation", $"GPS position from [{typedRow.StartLatitude},{typedRow.StartLongitude}] to [{typedRow.EndLatitude},{typedRow.EndLongitude}] should be >= 80% Non-paved surface");
                         }
 
                         break;
                     case SurfaceTypeRules.Unconstructed:
                         if ((unconstructedLength / totalLength) >= .2)
                         {
-                            warnings.AddItem("Surface Type Validation", $"Rule is {SurfaceTypeRules.Unconstructed} on Line and unconstructed surface is more than 20%");
+                            
+                            warnings.AddItem("Surface Type Validation", $"GPS position from [{typedRow.StartLatitude},{typedRow.StartLongitude}] to [{typedRow.EndLatitude},{typedRow.EndLongitude}] should NOT be >= 20% Unconstructed surface");
                         }
 
                         break;
@@ -423,17 +445,18 @@ namespace Hmcr.Domain.Hangfire
                     case SurfaceTypeRules.PavedStructure:
                         if (pavedLength > 0)
                         {
-                            //nothign wrong
+                            //nothing wrong
                         }
                         else
                         {
                             if (unpavedLength > 0 && surfaceTypeRule == SurfaceTypeRules.PavedStructure)
                             {
                                 //structure checking
+                                //warnings.AddItem("Surface Type Validation", $"GPS position [{typedRow.StartLatitude},{typedRow.StartLongitude}] should be paved or be within 100M of a Structure");
                             }
                             else if (unpavedLength > 0 && surfaceTypeRule == SurfaceTypeRules.PavedSurface)
                             {
-                                warnings.AddItem("Surface Type Validation", $"Rule is {SurfaceTypeRules.NonPavedSurface}, unpaved surface found on Point");
+                                warnings.AddItem("Surface Type Validation", $"GPS position [{typedRow.StartLatitude},{typedRow.StartLongitude}] should be paved");
                             }
                         }
 
@@ -445,14 +468,14 @@ namespace Hmcr.Domain.Hangfire
                         }
                         else if (pavedLength > 0)
                         {
-                            warnings.AddItem("Surface Type Validation", $"Rule is {SurfaceTypeRules.NonPavedSurface}, paved surface found on Point");
+                            warnings.AddItem("Surface Type Validation", $"GPS position [{typedRow.StartLatitude},{typedRow.StartLongitude}] should be non-paved");
                         }
 
                         break;
                     case SurfaceTypeRules.Unconstructed:
                         if (unconstructedLength > 0)
                         {
-                            warnings.AddItem("Surface Type Validation", $"Rule is {SurfaceTypeRules.Unconstructed}, unconstructed surface found on Point");
+                            warnings.AddItem("Surface Type Validation", $"GPS position at [{typedRow.StartLatitude},{typedRow.StartLongitude}] should NOT be Unconstructed");
                         }
 
                         break;
