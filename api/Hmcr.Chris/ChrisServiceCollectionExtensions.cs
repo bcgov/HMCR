@@ -13,14 +13,14 @@ namespace Hmcr.Chris
             services.AddHttpClient<IMapsApi, MapsApi>(client =>
             {
                 client.BaseAddress = new Uri(config.GetValue<string>("CHRIS:MapUrl"));
-                client.Timeout = new TimeSpan(0, 0, 15);
+                client.Timeout = new TimeSpan(0, 0, config.GetValue<int>("Timeouts:MapsAPI"));
                 client.DefaultRequestHeaders.Clear();
             });
 
             services.AddHttpClient<IOasApi, OasApi>(client =>
             {
                 client.BaseAddress = new Uri(config.GetValue<string>("CHRIS:OASUrl"));
-                client.Timeout = new TimeSpan(0, 0, 15);
+                client.Timeout = new TimeSpan(0, 0, config.GetValue<int>("Timeouts:OasAPI"));
                 client.DefaultRequestHeaders.Clear();
 
                 var userId = config.GetValue<string>("ServiceAccount:User");
@@ -32,7 +32,7 @@ namespace Hmcr.Chris
             services.AddHttpClient<IExportApi, ExportApi>(client =>
             {
                 client.BaseAddress = new Uri(config.GetValue<string>("CHRIS:ExportUrl"));
-                client.Timeout = new TimeSpan(0, 0, 15);
+                client.Timeout = new TimeSpan(0, 0, config.GetValue<int>("Timeouts:ExportAPI"));
                 client.DefaultRequestHeaders.Clear();
 
                 var userId = config.GetValue<string>("ServiceAccount:User");
@@ -44,7 +44,8 @@ namespace Hmcr.Chris
             services.AddHttpClient<IInventoryApi, InventoryApi>(client =>
             {
                 client.BaseAddress = new Uri(config.GetValue<string>("CHRIS:OASUrl"));
-                client.Timeout = new TimeSpan(0, 0, 45);
+                //TODO: need to set the timeouts to be configurable with the ConfigMap of OCP
+                client.Timeout = new TimeSpan(0, 0, config.GetValue<int>("Timeouts:InventoryAPI"));
                 client.DefaultRequestHeaders.Clear();
 
                 var userId = config.GetValue<string>("ServiceAccount:User");
