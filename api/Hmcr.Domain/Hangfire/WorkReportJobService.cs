@@ -170,6 +170,69 @@ namespace Hmcr.Domain.Hangfire
             return true;
         }
 
+        #region Validation Batch Processes
+
+        private List<WorkReportGeometry> PerformMaintenanceClassValidationBatchAsync(List<WorkReportGeometry> workReports)
+        {
+            MethodLogger.LogEntry(_logger, _enableMethodLog, _methodLogHeader, $"Total Record: {workReports.Count}");
+
+            //get surface type not applicable id
+            var notApplicableMaintenanceClassId = _validator.ActivityCodeRuleLookup
+                .Where(x => x.ActivityRuleSet == ActivityRuleType.RoadClass)
+                .Where(x => x.ActivityRuleExecName == MaintenanceClassRules.NA)
+                .FirstOrDefault().ActivityCodeRuleId;
+
+            //grouping the rows
+            var groups = new List<List<WorkReportGeometry>>();
+            var currentGroup = new List<WorkReportGeometry>();
+
+            var count = 0;
+            foreach (var workReport in workReports)
+            {
+                currentGroup.Add(workReport);
+                count++;
+
+                if (count % 10 == 0)
+                {
+                    groups.Add(currentGroup);
+                    currentGroup = new List<WorkReportGeometry>();
+                }
+            }
+
+            if (currentGroup.Count > 0)
+            {
+                groups.Add(currentGroup);
+            }
+
+            var updatedWorkReports = new ConcurrentBag<WorkReportGeometry>();
+            var progress = 0;
+
+            foreach (var group in groups)
+            {
+                var tasklist = new List<Task>();
+
+                //don't batch if not location code C
+                foreach (var row in group.Where(x => x.WorkReportTyped.ActivityCodeValidation.LocationCode == "C"))
+                {
+                    if (row.WorkReportTyped.ActivityCodeValidation.RoadClassRuleId != notApplicableMaintenanceClassId)
+                    {
+                        //tasklist.Add(Task.Run(async () => updatedWorkReports.Add(await PerformMaintenanceClassValidationAsync(row))));
+                    }
+                }
+
+                Task.WaitAll(tasklist.ToArray());
+
+                progress += 10;
+
+                if (progress % 500 == 0)
+                {
+                    _logger.LogInformation($"{_methodLogHeader} PerformMaintenanceClassValidationAsync {progress}");
+                }
+            }
+
+            return workReports.ToList();
+        }
+        
         private List<WorkReportGeometry> PerformSurfaceTypeValidationBatchAsync(List<WorkReportGeometry> workReports)
         {
             MethodLogger.LogEntry(_logger, _enableMethodLog, _methodLogHeader, $"Total Record: {workReports.Count}");
@@ -230,6 +293,61 @@ namespace Hmcr.Domain.Hangfire
 
             return updatedWorkReports.ToList();
         }
+
+        private List<WorkReportGeometry> PerformSpatialValidationAndConversionBatchAsync(List<WorkReportTyped> typedRows)
+        {
+            MethodLogger.LogEntry(_logger, _enableMethodLog, _methodLogHeader, $"Total Record: {typedRows.Count}");
+
+            //grouping the rows
+            var groups = new List<List<WorkReportTyped>>();
+            var currentGroup = new List<WorkReportTyped>();
+
+            var count = 0;
+            foreach (var typedRow in typedRows)
+            {
+                currentGroup.Add(typedRow);
+                count++;
+
+                if (count % 10 == 0)
+                {
+                    groups.Add(currentGroup);
+                    currentGroup = new List<WorkReportTyped>();
+                }
+            }
+
+            if (currentGroup.Count > 0)
+            {
+                groups.Add(currentGroup);
+            }
+
+            var geometries = new ConcurrentBag<WorkReportGeometry>();
+            var progress = 0;
+
+            foreach (var group in groups)
+            {
+                var tasklist = new List<Task>();
+
+                foreach (var row in group)
+                {
+                    tasklist.Add(Task.Run(async () => geometries.Add(await PerformSpatialValidationAndConversionAsync(row))));
+                }
+
+                Task.WaitAll(tasklist.ToArray());
+
+                progress += 10;
+
+                if (progress % 500 == 0)
+                {
+                    _logger.LogInformation($"{_methodLogHeader} PerformSpatialValidationAndConversionAsync {progress}");
+                }
+            }
+
+            return geometries.ToList();
+        }
+
+        #endregion
+
+        #region Async Validation Functions
 
         /*private async Task<WorkReportGeometry> PerformMaintenanceClassValidationAsync(WorkReportGeometry row)
         {
@@ -306,6 +424,37 @@ namespace Hmcr.Domain.Hangfire
             return row;
         }
 
+        private async Task<WorkReportGeometry> PerformSpatialValidationAndConversionAsync(WorkReportTyped typedRow)
+        {
+            var submissionRow = _submissionRows[(decimal)typedRow.RowNum];
+            var workReport = new WorkReportGeometry(typedRow, null);
+
+            if (typedRow.SpatialData == SpatialData.Gps)
+            {
+                await PerformSpatialGpsValidation(workReport, submissionRow);
+
+                SetVarianceWarningDetail(submissionRow, typedRow.HighwayUnique,
+                    GetGpsString(typedRow.StartLatitude, typedRow.StartLongitude),
+                    GetGpsString(typedRow.EndLatitude, typedRow.EndLongitude),
+                    typedRow.SpThresholdLevel);
+            }
+            else if (typedRow.SpatialData == SpatialData.Lrs)
+            {
+                await PerformSpatialLrsValidation(workReport, submissionRow);
+
+                SetVarianceWarningDetail(submissionRow, typedRow.HighwayUnique,
+                    GetOffsetString(typedRow.StartOffset),
+                    GetOffsetString(typedRow.EndOffset),
+                    typedRow.SpThresholdLevel);
+            }
+
+            return workReport;
+        }
+
+        #endregion
+        
+        #region Validation Routines
+
         private void PerformAnalyticalFieldValidation(WorkReportTyped typedRow)
         {
             var submissionRow = _submissionRows[(decimal)typedRow.RowNum];
@@ -339,6 +488,7 @@ namespace Hmcr.Domain.Hangfire
                 SetWarningDetail(submissionRow, warnings);
             }
         }
+
         private void PerformSurfaceTypeValidation(WorkReportTyped typedRow)
         {
             var warnings = new Dictionary<string, List<string>>();
@@ -372,11 +522,7 @@ namespace Hmcr.Domain.Hangfire
                 {
                     case SurfaceTypeRules.PavedSurface:
                     case SurfaceTypeRules.PavedStructure:
-                        if ((pavedLength / totalLength) >= .8)
-                        {
-                            //nothing wrong
-                        }
-                        else
+                        if ((pavedLength / totalLength) < .8)
                         {
                             if (surfaceTypeRule == SurfaceTypeRules.PavedStructure)
                             {
@@ -391,11 +537,7 @@ namespace Hmcr.Domain.Hangfire
                         
                         break;
                     case SurfaceTypeRules.NonPavedSurface:
-                        if ((unpavedLength / totalLength) >= .8)
-                        {
-                            //nothing wrong
-                        }
-                        else
+                        if ((unpavedLength / totalLength) < .8)
                         {
                             warnings.AddItem("Surface Type Validation", $"GPS position from [{typedRow.StartLatitude},{typedRow.StartLongitude}] to [{typedRow.EndLatitude},{typedRow.EndLongitude}] should be >= 80% Non-paved surface");
                         }
@@ -417,11 +559,7 @@ namespace Hmcr.Domain.Hangfire
                 {
                     case SurfaceTypeRules.PavedSurface:
                     case SurfaceTypeRules.PavedStructure:
-                        if (pavedLength > 0)
-                        {
-                            //nothing wrong
-                        }
-                        else
+                        if (pavedLength < 0)
                         {
                             if (unpavedLength > 0 && surfaceTypeRule == SurfaceTypeRules.PavedStructure)
                             {
@@ -436,11 +574,7 @@ namespace Hmcr.Domain.Hangfire
 
                         break;
                     case SurfaceTypeRules.NonPavedSurface:
-                        if (unpavedLength > 0)
-                        {
-                            //nothing wrong
-                        }
-                        else if (pavedLength > 0)
+                        if (pavedLength > 0)
                         {
                             warnings.AddItem("Surface Type Validation", $"GPS position [{typedRow.StartLatitude},{typedRow.StartLongitude}] should be non-paved");
                         }
@@ -561,130 +695,6 @@ namespace Hmcr.Domain.Hangfire
                     SetErrorDetail(submissionRow, errors, _statusService.FileConflictionError);
                 }
             }
-        }
-
-        private void CopyCalculatedFieldsFormUntypedRow(List<WorkReportTyped> typedRows, List<WorkReportCsvDto> untypedRows)
-        {
-            MethodLogger.LogEntry(_logger, _enableMethodLog, _methodLogHeader);
-
-            foreach (var typedRow in typedRows)
-            {
-                var untypedRow = untypedRows.First(x => x.RowNum == typedRow.RowNum);
-                typedRow.FeatureType = untypedRow.FeatureType;
-                typedRow.SpatialData = untypedRow.SpatialData;
-                typedRow.RowId = untypedRow.RowId;
-                typedRow.SpThresholdLevel = untypedRow.SpThresholdLevel;
-
-                //move activity rules and location code from untyped to typed
-                typedRow.ActivityCodeValidation= untypedRow.ActivityCodeValidation;
-            }
-        }
-
-        private void SetActivityCodeRulesIntoUntypedRow(WorkReportCsvDto untypedRow, ActivityCodeDto activityCode)
-        {
-            untypedRow.FeatureType = activityCode.FeatureType ?? FeatureType.None;
-            untypedRow.SpThresholdLevel = activityCode.SpThresholdLevel;
-            //set activity code rules and location code
-            untypedRow.ActivityCodeValidation.LocationCode = activityCode.LocationCode.LocationCode;
-
-            untypedRow.ActivityCodeValidation.RoadLengthRuleId = activityCode.RoadLengthRule;
-            untypedRow.ActivityCodeValidation.RoadLenghRuleExec = _validator.ActivityCodeRuleLookup
-                .Where(x => x.ActivityCodeRuleId == activityCode.RoadLengthRule)
-                .FirstOrDefault().ActivityRuleExecName;
-
-            untypedRow.ActivityCodeValidation.SurfaceTypeRuleId = activityCode.SurfaceTypeRule;
-            untypedRow.ActivityCodeValidation.SurfaceTypeRuleExec = _validator.ActivityCodeRuleLookup
-                .Where(x => x.ActivityCodeRuleId == activityCode.SurfaceTypeRule)
-                .FirstOrDefault().ActivityRuleExecName;
-
-            untypedRow.ActivityCodeValidation.RoadClassRuleId = activityCode.RoadClassRule;
-            untypedRow.ActivityCodeValidation.RoadClassRuleExec = _validator.ActivityCodeRuleLookup
-                .Where(x => x.ActivityCodeRuleId == activityCode.RoadClassRule)
-                .FirstOrDefault().ActivityRuleExecName;
-
-            untypedRow.ActivityCodeValidation.MinValue = activityCode.MinValue;
-            untypedRow.ActivityCodeValidation.MaxValue = activityCode.MaxValue;
-            untypedRow.ActivityCodeValidation.ReportingFrequency = activityCode.ReportingFrequency;
-            
-            untypedRow.ActivityCodeValidation.ServiceAreaNumbers = activityCode.ServiceAreaNumbers;
-        }
-
-        private List<WorkReportGeometry> PerformSpatialValidationAndConversionBatchAsync(List<WorkReportTyped> typedRows)
-        {
-            MethodLogger.LogEntry(_logger, _enableMethodLog, _methodLogHeader, $"Total Record: {typedRows.Count}");
-
-            //grouping the rows
-            var groups = new List<List<WorkReportTyped>>();
-            var currentGroup = new List<WorkReportTyped>();
-
-            var count = 0;
-            foreach (var typedRow in typedRows)
-            {
-                currentGroup.Add(typedRow);
-                count++;
-
-                if (count % 10 == 0)
-                {
-                    groups.Add(currentGroup);
-                    currentGroup = new List<WorkReportTyped>();
-                }
-            }
-
-            if (currentGroup.Count > 0)
-            {
-                groups.Add(currentGroup);
-            }
-
-            var geometries = new ConcurrentBag<WorkReportGeometry>();
-            var progress = 0;
-
-            foreach (var group in groups)
-            {
-                var tasklist = new List<Task>();
-
-                foreach (var row in group)
-                {
-                    tasklist.Add(Task.Run(async () => geometries.Add(await PerformSpatialValidationAndConversionAsync(row))));
-                }
-
-                Task.WaitAll(tasklist.ToArray());
-
-                progress += 10;
-
-                if (progress % 500 == 0)
-                {
-                    _logger.LogInformation($"{_methodLogHeader} PerformSpatialValidationAndConversionAsync {progress}");
-                }
-            }
-
-            return geometries.ToList();
-        }
-
-        private async Task<WorkReportGeometry> PerformSpatialValidationAndConversionAsync(WorkReportTyped typedRow)
-        {
-            var submissionRow = _submissionRows[(decimal)typedRow.RowNum];
-            var workReport = new WorkReportGeometry(typedRow, null);
-
-            if (typedRow.SpatialData == SpatialData.Gps)
-            {
-                await PerformSpatialGpsValidation(workReport, submissionRow);
-
-                SetVarianceWarningDetail(submissionRow, typedRow.HighwayUnique,
-                    GetGpsString(typedRow.StartLatitude, typedRow.StartLongitude),
-                    GetGpsString(typedRow.EndLatitude, typedRow.EndLongitude),
-                    typedRow.SpThresholdLevel);
-            }
-            else if (typedRow.SpatialData == SpatialData.Lrs)
-            {
-                await PerformSpatialLrsValidation(workReport, submissionRow);
-
-                SetVarianceWarningDetail(submissionRow, typedRow.HighwayUnique,
-                    GetOffsetString(typedRow.StartOffset),
-                    GetOffsetString(typedRow.EndOffset),
-                    typedRow.SpThresholdLevel);
-            }
-
-            return workReport;
         }
 
         private async Task PerformSpatialGpsValidation(WorkReportGeometry workReport, HmrSubmissionRow submissionRow)
@@ -961,6 +971,56 @@ namespace Hmcr.Domain.Hangfire
             }
         }
 
+        #endregion
+
+        #region Utility Functions
+
+        private void CopyCalculatedFieldsFormUntypedRow(List<WorkReportTyped> typedRows, List<WorkReportCsvDto> untypedRows)
+        {
+            MethodLogger.LogEntry(_logger, _enableMethodLog, _methodLogHeader);
+
+            foreach (var typedRow in typedRows)
+            {
+                var untypedRow = untypedRows.First(x => x.RowNum == typedRow.RowNum);
+                typedRow.FeatureType = untypedRow.FeatureType;
+                typedRow.SpatialData = untypedRow.SpatialData;
+                typedRow.RowId = untypedRow.RowId;
+                typedRow.SpThresholdLevel = untypedRow.SpThresholdLevel;
+
+                //move activity rules and location code from untyped to typed
+                typedRow.ActivityCodeValidation= untypedRow.ActivityCodeValidation;
+            }
+        }
+
+        private void SetActivityCodeRulesIntoUntypedRow(WorkReportCsvDto untypedRow, ActivityCodeDto activityCode)
+        {
+            untypedRow.FeatureType = activityCode.FeatureType ?? FeatureType.None;
+            untypedRow.SpThresholdLevel = activityCode.SpThresholdLevel;
+            //set activity code rules and location code
+            untypedRow.ActivityCodeValidation.LocationCode = activityCode.LocationCode.LocationCode;
+
+            untypedRow.ActivityCodeValidation.RoadLengthRuleId = activityCode.RoadLengthRule;
+            untypedRow.ActivityCodeValidation.RoadLenghRuleExec = _validator.ActivityCodeRuleLookup
+                .Where(x => x.ActivityCodeRuleId == activityCode.RoadLengthRule)
+                .FirstOrDefault().ActivityRuleExecName;
+
+            untypedRow.ActivityCodeValidation.SurfaceTypeRuleId = activityCode.SurfaceTypeRule;
+            untypedRow.ActivityCodeValidation.SurfaceTypeRuleExec = _validator.ActivityCodeRuleLookup
+                .Where(x => x.ActivityCodeRuleId == activityCode.SurfaceTypeRule)
+                .FirstOrDefault().ActivityRuleExecName;
+
+            untypedRow.ActivityCodeValidation.RoadClassRuleId = activityCode.RoadClassRule;
+            untypedRow.ActivityCodeValidation.RoadClassRuleExec = _validator.ActivityCodeRuleLookup
+                .Where(x => x.ActivityCodeRuleId == activityCode.RoadClassRule)
+                .FirstOrDefault().ActivityRuleExecName;
+
+            untypedRow.ActivityCodeValidation.MinValue = activityCode.MinValue;
+            untypedRow.ActivityCodeValidation.MaxValue = activityCode.MaxValue;
+            untypedRow.ActivityCodeValidation.ReportingFrequency = activityCode.ReportingFrequency;
+            
+            untypedRow.ActivityCodeValidation.ServiceAreaNumbers = activityCode.ServiceAreaNumbers;
+        }
+
         private string GetValidationEntityName(WorkReportCsvDto untypedRow, ActivityCodeDto activityCode)
         {
             var locationCode = activityCode.LocationCode;
@@ -1071,5 +1131,7 @@ namespace Hmcr.Domain.Hangfire
 
             return (0, rows);
         }
+
+        #endregion 
     }
 }
