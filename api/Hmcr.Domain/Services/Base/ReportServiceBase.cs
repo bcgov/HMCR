@@ -6,6 +6,7 @@ using Hmcr.Model.Dtos.SubmissionObject;
 using Hmcr.Model.Dtos.SubmissionRow;
 using Hmcr.Model.Dtos.SubmissionStream;
 using Hmcr.Model.Utils;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -20,6 +21,7 @@ namespace Hmcr.Domain.Services.Base
         protected IUnitOfWork _unitOfWork;
         protected IFieldValidatorService _validator;
         protected IServiceAreaService _saService;
+        private ILogger _logger;
         protected ISubmissionStreamService _streamService;
         protected ISubmissionObjectRepository _submissionRepo;
         protected ISumbissionRowRepository _rowRepo;
@@ -46,7 +48,7 @@ namespace Hmcr.Domain.Services.Base
         public ReportServiceBase(IUnitOfWork unitOfWork,
             ISubmissionStreamService streamService, ISubmissionObjectRepository submissionRepo, ISumbissionRowRepository rowRepo,
             IContractTermRepository contractRepo, ISubmissionStatusService statusService, IFieldValidatorService validator, 
-            IServiceAreaService saService)
+            IServiceAreaService saService, ILogger logger)
         {
             _unitOfWork = unitOfWork;
             _streamService = streamService;
@@ -56,13 +58,20 @@ namespace Hmcr.Domain.Services.Base
             _statusService = statusService;
             _validator = validator;
             _saService = saService;
+            _logger = logger;
         }
         public async Task<(Dictionary<string, List<string>> errors, List<string> resubmittedRecordNumbers)> CheckResubmitAsync(FileUploadDto upload)
         {
             if (!HasRowIdentifier)
                 return (new Dictionary<string, List<string>>(), null);
 
+            var instance = Guid.NewGuid();
+
+            _logger.LogInformation($"[Api] {instance} Checking resubmit started.");
+
             var (errors, submission) = await ValidateAndLogReportErrorAsync(upload);
+
+            _logger.LogInformation($"[Api] {instance} Checking resubmit finished.");
 
             //if there are any errors, just log it and report them to the user.
             if (errors.Count > 0)
@@ -75,15 +84,22 @@ namespace Hmcr.Domain.Services.Base
 
         public async Task<(decimal submissionObjectId, Dictionary<string, List<string>> errors)> CreateReportAsync(FileUploadDto upload)
         {
+            var instance = Guid.NewGuid();
+
+            _logger.LogInformation($"[Api] {instance} Creating report started.");
+
             var (errors, submission) = await ValidateAndLogReportErrorAsync(upload);
 
             if (errors.Count > 0)
             {
+                _logger.LogInformation($"[Api] {instance} Creating report finished with errors.");
                 return (0, errors);
             }
 
             var submissionEntity = await _submissionRepo.CreateSubmissionObjectAsync(submission);
             _unitOfWork.Commit();
+
+            _logger.LogInformation($"[Api] {instance} Creating report finished.");
 
             return (submissionEntity.SubmissionObjectId, errors);
         }

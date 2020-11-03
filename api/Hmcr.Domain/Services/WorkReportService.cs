@@ -33,7 +33,7 @@ namespace Hmcr.Domain.Services
             ISubmissionStreamService streamService, ISubmissionObjectRepository submissionRepo, ISumbissionRowRepository rowRepo, 
             IContractTermRepository contractRepo, ISubmissionStatusService statusService, IWorkReportRepository workRptRepo, IFieldValidatorService validator,
             ILogger<WorkReportService> logger, IServiceAreaService saService)
-            : base(unitOfWork, streamService, submissionRepo, rowRepo, contractRepo, statusService, validator, saService)
+            : base(unitOfWork, streamService, submissionRepo, rowRepo, contractRepo, statusService, validator, saService, logger)
         {
             TableName = TableNames.WorkReport;
             HasRowIdentifier = true;
