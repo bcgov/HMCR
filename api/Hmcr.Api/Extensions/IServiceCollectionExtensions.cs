@@ -216,5 +216,17 @@ namespace Hmcr.Api.Extensions
             services.AddHealthChecks()
                 .AddSqlServer(connectionString, name: "HMCR-DB-Check", failureStatus: HealthStatus.Degraded, tags: new string[] { "sql", "db" });
         }
+
+        public static void AddHmcrCors(this IServiceCollection services)
+        {
+            services.AddCors(options =>
+            {
+                options.AddPolicy(name: "HmcrOrigins",
+                    builder =>
+                    {
+                        builder.WithOrigins("https://dev-hmcr.th.gov.bc.ca", "https://tst-hmcr.th.gov.bc.ca", "https://uat-hmcr.th.gov.bc.ca", "https://hmcr.th.gov.bc.ca");
+                    });
+            });
+        }
     }
 }

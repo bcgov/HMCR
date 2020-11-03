@@ -51,9 +51,10 @@ namespace Hmcr.Api
 
             app.UseExceptionMiddleware();
             app.UseHmcrHealthCheck();
-            app.UseAuthorization();
-            app.UseAuthentication();
             app.UseRouting();
+            app.UseCors("HmcrOrigins");
+            app.UseAuthentication();
+            app.UseAuthorization();
             app.UseHmcrEndpoints();
             app.UseHmcrSwagger(env, Configuration.GetSection("Constants:SwaggerApiUrl").Value);
 
