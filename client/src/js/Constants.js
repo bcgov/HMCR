@@ -1,6 +1,6 @@
 export const API_URL = window.RUNTIME_REACT_APP_API_HOST
   ? `${window.location.protocol}//${window.RUNTIME_REACT_APP_API_HOST}/api`
-  : `https://api-${process.env.REACT_APP_API_HOST}/api`;
+  : `${window.location.protocol}//${process.env.REACT_APP_API_HOST}/api`;
 
 const CODE_LOOKUP = '/codelookup';
 
