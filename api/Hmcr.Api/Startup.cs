@@ -4,6 +4,7 @@ using Hmcr.Chris;
 using Hmcr.Data.Repositories;
 using Hmcr.Domain.Hangfire;
 using Hmcr.Domain.Services;
+using Hmcr.Model;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
@@ -52,7 +53,7 @@ namespace Hmcr.Api
             app.UseExceptionMiddleware();
             app.UseHmcrHealthCheck();
             app.UseRouting();
-            app.UseCors("HmcrOrigins");
+            app.UseCors(Constants.HmcrOrigins);
             app.UseAuthentication();
             app.UseAuthorization();
             app.UseHmcrEndpoints();
