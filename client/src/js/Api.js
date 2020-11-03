@@ -9,6 +9,7 @@ import * as Constants from './Constants';
 export const instance = axios.create({
   baseURL: `${Constants.API_URL}`,
   headers: {
+    'Access-Control-Allow-Origin': '*',
     Pragma: 'no-cache',
   },
 });
