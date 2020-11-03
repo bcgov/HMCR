@@ -224,10 +224,7 @@ namespace Hmcr.Api.Extensions
                 options.AddPolicy(name: Constants.HmcrOrigins,
                     builder =>
                     {
-                        //builder.WithOrigins("https://dev-hmcr.th.gov.bc.ca", "https://tst-hmcr.th.gov.bc.ca", "https://uat-hmcr.th.gov.bc.ca", "https://hmcr.th.gov.bc.ca")
-                        //    .AllowAnyHeader()
-                        //    .AllowAnyMethod();
-                        builder.AllowAnyOrigin()
+                        builder.WithOrigins("https://dev-hmcr.th.gov.bc.ca", "https://tst-hmcr.th.gov.bc.ca", "https://uat-hmcr.th.gov.bc.ca", "https://hmcr.th.gov.bc.ca")
                             .AllowAnyHeader()
                             .AllowAnyMethod();
                     });

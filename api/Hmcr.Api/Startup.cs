@@ -33,7 +33,7 @@ namespace Hmcr.Api
             services.AddHttpContextAccessor();
             services.AddHmcrAuthentication(Configuration);
             services.AddHmcrDbContext(connectionString);
-            services.AddCors();
+            services.AddHmcrCors();
             services.AddHmcrControllers();
             services.AddHmcrAutoMapper();
             services.AddHmcrApiVersioning();
