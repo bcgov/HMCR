@@ -160,6 +160,14 @@ namespace Hmcr.Domain.Hangfire
                 return true;
             }
 
+            workReports = PerformMaintenanceClassValidationBatchAsync(workReports);
+
+            if (_submission.SubmissionStatusId != _statusService.FileInProgress)
+            {
+                await CommitAndSendEmailAsync();
+                return true;
+            }
+
             _submission.SubmissionStatusId = _statusService.FileSuccess;
             //stage 4 validation ends
 
@@ -216,7 +224,7 @@ namespace Hmcr.Domain.Hangfire
                 {
                     if (row.WorkReportTyped.ActivityCodeValidation.RoadClassRuleId != notApplicableMaintenanceClassId)
                     {
-                        //tasklist.Add(Task.Run(async () => updatedWorkReports.Add(await PerformMaintenanceClassValidationAsync(row))));
+                        tasklist.Add(Task.Run(async () => updatedWorkReports.Add(await PerformMaintenanceClassValidationAsync(row))));
                     }
                 }
 
@@ -349,14 +357,85 @@ namespace Hmcr.Domain.Hangfire
 
         #region Async Validation Functions
 
-        /*private async Task<WorkReportGeometry> PerformMaintenanceClassValidationAsync(WorkReportGeometry row)
+        private async Task<WorkReportGeometry> PerformMaintenanceClassValidationAsync(WorkReportGeometry row)
         {
             var errors = new Dictionary<string, List<string>>();
             var typedRow = row.WorkReportTyped;
             var geometry = row.Geometry;
             var submissionRow = _submissionRows[(decimal)typedRow.RowNum];
-           // typedRow.RoadFeatures = new List<>();
-        }*/
+            typedRow.RoadFeatures = new List<WorkReportRoadFeature>();
+
+            var summerMaintainedRatings = new[] { "1", "2", "3", "4", "5", "6", "7" };
+            var winterMaintainedRatings = new[] { "A", "B", "C", "D", "E" };
+            
+
+            var geometryLineString = "";
+            foreach (Coordinate coordinate in geometry.Coordinates)
+            {
+                geometryLineString += coordinate.X + "\\," + coordinate.Y;
+                geometryLineString += (coordinate != geometry.Coordinates.Last()) ? "\\," : "";
+            }
+
+            //surface type calls are different between Point & Line
+            if (typedRow.FeatureType == FeatureType.Point)
+            {
+                var result = await _spatialService.GetMaintenanceClassAssocWithPointAsync(geometryLineString);
+
+                if (result.result == SpValidationResult.Fail)
+                {
+                    SetErrorDetail(submissionRow, errors, _statusService.FileLocationError);
+                }
+                else if (result.result == SpValidationResult.Success)
+                {
+                    if (typedRow.ActivityCodeValidation.RoadClassRuleExec == MaintenanceClassRules.Class8OrF)
+                    {
+                        if (result.maintenanceClass.WinterRating != "8" || result.maintenanceClass.SummerRating != "F")
+                        {
+                            //throw warning
+                        }
+                    }
+                    else if (typedRow.ActivityCodeValidation.RoadClassRuleExec == MaintenanceClassRules.NotClass8OrF)
+                    {
+                        if (result.maintenanceClass.WinterRating == "8" || result.maintenanceClass.SummerRating == "F")
+                        {
+                            //throw warning
+                        }
+                    }
+                }
+
+            }
+            else if (typedRow.FeatureType == FeatureType.Line)
+            {
+                var result = await _spatialService.GetMaintenanceClassAssocWithLineAsync(geometryLineString);
+                if (result.result == SpValidationResult.Fail)
+                {
+                    SetErrorDetail(submissionRow, errors, _statusService.FileLocationError);
+                }
+                else if (result.result == SpValidationResult.Success)
+                {
+                    var winterMaintainedLen = result.maintenanceClasses.Where(x => winterMaintainedRatings.Contains(x.WinterRating)).Sum(x => x.Length);
+                    var winterUnmaintainedLen = result.maintenanceClasses.Where(x => x.WinterRating == "F").Sum(x => x.Length);
+                    var winterTotal = winterMaintainedLen + winterUnmaintainedLen;
+
+                    var summerMaintainedLen = result.maintenanceClasses.Where(x => summerMaintainedRatings.Contains(x.SummerRating)).Sum(x => x.Length);
+                    var summerUnmaintainedLen = result.maintenanceClasses.Where(x => x.SummerRating == "8").Sum(x => x.Length);
+                    var summerTotal = summerMaintainedLen + summerUnmaintainedLen;
+
+                    if (typedRow.ActivityCodeValidation.RoadClassRuleExec == MaintenanceClassRules.Class8OrF)
+                    {
+                        //determine proportion of not maintained to total, summer & winter
+                        //if proportion of not maintained < 90% throw warning
+                    } 
+                    else if (typedRow.ActivityCodeValidation.RoadClassRuleExec == MaintenanceClassRules.NotClass8OrF)
+                    {
+                        //determine proportion of maintained to total, summer & winter
+                        //if proportion of maintained < 90% throw warning
+                    }
+                }
+            }
+
+            return row;
+        }
 
         private async Task<WorkReportGeometry> PerformSurfaceTypeValidationAsync(WorkReportGeometry row)
         {

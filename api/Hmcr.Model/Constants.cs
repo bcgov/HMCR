@@ -338,6 +338,13 @@ namespace Hmcr.Model
         public const string Unconstructed = "GPS_NOT_UNCONSTRUCTED";
     }
 
+    public static class MaintenanceClassRules
+    {
+        public const string NA = "NOT_APPLICABLE";
+        public const string Class8OrF = "CLASS_8_OR_F";
+        public const string NotClass8OrF = "NOT_CLASS_8_OR_F";
+    }
+    
     public static class RoadSurface
     {
         public const string HOT_MIX = "1";
