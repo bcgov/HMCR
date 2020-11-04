@@ -273,6 +273,8 @@ namespace Hmcr.Model
         public const string FeatureType = "FEATURE_TYPE";
         public const string NonSpHighwayUnique = "NONSP_HIGHWAY_UNIQUE";
         public const string ThresholdSp = "THRSHLD_SP_VAR";
+        public const string ValidatorProportion = "VALIDATOR_PROPORTION";
+
     }
 
     public static class ThresholdSpLevels
@@ -357,6 +359,14 @@ namespace Hmcr.Model
         public const string UNCLEARED = "F";
         public const string OTHER = "7";
         public const string UNKNOWN = "Z";
+    }
+
+    public static class ValidatorProportionCode
+    {
+        public const string SURFACE_TYPE_PAVED = "SURFACE_TYPE_PAVED";
+        public const string SURFACE_TYPE_UNPAVED = "SURFACE_TYPE_UNPAVED";
+        public const string SURFACE_TYPE_UNCONSTRUCTED = "SURFACE_TYPE_UNCNSTR";
+        public const string MAINTENANCE_CLASS = "MAINTENANCE_CLASS";
     }
 
     /// <summary>
