@@ -99,7 +99,7 @@ namespace Hmcr.Domain.Services.Base
             var submissionEntity = await _submissionRepo.CreateSubmissionObjectAsync(submission);
             _unitOfWork.Commit();
 
-            _logger.LogInformation($"[Api] {instance} Creating report finished.");
+            _logger.LogInformation($"[Api] {instance} Creating report finished - submission #: {submissionEntity.SubmissionObjectId}");
 
             return (submissionEntity.SubmissionObjectId, errors);
         }
