@@ -140,6 +140,12 @@ namespace Hmcr.Domain.Hangfire
             }
 
             //stage 4 validation starts
+            PerformFieldServiceAreaValidation(typedRows);
+            if (_submission.SubmissionStatusId != _statusService.FileInProgress)
+            {
+                await CommitAndSendEmailAsync();
+                return true;
+            }
 
             var workReports = PerformSpatialValidationAndConversionBatchAsync(typedRows);
 
@@ -493,19 +499,33 @@ namespace Hmcr.Domain.Hangfire
             {
                 errors.AddItem(Fields.RecordType, $"Record type of the activity code [{activityCode.ActivityNumber}] must be [{activityCode.MaintenanceType}]");
             }
-            if (string.IsNullOrWhiteSpace(untypedRow.ServiceArea) || activityCode.ServiceAreaNumbers == null)
-            {
-                errors.AddItem(Fields.ServiceArea, $"Service area [{untypedRow.ServiceArea}] is not associated with the activity code [{activityCode.ActivityNumber}]");
-            }
-            else
-            {
-                if (!activityCode.ServiceAreaNumbers.Contains(decimal.Parse(untypedRow.ServiceArea)))
-                {
-                    errors.AddItem(Fields.ServiceArea, $"Service area [{untypedRow.ServiceArea}] is not associated with the activity code [{activityCode.ActivityNumber}]");
-                }
-            }
         }
 
+        private void PerformFieldServiceAreaValidation(List<WorkReportTyped> typedRows)
+        {
+            foreach (var typedRow in typedRows)
+            {
+                var errors = new Dictionary<string, List<string>>();
+                var submissionRow = _submissionRows[(decimal)typedRow.RowNum];
+
+                if (string.IsNullOrWhiteSpace(typedRow.ServiceArea.ToString())|| typedRow.ActivityCodeValidation.ServiceAreaNumbers == null)
+                {
+                    errors.AddItem(Fields.ServiceArea, $"Service area [{typedRow.ServiceArea}] is NOT associated with Activity [{typedRow.ActivityNumber}]");
+                }
+                else
+                {
+                    if (!typedRow.ActivityCodeValidation.ServiceAreaNumbers.Contains(typedRow.ServiceArea))
+                    {
+                        errors.AddItem(Fields.ServiceArea, $"Service area [{typedRow.ServiceArea}] is NOT associated with Activity [{typedRow.ActivityNumber}]");
+                    }
+                }
+                if (errors.Count > 0)
+                {
+                    SetErrorDetail(submissionRow, errors, _statusService.FileLocationError);
+                }
+            }
+            
+        }
         private void PerformAdditionalValidation(List<WorkReportTyped> typedRows)
         {
             MethodLogger.LogEntry(_logger, _enableMethodLog, _methodLogHeader);
