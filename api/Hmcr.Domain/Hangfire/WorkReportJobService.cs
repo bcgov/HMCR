@@ -363,12 +363,9 @@ namespace Hmcr.Domain.Hangfire
             var typedRow = row.WorkReportTyped;
             var geometry = row.Geometry;
             var submissionRow = _submissionRows[(decimal)typedRow.RowNum];
-            typedRow.RoadFeatures = new List<WorkReportRoadFeature>();
+            typedRow.SurfaceTypes = new List<WorkReportSurfaceType>();
 
-            var summerMaintainedRatings = new[] { "1", "2", "3", "4", "5", "6", "7" };
-            var winterMaintainedRatings = new[] { "A", "B", "C", "D", "E" };
             
-
             var geometryLineString = "";
             foreach (Coordinate coordinate in geometry.Coordinates)
             {
@@ -387,20 +384,16 @@ namespace Hmcr.Domain.Hangfire
                 }
                 else if (result.result == SpValidationResult.Success)
                 {
-                    if (typedRow.ActivityCodeValidation.RoadClassRuleExec == MaintenanceClassRules.Class8OrF)
+                    if (result.maintenanceClass != null)    //only add if type was returned
                     {
-                        if (result.maintenanceClass.WinterRating != "8" || result.maintenanceClass.SummerRating != "F")
-                        {
-                            //throw warning
-                        }
+                        WorkReportMaintenanceClass roadClass = new WorkReportMaintenanceClass();
+                        roadClass.WinterRating = result.maintenanceClass.WinterRating;
+                        roadClass.SummerRating = result.maintenanceClass.SummerRating;
+                        roadClass.RoadLength = result.maintenanceClass.Length;
+                        typedRow.MaintenanceClasses.Add(roadClass);
                     }
-                    else if (typedRow.ActivityCodeValidation.RoadClassRuleExec == MaintenanceClassRules.NotClass8OrF)
-                    {
-                        if (result.maintenanceClass.WinterRating == "8" || result.maintenanceClass.SummerRating == "F")
-                        {
-                            //throw warning
-                        }
-                    }
+
+                    PerformMaintenanceClassValidation(typedRow);
                 }
 
             }
@@ -413,24 +406,16 @@ namespace Hmcr.Domain.Hangfire
                 }
                 else if (result.result == SpValidationResult.Success)
                 {
-                    var winterMaintainedLen = result.maintenanceClasses.Where(x => winterMaintainedRatings.Contains(x.WinterRating)).Sum(x => x.Length);
-                    var winterUnmaintainedLen = result.maintenanceClasses.Where(x => x.WinterRating == "F").Sum(x => x.Length);
-                    var winterTotal = winterMaintainedLen + winterUnmaintainedLen;
-
-                    var summerMaintainedLen = result.maintenanceClasses.Where(x => summerMaintainedRatings.Contains(x.SummerRating)).Sum(x => x.Length);
-                    var summerUnmaintainedLen = result.maintenanceClasses.Where(x => x.SummerRating == "8").Sum(x => x.Length);
-                    var summerTotal = summerMaintainedLen + summerUnmaintainedLen;
-
-                    if (typedRow.ActivityCodeValidation.RoadClassRuleExec == MaintenanceClassRules.Class8OrF)
+                    foreach (var maintenanceClass in result.maintenanceClasses)
                     {
-                        //determine proportion of not maintained to total, summer & winter
-                        //if proportion of not maintained < 90% throw warning
-                    } 
-                    else if (typedRow.ActivityCodeValidation.RoadClassRuleExec == MaintenanceClassRules.NotClass8OrF)
-                    {
-                        //determine proportion of maintained to total, summer & winter
-                        //if proportion of maintained < 90% throw warning
+                        WorkReportMaintenanceClass roadClass = new WorkReportMaintenanceClass();
+                        roadClass.WinterRating = maintenanceClass.WinterRating;
+                        roadClass.SummerRating = maintenanceClass.SummerRating;
+                        roadClass.RoadLength = maintenanceClass.Length;
+                        typedRow.MaintenanceClasses.Add(roadClass);
                     }
+
+                    PerformMaintenanceClassValidation(typedRow);
                 }
             }
 
@@ -443,7 +428,7 @@ namespace Hmcr.Domain.Hangfire
             var typedRow = row.WorkReportTyped;
             var geometry = row.Geometry;
             var submissionRow = _submissionRows[(decimal)typedRow.RowNum];
-            typedRow.RoadFeatures = new List<WorkReportRoadFeature>();
+            typedRow.SurfaceTypes = new List<WorkReportSurfaceType>();
 
             //build Geometry linestring
             var geometryLineString = "";
@@ -466,10 +451,10 @@ namespace Hmcr.Domain.Hangfire
                 {
                     if (result.surfaceType.Type != null)    //only add if type was returned
                     {
-                        WorkReportRoadFeature roadFeature = new WorkReportRoadFeature();
+                        WorkReportSurfaceType roadFeature = new WorkReportSurfaceType();
                         roadFeature.SurfaceLength = result.surfaceType.Length;
                         roadFeature.SurfaceType = result.surfaceType.Type;
-                        typedRow.RoadFeatures.Add(roadFeature);
+                        typedRow.SurfaceTypes.Add(roadFeature);
                     }
 
                     PerformSurfaceTypeValidation(typedRow);
@@ -490,10 +475,10 @@ namespace Hmcr.Domain.Hangfire
                     {
                         var totalLengthOfType = result.surfaceTypes.Where(x => x.Type == type).Sum(x => x.Length);
                         
-                        WorkReportRoadFeature roadFeature = new WorkReportRoadFeature();
+                        WorkReportSurfaceType roadFeature = new WorkReportSurfaceType();
                         roadFeature.SurfaceLength = totalLengthOfType;
                         roadFeature.SurfaceType = type;
-                        typedRow.RoadFeatures.Add(roadFeature);
+                        typedRow.SurfaceTypes.Add(roadFeature);
                     }
 
                     PerformSurfaceTypeValidation(typedRow);
@@ -568,33 +553,105 @@ namespace Hmcr.Domain.Hangfire
             }
         }
 
+        private void PerformMaintenanceClassValidation(WorkReportTyped typedRow)
+        {
+            var warnings = new Dictionary<string, List<string>>();
+            var submissionRow = _submissionRows[(decimal)typedRow.RowNum];
+
+            var summerMaintainedRatings = new[] { "1", "2", "3", "4", "5", "6", "7" };
+            var winterMaintainedRatings = new[] { "A", "B", "C", "D", "E" };
+
+            var winterMaintainedLen = typedRow.MaintenanceClasses.Where(x => winterMaintainedRatings.Contains(x.WinterRating)).Sum(x => x.RoadLength);
+            var winterUnmaintainedLen = typedRow.MaintenanceClasses.Where(x => x.WinterRating == "F").Sum(x => x.RoadLength);
+            var winterTotal = winterMaintainedLen + winterUnmaintainedLen;
+
+            var summerMaintainedLen = typedRow.MaintenanceClasses.Where(x => summerMaintainedRatings.Contains(x.SummerRating)).Sum(x => x.RoadLength);
+            var summerUnmaintainedLen = typedRow.MaintenanceClasses.Where(x => x.SummerRating == "8").Sum(x => x.RoadLength);
+            var summerTotal = summerMaintainedLen + summerUnmaintainedLen;
+
+            //TODO: the percentages need to be configurable using CODE LOOKUP
+
+            if (typedRow.FeatureType == FeatureType.Line)
+            {
+                if (typedRow.ActivityCodeValidation.RoadClassRuleExec == MaintenanceClassRules.Class8OrF)
+                {
+                    //determine proportion of not maintained to total, summer & winter
+                    //if proportion of not maintained < 90% throw warning
+                    if (((summerUnmaintainedLen / summerTotal) >= .9) || ((winterUnmaintainedLen / winterTotal) >= .9))
+                    {
+                        warnings.AddItem("Road Class Validation"
+                        , $"GPS position from [{typedRow.StartLatitude},{typedRow.StartLongitude}] " +
+                        $"to [{typedRow.EndLatitude},{typedRow.EndLongitude}] should be >= 90% Maintenance Class 8 or F");
+                    }
+                }
+                else if (typedRow.ActivityCodeValidation.RoadClassRuleExec == MaintenanceClassRules.NotClass8OrF)
+                {
+                    //determine proportion of maintained to total, summer & winter
+                    //if proportion of maintained < 90% throw warning
+                    if (((summerMaintainedLen / summerTotal) >= .9) || ((winterMaintainedLen / winterTotal) >= .9))
+                    {
+                        warnings.AddItem("Road Class Validation"
+                        , $"GPS position from [{typedRow.StartLatitude},{typedRow.StartLongitude}] " +
+                        $"to [{typedRow.EndLatitude},{typedRow.EndLongitude}] should NOT be >= 90% Maintenance Class 8 or F");
+                    }
+                }
+            }
+            else if (typedRow.FeatureType == FeatureType.Point)
+            {
+                
+                if (typedRow.ActivityCodeValidation.RoadClassRuleExec == MaintenanceClassRules.Class8OrF)
+                {
+                    if (typedRow.MaintenanceClasses.First().WinterRating != "8" || typedRow.MaintenanceClasses.First().SummerRating != "F")
+                    {
+                        warnings.AddItem("Road Class Validation"
+                            , $"GPS position [{typedRow.StartLatitude},{typedRow.StartLongitude}] should be Maintenance Class 8 or F");
+                    }
+                }
+                else if (typedRow.ActivityCodeValidation.RoadClassRuleExec == MaintenanceClassRules.NotClass8OrF)
+                {
+                    if (typedRow.MaintenanceClasses.First().WinterRating == "8" || typedRow.MaintenanceClasses.First().SummerRating == "F")
+                    {
+                        warnings.AddItem("Road Class Validation"
+                            , $"GPS position [{typedRow.StartLatitude},{typedRow.StartLongitude}] should NOT be Maintenance Class 8 or F");
+                    }
+                }
+            }
+
+            if (warnings.Count > 0)
+            {
+                SetWarningDetail(submissionRow, warnings);
+            }
+        }
+
         private void PerformSurfaceTypeValidation(WorkReportTyped typedRow)
         {
             var warnings = new Dictionary<string, List<string>>();
             var submissionRow = _submissionRows[(decimal)typedRow.RowNum];
 
             //get total length of path
-            var totalLength = typedRow.RoadFeatures.Sum(x => x.SurfaceLength);
+            var totalLength = typedRow.SurfaceTypes.Sum(x => x.SurfaceLength);
             
             //determine path length; paved, non-paved, unconstructed, other
-            var pavedLength = typedRow.RoadFeatures.Where(x => x.SurfaceLength > 0)
+            var pavedLength = typedRow.SurfaceTypes.Where(x => x.SurfaceLength > 0)
                 .Where(x => x.SurfaceType == RoadSurface.HOT_MIX ||
                 x.SurfaceType == RoadSurface.COLD_MIX || x.SurfaceType == RoadSurface.CONCRETE ||
                 x.SurfaceType == RoadSurface.SURFACE_TREATED).Sum(x => x.SurfaceLength);
             
-            var unpavedLength = typedRow.RoadFeatures.Where(x => x.SurfaceLength > 0)
+            var unpavedLength = typedRow.SurfaceTypes.Where(x => x.SurfaceLength > 0)
                 .Where(x => x.SurfaceType == RoadSurface.GRAVEL ||
                 x.SurfaceType == RoadSurface.DIRT).Sum(x => x.SurfaceLength);
             
-            var unconstructedLength = typedRow.RoadFeatures.Where(x => x.SurfaceLength > 0)
+            var unconstructedLength = typedRow.SurfaceTypes.Where(x => x.SurfaceLength > 0)
                 .Where(x => x.SurfaceType == RoadSurface.CLEARED ||
                 x.SurfaceType == RoadSurface.UNCLEARED).Sum(x => x.SurfaceLength);
             
-            var otherLength = typedRow.RoadFeatures.Where(x => x.SurfaceLength > 0)
+            var otherLength = typedRow.SurfaceTypes.Where(x => x.SurfaceLength > 0)
                 .Where(x => x.SurfaceType == RoadSurface.OTHER ||
                 x.SurfaceType == RoadSurface.UNKNOWN).Sum(x => x.SurfaceLength);
 
             var surfaceTypeRule = typedRow.ActivityCodeValidation.SurfaceTypeRuleExec;
+
+            //TODO: The percentage check should be configurable using CODE LOOKUP
 
             if (typedRow.FeatureType == FeatureType.Line) {
                 switch (surfaceTypeRule) 
@@ -610,7 +667,9 @@ namespace Hmcr.Domain.Hangfire
                             }
                             else if (surfaceTypeRule == SurfaceTypeRules.PavedSurface)
                             {
-                                warnings.AddItem("Surface Type Validation", $"GPS position from [{typedRow.StartLatitude},{typedRow.StartLongitude}] to [{typedRow.EndLatitude},{typedRow.EndLongitude}] should be >= 80% paved surface");
+                                warnings.AddItem("Surface Type Validation"
+                                    , $"GPS position from [{typedRow.StartLatitude},{typedRow.StartLongitude}] " +
+                                    $"to [{typedRow.EndLatitude},{typedRow.EndLongitude}] should be >= 80% paved surface");
                             }
                         }
                         
@@ -618,7 +677,9 @@ namespace Hmcr.Domain.Hangfire
                     case SurfaceTypeRules.NonPavedSurface:
                         if ((unpavedLength / totalLength) < .8)
                         {
-                            warnings.AddItem("Surface Type Validation", $"GPS position from [{typedRow.StartLatitude},{typedRow.StartLongitude}] to [{typedRow.EndLatitude},{typedRow.EndLongitude}] should be >= 80% Non-paved surface");
+                            warnings.AddItem("Surface Type Validation"
+                                , $"GPS position from [{typedRow.StartLatitude},{typedRow.StartLongitude}] " +
+                                $"to [{typedRow.EndLatitude},{typedRow.EndLongitude}] should be >= 80% Non-paved surface");
                         }
 
                         break;
@@ -626,7 +687,9 @@ namespace Hmcr.Domain.Hangfire
                         if ((unconstructedLength / totalLength) >= .2)
                         {
                             
-                            warnings.AddItem("Surface Type Validation", $"GPS position from [{typedRow.StartLatitude},{typedRow.StartLongitude}] to [{typedRow.EndLatitude},{typedRow.EndLongitude}] should NOT be >= 20% Unconstructed surface");
+                            warnings.AddItem("Surface Type Validation"
+                                , $"GPS position from [{typedRow.StartLatitude},{typedRow.StartLongitude}] " +
+                                $"to [{typedRow.EndLatitude},{typedRow.EndLongitude}] should NOT be >= 20% Unconstructed surface");
                         }
 
                         break;
@@ -647,7 +710,8 @@ namespace Hmcr.Domain.Hangfire
                             }
                             else if (unpavedLength > 0 && surfaceTypeRule == SurfaceTypeRules.PavedSurface)
                             {
-                                warnings.AddItem("Surface Type Validation", $"GPS position [{typedRow.StartLatitude},{typedRow.StartLongitude}] should be paved");
+                                warnings.AddItem("Surface Type Validation"
+                                    , $"GPS position [{typedRow.StartLatitude},{typedRow.StartLongitude}] should be paved");
                             }
                         }
 
@@ -655,14 +719,16 @@ namespace Hmcr.Domain.Hangfire
                     case SurfaceTypeRules.NonPavedSurface:
                         if (pavedLength > 0)
                         {
-                            warnings.AddItem("Surface Type Validation", $"GPS position [{typedRow.StartLatitude},{typedRow.StartLongitude}] should be non-paved");
+                            warnings.AddItem("Surface Type Validation"
+                                , $"GPS position [{typedRow.StartLatitude},{typedRow.StartLongitude}] should be non-paved");
                         }
 
                         break;
                     case SurfaceTypeRules.Unconstructed:
                         if (unconstructedLength > 0)
                         {
-                            warnings.AddItem("Surface Type Validation", $"GPS position at [{typedRow.StartLatitude},{typedRow.StartLongitude}] should NOT be Unconstructed");
+                            warnings.AddItem("Surface Type Validation"
+                                , $"GPS position at [{typedRow.StartLatitude},{typedRow.StartLongitude}] should NOT be Unconstructed");
                         }
 
                         break;
