@@ -1,6 +1,6 @@
 export const API_URL = window.RUNTIME_REACT_APP_API_HOST
-  ? `${window.location.protocol}//${window.RUNTIME_REACT_APP_API_HOST}/api`
-  : `${window.location.protocol}//${process.env.REACT_APP_API_HOST}/api`;
+  ? `${window.location.protocol}//${window.RUNTIME_REACT_APP_API_HOST}/api` //For non-dev environments, CORS is enabled to HMCR urls.
+  : `${window.location.protocol}//${process.env.REACT_APP_CLINET_ORIGIN}/api`; //For dev environment, proxy (setupProxy.js) is set up to avoid the same origin policy
 
 const CODE_LOOKUP = '/codelookup';
 
