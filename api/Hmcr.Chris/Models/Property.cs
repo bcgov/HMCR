@@ -23,8 +23,8 @@
         // used only by structure queries
         public string RFI_UNIQUE { get; set; }
         public string IIT_INV_TYPE { get; set; }
-        public double BEGIN_KM { get; set; }
-        public double END_KM { get; set; }
+        public decimal BEGIN_KM { get; set; }
+        public decimal END_KM { get; set; }
         public double LENGTH_KM { get; set; }
         public string BMIS_STRUCTURE_TYPE { get; set; }
     }

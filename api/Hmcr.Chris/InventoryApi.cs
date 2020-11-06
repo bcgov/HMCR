@@ -322,7 +322,7 @@ namespace Hmcr.Chris
                 foreach (var feature in results.features)
                 {
                     Structure structure = new Structure();
-                    structure.StructureType = feature.properties.IIT_INV_TYPE;  //this may possibly be feature.properties.BMIS_STRUCTURE_TYPE
+                    structure.StructureType = feature.properties.BMIS_STRUCTURE_TYPE;  //this may possibly be feature.properties.IIT_INV_TYPE
                     structure.BeginKM = feature.properties.BEGIN_KM;
                     structure.EndKM = feature.properties.END_KM;
                     structure.Length = feature.properties.LENGTH_KM;
