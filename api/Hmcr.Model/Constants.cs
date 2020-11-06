@@ -367,6 +367,18 @@ namespace Hmcr.Model
         public const string SURFACE_TYPE_UNPAVED = "SURFACE_TYPE_UNPAVED";
         public const string SURFACE_TYPE_UNCONSTRUCTED = "SURFACE_TYPE_UNCNSTR";
         public const string MAINTENANCE_CLASS = "MAINTENANCE_CLASS";
+        public const string STRUCTURE_VARIANCE_M = "STRUCTURE_VARIANCE_M";
+    }
+
+    public static class StructureType
+    {
+        public const string BRIDGE = "BRIDGE";
+        public const string CULVERT = "CULVERT";
+        public const string MARINE = "MARINE";
+        public const string RWALL = "RWALL";
+        public const string SIGN = "SIGN";
+        public const string TUNNEL = "TUNNEL";
+
     }
 
     /// <summary>

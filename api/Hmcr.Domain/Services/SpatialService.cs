@@ -23,6 +23,7 @@ namespace Hmcr.Domain.Services
         Task<(SpValidationResult result, SurfaceType surfaceType)> GetSurfaceTypeAssocWithPointAsync(string geometryLineString);
         Task<(SpValidationResult result, List<MaintenanceClass> maintenanceClasses)> GetMaintenanceClassAssocWithLineAsync(string geometryLineString);
         Task<(SpValidationResult result, MaintenanceClass maintenanceClass)> GetMaintenanceClassAssocWithPointAsync(string geometryLineString);
+        Task<(SpValidationResult result, List<Structure> structures)> GetBridgeStructureOnRFISegment(string rfiSegmentName);
     }
 
     public class SpatialService : ISpatialService
@@ -273,6 +274,13 @@ namespace Hmcr.Domain.Services
             var maintenanceClasses = await _inventoryApi.GetMaintenanceClassesAssociatedWithLine(geometryLineString);
 
             return (SpValidationResult.Success, maintenanceClasses);
+        }
+
+        public async Task<(SpValidationResult result, List<Structure> structures)> GetBridgeStructureOnRFISegment(string rfiSegmentName)
+        {
+            var structures = await _inventoryApi.GetBridgeStructure(rfiSegmentName);
+
+            return (SpValidationResult.Success, structures);
         }
 
         private (bool withinTolerance, decimal snappedOffset) GetSnappedOffset(RfiSegment segment, decimal offset, string rfiSegment,

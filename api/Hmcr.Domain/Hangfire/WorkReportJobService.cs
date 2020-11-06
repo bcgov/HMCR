@@ -462,7 +462,7 @@ namespace Hmcr.Domain.Hangfire
                         typedRow.SurfaceTypes.Add(roadFeature);
                     }
 
-                    PerformSurfaceTypeValidation(typedRow);
+                    await PerformSurfaceTypeValidation(typedRow);
                 }
             } 
             else if (typedRow.FeatureType == FeatureType.Line)
@@ -486,7 +486,7 @@ namespace Hmcr.Domain.Hangfire
                         typedRow.SurfaceTypes.Add(roadFeature);
                     }
 
-                    PerformSurfaceTypeValidation(typedRow);
+                    await PerformSurfaceTypeValidation(typedRow);
                 }
             }
 
@@ -633,13 +633,13 @@ namespace Hmcr.Domain.Hangfire
             }
         }
 
-        private void PerformSurfaceTypeValidation(WorkReportTyped typedRow)
+        private async Task PerformSurfaceTypeValidation(WorkReportTyped typedRow)
         {
             var warnings = new Dictionary<string, List<string>>();
             var submissionRow = _submissionRows[(decimal)typedRow.RowNum];
 
             //get total length of path
-         var totalLength = typedRow.SurfaceTypes.Sum(x => x.SurfaceLength);
+            var totalLength = typedRow.SurfaceTypes.Sum(x => x.SurfaceLength);
             
             //determine path length; paved, non-paved, unconstructed, other
             var pavedLength = typedRow.SurfaceTypes.Where(x => x.SurfaceLength > 0)
@@ -658,6 +658,10 @@ namespace Hmcr.Domain.Hangfire
             var otherLength = typedRow.SurfaceTypes.Where(x => x.SurfaceLength > 0)
                 .Where(x => x.SurfaceType == RoadSurface.OTHER ||
                 x.SurfaceType == RoadSurface.UNKNOWN).Sum(x => x.SurfaceLength);
+
+            var structureVariance = _validator.CodeLookup.Where(x => x.CodeSet == CodeSet.ValidatorProportion)
+                .Where(x => x.CodeName == ValidatorProportionCode.STRUCTURE_VARIANCE_M).First().CodeValueNum;
+            var structureVarianceM = structureVariance / 1000;
 
             var surfaceTypeRule = typedRow.ActivityCodeValidation.SurfaceTypeRuleExec;
 
@@ -679,7 +683,11 @@ namespace Hmcr.Domain.Hangfire
                             if (surfaceTypeRule == SurfaceTypeRules.PavedStructure)
                             {
                                 //structure checking
-                                //warnings.AddItem("Surface Type Validation", $"GPS position from [{typedRow.StartLatitude},{typedRow.StartLongitude}] to [{typedRow.EndLatitude},{typedRow.EndLongitude}] should be >= 80% paved surface or or be within 100M of a Structure")
+                                var hasBridgeWithinVariance = await WithinBridgeStructureVariance(typedRow, (decimal)structureVarianceM);
+                                if (!hasBridgeWithinVariance)
+                                {
+                                    warnings.AddItem("Surface Type Validation", $"GPS position from [{typedRow.StartLatitude},{typedRow.StartLongitude}] to [{typedRow.EndLatitude},{typedRow.EndLongitude}] should be >= 80% paved surface or or be within {structureVariance}M of a Structure");
+                                }
                             }
                             else if (surfaceTypeRule == SurfaceTypeRules.PavedSurface)
                             {
@@ -721,7 +729,11 @@ namespace Hmcr.Domain.Hangfire
                             if (unpavedLength > 0 && surfaceTypeRule == SurfaceTypeRules.PavedStructure)
                             {
                                 //structure checking
-                                //warnings.AddItem("Surface Type Validation", $"GPS position [{typedRow.StartLatitude},{typedRow.StartLongitude}] should be paved or be within 100M of a Structure");
+                                var hasBridgeWithinVariance = await WithinBridgeStructureVariance(typedRow, (decimal)structureVarianceM);
+                                if (!hasBridgeWithinVariance)
+                                {
+                                    warnings.AddItem("Surface Type Validation", $"GPS position [{typedRow.StartLatitude},{typedRow.StartLongitude}] should be paved or be within 100M of a Structure");
+                                }
                             }
                             else if (unpavedLength > 0 && surfaceTypeRule == SurfaceTypeRules.PavedSurface)
                             {
@@ -754,6 +766,28 @@ namespace Hmcr.Domain.Hangfire
             {
                 SetWarningDetail(submissionRow, warnings);
             }
+        }
+
+        private async Task<bool> WithinBridgeStructureVariance(WorkReportTyped typedRow, decimal structureVariance)
+        {
+            var isBridgeWithinVariance = false;
+
+            var startOffset = typedRow.StartOffset - structureVariance;
+            var endOffset = typedRow.EndOffset + structureVariance;
+
+            var result = await _spatialService.GetBridgeStructureOnRFISegment(typedRow.HighwayUnique);
+
+            var bridgeStructures = result.structures.Where(x => x.StructureType == StructureType.BRIDGE).ToList();
+            foreach (var bridge in bridgeStructures)
+            {
+                if ((bridge.BeginKM >= startOffset) && (bridge.EndKM <= endOffset))
+                {
+                    isBridgeWithinVariance = true;  // if we find one we can stop searching
+                    break;
+                }
+            }
+
+            return isBridgeWithinVariance;
         }
 
         private void PerformFieldValidation(Dictionary<string, List<string>> errors, WorkReportCsvDto untypedRow, ActivityCodeDto activityCode)

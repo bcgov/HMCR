@@ -20,6 +20,7 @@ namespace Hmcr.Chris
         Task<List<HighwayProfile>> GetHighwayProfileAssociatedWithLine(string lineStringCoordinates);
         Task<Guardrail> GetGuardrailAssociatedWithPoint(string lineStringCoordinates);
         Task<List<Guardrail>> GetGuardrailAssociatedWithLine(string lineStringCoordinates);
+        Task<List<Structure>> GetBridgeStructure(string rfiSegment);
     }
 
     public class InventoryApi : IInventoryApi
@@ -299,6 +300,41 @@ namespace Hmcr.Chris
             catch (System.Exception ex)
             {
                 _logger.LogError($"Exception - GetGuardrailAssociatedWithLine: {body} - {contents}");
+                throw ex;
+            }
+        }
+
+        public async Task<List<Structure>> GetBridgeStructure(string rfiSegment)
+        {
+            var query = "";
+            var content = "";
+
+            try
+            {
+                query = _path + string.Format(_queries.StructureOnRfiSegment, rfiSegment);
+
+                content = await (await _api.GetWithRetry(_client, query)).Content.ReadAsStringAsync();
+
+                var results = JsonSerializer.Deserialize<FeatureCollection<object>>(content);
+
+                var structures = new List<Structure>();
+
+                foreach (var feature in results.features)
+                {
+                    Structure structure = new Structure();
+                    structure.StructureType = feature.properties.IIT_INV_TYPE;  //this may possibly be feature.properties.BMIS_STRUCTURE_TYPE
+                    structure.BeginKM = feature.properties.BEGIN_KM;
+                    structure.EndKM = feature.properties.END_KM;
+                    structure.Length = feature.properties.LENGTH_KM;
+
+                    structures.Add(structure);
+                }
+
+                return structures;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"Exception - GetRfiSegmentDetailAsync: {query} - {content}");
                 throw ex;
             }
         }
