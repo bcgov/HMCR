@@ -156,16 +156,7 @@ namespace Hmcr.Domain.Hangfire
                 return true;
             }
 
-            //perform surfacetype lookup and validation
-            workReports = PerformSurfaceTypeValidationBatchAsync(workReports);
-
-            if (_submission.SubmissionStatusId != _statusService.FileInProgress)
-            {
-                await CommitAndSendEmailAsync();
-                return true;
-            }
-
-            workReports = PerformMaintenanceClassValidationBatchAsync(workReports);
+            workReports = PerformAnalyticalValidationBatchAsync(workReports);
 
             if (_submission.SubmissionStatusId != _statusService.FileInProgress)
             {
@@ -185,9 +176,15 @@ namespace Hmcr.Domain.Hangfire
 
         #region Validation Batch Processes
 
-        private List<WorkReportGeometry> PerformMaintenanceClassValidationBatchAsync(List<WorkReportGeometry> workReports)
+        private List<WorkReportGeometry> PerformAnalyticalValidationBatchAsync(List<WorkReportGeometry> workReports)
         {
             MethodLogger.LogEntry(_logger, _enableMethodLog, _methodLogHeader, $"Total Record: {workReports.Count}");
+
+            //get surface type not applicable id
+            var notApplicableRoadLengthId = _validator.ActivityCodeRuleLookup
+                .Where(x => x.ActivityRuleSet == ActivityRuleType.RoadLength)
+                .Where(x => x.ActivityRuleExecName == RoadLengthRules.NA)
+                .FirstOrDefault().ActivityCodeRuleId;
 
             //get surface type not applicable id
             var notApplicableMaintenanceClassId = _validator.ActivityCodeRuleLookup
@@ -195,62 +192,6 @@ namespace Hmcr.Domain.Hangfire
                 .Where(x => x.ActivityRuleExecName == MaintenanceClassRules.NA)
                 .FirstOrDefault().ActivityCodeRuleId;
 
-            //grouping the rows
-            var groups = new List<List<WorkReportGeometry>>();
-            var currentGroup = new List<WorkReportGeometry>();
-
-            var count = 0;
-            foreach (var workReport in workReports)
-            {
-                currentGroup.Add(workReport);
-                count++;
-
-                if (count % 10 == 0)
-                {
-                    groups.Add(currentGroup);
-                    currentGroup = new List<WorkReportGeometry>();
-                }
-            }
-
-            if (currentGroup.Count > 0)
-            {
-                groups.Add(currentGroup);
-            }
-
-            var updatedWorkReports = new ConcurrentBag<WorkReportGeometry>();
-            var progress = 0;
-
-            foreach (var group in groups)
-            {
-                var tasklist = new List<Task>();
-
-                //don't batch if not location code C
-                foreach (var row in group.Where(x => x.WorkReportTyped.ActivityCodeValidation.LocationCode == "C"))
-                {
-                    if (row.WorkReportTyped.ActivityCodeValidation.RoadClassRuleId != notApplicableMaintenanceClassId)
-                    {
-                        tasklist.Add(Task.Run(async () => updatedWorkReports.Add(await PerformMaintenanceClassValidationAsync(row))));
-                    }
-                }
-
-                Task.WaitAll(tasklist.ToArray());
-
-                progress += 10;
-
-                if (progress % 500 == 0)
-                {
-                    _logger.LogInformation($"{_methodLogHeader} PerformMaintenanceClassValidationAsync {progress}");
-                }
-            }
-
-            return workReports.ToList();
-        }
-        
-        private List<WorkReportGeometry> PerformSurfaceTypeValidationBatchAsync(List<WorkReportGeometry> workReports)
-        {
-            MethodLogger.LogEntry(_logger, _enableMethodLog, _methodLogHeader, $"Total Record: {workReports.Count}");
-
-            //get surface type not applicable id
             var notApplicableSurfaceTypeId = _validator.ActivityCodeRuleLookup
                 .Where(x => x.ActivityRuleSet == ActivityRuleType.SurfaceType)
                 .Where(x => x.ActivityRuleExecName == SurfaceTypeRules.NA)
@@ -287,8 +228,14 @@ namespace Hmcr.Domain.Hangfire
                 
                 //don't batch if not location code C
                 foreach (var row in group.Where(x => x.WorkReportTyped.ActivityCodeValidation.LocationCode == "C"))
-                {
-                    if (row.WorkReportTyped.ActivityCodeValidation.SurfaceTypeRuleId != notApplicableSurfaceTypeId)
+                {   
+                    if ((row.WorkReportTyped.ActivityCodeValidation.RoadClassRuleId != 0)
+                         && (row.WorkReportTyped.ActivityCodeValidation.RoadClassRuleId != notApplicableMaintenanceClassId))
+                    {
+                        tasklist.Add(Task.Run(async () => updatedWorkReports.Add(await PerformMaintenanceClassValidationAsync(row))));
+                    } 
+                    if ((row.WorkReportTyped.ActivityCodeValidation.SurfaceTypeRuleId != 0)
+                         && (row.WorkReportTyped.ActivityCodeValidation.SurfaceTypeRuleId != notApplicableSurfaceTypeId))
                     {
                         tasklist.Add(Task.Run(async () => updatedWorkReports.Add(await PerformSurfaceTypeValidationAsync(row))));
                     }
@@ -300,11 +247,11 @@ namespace Hmcr.Domain.Hangfire
 
                 if (progress % 500 == 0)
                 {
-                    _logger.LogInformation($"{_methodLogHeader} PerformSurfaceTypeValidationAsync {progress}");
+                    _logger.LogInformation($"{_methodLogHeader} PerformAnalyticalValidationBatchAsync {progress}");
                 }
             }
 
-            return updatedWorkReports.ToList();
+            return workReports.ToList();
         }
 
         private List<WorkReportGeometry> PerformSpatialValidationAndConversionBatchAsync(List<WorkReportTyped> typedRows)
