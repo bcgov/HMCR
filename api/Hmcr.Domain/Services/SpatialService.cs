@@ -21,6 +21,9 @@ namespace Hmcr.Domain.Services
             ValidateLrsLineAsync(decimal startOffset, decimal endOffset, string rfiSegment, string rfiSegmentName, string thresholdLevel, Dictionary<string, List<string>> errors);
         Task<(SpValidationResult result, List<SurfaceType> surfaceTypes)> GetSurfaceTypeAssocWithLineAsync(string geometryLineString);
         Task<(SpValidationResult result, SurfaceType surfaceType)> GetSurfaceTypeAssocWithPointAsync(string geometryLineString);
+        Task<(SpValidationResult result, List<MaintenanceClass> maintenanceClasses)> GetMaintenanceClassAssocWithLineAsync(string geometryLineString);
+        Task<(SpValidationResult result, MaintenanceClass maintenanceClass)> GetMaintenanceClassAssocWithPointAsync(string geometryLineString);
+        Task<(SpValidationResult result, List<Structure> structures)> GetBridgeStructureOnRFISegment(string rfiSegmentName);
     }
 
     public class SpatialService : ISpatialService
@@ -257,6 +260,27 @@ namespace Hmcr.Domain.Services
             var surfaceType = await _inventoryApi.GetSurfaceTypeAssociatedWithPoint(geometryLineString);
 
             return (SpValidationResult.Success, surfaceType);
+        }
+
+        public async Task<(SpValidationResult result, MaintenanceClass maintenanceClass)> GetMaintenanceClassAssocWithPointAsync(string geometryLineString)
+        {
+            var maintenanceClass = await _inventoryApi.GetMaintenanceClassesAssociatedWithPoint(geometryLineString);
+
+            return (SpValidationResult.Success, maintenanceClass);
+        }
+
+        public async Task<(SpValidationResult result, List<MaintenanceClass> maintenanceClasses)> GetMaintenanceClassAssocWithLineAsync(string geometryLineString)
+        {
+            var maintenanceClasses = await _inventoryApi.GetMaintenanceClassesAssociatedWithLine(geometryLineString);
+
+            return (SpValidationResult.Success, maintenanceClasses);
+        }
+
+        public async Task<(SpValidationResult result, List<Structure> structures)> GetBridgeStructureOnRFISegment(string rfiSegmentName)
+        {
+            var structures = await _inventoryApi.GetBridgeStructure(rfiSegmentName);
+
+            return (SpValidationResult.Success, structures);
         }
 
         private (bool withinTolerance, decimal snappedOffset) GetSnappedOffset(RfiSegment segment, decimal offset, string rfiSegment,

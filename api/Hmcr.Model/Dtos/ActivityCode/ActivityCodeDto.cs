@@ -27,7 +27,6 @@ namespace Hmcr.Model.Dtos.ActivityCode
         public decimal SurfaceTypeRule { get; set; }
         public decimal RoadClassRule { get; set; }
         public IList<decimal> ServiceAreaNumbers { get; set; }
-
         public decimal? MinValue { get; set; }
         public decimal? MaxValue { get; set; }
         public int? ReportingFrequency { get; set; }

@@ -56,7 +56,9 @@ namespace Hmcr.Model.Dtos.WorkReport
         /// <summary>
         /// Road feature data retrieved from CHRIS
         /// </summary>
-        public virtual IList<WorkReportRoadFeature> RoadFeatures { get; set; }
+        public virtual IList<WorkReportSurfaceType> SurfaceTypes { get; set; }
+        public virtual IList<WorkReportMaintenanceClass> MaintenanceClasses { get; set; }
+
         public ActivityCodeValidationDto ActivityCodeValidation { get; set; }
     }
 }

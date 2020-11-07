@@ -4,16 +4,15 @@ using System.Text;
 
 namespace Hmcr.Chris.Models
 {
-    public class SurfaceType
+    public class MaintenanceClass
     {
 
         public Geometry geometry { get; set; }
         /// <summary>
         /// Length in Meters
         /// </summary>
+        public string SummerRating { get; set; }
+        public string WinterRating { get; set; }
         public double Length { get; set; }
-
-        public string Type { get; set; }
-        
     }
 }

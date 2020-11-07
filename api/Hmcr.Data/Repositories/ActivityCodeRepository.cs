@@ -17,6 +17,7 @@ namespace Hmcr.Data.Repositories
     {
         Task<IEnumerable<ActivityCodeDto>> GetActiveActivityCodesAsync();
         Task<IEnumerable<ActivityCodeLiteDto>> GetActiveActivityCodesLiteAsync();
+        Task<IEnumerable<ActivityCodeDto>> GetActiveActivityCodesByActivityNumbersAsync(List<string> actNumbers);
         Task<PagedDto<ActivityCodeSearchDto>> GetActivityCodesAsync(string[]? maintenanceTypes, decimal[]? locationCodes, bool? isActive, string searchText, int pageSize, int pageNumber, string orderBy, string direction);
         Task<ActivityCodeSearchDto> GetActivityCodeAsync(decimal id);
         Task<HmrActivityCode> CreateActivityCodeAsync(ActivityCodeCreateDto activityCode);
@@ -39,9 +40,29 @@ namespace Hmcr.Data.Repositories
         {
             var activities = await DbSet
                 .Include(x => x.LocationCode)
+                .Include(x => x.HmrServiceAreaActivities)
                 .ToListAsync();
 
             return Mapper.Map<IEnumerable<ActivityCodeDto>>(activities).Where(x => x.IsActive);
+        }
+        public async Task<IEnumerable<ActivityCodeDto>> GetActiveActivityCodesByActivityNumbersAsync(List<string> actNumbers)
+        {
+            var activities = await DbSet
+                .Include(x => x.LocationCode)
+                .Include(x => x.HmrServiceAreaActivities)
+                .Where(s => actNumbers.Contains(s.ActivityNumber))
+                .ToListAsync();
+
+            var activityCodes = Mapper.Map<IEnumerable<ActivityCodeDto>>(activities).Where(x => x.IsActive);
+
+            foreach (var activityCode in activityCodes)
+            {
+                HmrActivityCode act =
+                    activities
+                    .Where(x => x.ActivityCodeId == activityCode.ActivityCodeId).FirstOrDefault();
+                activityCode.ServiceAreaNumbers = act.HmrServiceAreaActivities.Select(y=>y.ServiceAreaNumber).ToList();
+            }
+            return activityCodes;
         }
 
         public async Task<IEnumerable<ActivityCodeLiteDto>> GetActiveActivityCodesLiteAsync()

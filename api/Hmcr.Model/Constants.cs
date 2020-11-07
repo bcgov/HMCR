@@ -273,6 +273,8 @@ namespace Hmcr.Model
         public const string FeatureType = "FEATURE_TYPE";
         public const string NonSpHighwayUnique = "NONSP_HIGHWAY_UNIQUE";
         public const string ThresholdSp = "THRSHLD_SP_VAR";
+        public const string ValidatorProportion = "VALIDATOR_PROPORTION";
+
     }
 
     public static class ThresholdSpLevels
@@ -338,6 +340,13 @@ namespace Hmcr.Model
         public const string Unconstructed = "GPS_NOT_UNCONSTRUCTED";
     }
 
+    public static class MaintenanceClassRules
+    {
+        public const string NA = "NOT_APPLICABLE";
+        public const string Class8OrF = "CLASS_8_OR_F";
+        public const string NotClass8OrF = "NOT_CLASS_8_OR_F";
+    }
+    
     public static class RoadSurface
     {
         public const string HOT_MIX = "1";
@@ -350,6 +359,26 @@ namespace Hmcr.Model
         public const string UNCLEARED = "F";
         public const string OTHER = "7";
         public const string UNKNOWN = "Z";
+    }
+
+    public static class ValidatorProportionCode
+    {
+        public const string SURFACE_TYPE_PAVED = "SURFACE_TYPE_PAVED";
+        public const string SURFACE_TYPE_UNPAVED = "SURFACE_TYPE_UNPAVED";
+        public const string SURFACE_TYPE_UNCONSTRUCTED = "SURFACE_TYPE_UNCNSTR";
+        public const string MAINTENANCE_CLASS = "MAINTENANCE_CLASS";
+        public const string STRUCTURE_VARIANCE_M = "STRUCTURE_VARIANCE_M";
+    }
+
+    public static class StructureType
+    {
+        public const string BRIDGE = "BRIDGE";
+        public const string CULVERT = "CULVERT";
+        public const string MARINE = "MARINE";
+        public const string RWALL = "RWALL";
+        public const string SIGN = "SIGN";
+        public const string TUNNEL = "TUNNEL";
+
     }
 
     /// <summary>
