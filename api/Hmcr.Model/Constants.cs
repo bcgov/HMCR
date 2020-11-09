@@ -346,6 +346,11 @@ namespace Hmcr.Model
         public const string Class8OrF = "CLASS_8_OR_F";
         public const string NotClass8OrF = "NOT_CLASS_8_OR_F";
     }
+
+    public static class RoadLengthRules
+    {
+        public const string NA = "NOT_APPLICABLE";
+    }
     
     public static class RoadSurface
     {
