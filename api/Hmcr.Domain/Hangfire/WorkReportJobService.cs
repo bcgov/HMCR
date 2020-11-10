@@ -163,7 +163,12 @@ namespace Hmcr.Domain.Hangfire
                 await CommitAndSendEmailAsync();
                 return true;
             }
-
+            await PerformReportedWorkReportsValidationAsync(workReports);
+            if (_submission.SubmissionStatusId != _statusService.FileInProgress)
+            {
+                await CommitAndSendEmailAsync();
+                return true;
+            }
             _submission.SubmissionStatusId = _statusService.FileSuccess;
             //stage 4 validation ends
 
@@ -220,12 +225,13 @@ namespace Hmcr.Domain.Hangfire
             }
 
             var updatedWorkReports = new ConcurrentBag<WorkReportGeometry>();
+            var updatedWorkReportTypeds = new ConcurrentBag<WorkReportTyped>();
             var progress = 0;
 
             foreach (var group in groups)
             {
                 var tasklist = new List<Task>();
-                
+
                 //don't batch if not location code C
                 foreach (var row in group.Where(x => x.WorkReportTyped.ActivityCodeValidation.LocationCode == "C"))
                 {   
@@ -309,6 +315,63 @@ namespace Hmcr.Domain.Hangfire
 
         #region Async Validation Functions
 
+        private async Task<List<WorkReportGeometry>> PerformReportedWorkReportsValidationAsync(List<WorkReportGeometry> workReports)
+        {
+            foreach (var workReport in workReports)
+            {
+                await PerformReportedWorkReportValidationAsync(workReport.WorkReportTyped);
+            }
+            return workReports;
+        }
+        private async Task<WorkReportTyped> PerformReportedWorkReportValidationAsync(WorkReportTyped typedRow)
+        {
+            var warnings = new Dictionary<string, List<string>>();
+            var submissionRow = _submissionRows[(decimal)typedRow.RowNum];
+            string locationCode = typedRow.ActivityCodeValidation.LocationCode.ToUpper();
+            if (locationCode == "A" &&  await _workReportRepo.IsReportedWorkReportForLocationAAsync(typedRow))
+            {
+                warnings.AddItem("Reporting Frequency Validation: End Date"
+                                , $"(Location Code = 'A'): END DATE Should NOT be reported more frequently" +
+                                $" than the Reporting Frequency(days) of [{ typedRow.ActivityCodeValidation.ReportingFrequency}]" +
+                                $" for Activity[{ typedRow.ActivityNumber}]");
+            }
+            else if (locationCode == "B" && await _workReportRepo.IsReportedWorkReportForLocationBAsync(typedRow))
+            {
+                warnings.AddItem("Reporting Frequency Validation: End Date"
+                                , $"(Location Code = 'B'): END DATE Should NOT be reported more frequently" +
+                                $" than the Reporting Frequency(days) of [{ typedRow.ActivityCodeValidation.ReportingFrequency}]" +
+                                $" for Activity[{ typedRow.ActivityNumber}]" +
+                                $" for Highway Unique [{typedRow.HighwayUnique}]");
+            }
+            else if (locationCode == "C"
+                    && typedRow .FeatureType.ToLower() == "point"
+                    && await _workReportRepo.IsReportedWorkReportForLocationCPointAsync(typedRow))
+            {
+                warnings.AddItem("Reporting Frequency Validation: End Date, GPS position"
+                                , $"(Location Code = 'C'; {typedRow.FeatureType}): END DATE Should NOT be reported more frequently" +
+                                $" than the Reporting Frequency(days) of [{ typedRow.ActivityCodeValidation.ReportingFrequency}]" +
+                                $" for Activity[{ typedRow.ActivityNumber}]," +
+                                $" Highway Unique [{typedRow.HighwayUnique}]," +
+                                $" GPS position [{typedRow.StartLatitude},{typedRow.StartLongitude}] with a tolerance of -/+ 100M");
+            }
+            else if (locationCode == "C"
+                    && typedRow.FeatureType.ToLower() == "line"
+                    && await _workReportRepo.IsReportedWorkReportForLocationCLineAsync(typedRow))
+            {
+                warnings.AddItem("Reporting Frequency Validation: End Date, GPS position"
+                                , $"(Location Code = 'C'; {typedRow.FeatureType}): END DATE Should NOT be reported more frequently" +
+                                $" than the Reporting Frequency(days) of [{ typedRow.ActivityCodeValidation.ReportingFrequency}]" +
+                                $" for Activity[{ typedRow.ActivityNumber}]," +
+                                $" Highway Unique [{typedRow.HighwayUnique}]," +
+                                $" GPS position from [{typedRow.StartLatitude},{typedRow.StartLongitude}]" +
+                                $" to [{typedRow.EndLatitude},{typedRow.EndLongitude}] with a tolerance of -/+ 100M");
+            }
+            if (warnings.Count > 0)
+            {
+                SetWarningDetail(submissionRow, warnings);
+            }
+            return typedRow;
+        }
         private async Task<WorkReportGeometry> PerformMaintenanceClassValidationAsync(WorkReportGeometry row)
         {
             var errors = new Dictionary<string, List<string>>();
@@ -432,7 +495,6 @@ namespace Hmcr.Domain.Hangfire
                         roadFeature.SurfaceType = type;
                         typedRow.SurfaceTypes.Add(roadFeature);
                     }
-
                     await PerformSurfaceTypeValidation(typedRow);
                 }
             }
@@ -444,7 +506,6 @@ namespace Hmcr.Domain.Hangfire
         {
             var submissionRow = _submissionRows[(decimal)typedRow.RowNum];
             var workReport = new WorkReportGeometry(typedRow, null);
-
             if (typedRow.SpatialData == SpatialData.Gps)
             {
                 await PerformSpatialGpsValidation(workReport, submissionRow);
@@ -776,7 +837,6 @@ namespace Hmcr.Domain.Hangfire
             {
                 var errors = new Dictionary<string, List<string>>();
                 var submissionRow = _submissionRows[(decimal)typedRow.RowNum];
-
                 if (string.IsNullOrWhiteSpace(typedRow.ServiceArea.ToString())|| typedRow.ActivityCodeValidation.ServiceAreaNumbers == null)
                 {
                     errors.AddItem(Fields.ServiceArea, $"Service area [{typedRow.ServiceArea}] is NOT associated with Activity [{typedRow.ActivityNumber}]");
@@ -788,6 +848,7 @@ namespace Hmcr.Domain.Hangfire
                         errors.AddItem(Fields.ServiceArea, $"Service area [{typedRow.ServiceArea}] is NOT associated with Activity [{typedRow.ActivityNumber}]");
                     }
                 }
+                
                 if (errors.Count > 0)
                 {
                     SetErrorDetail(submissionRow, errors, _statusService.FileLocationError);
