@@ -129,5 +129,4 @@ parameters:
     displayName: GEOSERVER_TIMEOUT
     name: GEOSERVER_TIMEOUT
     required: true
-    value: 120
-    
+    value: "120"
