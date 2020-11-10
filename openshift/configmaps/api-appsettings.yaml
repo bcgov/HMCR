@@ -62,10 +62,10 @@ objects:
                 "KMLExportPath": "ogs-geoV06/wms/kml?mode=download&styles=HMR_GENERIC_FOR_KML"
             },
             "Timeouts": {
-              "MapsAPI": 120,
-              "OasAPI": 120,
-              "ExportAPI": 120,
-              "InventoryAPI": 120
+              "MapsAPI": ${GEOSERVER_TIMEOUT},
+              "OasAPI": ${GEOSERVER_TIMEOUT},
+              "ExportAPI": ${GEOSERVER_TIMEOUT},
+              "InventoryAPI": ${GEOSERVER_TIMEOUT}
             },
             "JWT": {
                 "Authority": "https://sso-dev.pathfinder.gov.bc.ca/auth/realms/<realmid>",
@@ -125,4 +125,8 @@ parameters:
     name: OAS_URL
     required: true
     value: "https://devoas1.apps.th.gov.bc.ca"
-    
+  - description: Default timeout value for CHRIS/GeoServer API calls
+    displayName: GEOSERVER_TIMEOUT
+    name: GEOSERVER_TIMEOUT
+    required: true
+    value: "120"
