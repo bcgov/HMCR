@@ -123,10 +123,11 @@ parameters:
   - description: GeoServer CHRIS API URL
     displayName: OAS_URL
     name: OAS_URL
-    required: true;
+    required: true
     value: "https://devoas1.apps.th.gov.bc.ca"
   - description: Default timeout value for CHRIS/GeoServer API calls
     displayName: GEOSERVER_TIMEOUT
     name: GEOSERVER_TIMEOUT
     required: true
     value: 120
+    
