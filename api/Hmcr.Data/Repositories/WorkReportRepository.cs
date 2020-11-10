@@ -1,8 +1,10 @@
 ﻿using AutoMapper;
 using Hmcr.Data.Database.Entities;
 using Hmcr.Data.Repositories.Base;
+using Hmcr.Model;
 using Hmcr.Model.Dtos.WorkReport;
 using Microsoft.EntityFrameworkCore;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -14,6 +16,10 @@ namespace Hmcr.Data.Repositories
         IAsyncEnumerable<HmrWorkReport> SaveWorkReportAsnyc(HmrSubmissionObject submission, List<WorkReportGeometry> workReports);
         Task<IEnumerable<WorkReportExportDto>> ExportReportAsync(decimal submissionObjectId);
         Task<bool> IsActivityNumberInUseAsync(string activityNumber);
+        Task<bool> IsReportedWorkReportForLocationAAsync(WorkReportTyped workReportTyped);
+        Task<bool> IsReportedWorkReportForLocationBAsync(WorkReportTyped workReportTyped);
+        Task<bool> IsReportedWorkReportForLocationCPointAsync(WorkReportTyped workReportTyped);
+        Task<bool> IsReportedWorkReportForLocationCLineAsync(WorkReportTyped workReportTyped);
     }
     public class WorkReportRepository : HmcrRepositoryBase<HmrWorkReport>, IWorkReportRepository, IReportExportRepository<WorkReportExportDto>
     {
@@ -66,6 +72,80 @@ namespace Hmcr.Data.Repositories
         public async Task<bool> IsActivityNumberInUseAsync(string activityNumber)
         {
             return await DbSet.AnyAsync(wr => wr.ActivityNumber == activityNumber);
+        }
+
+        public async Task<bool> IsReportedWorkReportForLocationAAsync(WorkReportTyped workReportTyped)
+        {
+            if (workReportTyped.ActivityCodeValidation.ReportingFrequency == null
+                || workReportTyped.ActivityCodeValidation.ReportingFrequency < 1) return false;
+            DateTime eDate = workReportTyped.EndDate.GetValueOrDefault(DateTime.Today).Date;
+            int days = (int)workReportTyped.ActivityCodeValidation.ReportingFrequency;
+            DateTime sDate = eDate.AddDays(-days);
+            return await DbContext.HmrWorkReportVws.AsNoTracking()
+                .Where(x => x.ActivityNumber == workReportTyped.ActivityNumber
+                        && x.ServiceArea == workReportTyped.ServiceArea
+                        && (x.EndDate > sDate && x.EndDate <= eDate)
+                        && x.ValidationStatus.ToUpper().StartsWith(RowStatus.RowSuccess)
+                )
+                .AnyAsync();
+        }
+        public async Task<bool> IsReportedWorkReportForLocationBAsync(WorkReportTyped workReportTyped)
+        {
+            if (workReportTyped.ActivityCodeValidation.ReportingFrequency == null
+                || workReportTyped.ActivityCodeValidation.ReportingFrequency < 1) return false;
+            DateTime eDate = workReportTyped.EndDate.GetValueOrDefault(DateTime.Today).Date;
+            int days = (int)workReportTyped.ActivityCodeValidation.ReportingFrequency;
+            DateTime sDate = eDate.AddDays(-days);
+            return await DbContext.HmrWorkReportVws.AsNoTracking()
+                .Where(x => x.ActivityNumber == workReportTyped.ActivityNumber
+                        && x.ServiceArea == workReportTyped.ServiceArea
+                        && x.HighwayUnique.ToLower() == workReportTyped.HighwayUnique.ToLower()
+                        && (x.EndDate > sDate && x.EndDate <= eDate)
+                        && x.ValidationStatus.ToUpper().StartsWith(RowStatus.RowSuccess)
+                )
+                .AnyAsync();
+        }
+        public async Task<bool> IsReportedWorkReportForLocationCPointAsync(WorkReportTyped workReportTyped)
+        {
+            decimal md = (decimal)0.1; //100m
+            decimal startOffset = (decimal)workReportTyped.StartOffset - md;
+            decimal endOffset = (decimal)workReportTyped.StartOffset + md;
+            if (workReportTyped.ActivityCodeValidation.ReportingFrequency == null
+                || workReportTyped.ActivityCodeValidation.ReportingFrequency < 1) return false;
+            DateTime eDate = workReportTyped.EndDate.GetValueOrDefault(DateTime.Today).Date;
+            int days = (int)workReportTyped.ActivityCodeValidation.ReportingFrequency;
+            DateTime sDate = eDate.AddDays(-days);
+            return await DbContext.HmrWorkReportVws.AsNoTracking()
+                .Where(x => x.ActivityNumber == workReportTyped.ActivityNumber
+                        && x.ServiceArea == workReportTyped.ServiceArea
+                        && x.HighwayUnique.ToLower() == workReportTyped.HighwayUnique.ToLower()
+                        && (x.EndDate > sDate && x.EndDate <= eDate)
+                        && (x.StartOffset != null && x.EndOffset == null)
+                        && (x.StartOffset> startOffset && x.StartOffset< endOffset)
+                        && x.ValidationStatus.ToUpper().StartsWith(RowStatus.RowSuccess)
+                )
+                .AnyAsync();
+        }
+        public async Task<bool> IsReportedWorkReportForLocationCLineAsync(WorkReportTyped workReportTyped)
+        {
+            decimal md = (decimal)0.1; //100m
+            decimal startOffset = (decimal)workReportTyped.StartOffset - md;
+            decimal endOffset = (decimal)workReportTyped.EndOffset + md;
+            if (workReportTyped.ActivityCodeValidation.ReportingFrequency == null
+                || workReportTyped.ActivityCodeValidation.ReportingFrequency < 1) return false;
+            DateTime eDate = workReportTyped.EndDate.GetValueOrDefault(DateTime.Today).Date;
+            int days = (int)workReportTyped.ActivityCodeValidation.ReportingFrequency;
+            DateTime sDate = eDate.AddDays(-days);
+            return await DbContext.HmrWorkReportVws.AsNoTracking()
+                .Where(x => x.ActivityNumber == workReportTyped.ActivityNumber
+                        && x.ServiceArea == workReportTyped.ServiceArea
+                        && x.HighwayUnique.ToLower() == workReportTyped.HighwayUnique.ToLower()
+                        && (x.EndDate > sDate && x.EndDate <= eDate)
+                        && (x.StartOffset != null && x.EndOffset != null)
+                        && (x.StartOffset > startOffset || x.EndOffset < endOffset)
+                        && x.ValidationStatus.ToUpper().StartsWith(RowStatus.RowSuccess)
+                )
+                .AnyAsync();
         }
     }
 }
