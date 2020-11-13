@@ -1,6 +1,6 @@
-export const API_URL = window.RUNTIME_REACT_APP_API_HOST
-  ? `${window.location.protocol}//${window.RUNTIME_REACT_APP_API_HOST}/api`
-  : process.env.REACT_APP_API_HOST;
+export const API_URL = window.RUNTIME_REACT_APP_API_HOST //In non-dev environments, start.sh makes sure the runtime variables are popluated using host environment variables.
+  ? `${window.location.protocol}//${window.RUNTIME_REACT_APP_API_HOST}/api` //For non-dev environments, CORS is enabled to HMCR urls.
+  : `${window.location.protocol}//${process.env.REACT_APP_CLIENT_ORIGIN}/api`; //For dev environment, proxy (setupProxy.js) is set up to avoid the same origin policy
 
 const CODE_LOOKUP = '/codelookup';
 
