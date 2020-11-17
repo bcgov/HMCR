@@ -19,10 +19,10 @@ namespace Hmcr.Domain.Services
             (decimal offset, string rfiSegment, string rfiSegmentName, string thresholdLevel, Dictionary<string, List<string>> errors);
         Task<(SpValidationResult result, decimal snappedStartOffset, decimal snappedEndOffset, Point startPoint, Point endPoint, List<Line> lines, RfiSegment rfiSegment)> 
             ValidateLrsLineAsync(decimal startOffset, decimal endOffset, string rfiSegment, string rfiSegmentName, string thresholdLevel, Dictionary<string, List<string>> errors);
-        Task<(SpValidationResult result, List<SurfaceType> surfaceTypes)> GetSurfaceTypeAssocWithLineAsync(string geometryLineString);
-        Task<(SpValidationResult result, SurfaceType surfaceType)> GetSurfaceTypeAssocWithPointAsync(string geometryLineString);
-        Task<(SpValidationResult result, List<MaintenanceClass> maintenanceClasses)> GetMaintenanceClassAssocWithLineAsync(string geometryLineString);
-        Task<(SpValidationResult result, MaintenanceClass maintenanceClass)> GetMaintenanceClassAssocWithPointAsync(string geometryLineString);
+        Task<(SpValidationResult result, List<SurfaceType> surfaceTypes)> GetSurfaceTypeAssocWithLineAsync(NetTopologySuite.Geometries.Geometry geometry);
+        Task<(SpValidationResult result, SurfaceType surfaceType)> GetSurfaceTypeAssocWithPointAsync(NetTopologySuite.Geometries.Geometry geometry);
+        Task<(SpValidationResult result, List<MaintenanceClass> maintenanceClasses)> GetMaintenanceClassAssocWithLineAsync(NetTopologySuite.Geometries.Geometry geometry);
+        Task<(SpValidationResult result, MaintenanceClass maintenanceClass)> GetMaintenanceClassAssocWithPointAsync(NetTopologySuite.Geometries.Geometry geometry);
         Task<(SpValidationResult result, List<Structure> structures)> GetBridgeStructureOnRFISegment(string rfiSegmentName);
     }
 
@@ -248,30 +248,30 @@ namespace Hmcr.Domain.Services
             return (SpValidationResult.Success, rfiDetail);
         }
 
-        public async Task<(SpValidationResult result, List<SurfaceType> surfaceTypes)> GetSurfaceTypeAssocWithLineAsync(string geometryLineString)
+        public async Task<(SpValidationResult result, List<SurfaceType> surfaceTypes)> GetSurfaceTypeAssocWithLineAsync(NetTopologySuite.Geometries.Geometry geometry)
         {
-            var surfaceTypes = await _inventoryApi.GetSurfaceTypeAssociatedWithLine(geometryLineString);
+            var surfaceTypes = await _inventoryApi.GetSurfaceTypeAssociatedWithLine(geometry);
 
             return (SpValidationResult.Success, surfaceTypes);
         }
 
-        public async Task<(SpValidationResult result, SurfaceType surfaceType)> GetSurfaceTypeAssocWithPointAsync(string geometryLineString)
+        public async Task<(SpValidationResult result, SurfaceType surfaceType)> GetSurfaceTypeAssocWithPointAsync(NetTopologySuite.Geometries.Geometry geometry)
         {
-            var surfaceType = await _inventoryApi.GetSurfaceTypeAssociatedWithPoint(geometryLineString);
+            var surfaceType = await _inventoryApi.GetSurfaceTypeAssociatedWithPoint(geometry);
 
             return (SpValidationResult.Success, surfaceType);
         }
 
-        public async Task<(SpValidationResult result, MaintenanceClass maintenanceClass)> GetMaintenanceClassAssocWithPointAsync(string geometryLineString)
+        public async Task<(SpValidationResult result, MaintenanceClass maintenanceClass)> GetMaintenanceClassAssocWithPointAsync(NetTopologySuite.Geometries.Geometry geometry)
         {
-            var maintenanceClass = await _inventoryApi.GetMaintenanceClassesAssociatedWithPoint(geometryLineString);
+            var maintenanceClass = await _inventoryApi.GetMaintenanceClassesAssociatedWithPoint(geometry);
 
             return (SpValidationResult.Success, maintenanceClass);
         }
 
-        public async Task<(SpValidationResult result, List<MaintenanceClass> maintenanceClasses)> GetMaintenanceClassAssocWithLineAsync(string geometryLineString)
+        public async Task<(SpValidationResult result, List<MaintenanceClass> maintenanceClasses)> GetMaintenanceClassAssocWithLineAsync(NetTopologySuite.Geometries.Geometry geometry)
         {
-            var maintenanceClasses = await _inventoryApi.GetMaintenanceClassesAssociatedWithLine(geometryLineString);
+            var maintenanceClasses = await _inventoryApi.GetMaintenanceClassesAssociatedWithLine(geometry);
 
             return (SpValidationResult.Success, maintenanceClasses);
         }

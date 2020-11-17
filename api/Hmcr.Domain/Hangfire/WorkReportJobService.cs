@@ -376,22 +376,13 @@ namespace Hmcr.Domain.Hangfire
         {
             var errors = new Dictionary<string, List<string>>();
             var typedRow = row.WorkReportTyped;
-            var geometry = row.Geometry;
             var submissionRow = _submissionRows[(decimal)typedRow.RowNum];
             typedRow.MaintenanceClasses = new List<WorkReportMaintenanceClass>();
-
-            
-            var geometryLineString = "";
-            foreach (Coordinate coordinate in geometry.Coordinates)
-            {
-                geometryLineString += coordinate.X + "\\," + coordinate.Y;
-                geometryLineString += (coordinate != geometry.Coordinates.Last()) ? "\\," : "";
-            }
 
             //surface type calls are different between Point & Line
             if (typedRow.FeatureType == FeatureType.Point)
             {
-                var result = await _spatialService.GetMaintenanceClassAssocWithPointAsync(geometryLineString);
+                var result = await _spatialService.GetMaintenanceClassAssocWithPointAsync(row.Geometry);
 
                 if (result.result == SpValidationResult.Fail)
                 {
@@ -414,7 +405,7 @@ namespace Hmcr.Domain.Hangfire
             }
             else if (typedRow.FeatureType == FeatureType.Line)
             {
-                var result = await _spatialService.GetMaintenanceClassAssocWithLineAsync(geometryLineString);
+                var result = await _spatialService.GetMaintenanceClassAssocWithLineAsync(row.Geometry);
                 if (result.result == SpValidationResult.Fail)
                 {
                     SetErrorDetail(submissionRow, errors, _statusService.FileLocationError);
@@ -441,22 +432,13 @@ namespace Hmcr.Domain.Hangfire
         {
             var errors = new Dictionary<string, List<string>>();
             var typedRow = row.WorkReportTyped;
-            var geometry = row.Geometry;
             var submissionRow = _submissionRows[(decimal)typedRow.RowNum];
             typedRow.SurfaceTypes = new List<WorkReportSurfaceType>();
 
-            //build Geometry linestring
-            var geometryLineString = "";
-            foreach (Coordinate coordinate in geometry.Coordinates)
-            {
-                geometryLineString += coordinate.X + "\\," + coordinate.Y;
-                geometryLineString += (coordinate != geometry.Coordinates.Last()) ? "\\," : "";
-            }
-            
             //surface type calls are different between Point & Line
             if (typedRow.FeatureType == FeatureType.Point)
             {
-                var result = await _spatialService.GetSurfaceTypeAssocWithPointAsync(geometryLineString);
+                var result = await _spatialService.GetSurfaceTypeAssocWithPointAsync(row.Geometry);
 
                 if (result.result == SpValidationResult.Fail)
                 {
@@ -474,10 +456,10 @@ namespace Hmcr.Domain.Hangfire
 
                     await PerformSurfaceTypeValidation(typedRow);
                 }
-            } 
+            }
             else if (typedRow.FeatureType == FeatureType.Line)
             {
-                var result = await _spatialService.GetSurfaceTypeAssocWithLineAsync(geometryLineString);
+                var result = await _spatialService.GetSurfaceTypeAssocWithLineAsync(row.Geometry);
 
                 if (result.result == SpValidationResult.Fail)
                 {

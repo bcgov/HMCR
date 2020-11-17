@@ -1,8 +1,10 @@
 ﻿using Hmcr.Chris.Models;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using NetTopologySuite.Geometries;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net.Http;
 using System.Text.Json;
 using System.Threading.Tasks;
@@ -11,15 +13,14 @@ namespace Hmcr.Chris
 {
     public interface IInventoryApi
     {
-        Task<List<SurfaceType>> GetSurfaceTypeAssociatedWithLine(string lineStringCoordinates);
-        Task<SurfaceType> GetSurfaceTypeAssociatedWithPoint(string lineStringCoordinates);
-
-        Task<List<MaintenanceClass>> GetMaintenanceClassesAssociatedWithLine(string lineStringCoordinates);
-        Task<MaintenanceClass> GetMaintenanceClassesAssociatedWithPoint(string lineStringCoordinates);
-        Task<HighwayProfile> GetHighwayProfileAssociatedWithPoint(string lineStringCoordinates);
-        Task<List<HighwayProfile>> GetHighwayProfileAssociatedWithLine(string lineStringCoordinates);
-        Task<Guardrail> GetGuardrailAssociatedWithPoint(string lineStringCoordinates);
-        Task<List<Guardrail>> GetGuardrailAssociatedWithLine(string lineStringCoordinates);
+        Task<List<SurfaceType>> GetSurfaceTypeAssociatedWithLine(NetTopologySuite.Geometries.Geometry geometry);
+        Task<SurfaceType> GetSurfaceTypeAssociatedWithPoint(NetTopologySuite.Geometries.Geometry geometry);
+        Task<List<MaintenanceClass>> GetMaintenanceClassesAssociatedWithLine(NetTopologySuite.Geometries.Geometry geometry);
+        Task<MaintenanceClass> GetMaintenanceClassesAssociatedWithPoint(NetTopologySuite.Geometries.Geometry geometry);
+        Task<HighwayProfile> GetHighwayProfileAssociatedWithPoint(NetTopologySuite.Geometries.Geometry geometry);
+        Task<List<HighwayProfile>> GetHighwayProfileAssociatedWithLine(NetTopologySuite.Geometries.Geometry geometry);
+        Task<Guardrail> GetGuardrailAssociatedWithPoint(NetTopologySuite.Geometries.Geometry geometry);
+        Task<List<Guardrail>> GetGuardrailAssociatedWithLine(NetTopologySuite.Geometries.Geometry geometry);
         Task<List<Structure>> GetBridgeStructure(string rfiSegment);
     }
 
@@ -56,23 +57,62 @@ namespace Hmcr.Chris
             _logger = logger;
         }
 
-        public async Task<SurfaceType> GetSurfaceTypeAssociatedWithPoint(string lineStringCoordinates)
+        /// <summary>
+        /// Utility function takes an array of coordinates and builds them 
+        /// into a string with a limit of 250 coordinate pairs in a group. 
+        /// The group is placed into a string array that is then returned 
+        /// for processing.
+        /// This is to deal with https://jira.th.gov.bc.ca/browse/HMCR-871 
+        /// in which GeoServer only accepts a max of 500 coordinate pairs
+        /// and also ensures we don't hit the 120sec timeout limit or 
+        /// MAX post size.
+        /// </summary>
+        /// <param name="coordinates"></param>
+        /// <returns></returns>
+        private List<string> BuildGeometryString(Coordinate[] coordinates)
+        {
+            var geometryGroup = new List<string>();
+            var geometryLineString = "";
+            var coordinateCount = 0;
+
+            foreach (Coordinate coordinate in coordinates)
+            {
+                geometryLineString += coordinate.X + "\\," + coordinate.Y + "\\,";
+                coordinateCount++;
+                if (coordinateCount == 250 || (coordinate == coordinates.Last()))
+                {
+                    geometryGroup.Add(geometryLineString.Substring(0, geometryLineString.Length - 2));
+                    geometryLineString = "";
+                    coordinateCount = 0;
+                }
+            }
+
+            return geometryGroup;
+        }
+
+        public async Task<SurfaceType> GetSurfaceTypeAssociatedWithPoint(NetTopologySuite.Geometries.Geometry geometry)
         {
             var body = "";
             var contents = "";
+            SurfaceType surfaceType = new SurfaceType();
 
             try
             {
-                body = string.Format(_queries.InventoryAssocWithPointQuery, lineStringCoordinates, InventoryQueryTypeName.SURF_ASSOC_WITH_POINT);
+                var geometryGroup = BuildGeometryString(geometry.Coordinates);
 
-                contents = await (await _api.PostWithRetry(_client, _path, body)).Content.ReadAsStringAsync();
-
-                var results = JsonSerializer.Deserialize<FeatureCollection<object>>(contents);
-
-                SurfaceType surfaceType = new SurfaceType();
-                if (results.features.Length > 0)
+                foreach (var lineStringCoordinates in geometryGroup)
                 {
-                    surfaceType.Type = results.features[0].properties.SURFACE_TYPE;
+                    body = string.Format(_queries.InventoryAssocWithPointQuery, lineStringCoordinates, InventoryQueryTypeName.SURF_ASSOC_WITH_POINT);
+
+                    contents = await (await _api.PostWithRetry(_client, _path, body)).Content.ReadAsStringAsync();
+
+                    var results = JsonSerializer.Deserialize<FeatureCollection<object>>(contents);
+
+
+                    if (results.features.Length > 0)
+                    {
+                        surfaceType.Type = results.features[0].properties.SURFACE_TYPE;
+                    }
                 }
 
                 return surfaceType;
@@ -84,28 +124,32 @@ namespace Hmcr.Chris
             }
         }
 
-        public async Task<List<SurfaceType>> GetSurfaceTypeAssociatedWithLine(string lineStringCoordinates)
+        public async Task<List<SurfaceType>> GetSurfaceTypeAssociatedWithLine(NetTopologySuite.Geometries.Geometry geometry)
         {
             var body = "";
             var contents = "";
+            var surfaceTypes = new List<SurfaceType>();
 
             try
             {
-                body = string.Format(_queries.InventoryAssocWithLineQuery, lineStringCoordinates, InventoryQueryTypeName.SURF_ASSOC_WITH_LINE);
+                var geometryGroup = BuildGeometryString(geometry.Coordinates);
 
-                contents = await (await _api.PostWithRetry(_client, _path, body)).Content.ReadAsStringAsync();
-
-                var results = JsonSerializer.Deserialize<FeatureCollection<object>>(contents);
-
-                var surfaceTypes = new List<SurfaceType>();
-
-                foreach (var feature in results.features)
+                foreach (var lineStringCoordinates in geometryGroup)
                 {
-                    SurfaceType surfaceType = new SurfaceType();
-                    surfaceType.Length = feature.properties.CLIPPED_LENGTH_KM;
-                    surfaceType.Type = feature.properties.SURFACE_TYPE;
+                    body = string.Format(_queries.InventoryAssocWithLineQuery, lineStringCoordinates, InventoryQueryTypeName.SURF_ASSOC_WITH_LINE);
 
-                    surfaceTypes.Add(surfaceType);
+                    contents = await (await _api.PostWithRetry(_client, _path, body)).Content.ReadAsStringAsync();
+
+                    var results = JsonSerializer.Deserialize<FeatureCollection<object>>(contents);
+
+                    foreach (var feature in results.features)
+                    {
+                        SurfaceType surfaceType = new SurfaceType();
+                        surfaceType.Length = feature.properties.CLIPPED_LENGTH_KM;
+                        surfaceType.Type = feature.properties.SURFACE_TYPE;
+
+                        surfaceTypes.Add(surfaceType);
+                    }
                 }
 
                 return surfaceTypes;
@@ -117,29 +161,35 @@ namespace Hmcr.Chris
             }
         }
 
-        public async Task<List<MaintenanceClass>> GetMaintenanceClassesAssociatedWithLine(string lineStringCoordinates)
+        public async Task<List<MaintenanceClass>> GetMaintenanceClassesAssociatedWithLine(NetTopologySuite.Geometries.Geometry geometry)
         {
             var body = "";
             var contents = "";
+            var maintenanceClasses = new List<MaintenanceClass>();
 
             try
             {
-                body = string.Format(_queries.InventoryAssocWithLineQuery, lineStringCoordinates, InventoryQueryTypeName.MC_ASSOC_WITH_LINE);
+                var geometryGroup = BuildGeometryString(geometry.Coordinates);
 
-                contents = await (await _api.PostWithRetry(_client, _path, body)).Content.ReadAsStringAsync();
-
-                var results = JsonSerializer.Deserialize<FeatureCollection<object>>(contents);
-
-                var maintenanceClasses = new List<MaintenanceClass>();
-
-                foreach (var feature in results.features)
+                foreach (var lineStringCoordinates in geometryGroup)
                 {
-                    MaintenanceClass maintenanceClass = new MaintenanceClass();
-                    maintenanceClass.Length = feature.properties.CLIPPED_LENGTH_KM;
-                    maintenanceClass.SummerRating = feature.properties.SUMMER_CLASS_RATING;
-                    maintenanceClass.WinterRating = feature.properties.WINTER_CLASS_RATING;
+                    body = string.Format(_queries.InventoryAssocWithLineQuery, lineStringCoordinates, InventoryQueryTypeName.MC_ASSOC_WITH_LINE);
 
-                    maintenanceClasses.Add(maintenanceClass);
+                    contents = await (await _api.PostWithRetry(_client, _path, body)).Content.ReadAsStringAsync();
+
+                    var results = JsonSerializer.Deserialize<FeatureCollection<object>>(contents);
+
+                    
+
+                    foreach (var feature in results.features)
+                    {
+                        MaintenanceClass maintenanceClass = new MaintenanceClass();
+                        maintenanceClass.Length = feature.properties.CLIPPED_LENGTH_KM;
+                        maintenanceClass.SummerRating = feature.properties.SUMMER_CLASS_RATING;
+                        maintenanceClass.WinterRating = feature.properties.WINTER_CLASS_RATING;
+
+                        maintenanceClasses.Add(maintenanceClass);
+                    }
                 }
 
                 return maintenanceClasses;
@@ -151,24 +201,29 @@ namespace Hmcr.Chris
             }
         }
 
-        public async Task<MaintenanceClass> GetMaintenanceClassesAssociatedWithPoint(string lineStringCoordinates)
+        public async Task<MaintenanceClass> GetMaintenanceClassesAssociatedWithPoint(NetTopologySuite.Geometries.Geometry geometry)
         {
             var body = "";
             var contents = "";
+            MaintenanceClass maintenanceClass = new MaintenanceClass();
 
             try
             {
-                body = string.Format(_queries.InventoryAssocWithPointQuery, lineStringCoordinates, InventoryQueryTypeName.MC_ASSOC_WITH_POINT);
+                var geometryGroup = BuildGeometryString(geometry.Coordinates);
 
-                contents = await (await _api.PostWithRetry(_client, _path, body)).Content.ReadAsStringAsync();
-
-                var results = JsonSerializer.Deserialize<FeatureCollection<object>>(contents);
-
-                MaintenanceClass maintenanceClass = new MaintenanceClass();
-                if (results.features.Length > 0)
+                foreach (var lineStringCoordinates in geometryGroup)
                 {
-                    maintenanceClass.SummerRating = results.features[0].properties.SUMMER_CLASS_RATING;
-                    maintenanceClass.WinterRating = results.features[0].properties.WINTER_CLASS_RATING;
+                    body = string.Format(_queries.InventoryAssocWithPointQuery, lineStringCoordinates, InventoryQueryTypeName.MC_ASSOC_WITH_POINT);
+
+                    contents = await (await _api.PostWithRetry(_client, _path, body)).Content.ReadAsStringAsync();
+
+                    var results = JsonSerializer.Deserialize<FeatureCollection<object>>(contents);
+
+                    if (results.features.Length > 0)
+                    {
+                        maintenanceClass.SummerRating = results.features[0].properties.SUMMER_CLASS_RATING;
+                        maintenanceClass.WinterRating = results.features[0].properties.WINTER_CLASS_RATING;
+                    }
                 }
 
                 return maintenanceClass;
@@ -180,24 +235,30 @@ namespace Hmcr.Chris
             }
         }
 
-        public async Task<HighwayProfile> GetHighwayProfileAssociatedWithPoint(string lineStringCoordinates)
+        public async Task<HighwayProfile> GetHighwayProfileAssociatedWithPoint(NetTopologySuite.Geometries.Geometry geometry)
         {
             var body = "";
             var contents = "";
+            HighwayProfile highwayProfile = new HighwayProfile();
 
             try
             {
-                body = string.Format(_queries.InventoryAssocWithPointQuery, lineStringCoordinates, InventoryQueryTypeName.HP_ASSOC_WITH_POINT);
+                var geometryGroup = BuildGeometryString(geometry.Coordinates);
 
-                contents = await (await _api.PostWithRetry(_client, _path, body)).Content.ReadAsStringAsync();
-
-                var results = JsonSerializer.Deserialize<FeatureCollection<object>>(contents);
-
-                HighwayProfile highwayProfile = new HighwayProfile();
-                if (results.features.Length > 0)
+                foreach (var lineStringCoordinates in geometryGroup)
                 {
-                    highwayProfile.NumberOfLanes = results.features[0].properties.NUMBER_OF_LANES;
-                    highwayProfile.DividedHighwayFlag = results.features[0].properties.DIVIDED_HIGHWAY_FLAG;
+                    body = string.Format(_queries.InventoryAssocWithPointQuery, lineStringCoordinates, InventoryQueryTypeName.HP_ASSOC_WITH_POINT);
+
+                    contents = await (await _api.PostWithRetry(_client, _path, body)).Content.ReadAsStringAsync();
+
+                    var results = JsonSerializer.Deserialize<FeatureCollection<object>>(contents);
+
+                    
+                    if (results.features.Length > 0)
+                    {
+                        highwayProfile.NumberOfLanes = results.features[0].properties.NUMBER_OF_LANES;
+                        highwayProfile.DividedHighwayFlag = results.features[0].properties.DIVIDED_HIGHWAY_FLAG;
+                    }
                 }
 
                 return highwayProfile;
@@ -209,29 +270,33 @@ namespace Hmcr.Chris
             }
         }
 
-        public async Task<List<HighwayProfile>> GetHighwayProfileAssociatedWithLine(string lineStringCoordinates)
+        public async Task<List<HighwayProfile>> GetHighwayProfileAssociatedWithLine(NetTopologySuite.Geometries.Geometry geometry)
         {
             var body = "";
             var contents = "";
+            var highwayProfiles = new List<HighwayProfile>();
 
             try
             {
-                body = string.Format(_queries.InventoryAssocWithLineQuery, lineStringCoordinates, InventoryQueryTypeName.HP_ASSOC_WITH_LINE);
+                var geometryGroup = BuildGeometryString(geometry.Coordinates);
 
-                contents = await (await _api.PostWithRetry(_client, _path, body)).Content.ReadAsStringAsync();
-
-                var results = JsonSerializer.Deserialize<FeatureCollection<object>>(contents);
-
-                var highwayProfiles = new List<HighwayProfile>();
-
-                foreach (var feature in results.features)
+                foreach (var lineStringCoordinates in geometryGroup)
                 {
-                    HighwayProfile highwayProfile = new HighwayProfile();
-                    highwayProfile.Length = feature.properties.CLIPPED_LENGTH_KM;
-                    highwayProfile.NumberOfLanes = feature.properties.NUMBER_OF_LANES;
-                    highwayProfile.DividedHighwayFlag = feature.properties.DIVIDED_HIGHWAY_FLAG;
+                    body = string.Format(_queries.InventoryAssocWithLineQuery, lineStringCoordinates, InventoryQueryTypeName.HP_ASSOC_WITH_LINE);
 
-                    highwayProfiles.Add(highwayProfile);
+                    contents = await (await _api.PostWithRetry(_client, _path, body)).Content.ReadAsStringAsync();
+
+                    var results = JsonSerializer.Deserialize<FeatureCollection<object>>(contents);
+
+                    foreach (var feature in results.features)
+                    {
+                        HighwayProfile highwayProfile = new HighwayProfile();
+                        highwayProfile.Length = feature.properties.CLIPPED_LENGTH_KM;
+                        highwayProfile.NumberOfLanes = feature.properties.NUMBER_OF_LANES;
+                        highwayProfile.DividedHighwayFlag = feature.properties.DIVIDED_HIGHWAY_FLAG;
+
+                        highwayProfiles.Add(highwayProfile);
+                    }
                 }
 
                 return highwayProfiles;
@@ -243,23 +308,28 @@ namespace Hmcr.Chris
             }
         }
 
-        public async Task<Guardrail> GetGuardrailAssociatedWithPoint(string lineStringCoordinates)
+        public async Task<Guardrail> GetGuardrailAssociatedWithPoint(NetTopologySuite.Geometries.Geometry geometry)
         {
             var body = "";
             var contents = "";
+            Guardrail guardrail = new Guardrail();
 
             try
             {
-                body = string.Format(_queries.InventoryAssocWithPointQuery, lineStringCoordinates, InventoryQueryTypeName.HP_ASSOC_WITH_POINT);
+                var geometryGroup = BuildGeometryString(geometry.Coordinates);
 
-                contents = await (await _api.PostWithRetry(_client, _path, body)).Content.ReadAsStringAsync();
-
-                var results = JsonSerializer.Deserialize<FeatureCollection<object>>(contents);
-
-                Guardrail guardrail = new Guardrail();
-                if (results.features.Length > 0)
+                foreach (var lineStringCoordinates in geometryGroup)
                 {
-                    guardrail.GuardrailType = results.features[0].properties.GUARDRAIL_TYPE;
+                    body = string.Format(_queries.InventoryAssocWithPointQuery, lineStringCoordinates, InventoryQueryTypeName.HP_ASSOC_WITH_POINT);
+
+                    contents = await (await _api.PostWithRetry(_client, _path, body)).Content.ReadAsStringAsync();
+
+                    var results = JsonSerializer.Deserialize<FeatureCollection<object>>(contents);
+
+                    if (results.features.Length > 0)
+                    {
+                        guardrail.GuardrailType = results.features[0].properties.GUARDRAIL_TYPE;
+                    }
                 }
 
                 return guardrail;
@@ -271,28 +341,32 @@ namespace Hmcr.Chris
             }
         }
 
-        public async Task<List<Guardrail>> GetGuardrailAssociatedWithLine(string lineStringCoordinates)
+        public async Task<List<Guardrail>> GetGuardrailAssociatedWithLine(NetTopologySuite.Geometries.Geometry geometry)
         {
             var body = "";
             var contents = "";
+            var guardrails = new List<Guardrail>();
 
             try
             {
-                body = string.Format(_queries.InventoryAssocWithLineQuery, lineStringCoordinates, InventoryQueryTypeName.HP_ASSOC_WITH_LINE);
+                var geometryGroup = BuildGeometryString(geometry.Coordinates);
 
-                contents = await (await _api.PostWithRetry(_client, _path, body)).Content.ReadAsStringAsync();
-
-                var results = JsonSerializer.Deserialize<FeatureCollection<object>>(contents);
-
-                var guardrails = new List<Guardrail>();
-
-                foreach (var feature in results.features)
+                foreach (var lineStringCoordinates in geometryGroup)
                 {
-                    Guardrail guardrail = new Guardrail();
-                    guardrail.Length = feature.properties.CLIPPED_LENGTH_KM;
-                    guardrail.GuardrailType = feature.properties.GUARDRAIL_TYPE;
+                    body = string.Format(_queries.InventoryAssocWithLineQuery, lineStringCoordinates, InventoryQueryTypeName.HP_ASSOC_WITH_LINE);
 
-                    guardrails.Add(guardrail);
+                    contents = await (await _api.PostWithRetry(_client, _path, body)).Content.ReadAsStringAsync();
+
+                    var results = JsonSerializer.Deserialize<FeatureCollection<object>>(contents);
+
+                    foreach (var feature in results.features)
+                    {
+                        Guardrail guardrail = new Guardrail();
+                        guardrail.Length = feature.properties.CLIPPED_LENGTH_KM;
+                        guardrail.GuardrailType = feature.properties.GUARDRAIL_TYPE;
+
+                        guardrails.Add(guardrail);
+                    }
                 }
 
                 return guardrails;
