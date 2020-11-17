@@ -184,6 +184,7 @@ namespace Hmcr.Domain.Hangfire
         private List<WorkReportGeometry> PerformAnalyticalValidationBatchAsync(List<WorkReportGeometry> workReports)
         {
             MethodLogger.LogEntry(_logger, _enableMethodLog, _methodLogHeader, $"Total Record: {workReports.Count}");
+            //DateTime StartAt = DateTime.Now;
 
             //get surface type not applicable id
             var notApplicableRoadLengthId = _validator.ActivityCodeRuleLookup
@@ -202,60 +203,39 @@ namespace Hmcr.Domain.Hangfire
                 .Where(x => x.ActivityRuleExecName == SurfaceTypeRules.NA)
                 .FirstOrDefault().ActivityCodeRuleId;
 
-            //grouping the rows
-            var groups = new List<List<WorkReportGeometry>>();
-            var currentGroup = new List<WorkReportGeometry>();
-
-            var count = 0;
-            foreach (var workReport in workReports)
-            {
-                currentGroup.Add(workReport);
-                count++;
-
-                if (count % 10 == 0)
-                {
-                    groups.Add(currentGroup);
-                    currentGroup = new List<WorkReportGeometry>();
-                }
-            }
-
-            if (currentGroup.Count > 0)
-            {
-                groups.Add(currentGroup);
-            }
-
             var updatedWorkReports = new ConcurrentBag<WorkReportGeometry>();
             var updatedWorkReportTypeds = new ConcurrentBag<WorkReportTyped>();
             var progress = 0;
 
-            foreach (var group in groups)
+            foreach (var workReport in workReports.Where(x => x.WorkReportTyped.ActivityCodeValidation.LocationCode == "C"))
             {
                 var tasklist = new List<Task>();
-
-                //don't batch if not location code C
-                foreach (var row in group.Where(x => x.WorkReportTyped.ActivityCodeValidation.LocationCode == "C"))
-                {   
-                    if ((row.WorkReportTyped.ActivityCodeValidation.RoadClassRuleId != 0)
-                         && (row.WorkReportTyped.ActivityCodeValidation.RoadClassRuleId != notApplicableMaintenanceClassId))
-                    {
-                        tasklist.Add(Task.Run(async () => updatedWorkReports.Add(await PerformMaintenanceClassValidationAsync(row))));
-                    } 
-                    if ((row.WorkReportTyped.ActivityCodeValidation.SurfaceTypeRuleId != 0)
-                         && (row.WorkReportTyped.ActivityCodeValidation.SurfaceTypeRuleId != notApplicableSurfaceTypeId))
-                    {
-                        tasklist.Add(Task.Run(async () => updatedWorkReports.Add(await PerformSurfaceTypeValidationAsync(row))));
-                    }
-                }
+ 
+                if ((workReport.WorkReportTyped.ActivityCodeValidation.RoadClassRuleId != 0)
+                        && (workReport.WorkReportTyped.ActivityCodeValidation.RoadClassRuleId != notApplicableMaintenanceClassId))
+                {
+                    tasklist.Add(Task.Run(async () => updatedWorkReports.Add(await PerformMaintenanceClassValidationAsync(workReport))));
+                } 
+                if ((workReport.WorkReportTyped.ActivityCodeValidation.SurfaceTypeRuleId != 0)
+                        && (workReport.WorkReportTyped.ActivityCodeValidation.SurfaceTypeRuleId != notApplicableSurfaceTypeId))
+                {
+                    tasklist.Add(Task.Run(async () => updatedWorkReports.Add(await PerformSurfaceTypeValidationAsync(workReport))));
+                }              
 
                 Task.WaitAll(tasklist.ToArray());
 
-                progress += 10;
+                progress += 1;
 
-                if (progress % 500 == 0)
+                if (progress % 100 == 0)
                 {
                     _logger.LogInformation($"{_methodLogHeader} PerformAnalyticalValidationBatchAsync {progress}");
                 }
             }
+
+            /*** Time profiling ***
+             * DateTime EndAt = DateTime.Now;
+            TimeSpan TimeDifference = EndAt - StartAt;
+            Console.WriteLine("Total Duration in milliseconds: {0}", TimeDifference.TotalMilliseconds.ToString());*/
 
             return workReports.ToList();
         }

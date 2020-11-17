@@ -408,7 +408,7 @@ namespace Hmcr.Chris
             }
             catch (Exception ex)
             {
-                _logger.LogError($"Exception - GetRfiSegmentDetailAsync: {query} - {content}");
+                _logger.LogError($"Exception - GetBridgeStructure: {query} - {content}");
                 throw ex;
             }
         }
