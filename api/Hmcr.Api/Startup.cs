@@ -4,6 +4,7 @@ using Hmcr.Chris;
 using Hmcr.Data.Repositories;
 using Hmcr.Domain.Hangfire;
 using Hmcr.Domain.Services;
+using Hmcr.Model;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
@@ -31,7 +32,7 @@ namespace Hmcr.Api
             services.AddHttpContextAccessor();
             services.AddHmcrAuthentication(Configuration);
             services.AddHmcrDbContext(connectionString);
-            services.AddCors();
+            services.AddHmcrCors();
             services.AddHmcrControllers();
             services.AddHmcrAutoMapper();
             services.AddHmcrApiVersioning();
@@ -51,9 +52,10 @@ namespace Hmcr.Api
 
             app.UseExceptionMiddleware();
             app.UseHmcrHealthCheck();
-            app.UseAuthorization();
-            app.UseAuthentication();
             app.UseRouting();
+            app.UseCors(Constants.HmcrOrigins);
+            app.UseAuthentication();
+            app.UseAuthorization();
             app.UseHmcrEndpoints();
             app.UseHmcrSwagger(env, Configuration.GetSection("Constants:SwaggerApiUrl").Value);
 
