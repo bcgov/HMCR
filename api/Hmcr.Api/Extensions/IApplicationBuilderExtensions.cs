@@ -14,15 +14,6 @@ namespace Hmcr.Api.Extensions
 {
     public static class IApplicationBuilderExtensions
     {
-        public static void UseHmcrCors(this IApplicationBuilder app)
-        {
-            app.UseCors(builder => builder
-                .AllowAnyOrigin()
-                .AllowAnyMethod()
-                .AllowAnyHeader()
-                .WithExposedHeaders("Content-Disposition"));
-        }
-
         public static void UseExceptionMiddleware(this IApplicationBuilder app)
         {
             app.UseMiddleware<ExceptionMiddleware>();

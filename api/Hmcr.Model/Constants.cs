@@ -12,6 +12,7 @@ namespace Hmcr.Model
         public const string VancouverTimeZone = "America/Vancouver";
         public const string PacificTimeZone = "Pacific Standard Time";
         public const string SystemAdmin = "SYSTEM_ADMIN";
+        public const string HmcrOrigins = "HmcrOrigins";
     }
 
     public static class Reports
