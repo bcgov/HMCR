@@ -31,8 +31,7 @@ const tipHighwayAttributeValidation = [<ul key ='tipHighwayAttributeValidation_u
   <li style={{margin: '0 0 6px 0'}}>Highway Attribute Validations provide warnings for Location Code C activities when the features of the reported 
   location and/or accomplishment do not meet the defined parameters.</li>
   <li style={{margin: '0 0 6px 0'}}>Road Length checks the accomplishment against the road length (either Road KM or Lane KM), 
-    or against Guardrail Length [<b>NTD: to confirm Guardrail vs Barrier vernacular based on what types of 
-    guardrail/barrier will be included</b>], as defined in each individual rule. Several rules account for the road length 
+    or against Guardrail Length, as defined in each individual rule. Several rules account for the road length 
     to be multiplied by one or more factors to accommodate non kilometre-based units of measure. Multiplying factors 
     include conversion factors (e.g. 1km=1,000m), application rates (e.g. 2.0 litres/m2) or lane width factors to calculate surface area
      (e.g. lane width = 3.5m). A 10% tolerance is added to the Total Road KM (to a 200m maximum) and Total Lane KM (to a 500m maximum) 
