@@ -608,27 +608,6 @@ namespace Hmcr.Domain.Hangfire
             var warnings = new Dictionary<string, List<string>>();
             var submissionRow = _submissionRows[(decimal)typedRow.RowNum];
 
-            //get total length of path
-            var totalLength = typedRow.SurfaceTypes.Sum(x => x.SurfaceLength);
-            
-            //determine path length; paved, non-paved, unconstructed, other
-            var pavedLength = typedRow.SurfaceTypes.Where(x => x.SurfaceLength > 0)
-                .Where(x => x.SurfaceType == RoadSurface.HOT_MIX ||
-                x.SurfaceType == RoadSurface.COLD_MIX || x.SurfaceType == RoadSurface.CONCRETE ||
-                x.SurfaceType == RoadSurface.SURFACE_TREATED).Sum(x => x.SurfaceLength);
-            
-            var unpavedLength = typedRow.SurfaceTypes.Where(x => x.SurfaceLength > 0)
-                .Where(x => x.SurfaceType == RoadSurface.GRAVEL ||
-                x.SurfaceType == RoadSurface.DIRT).Sum(x => x.SurfaceLength);
-            
-            var unconstructedLength = typedRow.SurfaceTypes.Where(x => x.SurfaceLength > 0)
-                .Where(x => x.SurfaceType == RoadSurface.CLEARED ||
-                x.SurfaceType == RoadSurface.UNCLEARED).Sum(x => x.SurfaceLength);
-            
-            var otherLength = typedRow.SurfaceTypes.Where(x => x.SurfaceLength > 0)
-                .Where(x => x.SurfaceType == RoadSurface.OTHER ||
-                x.SurfaceType == RoadSurface.UNKNOWN).Sum(x => x.SurfaceLength);
-
             var structureVariance = _validator.CodeLookup.Where(x => x.CodeSet == CodeSet.ValidatorProportion)
                 .Where(x => x.CodeName == ValidatorProportionCode.STRUCTURE_VARIANCE_M).First().CodeValueNum;
             var structureVarianceM = structureVariance / 1000;
@@ -636,6 +615,27 @@ namespace Hmcr.Domain.Hangfire
             var surfaceTypeRule = typedRow.ActivityCodeValidation.SurfaceTypeRuleExec;
 
             if (typedRow.FeatureType == FeatureType.Line) {
+                //get total length of path
+                var totalLength = typedRow.SurfaceTypes.Sum(x => x.SurfaceLength);
+
+                //determine path length; paved, non-paved, unconstructed, other
+                var pavedLength = typedRow.SurfaceTypes.Where(x => x.SurfaceLength > 0)
+                    .Where(x => x.SurfaceType == RoadSurface.HOT_MIX ||
+                    x.SurfaceType == RoadSurface.COLD_MIX || x.SurfaceType == RoadSurface.CONCRETE ||
+                    x.SurfaceType == RoadSurface.SURFACE_TREATED).Sum(x => x.SurfaceLength);
+
+                var unpavedLength = typedRow.SurfaceTypes.Where(x => x.SurfaceLength > 0)
+                    .Where(x => x.SurfaceType == RoadSurface.GRAVEL ||
+                    x.SurfaceType == RoadSurface.DIRT).Sum(x => x.SurfaceLength);
+
+                var unconstructedLength = typedRow.SurfaceTypes.Where(x => x.SurfaceLength > 0)
+                    .Where(x => x.SurfaceType == RoadSurface.CLEARED ||
+                    x.SurfaceType == RoadSurface.UNCLEARED).Sum(x => x.SurfaceLength);
+
+                var otherLength = typedRow.SurfaceTypes.Where(x => x.SurfaceLength > 0)
+                    .Where(x => x.SurfaceType == RoadSurface.OTHER ||
+                    x.SurfaceType == RoadSurface.UNKNOWN).Sum(x => x.SurfaceLength);
+
                 //get the proportion percentages from the CODELOOKUP table, turn into double & percent
                 var proportionPercPaved = _validator.CodeLookup.Where(x => x.CodeSet == CodeSet.ValidatorProportion)
                 .Where(x => x.CodeName == ValidatorProportionCode.SURFACE_TYPE_PAVED).First().CodeValueNum;
@@ -687,16 +687,32 @@ namespace Hmcr.Domain.Hangfire
 
                         break;
                 }
-
-            } else if (typedRow.FeatureType == FeatureType.Point)
+            } 
+            else if (typedRow.FeatureType == FeatureType.Point)
             {
+                var pointSurfaceType = typedRow.SurfaceTypes.First().SurfaceType;
+
+                var isPaved = (pointSurfaceType == RoadSurface.HOT_MIX 
+                    || pointSurfaceType == RoadSurface.COLD_MIX 
+                    || pointSurfaceType == RoadSurface.CONCRETE 
+                    || pointSurfaceType == RoadSurface.SURFACE_TREATED);
+
+                var isUnpaved = (pointSurfaceType == RoadSurface.GRAVEL 
+                    || pointSurfaceType == RoadSurface.DIRT);
+
+                var isUnconstructed = (pointSurfaceType == RoadSurface.CLEARED 
+                    || pointSurfaceType == RoadSurface.UNCLEARED);
+
+                var isOther = (pointSurfaceType == RoadSurface.OTHER 
+                    || pointSurfaceType == RoadSurface.UNKNOWN);
+
                 switch (surfaceTypeRule)
                 {
                     case SurfaceTypeRules.PavedSurface:
                     case SurfaceTypeRules.PavedStructure:
-                        if (pavedLength < 0)
+                        if (!isPaved)
                         {
-                            if (unpavedLength > 0 && surfaceTypeRule == SurfaceTypeRules.PavedStructure)
+                            if (isUnpaved && surfaceTypeRule == SurfaceTypeRules.PavedStructure)
                             {
                                 //structure checking
                                 var hasBridgeWithinVariance = await WithinBridgeStructureVariance(typedRow, (decimal)structureVarianceM);
@@ -705,7 +721,7 @@ namespace Hmcr.Domain.Hangfire
                                     warnings.AddItem("Surface Type Validation", $"GPS position [{typedRow.StartLatitude},{typedRow.StartLongitude}] should be paved or be within 100M of a Structure");
                                 }
                             }
-                            else if (unpavedLength > 0 && surfaceTypeRule == SurfaceTypeRules.PavedSurface)
+                            else if (isUnpaved && surfaceTypeRule == SurfaceTypeRules.PavedSurface)
                             {
                                 warnings.AddItem("Surface Type Validation"
                                     , $"GPS position [{typedRow.StartLatitude},{typedRow.StartLongitude}] should be paved");
@@ -714,7 +730,7 @@ namespace Hmcr.Domain.Hangfire
 
                         break;
                     case SurfaceTypeRules.NonPavedSurface:
-                        if (pavedLength > 0)
+                        if (!isUnpaved)
                         {
                             warnings.AddItem("Surface Type Validation"
                                 , $"GPS position [{typedRow.StartLatitude},{typedRow.StartLongitude}] should be non-paved");
@@ -722,7 +738,7 @@ namespace Hmcr.Domain.Hangfire
 
                         break;
                     case SurfaceTypeRules.Unconstructed:
-                        if (unconstructedLength > 0)
+                        if (!isUnconstructed)
                         {
                             warnings.AddItem("Surface Type Validation"
                                 , $"GPS position at [{typedRow.StartLatitude},{typedRow.StartLongitude}] should NOT be Unconstructed");
