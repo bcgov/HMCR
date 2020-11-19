@@ -47,6 +47,11 @@ namespace Hmcr.Chris
             public const string GR_ASSOC_WITH_LINE = "GR_ASSOCIATED_WITH_POINT";
             public const string GR_ASSOC_WITH_POINT = "GR_ASSOCIATED_WITH_LINE";
         }
+        public static class InventoryParamType
+        {
+            public const string POINT_COORDINATE = "coordinate";
+            public const string LINE_COORDINATE = "coordinates";
+        }
 
         public InventoryApi(HttpClient client, IApi api, IConfiguration config, ILogger<IInventoryApi> logger)
         {
@@ -102,12 +107,11 @@ namespace Hmcr.Chris
 
                 foreach (var lineStringCoordinates in geometryGroup)
                 {
-                    body = string.Format(_queries.InventoryAssocWithPointQuery, lineStringCoordinates, InventoryQueryTypeName.SURF_ASSOC_WITH_POINT);
+                    body = string.Format(_queries.InventoryAssocWithPointQuery, InventoryParamType.POINT_COORDINATE, lineStringCoordinates, InventoryQueryTypeName.SURF_ASSOC_WITH_POINT);
 
                     contents = await (await _api.PostWithRetry(_client, _path, body)).Content.ReadAsStringAsync();
 
                     var results = JsonSerializer.Deserialize<FeatureCollection<object>>(contents);
-
 
                     if (results.features.Length > 0)
                     {
@@ -136,7 +140,7 @@ namespace Hmcr.Chris
 
                 foreach (var lineStringCoordinates in geometryGroup)
                 {
-                    body = string.Format(_queries.InventoryAssocWithLineQuery, lineStringCoordinates, InventoryQueryTypeName.SURF_ASSOC_WITH_LINE);
+                    body = string.Format(_queries.InventoryAssocWithLineQuery, InventoryParamType.LINE_COORDINATE, lineStringCoordinates, InventoryQueryTypeName.SURF_ASSOC_WITH_LINE);
 
                     contents = await (await _api.PostWithRetry(_client, _path, body)).Content.ReadAsStringAsync();
 
@@ -173,13 +177,11 @@ namespace Hmcr.Chris
 
                 foreach (var lineStringCoordinates in geometryGroup)
                 {
-                    body = string.Format(_queries.InventoryAssocWithLineQuery, lineStringCoordinates, InventoryQueryTypeName.MC_ASSOC_WITH_LINE);
+                    body = string.Format(_queries.InventoryAssocWithLineQuery, InventoryParamType.LINE_COORDINATE, lineStringCoordinates, InventoryQueryTypeName.MC_ASSOC_WITH_LINE);
 
                     contents = await (await _api.PostWithRetry(_client, _path, body)).Content.ReadAsStringAsync();
 
                     var results = JsonSerializer.Deserialize<FeatureCollection<object>>(contents);
-
-                    
 
                     foreach (var feature in results.features)
                     {
@@ -213,7 +215,7 @@ namespace Hmcr.Chris
 
                 foreach (var lineStringCoordinates in geometryGroup)
                 {
-                    body = string.Format(_queries.InventoryAssocWithPointQuery, lineStringCoordinates, InventoryQueryTypeName.MC_ASSOC_WITH_POINT);
+                    body = string.Format(_queries.InventoryAssocWithPointQuery, InventoryParamType.POINT_COORDINATE, lineStringCoordinates, InventoryQueryTypeName.MC_ASSOC_WITH_POINT);
 
                     contents = await (await _api.PostWithRetry(_client, _path, body)).Content.ReadAsStringAsync();
 
@@ -247,7 +249,7 @@ namespace Hmcr.Chris
 
                 foreach (var lineStringCoordinates in geometryGroup)
                 {
-                    body = string.Format(_queries.InventoryAssocWithPointQuery, lineStringCoordinates, InventoryQueryTypeName.HP_ASSOC_WITH_POINT);
+                    body = string.Format(_queries.InventoryAssocWithPointQuery, InventoryParamType.POINT_COORDINATE, lineStringCoordinates, InventoryQueryTypeName.HP_ASSOC_WITH_POINT);
 
                     contents = await (await _api.PostWithRetry(_client, _path, body)).Content.ReadAsStringAsync();
 
@@ -282,7 +284,7 @@ namespace Hmcr.Chris
 
                 foreach (var lineStringCoordinates in geometryGroup)
                 {
-                    body = string.Format(_queries.InventoryAssocWithLineQuery, lineStringCoordinates, InventoryQueryTypeName.HP_ASSOC_WITH_LINE);
+                    body = string.Format(_queries.InventoryAssocWithLineQuery, InventoryParamType.LINE_COORDINATE, lineStringCoordinates, InventoryQueryTypeName.HP_ASSOC_WITH_LINE);
 
                     contents = await (await _api.PostWithRetry(_client, _path, body)).Content.ReadAsStringAsync();
 
@@ -320,7 +322,7 @@ namespace Hmcr.Chris
 
                 foreach (var lineStringCoordinates in geometryGroup)
                 {
-                    body = string.Format(_queries.InventoryAssocWithPointQuery, lineStringCoordinates, InventoryQueryTypeName.HP_ASSOC_WITH_POINT);
+                    body = string.Format(_queries.InventoryAssocWithPointQuery, InventoryParamType.POINT_COORDINATE, lineStringCoordinates, InventoryQueryTypeName.HP_ASSOC_WITH_POINT);
 
                     contents = await (await _api.PostWithRetry(_client, _path, body)).Content.ReadAsStringAsync();
 
@@ -353,7 +355,7 @@ namespace Hmcr.Chris
 
                 foreach (var lineStringCoordinates in geometryGroup)
                 {
-                    body = string.Format(_queries.InventoryAssocWithLineQuery, lineStringCoordinates, InventoryQueryTypeName.HP_ASSOC_WITH_LINE);
+                    body = string.Format(_queries.InventoryAssocWithLineQuery, InventoryParamType.LINE_COORDINATE, lineStringCoordinates, InventoryQueryTypeName.HP_ASSOC_WITH_LINE);
 
                     contents = await (await _api.PostWithRetry(_client, _path, body)).Content.ReadAsStringAsync();
 
