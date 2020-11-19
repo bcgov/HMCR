@@ -721,7 +721,7 @@ namespace Hmcr.Domain.Hangfire
                                     warnings.AddItem("Surface Type Validation", $"GPS position [{typedRow.StartLatitude},{typedRow.StartLongitude}] should be paved or be within 100M of a Structure");
                                 }
                             }
-                            else if (isUnpaved && surfaceTypeRule == SurfaceTypeRules.PavedSurface)
+                            else
                             {
                                 warnings.AddItem("Surface Type Validation"
                                     , $"GPS position [{typedRow.StartLatitude},{typedRow.StartLongitude}] should be paved");
@@ -738,7 +738,7 @@ namespace Hmcr.Domain.Hangfire
 
                         break;
                     case SurfaceTypeRules.Unconstructed:
-                        if (!isUnconstructed)
+                        if (isUnconstructed)
                         {
                             warnings.AddItem("Surface Type Validation"
                                 , $"GPS position at [{typedRow.StartLatitude},{typedRow.StartLongitude}] should NOT be Unconstructed");
