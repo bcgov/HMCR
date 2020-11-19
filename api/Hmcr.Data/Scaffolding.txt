@@ -20,3 +20,15 @@ protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         optionsBuilder.UseSqlServer("Data Source=(localdb)\\MSSQLLocalDB;Initial Catalog=aspnet-hmcr");
     }
 }
+
+
+********************************************
+NOTE: There have been some changes to EF Core pluralization when using DBContext, 
+in that at times it's not working. Because the original Entity Framework was generated
+with Pluralization it's imperative that it work. The following steps will allow you
+to run the Scaffolding with Pluralization, if it's not working for you
+********************************************
+1. Open the Package Manager console, change the default project to Hmcr.Data
+2. Run the following command; Install-Package Bricelam.EntityFrameworkCore.Pluralizer
+3. Run the Scaffold-DbContext command in Step 2 above.
+4. Revert changes to Hmcr.csproj so as to not include the Pluralizer.
