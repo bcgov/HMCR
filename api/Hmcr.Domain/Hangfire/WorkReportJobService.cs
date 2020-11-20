@@ -712,7 +712,7 @@ namespace Hmcr.Domain.Hangfire
                     case SurfaceTypeRules.PavedStructure:
                         if (!isPaved)
                         {
-                            if (isUnpaved && surfaceTypeRule == SurfaceTypeRules.PavedStructure)
+                            if (surfaceTypeRule == SurfaceTypeRules.PavedStructure)
                             {
                                 //structure checking
                                 var hasBridgeWithinVariance = await WithinBridgeStructureVariance(typedRow, (decimal)structureVarianceM);
@@ -759,14 +759,17 @@ namespace Hmcr.Domain.Hangfire
             var isBridgeWithinVariance = false;
 
             var startOffset = typedRow.StartOffset - structureVariance;
-            var endOffset = typedRow.EndOffset + structureVariance;
+            var endOffset = ((typedRow.EndOffset == null) ? typedRow.StartOffset : typedRow.EndOffset) + structureVariance;
 
             var result = await _spatialService.GetBridgeStructureOnRFISegment(typedRow.HighwayUnique);
 
             var bridgeStructures = result.structures.Where(x => x.StructureType == StructureType.BRIDGE).ToList();
             foreach (var bridge in bridgeStructures)
             {
-                if ((bridge.BeginKM >= startOffset) && (bridge.EndKM <= endOffset))
+                //we need to check if the start of the bridge is between the offset
+                // or if the end of the bridge is between the offset
+                if (((bridge.BeginKM >= startOffset) && (bridge.BeginKM <= endOffset))
+                    || ((bridge.EndKM >= startOffset) && (bridge.EndKM <= endOffset)))
                 {
                     isBridgeWithinVariance = true;  // if we find one we can stop searching
                     break;
