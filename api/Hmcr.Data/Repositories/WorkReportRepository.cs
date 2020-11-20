@@ -49,10 +49,11 @@ namespace Hmcr.Data.Repositories
                 else
                 {
                     workReport.WorkReportTyped.WorkReportId = entity.WorkReportId;
+                    int currentVersioinNumber = entity.RecordVersionNumber;
                     Mapper.Map(workReport.WorkReportTyped, entity);
                     entity.Geometry = workReport.Geometry;
+                    entity.RecordVersionNumber = currentVersioinNumber + 1;
                 }
-
                 yield return entity;
             }
         }

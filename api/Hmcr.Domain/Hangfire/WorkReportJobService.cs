@@ -85,7 +85,7 @@ namespace Hmcr.Domain.Hangfire
                 var submissionRow = _submissionRows[(decimal)untypedRow.RowNum];
 
                 submissionRow.RowStatusId = _statusService.RowSuccess; //set the initial row status as success 
-
+                untypedRow.HighwayUnique = untypedRow.HighwayUnique.ToTrimAndUppercase();
                 var activityCode = activityCodes.FirstOrDefault(x => x.ActivityNumber == untypedRow.ActivityNumber);
 
                 if (activityCode == null)
@@ -1301,6 +1301,7 @@ namespace Hmcr.Domain.Hangfire
                 try
                 {
                     var row = csv.GetRecord<WorkReportTyped>();
+                    row.HighwayUnique = row.HighwayUnique.ToTrimAndUppercase();
                     rows.Add(row);
                     rowNum = (decimal)row.RowNum;
                     row.ServiceArea = _serviceArea.ConvertToServiceAreaNumber(row.ServiceArea);

@@ -29,6 +29,7 @@ namespace Hmcr.Data.Repositories
         Task UpdateUserFromBceidAsync(BceidAccount user, long concurrencyControlNumber);
         IEnumerable<UserDto> GetActiveUsersByServiceAreaNumber(decimal serviceAreaNumber);
         Task UpdateUserApiClientId(string clientId);
+        Task<IEnumerable<UserSearchExportDto>> GetUsersByFilterAsync(decimal[]? serviceAreas, string[]? userTypes, string searchText, bool? isActive);
     }
 
     public class UserRepository : HmcrRepositoryBase<HmrSystemUser>, IUserRepository
@@ -162,6 +163,89 @@ namespace Hmcr.Data.Repositories
             };
 
             return pagedDTO;
+        }
+        public async Task<IEnumerable<UserSearchExportDto>> GetUsersByFilterAsync(decimal[]? serviceAreas, string[]? userTypes, string searchText, bool? isActive)
+        {
+            var query = DbSet.AsNoTracking();
+
+            if (serviceAreas != null && serviceAreas.Length > 0)
+            {
+                query = query.Where(u => u.HmrServiceAreaUsers.Any(s => serviceAreas.Contains(s.ServiceAreaNumber)));
+            }
+
+            if (userTypes != null && userTypes.Length > 0)
+            {
+                query = query.Where(u => userTypes.Contains(u.UserType));
+            }
+
+            if (searchText.IsNotEmpty())
+            {
+                searchText = searchText.Trim();
+
+                query = query
+                    .Where(u => u.Username.Contains(searchText) 
+                    || u.FirstName.Contains(searchText) 
+                    || (u.FirstName + " " + u.LastName).Contains(searchText) 
+                    || u.LastName.Contains(searchText) 
+                    || u.BusinessLegalName.Contains(searchText));
+            }
+
+            if (isActive != null)
+            {
+                query = (bool)isActive
+                    ? query.Where(u => u.EndDate == null || u.EndDate > DateTime.Today)
+                    : query.Where(u => u.EndDate != null && u.EndDate <= DateTime.Today);
+            }
+
+            var entityUsers = await query
+                .Include(u => u.HmrServiceAreaUsers)
+                .Include(u => u.HmrUserRoles)
+                .ToListAsync();
+
+            var users = Mapper.Map<IEnumerable<UserSearchExportDto>>(entityUsers);
+
+            var userServiceArea = entityUsers.SelectMany(u => u.HmrServiceAreaUsers).ToLookup(u => u.SystemUserId);
+            int totalServiceArea = await DbContext.HmrServiceAreas.AsNoTracking().CountAsync();
+            var roles = await DbContext.HmrRoles.AsNoTracking().ToListAsync();
+            var userRoles = entityUsers
+                            .Where(r => r.EndDate == null || r.EndDate > DateTime.Today)
+                            .SelectMany(u => u.HmrUserRoles)
+                            .ToLookup(u => u.SystemUserId);
+
+            foreach (var user in users)
+            {
+                string userServiceAreas = string.Join(",", userServiceArea[user.SystemUserId].Select(x => x.ServiceAreaNumber).OrderBy(x => x));
+                if (userServiceAreas.Count(f => f == ',') >0 )
+                {
+                    if (userServiceAreas.Count(f => f == ',') + 1 == totalServiceArea)
+                    {
+                        user.ServiceAreas = "ALL";
+                    }
+                    else
+                    {
+                        user.ServiceAreas = string.Format("\"{0}\"", userServiceAreas);
+                    }
+                }
+                else
+                {
+                    user.ServiceAreas = userServiceAreas;
+                }
+                var roleIds = userRoles[user.SystemUserId].Select(x => x.RoleId).Distinct();
+                string uRoles = string.Join(",", roles.Where(x => roleIds.Contains(x.RoleId)).Select(y => y.Name).OrderBy(z => z));
+                if (uRoles.Count(f => f == ',') > 0)
+                {
+                    user.UserRoles = string.Format("\"{0}\"", uRoles);
+                }
+                else
+                {
+                    user.UserRoles = uRoles;
+                }
+                user.HasLogInHistory = entityUsers.Any(u => u.SystemUserId == user.SystemUserId && u.UserGuid != null);
+            }
+
+            
+
+            return users;
         }
 
         public async Task<UserDto> GetUserAsync(decimal systemUserId)

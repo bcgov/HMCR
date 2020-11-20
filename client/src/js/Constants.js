@@ -25,6 +25,7 @@ export const API_PATHS = {
   USER_TYPES: '/users/usertypes',
   USER_STATUSES: '/users/userstatus',
   USER_BCEID_ACCOUNT: '/users/bceidaccount',
+  USER_REPORT_EXPORT: '/users/exportuser',
   ROCKFALL_REPORT: '/rockfallreports',
   WILDLIFE_REPORT: '/wildlifereports',
   WORK_REPORT: '/workreports',
@@ -53,6 +54,7 @@ export const PATHS = {
   ADMIN_USERS: '/admin/users',
   ADMIN_ROLES: '/admin/roles',
   REPORT_EXPORT: '/export',
+  REPORT_EXPORT_USER: '/user',
   VERSION: '/version',
   DATA_ROOM: 'https://engineering.sp.th.gov.bc.ca/sites/service-areas-portal',
   MANUAL_AND_TEMPLATES:
@@ -64,6 +66,8 @@ export const MESSAGE_DATE_FORMAT = 'YYYY-MM-DD hh:mmA';
 export const DATE_DISPLAY_FORMAT = 'YYYY-MM-DD';
 
 export const DATE_UTC_FORMAT = 'YYYY-MM-DDTHH:mm';
+
+export const DATE_TIME_FORMAT = 'YYYY-MM-DD HH:mm:ss';
 
 export const FORM_TYPE = { ADD: 'ADD_FORM', EDIT: 'EDIT_FORM' };
 
@@ -146,6 +150,15 @@ export const REPORT_EXPORT_FIELDS = {
     'VALUE_OF_WORK',
     'COMMENTS',
     'SUBMISSION_OBJECT_ID',
+    'FILE_NAME',
+    'RECORD_VERSION_NUMBER',
+    'SUBMISSION_DATE',
+    'MIN_MAX_VALUE_VALID_WARNING',
+    'DATA_PRECISION_VALID_WARNING',
+    'REPORTING_FREQ_VALID_WARNING',
+    'SURFACE_TYPE_VALID_WARNING',
+    'ROAD_CLASS_VALID_WARNING',
+    'ROAD_LENGTH_VALID_WARNING',
   ],
   HMR_WILDLIFE_REPORT: [
     'RECORD_TYPE',
@@ -166,6 +179,8 @@ export const REPORT_EXPORT_FIELDS = {
     'AGE',
     'COMMENT',
     'SUBMISSION_OBJECT_ID',
+    'FILE_NAME',
+    'SUBMISSION_DATE',
   ],
   HMR_ROCKFALL_REPORT: [
     'MCRR_INCIDENT_NUMBER',
@@ -201,5 +216,8 @@ export const REPORT_EXPORT_FIELDS = {
     'MC_NAME',
     'REPORT_DATE',
     'SUBMISSION_OBJECT_ID',
-  ],
+    'FILE_NAME',
+    'RECORD_VERSION_NUMBER',
+    'SUBMISSION_DATE',
+  ]
 };

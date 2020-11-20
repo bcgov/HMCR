@@ -30,10 +30,13 @@ const defaultSearchFormValues = {
   reportTypeId: '',
   dateFrom: moment().subtract(1, 'months').startOf('month'),
   dateTo: moment().subtract(1, 'months').endOf('month'),
+  submissionDateFrom: moment().subtract(1, 'months').startOf('month'),
+  submissionDateTo: moment().subtract(1, 'months').endOf('month'),
   serviceAreaNumbers: [],
   highwayUnique: '',
   maintenanceTypeIds: [],
   activityNumberIds: [],
+  submissionNumber:'',
   outputFormat: 'csv',
 };
 
@@ -127,6 +130,15 @@ const ReportExport = ({
       if (values.activityNumberIds.length > 0) {
         cql_filters.push(`ACTIVITY_NUMBER IN (${activityNumbers})`);
       }
+    }
+
+    if (values.submissionNumber.length > 0) {
+      cql_filters.push(`SUBMISSION_OBJECT_ID = ${values.submissionNumber}`);
+    }
+    if (values.submissionDateFrom!== null && values.submissionDateTo!== null) {
+      var sdFrom = values.submissionDateFrom.startOf('day').format(Constants.DATE_TIME_FORMAT);
+      var sdTo = values.submissionDateTo.endOf('day').format(Constants.DATE_TIME_FORMAT);
+      cql_filters.push(`SUBMISSION_DATE BETWEEN '${sdFrom}' AND '${sdTo}'`);
     }
 
     if (cql_filters.length > 0) {
@@ -303,6 +315,24 @@ const ReportExport = ({
                           </div>
                         </React.Fragment>
                       )}
+                    </div>
+                    <div className="d-flex mt-3">
+                      <div style={filterContainerStyle}>
+                        <FormInput type="text" name="submissionNumber" placeholder="Submission Number" />
+                      </div>
+                      <div className="d-flex align-items-center">
+                        <DateRangeField
+                          name="submissionDate"
+                          fromName="submissionDateFrom"
+                          toName="submissionDateTo"
+                          isOutsideRange={disableFutureDates}
+                        />
+                        <MouseoverTooltip id="tooltip_submission_datepicker">
+                          <ul style={{ paddingInlineStart: 10 }}>
+                          This is the Submission Date
+                          </ul>
+                        </MouseoverTooltip>
+                      </div>
                     </div>
                   </React.Fragment>
                 )}

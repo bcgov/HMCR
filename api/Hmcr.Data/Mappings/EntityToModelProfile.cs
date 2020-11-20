@@ -79,7 +79,7 @@ namespace Hmcr.Data.Mappings
             CreateMap<HmrSystemUser, UserSearchDto>();
             CreateMap<HmrSystemUser, UserUpdateDto>();
             CreateMap<HmrSystemUser, UserDeleteDto>();
-
+            CreateMap<HmrSystemUser, UserSearchExportDto>();
             CreateMap<BceidAccount, UserBceidAccountDto>();
 
             CreateMap<HmrUserRole, UserRoleDto>();
