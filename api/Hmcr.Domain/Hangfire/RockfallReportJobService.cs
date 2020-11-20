@@ -80,7 +80,7 @@ namespace Hmcr.Domain.Hangfire
                 var submissionRow = _submissionRows[(decimal)untypedRow.RowNum];
 
                 submissionRow.RowStatusId = _statusService.RowSuccess; //set the initial row status as success 
-
+                untypedRow.HighwayUnique = untypedRow.HighwayUnique.ToTrimAndUppercase();
                 var entityName = GetValidationEntityName(untypedRow);
 
                 _validator.Validate(entityName, untypedRow, errors);
@@ -536,6 +536,7 @@ namespace Hmcr.Domain.Hangfire
                 try
                 {
                     var row = csv.GetRecord<RockfallReportTyped>();
+                    row.HighwayUnique = row.HighwayUnique.ToTrimAndUppercase();
                     rows.Add(row);
                     rowNum = (decimal)row.RowNum;
                     row.ServiceArea = _serviceArea.ConvertToServiceAreaNumber(row.ServiceArea);

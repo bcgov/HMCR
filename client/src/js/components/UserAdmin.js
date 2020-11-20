@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 
 import { useLocation } from 'react-router-dom';
 import { connect } from 'react-redux';
-import { Row, Col, Button } from 'reactstrap';
+import { Row, Col, Button,Alert, Spinner } from 'reactstrap';
 import { Formik, Form, Field } from 'formik';
 import queryString from 'query-string';
 import * as Yup from 'yup';
@@ -18,9 +18,9 @@ import PageSpinner from './ui/PageSpinner';
 import useSearchData from './hooks/useSearchData';
 import useFormModal from './hooks/useFormModal';
 import EditUserFormFields from './forms/EditUserFormFields';
-
-import { showValidationErrorDialog } from '../actions';
-
+import SimpleModalWrapper from './ui/SimpleModalWrapper';
+import { showValidationErrorDialog,hideErrorDialog } from '../actions';
+import FileSaver from 'file-saver';
 import * as Constants from '../Constants';
 import * as api from '../Api';
 import { buildStatusIdArray } from '../utils';
@@ -60,11 +60,22 @@ const validationSchema = Yup.object({
   }),
 });
 
-const UserAdmin = ({ serviceAreas, userStatuses, userTypes, showValidationErrorDialog }) => {
+const EXPORT_STAGE = {
+  WAIT: 'WAIT',
+  ERROR: 'ERROR',
+  NOT_FOUND: 'NOT_FOUND',
+  DONE: 'DONE',
+};
+
+const UserAdmin = ({ serviceAreas, userStatuses, userTypes, showValidationErrorDialog,hideErrorDialog }) => {
   const location = useLocation();
   const searchData = useSearchData(defaultSearchOptions);
   const [searchInitialValues, setSearchInitialValues] = useState(defaultSearchFormValues);
   const [addUserWizardIsOpen, setAddUserWizardIsOpen] = useState(false);
+  const [exporting, setExporting] = useState(false);
+  const [showModal, setShowModal] = useState(false);
+  const [exportStage, setExportStage] = useState(EXPORT_STAGE.WAIT);
+  const [exportResult, setExportResult] = useState({});
 
   // Run on load, parse URL query params
   useEffect(() => {
@@ -120,6 +131,21 @@ const UserAdmin = ({ serviceAreas, userStatuses, userTypes, showValidationErrorD
     searchData.refresh(true);
   };
 
+  const buildExportParams = (values) => {
+    const serviceAreas = searchData.searchOptions.serviceAreas;
+    const userTypeIds = searchData.searchOptions.userTypes;
+    const searchText = searchData.searchOptions.searchText;
+    const isActive = searchData.searchOptions.isActive;
+    const options = {
+      ...searchData.searchOptions,
+      isActive,
+      searchText,
+      serviceAreas,
+      userTypes: userTypeIds,
+    };
+    return options;
+  };
+
   const onEditClicked = (userId) => {
     formModal.openForm(Constants.FORM_TYPE.EDIT, { userId });
   };
@@ -150,7 +176,42 @@ const UserAdmin = ({ serviceAreas, userStatuses, userTypes, showValidationErrorD
         .finally(() => formModal.setSubmitting(false));
     }
   };
+  
+  const submitExport = (values) => {
+    setExporting(true);
+    setShowModal(true);
+    setExportStage(EXPORT_STAGE.WAIT);
+    api
+      .getUserReportExport(buildExportParams(values))
+      .then((response) => {
+        const fileExtensionHeaders = response.headers['content-disposition'].match(/.csv/i);
 
+        let fileName = `${values.reportTypeId}_Export_`;
+        if (fileExtensionHeaders) fileName += fileExtensionHeaders[0];
+
+        let data = response.data;
+        if (fileName.indexOf('.json') > -1) data = JSON.stringify(data);
+
+        FileSaver.saveAs(new Blob([data]), fileName);
+
+        setExportResult({ fileName });
+        setExportStage(EXPORT_STAGE.DONE);
+      })
+      .catch((error) => {
+        if (error.response) {
+          const response = error.response;
+
+          if (response.status === 422) {
+            setExportResult({ error: error.response.data });
+            setExportStage(EXPORT_STAGE.ERROR);
+          } else if (response.status === 404) {
+            hideErrorDialog();
+            setExportStage(EXPORT_STAGE.NOT_FOUND);
+          }
+        }
+      })
+      .finally(() => setExporting(false));
+  };
   const formModal = useFormModal(
     'User',
     <EditUserFormFields validationSchema={validationSchema} />,
@@ -161,6 +222,51 @@ const UserAdmin = ({ serviceAreas, userStatuses, userTypes, showValidationErrorD
     ...user,
     userType: userTypes.find((type) => type.id === user.userType).name,
   }));
+
+  const renderContent = () => {
+    switch (exportStage) {
+      case EXPORT_STAGE.NOT_FOUND:
+        return (
+          <Alert color="warning">
+            <p>
+              <strong>No Results Found</strong>
+            </p>
+            <p>There are no results matching the provided search criterion</p>
+          </Alert>
+        );
+      case EXPORT_STAGE.ERROR:
+        return (
+          <Alert color="danger">
+            <p>
+              <strong>{exportResult.error.title}</strong>
+            </p>
+            <p>{exportResult.error.detail}</p>
+          </Alert>
+        );
+      case EXPORT_STAGE.DONE:
+        return (
+          <Alert color="success">
+            <p>
+              <strong>Export Complete</strong>
+            </p>
+            <p>Your report has been saved to your computer.</p>
+            <p>
+              <small>{exportResult.fileName}</small>
+            </p>
+          </Alert>
+        );
+      default:
+        return (
+          <div className="text-center">
+            <Spinner color="primary" />
+            <div className="mt-2">
+              <div>Your report is being generated.</div>
+              <div>This may take a few minutes.</div>
+            </div>
+          </div>
+        );
+    }
+  };
 
   return (
     <React.Fragment>
@@ -214,9 +320,14 @@ const UserAdmin = ({ serviceAreas, userStatuses, userTypes, showValidationErrorD
       <Authorize requires={Constants.PERMISSIONS.USER_W}>
         <Row>
           <Col>
-            <Button size="sm" color="primary" className="float-right mb-3" onClick={() => setAddUserWizardIsOpen(true)}>
-              Add User
-            </Button>
+            <div className="float-right mb-3">
+              <Button size="sm" color="primary" className="mr-2" onClick={() => setAddUserWizardIsOpen(true)}>
+                Add User
+              </Button>
+              <Button size="sm" color="primary" onClick={(values) => submitExport(values)}>
+                Export
+              </Button>
+            </div>
           </Col>
         </Row>
       </Authorize>
@@ -248,6 +359,17 @@ const UserAdmin = ({ serviceAreas, userStatuses, userTypes, showValidationErrorD
           validationSchema={validationSchema}
         />
       )}
+      <SimpleModalWrapper
+        isOpen={showModal}
+        toggle={() => {
+          if (!exporting) setShowModal(false);
+        }}
+        backdrop="static"
+        title="Generating Report"
+        disableClose={exporting}
+      >
+        {renderContent()}
+      </SimpleModalWrapper>
     </React.Fragment>
   );
 };
@@ -261,4 +383,4 @@ const mapStateToProps = (state) => {
   };
 };
 
-export default connect(mapStateToProps, { showValidationErrorDialog })(UserAdmin);
+export default connect(mapStateToProps, { showValidationErrorDialog, hideErrorDialog  })(UserAdmin);

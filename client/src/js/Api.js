@@ -36,6 +36,7 @@ export const deleteUser = (id, endDate) =>
 export const searchUsers = (params) => instance.get(Constants.API_PATHS.USER, { params: { ...params } });
 export const getUserBceidAccount = (userType, username) =>
   instance.get(`${Constants.API_PATHS.USER_BCEID_ACCOUNT}/${userType}/${username}`);
+export const getUserReportExport = (params) => instance.get(Constants.API_PATHS.USER_REPORT_EXPORT, { params: { ...params } });
 
 export const getRoles = () => instance.get(Constants.API_PATHS.ROLE);
 export const getRole = (id) => instance.get(`${Constants.API_PATHS.ROLE}/${id}`);

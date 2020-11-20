@@ -11,6 +11,10 @@ using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using System.Net;
+using System.Net.Http;
+using System.Linq;
+using System.Text;
 
 namespace Hmcr.Api.Controllers
 {
@@ -95,6 +99,28 @@ namespace Hmcr.Api.Controllers
             [FromQuery]int pageSize, [FromQuery]int pageNumber, [FromQuery]string orderBy = "username", [FromQuery]string direction = "")
         {
             return Ok(await _userService.GetUsersAsync(serviceAreas.ToDecimalArray(), userTypes.ToStringArray(), searchText, isActive, pageSize, pageNumber, orderBy, direction));
+        }
+
+        [HttpGet("exportuser", Name = "Exportuser")]
+        [RequiresPermission(Permissions.UserWrite)]
+        public async Task<IActionResult> GetUsersByFilterAsync(
+            [FromQuery] string? serviceAreas, [FromQuery] string? userTypes, [FromQuery] string searchText, [FromQuery] bool? isActive)
+        {
+            string format = "csv";
+            string fileName = "export_user.csv";
+            string[] fileheader= new string[] { "USERName", "USERType" };
+            var exportedUsers = await _userService.GetUsersByFilterAsync(serviceAreas.ToDecimalArray(), userTypes.ToStringArray(), searchText, isActive);
+            if (exportedUsers== null || exportedUsers.Count() <1)
+            {
+                return NotFound();
+            }
+            var rptCsv = string.Join(Environment.NewLine, exportedUsers.Select(x => x.ToCsv()));
+            rptCsv = $"{CsvUtils.GetCsvHeader<UserSearchExportDto>()}{Environment.NewLine}{rptCsv}";
+
+            var encoding = new UTF8Encoding();
+            var bytes  =encoding.GetBytes(rptCsv);
+            return File(bytes, "text/csv;charset=UTF-8", fileName);
+
         }
 
         [HttpGet("{id}", Name = "GetUser")]
