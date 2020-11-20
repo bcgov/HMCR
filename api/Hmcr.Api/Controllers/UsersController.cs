@@ -101,16 +101,14 @@ namespace Hmcr.Api.Controllers
             return Ok(await _userService.GetUsersAsync(serviceAreas.ToDecimalArray(), userTypes.ToStringArray(), searchText, isActive, pageSize, pageNumber, orderBy, direction));
         }
 
-        [HttpGet("exportuser", Name = "Exportuser")]
+        [HttpGet("exportuser", Name = "ExportUser")]
         [RequiresPermission(Permissions.UserWrite)]
         public async Task<IActionResult> GetUsersByFilterAsync(
-            [FromQuery] string? serviceAreas, [FromQuery] string? userTypes, [FromQuery] string searchText, [FromQuery] bool? isActive)
+            [FromQuery] string? serviceAreas, [FromQuery] string? userTypes, [FromQuery] string searchText, [FromQuery] bool? isActive, [FromQuery] string fileName)
         {
-            string format = "csv";
-            string fileName = "export_user.csv";
-            string[] fileheader= new string[] { "USERName", "USERType" };
+            fileName = fileName.IsEmpty()?"export_user.csv": fileName;
             var exportedUsers = await _userService.GetUsersByFilterAsync(serviceAreas.ToDecimalArray(), userTypes.ToStringArray(), searchText, isActive);
-            if (exportedUsers== null || exportedUsers.Count() <1)
+            if (exportedUsers== null || exportedUsers.Count() == 0)
             {
                 return NotFound();
             }
@@ -120,7 +118,6 @@ namespace Hmcr.Api.Controllers
             var encoding = new UTF8Encoding();
             var bytes  =encoding.GetBytes(rptCsv);
             return File(bytes, "text/csv;charset=UTF-8", fileName);
-
         }
 
         [HttpGet("{id}", Name = "GetUser")]

@@ -76,6 +76,7 @@ const UserAdmin = ({ serviceAreas, userStatuses, userTypes, showValidationErrorD
   const [showModal, setShowModal] = useState(false);
   const [exportStage, setExportStage] = useState(EXPORT_STAGE.WAIT);
   const [exportResult, setExportResult] = useState({});
+  const [isExport, setIsExport] = useState(false);
 
   // Run on load, parse URL query params
   useEffect(() => {
@@ -124,6 +125,11 @@ const UserAdmin = ({ serviceAreas, userStatuses, userTypes, showValidationErrorD
       pageNumber: 1,
     };
     searchData.updateSearchOptions(options);
+    if(isExport)
+    {
+      setIsExport(false);
+      submitExport(values);
+    }
   };
 
   const handleSearchFormReset = () => {
@@ -132,16 +138,21 @@ const UserAdmin = ({ serviceAreas, userStatuses, userTypes, showValidationErrorD
   };
 
   const buildExportParams = (values) => {
-    const serviceAreas = searchData.searchOptions.serviceAreas;
-    const userTypeIds = searchData.searchOptions.userTypes;
-    const searchText = searchData.searchOptions.searchText;
-    const isActive = searchData.searchOptions.isActive;
+    const serviceAreas = values.serviceAreaIds.join(',') || null;
+    const userTypeIds = values.userTypeIds.join(',') || null;
+    const searchText = values.searchText.trim() || null;
+
+    let isActive = null;
+    if (values.statusId.length === 1) {
+      isActive = values.statusId[0] === 'ACTIVE';
+    }
     const options = {
       ...searchData.searchOptions,
       isActive,
       searchText,
       serviceAreas,
       userTypes: userTypeIds,
+      fileName:'user_export.csv',
     };
     return options;
   };
@@ -184,16 +195,13 @@ const UserAdmin = ({ serviceAreas, userStatuses, userTypes, showValidationErrorD
     api
       .getUserReportExport(buildExportParams(values))
       .then((response) => {
-        const fileExtensionHeaders = response.headers['content-disposition'].match(/.csv/i);
-
-        let fileName = `${values.reportTypeId}_Export_`;
+        const fileExtensionHeaders = response.headers['content-disposition'].match(/.csv|.json|.gml|.kml|.kmz/i);
+        let fileName = `user_export`;
         if (fileExtensionHeaders) fileName += fileExtensionHeaders[0];
-
         let data = response.data;
         if (fileName.indexOf('.json') > -1) data = JSON.stringify(data);
 
         FileSaver.saveAs(new Blob([data]), fileName);
-
         setExportResult({ fileName });
         setExportStage(EXPORT_STAGE.DONE);
       })
@@ -270,8 +278,6 @@ const UserAdmin = ({ serviceAreas, userStatuses, userTypes, showValidationErrorD
 
   return (
     <React.Fragment>
-      <MaterialCard>
-        <UIHeader>User Management</UIHeader>
         <Formik
           initialValues={searchInitialValues}
           enableReinitialize={true}
@@ -279,58 +285,65 @@ const UserAdmin = ({ serviceAreas, userStatuses, userTypes, showValidationErrorD
           onReset={handleSearchFormReset}
         >
           {(formikProps) => (
-            <Form>
-              <Row form>
-                <Col>
-                  <Field
-                    type="text"
-                    name="searchText"
-                    placeholder="User Id/Name/Organization"
-                    className="form-control"
-                  />
-                </Col>
-                <Col>
-                  <MultiDropdownField
-                    {...formikProps}
-                    items={serviceAreas}
-                    name="serviceAreaIds"
-                    title="Service Area"
-                    searchable={true}
-                  />
-                </Col>
-                <Col>
-                  <MultiDropdownField {...formikProps} items={userTypes} name="userTypeIds" title="User Type" />
-                </Col>
-                <Col>
-                  <MultiDropdownField {...formikProps} items={userStatuses} name="statusId" title="User Status" />
-                </Col>
-                <Col>
-                  <div className="float-right">
-                    <SubmitButton className="mr-2" disabled={searchData.loading} submitting={searchData.loading}>
-                      Search
-                    </SubmitButton>
-                    <Button type="reset">Reset</Button>
-                  </div>
-                </Col>
-              </Row>
-            </Form>
+            <React.Fragment>
+              <MaterialCard>
+              <UIHeader>User Management</UIHeader>
+              <Form>
+                <Row form>
+                  <Col>
+                    <Field
+                      type="text"
+                      name="searchText"
+                      placeholder="User Id/Name/Organization"
+                      className="form-control"
+                    />
+                  </Col>
+                  <Col>
+                    <MultiDropdownField
+                      {...formikProps}
+                      items={serviceAreas}
+                      name="serviceAreaIds"
+                      title="Service Area"
+                      searchable={true}
+                    />
+                  </Col>
+                  <Col>
+                    <MultiDropdownField {...formikProps} items={userTypes} name="userTypeIds" title="User Type" />
+                  </Col>
+                  <Col>
+                    <MultiDropdownField {...formikProps} items={userStatuses} name="statusId" title="User Status" />
+                  </Col>
+                  <Col>
+                    <div className="float-right">
+                      <SubmitButton className="mr-2" disabled={searchData.loading} submitting={searchData.loading}>
+                        Search
+                      </SubmitButton>
+                      <Button type="reset">Reset</Button>
+                    </div>
+                  </Col>
+                </Row>
+              </Form>
+              </MaterialCard>
+              <Authorize requires={Constants.PERMISSIONS.USER_W}>
+                <Row>
+                  <Col>
+                    <div className="float-right mb-3">
+                      <Button size="sm" color="primary" className="mr-2" onClick={() => setAddUserWizardIsOpen(true)}>
+                        Add User
+                      </Button>
+                      <Button size="sm" color="primary" onClick={() => {
+                        setIsExport(true);
+                        formikProps.submitForm();
+                      }}>
+                        Export
+                      </Button>
+                    </div>
+                  </Col>
+                </Row>
+              </Authorize>
+            </React.Fragment>
           )}
-        </Formik>
-      </MaterialCard>
-      <Authorize requires={Constants.PERMISSIONS.USER_W}>
-        <Row>
-          <Col>
-            <div className="float-right mb-3">
-              <Button size="sm" color="primary" className="mr-2" onClick={() => setAddUserWizardIsOpen(true)}>
-                Add User
-              </Button>
-              <Button size="sm" color="primary" onClick={(values) => submitExport(values)}>
-                Export
-              </Button>
-            </div>
-          </Col>
-        </Row>
-      </Authorize>
+       </Formik>
       {searchData.loading && <PageSpinner />}
       {!searchData.loading && (
         <MaterialCard>

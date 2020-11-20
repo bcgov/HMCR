@@ -183,7 +183,11 @@ namespace Hmcr.Data.Repositories
                 searchText = searchText.Trim();
 
                 query = query
-                    .Where(u => u.Username.Contains(searchText) || u.FirstName.Contains(searchText) || (u.FirstName + " " + u.LastName).Contains(searchText) || u.LastName.Contains(searchText) || u.BusinessLegalName.Contains(searchText));
+                    .Where(u => u.Username.Contains(searchText) 
+                    || u.FirstName.Contains(searchText) 
+                    || (u.FirstName + " " + u.LastName).Contains(searchText) 
+                    || u.LastName.Contains(searchText) 
+                    || u.BusinessLegalName.Contains(searchText));
             }
 
             if (isActive != null)
@@ -193,22 +197,48 @@ namespace Hmcr.Data.Repositories
                     : query.Where(u => u.EndDate != null && u.EndDate <= DateTime.Today);
             }
 
-            var entityUsers = await query.Include(u => u.HmrServiceAreaUsers).ToListAsync();
+            var entityUsers = await query
+                .Include(u => u.HmrServiceAreaUsers)
+                .Include(u => u.HmrUserRoles)
+                .ToListAsync();
 
             var users = Mapper.Map<IEnumerable<UserSearchExportDto>>(entityUsers);
 
             var userServiceArea = entityUsers.SelectMany(u => u.HmrServiceAreaUsers).ToLookup(u => u.SystemUserId);
+            int totalServiceArea = await DbContext.HmrServiceAreas.AsNoTracking().CountAsync();
+            var roles = await DbContext.HmrRoles.AsNoTracking().ToListAsync();
+            var userRoles = entityUsers
+                            .Where(r => r.EndDate == null || r.EndDate > DateTime.Today)
+                            .SelectMany(u => u.HmrUserRoles)
+                            .ToLookup(u => u.SystemUserId);
 
             foreach (var user in users)
             {
                 string userServiceAreas = string.Join(",", userServiceArea[user.SystemUserId].Select(x => x.ServiceAreaNumber).OrderBy(x => x));
                 if (userServiceAreas.Count(f => f == ',') >0 )
                 {
-                    user.ServiceAreas = string.Format("\"{0}\"", userServiceAreas);
+                    if (userServiceAreas.Count(f => f == ',') + 1 == totalServiceArea)
+                    {
+                        user.ServiceAreas = "ALL";
+                    }
+                    else
+                    {
+                        user.ServiceAreas = string.Format("\"{0}\"", userServiceAreas);
+                    }
                 }
                 else
                 {
                     user.ServiceAreas = userServiceAreas;
+                }
+                var roleIds = userRoles[user.SystemUserId].Select(x => x.RoleId).Distinct();
+                string uRoles = string.Join(",", roles.Where(x => roleIds.Contains(x.RoleId)).Select(y => y.Name).OrderBy(z => z));
+                if (uRoles.Count(f => f == ',') > 0)
+                {
+                    user.UserRoles = string.Format("\"{0}\"", uRoles);
+                }
+                else
+                {
+                    user.UserRoles = uRoles;
                 }
                 user.HasLogInHistory = entityUsers.Any(u => u.SystemUserId == user.SystemUserId && u.UserGuid != null);
             }
