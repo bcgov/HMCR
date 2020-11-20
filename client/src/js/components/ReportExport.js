@@ -162,10 +162,14 @@ const ReportExport = ({
         console.log('1--');
         console.log(response);
         const fileExtensionHeaders = response.headers['content-disposition'].match(/.csv|.json|.gml|.kml|.kmz/i);
-
+        console.log('1.1--');
+        console.log(fileExtensionHeaders);
+        console.log('1.2--');
         let fileName = `${values.reportTypeId}_Export_${dateFrom}-${dateTo}`;
+        console.log('1.3--');
         if (fileExtensionHeaders) fileName += fileExtensionHeaders[0];
-
+        console.log(fileName);
+        console.log('1.4--');
         let data = response.data;
         console.log('1.5--');
         console.log(data);

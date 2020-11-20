@@ -226,8 +226,9 @@ namespace Hmcr.Api.Extensions
                     {
                         builder.WithOrigins("https://dev-hmcr.th.gov.bc.ca", "https://tst-hmcr.th.gov.bc.ca", "https://uat-hmcr.th.gov.bc.ca", "https://hmcr.th.gov.bc.ca")
                             .AllowAnyHeader()
-                            .AllowAnyMethod();
-                    });
+                            .AllowAnyMethod()
+                            .WithExposedHeaders("Content-Disposition");
+            });
             });
         }
     }
