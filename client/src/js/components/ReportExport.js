@@ -159,15 +159,21 @@ const ReportExport = ({
     api
       .getReportExport(buildExportParams(values, dateFrom, dateTo))
       .then((response) => {
+        console.log('1--');
+        console.log(response);
         const fileExtensionHeaders = response.headers['content-disposition'].match(/.csv|.json|.gml|.kml|.kmz/i);
 
         let fileName = `${values.reportTypeId}_Export_${dateFrom}-${dateTo}`;
         if (fileExtensionHeaders) fileName += fileExtensionHeaders[0];
 
         let data = response.data;
+        console.log('1.5--');
+        console.log(data);
         if (fileName.indexOf('.json') > -1) data = JSON.stringify(data);
-
+        console.log('2-------');
+        console.log(data);
         FileSaver.saveAs(new Blob([data]), fileName);
+        console.log('3-------');
 
         setExportResult({ fileName });
         setExportStage(EXPORT_STAGE.DONE);
