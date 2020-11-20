@@ -2357,9 +2357,7 @@ namespace Hmcr.Data.Database.Entities
                     .HasMaxLength(1)
                     .IsUnicode(false);
 
-                entity.Property(e => e.RecordVersionNumber)
-                    .HasColumnName("RECORD_VERSION_NUMBER")
-                    .HasDefaultValueSql("((1))");
+                entity.Property(e => e.RecordVersionNumber).HasColumnName("RECORD_VERSION_NUMBER");
 
                 entity.Property(e => e.ReportDate)
                     .HasColumnName("REPORT_DATE")
@@ -6521,9 +6519,7 @@ namespace Hmcr.Data.Database.Entities
                     .HasMaxLength(1)
                     .IsUnicode(false);
 
-                entity.Property(e => e.RecordVersionNumber)
-                    .HasColumnName("RECORD_VERSION_NUMBER")
-                    .HasDefaultValueSql("((1))");
+                entity.Property(e => e.RecordVersionNumber).HasColumnName("RECORD_VERSION_NUMBER");
 
                 entity.Property(e => e.RowId)
                     .HasColumnName("ROW_ID")
@@ -6629,7 +6625,7 @@ namespace Hmcr.Data.Database.Entities
 
                 entity.Property(e => e.DataPrecisionValidWarning)
                     .HasColumnName("DATA_PRECISION_VALID_WARNING")
-                    .HasMaxLength(255);
+                    .HasMaxLength(4000);
 
                 entity.Property(e => e.EndDate)
                     .HasColumnName("END_DATE")
@@ -6687,7 +6683,7 @@ namespace Hmcr.Data.Database.Entities
 
                 entity.Property(e => e.MinMaxValueValidWarning)
                     .HasColumnName("MIN_MAX_VALUE_VALID_WARNING")
-                    .HasMaxLength(255);
+                    .HasMaxLength(4000);
 
                 entity.Property(e => e.PostedDate)
                     .HasColumnName("POSTED_DATE")
@@ -6713,15 +6709,15 @@ namespace Hmcr.Data.Database.Entities
 
                 entity.Property(e => e.ReportingFreqValidWarning)
                     .HasColumnName("REPORTING_FREQ_VALID_WARNING")
-                    .HasMaxLength(255);
+                    .HasMaxLength(4000);
 
                 entity.Property(e => e.RoadClassValidWarning)
                     .HasColumnName("ROAD_CLASS_VALID_WARNING")
-                    .HasMaxLength(255);
+                    .HasMaxLength(4000);
 
                 entity.Property(e => e.RoadLengthValidWarning)
                     .HasColumnName("ROAD_LENGTH_VALID_WARNING")
-                    .HasMaxLength(255);
+                    .HasMaxLength(4000);
 
                 entity.Property(e => e.RowNum)
                     .HasColumnName("ROW_NUM")
@@ -6771,7 +6767,7 @@ namespace Hmcr.Data.Database.Entities
 
                 entity.Property(e => e.SurfaceTypeValidWarning)
                     .HasColumnName("SURFACE_TYPE_VALID_WARNING")
-                    .HasMaxLength(255);
+                    .HasMaxLength(4000);
 
                 entity.Property(e => e.TaskNumber)
                     .HasColumnName("TASK_NUMBER")
