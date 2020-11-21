@@ -20,6 +20,7 @@
         public string DIVIDED_HIGHWAY_FLAG { get; set; }
         // used only by guardrail queries
         public string GUARDRAIL_TYPE { get; set; }
+        public string IIT_X_SECT { get; set; }
         // used only by structure queries
         public string RFI_UNIQUE { get; set; }
         public string IIT_INV_TYPE { get; set; }

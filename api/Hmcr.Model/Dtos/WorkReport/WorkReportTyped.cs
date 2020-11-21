@@ -58,6 +58,8 @@ namespace Hmcr.Model.Dtos.WorkReport
         /// </summary>
         public virtual IList<WorkReportSurfaceType> SurfaceTypes { get; set; }
         public virtual IList<WorkReportMaintenanceClass> MaintenanceClasses { get; set; }
+        public virtual IList<WorkReportHighwayProfile> HighwayProfiles { get; set; }
+        public virtual IList<WorkReportGuardrail> Guardrails { get; set; }
 
         public ActivityCodeValidationDto ActivityCodeValidation { get; set; }
     }

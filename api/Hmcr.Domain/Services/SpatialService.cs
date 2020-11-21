@@ -24,6 +24,12 @@ namespace Hmcr.Domain.Services
         Task<(SpValidationResult result, List<MaintenanceClass> maintenanceClasses)> GetMaintenanceClassAssocWithLineAsync(NetTopologySuite.Geometries.Geometry geometry);
         Task<(SpValidationResult result, MaintenanceClass maintenanceClass)> GetMaintenanceClassAssocWithPointAsync(NetTopologySuite.Geometries.Geometry geometry);
         Task<(SpValidationResult result, List<Structure> structures)> GetBridgeStructureOnRFISegment(string rfiSegmentName);
+        Task<(SpValidationResult result, HighwayProfile highwayProfile)> GetHighwayProfileAssocWithPointAsync(NetTopologySuite.Geometries.Geometry geometry);
+        Task<(SpValidationResult result, List<HighwayProfile> highwayProfiles)> GetHighwayProfileAssocWithLineAsync(NetTopologySuite.Geometries.Geometry geometry);
+        Task<(SpValidationResult result, List<Guardrail> guardrails)> GetGuardrailAssociatedWithLineAsync(NetTopologySuite.Geometries.Geometry geometry);
+        Task<(SpValidationResult result, Guardrail guardrail)> GetGuardrailAssociatedWithPointAsync(NetTopologySuite.Geometries.Geometry geometry);
+
+
     }
 
     public class SpatialService : ISpatialService
@@ -281,6 +287,34 @@ namespace Hmcr.Domain.Services
             var structures = await _inventoryApi.GetBridgeStructure(rfiSegmentName);
 
             return (SpValidationResult.Success, structures);
+        }
+
+        public async Task<(SpValidationResult result, List<HighwayProfile> highwayProfiles)> GetHighwayProfileAssocWithLineAsync(NetTopologySuite.Geometries.Geometry geometry)
+        {
+            var highwayProfiles = await _inventoryApi.GetHighwayProfileAssociatedWithLine(geometry);
+
+            return (SpValidationResult.Success, highwayProfiles);
+        }
+
+        public async Task<(SpValidationResult result, HighwayProfile highwayProfile)> GetHighwayProfileAssocWithPointAsync(NetTopologySuite.Geometries.Geometry geometry)
+        {
+            var highwayProfile = await _inventoryApi.GetHighwayProfileAssociatedWithPoint(geometry);
+
+            return (SpValidationResult.Success, highwayProfile);
+        }
+
+        public async Task<(SpValidationResult result, List<Guardrail> guardrails)> GetGuardrailAssociatedWithLineAsync(NetTopologySuite.Geometries.Geometry geometry)
+        {
+            var guardrails = await _inventoryApi.GetGuardrailAssociatedWithLine(geometry);
+
+            return (SpValidationResult.Success, guardrails);
+        }
+
+        public async Task<(SpValidationResult result, Guardrail guardrail)> GetGuardrailAssociatedWithPointAsync(NetTopologySuite.Geometries.Geometry geometry)
+        {
+            var guardrail = await _inventoryApi.GetGuardrailAssociatedWithPoint(geometry);
+
+            return (SpValidationResult.Success, guardrail);
         }
 
         private (bool withinTolerance, decimal snappedOffset) GetSnappedOffset(RfiSegment segment, decimal offset, string rfiSegment,

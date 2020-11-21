@@ -351,6 +351,20 @@ namespace Hmcr.Model
     public static class RoadLengthRules
     {
         public const string NA = "NOT_APPLICABLE";
+        public const string RATE_LANE_KM_TONNES1 = "RATE_LANE_KM_TONNES1";
+        public const string RATE_LANE_KM_TONNES2 = "RATE_LANE_KM_TONNES2";
+        public const string RATE_LANE_KM_LITRES1 = "RATE_LANE_KM_LITRES1";
+        public const string RATE_LANE_KM_35 = "RATE_LANE_KM_35";
+        public const string RATE_LANE_KM_60 = "RATE_LANE_KM_60";
+        public const string LANE_METERS_35 = "LANE_METERS_35";
+        public const string LANE_KM = "LANE_KM";
+        public const string LANE_KM_20 = "LANE_KM_20";
+        public const string LANE_METERS = "LANE_METERS";
+        public const string ROAD_KM = "ROAD_KM";
+        public const string ROAD_KM_20 = "ROAD_KM_20";
+        public const string ROAD_METERS = "ROAD_METERS";
+        public const string ROAD_METERS_20 = "ROAD_METERS_20";
+        public const string GUARDRAIL_LEN_METERS = "GUARDRAIL_LEN_METERS";
     }
     
     public static class RoadSurface

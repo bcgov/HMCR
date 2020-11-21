@@ -322,7 +322,7 @@ namespace Hmcr.Chris
 
                 foreach (var lineStringCoordinates in geometryGroup)
                 {
-                    body = string.Format(_queries.InventoryAssocWithPointQuery, InventoryParamType.POINT_COORDINATE, lineStringCoordinates, InventoryQueryTypeName.HP_ASSOC_WITH_POINT);
+                    body = string.Format(_queries.InventoryAssocWithPointQuery, InventoryParamType.POINT_COORDINATE, lineStringCoordinates, InventoryQueryTypeName.GR_ASSOC_WITH_POINT);
 
                     contents = await (await _api.PostWithRetry(_client, _path, body)).Content.ReadAsStringAsync();
 
@@ -331,6 +331,7 @@ namespace Hmcr.Chris
                     if (results.features.Length > 0)
                     {
                         guardrail.GuardrailType = results.features[0].properties.GUARDRAIL_TYPE;
+                        guardrail.CrossSectionPosition = results.features[0].properties.IIT_X_SECT;
                     }
                 }
 
@@ -355,7 +356,7 @@ namespace Hmcr.Chris
 
                 foreach (var lineStringCoordinates in geometryGroup)
                 {
-                    body = string.Format(_queries.InventoryAssocWithLineQuery, InventoryParamType.LINE_COORDINATE, lineStringCoordinates, InventoryQueryTypeName.HP_ASSOC_WITH_LINE);
+                    body = string.Format(_queries.InventoryAssocWithLineQuery, InventoryParamType.LINE_COORDINATE, lineStringCoordinates, InventoryQueryTypeName.GR_ASSOC_WITH_LINE);
 
                     contents = await (await _api.PostWithRetry(_client, _path, body)).Content.ReadAsStringAsync();
 
@@ -366,6 +367,7 @@ namespace Hmcr.Chris
                         Guardrail guardrail = new Guardrail();
                         guardrail.Length = feature.properties.CLIPPED_LENGTH_KM;
                         guardrail.GuardrailType = feature.properties.GUARDRAIL_TYPE;
+                        guardrail.CrossSectionPosition = feature.properties.IIT_X_SECT;
 
                         guardrails.Add(guardrail);
                     }

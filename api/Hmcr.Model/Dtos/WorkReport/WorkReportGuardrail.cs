@@ -2,14 +2,10 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace Hmcr.Chris.Models
+namespace Hmcr.Model.Dtos.WorkReport
 {
-    public class Guardrail
+    public class WorkReportGuardrail
     {
-        public Geometry geometry { get; set; }
-        /// <summary>
-        /// Length in Meters
-        /// </summary>
         public string GuardrailType { get; set; }
         public double Length { get; set; }
         public string CrossSectionPosition { get; set; }
