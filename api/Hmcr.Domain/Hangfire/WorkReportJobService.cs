@@ -712,6 +712,7 @@ namespace Hmcr.Domain.Hangfire
                 if (accomplishment > (totalRoadKM * 1000))
                 {
                     accomplishmentWarning = $"Accomplishment value of [{accomplishment}] should be <= [{totalRoadKM}] Guardrail Length M]";
+                    accomplishmentWarning = $"Accomplishment value of [{accomplishment}] should be <= [{totalRoadKM * 1000}] Guardrail Length M";
                 }
             } else
             {
