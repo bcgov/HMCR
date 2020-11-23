@@ -366,29 +366,11 @@ namespace Hmcr.Domain.Hangfire
             var typedRow = row.WorkReportTyped;
             var submissionRow = _submissionRows[(decimal)typedRow.RowNum];
             typedRow.HighwayProfiles = new List<WorkReportHighwayProfile>();
+            typedRow.Guardrails = new List<WorkReportGuardrail>();
 
             //surface type calls are different between Point & Line
             if (typedRow.FeatureType == FeatureType.Point)
             {
-                //always get highway profile
-                var hpResult = await _spatialService.GetHighwayProfileAssocWithPointAsync(row.Geometry);
-                if (hpResult.result == SpValidationResult.Fail)
-                {
-                    querySuccess = false;
-                    SetErrorDetail(submissionRow, errors, _statusService.FileLocationError);
-                }
-                else if (hpResult.result == SpValidationResult.Success)
-                {
-                    if (hpResult.highwayProfile != null)    //only add if type was returned
-                    {
-                        WorkReportHighwayProfile highwayProfile = new WorkReportHighwayProfile();
-                        highwayProfile.Length = hpResult.highwayProfile.Length;
-                        highwayProfile.NumberOfLanes = hpResult.highwayProfile.NumberOfLanes;
-                        
-                        typedRow.HighwayProfiles.Add(highwayProfile);
-                    }
-                }
-
                 //get guardrails when activity rule calls for it
                 if (typedRow.ActivityCodeValidation.RoadLenghRuleExec == RoadLengthRules.GUARDRAIL_LEN_METERS)
                 {
@@ -409,6 +391,27 @@ namespace Hmcr.Domain.Hangfire
                             typedRow.Guardrails.Add(guardrail);
                         }
                     }
+                } 
+                else 
+                {
+                    //get highway profile
+                    var hpResult = await _spatialService.GetHighwayProfileAssocWithPointAsync(row.Geometry);
+                    if (hpResult.result == SpValidationResult.Fail)
+                    {
+                        querySuccess = false;
+                        SetErrorDetail(submissionRow, errors, _statusService.FileLocationError);
+                    }
+                    else if (hpResult.result == SpValidationResult.Success)
+                    {
+                        if (hpResult.highwayProfile != null)    //only add if type was returned
+                        {
+                            WorkReportHighwayProfile highwayProfile = new WorkReportHighwayProfile();
+                            highwayProfile.Length = hpResult.highwayProfile.Length;
+                            highwayProfile.NumberOfLanes = hpResult.highwayProfile.NumberOfLanes;
+
+                            typedRow.HighwayProfiles.Add(highwayProfile);
+                        }
+                    }
                 }
 
                 if (querySuccess)
@@ -418,25 +421,6 @@ namespace Hmcr.Domain.Hangfire
             }
             else if (typedRow.FeatureType == FeatureType.Line)
             {
-                //always get highway profile
-                var hpResult = await _spatialService.GetHighwayProfileAssocWithLineAsync(row.Geometry);
-                if (hpResult.result == SpValidationResult.Fail)
-                {
-                    querySuccess = false;
-                    SetErrorDetail(submissionRow, errors, _statusService.FileLocationError);
-                }
-                else if (hpResult.result == SpValidationResult.Success)
-                {
-                    foreach (var profile in hpResult.highwayProfiles)
-                    {
-                        WorkReportHighwayProfile highwayProfile = new WorkReportHighwayProfile();
-                        highwayProfile.Length = profile.Length;
-                        highwayProfile.NumberOfLanes = profile.NumberOfLanes;
-
-                        typedRow.HighwayProfiles.Add(highwayProfile);
-                    }
-                }
-
                 //get guardrails when activity rule calls for it
                 if (typedRow.ActivityCodeValidation.RoadLenghRuleExec == RoadLengthRules.GUARDRAIL_LEN_METERS)
                 {
@@ -458,7 +442,28 @@ namespace Hmcr.Domain.Hangfire
                         }
                     }
                 }
+                else
+                {
+                    //get highway profile
+                    var hpResult = await _spatialService.GetHighwayProfileAssocWithLineAsync(row.Geometry);
+                    if (hpResult.result == SpValidationResult.Fail)
+                    {
+                        querySuccess = false;
+                        SetErrorDetail(submissionRow, errors, _statusService.FileLocationError);
+                    }
+                    else if (hpResult.result == SpValidationResult.Success)
+                    {
+                        foreach (var profile in hpResult.highwayProfiles)
+                        {
+                            WorkReportHighwayProfile highwayProfile = new WorkReportHighwayProfile();
+                            highwayProfile.Length = profile.Length;
+                            highwayProfile.NumberOfLanes = profile.NumberOfLanes;
 
+                            typedRow.HighwayProfiles.Add(highwayProfile);
+                        }
+                    }
+                }
+                
                 if (querySuccess)
                 {
                     PerformRoadLengthValidation(typedRow);
@@ -663,9 +668,6 @@ namespace Hmcr.Domain.Hangfire
                         {
                             totalRoadKM += guardrail.Length;
                         }
-                    } else
-                    {
-                        //what happens when no guardrail data is returned.. but the rule is GUARDRAIL validation??
                     }
                 }
                 else
@@ -689,9 +691,6 @@ namespace Hmcr.Domain.Hangfire
                     {
                         WorkReportGuardrail guardrail = typedRow.Guardrails.First();
                         totalRoadKM += (guardrail.CrossSectionPosition != "M") ? guardrail.Length : 0.0;
-                    } else
-                    {
-                        //what happens when no guardrail data is returned.. but the rule is GUARDRAIL validation??
                     }
                 }
                 else
@@ -740,7 +739,7 @@ namespace Hmcr.Domain.Hangfire
                     }
                     break;
                 case RoadLengthRules.RATE_LANE_KM_TONNES2:
-                    if (accomplishment > (0.146 * (totalLaneKM * 1000) * 35))
+                    if (accomplishment > (0.146 * (totalLaneKM * 1000) * 3.5))
                     {
                         message = $"Accomplishment value of [{accomplishment}] should be <= [0.146] * [{totalLaneKM}] Lane KM * 1000] * [3.5]";
                     }

@@ -44,8 +44,8 @@ namespace Hmcr.Chris
             public const string MC_ASSOC_WITH_POINT = "MC_ASSOCIATED_WITH_POINT";
             public const string HP_ASSOC_WITH_LINE = "HP_ASSOCIATED_WITH_LINE";
             public const string HP_ASSOC_WITH_POINT = "HP_ASSOCIATED_WITH_POINT";
-            public const string GR_ASSOC_WITH_LINE = "GR_ASSOCIATED_WITH_POINT";
-            public const string GR_ASSOC_WITH_POINT = "GR_ASSOCIATED_WITH_LINE";
+            public const string GR_ASSOC_WITH_LINE = "GR_ASSOCIATED_WITH_LINE";
+            public const string GR_ASSOC_WITH_POINT = "GR_ASSOCIATED_WITH_POINT";
         }
         public static class InventoryParamType
         {
