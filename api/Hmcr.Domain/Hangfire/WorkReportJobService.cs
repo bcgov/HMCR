@@ -14,6 +14,7 @@ using Hmcr.Model.Utils;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using NetTopologySuite.Geometries;
+using NetTopologySuite.Operation.Valid;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -220,7 +221,12 @@ namespace Hmcr.Domain.Hangfire
                         && (workReport.WorkReportTyped.ActivityCodeValidation.SurfaceTypeRuleId != notApplicableSurfaceTypeId))
                 {
                     tasklist.Add(Task.Run(async () => updatedWorkReports.Add(await PerformSurfaceTypeValidationAsync(workReport))));
-                }              
+                }
+                if ((workReport.WorkReportTyped.ActivityCodeValidation.RoadLengthRuleId != 0)
+                        && (workReport.WorkReportTyped.ActivityCodeValidation.RoadLengthRuleId != notApplicableRoadLengthId))
+                {
+                    tasklist.Add(Task.Run(async () => updatedWorkReports.Add(await PerformRoadLengthValidationAsync(workReport))));
+                }
 
                 Task.WaitAll(tasklist.ToArray());
 
@@ -352,6 +358,121 @@ namespace Hmcr.Domain.Hangfire
             }
             return typedRow;
         }
+
+        private async Task<WorkReportGeometry> PerformRoadLengthValidationAsync(WorkReportGeometry row)
+        {
+            var errors = new Dictionary<string, List<string>>();
+            var querySuccess = true;
+            var typedRow = row.WorkReportTyped;
+            var submissionRow = _submissionRows[(decimal)typedRow.RowNum];
+            typedRow.HighwayProfiles = new List<WorkReportHighwayProfile>();
+            typedRow.Guardrails = new List<WorkReportGuardrail>();
+
+            //surface type calls are different between Point & Line
+            if (typedRow.FeatureType == FeatureType.Point)
+            {
+                //get guardrails when activity rule calls for it
+                if (typedRow.ActivityCodeValidation.RoadLenghRuleExec == RoadLengthRules.GUARDRAIL_LEN_METERS)
+                {
+                    var grResult = await _spatialService.GetGuardrailAssociatedWithPointAsync(row.Geometry);
+                    if (grResult.result == SpValidationResult.Fail)
+                    {
+                        querySuccess = false;
+                        SetErrorDetail(submissionRow, errors, _statusService.FileLocationError);
+                    }
+                    else if (grResult.result == SpValidationResult.Success)
+                    {
+                        if (grResult.guardrail != null)
+                        {
+                            WorkReportGuardrail guardrail = new WorkReportGuardrail();
+                            guardrail.GuardrailType = grResult.guardrail.GuardrailType;
+                            guardrail.Length = grResult.guardrail.Length;
+
+                            typedRow.Guardrails.Add(guardrail);
+                        }
+                    }
+                } 
+                else 
+                {
+                    //get highway profile
+                    var hpResult = await _spatialService.GetHighwayProfileAssocWithPointAsync(row.Geometry);
+                    if (hpResult.result == SpValidationResult.Fail)
+                    {
+                        querySuccess = false;
+                        SetErrorDetail(submissionRow, errors, _statusService.FileLocationError);
+                    }
+                    else if (hpResult.result == SpValidationResult.Success)
+                    {
+                        if (hpResult.highwayProfile != null)    //only add if type was returned
+                        {
+                            WorkReportHighwayProfile highwayProfile = new WorkReportHighwayProfile();
+                            highwayProfile.Length = hpResult.highwayProfile.Length;
+                            highwayProfile.NumberOfLanes = hpResult.highwayProfile.NumberOfLanes;
+
+                            typedRow.HighwayProfiles.Add(highwayProfile);
+                        }
+                    }
+                }
+
+                if (querySuccess)
+                {
+                    PerformRoadLengthValidation(typedRow);
+                }
+            }
+            else if (typedRow.FeatureType == FeatureType.Line)
+            {
+                //get guardrails when activity rule calls for it
+                if (typedRow.ActivityCodeValidation.RoadLenghRuleExec == RoadLengthRules.GUARDRAIL_LEN_METERS)
+                {
+                    var grResult = await _spatialService.GetGuardrailAssociatedWithLineAsync(row.Geometry);
+                    if (grResult.result == SpValidationResult.Fail)
+                    {
+                        querySuccess = false;
+                        SetErrorDetail(submissionRow, errors, _statusService.FileLocationError);
+                    }
+                    else if (grResult.result == SpValidationResult.Success)
+                    {
+                        foreach (var profile in grResult.guardrails)
+                        {
+                            WorkReportGuardrail guardrail = new WorkReportGuardrail();
+                            guardrail.GuardrailType = profile.GuardrailType;
+                            guardrail.Length = profile.Length;
+
+                            typedRow.Guardrails.Add(guardrail);
+                        }
+                    }
+                }
+                else
+                {
+                    //get highway profile
+                    var hpResult = await _spatialService.GetHighwayProfileAssocWithLineAsync(row.Geometry);
+                    if (hpResult.result == SpValidationResult.Fail)
+                    {
+                        querySuccess = false;
+                        SetErrorDetail(submissionRow, errors, _statusService.FileLocationError);
+                    }
+                    else if (hpResult.result == SpValidationResult.Success)
+                    {
+                        foreach (var profile in hpResult.highwayProfiles)
+                        {
+                            WorkReportHighwayProfile highwayProfile = new WorkReportHighwayProfile();
+                            highwayProfile.Length = profile.Length;
+                            highwayProfile.NumberOfLanes = profile.NumberOfLanes;
+
+                            typedRow.HighwayProfiles.Add(highwayProfile);
+                        }
+                    }
+                }
+                
+                if (querySuccess)
+                {
+                    PerformRoadLengthValidation(typedRow);
+                }
+            }
+            
+            return row;
+        }
+
         private async Task<WorkReportGeometry> PerformMaintenanceClassValidationAsync(WorkReportGeometry row)
         {
             var errors = new Dictionary<string, List<string>>();
@@ -522,10 +643,181 @@ namespace Hmcr.Domain.Hangfire
                         $" should be <= the Maximum Value [{maxValue}] allowed for the Activity [{typedRow.ActivityNumber}]");
                 }
             }
+
             if (warnings.Count > 0)
             {
                 SetWarningDetail(submissionRow, warnings);
             }
+        }
+
+        private void PerformRoadLengthValidation(WorkReportTyped typedRow)
+        {
+            var warnings = new Dictionary<string, List<string>>();
+            var submissionRow = _submissionRows[(decimal)typedRow.RowNum];
+            var totalRoadKM = 0.0;
+            var totalLaneKM = 0.0;
+            var accomplishment = (double)typedRow.Accomplishment;   //cast accomplishment as a double
+
+            if (typedRow.FeatureType == FeatureType.Line)
+            {
+                if (typedRow.ActivityCodeValidation.RoadLenghRuleExec == RoadLengthRules.GUARDRAIL_LEN_METERS)
+                {
+                    if (typedRow.Guardrails.Count > 0)
+                    {
+                        foreach (var guardrail in typedRow.Guardrails.Where(x => x.CrossSectionPosition != "M"))
+                        {
+                            totalRoadKM += guardrail.Length;
+                        }
+
+                        totalRoadKM += ((totalRoadKM * .10) > 0.2) ? 0.2 : (totalRoadKM * .10);
+                    }
+                }
+                else
+                {
+                    foreach (var profile in typedRow.HighwayProfiles)
+                    {
+                        totalRoadKM += profile.Length;
+                        totalLaneKM += profile.Length * profile.NumberOfLanes;
+                    }
+
+                    //Add a tolerance of 10% to a maximum of 0.2KM (which is 0.1KM each side) to the Total RoadKM
+                    totalRoadKM += ((totalRoadKM * .10) > 0.2) ? 0.2 : (totalRoadKM * .10);
+                    //Add a tolerance of 10% to a maximum of 0.5km to the total LaneKM
+                    totalLaneKM += ((totalLaneKM * .10) > 0.5) ? 0.5 : (totalLaneKM * .10);
+                }
+            }
+            else if (typedRow.FeatureType == FeatureType.Point)
+            {
+                if (typedRow.ActivityCodeValidation.RoadLenghRuleExec == RoadLengthRules.GUARDRAIL_LEN_METERS)
+                {
+                    if (typedRow.Guardrails.Count > 0)
+                    {
+                        WorkReportGuardrail guardrail = typedRow.Guardrails.First();
+                        totalRoadKM += (guardrail.CrossSectionPosition != "M") ? guardrail.Length : 0.0;
+                    }
+                    //add tolerance to guardrail length
+                    totalRoadKM += 0.04;
+                }
+                else
+                {
+                    var numberOfLanes = typedRow.HighwayProfiles.First().NumberOfLanes;
+                    totalRoadKM = 0.04;
+                    totalLaneKM = totalRoadKM * numberOfLanes;
+                }
+            }
+
+            var accomplishmentWarning = "";
+            if (typedRow.ActivityCodeValidation.RoadLenghRuleExec == RoadLengthRules.GUARDRAIL_LEN_METERS)
+            {
+                if (accomplishment > (totalRoadKM * 1000))
+                {
+                    accomplishmentWarning = $"Accomplishment value of [{accomplishment}] should be <= [{totalRoadKM}] Guardrail Length M]";
+                }
+            } else
+            {
+                accomplishmentWarning = ValidateRoadLengthAccomplishment(typedRow.ActivityCodeValidation.RoadLenghRuleExec
+                    , accomplishment, totalLaneKM, totalRoadKM);
+            }
+            
+            if (accomplishmentWarning != "")
+            {
+                warnings.AddItem("Road Length Validation", accomplishmentWarning);
+            }
+
+            if (warnings.Count > 0)
+            {
+                SetWarningDetail(submissionRow, warnings);
+            }
+        }
+    
+        private string ValidateRoadLengthAccomplishment(string ruleExec, double accomplishment, double totalLaneKM, double totalRoadKM)
+        {
+            var message = "";
+
+            //perform the validation based on the rule
+            switch (ruleExec)
+            {
+                case RoadLengthRules.RATE_LANE_KM_TONNES1:
+                    if (accomplishment > (0.120 * (totalLaneKM * 1000) * 3.5))
+                    {
+                        message = $"Accomplishment value of [{accomplishment}] should be <= [0.120] * [{totalLaneKM}] Lane KM * 1000] * [3.5]";
+                    }
+                    break;
+                case RoadLengthRules.RATE_LANE_KM_TONNES2:
+                    if (accomplishment > (0.146 * (totalLaneKM * 1000) * 3.5))
+                    {
+                        message = $"Accomplishment value of [{accomplishment}] should be <= [0.146] * [{totalLaneKM}] Lane KM * 1000] * [3.5]";
+                    }
+                    break;
+                case RoadLengthRules.RATE_LANE_KM_LITRES1:
+                    if (accomplishment > (1.1 * (totalLaneKM * 1000) * 3.5))
+                    {
+                        message = $"Accomplishment value of [{accomplishment}] should be <= [1.1] * [{totalLaneKM}] Lane KM * 1000] * [3.5]";
+                    }
+                    break;
+                case RoadLengthRules.RATE_LANE_KM_35:
+                    if (accomplishment > (2.0 * (totalRoadKM * 1000) * 3.5))
+                    {
+                        message = $"Accomplishment value of [{accomplishment}] should be <= [2.0] * [{totalRoadKM}] Road KM * 1000.0] * [3.5]";
+                    }
+                    break;
+                case RoadLengthRules.RATE_LANE_KM_60:
+                    if (accomplishment > (3.0 * (totalRoadKM * 1000) * 6.0))
+                    {
+                        message = $"Accomplishment value of [{accomplishment}] should be <= [3.0 * [{totalRoadKM}] Road KM * 1000.0] * [6.0]";
+                    }
+                    break;
+                case RoadLengthRules.LANE_METERS_35:
+                    if (accomplishment > ((totalLaneKM * 1000) * 3.5))
+                    {
+                        message = $"Accomplishment value of [{accomplishment}] should be <=  [{totalLaneKM}] Lane KM * 1000.0] * [3.5]";
+                    }
+                    break;
+                case RoadLengthRules.LANE_KM:
+                    if (accomplishment > totalLaneKM)
+                    {
+                        message = $"Accomplishment value of [{accomplishment}] should be <= [{totalLaneKM}] Lane KM]";
+                    }
+                    break;
+                case RoadLengthRules.LANE_KM_20:
+                    if (accomplishment > (totalLaneKM * 2.0))
+                    {
+                        message = $"Accomplishment value of [{accomplishment}] should be <= [{totalLaneKM}] Lane KM] * 2.0";
+                    }
+                    break;
+                case RoadLengthRules.LANE_METERS:
+                    if (accomplishment > (totalLaneKM * 1000))
+                    {
+                        message = $"Accomplishment value of [{accomplishment}] should be <=  [{totalLaneKM}] Lane KM * 1000.0]";
+                    }
+                    break;
+                case RoadLengthRules.ROAD_KM:
+                    if (accomplishment > totalRoadKM)
+                    {
+                        message = $"Accomplishment value of [{accomplishment}] should be <= [{totalRoadKM}] Road KM]";
+                    }
+                    break;
+                case RoadLengthRules.ROAD_KM_20:
+                    if (accomplishment > (totalRoadKM * 2.0))
+                    {
+                        message = $"Accomplishment value of [{accomplishment}] should be <= [{totalRoadKM}] Road KM] * 2.0";
+                    }
+                    break;
+                case RoadLengthRules.ROAD_METERS:
+                    if (accomplishment > (totalRoadKM * 1000))
+                    {
+                        message = $"Accomplishment value of [{accomplishment}] should be <= [{totalRoadKM}] Road KM * 1000.0]";
+                    }
+                    break;
+                case RoadLengthRules.ROAD_METERS_20:
+                    if (accomplishment > (totalRoadKM * 1000) * 2.0)
+                    {
+                        message = $"Accomplishment value of [{accomplishment}] should be <= [{totalRoadKM}] Road KM * 1000.0] * 2.0";
+                    }
+                    break;
+            }
+
+            return message;
         }
 
         private void PerformMaintenanceClassValidation(WorkReportTyped typedRow)
@@ -544,8 +836,6 @@ namespace Hmcr.Domain.Hangfire
             var summerUnmaintainedLen = typedRow.MaintenanceClasses.Where(x => x.SummerRating == "8").Sum(x => x.RoadLength);
             var summerTotal = summerMaintainedLen + summerUnmaintainedLen;
 
-            //TODO: the percentages need to be configurable using CODE LOOKUP
-            
             if (typedRow.FeatureType == FeatureType.Line)
             {
                 var proportionPercMaintenance = _validator.CodeLookup.Where(x => x.CodeSet == CodeSet.ValidatorProportion)
