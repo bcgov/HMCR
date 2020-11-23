@@ -668,6 +668,8 @@ namespace Hmcr.Domain.Hangfire
                         {
                             totalRoadKM += guardrail.Length;
                         }
+
+                        totalRoadKM += ((totalRoadKM * .10) > 0.2) ? 0.2 : (totalRoadKM * .10);
                     }
                 }
                 else
@@ -678,8 +680,9 @@ namespace Hmcr.Domain.Hangfire
                         totalLaneKM += profile.Length * profile.NumberOfLanes;
                     }
 
-                    //Add a tolerance of 10% to a maxiumum of 0.2KM (which is 0.1KM each side) to the Total RoadKM
+                    //Add a tolerance of 10% to a maximum of 0.2KM (which is 0.1KM each side) to the Total RoadKM
                     totalRoadKM += ((totalRoadKM * .10) > 0.2) ? 0.2 : (totalRoadKM * .10);
+                    //Add a tolerance of 10% to a maximum of 0.5km to the total LaneKM
                     totalLaneKM += ((totalLaneKM * .10) > 0.5) ? 0.5 : (totalLaneKM * .10);
                 }
             }
@@ -692,6 +695,8 @@ namespace Hmcr.Domain.Hangfire
                         WorkReportGuardrail guardrail = typedRow.Guardrails.First();
                         totalRoadKM += (guardrail.CrossSectionPosition != "M") ? guardrail.Length : 0.0;
                     }
+                    //add tolerance to guardrail length
+                    totalRoadKM += 0.04;
                 }
                 else
                 {
@@ -706,7 +711,7 @@ namespace Hmcr.Domain.Hangfire
             {
                 if (accomplishment > (totalRoadKM * 1000))
                 {
-                    accomplishmentWarning = $"Accomplishment value of [{accomplishment}] should be <= [{totalRoadKM}] Guardrail Length * 1000.0]";
+                    accomplishmentWarning = $"Accomplishment value of [{accomplishment}] should be <= [{totalRoadKM}] Guardrail Length M]";
                 }
             } else
             {
