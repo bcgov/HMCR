@@ -29,5 +29,9 @@
         public double LENGTH_KM { get; set; }
         public string BMIS_STRUCTURE_TYPE { get; set; }
         public string BMIS_STRUCTURE_NO { get; set; }
+        //used only by the rest area queries
+        public decimal LOC_KM { get; set; }
+        public string REST_AREA_NUMBER { get; set; }
+        public string REST_AREA_CLASS { get; set; }
     }
 }

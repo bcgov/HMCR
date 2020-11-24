@@ -28,7 +28,7 @@ namespace Hmcr.Domain.Services
         Task<(SpValidationResult result, List<HighwayProfile> highwayProfiles)> GetHighwayProfileAssocWithLineAsync(NetTopologySuite.Geometries.Geometry geometry);
         Task<(SpValidationResult result, List<Guardrail> guardrails)> GetGuardrailAssociatedWithLineAsync(NetTopologySuite.Geometries.Geometry geometry);
         Task<(SpValidationResult result, Guardrail guardrail)> GetGuardrailAssociatedWithPointAsync(NetTopologySuite.Geometries.Geometry geometry);
-
+        Task<(SpValidationResult result, List<RestArea> restAreas)> GetRestAreasOnRFISegmentAsync(string rfiSegmentName);
 
     }
 
@@ -315,6 +315,13 @@ namespace Hmcr.Domain.Services
             var guardrail = await _inventoryApi.GetGuardrailAssociatedWithPoint(geometry);
 
             return (SpValidationResult.Success, guardrail);
+        }
+
+        public async Task<(SpValidationResult result, List<RestArea> restAreas)> GetRestAreasOnRFISegmentAsync(string rfiSegmentName)
+        {
+            var restAreas = await _inventoryApi.GetRestAreasOnRFISegment(rfiSegmentName);
+
+            return (SpValidationResult.Success, restAreas);
         }
 
         private (bool withinTolerance, decimal snappedOffset) GetSnappedOffset(RfiSegment segment, decimal offset, string rfiSegment,
