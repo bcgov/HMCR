@@ -416,11 +416,11 @@ namespace Hmcr.Domain.Hangfire
             {
                 if (typedRow.FeatureType == FeatureType.Line)
                 {
-                    warnings.AddItem("Structure Validation", $"Structure Number[{typedRow.StructureNumber}] is not found within 100M of the GPS position from [{typedRow.StartLatitude},{typedRow.StartLongitude}] to [{typedRow.EndLatitude},{typedRow.EndLongitude}]");
+                    warnings.AddItem("Structure Validation", $"Structure Number [{typedRow.StructureNumber}] is not found within 100M of the GPS position from [{typedRow.StartLatitude},{typedRow.StartLongitude}] to [{typedRow.EndLatitude},{typedRow.EndLongitude}]");
                 } 
                 else
                 {
-                    warnings.AddItem("Structure Validation", $"Structure Number[{typedRow.StructureNumber}] is not found within 100M of the GPS position [{typedRow.StartLatitude},{typedRow.StartLongitude}]");
+                    warnings.AddItem("Structure Validation", $"Structure Number [{typedRow.StructureNumber}] is not found within 100M of the GPS position [{typedRow.StartLatitude},{typedRow.StartLongitude}]");
                 }
             }
 
