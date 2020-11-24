@@ -729,11 +729,12 @@ namespace Hmcr.Domain.Hangfire
                 {
                     if (typedRow.Guardrails.Count > 0)
                     {
-                        WorkReportGuardrail guardrail = typedRow.Guardrails.First();
-                        totalRoadKM += (guardrail.CrossSectionPosition != "M") ? guardrail.Length : 0.0;
+                        foreach (var guardrail in typedRow.Guardrails.Where(x => x.CrossSectionPosition != "M"))
+                        {
+                            //add the tolerance for each guardrail record
+                            totalRoadKM += guardrail.Length += 0.04;
+                        }
                     }
-                    //add tolerance to guardrail length
-                    totalRoadKM += 0.04;
                 }
                 else
                 {
