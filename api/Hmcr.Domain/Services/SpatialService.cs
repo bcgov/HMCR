@@ -23,7 +23,7 @@ namespace Hmcr.Domain.Services
         Task<(SpValidationResult result, SurfaceType surfaceType)> GetSurfaceTypeAssocWithPointAsync(NetTopologySuite.Geometries.Geometry geometry);
         Task<(SpValidationResult result, List<MaintenanceClass> maintenanceClasses)> GetMaintenanceClassAssocWithLineAsync(NetTopologySuite.Geometries.Geometry geometry);
         Task<(SpValidationResult result, MaintenanceClass maintenanceClass)> GetMaintenanceClassAssocWithPointAsync(NetTopologySuite.Geometries.Geometry geometry);
-        Task<(SpValidationResult result, List<Structure> structures)> GetBridgeStructureOnRFISegment(string rfiSegmentName);
+        Task<(SpValidationResult result, List<Structure> structures)> GetStructuresOnRFISegmentAsync(string rfiSegmentName);
         Task<(SpValidationResult result, HighwayProfile highwayProfile)> GetHighwayProfileAssocWithPointAsync(NetTopologySuite.Geometries.Geometry geometry);
         Task<(SpValidationResult result, List<HighwayProfile> highwayProfiles)> GetHighwayProfileAssocWithLineAsync(NetTopologySuite.Geometries.Geometry geometry);
         Task<(SpValidationResult result, List<Guardrail> guardrails)> GetGuardrailAssociatedWithLineAsync(NetTopologySuite.Geometries.Geometry geometry);
@@ -282,9 +282,9 @@ namespace Hmcr.Domain.Services
             return (SpValidationResult.Success, maintenanceClasses);
         }
 
-        public async Task<(SpValidationResult result, List<Structure> structures)> GetBridgeStructureOnRFISegment(string rfiSegmentName)
+        public async Task<(SpValidationResult result, List<Structure> structures)> GetStructuresOnRFISegmentAsync(string rfiSegmentName)
         {
-            var structures = await _inventoryApi.GetBridgeStructure(rfiSegmentName);
+            var structures = await _inventoryApi.GetStructuresOnRFISegment(rfiSegmentName);
 
             return (SpValidationResult.Success, structures);
         }

@@ -14,5 +14,6 @@ namespace Hmcr.Chris.Models
         public decimal BeginKM { get; set; }
         public decimal EndKM { get; set; }
         public double Length { get; set; }
+        public string StructureNumber { get; set; }
     }
 }

@@ -21,7 +21,7 @@ namespace Hmcr.Chris
         Task<List<HighwayProfile>> GetHighwayProfileAssociatedWithLine(NetTopologySuite.Geometries.Geometry geometry);
         Task<Guardrail> GetGuardrailAssociatedWithPoint(NetTopologySuite.Geometries.Geometry geometry);
         Task<List<Guardrail>> GetGuardrailAssociatedWithLine(NetTopologySuite.Geometries.Geometry geometry);
-        Task<List<Structure>> GetBridgeStructure(string rfiSegment);
+        Task<List<Structure>> GetStructuresOnRFISegment(string rfiSegment);
     }
 
     public class InventoryApi : IInventoryApi
@@ -382,7 +382,7 @@ namespace Hmcr.Chris
             }
         }
 
-        public async Task<List<Structure>> GetBridgeStructure(string rfiSegment)
+        public async Task<List<Structure>> GetStructuresOnRFISegment(string rfiSegment)
         {
             var query = "";
             var content = "";
@@ -401,6 +401,9 @@ namespace Hmcr.Chris
                 {
                     Structure structure = new Structure();
                     structure.StructureType = feature.properties.BMIS_STRUCTURE_TYPE;  //this may possibly be feature.properties.IIT_INV_TYPE
+                    // need to apply trim start '0' to strip leading zeros, if the structure number in the typed row
+                    //  had no alpha chars the CSV parse casts it as a number (ie. 00525 = 525)
+                    structure.StructureNumber = feature.properties.BMIS_STRUCTURE_NO.TrimStart('0');
                     structure.BeginKM = feature.properties.BEGIN_KM;
                     structure.EndKM = feature.properties.END_KM;
                     structure.Length = feature.properties.LENGTH_KM;
@@ -412,7 +415,7 @@ namespace Hmcr.Chris
             }
             catch (Exception ex)
             {
-                _logger.LogError($"Exception - GetBridgeStructure: {query} - {content}");
+                _logger.LogError($"Exception - GetStructuresOnRFISegment: {query} - {content}");
                 throw ex;
             }
         }

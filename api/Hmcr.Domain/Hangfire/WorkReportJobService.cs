@@ -227,6 +227,10 @@ namespace Hmcr.Domain.Hangfire
                 {
                     tasklist.Add(Task.Run(async () => updatedWorkReports.Add(await PerformRoadLengthValidationAsync(workReport))));
                 }
+                if ((workReport.WorkReportTyped.ActivityNumber.StartsWith('6')))
+                {
+                    tasklist.Add(Task.Run(async () => updatedWorkReports.Add(await PerformStructureValidationAsync(workReport))));
+                }
 
                 Task.WaitAll(tasklist.ToArray());
 
@@ -309,6 +313,7 @@ namespace Hmcr.Domain.Hangfire
             }
             return workReports;
         }
+
         private async Task<WorkReportTyped> PerformReportedWorkReportValidationAsync(WorkReportTyped typedRow)
         {
             var warnings = new Dictionary<string, List<string>>();
@@ -357,6 +362,38 @@ namespace Hmcr.Domain.Hangfire
                 SetWarningDetail(submissionRow, warnings);
             }
             return typedRow;
+        }
+
+        private async Task<WorkReportGeometry> PerformStructureValidationAsync(WorkReportGeometry row)
+        {
+            var typedRow = row.WorkReportTyped;
+            var submissionRow = _submissionRows[(decimal)typedRow.RowNum];
+            var warnings = new Dictionary<string, List<string>>();
+            
+            var structureVariance = _validator.CodeLookup.Where(x => x.CodeSet == CodeSet.ValidatorProportion)
+                .Where(x => x.CodeName == ValidatorProportionCode.STRUCTURE_VARIANCE_M).First().CodeValueNum;
+            var structureVarianceM = structureVariance / 1000;
+
+            //structure checking
+            var hasStructureWithinVariance = await WithinStructureVariance(typedRow, (decimal)structureVarianceM);
+            if (!hasStructureWithinVariance)
+            {
+                if (typedRow.FeatureType == FeatureType.Line)
+                {
+                    warnings.AddItem("Structure Validation", $"Structure Number[{typedRow.StructureNumber}] is not found within 100M of the GPS position from [{typedRow.StartLatitude},{typedRow.StartLongitude}] to [{typedRow.EndLatitude},{typedRow.EndLongitude}]");
+                } 
+                else
+                {
+                    warnings.AddItem("Structure Validation", $"Structure Number[{typedRow.StructureNumber}] is not found within 100M of the GPS position [{typedRow.StartLatitude},{typedRow.StartLongitude}]");
+                }
+            }
+
+            if (warnings.Count > 0)
+            {
+                SetWarningDetail(submissionRow, warnings);
+            }
+
+            return row;
         }
 
         private async Task<WorkReportGeometry> PerformRoadLengthValidationAsync(WorkReportGeometry row)
@@ -711,7 +748,7 @@ namespace Hmcr.Domain.Hangfire
             {
                 if (accomplishment > (totalRoadKM * 1000))
                 {
-                    accomplishmentWarning = $"Accomplishment value of [{accomplishment}] should be <= [{totalRoadKM}] Guardrail Length M]";
+                    accomplishmentWarning = $"Accomplishment value of [{accomplishment}] should be <= [{totalRoadKM * 1000}] Guardrail Length M";
                 }
             } else
             {
@@ -892,7 +929,7 @@ namespace Hmcr.Domain.Hangfire
                 SetWarningDetail(submissionRow, warnings);
             }
         }
-
+        
         private async Task PerformSurfaceTypeValidation(WorkReportTyped typedRow)
         {
             var warnings = new Dictionary<string, List<string>>();
@@ -1051,7 +1088,7 @@ namespace Hmcr.Domain.Hangfire
             var startOffset = typedRow.StartOffset - structureVariance;
             var endOffset = ((typedRow.EndOffset == null) ? typedRow.StartOffset : typedRow.EndOffset) + structureVariance;
 
-            var result = await _spatialService.GetBridgeStructureOnRFISegment(typedRow.HighwayUnique);
+            var result = await _spatialService.GetStructuresOnRFISegmentAsync(typedRow.HighwayUnique);
 
             var bridgeStructures = result.structures.Where(x => x.StructureType == StructureType.BRIDGE).ToList();
             foreach (var bridge in bridgeStructures)
@@ -1067,6 +1104,32 @@ namespace Hmcr.Domain.Hangfire
             }
 
             return isBridgeWithinVariance;
+        }
+
+        private async Task<bool> WithinStructureVariance(WorkReportTyped typedRow, decimal structureVariance)
+        {
+            var isWithinVariance = false;
+
+            var startOffset = typedRow.StartOffset - structureVariance;
+            var endOffset = ((typedRow.EndOffset == null) ? typedRow.StartOffset : typedRow.EndOffset) + structureVariance;
+            string structureNumber = typedRow.StructureNumber.TrimStart('0');
+
+            var result = await _spatialService.GetStructuresOnRFISegmentAsync(typedRow.HighwayUnique);
+            
+            var structures = result.structures.Where(x => x.StructureNumber == structureNumber).ToList();
+            foreach (var structure in structures)
+            {
+                //we need to check if the start of the structure is between the offset
+                // or if the end of the structure is between the offset
+                if (((structure.BeginKM >= startOffset) && (structure.BeginKM <= endOffset))
+                    || ((structure.EndKM >= startOffset) && (structure.EndKM <= endOffset)))
+                {
+                    isWithinVariance = true;  // if we find one we can stop searching
+                    break;
+                }
+            }
+
+            return isWithinVariance;
         }
 
         private void PerformFieldValidation(Dictionary<string, List<string>> errors, WorkReportCsvDto untypedRow, ActivityCodeDto activityCode)
