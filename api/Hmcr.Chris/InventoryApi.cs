@@ -22,6 +22,7 @@ namespace Hmcr.Chris
         Task<Guardrail> GetGuardrailAssociatedWithPoint(NetTopologySuite.Geometries.Geometry geometry);
         Task<List<Guardrail>> GetGuardrailAssociatedWithLine(NetTopologySuite.Geometries.Geometry geometry);
         Task<List<Structure>> GetStructuresOnRFISegment(string rfiSegment);
+        Task<List<RestArea>> GetRestAreasOnRFISegment(string rfiSegment);
     }
 
     public class InventoryApi : IInventoryApi
@@ -400,7 +401,7 @@ namespace Hmcr.Chris
                 foreach (var feature in results.features)
                 {
                     Structure structure = new Structure();
-                    structure.StructureType = feature.properties.BMIS_STRUCTURE_TYPE;  //this may possibly be feature.properties.IIT_INV_TYPE
+                    structure.StructureType = feature.properties.BMIS_STRUCTURE_TYPE;
                     // need to apply trim start '0' to strip leading zeros, if the structure number in the typed row
                     //  had no alpha chars the CSV parse casts it as a number (ie. 00525 = 525)
                     structure.StructureNumber = feature.properties.BMIS_STRUCTURE_NO.TrimStart('0');
@@ -416,6 +417,40 @@ namespace Hmcr.Chris
             catch (Exception ex)
             {
                 _logger.LogError($"Exception - GetStructuresOnRFISegment: {query} - {content}");
+                throw ex;
+            }
+        }
+
+        public async Task<List<RestArea>> GetRestAreasOnRFISegment(string rfiSegment)
+        {
+            var query = "";
+            var content = "";
+
+            try
+            {
+                query = _path + string.Format(_queries.RestAreaOnRfiSegment, rfiSegment);
+
+                content = await (await _api.GetWithRetry(_client, query)).Content.ReadAsStringAsync();
+
+                var results = JsonSerializer.Deserialize<FeatureCollection<object>>(content);
+
+                var restAreas = new List<RestArea>();
+
+                foreach (var feature in results.features)
+                {
+                    RestArea restArea = new RestArea();
+                    restArea.SiteNumber = feature.properties.REST_AREA_NUMBER;
+                    restArea.LocationKM = feature.properties.LOC_KM;
+                    restArea.Class = feature.properties.REST_AREA_CLASS;
+
+                    restAreas.Add(restArea);
+                }
+
+                return restAreas;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"Exception - GetRestAreasOnRFISegment: {query} - {content}");
                 throw ex;
             }
         }

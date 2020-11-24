@@ -28,5 +28,8 @@ namespace Hmcr.Chris
 
         public readonly string StructureOnRfiSegment
             = "service=WFS&version=1.1.0&request=GetFeature&typeName=cwr:BSR_BY_RFI&srsName=EPSG:4326&outputFormat=application/json&cql_filter=RFI_UNIQUE='{0}'";
+
+        public readonly string RestAreaOnRfiSegment
+            = "service=WFS&version=1.1.0&request=GetFeature&typeName=cwr:RA_BY_RFI&srsName=EPSG:4326&outputFormat=application/json&cql_filter=RFI_UNIQUE='{0}'";
     }
 }
