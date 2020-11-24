@@ -28,5 +28,6 @@
         public decimal END_KM { get; set; }
         public double LENGTH_KM { get; set; }
         public string BMIS_STRUCTURE_TYPE { get; set; }
+        public string BMIS_STRUCTURE_NO { get; set; }
     }
 }
