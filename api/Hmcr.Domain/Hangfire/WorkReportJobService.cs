@@ -164,6 +164,7 @@ namespace Hmcr.Domain.Hangfire
                 await CommitAndSendEmailAsync();
                 return true;
             }
+
             await PerformReportedWorkReportsValidationAsync(workReports);
             if (_submission.SubmissionStatusId != _statusService.FileInProgress)
             {
@@ -171,6 +172,7 @@ namespace Hmcr.Domain.Hangfire
                 return true;
             }
             _submission.SubmissionStatusId = _statusService.FileSuccess;
+
             //stage 4 validation ends
 
             await foreach (var entity in _workReportRepo.SaveWorkReportAsnyc(_submission, workReports)) { }
@@ -339,7 +341,7 @@ namespace Hmcr.Domain.Hangfire
                                 $" for Highway Unique [{typedRow.HighwayUnique}]");
             }
             else if (locationCode == "C"
-                    && typedRow .FeatureType.ToLower() == "point"
+                    && typedRow.FeatureType.ToLower() == "point"
                     && await _workReportRepo.IsReportedWorkReportForLocationCPointAsync(typedRow))
             {
                 warnings.AddItem("Reporting Frequency Validation: End Date, GPS position"
@@ -692,17 +694,22 @@ namespace Hmcr.Domain.Hangfire
         {
             var submissionRow = _submissionRows[(decimal)typedRow.RowNum];
             var warnings = new Dictionary<string, List<string>>();
+            string accomplishment = typedRow.Accomplishment.ToString();
+
+            //always perform data precision validation
+            if ((new[] { "site", "num", "ea" }).Contains(typedRow.UnitOfMeasure.ToLowerInvariant()) && !accomplishment.IsInteger())
+            {
+                warnings.AddItem("Data Precision Validation: Accomplishment",
+                    $"Accomplishment value of [{accomplishment}] should be a whole number for Unit of Measure [{typedRow.UnitOfMeasure}]" +
+                    $" for Activity Code [{typedRow.ActivityNumber}]");
+            }
+
+            //validate min/max value
             if (typedRow.ActivityCodeValidation.MinValue != null && typedRow.ActivityCodeValidation.MaxValue != null)
             {
-                string accomplishment = typedRow.Accomplishment.ToString();
                 string minValue = typedRow.ActivityCodeValidation.MinValue.ConvertDecimalToStringAndRemoveTrailing(); //remove trailing 0
                 string maxValue = typedRow.ActivityCodeValidation.MaxValue.ConvertDecimalToStringAndRemoveTrailing();
-                if ((new[] { "site", "num", "ea" }).Contains(typedRow.UnitOfMeasure.ToLowerInvariant()) && !accomplishment.IsInteger())
-                {
-                    warnings.AddItem("Data Precision Validation: Accomplishment", 
-                        $"Accomplishment value of [{accomplishment}] should be a whole number for Unit of Measure [{typedRow.UnitOfMeasure}]" +
-                        $" for Activity Code [{typedRow.ActivityNumber}]");
-                }
+                
                 if (accomplishment.ConvertStrToDecimal() < typedRow.ActivityCodeValidation.MinValue.ConvertNullableDecimal())
                 {
                     warnings.AddItem("Minimum / Maximum Value Validation: Accomplishment", 
@@ -920,7 +927,7 @@ namespace Hmcr.Domain.Hangfire
                     //determine proportion of not maintained to total, summer & winter
                     //if proportion of not maintained < 90% throw warning
                     if (((summerUnmaintainedLen / summerTotal) < (double)(proportionPercMaintenance / 100)) 
-                        || ((winterUnmaintainedLen / winterTotal) < (double)(proportionPercMaintenance / 100)))
+                        && ((winterUnmaintainedLen / winterTotal) < (double)(proportionPercMaintenance / 100)))
                     {
                         warnings.AddItem("Road Class Validation"
                         , $"GPS position from [{typedRow.StartLatitude},{typedRow.StartLongitude}] " +
@@ -932,7 +939,7 @@ namespace Hmcr.Domain.Hangfire
                     //determine proportion of maintained to total, summer & winter
                     //if proportion of maintained < 90% throw warning
                     if (((summerMaintainedLen / summerTotal) < (double)(proportionPercMaintenance / 100)) 
-                        || ((winterMaintainedLen / winterTotal) < (double)(proportionPercMaintenance / 100)))
+                        && ((winterMaintainedLen / winterTotal) < (double)(proportionPercMaintenance / 100)))
                     {
                         warnings.AddItem("Road Class Validation"
                         , $"GPS position from [{typedRow.StartLatitude},{typedRow.StartLongitude}] " +
@@ -945,7 +952,7 @@ namespace Hmcr.Domain.Hangfire
                 
                 if (typedRow.ActivityCodeValidation.RoadClassRuleExec == MaintenanceClassRules.Class8OrF)
                 {
-                    if (typedRow.MaintenanceClasses.First().WinterRating != "8" || typedRow.MaintenanceClasses.First().SummerRating != "F")
+                    if (typedRow.MaintenanceClasses.First().WinterRating != "F" && typedRow.MaintenanceClasses.First().SummerRating != "8")
                     {
                         warnings.AddItem("Road Class Validation"
                             , $"GPS position [{typedRow.StartLatitude},{typedRow.StartLongitude}] should be Maintenance Class 8 or F");
@@ -953,7 +960,7 @@ namespace Hmcr.Domain.Hangfire
                 }
                 else if (typedRow.ActivityCodeValidation.RoadClassRuleExec == MaintenanceClassRules.NotClass8OrF)
                 {
-                    if (typedRow.MaintenanceClasses.First().WinterRating == "8" || typedRow.MaintenanceClasses.First().SummerRating == "F")
+                    if (typedRow.MaintenanceClasses.First().WinterRating == "F" && typedRow.MaintenanceClasses.First().SummerRating == "8")
                     {
                         warnings.AddItem("Road Class Validation"
                             , $"GPS position [{typedRow.StartLatitude},{typedRow.StartLongitude}] should NOT be Maintenance Class 8 or F");
@@ -1247,7 +1254,7 @@ namespace Hmcr.Domain.Hangfire
                 
                 if (errors.Count > 0)
                 {
-                    SetErrorDetail(submissionRow, errors, _statusService.FileLocationError);
+                    SetErrorDetail(submissionRow, errors, _statusService.FileConflictionError);
                 }
             }
             
