@@ -78,6 +78,8 @@ namespace Hmcr.Domain.Hangfire
                 await CommitAndSendEmailAsync();
                 return true;
             }
+
+            #region Stage 2 Validation Processes
             //stage 2 validation
             foreach (var untypedRow in untypedRows)
             {
@@ -111,12 +113,17 @@ namespace Hmcr.Domain.Hangfire
                     SetErrorDetail(submissionRow, errors, _statusService.FileBasicError); //Stage 2 - Basic Error
                 }
             }
+            #endregion
 
+            #region Stage 3 Validation Processes
             //stage 3 validation
             var typedRows = new List<WorkReportTyped>();
-
-            if (_submission.SubmissionStatusId == _statusService.FileInProgress)
+            
+            if (_statusService.IsFileInProgress(_submission.SubmissionStatusId))
+            //if (_submission.SubmissionStatusId == _statusService.FileInProgress)
             {
+                UpdateSubmissionStatus(_statusService.FileStage3InProgress);
+
                 var (rowNum, rows) = ParseRowsTyped(text, errors);
 
                 if (rowNum != 0)
@@ -132,51 +139,58 @@ namespace Hmcr.Domain.Hangfire
                 CopyCalculatedFieldsFormUntypedRow(typedRows, untypedRows);
                 PerformAdditionalValidation(typedRows);
             }
-
-            if (_submission.SubmissionStatusId != _statusService.FileInProgress)
+            //if (_submission.SubmissionStatusId != _statusService.FileInProgress)
+            if (!_statusService.IsFileInProgress(_submission.SubmissionStatusId))
             {
                 await CommitAndSendEmailAsync();
                 return true;
             }
 
-            //stage 4 validation starts
             PerformFieldServiceAreaValidation(typedRows);
-            if (_submission.SubmissionStatusId != _statusService.FileInProgress)
+            //if (_submission.SubmissionStatusId != _statusService.FileInProgress)
+            if (!_statusService.IsFileInProgress(_submission.SubmissionStatusId))
             {
                 await CommitAndSendEmailAsync();
                 return true;
             }
+            #endregion
+
+            #region Stage 4 Validation Processes
+            //stage 4 validation starts
+            UpdateSubmissionStatus(_statusService.FileStage4InProgress);
 
             var workReports = PerformSpatialValidationAndConversionBatchAsync(typedRows);
-
             _logger.LogInformation($"{_methodLogHeader} PerformSpatialValidationAndConversionAsync 100%");
-
-            if (_submission.SubmissionStatusId != _statusService.FileInProgress)
+            //if (_submission.SubmissionStatusId != _statusService.FileInProgress)
+            if (!_statusService.IsFileInProgress(_submission.SubmissionStatusId))
             {
                 await CommitAndSendEmailAsync();
                 return true;
             }
 
             workReports = PerformAnalyticalValidationBatchAsync(workReports);
-
-            if (_submission.SubmissionStatusId != _statusService.FileInProgress)
+            //if (_submission.SubmissionStatusId != _statusService.FileInProgress)
+            if (!_statusService.IsFileInProgress(_submission.SubmissionStatusId))
             {
                 await CommitAndSendEmailAsync();
                 return true;
             }
 
             await PerformReportedWorkReportsValidationAsync(workReports);
-            if (_submission.SubmissionStatusId != _statusService.FileInProgress)
+            //if (_submission.SubmissionStatusId != _statusService.FileInProgress)
+            if (!_statusService.IsFileInProgress(_submission.SubmissionStatusId))
             {
                 await CommitAndSendEmailAsync();
                 return true;
             }
-            _submission.SubmissionStatusId = _statusService.FileSuccess;
+
+            _submission.SubmissionStatusId = HasWarningSet() ? _statusService.FileSuccessWithWarnings : _statusService.FileSuccess;
+            //_submission.SubmissionStatusId = _statusService.FileSuccess;
 
             //stage 4 validation ends
+            #endregion
 
             await foreach (var entity in _workReportRepo.SaveWorkReportAsnyc(_submission, workReports)) { }
-
             await CommitAndSendEmailAsync();
 
             return true;
@@ -1254,7 +1268,7 @@ namespace Hmcr.Domain.Hangfire
                 
                 if (errors.Count > 0)
                 {
-                    SetErrorDetail(submissionRow, errors, _statusService.FileConflictionError);
+                    SetErrorDetail(submissionRow, errors, _statusService.FileServiceAreaError);
                 }
             }
             
@@ -1308,6 +1322,7 @@ namespace Hmcr.Domain.Hangfire
                 {
                     errors.AddItem($"{Fields.EndLongitude}/{Fields.EndLatitude}", "Invalid range of GPS coordinates.");
                 }
+
                 PerformAnalyticalFieldValidation(typedRow);
                 if (errors.Count > 0)
                 {
@@ -1593,7 +1608,6 @@ namespace Hmcr.Domain.Hangfire
         #endregion
 
         #region Utility Functions
-
         private void CopyCalculatedFieldsFormUntypedRow(List<WorkReportTyped> typedRows, List<WorkReportCsvDto> untypedRows)
         {
             MethodLogger.LogEntry(_logger, _enableMethodLog, _methodLogHeader);

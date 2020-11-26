@@ -18,13 +18,19 @@ namespace Hmcr.Domain.Services
         decimal FileLocationError { get; }
         decimal FileUnexpectedError { get; }
         decimal FileSuccess { get; }
-
+        decimal FileStage3InProgress { get; }
+        decimal FileStage4InProgress { get; }
+        decimal FileServiceAreaError { get; }
+        decimal FileSuccessWithWarnings { get; }
+        
         decimal RowReceived { get; }
         decimal RowError { get; }
         decimal RowDuplicate { get; }
         decimal RowSuccess { get; }
-
+        
         Task<IEnumerable<SubmissionStatusDto>> GetSubmissionStatusAsync();
+
+        bool IsFileInProgress(decimal submissionStatusId);
     }
     public class SubmissionStatusService : ISubmissionStatusService
     {
@@ -101,6 +107,20 @@ namespace Hmcr.Domain.Services
         private decimal GetStatusIdByTypeAndCode(string type, string code)
         {
             return Statuses.First(x => x.StatusType == type && x.StatusCode == code).StatusId;
+        }
+
+        public bool IsFileInProgress(decimal submissionStatusId)
+        {
+            bool isFileInProgress = false;
+
+            if ((submissionStatusId == FileInProgress) 
+                || (submissionStatusId == FileStage3InProgress) 
+                || (submissionStatusId == FileStage4InProgress))
+            {
+                isFileInProgress = true;
+            }
+
+            return isFileInProgress;
         }
     }
 }

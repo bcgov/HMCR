@@ -92,6 +92,12 @@ namespace Hmcr.Domain.Hangfire.Base
             return true;
         }
 
+        public void UpdateSubmissionStatus(decimal submissionStatusId)
+        {
+            _submission.SubmissionStatusId = submissionStatusId;
+            _unitOfWork.Commit();
+        } 
+
         public virtual Task<bool> ProcessSubmission(SubmissionDto submissionDto)
         {
             throw new NotImplementedException();
@@ -185,11 +191,23 @@ namespace Hmcr.Domain.Hangfire.Base
                     submissionRow.RowStatusId = _statusService.RowError;
                     submissionRow.WarningDetail = warnings.GetWarningDetail();
                 }
-                
-
-                
-
             }
+        }
+
+        protected bool HasWarningSet()
+        {
+            bool hasWarningSet = false;
+
+            foreach (var row in _submission.HmrSubmissionRows)
+            {
+                if (row.WarningDetail != null)
+                {
+                    hasWarningSet = true;
+                    break;
+                }
+            }
+
+            return hasWarningSet;
         }
 
         protected async Task CommitAndSendEmailAsync()
