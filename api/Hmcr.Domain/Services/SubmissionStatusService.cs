@@ -18,13 +18,19 @@ namespace Hmcr.Domain.Services
         decimal FileLocationError { get; }
         decimal FileUnexpectedError { get; }
         decimal FileSuccess { get; }
-
+        decimal FileStage3InProgress { get; }
+        decimal FileStage4InProgress { get; }
+        decimal FileServiceAreaError { get; }
+        decimal FileSuccessWithWarnings { get; }
+        
         decimal RowReceived { get; }
         decimal RowError { get; }
         decimal RowDuplicate { get; }
         decimal RowSuccess { get; }
-
+        
         Task<IEnumerable<SubmissionStatusDto>> GetSubmissionStatusAsync();
+
+        bool IsFileInProgress(decimal submissionStatusId);
     }
     public class SubmissionStatusService : ISubmissionStatusService
     {
@@ -60,6 +66,18 @@ namespace Hmcr.Domain.Services
 
         private decimal? _fileSuccess;
         public decimal FileSuccess => _fileSuccess ??= GetStatusIdByTypeAndCode(StatusType.File, FileStatus.FileSuccess);
+
+        private decimal? _fileStage3InProgress;
+        public decimal FileStage3InProgress => _fileStage3InProgress ??= GetStatusIdByTypeAndCode(StatusType.File, FileStatus.FileStage3InProgress);
+
+        private decimal? _fileStage4InProgress;
+        public decimal FileStage4InProgress => _fileStage4InProgress ??= GetStatusIdByTypeAndCode(StatusType.File, FileStatus.FileStage4InProgress);
+
+        private decimal? _fileServiceAreaError;
+        public decimal FileServiceAreaError => _fileServiceAreaError ??= GetStatusIdByTypeAndCode(StatusType.File, FileStatus.FileServiceAreaError);
+
+        private decimal? _fileSuccessWithWarnings;
+        public decimal FileSuccessWithWarnings => _fileSuccessWithWarnings ??= GetStatusIdByTypeAndCode(StatusType.File, FileStatus.FileSuccessWithWarnings);
         #endregion
 
         #region Row Status
@@ -89,6 +107,20 @@ namespace Hmcr.Domain.Services
         private decimal GetStatusIdByTypeAndCode(string type, string code)
         {
             return Statuses.First(x => x.StatusType == type && x.StatusCode == code).StatusId;
+        }
+
+        public bool IsFileInProgress(decimal submissionStatusId)
+        {
+            bool isFileInProgress = false;
+
+            if ((submissionStatusId == FileInProgress) 
+                || (submissionStatusId == FileStage3InProgress) 
+                || (submissionStatusId == FileStage4InProgress))
+            {
+                isFileInProgress = true;
+            }
+
+            return isFileInProgress;
         }
     }
 }

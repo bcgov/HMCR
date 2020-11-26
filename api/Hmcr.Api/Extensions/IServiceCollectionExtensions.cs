@@ -228,7 +228,7 @@ namespace Hmcr.Api.Extensions
                             .AllowAnyHeader()
                             .AllowAnyMethod()
                             .WithExposedHeaders("Content-Disposition");
-            });
+                    });
             });
         }
     }

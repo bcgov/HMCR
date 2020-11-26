@@ -78,6 +78,8 @@ namespace Hmcr.Domain.Hangfire
                 await CommitAndSendEmailAsync();
                 return true;
             }
+
+            #region Stage 2 Validation Processes
             //stage 2 validation
             foreach (var untypedRow in untypedRows)
             {
@@ -111,12 +113,17 @@ namespace Hmcr.Domain.Hangfire
                     SetErrorDetail(submissionRow, errors, _statusService.FileBasicError); //Stage 2 - Basic Error
                 }
             }
+            #endregion
 
+            #region Stage 3 Validation Processes
             //stage 3 validation
             var typedRows = new List<WorkReportTyped>();
-
-            if (_submission.SubmissionStatusId == _statusService.FileInProgress)
+            
+            if (_statusService.IsFileInProgress(_submission.SubmissionStatusId))
+            //if (_submission.SubmissionStatusId == _statusService.FileInProgress)
             {
+                UpdateSubmissionStatus(_statusService.FileStage3InProgress);
+
                 var (rowNum, rows) = ParseRowsTyped(text, errors);
 
                 if (rowNum != 0)
@@ -132,49 +139,58 @@ namespace Hmcr.Domain.Hangfire
                 CopyCalculatedFieldsFormUntypedRow(typedRows, untypedRows);
                 PerformAdditionalValidation(typedRows);
             }
-
-            if (_submission.SubmissionStatusId != _statusService.FileInProgress)
+            //if (_submission.SubmissionStatusId != _statusService.FileInProgress)
+            if (!_statusService.IsFileInProgress(_submission.SubmissionStatusId))
             {
                 await CommitAndSendEmailAsync();
                 return true;
             }
 
-            //stage 4 validation starts
             PerformFieldServiceAreaValidation(typedRows);
-            if (_submission.SubmissionStatusId != _statusService.FileInProgress)
+            //if (_submission.SubmissionStatusId != _statusService.FileInProgress)
+            if (!_statusService.IsFileInProgress(_submission.SubmissionStatusId))
             {
                 await CommitAndSendEmailAsync();
                 return true;
             }
+            #endregion
+
+            #region Stage 4 Validation Processes
+            //stage 4 validation starts
+            UpdateSubmissionStatus(_statusService.FileStage4InProgress);
 
             var workReports = PerformSpatialValidationAndConversionBatchAsync(typedRows);
-
             _logger.LogInformation($"{_methodLogHeader} PerformSpatialValidationAndConversionAsync 100%");
-
-            if (_submission.SubmissionStatusId != _statusService.FileInProgress)
+            //if (_submission.SubmissionStatusId != _statusService.FileInProgress)
+            if (!_statusService.IsFileInProgress(_submission.SubmissionStatusId))
             {
                 await CommitAndSendEmailAsync();
                 return true;
             }
 
             workReports = PerformAnalyticalValidationBatchAsync(workReports);
+            //if (_submission.SubmissionStatusId != _statusService.FileInProgress)
+            if (!_statusService.IsFileInProgress(_submission.SubmissionStatusId))
+            {
+                await CommitAndSendEmailAsync();
+                return true;
+            }
 
-            if (_submission.SubmissionStatusId != _statusService.FileInProgress)
-            {
-                await CommitAndSendEmailAsync();
-                return true;
-            }
             await PerformReportedWorkReportsValidationAsync(workReports);
-            if (_submission.SubmissionStatusId != _statusService.FileInProgress)
+            //if (_submission.SubmissionStatusId != _statusService.FileInProgress)
+            if (!_statusService.IsFileInProgress(_submission.SubmissionStatusId))
             {
                 await CommitAndSendEmailAsync();
                 return true;
             }
-            _submission.SubmissionStatusId = _statusService.FileSuccess;
+
+            _submission.SubmissionStatusId = HasWarningSet() ? _statusService.FileSuccessWithWarnings : _statusService.FileSuccess;
+            //_submission.SubmissionStatusId = _statusService.FileSuccess;
+
             //stage 4 validation ends
+            #endregion
 
             await foreach (var entity in _workReportRepo.SaveWorkReportAsnyc(_submission, workReports)) { }
-
             await CommitAndSendEmailAsync();
 
             return true;
@@ -339,7 +355,7 @@ namespace Hmcr.Domain.Hangfire
                                 $" for Highway Unique [{typedRow.HighwayUnique}]");
             }
             else if (locationCode == "C"
-                    && typedRow .FeatureType.ToLower() == "point"
+                    && typedRow.FeatureType.ToLower() == "point"
                     && await _workReportRepo.IsReportedWorkReportForLocationCPointAsync(typedRow))
             {
                 warnings.AddItem("Reporting Frequency Validation: End Date, GPS position"
@@ -373,8 +389,9 @@ namespace Hmcr.Domain.Hangfire
             var typedRow = row.WorkReportTyped;
             var submissionRow = _submissionRows[(decimal)typedRow.RowNum];
             var warnings = new Dictionary<string, List<string>>();
-            var structureVariance = _validator.CodeLookup.Where(x => x.CodeSet == CodeSet.ValidatorProportion)
-                .Where(x => x.CodeName == ValidatorProportionCode.STRUCTURE_VARIANCE_M).First().CodeValueNum;
+            
+            var threshold = _lookupService.GetThresholdLevel(typedRow.SpThresholdLevel);
+            var structureVariance = threshold.Warning;
             var structureVarianceM = structureVariance / 1000;
 
             var hasRestAreaWithinVariance = await WithinRestAreaVariance(typedRow, (decimal)structureVarianceM);
@@ -384,11 +401,11 @@ namespace Hmcr.Domain.Hangfire
                 if (typedRow.FeatureType == FeatureType.Line)
                 {
                     
-                    warnings.AddItem("Site Validation", $"Site Number [{typedRow.SiteNumber}] is not found within 100M of the GPS position from [{typedRow.StartLatitude},{typedRow.StartLongitude}] to [{typedRow.EndLatitude},{typedRow.EndLongitude}]");
+                    warnings.AddItem("Site Validation", $"Site Number [{typedRow.SiteNumber}] is not found within {structureVariance}M of the GPS position from [{typedRow.StartLatitude},{typedRow.StartLongitude}] to [{typedRow.EndLatitude},{typedRow.EndLongitude}]");
                 }
                 else
                 {
-                    warnings.AddItem("Site Validation", $"Site Number [{typedRow.SiteNumber}] is not found within 100M of the GPS position [{typedRow.StartLatitude},{typedRow.StartLongitude}]");
+                    warnings.AddItem("Site Validation", $"Site Number [{typedRow.SiteNumber}] is not found within {structureVariance}M of the GPS position [{typedRow.StartLatitude},{typedRow.StartLongitude}]");
                 }
             }
 
@@ -405,9 +422,9 @@ namespace Hmcr.Domain.Hangfire
             var typedRow = row.WorkReportTyped;
             var submissionRow = _submissionRows[(decimal)typedRow.RowNum];
             var warnings = new Dictionary<string, List<string>>();
-            
-            var structureVariance = _validator.CodeLookup.Where(x => x.CodeSet == CodeSet.ValidatorProportion)
-                .Where(x => x.CodeName == ValidatorProportionCode.STRUCTURE_VARIANCE_M).First().CodeValueNum;
+
+            var threshold = _lookupService.GetThresholdLevel(typedRow.SpThresholdLevel);
+            var structureVariance = threshold.Warning;
             var structureVarianceM = structureVariance / 1000;
 
             //structure checking
@@ -416,11 +433,11 @@ namespace Hmcr.Domain.Hangfire
             {
                 if (typedRow.FeatureType == FeatureType.Line)
                 {
-                    warnings.AddItem("Structure Validation", $"Structure Number [{typedRow.StructureNumber}] is not found within 100M of the GPS position from [{typedRow.StartLatitude},{typedRow.StartLongitude}] to [{typedRow.EndLatitude},{typedRow.EndLongitude}]");
+                    warnings.AddItem("Structure Validation", $"Structure Number [{typedRow.StructureNumber}] is not found within {structureVariance}M of the GPS position from [{typedRow.StartLatitude},{typedRow.StartLongitude}] to [{typedRow.EndLatitude},{typedRow.EndLongitude}]");
                 } 
                 else
                 {
-                    warnings.AddItem("Structure Validation", $"Structure Number [{typedRow.StructureNumber}] is not found within 100M of the GPS position [{typedRow.StartLatitude},{typedRow.StartLongitude}]");
+                    warnings.AddItem("Structure Validation", $"Structure Number [{typedRow.StructureNumber}] is not found within {structureVariance}M of the GPS position [{typedRow.StartLatitude},{typedRow.StartLongitude}]");
                 }
             }
 
@@ -692,17 +709,22 @@ namespace Hmcr.Domain.Hangfire
         {
             var submissionRow = _submissionRows[(decimal)typedRow.RowNum];
             var warnings = new Dictionary<string, List<string>>();
+            string accomplishment = typedRow.Accomplishment.ToString();
+
+            //always perform data precision validation
+            if ((new[] { "site", "num", "ea" }).Contains(typedRow.UnitOfMeasure.ToLowerInvariant()) && !accomplishment.IsInteger())
+            {
+                warnings.AddItem("Data Precision Validation: Accomplishment",
+                    $"Accomplishment value of [{accomplishment}] should be a whole number for Unit of Measure [{typedRow.UnitOfMeasure}]" +
+                    $" for Activity Code [{typedRow.ActivityNumber}]");
+            }
+
+            //validate min/max value
             if (typedRow.ActivityCodeValidation.MinValue != null && typedRow.ActivityCodeValidation.MaxValue != null)
             {
-                string accomplishment = typedRow.Accomplishment.ToString();
                 string minValue = typedRow.ActivityCodeValidation.MinValue.ConvertDecimalToStringAndRemoveTrailing(); //remove trailing 0
                 string maxValue = typedRow.ActivityCodeValidation.MaxValue.ConvertDecimalToStringAndRemoveTrailing();
-                if ((new[] { "site", "num", "ea" }).Contains(typedRow.UnitOfMeasure.ToLowerInvariant()) && !accomplishment.IsInteger())
-                {
-                    warnings.AddItem("Data Precision Validation: Accomplishment", 
-                        $"Accomplishment value of [{accomplishment}] should be a whole number for Unit of Measure [{typedRow.UnitOfMeasure}]" +
-                        $" for Activity Code [{typedRow.ActivityNumber}]");
-                }
+                
                 if (accomplishment.ConvertStrToDecimal() < typedRow.ActivityCodeValidation.MinValue.ConvertNullableDecimal())
                 {
                     warnings.AddItem("Minimum / Maximum Value Validation: Accomplishment", 
@@ -920,7 +942,7 @@ namespace Hmcr.Domain.Hangfire
                     //determine proportion of not maintained to total, summer & winter
                     //if proportion of not maintained < 90% throw warning
                     if (((summerUnmaintainedLen / summerTotal) < (double)(proportionPercMaintenance / 100)) 
-                        || ((winterUnmaintainedLen / winterTotal) < (double)(proportionPercMaintenance / 100)))
+                        && ((winterUnmaintainedLen / winterTotal) < (double)(proportionPercMaintenance / 100)))
                     {
                         warnings.AddItem("Road Class Validation"
                         , $"GPS position from [{typedRow.StartLatitude},{typedRow.StartLongitude}] " +
@@ -932,7 +954,7 @@ namespace Hmcr.Domain.Hangfire
                     //determine proportion of maintained to total, summer & winter
                     //if proportion of maintained < 90% throw warning
                     if (((summerMaintainedLen / summerTotal) < (double)(proportionPercMaintenance / 100)) 
-                        || ((winterMaintainedLen / winterTotal) < (double)(proportionPercMaintenance / 100)))
+                        && ((winterMaintainedLen / winterTotal) < (double)(proportionPercMaintenance / 100)))
                     {
                         warnings.AddItem("Road Class Validation"
                         , $"GPS position from [{typedRow.StartLatitude},{typedRow.StartLongitude}] " +
@@ -945,7 +967,7 @@ namespace Hmcr.Domain.Hangfire
                 
                 if (typedRow.ActivityCodeValidation.RoadClassRuleExec == MaintenanceClassRules.Class8OrF)
                 {
-                    if (typedRow.MaintenanceClasses.First().WinterRating != "8" || typedRow.MaintenanceClasses.First().SummerRating != "F")
+                    if (typedRow.MaintenanceClasses.First().WinterRating != "F" && typedRow.MaintenanceClasses.First().SummerRating != "8")
                     {
                         warnings.AddItem("Road Class Validation"
                             , $"GPS position [{typedRow.StartLatitude},{typedRow.StartLongitude}] should be Maintenance Class 8 or F");
@@ -953,7 +975,7 @@ namespace Hmcr.Domain.Hangfire
                 }
                 else if (typedRow.ActivityCodeValidation.RoadClassRuleExec == MaintenanceClassRules.NotClass8OrF)
                 {
-                    if (typedRow.MaintenanceClasses.First().WinterRating == "8" || typedRow.MaintenanceClasses.First().SummerRating == "F")
+                    if (typedRow.MaintenanceClasses.First().WinterRating == "F" && typedRow.MaintenanceClasses.First().SummerRating == "8")
                     {
                         warnings.AddItem("Road Class Validation"
                             , $"GPS position [{typedRow.StartLatitude},{typedRow.StartLongitude}] should NOT be Maintenance Class 8 or F");
@@ -1082,7 +1104,7 @@ namespace Hmcr.Domain.Hangfire
                                 var hasBridgeWithinVariance = await WithinBridgeStructureVariance(typedRow, (decimal)structureVarianceM);
                                 if (!hasBridgeWithinVariance)
                                 {
-                                    warnings.AddItem("Surface Type Validation", $"GPS position [{typedRow.StartLatitude},{typedRow.StartLongitude}] should be paved or be within 100M of a Structure");
+                                    warnings.AddItem("Surface Type Validation", $"GPS position [{typedRow.StartLatitude},{typedRow.StartLongitude}] should be paved or be within {structureVariance}M of a Structure");
                                 }
                             }
                             else
@@ -1247,7 +1269,7 @@ namespace Hmcr.Domain.Hangfire
                 
                 if (errors.Count > 0)
                 {
-                    SetErrorDetail(submissionRow, errors, _statusService.FileLocationError);
+                    SetErrorDetail(submissionRow, errors, _statusService.FileServiceAreaError);
                 }
             }
             
@@ -1301,6 +1323,7 @@ namespace Hmcr.Domain.Hangfire
                 {
                     errors.AddItem($"{Fields.EndLongitude}/{Fields.EndLatitude}", "Invalid range of GPS coordinates.");
                 }
+
                 PerformAnalyticalFieldValidation(typedRow);
                 if (errors.Count > 0)
                 {
@@ -1586,7 +1609,6 @@ namespace Hmcr.Domain.Hangfire
         #endregion
 
         #region Utility Functions
-
         private void CopyCalculatedFieldsFormUntypedRow(List<WorkReportTyped> typedRows, List<WorkReportCsvDto> untypedRows)
         {
             MethodLogger.LogEntry(_logger, _enableMethodLog, _methodLogHeader);
