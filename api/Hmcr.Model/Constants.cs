@@ -125,6 +125,10 @@ namespace Hmcr.Model
         public const string FileLocationError = "S4";
         public const string FileUnexpectedError = "UE";
         public const string FileSuccess = "VS";
+        public const string FileStage3InProgress = "3P";
+        public const string FileStage4InProgress = "4P";
+        public const string FileServiceAreaError = "3E";
+        public const string FileSuccessWithWarnings = "SW";
     }
 
     public static class Fields

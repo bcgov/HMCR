@@ -60,6 +60,18 @@ namespace Hmcr.Domain.Services
 
         private decimal? _fileSuccess;
         public decimal FileSuccess => _fileSuccess ??= GetStatusIdByTypeAndCode(StatusType.File, FileStatus.FileSuccess);
+
+        private decimal? _fileStage3InProgress;
+        public decimal FileStage3InProgress => _fileStage3InProgress ??= GetStatusIdByTypeAndCode(StatusType.File, FileStatus.FileStage3InProgress);
+
+        private decimal? _fileStage4InProgress;
+        public decimal FileStage4InProgress => _fileStage4InProgress ??= GetStatusIdByTypeAndCode(StatusType.File, FileStatus.FileStage4InProgress);
+
+        private decimal? _fileServiceAreaError;
+        public decimal FileServiceAreaError => _fileServiceAreaError ??= GetStatusIdByTypeAndCode(StatusType.File, FileStatus.FileServiceAreaError);
+
+        private decimal? _fileSuccessWithWarnings;
+        public decimal FileSuccessWithWarnings => _fileSuccessWithWarnings ??= GetStatusIdByTypeAndCode(StatusType.File, FileStatus.FileSuccessWithWarnings);
         #endregion
 
         #region Row Status
