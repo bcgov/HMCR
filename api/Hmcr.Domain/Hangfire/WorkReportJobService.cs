@@ -389,8 +389,9 @@ namespace Hmcr.Domain.Hangfire
             var typedRow = row.WorkReportTyped;
             var submissionRow = _submissionRows[(decimal)typedRow.RowNum];
             var warnings = new Dictionary<string, List<string>>();
-            var structureVariance = _validator.CodeLookup.Where(x => x.CodeSet == CodeSet.ValidatorProportion)
-                .Where(x => x.CodeName == ValidatorProportionCode.STRUCTURE_VARIANCE_M).First().CodeValueNum;
+            
+            var threshold = _lookupService.GetThresholdLevel(typedRow.SpThresholdLevel);
+            var structureVariance = threshold.Warning;
             var structureVarianceM = structureVariance / 1000;
 
             var hasRestAreaWithinVariance = await WithinRestAreaVariance(typedRow, (decimal)structureVarianceM);
@@ -400,11 +401,11 @@ namespace Hmcr.Domain.Hangfire
                 if (typedRow.FeatureType == FeatureType.Line)
                 {
                     
-                    warnings.AddItem("Site Validation", $"Site Number [{typedRow.SiteNumber}] is not found within 100M of the GPS position from [{typedRow.StartLatitude},{typedRow.StartLongitude}] to [{typedRow.EndLatitude},{typedRow.EndLongitude}]");
+                    warnings.AddItem("Site Validation", $"Site Number [{typedRow.SiteNumber}] is not found within {structureVariance}M of the GPS position from [{typedRow.StartLatitude},{typedRow.StartLongitude}] to [{typedRow.EndLatitude},{typedRow.EndLongitude}]");
                 }
                 else
                 {
-                    warnings.AddItem("Site Validation", $"Site Number [{typedRow.SiteNumber}] is not found within 100M of the GPS position [{typedRow.StartLatitude},{typedRow.StartLongitude}]");
+                    warnings.AddItem("Site Validation", $"Site Number [{typedRow.SiteNumber}] is not found within {structureVariance}M of the GPS position [{typedRow.StartLatitude},{typedRow.StartLongitude}]");
                 }
             }
 
@@ -421,9 +422,9 @@ namespace Hmcr.Domain.Hangfire
             var typedRow = row.WorkReportTyped;
             var submissionRow = _submissionRows[(decimal)typedRow.RowNum];
             var warnings = new Dictionary<string, List<string>>();
-            
-            var structureVariance = _validator.CodeLookup.Where(x => x.CodeSet == CodeSet.ValidatorProportion)
-                .Where(x => x.CodeName == ValidatorProportionCode.STRUCTURE_VARIANCE_M).First().CodeValueNum;
+
+            var threshold = _lookupService.GetThresholdLevel(typedRow.SpThresholdLevel);
+            var structureVariance = threshold.Warning;
             var structureVarianceM = structureVariance / 1000;
 
             //structure checking
@@ -432,11 +433,11 @@ namespace Hmcr.Domain.Hangfire
             {
                 if (typedRow.FeatureType == FeatureType.Line)
                 {
-                    warnings.AddItem("Structure Validation", $"Structure Number [{typedRow.StructureNumber}] is not found within 100M of the GPS position from [{typedRow.StartLatitude},{typedRow.StartLongitude}] to [{typedRow.EndLatitude},{typedRow.EndLongitude}]");
+                    warnings.AddItem("Structure Validation", $"Structure Number [{typedRow.StructureNumber}] is not found within {structureVariance}M of the GPS position from [{typedRow.StartLatitude},{typedRow.StartLongitude}] to [{typedRow.EndLatitude},{typedRow.EndLongitude}]");
                 } 
                 else
                 {
-                    warnings.AddItem("Structure Validation", $"Structure Number [{typedRow.StructureNumber}] is not found within 100M of the GPS position [{typedRow.StartLatitude},{typedRow.StartLongitude}]");
+                    warnings.AddItem("Structure Validation", $"Structure Number [{typedRow.StructureNumber}] is not found within {structureVariance}M of the GPS position [{typedRow.StartLatitude},{typedRow.StartLongitude}]");
                 }
             }
 
@@ -1103,7 +1104,7 @@ namespace Hmcr.Domain.Hangfire
                                 var hasBridgeWithinVariance = await WithinBridgeStructureVariance(typedRow, (decimal)structureVarianceM);
                                 if (!hasBridgeWithinVariance)
                                 {
-                                    warnings.AddItem("Surface Type Validation", $"GPS position [{typedRow.StartLatitude},{typedRow.StartLongitude}] should be paved or be within 100M of a Structure");
+                                    warnings.AddItem("Surface Type Validation", $"GPS position [{typedRow.StartLatitude},{typedRow.StartLongitude}] should be paved or be within {structureVariance}M of a Structure");
                                 }
                             }
                             else
