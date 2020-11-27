@@ -85,6 +85,8 @@ namespace Hmcr.Data.Mappings
             CreateMap<ActivityCodeSearchDto, HmrActivityCode>();
             CreateMap<ActivityCodeCreateDto, HmrActivityCode>();
             CreateMap<ActivityCodeUpdateDto, HmrActivityCode>();
+            CreateMap<ActivityCodeSearchExportDto, HmrActivityCode>();
+
             CreateMap<LocationCodeDto, HmrLocationCode>();
 
             CreateMap<WorkReportTyped, HmrWorkReport>();

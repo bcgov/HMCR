@@ -18,6 +18,7 @@ namespace Hmcr.Domain.Services
         Task<(bool NotFound, Dictionary<string, List<string>> Errors)> UpdateActivityCodeAsync(ActivityCodeUpdateDto activityCode);
         Task<(decimal id, Dictionary<string, List<string>> Errors)> CreateActivityCodeAsync(ActivityCodeCreateDto activityCode);
         Task<(bool NotFound, Dictionary<string, List<string>> Errors)> DeleteActivityCodeAsync(decimal id);
+        Task<IEnumerable<ActivityCodeSearchExportDto>> GetActivityCodesByFilterAsync(string[]? maintenanceTypes, decimal[]? locationCodes, bool? isActive, string searchText);
     }
 
     public class ActivityCodeService : IActivityCodeService
@@ -132,6 +133,11 @@ namespace Hmcr.Domain.Services
         public async Task<PagedDto<ActivityCodeSearchDto>> GetActivityCodesAsync(string[]? maintenanceTypes, decimal[]? locationCodes, bool? isActive, string searchText, int pageSize, int pageNumber, string orderBy, string direction)
         {
             return await _activityCodeRepo.GetActivityCodesAsync(maintenanceTypes, locationCodes, isActive, searchText, pageSize, pageNumber, orderBy, direction);
+        }
+
+        public async Task<IEnumerable<ActivityCodeSearchExportDto>> GetActivityCodesByFilterAsync(string[]? maintenanceTypes, decimal[]? locationCodes, bool? isActive, string searchText)
+        {
+            return await _activityCodeRepo.GetActivityCodesByFilterAsync(maintenanceTypes, locationCodes, isActive, searchText);
         }
 
         public async Task<(bool NotFound, Dictionary<string, List<string>> Errors)> UpdateActivityCodeAsync(ActivityCodeUpdateDto activityCode)

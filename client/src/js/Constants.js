@@ -8,6 +8,7 @@ const ACTIVITY_RULE = '/activityrule';
 export const API_PATHS = {
   ACTIVITY_CODES: '/activitycodes',
   ACTIVITY_CODES_LITE: '/activitycodes/lite',
+  ACTIVITY_CODES_EXPORT: '/activitycodes/exportactivities',
   RULE_ROAD_LENGTH: `${ACTIVITY_RULE}/roadlength`,
   RULE_SURFACE_TYPE: `${ACTIVITY_RULE}/surfacetype`,
   RULE_ROAD_CLASS: `${ACTIVITY_RULE}/roadclass`,
