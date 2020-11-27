@@ -342,14 +342,14 @@ namespace Hmcr.Domain.Hangfire
             if (locationCode == "A" &&  await _workReportRepo.IsReportedWorkReportForLocationAAsync(typedRow))
             {
                 warnings.AddItem("Reporting Frequency Validation: End Date"
-                                , $"(Location Code = 'A'): END DATE Should NOT be reported more frequently" +
+                                , $"END DATE Should NOT be reported more frequently" +
                                 $" than the Reporting Frequency(days) of [{ typedRow.ActivityCodeValidation.ReportingFrequency}]" +
                                 $" for Activity[{ typedRow.ActivityNumber}]");
             }
             else if (locationCode == "B" && await _workReportRepo.IsReportedWorkReportForLocationBAsync(typedRow))
             {
                 warnings.AddItem("Reporting Frequency Validation: End Date"
-                                , $"(Location Code = 'B'): END DATE Should NOT be reported more frequently" +
+                                , $"END DATE Should NOT be reported more frequently" +
                                 $" than the Reporting Frequency(days) of [{ typedRow.ActivityCodeValidation.ReportingFrequency}]" +
                                 $" for Activity[{ typedRow.ActivityNumber}]" +
                                 $" for Highway Unique [{typedRow.HighwayUnique}]");
@@ -359,7 +359,7 @@ namespace Hmcr.Domain.Hangfire
                     && await _workReportRepo.IsReportedWorkReportForLocationCPointAsync(typedRow))
             {
                 warnings.AddItem("Reporting Frequency Validation: End Date, GPS position"
-                                , $"(Location Code = 'C'; {typedRow.FeatureType}): END DATE Should NOT be reported more frequently" +
+                                , $"END DATE Should NOT be reported more frequently" +
                                 $" than the Reporting Frequency(days) of [{ typedRow.ActivityCodeValidation.ReportingFrequency}]" +
                                 $" for Activity[{ typedRow.ActivityNumber}]," +
                                 $" Highway Unique [{typedRow.HighwayUnique}]," +
@@ -370,7 +370,7 @@ namespace Hmcr.Domain.Hangfire
                     && await _workReportRepo.IsReportedWorkReportForLocationCLineAsync(typedRow))
             {
                 warnings.AddItem("Reporting Frequency Validation: End Date, GPS position"
-                                , $"(Location Code = 'C'; {typedRow.FeatureType}): END DATE Should NOT be reported more frequently" +
+                                , $"END DATE Should NOT be reported more frequently" +
                                 $" than the Reporting Frequency(days) of [{ typedRow.ActivityCodeValidation.ReportingFrequency}]" +
                                 $" for Activity[{ typedRow.ActivityNumber}]," +
                                 $" Highway Unique [{typedRow.HighwayUnique}]," +

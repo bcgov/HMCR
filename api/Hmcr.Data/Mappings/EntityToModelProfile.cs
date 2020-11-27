@@ -91,6 +91,12 @@ namespace Hmcr.Data.Mappings
             CreateMap<HmrActivityCode, ActivityCodeCreateDto>();
             CreateMap<HmrActivityCode, ActivityCodeUpdateDto>();
 
+            CreateMap<HmrActivityCode, ActivityCodeSearchExportDto>()
+                .ForMember(ac => ac.RoadClassRuleName, opt => opt.MapFrom(src => src.RoadClassRuleNavigation.ActivityRuleName))
+                .ForMember(ac => ac.RoadLengthRuleName, opt => opt.MapFrom(src => src.RoadLengthRuleNavigation.ActivityRuleName))
+                .ForMember(ac => ac.SurfaceTypeRuleName, opt => opt.MapFrom(src => src.SurfaceTypeRuleNavigation.ActivityRuleName))
+                .ForMember(ac => ac.LocationCode, opt => opt.MapFrom(src => src.LocationCode.LocationCode));
+
             CreateMap<HmrLocationCode, LocationCodeDto>();
             CreateMap<HmrLocationCode, LocationCodeDropDownDto>();
             

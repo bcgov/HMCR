@@ -24,6 +24,7 @@ namespace Hmcr.Data.Repositories
         Task UpdateActivityCodeAsync(ActivityCodeUpdateDto activityCode);
         Task<bool> DoesActivityNumberExistAsync(string activityNumber);
         Task DeleteActivityCodeAsync(decimal id);
+        Task<IEnumerable<ActivityCodeSearchExportDto>> GetActivityCodesByFilterAsync(string[]? maintenanceTypes, decimal[]? locationCodes, bool? isActive, string searchText);
     }
 
     public class ActivityCodeRepository : HmcrRepositoryBase<HmrActivityCode>, IActivityCodeRepository
@@ -122,6 +123,81 @@ namespace Hmcr.Data.Repositories
             activityCode.ServiceAreaNumbers = serviceAreasNumbers;
 
             return activityCode;
+        }
+
+        public async Task<IEnumerable<ActivityCodeSearchExportDto>> GetActivityCodesByFilterAsync(string[]? maintenanceTypes, decimal[]? locationCodes, bool? isActive, string searchText)
+        {
+            var query = DbSet.AsNoTracking();
+
+            if (maintenanceTypes != null && maintenanceTypes.Length > 0)
+            {
+                query = query.Where(ac => maintenanceTypes.Contains(ac.MaintenanceType));
+            }
+
+            if (locationCodes != null && locationCodes.Length > 0)
+            {
+                query = query.Where(ac => locationCodes.Contains(ac.LocationCodeId));
+            }
+
+            if (isActive != null)
+            {
+                query = (bool)isActive
+                    ? query.Where(ac => ac.EndDate == null || ac.EndDate > DateTime.Today)
+                    : query.Where(ac => ac.EndDate != null && ac.EndDate <= DateTime.Today);
+            }
+
+            if (searchText.IsNotEmpty())
+            {
+                query = query
+                    .Where(ac => ac.ActivityName.Contains(searchText) || ac.ActivityNumber.Contains(searchText));
+            }
+
+            var entityActivities = await query
+                .Include(u => u.HmrServiceAreaActivities)
+                .Include(u => u.RoadClassRuleNavigation)
+                .Include(u => u.RoadLengthRuleNavigation)
+                .Include(u => u.SurfaceTypeRuleNavigation)
+                .Include(u => u.LocationCode)
+                .ToListAsync();
+
+            var activityCodes = Mapper.Map<IEnumerable<ActivityCodeSearchExportDto>>(entityActivities);
+            
+            var activityServiceArea = entityActivities.SelectMany(u => u.HmrServiceAreaActivities).ToLookup(u => u.ActivityCodeId);
+            int totalServiceArea = await DbContext.HmrServiceAreas.AsNoTracking().CountAsync();
+
+            foreach (var activity in activityCodes)
+            {
+                //build out service area string
+                string activityServiceAreas = string.Join(",", activityServiceArea[activity.ActivityCodeId].Select(x => x.ServiceAreaNumber).OrderBy(x => x));
+                if (activityServiceAreas.Count(f => f == ',') > 0)
+                {
+                    activity.ServiceAreas = (activityServiceAreas.Count(f => f == ',') + 1 == totalServiceArea) 
+                        ? "ALL"
+                        : string.Format("\"{0}\"", activityServiceAreas);
+                }
+                else
+                {
+                    activity.ServiceAreas = activityServiceAreas;
+                }
+
+                activity.RoadClassRuleName = (activity.RoadClassRuleName == "Default")
+                    ? "Not Applicable"
+                    : activity.RoadClassRuleName;
+                activity.RoadLengthRuleName = (activity.RoadLengthRuleName == "Default")
+                    ? "Not Applicable"
+                    : activity.RoadLengthRuleName;
+                activity.SurfaceTypeRuleName = (activity.SurfaceTypeRuleName == "Default")
+                    ? "Not Applicable"
+                    : activity.SurfaceTypeRuleName;
+            }
+
+            // Find out which activity numbers are being used
+            await foreach (var activityNumber in FindActivityNumbersInUseAync(activityCodes.Select(ac => ac.ActivityNumber)))
+            {
+                activityCodes.FirstOrDefault(ac => ac.ActivityNumber == activityNumber).IsReferenced = true;
+            }
+
+            return activityCodes;
         }
 
         public async Task<PagedDto<ActivityCodeSearchDto>> GetActivityCodesAsync(string[]? maintenanceTypes, decimal[]? locationCodes, bool? isActive, string searchText, int pageSize, int pageNumber, string orderBy, string direction)
