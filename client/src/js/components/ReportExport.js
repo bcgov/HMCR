@@ -30,8 +30,8 @@ const defaultSearchFormValues = {
   reportTypeId: '',
   dateFrom: moment().subtract(1, 'months').startOf('month'),
   dateTo: moment().subtract(1, 'months').endOf('month'),
-  submissionDateFrom: moment().subtract(1, 'months').startOf('month'),
-  submissionDateTo: moment().subtract(1, 'months').endOf('month'),
+  submissionDateFrom: null,
+  submissionDateTo: null,
   serviceAreaNumbers: [],
   highwayUnique: '',
   maintenanceTypeIds: [],
@@ -325,7 +325,8 @@ const ReportExport = ({
                         />
                         <MouseoverTooltip id="tooltip_submission_datepicker">
                           <ul style={{ paddingInlineStart: 10 }}>
-                          This is the Submission Date
+                          This Submission Date filter applies in addition to the applicable mandatory date range above. 
+                          Tip: To ensure all records submitted in this date range (and / or matching the entered Submission Number) will be included in the export, set the mandatory date range above to be sufficiently broad
                           </ul>
                         </MouseoverTooltip>
                       </div>
