@@ -279,7 +279,7 @@ namespace Hmcr.Api.Controllers
                 case "hmr:hmr_wildlife_report_vw":
                     return DateColNames.AccidentDate;
                 case "hmr:hmr_rockfall_report_vw":
-                    return DateColNames.ReportDate;
+                    return DateColNames.RockfallDate;
                 default:
                     return null;
             }

@@ -264,7 +264,7 @@ const ReportExport = ({
                           For Maintenance Work Reporting this refers to the <em>End Date</em>
                         </li>
                         <li>
-                          For Rockfall this refers to the <em>Report Date</em>
+                          For Rockfall this refers to the <em>Rockfall Date</em>
                         </li>
                         <li>
                           For Wildlife this corresponds to the <em>Accident Date</em>

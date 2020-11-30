@@ -261,6 +261,7 @@ namespace Hmcr.Model
         public const string EndDate = "END_DATE";
         public const string ReportDate = "REPORT_DATE";
         public const string AccidentDate = "ACCIDENT_DATE";
+        public const string RockfallDate = "ESTIMATED_ROCKFALL_DATE";
     }
 
     public static class CodeSet
