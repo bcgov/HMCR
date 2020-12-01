@@ -424,9 +424,9 @@ namespace Hmcr.Domain.Hangfire
             var warnings = new Dictionary<string, List<string>>();
 
             var threshold = _lookupService.GetThresholdLevel(typedRow.SpThresholdLevel);
-            var structureVariance = threshold.Warning;
-            var structureVarianceM = structureVariance / 1000;
-
+            decimal structureVariance = threshold.Warning;
+            decimal structureVarianceM = (decimal)structureVariance / 1000;
+            
             //structure checking
             var hasStructureWithinVariance = await WithinStructureVariance(typedRow, (decimal)structureVarianceM);
             if (!hasStructureWithinVariance)

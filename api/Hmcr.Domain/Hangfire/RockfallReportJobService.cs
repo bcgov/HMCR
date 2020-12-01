@@ -81,6 +81,13 @@ namespace Hmcr.Domain.Hangfire
 
                 submissionRow.RowStatusId = _statusService.RowSuccess; //set the initial row status as success 
                 untypedRow.HighwayUnique = untypedRow.HighwayUnique.ToTrimAndUppercase();
+                
+                //rockfall requires Y/N fields to be set to Uppercase, see HMCR-643
+                untypedRow.HeavyPrecip = untypedRow.HeavyPrecip.ToTrimAndUppercase();
+                untypedRow.FreezeThaw = untypedRow.FreezeThaw.ToTrimAndUppercase();
+                untypedRow.DitchSnowIce = untypedRow.DitchSnowIce.ToTrimAndUppercase();
+                untypedRow.VehicleDamage = untypedRow.VehicleDamage.ToTrimAndUppercase();
+
                 var entityName = GetValidationEntityName(untypedRow);
 
                 _validator.Validate(entityName, untypedRow, errors);
@@ -537,6 +544,12 @@ namespace Hmcr.Domain.Hangfire
                 {
                     var row = csv.GetRecord<RockfallReportTyped>();
                     row.HighwayUnique = row.HighwayUnique.ToTrimAndUppercase();
+                    //rockfall requires Y/N fields to be set to Uppercase, see HMCR-643
+                    row.HeavyPrecip = row.HeavyPrecip.ToTrimAndUppercase();
+                    row.FreezeThaw = row.FreezeThaw.ToTrimAndUppercase();
+                    row.DitchSnowIce = row.DitchSnowIce.ToTrimAndUppercase();
+                    row.VehicleDamage = row.VehicleDamage.ToTrimAndUppercase();
+
                     rows.Add(row);
                     rowNum = (decimal)row.RowNum;
                     row.ServiceArea = _serviceArea.ConvertToServiceAreaNumber(row.ServiceArea);
