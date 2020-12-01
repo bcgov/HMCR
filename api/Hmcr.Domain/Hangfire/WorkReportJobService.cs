@@ -391,10 +391,10 @@ namespace Hmcr.Domain.Hangfire
             var warnings = new Dictionary<string, List<string>>();
             
             var threshold = _lookupService.GetThresholdLevel(typedRow.SpThresholdLevel);
-            var structureVariance = threshold.Warning;
+            decimal structureVariance = threshold.Warning;
             var structureVarianceM = structureVariance / 1000;
 
-            var hasRestAreaWithinVariance = await WithinRestAreaVariance(typedRow, (decimal)structureVarianceM);
+            var hasRestAreaWithinVariance = await WithinRestAreaVariance(typedRow, structureVarianceM);
 
             if (!hasRestAreaWithinVariance)
             {
@@ -425,10 +425,10 @@ namespace Hmcr.Domain.Hangfire
 
             var threshold = _lookupService.GetThresholdLevel(typedRow.SpThresholdLevel);
             decimal structureVariance = threshold.Warning;
-            decimal structureVarianceM = (decimal)structureVariance / 1000;
-            
+            var structureVarianceM = structureVariance / 1000;
+
             //structure checking
-            var hasStructureWithinVariance = await WithinStructureVariance(typedRow, (decimal)structureVarianceM);
+            var hasStructureWithinVariance = await WithinStructureVariance(typedRow, structureVarianceM);
             if (!hasStructureWithinVariance)
             {
                 if (typedRow.FeatureType == FeatureType.Line)
@@ -775,10 +775,21 @@ namespace Hmcr.Domain.Hangfire
                         totalLaneKM += profile.Length * profile.NumberOfLanes;
                     }
 
-                    //Add a tolerance of 10% to a maximum of 0.2KM (which is 0.1KM each side) to the Total RoadKM
-                    totalRoadKM += ((totalRoadKM * .10) > 0.2) ? 0.2 : (totalRoadKM * .10);
-                    //Add a tolerance of 10% to a maximum of 0.5km to the total LaneKM
-                    totalLaneKM += ((totalLaneKM * .10) > 0.5) ? 0.5 : (totalLaneKM * .10);
+                    //if the total road km is less than 40m we need to perform some slightly different logic
+                    // grab the max number of lanes of highway profiles 
+                    if (totalRoadKM < 0.4)
+                    {
+                        var maxNumberOfLanes = typedRow.HighwayProfiles.Aggregate((i1, i2) => i1.NumberOfLanes > i2.NumberOfLanes ? i1 : i2).NumberOfLanes;
+                        totalRoadKM = 0.04;
+                        totalLaneKM = totalRoadKM * maxNumberOfLanes;
+                    }
+                    else
+                    {
+                        //Add a tolerance of 10% to a maximum of 0.2KM (which is 0.1KM each side) to the Total RoadKM
+                        totalRoadKM += ((totalRoadKM * .10) > 0.2) ? 0.2 : (totalRoadKM * .10);
+                        //Add a tolerance of 10% to a maximum of 0.5km to the total LaneKM
+                        totalLaneKM += ((totalLaneKM * .10) > 0.5) ? 0.5 : (totalLaneKM * .10);
+                    }
                 }
             }
             else if (typedRow.FeatureType == FeatureType.Point)
