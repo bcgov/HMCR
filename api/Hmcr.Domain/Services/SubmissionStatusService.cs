@@ -74,7 +74,7 @@ namespace Hmcr.Domain.Services
         public decimal FileStage4InProgress => _fileStage4InProgress ??= GetStatusIdByTypeAndCode(StatusType.File, FileStatus.FileStage4InProgress);
 
         private decimal? _fileServiceAreaError;
-        public decimal FileServiceAreaError => _fileServiceAreaError ??= GetStatusIdByTypeAndCode(StatusType.File, FileStatus.FileServiceAreaError);
+        public decimal FileServiceAreaError => _fileServiceAreaError ??= GetStatusIdByTypeAndCode(StatusType.Row, FileStatus.FileServiceAreaError);
 
         private decimal? _fileSuccessWithWarnings;
         public decimal FileSuccessWithWarnings => _fileSuccessWithWarnings ??= GetStatusIdByTypeAndCode(StatusType.File, FileStatus.FileSuccessWithWarnings);
