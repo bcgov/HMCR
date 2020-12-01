@@ -391,10 +391,10 @@ namespace Hmcr.Domain.Hangfire
             var warnings = new Dictionary<string, List<string>>();
             
             var threshold = _lookupService.GetThresholdLevel(typedRow.SpThresholdLevel);
-            var structureVariance = threshold.Warning;
+            decimal structureVariance = threshold.Warning;
             var structureVarianceM = structureVariance / 1000;
 
-            var hasRestAreaWithinVariance = await WithinRestAreaVariance(typedRow, (decimal)structureVarianceM);
+            var hasRestAreaWithinVariance = await WithinRestAreaVariance(typedRow, structureVarianceM);
 
             if (!hasRestAreaWithinVariance)
             {
@@ -425,10 +425,10 @@ namespace Hmcr.Domain.Hangfire
 
             var threshold = _lookupService.GetThresholdLevel(typedRow.SpThresholdLevel);
             decimal structureVariance = threshold.Warning;
-            decimal structureVarianceM = (decimal)structureVariance / 1000;
-            
+            var structureVarianceM = structureVariance / 1000;
+
             //structure checking
-            var hasStructureWithinVariance = await WithinStructureVariance(typedRow, (decimal)structureVarianceM);
+            var hasStructureWithinVariance = await WithinStructureVariance(typedRow, structureVarianceM);
             if (!hasStructureWithinVariance)
             {
                 if (typedRow.FeatureType == FeatureType.Line)
