@@ -779,9 +779,12 @@ namespace Hmcr.Domain.Hangfire
                     // grab the max number of lanes of highway profiles 
                     if (totalRoadKM < 0.4)
                     {
-                        var maxNumberOfLanes = typedRow.HighwayProfiles.Aggregate((i1, i2) => i1.NumberOfLanes > i2.NumberOfLanes ? i1 : i2).NumberOfLanes;
+                        var maxNumberOfLanes = (typedRow.HighwayProfiles.Count > 0) 
+                            ? typedRow.HighwayProfiles.Aggregate((i1, i2) => i1.NumberOfLanes > i2.NumberOfLanes ? i1 : i2).NumberOfLanes 
+                            : 1;
+                        
                         totalRoadKM = 0.04;
-                        totalLaneKM = totalRoadKM * maxNumberOfLanes;
+                        totalLaneKM = (maxNumberOfLanes <= 2) ? 0.08 : (totalRoadKM * maxNumberOfLanes);
                     }
                     else
                     {
