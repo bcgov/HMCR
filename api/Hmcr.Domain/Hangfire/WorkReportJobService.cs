@@ -329,24 +329,25 @@ namespace Hmcr.Domain.Hangfire
         {
             foreach (var workReport in workReports)
             {
-                await PerformReportedWorkReportValidationAsync(workReport.WorkReportTyped);
+                await PerformReportedWorkReportValidationAsync(workReport.WorkReportTyped, workReports);
             }
             return workReports;
         }
 
-        private async Task<WorkReportTyped> PerformReportedWorkReportValidationAsync(WorkReportTyped typedRow)
+        private async Task<WorkReportTyped> PerformReportedWorkReportValidationAsync(WorkReportTyped typedRow, List<WorkReportGeometry> workReports)
         {
             var warnings = new Dictionary<string, List<string>>();
             var submissionRow = _submissionRows[(decimal)typedRow.RowNum];
             string locationCode = typedRow.ActivityCodeValidation.LocationCode.ToUpper();
-            if (locationCode == "A" &&  await _workReportRepo.IsReportedWorkReportForLocationAAsync(typedRow))
+
+            if (locationCode == "A" &&  await _workReportRepo.IsReportedWorkReportForLocationAAsync(typedRow, workReports))
             {
                 warnings.AddItem("Reporting Frequency Validation: End Date"
                                 , $"END DATE Should NOT be reported more frequently" +
                                 $" than the Reporting Frequency(days) of [{ typedRow.ActivityCodeValidation.ReportingFrequency}]" +
                                 $" for Activity[{ typedRow.ActivityNumber}]");
             }
-            else if (locationCode == "B" && await _workReportRepo.IsReportedWorkReportForLocationBAsync(typedRow))
+            else if (locationCode == "B" && await _workReportRepo.IsReportedWorkReportForLocationBAsync(typedRow, workReports))
             {
                 warnings.AddItem("Reporting Frequency Validation: End Date"
                                 , $"END DATE Should NOT be reported more frequently" +
@@ -355,8 +356,8 @@ namespace Hmcr.Domain.Hangfire
                                 $" for Highway Unique [{typedRow.HighwayUnique}]");
             }
             else if (locationCode == "C"
-                    && typedRow.FeatureType.ToLower() == "point"
-                    && await _workReportRepo.IsReportedWorkReportForLocationCPointAsync(typedRow))
+                    && typedRow.FeatureType == FeatureType.Point
+                    && await _workReportRepo.IsReportedWorkReportForLocationCPointAsync(typedRow, workReports))
             {
                 warnings.AddItem("Reporting Frequency Validation: End Date, GPS position"
                                 , $"END DATE Should NOT be reported more frequently" +
@@ -366,8 +367,8 @@ namespace Hmcr.Domain.Hangfire
                                 $" GPS position [{typedRow.StartLatitude},{typedRow.StartLongitude}] with a tolerance of -/+ 100M");
             }
             else if (locationCode == "C"
-                    && typedRow.FeatureType.ToLower() == "line"
-                    && await _workReportRepo.IsReportedWorkReportForLocationCLineAsync(typedRow))
+                    && typedRow.FeatureType == FeatureType.Line
+                    && await _workReportRepo.IsReportedWorkReportForLocationCLineAsync(typedRow, workReports))
             {
                 warnings.AddItem("Reporting Frequency Validation: End Date, GPS position"
                                 , $"END DATE Should NOT be reported more frequently" +
@@ -377,6 +378,7 @@ namespace Hmcr.Domain.Hangfire
                                 $" GPS position from [{typedRow.StartLatitude},{typedRow.StartLongitude}]" +
                                 $" to [{typedRow.EndLatitude},{typedRow.EndLongitude}] with a tolerance of -/+ 100M");
             }
+
             if (warnings.Count > 0)
             {
                 SetWarningDetail(submissionRow, warnings);

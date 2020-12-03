@@ -16,10 +16,10 @@ namespace Hmcr.Data.Repositories
         IAsyncEnumerable<HmrWorkReport> SaveWorkReportAsnyc(HmrSubmissionObject submission, List<WorkReportGeometry> workReports);
         Task<IEnumerable<WorkReportExportDto>> ExportReportAsync(decimal submissionObjectId);
         Task<bool> IsActivityNumberInUseAsync(string activityNumber);
-        Task<bool> IsReportedWorkReportForLocationAAsync(WorkReportTyped workReportTyped);
-        Task<bool> IsReportedWorkReportForLocationBAsync(WorkReportTyped workReportTyped);
-        Task<bool> IsReportedWorkReportForLocationCPointAsync(WorkReportTyped workReportTyped);
-        Task<bool> IsReportedWorkReportForLocationCLineAsync(WorkReportTyped workReportTyped);
+        Task<bool> IsReportedWorkReportForLocationAAsync(WorkReportTyped workReportTyped, List<WorkReportGeometry> workReports);
+        Task<bool> IsReportedWorkReportForLocationBAsync(WorkReportTyped workReportTyped, List<WorkReportGeometry> workReports);
+        Task<bool> IsReportedWorkReportForLocationCPointAsync(WorkReportTyped workReportTyped, List<WorkReportGeometry> workReports);
+        Task<bool> IsReportedWorkReportForLocationCLineAsync(WorkReportTyped workReportTyped, List<WorkReportGeometry> workReports);
     }
     public class WorkReportRepository : HmcrRepositoryBase<HmrWorkReport>, IWorkReportRepository, IReportExportRepository<WorkReportExportDto>
     {
@@ -75,92 +75,147 @@ namespace Hmcr.Data.Repositories
             return await DbSet.AnyAsync(wr => wr.ActivityNumber == activityNumber);
         }
 
-        public async Task<bool> IsReportedWorkReportForLocationAAsync(WorkReportTyped workReportTyped)
+        public async Task<bool> IsReportedWorkReportForLocationAAsync(WorkReportTyped workReportTyped, List<WorkReportGeometry> workReports)
         {
             if (workReportTyped.ActivityCodeValidation.ReportingFrequency == null
                 || workReportTyped.ActivityCodeValidation.ReportingFrequency < 1) return false;
 
-            DateTime eDate = workReportTyped.EndDate.GetValueOrDefault(DateTime.Today).Date;
-            
-            int days = (int)workReportTyped.ActivityCodeValidation.ReportingFrequency;
-            
-            DateTime sDate = eDate.AddDays(-days);
-            
-            return await DbContext.HmrWorkReportVws.AsNoTracking()
+            int daysBetween = (int)workReportTyped.ActivityCodeValidation.ReportingFrequency;
+            DateTime endDate = workReportTyped.EndDate.GetValueOrDefault(DateTime.Today).Date;
+            DateTime futureEndDate = endDate.AddDays(daysBetween);
+            DateTime startDate = endDate.AddDays(-daysBetween);
+
+            var existsInDB = await DbContext.HmrWorkReportVws.AsNoTracking()
                 .Where(x => x.ActivityNumber == workReportTyped.ActivityNumber
                         && x.ServiceArea == workReportTyped.ServiceArea
-                        && (x.EndDate > sDate && x.EndDate <= eDate)
+                        && ((x.EndDate > startDate && x.EndDate <= endDate)
+                        || (x.EndDate > endDate && x.EndDate <= futureEndDate))
                         && x.ValidationStatus.ToUpper().StartsWith(RowStatus.RowSuccess)
                 )
                 .AnyAsync();
+
+            var existsInReport = workReports.Where(x => x.WorkReportTyped.ActivityNumber == workReportTyped.ActivityNumber
+                        && x.WorkReportTyped.RecordNumber != workReportTyped.RecordNumber
+                        && x.WorkReportTyped.ServiceArea == workReportTyped.ServiceArea
+                        && ((x.WorkReportTyped.EndDate > startDate && x.WorkReportTyped.EndDate <= endDate)
+                        || (x.WorkReportTyped.EndDate > endDate && x.WorkReportTyped.EndDate <= futureEndDate))
+                        ).Any();
+
+            return (existsInDB || existsInReport);
         }
 
-        public async Task<bool> IsReportedWorkReportForLocationBAsync(WorkReportTyped workReportTyped)
+        public async Task<bool> IsReportedWorkReportForLocationBAsync(WorkReportTyped workReportTyped, List<WorkReportGeometry> workReports)
         {
             if (workReportTyped.ActivityCodeValidation.ReportingFrequency == null
                 || workReportTyped.ActivityCodeValidation.ReportingFrequency < 1) return false;
-            DateTime eDate = workReportTyped.EndDate.GetValueOrDefault(DateTime.Today).Date;
-            int days = (int)workReportTyped.ActivityCodeValidation.ReportingFrequency;
-            DateTime sDate = eDate.AddDays(-days);
-            return await DbContext.HmrWorkReportVws.AsNoTracking()
+
+            int daysBetween = (int)workReportTyped.ActivityCodeValidation.ReportingFrequency;
+            DateTime endDate = workReportTyped.EndDate.GetValueOrDefault(DateTime.Today).Date;
+            DateTime futureEndDate = endDate.AddDays(daysBetween);
+            DateTime startDate = endDate.AddDays(-daysBetween);
+
+            var existsInDB = await DbContext.HmrWorkReportVws.AsNoTracking()
                 .Where(x => x.ActivityNumber == workReportTyped.ActivityNumber
                         && x.ServiceArea == workReportTyped.ServiceArea
                         && x.HighwayUnique.ToLower() == workReportTyped.HighwayUnique.ToLower()
-                        && (x.EndDate > sDate && x.EndDate <= eDate)
+                        && ((x.EndDate > startDate && x.EndDate <= endDate)
+                        || (x.EndDate > endDate && x.EndDate <= futureEndDate))
                         && x.ValidationStatus.ToUpper().StartsWith(RowStatus.RowSuccess)
                 )
                 .AnyAsync();
+
+            var existsInReport = workReports.Where(x => x.WorkReportTyped.ActivityNumber == workReportTyped.ActivityNumber
+                        && x.WorkReportTyped.RecordNumber != workReportTyped.RecordNumber
+                        && x.WorkReportTyped.ServiceArea == workReportTyped.ServiceArea
+                        && x.WorkReportTyped.HighwayUnique.ToLower() == workReportTyped.HighwayUnique.ToLower()
+                        && ((x.WorkReportTyped.EndDate > startDate && x.WorkReportTyped.EndDate <= endDate)
+                        || (x.WorkReportTyped.EndDate > endDate && x.WorkReportTyped.EndDate <= futureEndDate))
+                        ).Any();
+
+            return (existsInDB || existsInReport);
         }
 
-        public async Task<bool> IsReportedWorkReportForLocationCPointAsync(WorkReportTyped workReportTyped)
+        public async Task<bool> IsReportedWorkReportForLocationCPointAsync(WorkReportTyped workReportTyped, List<WorkReportGeometry> workReports)
         {
             decimal md = (decimal)0.1; //100m
             decimal startOffset = (decimal)workReportTyped.StartOffset - md;
             decimal endOffset = (decimal)workReportTyped.StartOffset + md;
+            
             if (workReportTyped.ActivityCodeValidation.ReportingFrequency == null
                 || workReportTyped.ActivityCodeValidation.ReportingFrequency < 1) return false;
-            DateTime eDate = workReportTyped.EndDate.GetValueOrDefault(DateTime.Today).Date;
-            int days = (int)workReportTyped.ActivityCodeValidation.ReportingFrequency;
-            DateTime sDate = eDate.AddDays(-days);
-            return await DbContext.HmrWorkReportVws.AsNoTracking()
+
+            int daysBetween = (int)workReportTyped.ActivityCodeValidation.ReportingFrequency;
+            DateTime endDate = workReportTyped.EndDate.GetValueOrDefault(DateTime.Today).Date;
+            DateTime futureEndDate = endDate.AddDays(daysBetween);
+            DateTime startDate = endDate.AddDays(-daysBetween);
+
+            var existsInDB = await DbContext.HmrWorkReportVws.AsNoTracking()
                 .Where(x => x.ActivityNumber == workReportTyped.ActivityNumber
                         && x.ServiceArea == workReportTyped.ServiceArea
                         && x.HighwayUnique.ToLower() == workReportTyped.HighwayUnique.ToLower()
-                        && (x.EndDate > sDate && x.EndDate <= eDate)
-                        && (x.StartOffset != null && x.EndOffset == null)
-                        && (x.StartOffset > startOffset && x.StartOffset < endOffset)
-                        /*&& ((x.StartOffset >= startOffset) && (x.StartOffset <= endOffset)
-                        || (x.EndOffset >= endOffset) && (x.EndOffset <= endOffset))*/
+                        && ((x.EndDate > startDate && x.EndDate <= endDate)
+                        || (x.EndDate > endDate && x.EndDate <= futureEndDate))
+                        && x.StartOffset != null && x.EndOffset == null
+                        && ((x.StartOffset >= startOffset) && (x.StartOffset <= endOffset)
+                        || (x.EndOffset >= endOffset) && (x.EndOffset <= endOffset))
                         && x.ValidationStatus.ToUpper().StartsWith(RowStatus.RowSuccess)
                 )
                 .AnyAsync();
 
-            //(((bridge.BeginKM >= startOffset) && (bridge.BeginKM <= endOffset))
-            //|| ((bridge.EndKM >= startOffset) && (bridge.EndKM <= endOffset)))
+            var existsInReport = workReports.Where(x => x.WorkReportTyped.ActivityNumber == workReportTyped.ActivityNumber
+                        && x.WorkReportTyped.RecordNumber != workReportTyped.RecordNumber
+                        && x.WorkReportTyped.ServiceArea == workReportTyped.ServiceArea
+                        && x.WorkReportTyped.HighwayUnique.ToLower() == workReportTyped.HighwayUnique.ToLower()
+                        && ((x.WorkReportTyped.EndDate > startDate && x.WorkReportTyped.EndDate <= endDate)
+                        || (x.WorkReportTyped.EndDate > endDate && x.WorkReportTyped.EndDate <= futureEndDate))
+                        && x.WorkReportTyped.StartOffset != null && x.WorkReportTyped.EndOffset != null
+                        && ((x.WorkReportTyped.StartOffset >= startOffset) && (x.WorkReportTyped.StartOffset <= endOffset)
+                        || (x.WorkReportTyped.EndOffset >= endOffset) && (x.WorkReportTyped.EndOffset <= endOffset))
+                        ).Any();
+
+            return (existsInDB || existsInReport);
         }
 
-        public async Task<bool> IsReportedWorkReportForLocationCLineAsync(WorkReportTyped workReportTyped)
+        public async Task<bool> IsReportedWorkReportForLocationCLineAsync(WorkReportTyped workReportTyped, List<WorkReportGeometry> workReports)
         {
             decimal md = (decimal)0.1; //100m
             decimal startOffset = (decimal)workReportTyped.StartOffset - md;
             decimal endOffset = (decimal)workReportTyped.EndOffset + md;
+            
             if (workReportTyped.ActivityCodeValidation.ReportingFrequency == null
                 || workReportTyped.ActivityCodeValidation.ReportingFrequency < 1) return false;
-            DateTime eDate = workReportTyped.EndDate.GetValueOrDefault(DateTime.Today).Date;
-            int days = (int)workReportTyped.ActivityCodeValidation.ReportingFrequency;
-            DateTime sDate = eDate.AddDays(-days);
-            return await DbContext.HmrWorkReportVws.AsNoTracking()
+
+            int daysBetween = (int)workReportTyped.ActivityCodeValidation.ReportingFrequency;
+            DateTime endDate = workReportTyped.EndDate.GetValueOrDefault(DateTime.Today).Date;
+            DateTime futureEndDate = endDate.AddDays(daysBetween);
+            DateTime startDate = endDate.AddDays(-daysBetween);
+
+            var existsInDB = await DbContext.HmrWorkReportVws.AsNoTracking()
                 .Where(x => x.ActivityNumber == workReportTyped.ActivityNumber
                         && x.ServiceArea == workReportTyped.ServiceArea
                         && x.HighwayUnique.ToLower() == workReportTyped.HighwayUnique.ToLower()
-                        && (x.EndDate > sDate && x.EndDate <= eDate)
+                        && ((x.EndDate > startDate && x.EndDate <= endDate)
+                        || (x.EndDate > endDate && x.EndDate <= futureEndDate))
                         && (x.StartOffset != null && x.EndOffset != null)
-                        && (x.StartOffset > startOffset || x.EndOffset < endOffset)
-                        /*&& ((x.StartOffset >= startOffset) && (x.StartOffset <= endOffset)
-                        || (x.EndOffset >= endOffset) && (x.EndOffset <= endOffset))*/
+                        //&& (x.StartOffset > startOffset || x.EndOffset < endOffset) //offset may be partially located
+                        && ((x.StartOffset >= startOffset) && (x.StartOffset <= endOffset)
+                        || (x.EndOffset >= endOffset) && (x.EndOffset <= endOffset))
                         && x.ValidationStatus.ToUpper().StartsWith(RowStatus.RowSuccess)
                 )
                 .AnyAsync();
+
+            var existsInReport = workReports.Where(x => x.WorkReportTyped.ActivityNumber == workReportTyped.ActivityNumber
+                        && x.WorkReportTyped.RecordNumber != workReportTyped.RecordNumber
+                        && x.WorkReportTyped.ServiceArea == workReportTyped.ServiceArea
+                        && x.WorkReportTyped.HighwayUnique.ToLower() == workReportTyped.HighwayUnique.ToLower()
+                        && ((x.WorkReportTyped.EndDate > startDate && x.WorkReportTyped.EndDate <= endDate)
+                        || (x.WorkReportTyped.EndDate > endDate && x.WorkReportTyped.EndDate <= futureEndDate))
+                        && x.WorkReportTyped.StartOffset != null && x.WorkReportTyped.EndOffset != null
+                        && ((x.WorkReportTyped.StartOffset >= startOffset) && (x.WorkReportTyped.StartOffset <= endOffset)
+                        || (x.WorkReportTyped.EndOffset >= endOffset) && (x.WorkReportTyped.EndOffset <= endOffset))
+                        ).Any();
+
+            return (existsInDB || existsInReport);
         }
     }
 }
