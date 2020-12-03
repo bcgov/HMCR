@@ -120,7 +120,6 @@ namespace Hmcr.Domain.Hangfire
             var typedRows = new List<WorkReportTyped>();
             
             if (_statusService.IsFileInProgress(_submission.SubmissionStatusId))
-            //if (_submission.SubmissionStatusId == _statusService.FileInProgress)
             {
                 UpdateSubmissionStatus(_statusService.FileStage3InProgress);
 
@@ -138,16 +137,9 @@ namespace Hmcr.Domain.Hangfire
 
                 CopyCalculatedFieldsFormUntypedRow(typedRows, untypedRows);
                 PerformAdditionalValidation(typedRows);
+                PerformFieldServiceAreaValidation(typedRows);
             }
-            //if (_submission.SubmissionStatusId != _statusService.FileInProgress)
-            if (!_statusService.IsFileInProgress(_submission.SubmissionStatusId))
-            {
-                await CommitAndSendEmailAsync();
-                return true;
-            }
-
-            PerformFieldServiceAreaValidation(typedRows);
-            //if (_submission.SubmissionStatusId != _statusService.FileInProgress)
+            
             if (!_statusService.IsFileInProgress(_submission.SubmissionStatusId))
             {
                 await CommitAndSendEmailAsync();
