@@ -93,6 +93,19 @@ namespace Hmcr.Chris
                 }
             }
 
+            //check the last item to see if it's a single since the GeoServer queries expect
+            // at least 2 pairs we'll need to make some adjustments if there is a group with 1 pair
+            // this won't exceed the paramter limit since it's 1000 (500 pairs). See HMCR-909
+            var count = geometryGroup.Count();
+            if (geometryGroup[count - 1].Count(g => g == ',') == 1)
+            {
+                var lastGroup = geometryGroup[count - 1];
+                var secondLastGroup = geometryGroup[count - 2];
+                secondLastGroup += "\\," + lastGroup;   //append the previously last group to the 2nd last group text
+                geometryGroup[count - 2] = secondLastGroup; //update the second last group
+                geometryGroup.RemoveAt(count - 1);  //remove the last group
+            }
+
             return geometryGroup;
         }
 

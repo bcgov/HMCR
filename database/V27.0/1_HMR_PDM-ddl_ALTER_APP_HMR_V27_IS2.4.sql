@@ -189,17 +189,17 @@ CREATE VIEW [dbo].[HMR_WORK_REPORT_VW] AS
 	  ,CAST(subm_obj.APP_CREATE_TIMESTAMP  AS datetime) AS SUBMISSION_DATE
 	  ,wrkrpt.RECORD_VERSION_NUMBER
 	  ,REPLACE((SELECT distinct FIELDMESSAGE FROM OPENJSON(subm_rw.WARNING_DETAIL,'$.fieldMessages') 
-			WITH (FIELD nvarchar(255) '$.field', FIELDMESSAGE nvarchar(255) '$.messages[0]') WHERE charindex('Minimum / Maximum Value Validation', FIELD) >= 1 ), ',', '/') AS 'MIN_MAX_VALUE_VALID_WARNING'
+			WITH (FIELD nvarchar(1000) '$.field', FIELDMESSAGE nvarchar(1000) '$.messages[0]') WHERE charindex('Minimum / Maximum Value Validation', FIELD) >= 1 ), ',', '/') AS 'MIN_MAX_VALUE_VALID_WARNING'
 	  ,REPLACE((SELECT distinct FIELDMESSAGE FROM OPENJSON(subm_rw.WARNING_DETAIL,'$.fieldMessages') 
-			WITH (FIELD nvarchar(255) '$.field', FIELDMESSAGE nvarchar(255) '$.messages[0]') WHERE charindex('Data Precision Validation', FIELD) >= 1 ), ',', '/') AS 'DATA_PRECISION_VALID_WARNING'
+			WITH (FIELD nvarchar(1000) '$.field', FIELDMESSAGE nvarchar(1000) '$.messages[0]') WHERE charindex('Data Precision Validation', FIELD) >= 1 ), ',', '/') AS 'DATA_PRECISION_VALID_WARNING'
 	  ,REPLACE((SELECT distinct FIELDMESSAGE FROM OPENJSON(subm_rw.WARNING_DETAIL,'$.fieldMessages') 
-			WITH (FIELD nvarchar(255) '$.field', FIELDMESSAGE nvarchar(255) '$.messages[0]') WHERE charindex('Reporting Frequency Validation', FIELD) >= 1 ), ',', '/') AS 'REPORTING_FREQ_VALID_WARNING'
+			WITH (FIELD nvarchar(1000) '$.field', FIELDMESSAGE nvarchar(1000) '$.messages[0]') WHERE charindex('Reporting Frequency Validation', FIELD) >= 1 ), ',', '/') AS 'REPORTING_FREQ_VALID_WARNING'
 	  ,REPLACE((SELECT distinct FIELDMESSAGE FROM OPENJSON(subm_rw.WARNING_DETAIL,'$.fieldMessages') 
-			WITH (FIELD nvarchar(255) '$.field', FIELDMESSAGE nvarchar(255) '$.messages[0]') WHERE FIELD = 'Surface Type Validation'), ',', '/') AS 'SURFACE_TYPE_VALID_WARNING'
+			WITH (FIELD nvarchar(1000) '$.field', FIELDMESSAGE nvarchar(1000) '$.messages[0]') WHERE FIELD = 'Surface Type Validation'), ',', '/') AS 'SURFACE_TYPE_VALID_WARNING'
 	  ,REPLACE((SELECT distinct FIELDMESSAGE FROM OPENJSON(subm_rw.WARNING_DETAIL,'$.fieldMessages') 
-			WITH (FIELD nvarchar(255) '$.field', FIELDMESSAGE nvarchar(255) '$.messages[0]') WHERE FIELD = 'Road Class Validation'), ',', '/') AS 'ROAD_CLASS_VALID_WARNING'
+			WITH (FIELD nvarchar(1000) '$.field', FIELDMESSAGE nvarchar(1000) '$.messages[0]') WHERE FIELD = 'Road Class Validation'), ',', '/') AS 'ROAD_CLASS_VALID_WARNING'
 	  ,REPLACE((SELECT distinct FIELDMESSAGE FROM OPENJSON(subm_rw.WARNING_DETAIL,'$.fieldMessages') 
-			WITH (FIELD nvarchar(255) '$.field', FIELDMESSAGE nvarchar(255) '$.messages[0]') WHERE FIELD = 'Road Length Validation'), ',', '/') AS 'ROAD_LENGTH_VALID_WARNING'
+			WITH (FIELD nvarchar(1000) '$.field', FIELDMESSAGE nvarchar(1000) '$.messages[0]') WHERE FIELD = 'Road Length Validation'), ',', '/') AS 'ROAD_LENGTH_VALID_WARNING'
   FROM HMR_WORK_REPORT wrkrpt
   INNER JOIN HMR_SUBMISSION_OBJECT subm_obj ON wrkrpt.SUBMISSION_OBJECT_ID = subm_obj.SUBMISSION_OBJECT_ID
   LEFT OUTER JOIN HMR_ACTIVITY_CODE actcode ON wrkrpt.ACTIVITY_NUMBER = actcode.ACTIVITY_NUMBER
