@@ -18,10 +18,13 @@ namespace Hmcr.Model.Dtos.ActivityCode
         public string FeatureType { get; set; }
         public string SpThresholdLevel { get; set; }
         public string ActivityApplication { get; set; }
-        public bool IsSiteNumRequired { get; set; }
+        
+        //is site required is set to Y or N in the Mapper
+        public string IsSiteNumRequired { get; set; }
         public DateTime? EndDate { get; set; }
-        public bool IsActive => EndDate == null || EndDate > DateTime.Today;
-        public bool IsReferenced { get; set; }
+        public string IsActive => (EndDate == null || EndDate > DateTime.Today) ? "Y" : "N";
+        //is referenced is handled in the ActivityCodeRepo
+        public string IsReferenced { get; set; }
 
         //public decimal RoadLengthRule { get; set; }
         public string RoadLengthRuleName { get; set; }
