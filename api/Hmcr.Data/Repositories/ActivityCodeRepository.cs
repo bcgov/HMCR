@@ -3,7 +3,6 @@ using Hmcr.Data.Database.Entities;
 using Hmcr.Data.Repositories.Base;
 using Hmcr.Model.Dtos;
 using Hmcr.Model.Dtos.ActivityCode;
-using Hmcr.Model.Dtos.ServiceArea;
 using Hmcr.Model.Utils;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -30,7 +29,7 @@ namespace Hmcr.Data.Repositories
     public class ActivityCodeRepository : HmcrRepositoryBase<HmrActivityCode>, IActivityCodeRepository
     {
         private IWorkReportRepository _workReportRepo;
-
+        
         public ActivityCodeRepository(AppDbContext dbContext, IMapper mapper, IWorkReportRepository workReportRepo)
             : base(dbContext, mapper)
         {
@@ -189,12 +188,15 @@ namespace Hmcr.Data.Repositories
                 activity.SurfaceTypeRuleName = (activity.SurfaceTypeRuleName == "Default")
                     ? "Not Applicable"
                     : activity.SurfaceTypeRuleName;
+
+                //default is reference to N, following process will check and update if they are in use
+                activity.IsReferenced = "N";
             }
 
             // Find out which activity numbers are being used
             await foreach (var activityNumber in FindActivityNumbersInUseAync(activityCodes.Select(ac => ac.ActivityNumber)))
             {
-                activityCodes.FirstOrDefault(ac => ac.ActivityNumber == activityNumber).IsReferenced = true;
+                activityCodes.FirstOrDefault(ac => ac.ActivityNumber == activityNumber).IsReferenced = "Y";
             }
 
             return activityCodes;

@@ -771,7 +771,7 @@ namespace Hmcr.Domain.Hangfire
 
                     //if the total road km is less than 40m we need to perform some slightly different logic
                     // grab the max number of lanes of highway profiles 
-                    if (totalRoadKM < 0.4)
+                    if (totalRoadKM < 0.04)
                     {
                         var maxNumberOfLanes = (typedRow.HighwayProfiles.Count > 0) 
                             ? typedRow.HighwayProfiles.Aggregate((i1, i2) => i1.NumberOfLanes > i2.NumberOfLanes ? i1 : i2).NumberOfLanes 

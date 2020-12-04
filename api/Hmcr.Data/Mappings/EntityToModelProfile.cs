@@ -95,7 +95,8 @@ namespace Hmcr.Data.Mappings
                 .ForMember(ac => ac.RoadClassRuleName, opt => opt.MapFrom(src => src.RoadClassRuleNavigation.ActivityRuleName))
                 .ForMember(ac => ac.RoadLengthRuleName, opt => opt.MapFrom(src => src.RoadLengthRuleNavigation.ActivityRuleName))
                 .ForMember(ac => ac.SurfaceTypeRuleName, opt => opt.MapFrom(src => src.SurfaceTypeRuleNavigation.ActivityRuleName))
-                .ForMember(ac => ac.LocationCode, opt => opt.MapFrom(src => src.LocationCode.LocationCode));
+                .ForMember(ac => ac.LocationCode, opt => opt.MapFrom(src => src.LocationCode.LocationCode))
+                .ForMember(ac => ac.IsSiteNumRequired, opt => opt.MapFrom(src => (src.IsSiteNumRequired == true) ? "Y" : "N"));
 
             CreateMap<HmrLocationCode, LocationCodeDto>();
             CreateMap<HmrLocationCode, LocationCodeDropDownDto>();
