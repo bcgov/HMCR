@@ -1151,10 +1151,19 @@ namespace Hmcr.Domain.Hangfire
         private async Task<bool> WithinBridgeStructureVariance(WorkReportTyped typedRow, decimal structureVariance)
         {
             var isBridgeWithinVariance = false;
+            var startOffset = 0.0M;
+            var endOffset = 0.0M;
 
-            var startOffset = typedRow.StartOffset - structureVariance;
-            var endOffset = ((typedRow.EndOffset == null) ? typedRow.StartOffset : typedRow.EndOffset) + structureVariance;
-
+            if (typedRow.StartOffset > typedRow.EndOffset)
+            {
+                startOffset = (decimal)typedRow.StartOffset + structureVariance;
+                endOffset = (decimal)((typedRow.EndOffset == null) ? typedRow.StartOffset : typedRow.EndOffset) - structureVariance;
+            } else
+            {
+                startOffset = (decimal)typedRow.StartOffset - structureVariance;
+                endOffset = (decimal)((typedRow.EndOffset == null) ? typedRow.StartOffset : typedRow.EndOffset) + structureVariance;
+            }
+            
             var result = await _spatialService.GetStructuresOnRFISegmentAsync(typedRow.HighwayUnique);
 
             var bridgeStructures = result.structures.Where(x => x.StructureType == StructureType.BRIDGE).ToList();
@@ -1176,10 +1185,20 @@ namespace Hmcr.Domain.Hangfire
         private async Task<bool> WithinRestAreaVariance(WorkReportTyped typedRow, decimal structureVariance)
         {
             var isWithinVariance = false;
-
-            var startOffset = typedRow.StartOffset - structureVariance;
-            var endOffset = ((typedRow.EndOffset == null) ? typedRow.StartOffset : typedRow.EndOffset) + structureVariance;
+            var startOffset = 0.0M;
+            var endOffset = 0.0M;
             string siteNumber = typedRow.SiteNumber;
+
+            if (typedRow.StartOffset > typedRow.EndOffset)
+            {
+                startOffset = (decimal)typedRow.StartOffset + structureVariance;
+                endOffset = (decimal)((typedRow.EndOffset == null) ? typedRow.StartOffset : typedRow.EndOffset) - structureVariance;
+            }
+            else
+            {
+                startOffset = (decimal)typedRow.StartOffset - structureVariance;
+                endOffset = (decimal)((typedRow.EndOffset == null) ? typedRow.StartOffset : typedRow.EndOffset) + structureVariance;
+            }
 
             var result = await _spatialService.GetRestAreasOnRFISegmentAsync(typedRow.HighwayUnique);
 

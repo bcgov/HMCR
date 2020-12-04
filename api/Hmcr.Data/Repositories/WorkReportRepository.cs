@@ -137,10 +137,21 @@ namespace Hmcr.Data.Repositories
 
         public async Task<bool> IsReportedWorkReportForLocationCPointAsync(WorkReportTyped workReportTyped, List<WorkReportGeometry> workReports)
         {
-            decimal md = (decimal)0.1; //100m
-            decimal startOffset = (decimal)workReportTyped.StartOffset - md;
-            decimal endOffset = (decimal)workReportTyped.StartOffset + md;
-            
+            decimal md = 0.1M; //100m
+            decimal startOffset = 0.0M;
+            decimal endOffset = 0.0M;
+
+            if (workReportTyped.StartOffset > workReportTyped.EndOffset)
+            {
+                startOffset = (decimal)workReportTyped.StartOffset + md;
+                endOffset = (decimal)workReportTyped.EndOffset - md;
+            }
+            else
+            {
+                startOffset = (decimal)workReportTyped.StartOffset - md;
+                endOffset = (decimal)workReportTyped.EndOffset + md;
+            }
+
             if (workReportTyped.ActivityCodeValidation.ReportingFrequency == null
                 || workReportTyped.ActivityCodeValidation.ReportingFrequency < 1) return false;
 
@@ -157,20 +168,20 @@ namespace Hmcr.Data.Repositories
                         || (x.EndDate > endDate && x.EndDate <= futureEndDate))
                         && x.StartOffset != null && x.EndOffset == null
                         && ((x.StartOffset >= startOffset) && (x.StartOffset <= endOffset)
-                        || (x.EndOffset >= endOffset) && (x.EndOffset <= endOffset))
+                        || (x.EndOffset >= endOffset) && (x.EndOffset <= startOffset))
                         && x.ValidationStatus.ToUpper().StartsWith(RowStatus.RowSuccess)
                 )
                 .AnyAsync();
-
+            
             var existsInReport = workReports.Where(x => x.WorkReportTyped.ActivityNumber == workReportTyped.ActivityNumber
                         && x.WorkReportTyped.RecordNumber != workReportTyped.RecordNumber
                         && x.WorkReportTyped.ServiceArea == workReportTyped.ServiceArea
                         && x.WorkReportTyped.HighwayUnique.ToLower() == workReportTyped.HighwayUnique.ToLower()
                         && ((x.WorkReportTyped.EndDate > startDate && x.WorkReportTyped.EndDate <= endDate)
                         || (x.WorkReportTyped.EndDate > endDate && x.WorkReportTyped.EndDate <= futureEndDate))
-                        && x.WorkReportTyped.StartOffset != null && x.WorkReportTyped.EndOffset != null
+                        && x.WorkReportTyped.StartOffset != null && x.WorkReportTyped.EndOffset == null
                         && ((x.WorkReportTyped.StartOffset >= startOffset) && (x.WorkReportTyped.StartOffset <= endOffset)
-                        || (x.WorkReportTyped.EndOffset >= endOffset) && (x.WorkReportTyped.EndOffset <= endOffset))
+                        || (x.WorkReportTyped.EndOffset >= endOffset) && (x.WorkReportTyped.EndOffset <= startOffset))
                         ).Any();
 
             return (existsInDB || existsInReport);
@@ -178,9 +189,19 @@ namespace Hmcr.Data.Repositories
 
         public async Task<bool> IsReportedWorkReportForLocationCLineAsync(WorkReportTyped workReportTyped, List<WorkReportGeometry> workReports)
         {
-            decimal md = (decimal)0.1; //100m
-            decimal startOffset = (decimal)workReportTyped.StartOffset - md;
-            decimal endOffset = (decimal)workReportTyped.EndOffset + md;
+            decimal md = 0.1M; //100m
+            decimal startOffset = 0.0M;
+            decimal endOffset = 0.0M;
+            
+            if (workReportTyped.StartOffset > workReportTyped.EndOffset)
+            {
+                startOffset= (decimal)workReportTyped.StartOffset + md;
+                endOffset = (decimal)workReportTyped.EndOffset - md;
+            } else
+            {
+                startOffset = (decimal)workReportTyped.StartOffset - md;
+                endOffset = (decimal)workReportTyped.EndOffset + md;
+            }
             
             if (workReportTyped.ActivityCodeValidation.ReportingFrequency == null
                 || workReportTyped.ActivityCodeValidation.ReportingFrequency < 1) return false;
@@ -197,13 +218,12 @@ namespace Hmcr.Data.Repositories
                         && ((x.EndDate > startDate && x.EndDate <= endDate)
                         || (x.EndDate > endDate && x.EndDate <= futureEndDate))
                         && (x.StartOffset != null && x.EndOffset != null)
-                        //&& (x.StartOffset > startOffset || x.EndOffset < endOffset) //offset may be partially located
                         && ((x.StartOffset >= startOffset) && (x.StartOffset <= endOffset)
-                        || (x.EndOffset >= endOffset) && (x.EndOffset <= endOffset))
+                        || (x.EndOffset >= endOffset) && (x.EndOffset <= startOffset))
                         && x.ValidationStatus.ToUpper().StartsWith(RowStatus.RowSuccess)
                 )
                 .AnyAsync();
-
+            
             var existsInReport = workReports.Where(x => x.WorkReportTyped.ActivityNumber == workReportTyped.ActivityNumber
                         && x.WorkReportTyped.RecordNumber != workReportTyped.RecordNumber
                         && x.WorkReportTyped.ServiceArea == workReportTyped.ServiceArea
@@ -212,7 +232,7 @@ namespace Hmcr.Data.Repositories
                         || (x.WorkReportTyped.EndDate > endDate && x.WorkReportTyped.EndDate <= futureEndDate))
                         && x.WorkReportTyped.StartOffset != null && x.WorkReportTyped.EndOffset != null
                         && ((x.WorkReportTyped.StartOffset >= startOffset) && (x.WorkReportTyped.StartOffset <= endOffset)
-                        || (x.WorkReportTyped.EndOffset >= endOffset) && (x.WorkReportTyped.EndOffset <= endOffset))
+                        || (x.WorkReportTyped.EndOffset >= endOffset) && (x.WorkReportTyped.EndOffset <= startOffset))
                         ).Any();
 
             return (existsInDB || existsInReport);
