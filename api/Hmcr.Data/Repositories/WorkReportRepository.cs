@@ -138,19 +138,8 @@ namespace Hmcr.Data.Repositories
         public async Task<bool> IsReportedWorkReportForLocationCPointAsync(WorkReportTyped workReportTyped, List<WorkReportGeometry> workReports)
         {
             decimal md = 0.1M; //100m
-            decimal startOffset = 0.0M;
-            decimal endOffset = 0.0M;
-
-            if (workReportTyped.StartOffset > workReportTyped.EndOffset)
-            {
-                startOffset = (decimal)workReportTyped.StartOffset + md;
-                endOffset = (decimal)workReportTyped.EndOffset - md;
-            }
-            else
-            {
-                startOffset = (decimal)workReportTyped.StartOffset - md;
-                endOffset = (decimal)workReportTyped.EndOffset + md;
-            }
+            decimal startOffset = (decimal)workReportTyped.StartOffset - md;
+            decimal endOffset = (decimal)workReportTyped.StartOffset + md;
 
             if (workReportTyped.ActivityCodeValidation.ReportingFrequency == null
                 || workReportTyped.ActivityCodeValidation.ReportingFrequency < 1) return false;
