@@ -27,7 +27,7 @@ INSERT INTO HMR_SUBMISSION_STATUS
 	APP_CREATE_USERID, APP_CREATE_TIMESTAMP, APP_CREATE_USER_GUID, APP_CREATE_USER_DIRECTORY,
 	APP_LAST_UPDATE_USERID, APP_LAST_UPDATE_TIMESTAMP, APP_LAST_UPDATE_USER_GUID, APP_LAST_UPDATE_USER_DIRECTORY)
 	VALUES 
-	('3E', 'Stage 3 - Service Area Error', NULL, 'R', 3, 1, 
+	('3E', 'Stage 3 - Service Area Error', 'Indicates a submitted file has been evaluated and conflicting values and/or conflicting service areas have been submitted. The file will need to be uploaded again after making required corrections.', 'R', 3, 1, 
 	'sa', getutcdate(), '00000001-0000-0000-0000-000000000000', 'WIN AUTH',
 	'sa', getutcdate(), '00000001-0000-0000-0000-000000000000', 'WIN AUTH');
 GO
