@@ -75,7 +75,7 @@ namespace Hmcr.Chris
         /// </summary>
         /// <param name="coordinates"></param>
         /// <returns></returns>
-        private List<string> BuildGeometryString(Coordinate[] coordinates, bool isLine)
+        private List<string> BuildGeometryString(Coordinate[] coordinates)
         {
             var geometryGroup = new List<string>();
             var geometryLineString = "";
@@ -93,7 +93,7 @@ namespace Hmcr.Chris
                 }
             }
 
-            if (isLine)
+            if (coordinates.Count() > 1)
             {
                 //check the last item to see if it's a single since the GeoServer queries expect
                 // at least 2 pairs we'll need to make some adjustments if there is a group with 1 pair
@@ -120,7 +120,7 @@ namespace Hmcr.Chris
 
             try
             {
-                var geometryGroup = BuildGeometryString(geometry.Coordinates, false);
+                var geometryGroup = BuildGeometryString(geometry.Coordinates);
 
                 foreach (var lineStringCoordinates in geometryGroup)
                 {
@@ -153,7 +153,7 @@ namespace Hmcr.Chris
 
             try
             {
-                var geometryGroup = BuildGeometryString(geometry.Coordinates, true);
+                var geometryGroup = BuildGeometryString(geometry.Coordinates);
 
                 foreach (var lineStringCoordinates in geometryGroup)
                 {
@@ -190,7 +190,7 @@ namespace Hmcr.Chris
 
             try
             {
-                var geometryGroup = BuildGeometryString(geometry.Coordinates, true);
+                var geometryGroup = BuildGeometryString(geometry.Coordinates);
 
                 foreach (var lineStringCoordinates in geometryGroup)
                 {
@@ -228,7 +228,7 @@ namespace Hmcr.Chris
 
             try
             {
-                var geometryGroup = BuildGeometryString(geometry.Coordinates, false);
+                var geometryGroup = BuildGeometryString(geometry.Coordinates);
 
                 foreach (var lineStringCoordinates in geometryGroup)
                 {
@@ -262,7 +262,7 @@ namespace Hmcr.Chris
 
             try
             {
-                var geometryGroup = BuildGeometryString(geometry.Coordinates, false);
+                var geometryGroup = BuildGeometryString(geometry.Coordinates);
 
                 foreach (var lineStringCoordinates in geometryGroup)
                 {
@@ -297,7 +297,7 @@ namespace Hmcr.Chris
 
             try
             {
-                var geometryGroup = BuildGeometryString(geometry.Coordinates, true);
+                var geometryGroup = BuildGeometryString(geometry.Coordinates);
 
                 foreach (var lineStringCoordinates in geometryGroup)
                 {
@@ -335,7 +335,7 @@ namespace Hmcr.Chris
 
             try
             {
-                var geometryGroup = BuildGeometryString(geometry.Coordinates, false);
+                var geometryGroup = BuildGeometryString(geometry.Coordinates);
 
                 foreach (var lineStringCoordinates in geometryGroup)
                 {
@@ -369,7 +369,7 @@ namespace Hmcr.Chris
 
             try
             {
-                var geometryGroup = BuildGeometryString(geometry.Coordinates, true);
+                var geometryGroup = BuildGeometryString(geometry.Coordinates);
 
                 foreach (var lineStringCoordinates in geometryGroup)
                 {
