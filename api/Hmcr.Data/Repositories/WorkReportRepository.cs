@@ -89,17 +89,17 @@ namespace Hmcr.Data.Repositories
                 .Where(x => x.ActivityNumber == workReportTyped.ActivityNumber
                         && x.ServiceArea == workReportTyped.ServiceArea
                         && ((x.EndDate > startDate && x.EndDate <= endDate)
-                        || (x.EndDate > endDate && x.EndDate <= futureEndDate))
+                        || (x.EndDate >= endDate && x.EndDate < futureEndDate))
                         && x.ValidationStatus.ToUpper().StartsWith(RowStatus.RowSuccess)
-                )
-                .AnyAsync();
+                ).AnyAsync();
 
-            var existsInReport = workReports.Where(x => x.WorkReportTyped.ActivityNumber == workReportTyped.ActivityNumber
+            var existsInReport = workReports
+                .Where(x => x.WorkReportTyped.ActivityNumber == workReportTyped.ActivityNumber
                         && x.WorkReportTyped.RecordNumber != workReportTyped.RecordNumber
                         && x.WorkReportTyped.ServiceArea == workReportTyped.ServiceArea
                         && ((x.WorkReportTyped.EndDate > startDate && x.WorkReportTyped.EndDate <= endDate)
-                        || (x.WorkReportTyped.EndDate > endDate && x.WorkReportTyped.EndDate <= futureEndDate))
-                        ).Any();
+                        || (x.WorkReportTyped.EndDate >= endDate && x.WorkReportTyped.EndDate < futureEndDate))
+                 ).Any();
 
             return (existsInDB || existsInReport);
         }
@@ -119,18 +119,18 @@ namespace Hmcr.Data.Repositories
                         && x.ServiceArea == workReportTyped.ServiceArea
                         && x.HighwayUnique.ToLower() == workReportTyped.HighwayUnique.ToLower()
                         && ((x.EndDate > startDate && x.EndDate <= endDate)
-                        || (x.EndDate > endDate && x.EndDate <= futureEndDate))
+                        || (x.EndDate >= endDate && x.EndDate < futureEndDate))
                         && x.ValidationStatus.ToUpper().StartsWith(RowStatus.RowSuccess)
-                )
-                .AnyAsync();
+                ).AnyAsync();
 
-            var existsInReport = workReports.Where(x => x.WorkReportTyped.ActivityNumber == workReportTyped.ActivityNumber
+            var existsInReport = workReports
+                .Where(x => x.WorkReportTyped.ActivityNumber == workReportTyped.ActivityNumber
                         && x.WorkReportTyped.RecordNumber != workReportTyped.RecordNumber
                         && x.WorkReportTyped.ServiceArea == workReportTyped.ServiceArea
                         && x.WorkReportTyped.HighwayUnique.ToLower() == workReportTyped.HighwayUnique.ToLower()
                         && ((x.WorkReportTyped.EndDate > startDate && x.WorkReportTyped.EndDate <= endDate)
-                        || (x.WorkReportTyped.EndDate > endDate && x.WorkReportTyped.EndDate <= futureEndDate))
-                        ).Any();
+                        || (x.WorkReportTyped.EndDate >= endDate && x.WorkReportTyped.EndDate < futureEndDate))
+                 ).Any();
 
             return (existsInDB || existsInReport);
         }
@@ -154,24 +154,28 @@ namespace Hmcr.Data.Repositories
                         && x.ServiceArea == workReportTyped.ServiceArea
                         && x.HighwayUnique.ToLower() == workReportTyped.HighwayUnique.ToLower()
                         && ((x.EndDate > startDate && x.EndDate <= endDate)
-                        || (x.EndDate > endDate && x.EndDate <= futureEndDate))
+                        || (x.EndDate >= endDate && x.EndDate < futureEndDate))
                         && x.StartOffset != null && x.EndOffset == null
                         && ((x.StartOffset >= startOffset) && (x.StartOffset <= endOffset)
                         || (x.EndOffset >= endOffset) && (x.EndOffset <= startOffset))
+                        && x.SiteNumber != null && x.SiteNumber != workReportTyped.SiteNumber
+                        && x.StructureNumber != null && x.StructureNumber != workReportTyped.StructureNumber
                         && x.ValidationStatus.ToUpper().StartsWith(RowStatus.RowSuccess)
-                )
-                .AnyAsync();
+                ).AnyAsync();
             
-            var existsInReport = workReports.Where(x => x.WorkReportTyped.ActivityNumber == workReportTyped.ActivityNumber
+            var existsInReport = workReports
+                .Where(x => x.WorkReportTyped.ActivityNumber == workReportTyped.ActivityNumber
                         && x.WorkReportTyped.RecordNumber != workReportTyped.RecordNumber
                         && x.WorkReportTyped.ServiceArea == workReportTyped.ServiceArea
                         && x.WorkReportTyped.HighwayUnique.ToLower() == workReportTyped.HighwayUnique.ToLower()
                         && ((x.WorkReportTyped.EndDate > startDate && x.WorkReportTyped.EndDate <= endDate)
-                        || (x.WorkReportTyped.EndDate > endDate && x.WorkReportTyped.EndDate <= futureEndDate))
+                        || (x.WorkReportTyped.EndDate >= endDate && x.WorkReportTyped.EndDate < futureEndDate))
                         && x.WorkReportTyped.StartOffset != null && x.WorkReportTyped.EndOffset == null
                         && ((x.WorkReportTyped.StartOffset >= startOffset) && (x.WorkReportTyped.StartOffset <= endOffset)
                         || (x.WorkReportTyped.EndOffset >= endOffset) && (x.WorkReportTyped.EndOffset <= startOffset))
-                        ).Any();
+                        && x.WorkReportTyped.SiteNumber != null && x.WorkReportTyped.SiteNumber != workReportTyped.SiteNumber
+                        && x.WorkReportTyped.StructureNumber != null && x.WorkReportTyped.StructureNumber != workReportTyped.StructureNumber
+                 ).Any();
 
             return (existsInDB || existsInReport);
         }
@@ -205,24 +209,28 @@ namespace Hmcr.Data.Repositories
                         && x.ServiceArea == workReportTyped.ServiceArea
                         && x.HighwayUnique.ToLower() == workReportTyped.HighwayUnique.ToLower()
                         && ((x.EndDate > startDate && x.EndDate <= endDate)
-                        || (x.EndDate > endDate && x.EndDate <= futureEndDate))
-                        && (x.StartOffset != null && x.EndOffset != null)
+                        || (x.EndDate >= endDate && x.EndDate < futureEndDate))
+                        && x.StartOffset != null && x.EndOffset != null
                         && ((x.StartOffset >= startOffset) && (x.StartOffset <= endOffset)
                         || (x.EndOffset >= endOffset) && (x.EndOffset <= startOffset))
+                        && x.SiteNumber != null && x.SiteNumber != workReportTyped.SiteNumber
+                        && x.StructureNumber != null && x.StructureNumber != workReportTyped.StructureNumber
                         && x.ValidationStatus.ToUpper().StartsWith(RowStatus.RowSuccess)
-                )
-                .AnyAsync();
+                ).AnyAsync();
             
-            var existsInReport = workReports.Where(x => x.WorkReportTyped.ActivityNumber == workReportTyped.ActivityNumber
+            var existsInReport = workReports
+                .Where(x => x.WorkReportTyped.ActivityNumber == workReportTyped.ActivityNumber
                         && x.WorkReportTyped.RecordNumber != workReportTyped.RecordNumber
                         && x.WorkReportTyped.ServiceArea == workReportTyped.ServiceArea
                         && x.WorkReportTyped.HighwayUnique.ToLower() == workReportTyped.HighwayUnique.ToLower()
                         && ((x.WorkReportTyped.EndDate > startDate && x.WorkReportTyped.EndDate <= endDate)
-                        || (x.WorkReportTyped.EndDate > endDate && x.WorkReportTyped.EndDate <= futureEndDate))
+                        || (x.WorkReportTyped.EndDate >= endDate && x.WorkReportTyped.EndDate < futureEndDate))
                         && x.WorkReportTyped.StartOffset != null && x.WorkReportTyped.EndOffset != null
                         && ((x.WorkReportTyped.StartOffset >= startOffset) && (x.WorkReportTyped.StartOffset <= endOffset)
                         || (x.WorkReportTyped.EndOffset >= endOffset) && (x.WorkReportTyped.EndOffset <= startOffset))
-                        ).Any();
+                        && x.WorkReportTyped.SiteNumber != null && x.WorkReportTyped.SiteNumber != workReportTyped.SiteNumber
+                        && x.WorkReportTyped.StructureNumber != null && x.WorkReportTyped.StructureNumber != workReportTyped.StructureNumber
+                 ).Any();
 
             return (existsInDB || existsInReport);
         }
