@@ -703,8 +703,9 @@ namespace Hmcr.Domain.Hangfire
         {
             var submissionRow = _submissionRows[(decimal)typedRow.RowNum];
             var warnings = new Dictionary<string, List<string>>();
-            string accomplishment = typedRow.Accomplishment.ToString();
-
+            // accomplishment formatting in the ToString to strip trailing zeroes
+            string accomplishment = ((decimal)typedRow.Accomplishment).ToString("0.#####");
+            
             //always perform data precision validation
             if ((new[] { "site", "num", "ea" }).Contains(typedRow.UnitOfMeasure.ToLowerInvariant()) && !accomplishment.IsInteger())
             {
