@@ -16,11 +16,12 @@ namespace Hmcr.Data.Repositories
         IAsyncEnumerable<HmrWorkReport> SaveWorkReportAsnyc(HmrSubmissionObject submission, List<WorkReportGeometry> workReports);
         Task<IEnumerable<WorkReportExportDto>> ExportReportAsync(decimal submissionObjectId);
         Task<bool> IsActivityNumberInUseAsync(string activityNumber);
-        Task<bool> IsReportedWorkReportForLocationAAsync(WorkReportTyped workReportTyped, List<WorkReportGeometry> workReports);
-        Task<bool> IsReportedWorkReportForLocationBAsync(WorkReportTyped workReportTyped, List<WorkReportGeometry> workReports);
-        Task<bool> IsReportedWorkReportForLocationCPointAsync(WorkReportTyped workReportTyped, List<WorkReportGeometry> workReports);
-        Task<bool> IsReportedWorkReportForLocationCLineAsync(WorkReportTyped workReportTyped, List<WorkReportGeometry> workReports);
+        Task<(bool itemExists, List<string> conflicts)> IsReportedWorkReportForLocationAAsync(WorkReportTyped workReportTyped, List<WorkReportGeometry> workReports);
+        Task<(bool itemExists, List<string> conflicts)> IsReportedWorkReportForLocationBAsync(WorkReportTyped workReportTyped, List<WorkReportGeometry> workReports);
+        Task<(bool itemExists, List<string> conflicts)> IsReportedWorkReportForLocationCPointAsync(WorkReportTyped workReportTyped, List<WorkReportGeometry> workReports);
+        Task<(bool itemExists, List<string> conflicts)> IsReportedWorkReportForLocationCLineAsync(WorkReportTyped workReportTyped, List<WorkReportGeometry> workReports);
     }
+
     public class WorkReportRepository : HmcrRepositoryBase<HmrWorkReport>, IWorkReportRepository, IReportExportRepository<WorkReportExportDto>
     {
         public WorkReportRepository(AppDbContext dbContext, IMapper mapper)
@@ -75,81 +76,98 @@ namespace Hmcr.Data.Repositories
             return await DbSet.AnyAsync(wr => wr.ActivityNumber == activityNumber);
         }
 
-        public async Task<bool> IsReportedWorkReportForLocationAAsync(WorkReportTyped workReportTyped, List<WorkReportGeometry> workReports)
+        public async Task<(bool itemExists, List<string> conflicts)> IsReportedWorkReportForLocationAAsync(WorkReportTyped workReportTyped, List<WorkReportGeometry> workReports)
         {
-            if (workReportTyped.ActivityCodeValidation.ReportingFrequency == null
-                || workReportTyped.ActivityCodeValidation.ReportingFrequency < 1) return false;
+            List<string> conflicts = new List<string>();
 
             int daysBetween = (int)workReportTyped.ActivityCodeValidation.ReportingFrequency;
             DateTime endDate = workReportTyped.EndDate.GetValueOrDefault(DateTime.Today).Date;
             DateTime futureEndDate = endDate.AddDays(daysBetween);
             DateTime startDate = endDate.AddDays(-daysBetween);
 
-            var existsInDB = await DbContext.HmrWorkReportVws.AsNoTracking()
+            var foundInDB = await DbContext.HmrWorkReportVws.AsNoTracking()
                 .Where(x => x.ActivityNumber == workReportTyped.ActivityNumber
                         && x.ServiceArea == workReportTyped.ServiceArea
                         && ((x.EndDate > startDate && x.EndDate <= endDate)
                         || (x.EndDate >= endDate && x.EndDate < futureEndDate))
                         && x.ValidationStatus.ToUpper().StartsWith(RowStatus.RowSuccess)
-                ).AnyAsync();
+                ).ToListAsync();
+            
+            foreach (var foundItem in foundInDB)
+            {
+                conflicts.Add(foundItem.RecordNumber);
+            }
 
-            var existsInReport = workReports
+            var foundInReport = workReports
                 .Where(x => x.WorkReportTyped.ActivityNumber == workReportTyped.ActivityNumber
                         && x.WorkReportTyped.RecordNumber != workReportTyped.RecordNumber
                         && x.WorkReportTyped.ServiceArea == workReportTyped.ServiceArea
                         && ((x.WorkReportTyped.EndDate > startDate && x.WorkReportTyped.EndDate <= endDate)
                         || (x.WorkReportTyped.EndDate >= endDate && x.WorkReportTyped.EndDate < futureEndDate))
-                 ).Any();
+                 ).ToList();
 
-            return (existsInDB || existsInReport);
+            foreach (var foundItem in foundInReport)
+            {
+                conflicts.Add(foundItem.WorkReportTyped.RecordNumber);
+            }
+
+            return (conflicts.Count() > 0, conflicts);
         }
 
-        public async Task<bool> IsReportedWorkReportForLocationBAsync(WorkReportTyped workReportTyped, List<WorkReportGeometry> workReports)
+        public async Task<(bool itemExists, List<string> conflicts)> IsReportedWorkReportForLocationBAsync(WorkReportTyped workReportTyped, List<WorkReportGeometry> workReports)
         {
-            if (workReportTyped.ActivityCodeValidation.ReportingFrequency == null
-                || workReportTyped.ActivityCodeValidation.ReportingFrequency < 1) return false;
-
+            List<string> conflicts = new List<string>();
+            
             int daysBetween = (int)workReportTyped.ActivityCodeValidation.ReportingFrequency;
             DateTime endDate = workReportTyped.EndDate.GetValueOrDefault(DateTime.Today).Date;
             DateTime futureEndDate = endDate.AddDays(daysBetween);
             DateTime startDate = endDate.AddDays(-daysBetween);
 
-            var existsInDB = await DbContext.HmrWorkReportVws.AsNoTracking()
+            var foundInDB = await DbContext.HmrWorkReportVws.AsNoTracking()
                 .Where(x => x.ActivityNumber == workReportTyped.ActivityNumber
                         && x.ServiceArea == workReportTyped.ServiceArea
                         && x.HighwayUnique.ToLower() == workReportTyped.HighwayUnique.ToLower()
                         && ((x.EndDate > startDate && x.EndDate <= endDate)
                         || (x.EndDate >= endDate && x.EndDate < futureEndDate))
                         && x.ValidationStatus.ToUpper().StartsWith(RowStatus.RowSuccess)
-                ).AnyAsync();
+                ).ToListAsync();
 
-            var existsInReport = workReports
+            foreach (var foundItem in foundInDB)
+            {
+                conflicts.Add(foundItem.RecordNumber);
+            }
+
+            var foundInReport = workReports
                 .Where(x => x.WorkReportTyped.ActivityNumber == workReportTyped.ActivityNumber
                         && x.WorkReportTyped.RecordNumber != workReportTyped.RecordNumber
                         && x.WorkReportTyped.ServiceArea == workReportTyped.ServiceArea
                         && x.WorkReportTyped.HighwayUnique.ToLower() == workReportTyped.HighwayUnique.ToLower()
                         && ((x.WorkReportTyped.EndDate > startDate && x.WorkReportTyped.EndDate <= endDate)
                         || (x.WorkReportTyped.EndDate >= endDate && x.WorkReportTyped.EndDate < futureEndDate))
-                 ).Any();
+                 ).ToList();
 
-            return (existsInDB || existsInReport);
+            foreach (var foundItem in foundInReport)
+            {
+                conflicts.Add(foundItem.WorkReportTyped.RecordNumber);
+            }
+
+            return (conflicts.Count() > 0, conflicts);
         }
 
-        public async Task<bool> IsReportedWorkReportForLocationCPointAsync(WorkReportTyped workReportTyped, List<WorkReportGeometry> workReports)
+        public async Task<(bool itemExists, List<string> conflicts)> IsReportedWorkReportForLocationCPointAsync(WorkReportTyped workReportTyped, List<WorkReportGeometry> workReports)
         {
+            List<string> conflicts = new List<string>();
+
             decimal md = 0.1M; //100m
             decimal startOffset = (decimal)workReportTyped.StartOffset - md;
             decimal endOffset = (decimal)workReportTyped.StartOffset + md;
-
-            if (workReportTyped.ActivityCodeValidation.ReportingFrequency == null
-                || workReportTyped.ActivityCodeValidation.ReportingFrequency < 1) return false;
 
             int daysBetween = (int)workReportTyped.ActivityCodeValidation.ReportingFrequency;
             DateTime endDate = workReportTyped.EndDate.GetValueOrDefault(DateTime.Today).Date;
             DateTime futureEndDate = endDate.AddDays(daysBetween);
             DateTime startDate = endDate.AddDays(-daysBetween);
 
-            var existsInDB = await DbContext.HmrWorkReportVws.AsNoTracking()
+            var foundInDB = await DbContext.HmrWorkReportVws.AsNoTracking()
                 .Where(x => x.ActivityNumber == workReportTyped.ActivityNumber
                         && x.ServiceArea == workReportTyped.ServiceArea
                         && x.HighwayUnique.ToLower() == workReportTyped.HighwayUnique.ToLower()
@@ -158,12 +176,17 @@ namespace Hmcr.Data.Repositories
                         && x.StartOffset != null && x.EndOffset == null
                         && ((x.StartOffset >= startOffset) && (x.StartOffset <= endOffset)
                         || (x.EndOffset >= endOffset) && (x.EndOffset <= startOffset))
-                        && x.SiteNumber != null && x.SiteNumber != workReportTyped.SiteNumber
-                        && x.StructureNumber != null && x.StructureNumber != workReportTyped.StructureNumber
+                        && x.SiteNumber == workReportTyped.SiteNumber
+                        && x.StructureNumber == workReportTyped.StructureNumber
                         && x.ValidationStatus.ToUpper().StartsWith(RowStatus.RowSuccess)
-                ).AnyAsync();
-            
-            var existsInReport = workReports
+                ).ToListAsync();
+
+            foreach (var foundItem in foundInDB)
+            {
+                conflicts.Add(foundItem.RecordNumber);
+            }
+
+            var foundInReport = workReports
                 .Where(x => x.WorkReportTyped.ActivityNumber == workReportTyped.ActivityNumber
                         && x.WorkReportTyped.RecordNumber != workReportTyped.RecordNumber
                         && x.WorkReportTyped.ServiceArea == workReportTyped.ServiceArea
@@ -173,15 +196,22 @@ namespace Hmcr.Data.Repositories
                         && x.WorkReportTyped.StartOffset != null && x.WorkReportTyped.EndOffset == null
                         && ((x.WorkReportTyped.StartOffset >= startOffset) && (x.WorkReportTyped.StartOffset <= endOffset)
                         || (x.WorkReportTyped.EndOffset >= endOffset) && (x.WorkReportTyped.EndOffset <= startOffset))
-                        && x.WorkReportTyped.SiteNumber != null && x.WorkReportTyped.SiteNumber != workReportTyped.SiteNumber
-                        && x.WorkReportTyped.StructureNumber != null && x.WorkReportTyped.StructureNumber != workReportTyped.StructureNumber
-                 ).Any();
+                        && x.WorkReportTyped.SiteNumber == workReportTyped.SiteNumber
+                        && x.WorkReportTyped.StructureNumber == workReportTyped.StructureNumber
+                 ).ToList();
 
-            return (existsInDB || existsInReport);
+            foreach (var foundItem in foundInReport)
+            {
+                conflicts.Add(foundItem.WorkReportTyped.RecordNumber);
+            }
+
+            return (conflicts.Count() > 0, conflicts);
         }
 
-        public async Task<bool> IsReportedWorkReportForLocationCLineAsync(WorkReportTyped workReportTyped, List<WorkReportGeometry> workReports)
+        public async Task<(bool itemExists, List<string> conflicts)> IsReportedWorkReportForLocationCLineAsync(WorkReportTyped workReportTyped, List<WorkReportGeometry> workReports)
         {
+            List<string> conflicts = new List<string>();
+
             decimal md = 0.1M; //100m
             decimal startOffset = 0.0M;
             decimal endOffset = 0.0M;
@@ -196,15 +226,12 @@ namespace Hmcr.Data.Repositories
                 endOffset = (decimal)workReportTyped.EndOffset + md;
             }
             
-            if (workReportTyped.ActivityCodeValidation.ReportingFrequency == null
-                || workReportTyped.ActivityCodeValidation.ReportingFrequency < 1) return false;
-
             int daysBetween = (int)workReportTyped.ActivityCodeValidation.ReportingFrequency;
             DateTime endDate = workReportTyped.EndDate.GetValueOrDefault(DateTime.Today).Date;
             DateTime futureEndDate = endDate.AddDays(daysBetween);
             DateTime startDate = endDate.AddDays(-daysBetween);
 
-            var existsInDB = await DbContext.HmrWorkReportVws.AsNoTracking()
+            var foundInDB = await DbContext.HmrWorkReportVws.AsNoTracking()
                 .Where(x => x.ActivityNumber == workReportTyped.ActivityNumber
                         && x.ServiceArea == workReportTyped.ServiceArea
                         && x.HighwayUnique.ToLower() == workReportTyped.HighwayUnique.ToLower()
@@ -213,12 +240,17 @@ namespace Hmcr.Data.Repositories
                         && x.StartOffset != null && x.EndOffset != null
                         && ((x.StartOffset >= startOffset) && (x.StartOffset <= endOffset)
                         || (x.EndOffset >= endOffset) && (x.EndOffset <= startOffset))
-                        && x.SiteNumber != null && x.SiteNumber != workReportTyped.SiteNumber
-                        && x.StructureNumber != null && x.StructureNumber != workReportTyped.StructureNumber
+                        && x.SiteNumber == workReportTyped.SiteNumber
+                        && x.StructureNumber == workReportTyped.StructureNumber
                         && x.ValidationStatus.ToUpper().StartsWith(RowStatus.RowSuccess)
-                ).AnyAsync();
-            
-            var existsInReport = workReports
+                ).ToListAsync();
+
+            foreach (var foundItem in foundInDB)
+            {
+                conflicts.Add(foundItem.RecordNumber);
+            }
+
+            var foundInReport = workReports
                 .Where(x => x.WorkReportTyped.ActivityNumber == workReportTyped.ActivityNumber
                         && x.WorkReportTyped.RecordNumber != workReportTyped.RecordNumber
                         && x.WorkReportTyped.ServiceArea == workReportTyped.ServiceArea
@@ -228,11 +260,16 @@ namespace Hmcr.Data.Repositories
                         && x.WorkReportTyped.StartOffset != null && x.WorkReportTyped.EndOffset != null
                         && ((x.WorkReportTyped.StartOffset >= startOffset) && (x.WorkReportTyped.StartOffset <= endOffset)
                         || (x.WorkReportTyped.EndOffset >= endOffset) && (x.WorkReportTyped.EndOffset <= startOffset))
-                        && x.WorkReportTyped.SiteNumber != null && x.WorkReportTyped.SiteNumber != workReportTyped.SiteNumber
-                        && x.WorkReportTyped.StructureNumber != null && x.WorkReportTyped.StructureNumber != workReportTyped.StructureNumber
-                 ).Any();
+                        && x.WorkReportTyped.SiteNumber == workReportTyped.SiteNumber 
+                        && x.WorkReportTyped.StructureNumber == workReportTyped.StructureNumber
+                 ).ToList();
 
-            return (existsInDB || existsInReport);
+            foreach (var foundItem in foundInReport)
+            {
+                conflicts.Add(foundItem.WorkReportTyped.RecordNumber);
+            }
+
+            return (conflicts.Count() > 0, conflicts);
         }
     }
 }
