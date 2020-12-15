@@ -68,7 +68,7 @@ objects:
               "InventoryAPI": ${GEOSERVER_TIMEOUT}
             },
             "JWT": {
-                "Authority": "https://sso-dev.pathfinder.gov.bc.ca/auth/realms/<realmid>",
+                "Authority": "https://dev.oidc.gov.bc.ca/auth/realms/<realmid>",
                 "Audience": "<app-id>"
             },
             "BCeID": {
