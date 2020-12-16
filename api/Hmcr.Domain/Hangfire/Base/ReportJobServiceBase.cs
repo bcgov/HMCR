@@ -187,8 +187,7 @@ namespace Hmcr.Domain.Hangfire.Base
                     submissionRow.WarningDetail = newWarnings.ToString();
                 } else
                 {
-                    //we need to check for 
-                    submissionRow.RowStatusId = _statusService.RowError;
+                    //rows don't need to error when a warning is thrown, it's still a success but with a message.
                     submissionRow.WarningDetail = warnings.GetWarningDetail();
                 }
             }
