@@ -340,7 +340,7 @@ namespace Hmcr.Domain.Hangfire
                     if (itemExists)
                     {
                         warnings.AddItem("Reporting Frequency Validation: End Date"
-                            , $"END DATE [{typedRow.EndDate}] should NOT be reported more frequently" +
+                            , $"END DATE [{typedRow.EndDate.Value.ToShortDateString()}] should NOT be reported more frequently" +
                             $" than the Reporting Frequency (days) of [{ typedRow.ActivityCodeValidation.ReportingFrequency}]" +
                             $" for Activity [{ typedRow.ActivityNumber}]. Record conflicts with Record Number(s)" +
                             $"[{String.Join("; ", conflicts.ToArray())}]");
@@ -353,7 +353,7 @@ namespace Hmcr.Domain.Hangfire
                     if (itemExists)
                     {
                         warnings.AddItem("Reporting Frequency Validation: End Date"
-                            , $"END DATE [{typedRow.EndDate}] should NOT be reported more frequently" +
+                            , $"END DATE [{typedRow.EndDate.Value.ToShortDateString()}] should NOT be reported more frequently" +
                             $" than the Reporting Frequency (days) of [{ typedRow.ActivityCodeValidation.ReportingFrequency}]" +
                             $" for Activity [{ typedRow.ActivityNumber}] for Highway Unique [{typedRow.HighwayUnique}]." +
                             $" Record conflicts with Record Number(s) [{String.Join("; ", conflicts.ToArray())}]");
@@ -368,7 +368,7 @@ namespace Hmcr.Domain.Hangfire
                         if (itemExists)
                         { 
                             warnings.AddItem("Reporting Frequency Validation: End Date, GPS position"
-                                , $"END DATE [{typedRow.EndDate}] should NOT be reported more frequently" +
+                                , $"END DATE [{typedRow.EndDate.Value.ToShortDateString()}] should NOT be reported more frequently" +
                                 $" than the Reporting Frequency (days) of [{ typedRow.ActivityCodeValidation.ReportingFrequency}]" +
                                 $" for Activity [{ typedRow.ActivityNumber}]," +
                                 $" Highway Unique [{typedRow.HighwayUnique}]," +
@@ -382,7 +382,7 @@ namespace Hmcr.Domain.Hangfire
                         if (itemExists)
                         {
                             warnings.AddItem("Reporting Frequency Validation: End Date, GPS position"
-                                , $"END DATE [{typedRow.EndDate}] should NOT be reported more frequently" +
+                                , $"END DATE [{typedRow.EndDate.Value.ToShortDateString()}] should NOT be reported more frequently" +
                                 $" than the Reporting Frequency (days) of [{ typedRow.ActivityCodeValidation.ReportingFrequency}]" +
                                 $" for Activity [{ typedRow.ActivityNumber}]," +
                                 $" Highway Unique [{typedRow.HighwayUnique}]," +
