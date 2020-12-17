@@ -1,3 +1,5 @@
+![img](https://img.shields.io/badge/Lifecycle-Stable-97ca00)
+
 # HMCR
 
 As part of the Highway Maintenance Contract Renewal (HMCR) process the business area defined the reporting requirements for the Maintenance Contractors (MCs). The contracts outlined the fields that have to be reported on and the format that it needs to be reported in.
