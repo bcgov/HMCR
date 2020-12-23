@@ -19,16 +19,16 @@ namespace Hmcr.Domain.Services
             (decimal offset, string rfiSegment, string rfiSegmentName, string thresholdLevel, Dictionary<string, List<string>> errors);
         Task<(SpValidationResult result, decimal snappedStartOffset, decimal snappedEndOffset, Point startPoint, Point endPoint, List<Line> lines, RfiSegment rfiSegment)> 
             ValidateLrsLineAsync(decimal startOffset, decimal endOffset, string rfiSegment, string rfiSegmentName, string thresholdLevel, Dictionary<string, List<string>> errors);
-        Task<(SpValidationResult result, List<SurfaceType> surfaceTypes)> GetSurfaceTypeAssocWithLineAsync(NetTopologySuite.Geometries.Geometry geometry);
-        Task<(SpValidationResult result, SurfaceType surfaceType)> GetSurfaceTypeAssocWithPointAsync(NetTopologySuite.Geometries.Geometry geometry);
-        Task<(SpValidationResult result, List<MaintenanceClass> maintenanceClasses)> GetMaintenanceClassAssocWithLineAsync(NetTopologySuite.Geometries.Geometry geometry);
-        Task<(SpValidationResult result, MaintenanceClass maintenanceClass)> GetMaintenanceClassAssocWithPointAsync(NetTopologySuite.Geometries.Geometry geometry);
-        Task<(SpValidationResult result, List<Structure> structures)> GetStructuresOnRFISegmentAsync(string rfiSegmentName);
-        Task<(SpValidationResult result, HighwayProfile highwayProfile)> GetHighwayProfileAssocWithPointAsync(NetTopologySuite.Geometries.Geometry geometry);
-        Task<(SpValidationResult result, List<HighwayProfile> highwayProfiles)> GetHighwayProfileAssocWithLineAsync(NetTopologySuite.Geometries.Geometry geometry);
-        Task<(SpValidationResult result, List<Guardrail> guardrails)> GetGuardrailAssociatedWithLineAsync(NetTopologySuite.Geometries.Geometry geometry);
-        Task<(SpValidationResult result, Guardrail guardrail)> GetGuardrailAssociatedWithPointAsync(NetTopologySuite.Geometries.Geometry geometry);
-        Task<(SpValidationResult result, List<RestArea> restAreas)> GetRestAreasOnRFISegmentAsync(string rfiSegmentName);
+        Task<(SpValidationResult result, List<SurfaceType> surfaceTypes)> GetSurfaceTypeAssocWithLineAsync(NetTopologySuite.Geometries.Geometry geometry, string recordNumber);
+        Task<(SpValidationResult result, SurfaceType surfaceType)> GetSurfaceTypeAssocWithPointAsync(NetTopologySuite.Geometries.Geometry geometry, string recordNumber);
+        Task<(SpValidationResult result, List<MaintenanceClass> maintenanceClasses)> GetMaintenanceClassAssocWithLineAsync(NetTopologySuite.Geometries.Geometry geometry, string recordNumber);
+        Task<(SpValidationResult result, MaintenanceClass maintenanceClass)> GetMaintenanceClassAssocWithPointAsync(NetTopologySuite.Geometries.Geometry geometry, string recordNumber);
+        Task<(SpValidationResult result, List<Structure> structures)> GetStructuresOnRFISegmentAsync(string rfiSegmentName, string recordNumber);
+        Task<(SpValidationResult result, HighwayProfile highwayProfile)> GetHighwayProfileAssocWithPointAsync(NetTopologySuite.Geometries.Geometry geometry, string recordNumber);
+        Task<(SpValidationResult result, List<HighwayProfile> highwayProfiles)> GetHighwayProfileAssocWithLineAsync(NetTopologySuite.Geometries.Geometry geometry, string recordNumber);
+        Task<(SpValidationResult result, List<Guardrail> guardrails)> GetGuardrailAssociatedWithLineAsync(NetTopologySuite.Geometries.Geometry geometry, string recordNumber);
+        Task<(SpValidationResult result, Guardrail guardrail)> GetGuardrailAssociatedWithPointAsync(NetTopologySuite.Geometries.Geometry geometry, string recordNumber);
+        Task<(SpValidationResult result, List<RestArea> restAreas)> GetRestAreasOnRFISegmentAsync(string rfiSegmentName, string recordNumber);
 
     }
 
@@ -254,72 +254,72 @@ namespace Hmcr.Domain.Services
             return (SpValidationResult.Success, rfiDetail);
         }
 
-        public async Task<(SpValidationResult result, List<SurfaceType> surfaceTypes)> GetSurfaceTypeAssocWithLineAsync(NetTopologySuite.Geometries.Geometry geometry)
+        public async Task<(SpValidationResult result, List<SurfaceType> surfaceTypes)> GetSurfaceTypeAssocWithLineAsync(NetTopologySuite.Geometries.Geometry geometry, string recordNumber)
         {
-            var surfaceTypes = await _inventoryApi.GetSurfaceTypeAssociatedWithLine(geometry);
+            var surfaceTypes = await _inventoryApi.GetSurfaceTypeAssociatedWithLine(geometry, recordNumber);
 
             return (SpValidationResult.Success, surfaceTypes);
         }
 
-        public async Task<(SpValidationResult result, SurfaceType surfaceType)> GetSurfaceTypeAssocWithPointAsync(NetTopologySuite.Geometries.Geometry geometry)
+        public async Task<(SpValidationResult result, SurfaceType surfaceType)> GetSurfaceTypeAssocWithPointAsync(NetTopologySuite.Geometries.Geometry geometry, string recordNumber)
         {
-            var surfaceType = await _inventoryApi.GetSurfaceTypeAssociatedWithPoint(geometry);
+            var surfaceType = await _inventoryApi.GetSurfaceTypeAssociatedWithPoint(geometry, recordNumber);
 
             return (SpValidationResult.Success, surfaceType);
         }
 
-        public async Task<(SpValidationResult result, MaintenanceClass maintenanceClass)> GetMaintenanceClassAssocWithPointAsync(NetTopologySuite.Geometries.Geometry geometry)
+        public async Task<(SpValidationResult result, MaintenanceClass maintenanceClass)> GetMaintenanceClassAssocWithPointAsync(NetTopologySuite.Geometries.Geometry geometry, string recordNumber)
         {
-            var maintenanceClass = await _inventoryApi.GetMaintenanceClassesAssociatedWithPoint(geometry);
+            var maintenanceClass = await _inventoryApi.GetMaintenanceClassesAssociatedWithPoint(geometry, recordNumber);
 
             return (SpValidationResult.Success, maintenanceClass);
         }
 
-        public async Task<(SpValidationResult result, List<MaintenanceClass> maintenanceClasses)> GetMaintenanceClassAssocWithLineAsync(NetTopologySuite.Geometries.Geometry geometry)
+        public async Task<(SpValidationResult result, List<MaintenanceClass> maintenanceClasses)> GetMaintenanceClassAssocWithLineAsync(NetTopologySuite.Geometries.Geometry geometry, string recordNumber)
         {
-            var maintenanceClasses = await _inventoryApi.GetMaintenanceClassesAssociatedWithLine(geometry);
+            var maintenanceClasses = await _inventoryApi.GetMaintenanceClassesAssociatedWithLine(geometry, recordNumber);
 
             return (SpValidationResult.Success, maintenanceClasses);
         }
 
-        public async Task<(SpValidationResult result, List<Structure> structures)> GetStructuresOnRFISegmentAsync(string rfiSegmentName)
+        public async Task<(SpValidationResult result, List<Structure> structures)> GetStructuresOnRFISegmentAsync(string rfiSegmentName, string recordNumber)
         {
-            var structures = await _inventoryApi.GetStructuresOnRFISegment(rfiSegmentName);
+            var structures = await _inventoryApi.GetStructuresOnRFISegment(rfiSegmentName, recordNumber);
 
             return (SpValidationResult.Success, structures);
         }
 
-        public async Task<(SpValidationResult result, List<HighwayProfile> highwayProfiles)> GetHighwayProfileAssocWithLineAsync(NetTopologySuite.Geometries.Geometry geometry)
+        public async Task<(SpValidationResult result, List<HighwayProfile> highwayProfiles)> GetHighwayProfileAssocWithLineAsync(NetTopologySuite.Geometries.Geometry geometry, string recordNumber)
         {
-            var highwayProfiles = await _inventoryApi.GetHighwayProfileAssociatedWithLine(geometry);
+            var highwayProfiles = await _inventoryApi.GetHighwayProfileAssociatedWithLine(geometry, recordNumber);
 
             return (SpValidationResult.Success, highwayProfiles);
         }
 
-        public async Task<(SpValidationResult result, HighwayProfile highwayProfile)> GetHighwayProfileAssocWithPointAsync(NetTopologySuite.Geometries.Geometry geometry)
+        public async Task<(SpValidationResult result, HighwayProfile highwayProfile)> GetHighwayProfileAssocWithPointAsync(NetTopologySuite.Geometries.Geometry geometry, string recordNumber)
         {
-            var highwayProfile = await _inventoryApi.GetHighwayProfileAssociatedWithPoint(geometry);
+            var highwayProfile = await _inventoryApi.GetHighwayProfileAssociatedWithPoint(geometry, recordNumber);
 
             return (SpValidationResult.Success, highwayProfile);
         }
 
-        public async Task<(SpValidationResult result, List<Guardrail> guardrails)> GetGuardrailAssociatedWithLineAsync(NetTopologySuite.Geometries.Geometry geometry)
+        public async Task<(SpValidationResult result, List<Guardrail> guardrails)> GetGuardrailAssociatedWithLineAsync(NetTopologySuite.Geometries.Geometry geometry, string recordNumber)
         {
-            var guardrails = await _inventoryApi.GetGuardrailAssociatedWithLine(geometry);
+            var guardrails = await _inventoryApi.GetGuardrailAssociatedWithLine(geometry, recordNumber);
 
             return (SpValidationResult.Success, guardrails);
         }
 
-        public async Task<(SpValidationResult result, Guardrail guardrail)> GetGuardrailAssociatedWithPointAsync(NetTopologySuite.Geometries.Geometry geometry)
+        public async Task<(SpValidationResult result, Guardrail guardrail)> GetGuardrailAssociatedWithPointAsync(NetTopologySuite.Geometries.Geometry geometry, string recordNumber)
         {
-            var guardrail = await _inventoryApi.GetGuardrailAssociatedWithPoint(geometry);
+            var guardrail = await _inventoryApi.GetGuardrailAssociatedWithPoint(geometry, recordNumber);
 
             return (SpValidationResult.Success, guardrail);
         }
 
-        public async Task<(SpValidationResult result, List<RestArea> restAreas)> GetRestAreasOnRFISegmentAsync(string rfiSegmentName)
+        public async Task<(SpValidationResult result, List<RestArea> restAreas)> GetRestAreasOnRFISegmentAsync(string rfiSegmentName, string recordNumber)
         {
-            var restAreas = await _inventoryApi.GetRestAreasOnRFISegment(rfiSegmentName);
+            var restAreas = await _inventoryApi.GetRestAreasOnRFISegment(rfiSegmentName, recordNumber);
 
             return (SpValidationResult.Success, restAreas);
         }
