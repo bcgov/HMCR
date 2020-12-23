@@ -488,7 +488,7 @@ namespace Hmcr.Domain.Hangfire
                 //get guardrails when activity rule calls for it
                 if (typedRow.ActivityCodeValidation.RoadLenghRuleExec == RoadLengthRules.GUARDRAIL_LEN_METERS)
                 {
-                    var grResult = await _spatialService.GetGuardrailAssociatedWithPointAsync(row.Geometry);
+                    var grResult = await _spatialService.GetGuardrailAssociatedWithPointAsync(row.Geometry, row.WorkReportTyped.RecordNumber);
                     if (grResult.result == SpValidationResult.Fail)
                     {
                         querySuccess = false;
@@ -511,7 +511,7 @@ namespace Hmcr.Domain.Hangfire
                 else 
                 {
                     //get highway profile
-                    var hpResult = await _spatialService.GetHighwayProfileAssocWithPointAsync(row.Geometry);
+                    var hpResult = await _spatialService.GetHighwayProfileAssocWithPointAsync(row.Geometry, row.WorkReportTyped.RecordNumber);
                     if (hpResult.result == SpValidationResult.Fail)
                     {
                         querySuccess = false;
@@ -546,7 +546,7 @@ namespace Hmcr.Domain.Hangfire
                 //get guardrails when activity rule calls for it
                 if (typedRow.ActivityCodeValidation.RoadLenghRuleExec == RoadLengthRules.GUARDRAIL_LEN_METERS)
                 {
-                    var grResult = await _spatialService.GetGuardrailAssociatedWithLineAsync(row.Geometry);
+                    var grResult = await _spatialService.GetGuardrailAssociatedWithLineAsync(row.Geometry, row.WorkReportTyped.RecordNumber);
                     if (grResult.result == SpValidationResult.Fail)
                     {
                         querySuccess = false;
@@ -569,7 +569,7 @@ namespace Hmcr.Domain.Hangfire
                 else
                 {
                     //get highway profile
-                    var hpResult = await _spatialService.GetHighwayProfileAssocWithLineAsync(row.Geometry);
+                    var hpResult = await _spatialService.GetHighwayProfileAssocWithLineAsync(row.Geometry, row.WorkReportTyped.RecordNumber);
                     if (hpResult.result == SpValidationResult.Fail)
                     {
                         querySuccess = false;
@@ -620,7 +620,7 @@ namespace Hmcr.Domain.Hangfire
             //surface type calls are different between Point & Line
             if (typedRow.FeatureType == FeatureType.Point)
             {
-                var result = await _spatialService.GetMaintenanceClassAssocWithPointAsync(row.Geometry);
+                var result = await _spatialService.GetMaintenanceClassAssocWithPointAsync(row.Geometry, row.WorkReportTyped.RecordNumber);
 
                 if (result.result == SpValidationResult.Fail)
                 {
@@ -651,7 +651,7 @@ namespace Hmcr.Domain.Hangfire
             }
             else if (typedRow.FeatureType == FeatureType.Line)
             {
-                var result = await _spatialService.GetMaintenanceClassAssocWithLineAsync(row.Geometry);
+                var result = await _spatialService.GetMaintenanceClassAssocWithLineAsync(row.Geometry, row.WorkReportTyped.RecordNumber);
                 if (result.result == SpValidationResult.Fail)
                 {
                     SetErrorDetail(submissionRow, errors, _statusService.FileLocationError);
@@ -697,7 +697,7 @@ namespace Hmcr.Domain.Hangfire
             //surface type calls are different between Point & Line
             if (typedRow.FeatureType == FeatureType.Point)
             {
-                var result = await _spatialService.GetSurfaceTypeAssocWithPointAsync(row.Geometry);
+                var result = await _spatialService.GetSurfaceTypeAssocWithPointAsync(row.Geometry, row.WorkReportTyped.RecordNumber);
 
                 if (result.result == SpValidationResult.Fail)
                 {
@@ -725,7 +725,7 @@ namespace Hmcr.Domain.Hangfire
             }
             else if (typedRow.FeatureType == FeatureType.Line)
             {
-                var result = await _spatialService.GetSurfaceTypeAssocWithLineAsync(row.Geometry);
+                var result = await _spatialService.GetSurfaceTypeAssocWithLineAsync(row.Geometry, row.WorkReportTyped.RecordNumber);
 
                 if (result.result == SpValidationResult.Fail)
                 {
@@ -1267,7 +1267,7 @@ namespace Hmcr.Domain.Hangfire
                 endOffset = (decimal)((typedRow.EndOffset == null) ? typedRow.StartOffset : typedRow.EndOffset) + structureVariance;
             }
             
-            var result = await _spatialService.GetStructuresOnRFISegmentAsync(typedRow.HighwayUnique);
+            var result = await _spatialService.GetStructuresOnRFISegmentAsync(typedRow.HighwayUnique, typedRow.RecordNumber);
 
             if (result.structures.Count() > 0)
             {
@@ -1307,7 +1307,7 @@ namespace Hmcr.Domain.Hangfire
                 endOffset = (decimal)((typedRow.EndOffset == null) ? typedRow.StartOffset : typedRow.EndOffset) + structureVariance;
             }
 
-            var result = await _spatialService.GetRestAreasOnRFISegmentAsync(typedRow.HighwayUnique);
+            var result = await _spatialService.GetRestAreasOnRFISegmentAsync(typedRow.HighwayUnique, typedRow.RecordNumber);
 
             if (result.restAreas.Count() > 0)
             {
@@ -1335,7 +1335,7 @@ namespace Hmcr.Domain.Hangfire
             var endOffset = ((typedRow.EndOffset == null) ? typedRow.StartOffset : typedRow.EndOffset) + structureVariance;
             string structureNumber = typedRow.StructureNumber.TrimStart('0');
 
-            var result = await _spatialService.GetStructuresOnRFISegmentAsync(typedRow.HighwayUnique);
+            var result = await _spatialService.GetStructuresOnRFISegmentAsync(typedRow.HighwayUnique, typedRow.RecordNumber);
 
             if (result.structures.Count() > 0)
             {

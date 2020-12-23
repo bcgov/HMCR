@@ -13,16 +13,16 @@ namespace Hmcr.Chris
 {
     public interface IInventoryApi
     {
-        Task<List<SurfaceType>> GetSurfaceTypeAssociatedWithLine(NetTopologySuite.Geometries.Geometry geometry);
-        Task<SurfaceType> GetSurfaceTypeAssociatedWithPoint(NetTopologySuite.Geometries.Geometry geometry);
-        Task<List<MaintenanceClass>> GetMaintenanceClassesAssociatedWithLine(NetTopologySuite.Geometries.Geometry geometry);
-        Task<MaintenanceClass> GetMaintenanceClassesAssociatedWithPoint(NetTopologySuite.Geometries.Geometry geometry);
-        Task<HighwayProfile> GetHighwayProfileAssociatedWithPoint(NetTopologySuite.Geometries.Geometry geometry);
-        Task<List<HighwayProfile>> GetHighwayProfileAssociatedWithLine(NetTopologySuite.Geometries.Geometry geometry);
-        Task<Guardrail> GetGuardrailAssociatedWithPoint(NetTopologySuite.Geometries.Geometry geometry);
-        Task<List<Guardrail>> GetGuardrailAssociatedWithLine(NetTopologySuite.Geometries.Geometry geometry);
-        Task<List<Structure>> GetStructuresOnRFISegment(string rfiSegment);
-        Task<List<RestArea>> GetRestAreasOnRFISegment(string rfiSegment);
+        Task<List<SurfaceType>> GetSurfaceTypeAssociatedWithLine(NetTopologySuite.Geometries.Geometry geometry, string recordNumber);
+        Task<SurfaceType> GetSurfaceTypeAssociatedWithPoint(NetTopologySuite.Geometries.Geometry geometry, string recordNumber);
+        Task<List<MaintenanceClass>> GetMaintenanceClassesAssociatedWithLine(NetTopologySuite.Geometries.Geometry geometry, string recordNumber);
+        Task<MaintenanceClass> GetMaintenanceClassesAssociatedWithPoint(NetTopologySuite.Geometries.Geometry geometry, string recordNumber);
+        Task<HighwayProfile> GetHighwayProfileAssociatedWithPoint(NetTopologySuite.Geometries.Geometry geometry, string recordNumber);
+        Task<List<HighwayProfile>> GetHighwayProfileAssociatedWithLine(NetTopologySuite.Geometries.Geometry geometry, string recordNumber);
+        Task<Guardrail> GetGuardrailAssociatedWithPoint(NetTopologySuite.Geometries.Geometry geometry, string recordNumber);
+        Task<List<Guardrail>> GetGuardrailAssociatedWithLine(NetTopologySuite.Geometries.Geometry geometry, string recordNumber);
+        Task<List<Structure>> GetStructuresOnRFISegment(string rfiSegment, string recordNumber);
+        Task<List<RestArea>> GetRestAreasOnRFISegment(string rfiSegment, string recordNumber);
     }
 
     public class InventoryApi : IInventoryApi
@@ -112,7 +112,7 @@ namespace Hmcr.Chris
             return geometryGroup;
         }
 
-        public async Task<SurfaceType> GetSurfaceTypeAssociatedWithPoint(NetTopologySuite.Geometries.Geometry geometry)
+        public async Task<SurfaceType> GetSurfaceTypeAssociatedWithPoint(NetTopologySuite.Geometries.Geometry geometry,string recordNumber)
         {
             var body = "";
             var contents = "";
@@ -140,12 +140,12 @@ namespace Hmcr.Chris
             }
             catch (System.Exception ex)
             {
-                _logger.LogError($"Exception - GetSurfaceTypeAssociatedWithPoint: {body} - {contents}");
+                _logger.LogError($"Exception - GetSurfaceTypeAssociatedWithPoint({recordNumber}): {body} - {contents}");
                 throw ex;
             }
         }
 
-        public async Task<List<SurfaceType>> GetSurfaceTypeAssociatedWithLine(NetTopologySuite.Geometries.Geometry geometry)
+        public async Task<List<SurfaceType>> GetSurfaceTypeAssociatedWithLine(NetTopologySuite.Geometries.Geometry geometry, string recordNumber)
         {
             var body = "";
             var contents = "";
@@ -177,12 +177,12 @@ namespace Hmcr.Chris
             }
             catch (System.Exception ex)
             {
-                _logger.LogError($"Exception - GetSurfaceTypeAssociatedWithLine: {body} - {contents}");
+                _logger.LogError($"Exception - GetSurfaceTypeAssociatedWithLine({recordNumber}): {body} - {contents}");
                 throw ex;
             }
         }
 
-        public async Task<List<MaintenanceClass>> GetMaintenanceClassesAssociatedWithLine(NetTopologySuite.Geometries.Geometry geometry)
+        public async Task<List<MaintenanceClass>> GetMaintenanceClassesAssociatedWithLine(NetTopologySuite.Geometries.Geometry geometry, string recordNumber)
         {
             var body = "";
             var contents = "";
@@ -215,12 +215,12 @@ namespace Hmcr.Chris
             }
             catch (System.Exception ex)
             {
-                _logger.LogError($"Exception - GetMaintenanceClassesAssociatedWithLine: {body} - {contents}");
+                _logger.LogError($"Exception - GetMaintenanceClassesAssociatedWithLine({recordNumber}): {body} - {contents}");
                 throw ex;
             }
         }
 
-        public async Task<MaintenanceClass> GetMaintenanceClassesAssociatedWithPoint(NetTopologySuite.Geometries.Geometry geometry)
+        public async Task<MaintenanceClass> GetMaintenanceClassesAssociatedWithPoint(NetTopologySuite.Geometries.Geometry geometry, string recordNumber)
         {
             var body = "";
             var contents = "";
@@ -249,12 +249,12 @@ namespace Hmcr.Chris
             }
             catch (System.Exception ex)
             {
-                _logger.LogError($"Exception - GetMaintenanceClassesAssociatedWithPoint: {body} - {contents}");
+                _logger.LogError($"Exception - GetMaintenanceClassesAssociatedWithPoint({recordNumber}): {body} - {contents}");
                 throw ex;
             }
         }
 
-        public async Task<HighwayProfile> GetHighwayProfileAssociatedWithPoint(NetTopologySuite.Geometries.Geometry geometry)
+        public async Task<HighwayProfile> GetHighwayProfileAssociatedWithPoint(NetTopologySuite.Geometries.Geometry geometry, string recordNumber)
         {
             var body = "";
             var contents = "";
@@ -284,12 +284,12 @@ namespace Hmcr.Chris
             }
             catch (System.Exception ex)
             {
-                _logger.LogError($"Exception - GetHighwayProfileAssociatedWithPoint: {body} - {contents}");
+                _logger.LogError($"Exception - GetHighwayProfileAssociatedWithPoint({recordNumber}): {body} - {contents}");
                 throw ex;
             }
         }
 
-        public async Task<List<HighwayProfile>> GetHighwayProfileAssociatedWithLine(NetTopologySuite.Geometries.Geometry geometry)
+        public async Task<List<HighwayProfile>> GetHighwayProfileAssociatedWithLine(NetTopologySuite.Geometries.Geometry geometry, string recordNumber)
         {
             var body = "";
             var contents = "";
@@ -322,12 +322,12 @@ namespace Hmcr.Chris
             }
             catch (System.Exception ex)
             {
-                _logger.LogError($"Exception - GetHighwayProfileAssociatedWithLine: {body} - {contents}");
+                _logger.LogError($"Exception - GetHighwayProfileAssociatedWithLine({recordNumber}): {body} - {contents}");
                 throw ex;
             }
         }
 
-        public async Task<Guardrail> GetGuardrailAssociatedWithPoint(NetTopologySuite.Geometries.Geometry geometry)
+        public async Task<Guardrail> GetGuardrailAssociatedWithPoint(NetTopologySuite.Geometries.Geometry geometry, string recordNumber)
         {
             var body = "";
             var contents = "";
@@ -356,12 +356,12 @@ namespace Hmcr.Chris
             }
             catch (System.Exception ex)
             {
-                _logger.LogError($"Exception - GetGuardrailAssociatedWithPoint: {body} - {contents}");
+                _logger.LogError($"Exception - GetGuardrailAssociatedWithPoint({recordNumber}): {body} - {contents}");
                 throw ex;
             }
         }
 
-        public async Task<List<Guardrail>> GetGuardrailAssociatedWithLine(NetTopologySuite.Geometries.Geometry geometry)
+        public async Task<List<Guardrail>> GetGuardrailAssociatedWithLine(NetTopologySuite.Geometries.Geometry geometry, string recordNumber)
         {
             var body = "";
             var contents = "";
@@ -394,12 +394,12 @@ namespace Hmcr.Chris
             }
             catch (System.Exception ex)
             {
-                _logger.LogError($"Exception - GetGuardrailAssociatedWithLine: {body} - {contents}");
+                _logger.LogError($"Exception - GetGuardrailAssociatedWithLine({recordNumber}): {body} - {contents}");
                 throw ex;
             }
         }
 
-        public async Task<List<Structure>> GetStructuresOnRFISegment(string rfiSegment)
+        public async Task<List<Structure>> GetStructuresOnRFISegment(string rfiSegment, string recordNumber)
         {
             var query = "";
             var content = "";
@@ -432,12 +432,12 @@ namespace Hmcr.Chris
             }
             catch (Exception ex)
             {
-                _logger.LogError($"Exception - GetStructuresOnRFISegment: {query} - {content}");
+                _logger.LogError($"Exception - GetStructuresOnRFISegment({recordNumber}): {query} - {content}");
                 throw ex;
             }
         }
 
-        public async Task<List<RestArea>> GetRestAreasOnRFISegment(string rfiSegment)
+        public async Task<List<RestArea>> GetRestAreasOnRFISegment(string rfiSegment, string recordNumber)
         {
             var query = "";
             var content = "";
@@ -466,7 +466,7 @@ namespace Hmcr.Chris
             }
             catch (Exception ex)
             {
-                _logger.LogError($"Exception - GetRestAreasOnRFISegment: {query} - {content}");
+                _logger.LogError($"Exception - GetRestAreasOnRFISegment({recordNumber}): {query} - {content}");
                 throw ex;
             }
         }
