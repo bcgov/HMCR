@@ -24,7 +24,7 @@ const defaultState = {
   roadClassRules: [],
 };
 
-export default (state = defaultState, action) => {
+const codeLookupReducer = (state = defaultState, action) => {
   switch (action.type) {
     case FETCH_MAINTENANCE_TYPES:
       return { ...state, maintenanceTypes: _.orderBy(action.payload, ['name']) };
@@ -48,3 +48,5 @@ export default (state = defaultState, action) => {
       return state;
   }
 };
+
+export default codeLookupReducer;
