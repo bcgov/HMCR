@@ -362,36 +362,18 @@ namespace Hmcr.Domain.Hangfire
                 }
                 else if (locationCode == "C")
                 {
-                    if (typedRow.FeatureType == FeatureType.Point)
-                    {
-                        var (itemExists, conflicts) = await _workReportRepo.IsReportedWorkReportForLocationCPointAsync(typedRow, workReports);
+                    var (itemExists, conflicts) = await _workReportRepo.IsReportedWorkReportForLocationCAsync(typedRow, workReports);
 
-                        if (itemExists)
-                        { 
-                            warnings.AddItem("Reporting Frequency Validation: End Date, GPS position"
-                                , $"END DATE [{((typedRow.EndDate.Value == null) ? "" : typedRow.EndDate.Value.ToString("yyyy-MM-dd"))}] should NOT be reported more frequently" +
-                                $" than the Reporting Frequency (days) of [{ typedRow.ActivityCodeValidation.ReportingFrequency}]" +
-                                $" for Activity [{ typedRow.ActivityNumber}]," +
-                                $" Highway Unique [{typedRow.HighwayUnique}]," +
-                                $" GPS position [{typedRow.StartLatitude},{typedRow.StartLongitude}] with a tolerance of -/+ 100M." +
-                                $" Record conflicts with Record Number(s) [{String.Join("; ", conflicts.ToArray())}]");
-                        }
-                    } else if (typedRow.FeatureType == FeatureType.Line)
-                    {
-                        var (itemExists, conflicts) = await _workReportRepo.IsReportedWorkReportForLocationCLineAsync(typedRow, workReports);
-                        
-                        if (itemExists)
-                        {
-                            warnings.AddItem("Reporting Frequency Validation: End Date, GPS position"
-                                , $"END DATE [{((typedRow.EndDate.Value == null) ? "" : typedRow.EndDate.Value.ToString("yyyy-MM-dd"))}] should NOT be reported more frequently" +
-                                $" than the Reporting Frequency (days) of [{ typedRow.ActivityCodeValidation.ReportingFrequency}]" +
-                                $" for Activity [{ typedRow.ActivityNumber}]," +
-                                $" Highway Unique [{typedRow.HighwayUnique}]," +
-                                $" GPS position from [{typedRow.StartLatitude},{typedRow.StartLongitude}]" +
-                                $" to [{typedRow.EndLatitude},{typedRow.EndLongitude}] with a tolerance of -/+ 100M." +
-                                $" Record conflicts with Record Number(s) [{String.Join("; ", conflicts.ToArray())}]");
-                        }
-                    }    
+                    if (itemExists)
+                    { 
+                        warnings.AddItem("Reporting Frequency Validation: End Date, GPS position"
+                            , $"END DATE [{((typedRow.EndDate.Value == null) ? "" : typedRow.EndDate.Value.ToString("yyyy-MM-dd"))}] should NOT be reported more frequently" +
+                            $" than the Reporting Frequency (days) of [{ typedRow.ActivityCodeValidation.ReportingFrequency}]" +
+                            $" for Activity [{ typedRow.ActivityNumber}]," +
+                            $" Highway Unique [{typedRow.HighwayUnique}]," +
+                            $" GPS position [{typedRow.StartLatitude},{typedRow.StartLongitude}] with a tolerance of -/+ 100M." +
+                            $" Record conflicts with Record Number(s) [{String.Join("; ", conflicts.ToArray())}]");
+                    }
                 }
             }
             

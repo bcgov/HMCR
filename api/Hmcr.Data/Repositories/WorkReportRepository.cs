@@ -18,8 +18,8 @@ namespace Hmcr.Data.Repositories
         Task<bool> IsActivityNumberInUseAsync(string activityNumber);
         Task<(bool itemExists, List<string> conflicts)> IsReportedWorkReportForLocationAAsync(WorkReportTyped workReportTyped, List<WorkReportGeometry> workReports);
         Task<(bool itemExists, List<string> conflicts)> IsReportedWorkReportForLocationBAsync(WorkReportTyped workReportTyped, List<WorkReportGeometry> workReports);
-        Task<(bool itemExists, List<string> conflicts)> IsReportedWorkReportForLocationCPointAsync(WorkReportTyped workReportTyped, List<WorkReportGeometry> workReports);
-        Task<(bool itemExists, List<string> conflicts)> IsReportedWorkReportForLocationCLineAsync(WorkReportTyped workReportTyped, List<WorkReportGeometry> workReports);
+        Task<(bool itemExists, List<string> conflicts)> IsReportedWorkReportForLocationCAsync(WorkReportTyped workReportTyped, List<WorkReportGeometry> workReports);
+        
     }
 
     public class WorkReportRepository : HmcrRepositoryBase<HmrWorkReport>, IWorkReportRepository, IReportExportRepository<WorkReportExportDto>
@@ -125,6 +125,7 @@ namespace Hmcr.Data.Repositories
 
             var foundInDB = await DbContext.HmrWorkReportVws.AsNoTracking()
                 .Where(x => x.ActivityNumber == workReportTyped.ActivityNumber
+                        && x.RecordNumber != workReportTyped.RecordNumber
                         && x.ServiceArea == workReportTyped.ServiceArea
                         && x.HighwayUnique.ToLower() == workReportTyped.HighwayUnique.ToLower()
                         && ((x.EndDate > startDate && x.EndDate <= endDate)
@@ -153,14 +154,32 @@ namespace Hmcr.Data.Repositories
 
             return (conflicts.Count() > 0, conflicts);
         }
-
-        public async Task<(bool itemExists, List<string> conflicts)> IsReportedWorkReportForLocationCPointAsync(WorkReportTyped workReportTyped, List<WorkReportGeometry> workReports)
+        
+        public async Task<(bool itemExists, List<string> conflicts)> IsReportedWorkReportForLocationCAsync(WorkReportTyped workReportTyped, List<WorkReportGeometry> workReports)
         {
             List<string> conflicts = new List<string>();
 
             decimal md = 0.1M; //100m
-            decimal startOffset = (decimal)workReportTyped.StartOffset - md;
-            decimal endOffset = (decimal)workReportTyped.StartOffset + md;
+            decimal startOffset = 0.0M;
+            decimal endOffset = 0.0M;
+
+            if (workReportTyped.FeatureType == FeatureType.Point)
+            {
+                startOffset = (decimal)workReportTyped.StartOffset - md;
+                endOffset = (decimal)workReportTyped.StartOffset + md;
+            } else if (workReportTyped.FeatureType == FeatureType.Line)
+            {
+                if (workReportTyped.StartOffset > workReportTyped.EndOffset)
+                {
+                    startOffset = (decimal)workReportTyped.StartOffset + md;
+                    endOffset = (decimal)workReportTyped.EndOffset - md;
+                }
+                else
+                {
+                    startOffset = (decimal)workReportTyped.StartOffset - md;
+                    endOffset = (decimal)workReportTyped.EndOffset + md;
+                }
+            }
 
             int daysBetween = (int)workReportTyped.ActivityCodeValidation.ReportingFrequency;
             DateTime endDate = workReportTyped.EndDate.GetValueOrDefault(DateTime.Today).Date;
@@ -169,6 +188,7 @@ namespace Hmcr.Data.Repositories
 
             var foundInDB = await DbContext.HmrWorkReportVws.AsNoTracking()
                 .Where(x => x.ActivityNumber == workReportTyped.ActivityNumber
+                        && x.RecordNumber != workReportTyped.RecordNumber
                         && x.ServiceArea == workReportTyped.ServiceArea
                         && x.HighwayUnique.ToLower() == workReportTyped.HighwayUnique.ToLower()
                         && ((x.EndDate > startDate && x.EndDate <= endDate)
@@ -197,70 +217,6 @@ namespace Hmcr.Data.Repositories
                         && ((x.WorkReportTyped.StartOffset >= startOffset) && (x.WorkReportTyped.StartOffset <= endOffset)
                         || (x.WorkReportTyped.EndOffset >= endOffset) && (x.WorkReportTyped.EndOffset <= startOffset))
                         && x.WorkReportTyped.SiteNumber == workReportTyped.SiteNumber
-                        && x.WorkReportTyped.StructureNumber == workReportTyped.StructureNumber
-                 ).ToList();
-
-            foreach (var foundItem in foundInReport)
-            {
-                conflicts.Add(foundItem.WorkReportTyped.RecordNumber);
-            }
-
-            return (conflicts.Count() > 0, conflicts);
-        }
-
-        public async Task<(bool itemExists, List<string> conflicts)> IsReportedWorkReportForLocationCLineAsync(WorkReportTyped workReportTyped, List<WorkReportGeometry> workReports)
-        {
-            List<string> conflicts = new List<string>();
-
-            decimal md = 0.1M; //100m
-            decimal startOffset = 0.0M;
-            decimal endOffset = 0.0M;
-            
-            if (workReportTyped.StartOffset > workReportTyped.EndOffset)
-            {
-                startOffset= (decimal)workReportTyped.StartOffset + md;
-                endOffset = (decimal)workReportTyped.EndOffset - md;
-            } else
-            {
-                startOffset = (decimal)workReportTyped.StartOffset - md;
-                endOffset = (decimal)workReportTyped.EndOffset + md;
-            }
-            
-            int daysBetween = (int)workReportTyped.ActivityCodeValidation.ReportingFrequency;
-            DateTime endDate = workReportTyped.EndDate.GetValueOrDefault(DateTime.Today).Date;
-            DateTime futureEndDate = endDate.AddDays(daysBetween);
-            DateTime startDate = endDate.AddDays(-daysBetween);
-
-            var foundInDB = await DbContext.HmrWorkReportVws.AsNoTracking()
-                .Where(x => x.ActivityNumber == workReportTyped.ActivityNumber
-                        && x.ServiceArea == workReportTyped.ServiceArea
-                        && x.HighwayUnique.ToLower() == workReportTyped.HighwayUnique.ToLower()
-                        && ((x.EndDate > startDate && x.EndDate <= endDate)
-                        || (x.EndDate >= endDate && x.EndDate < futureEndDate))
-                        && x.StartOffset != null && x.EndOffset != null
-                        && ((x.StartOffset >= startOffset) && (x.StartOffset <= endOffset)
-                        || (x.EndOffset >= endOffset) && (x.EndOffset <= startOffset))
-                        && x.SiteNumber == workReportTyped.SiteNumber
-                        && x.StructureNumber == workReportTyped.StructureNumber
-                        && x.ValidationStatus.ToUpper().StartsWith(RowStatus.RowSuccess)
-                ).ToListAsync();
-
-            foreach (var foundItem in foundInDB)
-            {
-                conflicts.Add(foundItem.RecordNumber);
-            }
-
-            var foundInReport = workReports
-                .Where(x => x.WorkReportTyped.ActivityNumber == workReportTyped.ActivityNumber
-                        && x.WorkReportTyped.RecordNumber != workReportTyped.RecordNumber
-                        && x.WorkReportTyped.ServiceArea == workReportTyped.ServiceArea
-                        && x.WorkReportTyped.HighwayUnique.ToLower() == workReportTyped.HighwayUnique.ToLower()
-                        && ((x.WorkReportTyped.EndDate > startDate && x.WorkReportTyped.EndDate <= endDate)
-                        || (x.WorkReportTyped.EndDate >= endDate && x.WorkReportTyped.EndDate < futureEndDate))
-                        && x.WorkReportTyped.StartOffset != null && x.WorkReportTyped.EndOffset != null
-                        && ((x.WorkReportTyped.StartOffset >= startOffset) && (x.WorkReportTyped.StartOffset <= endOffset)
-                        || (x.WorkReportTyped.EndOffset >= endOffset) && (x.WorkReportTyped.EndOffset <= startOffset))
-                        && x.WorkReportTyped.SiteNumber == workReportTyped.SiteNumber 
                         && x.WorkReportTyped.StructureNumber == workReportTyped.StructureNumber
                  ).ToList();
 
