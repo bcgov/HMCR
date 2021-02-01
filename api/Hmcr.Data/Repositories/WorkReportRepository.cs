@@ -162,6 +162,8 @@ namespace Hmcr.Data.Repositories
             decimal md = 0.1M; //100m
             decimal startOffset = 0.0M;
             decimal endOffset = 0.0M;
+            decimal foundStartOffset = 0.0M;
+            decimal foundEndOffset = 0.0M;
 
             if (workReportTyped.FeatureType == FeatureType.Point)
             {
@@ -193,9 +195,6 @@ namespace Hmcr.Data.Repositories
                         && x.HighwayUnique.ToLower() == workReportTyped.HighwayUnique.ToLower()
                         && ((x.EndDate > startDate && x.EndDate <= endDate)
                         || (x.EndDate >= endDate && x.EndDate < futureEndDate))
-                        && x.StartOffset != null && x.EndOffset == null
-                        && ((x.StartOffset >= startOffset) && (x.StartOffset <= endOffset)
-                        || (x.EndOffset >= endOffset) && (x.EndOffset <= startOffset))
                         && x.SiteNumber == workReportTyped.SiteNumber
                         && x.StructureNumber == workReportTyped.StructureNumber
                         && x.ValidationStatus.ToUpper().StartsWith(RowStatus.RowSuccess)
@@ -203,7 +202,21 @@ namespace Hmcr.Data.Repositories
 
             foreach (var foundItem in foundInDB)
             {
-                conflicts.Add(foundItem.RecordNumber);
+                //perform the offset matching
+                foundStartOffset = (decimal)foundItem.StartOffset;
+                foundEndOffset = (decimal)((foundItem.EndOffset == null) 
+                    ? foundItem.StartOffset
+                    : foundItem.EndOffset);
+
+                //check that the line/points don't overlap?
+                if (!((endOffset <= foundItem.StartOffset) || (foundItem.EndOffset <= startOffset)))
+                {
+                    conflicts.Add(foundItem.RecordNumber);
+                }
+
+                //reset them
+                foundStartOffset = 0.0M;
+                foundEndOffset = 0.0M;
             }
 
             var foundInReport = workReports
@@ -213,18 +226,35 @@ namespace Hmcr.Data.Repositories
                         && x.WorkReportTyped.HighwayUnique.ToLower() == workReportTyped.HighwayUnique.ToLower()
                         && ((x.WorkReportTyped.EndDate > startDate && x.WorkReportTyped.EndDate <= endDate)
                         || (x.WorkReportTyped.EndDate >= endDate && x.WorkReportTyped.EndDate < futureEndDate))
-                        && x.WorkReportTyped.StartOffset != null && x.WorkReportTyped.EndOffset == null
-                        && ((x.WorkReportTyped.StartOffset >= startOffset) && (x.WorkReportTyped.StartOffset <= endOffset)
-                        || (x.WorkReportTyped.EndOffset >= endOffset) && (x.WorkReportTyped.EndOffset <= startOffset))
                         && x.WorkReportTyped.SiteNumber == workReportTyped.SiteNumber
                         && x.WorkReportTyped.StructureNumber == workReportTyped.StructureNumber
                  ).ToList();
 
             foreach (var foundItem in foundInReport)
             {
-                conflicts.Add(foundItem.WorkReportTyped.RecordNumber);
+                //perform the offset matching
+                foundStartOffset = (decimal)foundItem.WorkReportTyped.StartOffset;
+                foundEndOffset = (decimal)((foundItem.WorkReportTyped.FeatureType == FeatureType.Point)
+                    ? foundItem.WorkReportTyped.StartOffset
+                    : foundItem.WorkReportTyped.EndOffset);
+
+                //check that the line/points don't overlap?
+                if (!((endOffset <= foundStartOffset) || (foundEndOffset <= startOffset)))
+                {
+                    conflicts.Add(foundItem.WorkReportTyped.RecordNumber);
+                }
+                
+                //reset them
+                foundStartOffset = 0.0M;
+                foundEndOffset = 0.0M;
             }
 
+            //there is a scenario where a row is being overwritten so it exists in the database
+            // and the work report, if it's a conflict it'll show up twice (db and report). 
+            // we need to remove the duplicates to handle this.
+
+            conflicts = conflicts.Distinct().ToList();
+            conflicts.Sort();
             return (conflicts.Count() > 0, conflicts);
         }
     }
