@@ -37,7 +37,8 @@ namespace Hmcr.Data.Repositories
                     .Where(x => x.SubmissionObject.SubmissionStreamId == submissionStreamId 
                         && x.RecordNumber == row.RecordNumber
                         && x.SubmissionObject.ContractTermId == contractTermId
-                        && x.SubmissionObject.SubmissionStatus.StatusCode == FileStatus.FileSuccess)
+                        && ((x.SubmissionObject.SubmissionStatus.StatusCode == FileStatus.FileSuccess) 
+                        || (x.SubmissionObject.SubmissionStatus.StatusCode == FileStatus.FileSuccessWithWarnings)))
                     .OrderByDescending(x => x.RowId)
                     .FirstOrDefaultAsync();
 
@@ -53,7 +54,8 @@ namespace Hmcr.Data.Repositories
                 var duplicate = await DbSet
                     .Where(x => x.SubmissionObject.SubmissionStreamId == submissionStreamId
                         && x.RowHash == row.RowHash
-                        && x.SubmissionObject.SubmissionStatus.StatusCode == FileStatus.FileSuccess)
+                        && ((x.SubmissionObject.SubmissionStatus.StatusCode == FileStatus.FileSuccess)
+                        || (x.SubmissionObject.SubmissionStatus.StatusCode == FileStatus.FileSuccessWithWarnings)))
                     .FirstOrDefaultAsync();
 
                 if (duplicate != null)
@@ -71,7 +73,8 @@ namespace Hmcr.Data.Repositories
                     .Where(x => x.SubmissionObject.SubmissionStreamId == submissionStreamId
                         && x.RecordNumber == row.RecordNumber
                         && x.SubmissionObject.ContractTermId == contractTermId
-                        && x.SubmissionObject.SubmissionStatus.StatusCode == FileStatus.FileSuccess)
+                        && ((x.SubmissionObject.SubmissionStatus.StatusCode == FileStatus.FileSuccess)
+                        || (x.SubmissionObject.SubmissionStatus.StatusCode == FileStatus.FileSuccessWithWarnings)))
                     .OrderByDescending(x => x.RowId)
                     .FirstOrDefaultAsync();
                 
