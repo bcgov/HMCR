@@ -165,6 +165,11 @@ namespace Hmcr.Data.Repositories
             decimal foundStartOffset = 0.0M;
             decimal foundEndOffset = 0.0M;
 
+            int daysBetween = (int)workReportTyped.ActivityCodeValidation.ReportingFrequency;
+            DateTime endDate = workReportTyped.EndDate.GetValueOrDefault(DateTime.Today).Date;
+            DateTime futureEndDate = endDate.AddDays(daysBetween);
+            DateTime startDate = endDate.AddDays(-daysBetween);
+
             if (workReportTyped.FeatureType == FeatureType.Point)
             {
                 startOffset = (decimal)workReportTyped.StartOffset - md;
@@ -173,8 +178,11 @@ namespace Hmcr.Data.Repositories
             {
                 if (workReportTyped.StartOffset > workReportTyped.EndOffset)
                 {
-                    startOffset = (decimal)workReportTyped.StartOffset + md;
-                    endOffset = (decimal)workReportTyped.EndOffset - md;
+                    //the line is reversed we will flip them to handle this
+                    startOffset = (decimal)workReportTyped.EndOffset - md;
+                    endOffset = (decimal)workReportTyped.StartOffset + md;
+                    /*startOffset = (decimal)workReportTyped.StartOffset + md;
+                    endOffset = (decimal)workReportTyped.EndOffset - md;*/
                 }
                 else
                 {
@@ -183,11 +191,7 @@ namespace Hmcr.Data.Repositories
                 }
             }
 
-            int daysBetween = (int)workReportTyped.ActivityCodeValidation.ReportingFrequency;
-            DateTime endDate = workReportTyped.EndDate.GetValueOrDefault(DateTime.Today).Date;
-            DateTime futureEndDate = endDate.AddDays(daysBetween);
-            DateTime startDate = endDate.AddDays(-daysBetween);
-
+            //find items in the database that match based on standard criteria
             var foundInDB = await DbContext.HmrWorkReportVws.AsNoTracking()
                 .Where(x => x.ActivityNumber == workReportTyped.ActivityNumber
                         && x.RecordNumber != workReportTyped.RecordNumber
@@ -202,19 +206,15 @@ namespace Hmcr.Data.Repositories
 
             foreach (var foundItem in foundInDB)
             {
-                //perform the offset matching
-                foundStartOffset = (decimal)foundItem.StartOffset;
-                foundEndOffset = (decimal)((foundItem.EndOffset == null) 
-                    ? foundItem.StartOffset
-                    : foundItem.EndOffset);
+                (foundStartOffset, foundEndOffset) = normalizeOffsets(foundItem.StartOffset, foundItem.EndOffset);
 
-                //check that the line/points don't overlap?
-                if (!((endOffset <= foundItem.StartOffset) || (foundItem.EndOffset <= startOffset)))
+                //check that the offsets don't overlap?
+                if (!((endOffset <= foundStartOffset) || (foundEndOffset <= startOffset)))
                 {
                     conflicts.Add(foundItem.RecordNumber);
                 }
 
-                //reset them
+                //reset the found start/end offsets
                 foundStartOffset = 0.0M;
                 foundEndOffset = 0.0M;
             }
@@ -232,11 +232,7 @@ namespace Hmcr.Data.Repositories
 
             foreach (var foundItem in foundInReport)
             {
-                //perform the offset matching
-                foundStartOffset = (decimal)foundItem.WorkReportTyped.StartOffset;
-                foundEndOffset = (decimal)((foundItem.WorkReportTyped.FeatureType == FeatureType.Point)
-                    ? foundItem.WorkReportTyped.StartOffset
-                    : foundItem.WorkReportTyped.EndOffset);
+                (foundStartOffset, foundEndOffset) = normalizeOffsets(foundItem.WorkReportTyped.StartOffset, foundItem.WorkReportTyped.EndOffset);
 
                 //check that the line/points don't overlap?
                 if (!((endOffset <= foundStartOffset) || (foundEndOffset <= startOffset)))
@@ -256,6 +252,24 @@ namespace Hmcr.Data.Repositories
             conflicts = conflicts.Distinct().ToList();
             conflicts.Sort();
             return (conflicts.Count() > 0, conflicts);
+        }
+
+        private (decimal startOffset, decimal endOffset) normalizeOffsets(decimal? startOffset, decimal? endOffset)
+        {
+            //perform the offset matching
+            var foundStartOffset = (decimal)startOffset;
+            var foundEndOffset = (decimal)((endOffset == null)
+                ? startOffset
+                : endOffset);
+
+            //sometimes the offsets can be flipped, we need to adjust them for matching
+            if (foundStartOffset > foundEndOffset)
+            {
+                foundStartOffset = foundEndOffset;
+                foundEndOffset = (decimal)startOffset;
+            }
+
+            return (foundStartOffset, foundEndOffset);
         }
     }
 }

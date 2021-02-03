@@ -358,6 +358,7 @@ namespace Hmcr.Domain.Hangfire
                     submissionRow.EndVariance = result.endPointResult.Variance;
 
                     typedRow.WorkLength = typedRow.EndOffset - typedRow.StartOffset;
+                    typedRow.WorkLength = (typedRow.WorkLength < 0) ? typedRow.WorkLength * -1 : typedRow.WorkLength;
 
                     if (result.lines.Count == 1)
                     {
@@ -437,6 +438,7 @@ namespace Hmcr.Domain.Hangfire
                     submissionRow.EndVariance = typedRow.EndOffset - result.snappedEndOffset;
 
                     typedRow.WorkLength = result.snappedEndOffset - result.snappedStartOffset;
+                    typedRow.WorkLength = (typedRow.WorkLength < 0) ? typedRow.WorkLength * -1 : typedRow.WorkLength;
 
                     if (result.lines.Count == 1)
                     {

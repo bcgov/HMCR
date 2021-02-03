@@ -365,13 +365,19 @@ namespace Hmcr.Domain.Hangfire
                     var (itemExists, conflicts) = await _workReportRepo.IsReportedWorkReportForLocationCAsync(typedRow, workReports);
 
                     if (itemExists)
-                    { 
+                    {
+                        var gpsMessage = (typedRow.FeatureType == FeatureType.Line)
+                            ? $" GPS position from [{typedRow.StartLatitude},{typedRow.StartLongitude}]" +
+                              $" to [{typedRow.EndLatitude},{typedRow.EndLongitude}] with a tolerance of -/+ 100M."
+                            : $" GPS position [{typedRow.StartLatitude},{typedRow.StartLongitude}] with a tolerance of -/+ 100M.";
+
+                        //need to display the message differently for lines/points
                         warnings.AddItem("Reporting Frequency Validation: End Date, GPS position"
                             , $"END DATE [{((typedRow.EndDate.Value == null) ? "" : typedRow.EndDate.Value.ToString("yyyy-MM-dd"))}] should NOT be reported more frequently" +
                             $" than the Reporting Frequency (days) of [{ typedRow.ActivityCodeValidation.ReportingFrequency}]" +
                             $" for Activity [{ typedRow.ActivityNumber}]," +
                             $" Highway Unique [{typedRow.HighwayUnique}]," +
-                            $" GPS position [{typedRow.StartLatitude},{typedRow.StartLongitude}] with a tolerance of -/+ 100M." +
+                            gpsMessage +
                             $" Record conflicts with Record Number(s) [{String.Join("; ", conflicts.ToArray())}]");
                     }
                 }
@@ -1512,6 +1518,7 @@ namespace Hmcr.Domain.Hangfire
                     submissionRow.EndVariance = result.endPointResult.Variance;
 
                     typedRow.WorkLength = typedRow.EndOffset - typedRow.StartOffset;
+                    typedRow.WorkLength = (typedRow.WorkLength < 0) ? typedRow.WorkLength * -1 : typedRow.WorkLength;
 
                     if (result.lines.Count == 1)
                     {
@@ -1607,6 +1614,7 @@ namespace Hmcr.Domain.Hangfire
                     submissionRow.EndVariance = typedRow.EndOffset - result.snappedEndOffset;
 
                     typedRow.WorkLength = result.snappedEndOffset - result.snappedStartOffset;
+                    typedRow.WorkLength = (typedRow.WorkLength < 0) ? typedRow.WorkLength * -1 : typedRow.WorkLength;
 
                     if (result.lines.Count == 1)
                     {
