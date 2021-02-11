@@ -7,7 +7,7 @@ const defaultState = {
   streams: {},
 };
 
-export default (state = defaultState, action) => {
+const submissionReducer = (state = defaultState, action) => {
   switch (action.type) {
     case FETCH_SUBMISSION_STATUSES:
       return { ...state, statuses: { ..._.mapKeys(action.payload, 'statusCode') } };
@@ -28,3 +28,5 @@ export default (state = defaultState, action) => {
       return state;
   }
 };
+
+export default submissionReducer;
