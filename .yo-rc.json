@@ -5,17 +5,17 @@
         "jenkins": {
           "path": ".jenkins",
           "name": "jenkins",
-          "namespace": "txkggj-tools",
+          "namespace": "d3d940-tools",
           "version": "1.0.0",
           "environments": {
             "build": {
-              "namespace": "txkggj-tools"
+              "namespace": "d3d940-tools"
             },
             "dev": {
-              "namespace": "txkggj-tools"
+              "namespace": "d3d940-tools"
             },
             "prod": {
-              "namespace": "txkggj-tools"
+              "namespace": "d3d940-tools"
             }
           },
           "jenkinsJobName": "_jenkins",
@@ -30,16 +30,16 @@
           "path": ".",
           "environments": {
             "build": {
-              "namespace": "txkggj-tools"
+              "namespace": "d3d940-tools"
             },
             "dev": {
-              "namespace": "txkggj-dev"
+              "namespace": "d3d940-dev"
             },
             "test": {
-              "namespace": "txkggj-test"
+              "namespace": "d3d940-test"
             },
             "prod": {
-              "namespace": "txkggj-prod"
+              "namespace": "d3d940-prod"
             }
           },
           "jenkinsJobName": "hmr",

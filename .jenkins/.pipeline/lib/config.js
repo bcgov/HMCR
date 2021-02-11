@@ -6,7 +6,7 @@ const name = "jenkins";
 
 const phases = {
   build: {
-    namespace: "txkggj-tools",
+    namespace: "d3d940-tools",
     name: `${name}`,
     phase: "build",
     changeId: changeId,
@@ -16,7 +16,7 @@ const phases = {
     tag: `build-${version}-${changeId}`,
   },
   dev: {
-    namespace: "txkggj-tools",
+    namespace: "d3d940-tools",
     name: `${name}`,
     phase: "dev",
     changeId: changeId,
@@ -26,7 +26,7 @@ const phases = {
     tag: `dev-${version}-${changeId}`,
   },
   prod: {
-    namespace: "txkggj-tools",
+    namespace: "d3d940-tools",
     name: `${name}`,
     phase: "prod",
     changeId: changeId,

@@ -25,7 +25,7 @@ module.exports = (settings) => {
           SUFFIX: phases[phase].suffix,
           VERSION: phases[phase].tag,
           ENV_NAME: phases[phase].phase,
-          ROUTE_HOST: `${phases[phase].name}${phases[phase].suffix}-${phases[phase].namespace}.pathfinder.gov.bc.ca`,
+          ROUTE_HOST: `${phases[phase].name}${phases[phase].suffix}-${phases[phase].namespace}.apps.silver.devops.gov.bc.ca`,
         },
       }
     )
