@@ -20,7 +20,7 @@ import { showValidationErrorDialog } from '../actions';
 
 import * as Constants from '../Constants';
 import * as api from '../Api';
-import { buildStatusIdArray } from '../utils';
+import { buildStatusIdArray,isValueNotEmpty,toNumberOrNull,toStringOrEmpty,toStringWithCommasOrEmpty,isValueEmpty } from '../utils';
 
 const defaultSearchFormValues = { searchText: '', maintenanceTypeIds: [], statusId: [Constants.ACTIVE_STATUS.ACTIVE] };
 
@@ -41,7 +41,7 @@ const tableColumns = [
   { heading: 'Active', key: 'isActive', nosort: true },
 ];
 
-const ActivityAdmin = ({ maintenanceTypes, locationCodes, unitOfMeasures, showValidationErrorDialog }) => {
+const ActivityAdmin = ({ maintenanceTypes, locationCodes, unitOfMeasures,showValidationErrorDialog }) => {
   const location = useLocation();
   const searchData = useSearchData(defaultSearchOptions);
   const [searchInitialValues, setSearchInitialValues] = useState(defaultSearchFormValues);
@@ -105,12 +105,24 @@ const ActivityAdmin = ({ maintenanceTypes, locationCodes, unitOfMeasures, showVa
         values.featureType = null;
         values.isSiteNumRequired = false;
         values.thresholdLevels = null;
+        values.roadClassRule = 0;
+        values.roadLengthRule = 0;
+        values.surfaceTypeRule = 0;
       }
-
+      values.minValue = toNumberOrNull(values.minValue);
+      values.maxValue = toNumberOrNull(values.maxValue);
+      values.reportingFrequency = toNumberOrNull(values.reportingFrequency );
+      if(isValueNotEmpty(values.minValue) && isValueEmpty(values.maxValue))
+      {
+        values.maxValue = (['site','num','ea'].includes(values.unitOfMeasure)) ? 999999999:999999999.99;
+      }
       if (formType === Constants.FORM_TYPE.ADD) {
         api
           .postActivityCode(values)
           .then(() => {
+            values.minValue = toStringWithCommasOrEmpty(values.minValue);
+            values.maxValue = toStringWithCommasOrEmpty(values.maxValue);
+            values.reportingFrequency = toStringOrEmpty(values.reportingFrequency );
             formModal.closeForm();
             searchData.refresh();
           })
@@ -120,6 +132,9 @@ const ActivityAdmin = ({ maintenanceTypes, locationCodes, unitOfMeasures, showVa
         api
           .putActivityCode(values.id, values)
           .then(() => {
+            values.minValue = toStringWithCommasOrEmpty(values.minValue);
+            values.maxValue = toStringWithCommasOrEmpty(values.maxValue);
+            values.reportingFrequency = toStringOrEmpty(values.reportingFrequency );
             formModal.closeForm();
             searchData.refresh();
           })
@@ -129,7 +144,7 @@ const ActivityAdmin = ({ maintenanceTypes, locationCodes, unitOfMeasures, showVa
     }
   };
 
-  const formModal = useFormModal('Activity', <EditActivityFormFields />, handleEditFormSubmit);
+  const formModal = useFormModal('Activity', <EditActivityFormFields />, handleEditFormSubmit,'xl');
 
   const data = searchData.data.map((item) => ({
     ...item,

@@ -51,7 +51,7 @@ namespace Hmcr.Model
             else if (isFileError && !string.IsNullOrEmpty(errorDetailJson))
             {
 
-                var errorDetail = JsonSerializer.Deserialize<ErrorDetail>(errorDetailJson, _jsonOptions);
+                var errorDetail = JsonSerializer.Deserialize<MessageDetail>(errorDetailJson, _jsonOptions);
 
                 htmlBody.Append("<li>Status Detail</li>");
 

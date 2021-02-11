@@ -3,12 +3,14 @@ import { CustomInput, FormFeedback } from 'reactstrap';
 import { FieldArray, useField, useFormikContext } from 'formik';
 
 const MultiSelect = (props) => {
-  const { items, name, handleBlur, showSelectAll } = props;
+  const { items, name, handleBlur, showSelectAll,selectClass } = props;
   // eslint-disable-next-line
   const [field, meta] = useField(props);
+  const selectClassName= (selectClass===null ||selectClass===undefined||selectClass==='')?"form-control multi-select":selectClass;
+  
   const { values, setFieldValue } = useFormikContext();
   const selectedValues = values[name];
-
+  
   const [selectAll, setSelectAll] = useState(false);
 
   const handleItemSelected = (checked, itemId, push, remove) => {
@@ -38,7 +40,7 @@ const MultiSelect = (props) => {
   return (
     <React.Fragment>
       <div
-        className={`form-control multi-select ${
+        className={`${selectClassName} ${
           meta.touched && meta.error && typeof meta.error === 'string' && meta.value.length === 0 ? 'is-invalid' : ''
         }`}
       >

@@ -162,6 +162,36 @@ namespace Hmcr.Domain.Hangfire.Base
             }
         }
 
+        protected void SetWarningDetail(HmrSubmissionRow submissionRow, Dictionary<string, List<string>> warnings)
+        {
+            //warning can only be set for a row
+            if (submissionRow != null)
+            {
+                if (submissionRow.WarningDetail != null)
+                {
+                    var newWarnings = System.Text.Json.JsonSerializer.Deserialize<MessageDetail>(submissionRow.WarningDetail);
+                    foreach (var warning in warnings) 
+                    {
+                        newWarnings.FieldMessages.Add(new FieldMessage
+                        {
+                            Field = warning.Key.WordToWords(),
+                            Messages = warning.Value
+                        });
+                    }
+                    submissionRow.WarningDetail = newWarnings.ToString();
+                } else
+                {
+                    //we need to check for 
+                    submissionRow.RowStatusId = _statusService.RowError;
+                    submissionRow.WarningDetail = warnings.GetWarningDetail();
+                }
+                
+
+                
+
+            }
+        }
+
         protected async Task CommitAndSendEmailAsync()
         {
             MethodLogger.LogEntry(_logger, _enableMethodLog, _methodLogHeader);
@@ -217,6 +247,7 @@ namespace Hmcr.Domain.Hangfire.Base
 
         protected void SetVarianceWarningDetail(HmrSubmissionRow row, string rfiSegment, string start, string end, string thresholdLevel)
         {
+            var warnings = new Dictionary<string, List<string>>();
             var threshold = _lookupService.GetThresholdLevel(thresholdLevel);
             var threasholdInKm = threshold.Warning / 1000M;
 
@@ -225,11 +256,20 @@ namespace Hmcr.Domain.Hangfire.Base
 
             if (row.StartVariance != null && row.StartVariance > threasholdInKm)
             {
-                row.WarningDetail = string.Format(RowWarning.VarianceWarning, "Start", start, rfiSegment, threshold.Warning);
+                //row.WarningDetail = string.Format(RowWarning.VarianceWarning, "Start", start, rfiSegment, threshold.Warning);
+                warnings.AddItem("Start GPS Variance", string.Format("{0} {1} is is not on the Highway Unique [{2}] within the warning threshold [{3}] metres",
+                    "Start", start, rfiSegment, threshold.Warning));
             }
             else if (row.EndVariance != null && row.EndVariance > threasholdInKm)
             {
-                row.WarningDetail = string.Format(RowWarning.VarianceWarning, "End", end, rfiSegment, threshold.Warning);
+                //row.WarningDetail = string.Format(RowWarning.VarianceWarning, "End", end, rfiSegment, threshold.Warning);
+                warnings.AddItem("End GPS Variance", string.Format("{0} {1} is is not on the Highway Unique [{2}] within the warning threshold [{3}] metres",
+                    "End", end, rfiSegment, threshold.Warning));
+            }
+
+            if (warnings.Count > 0)
+            {
+                SetWarningDetail(row, warnings);
             }
         }
 

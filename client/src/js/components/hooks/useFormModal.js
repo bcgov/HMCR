@@ -6,7 +6,7 @@ import SubmitButton from '../ui/SubmitButton';
 
 import * as Constants from '../../Constants';
 
-const useFormModal = (formTitle, formFieldsChildElement, handleFormSubmit) => {
+const useFormModal = (formTitle, formFieldsChildElement, handleFormSubmit,modSize) => {
   // This is needed until Formik fixes its own setSubmitting function
   const [submitting, setSubmitting] = useState(false);
   const [initialValues, setInitialValues] = useState(null);
@@ -31,10 +31,10 @@ const useFormModal = (formTitle, formFieldsChildElement, handleFormSubmit) => {
   const onFormSubmit = (values) => handleFormSubmit(values, formType);
 
   const title = formType === Constants.FORM_TYPE.ADD ? `Add ${formTitle}` : `Edit ${formTitle}`;
-
+  modSize = (modSize===null )?'sm':modSize;
   const formModal = () => {
     return (
-      <Modal isOpen={isOpen} toggle={toggle} backdrop="static">
+      <Modal isOpen={isOpen} toggle={toggle} backdrop="static" size={modSize}>
         <ModalHeader toggle={toggle}>{title}</ModalHeader>
         <Formik
           enableReinitialize={true}
