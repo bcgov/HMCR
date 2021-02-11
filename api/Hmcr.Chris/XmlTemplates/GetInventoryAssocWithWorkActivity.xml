@@ -2,7 +2,7 @@
     version="1.1.0"
     outputFormat="json"
     maxFeatures="50"
-    viewParams="epsg:4326;coordinates:{0}"
+    viewParams="epsg:4326;{0}:{1}"
     xmlns:topp="http://www.openplans.org/topp"
     xmlns:wfs="http://www.opengis.net/wfs"
     xmlns="http://www.opengis.net/ogc"
@@ -10,5 +10,5 @@
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="http://www.opengis.net/wfs
                         http://schemas.opengis.net/wfs/1.1.0/WFS-basic.xsd">
-  <wfs:Query typeName="cwr:{1}" srsName="EPSG:3005"/>
+  <wfs:Query typeName="cwr:{2}" srsName="EPSG:3005"/>
 </wfs:GetFeature>

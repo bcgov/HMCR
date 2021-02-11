@@ -200,5 +200,20 @@ namespace Hmcr.Model.Utils
         {
             return query.StartsWith("?") ? query.Substring(1) : query;
         }
+
+        public static decimal ConvertStrToDecimal(this string value)
+        {
+            return IsEmpty(value) ? 0 : (decimal) decimal.Parse(value);
+        }
+        public static decimal ConvertNullableDecimal(this decimal? value)
+        {
+            return value?? 0;
+        }
+        public static string ConvertDecimalToStringAndRemoveTrailing(this decimal? value)
+        {
+            decimal val =  value ?? 0;
+            return val.ToString("G29");
+        }
+
     }
 }

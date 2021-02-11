@@ -30,7 +30,7 @@ namespace Hmcr.Data.Repositories
         public IEnumerable<ActivityCodeRuleCache> LoadActivityCodeRuleCache()
         {
             return DbSet.AsNoTracking()
-                .Where(x => x.EndDate == null || DateTime.Today < x.EndDate)
+                .Where(s => s.EndDate == null || s.EndDate > DateTime.Today)
                 .Select(x =>
                     new ActivityCodeRuleCache
                     {
@@ -45,7 +45,9 @@ namespace Hmcr.Data.Repositories
         public async Task<IEnumerable<ActivityCodeRuleDto>> GetRoadLengthRulesAsync()
         {
             var activityRules = await DbSet.AsNoTracking()
+                .Where(s => s.EndDate == null || s.EndDate > DateTime.Today)
                 .Where(s => s.ActivityRuleSet.ToUpper() == "ROAD_LENGTH")
+                .OrderBy(s => s.DisplayOrder)
                 .ToListAsync();
 
             return Mapper.Map<IEnumerable<ActivityCodeRuleDto>>(activityRules);
@@ -53,7 +55,9 @@ namespace Hmcr.Data.Repositories
         public async Task<IEnumerable<ActivityCodeRuleDto>> GetSurfaceTypeRulesAsync()
         {
             var activityRules = await DbSet.AsNoTracking()
+                .Where(s => s.EndDate == null || s.EndDate > DateTime.Today)
                 .Where(s => s.ActivityRuleSet.ToUpper() == "SURFACE_TYPE")
+                .OrderBy(s => s.DisplayOrder)
                 .ToListAsync();
 
             return Mapper.Map<IEnumerable<ActivityCodeRuleDto>>(activityRules);
@@ -61,7 +65,9 @@ namespace Hmcr.Data.Repositories
         public async Task<IEnumerable<ActivityCodeRuleDto>> GetRoadClassRulesAsync()
         {
             var activityRules = await DbSet.AsNoTracking()
+                .Where(s => s.EndDate == null || s.EndDate > DateTime.Today)
                 .Where(s => s.ActivityRuleSet.ToUpper() == "ROAD_CLASS")
+                .OrderBy(s => s.DisplayOrder)
                 .ToListAsync();
 
             return Mapper.Map<IEnumerable<ActivityCodeRuleDto>>(activityRules);
@@ -70,7 +76,9 @@ namespace Hmcr.Data.Repositories
         public async Task<IEnumerable<ActivityCodeRuleDto>> GetDefaultRules()
         {
             var activityRules = await DbSet.AsNoTracking()
+                .Where(s => s.EndDate == null || s.EndDate > DateTime.Today)
                 .Where(s => s.ActivityRuleName.ToUpper() == "NOT APPLICABLE")
+                .OrderBy(s => s.DisplayOrder)
                 .ToListAsync();
 
             return Mapper.Map<IEnumerable<ActivityCodeRuleDto>>(activityRules);
