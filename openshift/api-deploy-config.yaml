@@ -42,7 +42,7 @@ objects:
         spec:
           initContainers: # check if logdb is ready, and only continue when true
             - name: check-logdb-ready
-              image: image-registry.openshift.image-registry.svc:5000/d3d940-tools/postgresql-10-rhel8:1
+              image: image-registry.openshift-image-registry.svc:5000/d3d940-tools/postgresql-10-rhel8:1
               command:
                 [
                   "sh",
