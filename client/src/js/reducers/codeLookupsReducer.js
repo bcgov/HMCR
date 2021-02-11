@@ -9,7 +9,7 @@ import {
   FETCH_THRESHOLD_LEVELS,
   FETCH_ROAD_LENGTH_RULES,
   FETCH_SURFACE_TYPE_RULES,
-  FETCH_ROAD_CLASS_RULES
+  FETCH_ROAD_CLASS_RULES,
 } from '../actions/types';
 
 const defaultState = {
@@ -24,7 +24,7 @@ const defaultState = {
   roadClassRules: [],
 };
 
-export default (state = defaultState, action) => {
+const codeLookupsReducer = (state = defaultState, action) => {
   switch (action.type) {
     case FETCH_MAINTENANCE_TYPES:
       return { ...state, maintenanceTypes: _.orderBy(action.payload, ['name']) };
@@ -41,10 +41,12 @@ export default (state = defaultState, action) => {
     case FETCH_ROAD_LENGTH_RULES:
       return { ...state, roadLengthRules: _.orderBy(action.payload, ['displayOrder']) };
     case FETCH_SURFACE_TYPE_RULES:
-        return { ...state, surfaceTypeRules: _.orderBy(action.payload, ['displayOrder']) };
+      return { ...state, surfaceTypeRules: _.orderBy(action.payload, ['displayOrder']) };
     case FETCH_ROAD_CLASS_RULES:
-        return { ...state, roadClassRules: _.orderBy(action.payload, ['displayOrder']) };
+      return { ...state, roadClassRules: _.orderBy(action.payload, ['displayOrder']) };
     default:
       return state;
   }
 };
+
+export default codeLookupsReducer;
