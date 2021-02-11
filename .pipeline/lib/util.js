@@ -10,17 +10,19 @@ function getSecret(oc, namespace, secretId) {
       "secret",
       secretId,
       "-o",
-      "json"
+      "json",
     ]);
 
     secret = JSON.parse(raw.stdout).data;
   } catch (error) {
-    console.log(`Error: Unable to retrieve secret ${secretId} from ${namespace}`);
+    console.log(
+      `Error: Unable to retrieve secret ${secretId} from ${namespace}`
+    );
   }
 
   return secret;
 }
 
 module.exports = {
-  getSecret
+  getSecret,
 };
