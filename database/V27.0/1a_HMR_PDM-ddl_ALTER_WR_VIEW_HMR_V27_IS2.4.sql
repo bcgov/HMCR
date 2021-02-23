@@ -81,6 +81,8 @@ CREATE VIEW [dbo].[HMR_WORK_REPORT_VW] AS
 			WITH (FIELD nvarchar(1000) '$.field', FIELDMESSAGE nvarchar(1000) '$.messages[0]') WHERE FIELD = 'Surface Type Validation'), ',', '/') AS 'SURFACE_TYPE_VALID_WARNING'
 	  ,REPLACE((SELECT distinct FIELDMESSAGE FROM OPENJSON(subm_rw.WARNING_DETAIL,'$.fieldMessages') 
 			WITH (FIELD nvarchar(1000) '$.field', FIELDMESSAGE nvarchar(1000) '$.messages[0]') WHERE FIELD = 'Road Class Validation'), ',', '/') AS 'ROAD_CLASS_VALID_WARNING'
+    ,REPLACE((SELECT distinct FIELDMESSAGE FROM OPENJSON(subm_rw.WARNING_DETAIL,'$.fieldMessages') 
+			WITH (FIELD nvarchar(1000) '$.field', FIELDMESSAGE nvarchar(1000) '$.messages[0]') WHERE FIELD = 'Road Length Validation'), ',', '/') AS 'ROAD_LENGTH_VALID_WARNING'
 	  ,REPLACE((SELECT distinct FIELDMESSAGE FROM OPENJSON(subm_rw.WARNING_DETAIL,'$.fieldMessages') 
 			WITH (FIELD nvarchar(1000) '$.field', FIELDMESSAGE nvarchar(1000) '$.messages[0]') WHERE FIELD = 'Structure Validation'), ',', '/') AS 'STRUCTURE_VALIDATION'
 	  ,REPLACE((SELECT distinct FIELDMESSAGE FROM OPENJSON(subm_rw.WARNING_DETAIL,'$.fieldMessages') 
