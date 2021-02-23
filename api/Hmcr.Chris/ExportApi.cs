@@ -16,11 +16,12 @@ namespace Hmcr.Chris
         private IConfiguration _config;
         private ILogger<IExportApi> _logger;
 
-        public ExportApi(HttpClient client, IApi api, IConfiguration config)
+        public ExportApi(HttpClient client, IApi api, IConfiguration config, ILogger<IExportApi> logger)
         {
             _client = client;
             _api = api;
             _config = config;
+            _logger = logger;
         }
 
         public async Task<HttpResponseMessage> ExportReport(string query, string exportEndpointConfig)
