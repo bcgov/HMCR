@@ -1,7 +1,7 @@
 ﻿<wfs:GetFeature service="WFS"
     version="1.1.0"
     outputFormat="json"
-    maxFeatures="50"
+    maxFeatures="200"
     viewParams="epsg:4326;{0}:{1}"
     xmlns:topp="http://www.openplans.org/topp"
     xmlns:wfs="http://www.opengis.net/wfs"
