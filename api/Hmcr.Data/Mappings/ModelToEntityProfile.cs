@@ -76,7 +76,7 @@ namespace Hmcr.Data.Mappings
             CreateMap<UserSearchDto, HmrSystemUser>();
             CreateMap<UserUpdateDto, HmrSystemUser>();
             CreateMap<UserDeleteDto, HmrSystemUser>();
-
+            CreateMap<UserSearchExportDto, HmrSystemUser>();
             CreateMap<UserRoleDto, HmrUserRole>();
 
             CreateMap<SubmissionStreamDto, HmrSubmissionStream>();
@@ -85,6 +85,8 @@ namespace Hmcr.Data.Mappings
             CreateMap<ActivityCodeSearchDto, HmrActivityCode>();
             CreateMap<ActivityCodeCreateDto, HmrActivityCode>();
             CreateMap<ActivityCodeUpdateDto, HmrActivityCode>();
+            CreateMap<ActivityCodeSearchExportDto, HmrActivityCode>();
+
             CreateMap<LocationCodeDto, HmrLocationCode>();
 
             CreateMap<WorkReportTyped, HmrWorkReport>();

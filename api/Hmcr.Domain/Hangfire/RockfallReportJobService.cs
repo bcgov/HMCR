@@ -80,6 +80,13 @@ namespace Hmcr.Domain.Hangfire
                 var submissionRow = _submissionRows[(decimal)untypedRow.RowNum];
 
                 submissionRow.RowStatusId = _statusService.RowSuccess; //set the initial row status as success 
+                untypedRow.HighwayUnique = untypedRow.HighwayUnique.ToTrimAndUppercase();
+                
+                //rockfall requires Y/N fields to be set to Uppercase, see HMCR-643
+                untypedRow.HeavyPrecip = untypedRow.HeavyPrecip.ToTrimAndUppercase();
+                untypedRow.FreezeThaw = untypedRow.FreezeThaw.ToTrimAndUppercase();
+                untypedRow.DitchSnowIce = untypedRow.DitchSnowIce.ToTrimAndUppercase();
+                untypedRow.VehicleDamage = untypedRow.VehicleDamage.ToTrimAndUppercase();
 
                 var entityName = GetValidationEntityName(untypedRow);
 
@@ -351,6 +358,7 @@ namespace Hmcr.Domain.Hangfire
                     submissionRow.EndVariance = result.endPointResult.Variance;
 
                     typedRow.WorkLength = typedRow.EndOffset - typedRow.StartOffset;
+                    typedRow.WorkLength = (typedRow.WorkLength < 0) ? typedRow.WorkLength * -1 : typedRow.WorkLength;
 
                     if (result.lines.Count == 1)
                     {
@@ -430,6 +438,7 @@ namespace Hmcr.Domain.Hangfire
                     submissionRow.EndVariance = typedRow.EndOffset - result.snappedEndOffset;
 
                     typedRow.WorkLength = result.snappedEndOffset - result.snappedStartOffset;
+                    typedRow.WorkLength = (typedRow.WorkLength < 0) ? typedRow.WorkLength * -1 : typedRow.WorkLength;
 
                     if (result.lines.Count == 1)
                     {
@@ -536,6 +545,13 @@ namespace Hmcr.Domain.Hangfire
                 try
                 {
                     var row = csv.GetRecord<RockfallReportTyped>();
+                    row.HighwayUnique = row.HighwayUnique.ToTrimAndUppercase();
+                    //rockfall requires Y/N fields to be set to Uppercase, see HMCR-643
+                    row.HeavyPrecip = row.HeavyPrecip.ToTrimAndUppercase();
+                    row.FreezeThaw = row.FreezeThaw.ToTrimAndUppercase();
+                    row.DitchSnowIce = row.DitchSnowIce.ToTrimAndUppercase();
+                    row.VehicleDamage = row.VehicleDamage.ToTrimAndUppercase();
+
                     rows.Add(row);
                     rowNum = (decimal)row.RowNum;
                     row.ServiceArea = _serviceArea.ConvertToServiceAreaNumber(row.ServiceArea);

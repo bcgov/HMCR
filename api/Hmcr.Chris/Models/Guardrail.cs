@@ -12,5 +12,6 @@ namespace Hmcr.Chris.Models
         /// </summary>
         public string GuardrailType { get; set; }
         public double Length { get; set; }
+        public string CrossSectionPosition { get; set; }
     }
 }

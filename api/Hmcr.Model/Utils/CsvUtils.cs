@@ -23,18 +23,36 @@ namespace Hmcr.Model.Utils
                     continue;
                 }
 
+                //road length rules may contain UTF8 characters and Excel only handles ANSI
+                // we need to update the value if it contains the ≤ to be <= (see HMCR-1005)
+                if (field.Name == "RoadLengthRuleName")
+                {
+                    if (val.ToString().Contains("≤"))
+                    {
+                        val = val.ToString().Replace("≤", "<=");
+                    }
+                }
+
                 if (field.PropertyType == typeof(DateTime))
                 {
                     csvValue.Append($"{DateUtils.CovertToString((DateTime)val)},");
                 }
                 else if(wholeNumberFields.Contains(field.Name, StringComparer.InvariantCultureIgnoreCase))
                 {
-                    var valule = Regex.Replace(val.ToString(), @"\.0+$", "");
-                    csvValue.Append($"{valule},");
+                    var value = Regex.Replace(val.ToString(), @"\.0+$", "");
+                    csvValue.Append($"{value},");
                 }
                 else
                 {
-                    csvValue.Append($"{val.ToString()},");
+                    //we need to deal with the possibilities of commas in the string values
+                    if (val.ToString().Contains(",") && !val.ToString().Contains("\""))
+                    {
+                        csvValue.Append($"\"{val}\",");
+                    }
+                    else
+                    {
+                        csvValue.Append($"{val},");
+                    }
                 }
             }
 

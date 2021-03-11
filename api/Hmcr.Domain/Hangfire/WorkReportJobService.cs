@@ -14,6 +14,7 @@ using Hmcr.Model.Utils;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using NetTopologySuite.Geometries;
+using NetTopologySuite.Operation.Valid;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -77,6 +78,8 @@ namespace Hmcr.Domain.Hangfire
                 await CommitAndSendEmailAsync();
                 return true;
             }
+
+            #region Stage 2 Validation Processes
             //stage 2 validation
             foreach (var untypedRow in untypedRows)
             {
@@ -85,7 +88,7 @@ namespace Hmcr.Domain.Hangfire
                 var submissionRow = _submissionRows[(decimal)untypedRow.RowNum];
 
                 submissionRow.RowStatusId = _statusService.RowSuccess; //set the initial row status as success 
-
+                untypedRow.HighwayUnique = untypedRow.HighwayUnique.ToTrimAndUppercase();
                 var activityCode = activityCodes.FirstOrDefault(x => x.ActivityNumber == untypedRow.ActivityNumber);
 
                 if (activityCode == null)
@@ -110,12 +113,16 @@ namespace Hmcr.Domain.Hangfire
                     SetErrorDetail(submissionRow, errors, _statusService.FileBasicError); //Stage 2 - Basic Error
                 }
             }
+            #endregion
 
+            #region Stage 3 Validation Processes
             //stage 3 validation
             var typedRows = new List<WorkReportTyped>();
-
-            if (_submission.SubmissionStatusId == _statusService.FileInProgress)
+            
+            if (_statusService.IsFileInProgress(_submission.SubmissionStatusId))
             {
+                UpdateSubmissionStatus(_statusService.FileStage3InProgress);
+
                 var (rowNum, rows) = ParseRowsTyped(text, errors);
 
                 if (rowNum != 0)
@@ -130,50 +137,52 @@ namespace Hmcr.Domain.Hangfire
 
                 CopyCalculatedFieldsFormUntypedRow(typedRows, untypedRows);
                 PerformAdditionalValidation(typedRows);
+                PerformFieldServiceAreaValidation(typedRows);
             }
-
-            if (_submission.SubmissionStatusId != _statusService.FileInProgress)
+            
+            if (!_statusService.IsFileInProgress(_submission.SubmissionStatusId))
             {
                 await CommitAndSendEmailAsync();
                 return true;
             }
+            #endregion
 
+            #region Stage 4 Validation Processes
             //stage 4 validation starts
-            PerformFieldServiceAreaValidation(typedRows);
-            if (_submission.SubmissionStatusId != _statusService.FileInProgress)
-            {
-                await CommitAndSendEmailAsync();
-                return true;
-            }
+            UpdateSubmissionStatus(_statusService.FileStage4InProgress);
 
             var workReports = PerformSpatialValidationAndConversionBatchAsync(typedRows);
-
             _logger.LogInformation($"{_methodLogHeader} PerformSpatialValidationAndConversionAsync 100%");
-
-            if (_submission.SubmissionStatusId != _statusService.FileInProgress)
+            //if (_submission.SubmissionStatusId != _statusService.FileInProgress)
+            if (!_statusService.IsFileInProgress(_submission.SubmissionStatusId))
             {
                 await CommitAndSendEmailAsync();
                 return true;
             }
 
             workReports = PerformAnalyticalValidationBatchAsync(workReports);
+            //if (_submission.SubmissionStatusId != _statusService.FileInProgress)
+            if (!_statusService.IsFileInProgress(_submission.SubmissionStatusId))
+            {
+                await CommitAndSendEmailAsync();
+                return true;
+            }
 
-            if (_submission.SubmissionStatusId != _statusService.FileInProgress)
-            {
-                await CommitAndSendEmailAsync();
-                return true;
-            }
             await PerformReportedWorkReportsValidationAsync(workReports);
-            if (_submission.SubmissionStatusId != _statusService.FileInProgress)
+            //if (_submission.SubmissionStatusId != _statusService.FileInProgress)
+            if (!_statusService.IsFileInProgress(_submission.SubmissionStatusId))
             {
                 await CommitAndSendEmailAsync();
                 return true;
             }
-            _submission.SubmissionStatusId = _statusService.FileSuccess;
+
+            _submission.SubmissionStatusId = HasWarningSet() ? _statusService.FileSuccessWithWarnings : _statusService.FileSuccess;
+            //_submission.SubmissionStatusId = _statusService.FileSuccess;
+
             //stage 4 validation ends
+            #endregion
 
             await foreach (var entity in _workReportRepo.SaveWorkReportAsnyc(_submission, workReports)) { }
-
             await CommitAndSendEmailAsync();
 
             return true;
@@ -207,7 +216,7 @@ namespace Hmcr.Domain.Hangfire
             var updatedWorkReportTypeds = new ConcurrentBag<WorkReportTyped>();
             var progress = 0;
 
-            foreach (var workReport in workReports.Where(x => x.WorkReportTyped.ActivityCodeValidation.LocationCode == "C"))
+            foreach (var workReport in workReports.Where(x => x.WorkReportTyped.ActivityCodeValidation.LocationCode == "C" && x.IsNonSpatial== false))
             {
                 var tasklist = new List<Task>();
  
@@ -220,7 +229,20 @@ namespace Hmcr.Domain.Hangfire
                         && (workReport.WorkReportTyped.ActivityCodeValidation.SurfaceTypeRuleId != notApplicableSurfaceTypeId))
                 {
                     tasklist.Add(Task.Run(async () => updatedWorkReports.Add(await PerformSurfaceTypeValidationAsync(workReport))));
-                }              
+                }
+                if ((workReport.WorkReportTyped.ActivityCodeValidation.RoadLengthRuleId != 0)
+                        && (workReport.WorkReportTyped.ActivityCodeValidation.RoadLengthRuleId != notApplicableRoadLengthId))
+                {
+                    tasklist.Add(Task.Run(async () => updatedWorkReports.Add(await PerformRoadLengthValidationAsync(workReport))));
+                }
+                if (workReport.WorkReportTyped.ActivityNumber.StartsWith('6'))
+                {
+                    tasklist.Add(Task.Run(async () => updatedWorkReports.Add(await PerformStructureValidationAsync(workReport))));
+                }
+                if (workReport.WorkReportTyped.ActivityCodeValidation.IsSiteNumRequired)
+                {
+                    tasklist.Add(Task.Run(async () => updatedWorkReports.Add(await PerformSiteNumberValidationAsync(workReport))));
+                }
 
                 Task.WaitAll(tasklist.ToArray());
 
@@ -299,62 +321,287 @@ namespace Hmcr.Domain.Hangfire
         {
             foreach (var workReport in workReports)
             {
-                await PerformReportedWorkReportValidationAsync(workReport.WorkReportTyped);
+                if (workReport.WorkReportTyped.ActivityCodeValidation.LocationCode == "C" && workReport.IsNonSpatial == true) continue;
+                await PerformReportedWorkReportValidationAsync(workReport.WorkReportTyped, workReports);
             }
             return workReports;
         }
-        private async Task<WorkReportTyped> PerformReportedWorkReportValidationAsync(WorkReportTyped typedRow)
+
+        private async Task<WorkReportTyped> PerformReportedWorkReportValidationAsync(WorkReportTyped typedRow, List<WorkReportGeometry> workReports)
         {
             var warnings = new Dictionary<string, List<string>>();
             var submissionRow = _submissionRows[(decimal)typedRow.RowNum];
             string locationCode = typedRow.ActivityCodeValidation.LocationCode.ToUpper();
-            if (locationCode == "A" &&  await _workReportRepo.IsReportedWorkReportForLocationAAsync(typedRow))
+
+            if (typedRow.ActivityCodeValidation.ReportingFrequency != null || typedRow.ActivityCodeValidation.ReportingFrequency >= 1)
             {
-                warnings.AddItem("Reporting Frequency Validation: End Date"
-                                , $"(Location Code = 'A'): END DATE Should NOT be reported more frequently" +
-                                $" than the Reporting Frequency(days) of [{ typedRow.ActivityCodeValidation.ReportingFrequency}]" +
-                                $" for Activity[{ typedRow.ActivityNumber}]");
+                if (locationCode == "A")
+                {
+                    var (itemExists, conflicts) =await _workReportRepo.IsReportedWorkReportForLocationAAsync(typedRow, workReports);
+                    if (itemExists)
+                    {
+                        warnings.AddItem("Reporting Frequency Validation: End Date"
+                            , $"END DATE [{((typedRow.EndDate.Value == null) ? "" : typedRow.EndDate.Value.ToString("yyyy-MM-dd"))}] should NOT be reported more frequently" +
+                            $" than the Reporting Frequency (days) of [{ typedRow.ActivityCodeValidation.ReportingFrequency}]" +
+                            $" for Activity [{ typedRow.ActivityNumber}]. Record conflicts with Record Number(s)" +
+                            $"[{String.Join("; ", conflicts.ToArray())}]");
+                    }
+                }
+                else if (locationCode == "B")
+                {
+                    var (itemExists, conflicts) = await _workReportRepo.IsReportedWorkReportForLocationBAsync(typedRow, workReports);
+
+                    if (itemExists)
+                    {
+                        warnings.AddItem("Reporting Frequency Validation: End Date"
+                            , $"END DATE [{((typedRow.EndDate.Value == null) ? "" : typedRow.EndDate.Value.ToString("yyyy-MM-dd"))}] should NOT be reported more frequently" +
+                            $" than the Reporting Frequency (days) of [{ typedRow.ActivityCodeValidation.ReportingFrequency}]" +
+                            $" for Activity [{ typedRow.ActivityNumber}] for Highway Unique [{typedRow.HighwayUnique}]." +
+                            $" Record conflicts with Record Number(s) [{String.Join("; ", conflicts.ToArray())}]");
+                    }
+                }
+                else if (locationCode == "C")
+                {
+                    var (itemExists, conflicts) = await _workReportRepo.IsReportedWorkReportForLocationCAsync(typedRow, workReports);
+
+                    if (itemExists)
+                    {
+                        var gpsMessage = (typedRow.FeatureType == FeatureType.Line)
+                            ? $" GPS position from [{typedRow.StartLatitude},{typedRow.StartLongitude}]" +
+                              $" to [{typedRow.EndLatitude},{typedRow.EndLongitude}] with a tolerance of -/+ 100M."
+                            : $" GPS position [{typedRow.StartLatitude},{typedRow.StartLongitude}] with a tolerance of -/+ 100M.";
+
+                        //need to display the message differently for lines/points
+                        warnings.AddItem("Reporting Frequency Validation: End Date, GPS position"
+                            , $"END DATE [{((typedRow.EndDate.Value == null) ? "" : typedRow.EndDate.Value.ToString("yyyy-MM-dd"))}] should NOT be reported more frequently" +
+                            $" than the Reporting Frequency (days) of [{ typedRow.ActivityCodeValidation.ReportingFrequency}]" +
+                            $" for Activity [{ typedRow.ActivityNumber}]," +
+                            $" Highway Unique [{typedRow.HighwayUnique}]," +
+                            gpsMessage +
+                            $" Record conflicts with Record Number(s) [{String.Join("; ", conflicts.ToArray())}]");
+                    }
+                }
             }
-            else if (locationCode == "B" && await _workReportRepo.IsReportedWorkReportForLocationBAsync(typedRow))
-            {
-                warnings.AddItem("Reporting Frequency Validation: End Date"
-                                , $"(Location Code = 'B'): END DATE Should NOT be reported more frequently" +
-                                $" than the Reporting Frequency(days) of [{ typedRow.ActivityCodeValidation.ReportingFrequency}]" +
-                                $" for Activity[{ typedRow.ActivityNumber}]" +
-                                $" for Highway Unique [{typedRow.HighwayUnique}]");
-            }
-            else if (locationCode == "C"
-                    && typedRow .FeatureType.ToLower() == "point"
-                    && await _workReportRepo.IsReportedWorkReportForLocationCPointAsync(typedRow))
-            {
-                warnings.AddItem("Reporting Frequency Validation: End Date, GPS position"
-                                , $"(Location Code = 'C'; {typedRow.FeatureType}): END DATE Should NOT be reported more frequently" +
-                                $" than the Reporting Frequency(days) of [{ typedRow.ActivityCodeValidation.ReportingFrequency}]" +
-                                $" for Activity[{ typedRow.ActivityNumber}]," +
-                                $" Highway Unique [{typedRow.HighwayUnique}]," +
-                                $" GPS position [{typedRow.StartLatitude},{typedRow.StartLongitude}] with a tolerance of -/+ 100M");
-            }
-            else if (locationCode == "C"
-                    && typedRow.FeatureType.ToLower() == "line"
-                    && await _workReportRepo.IsReportedWorkReportForLocationCLineAsync(typedRow))
-            {
-                warnings.AddItem("Reporting Frequency Validation: End Date, GPS position"
-                                , $"(Location Code = 'C'; {typedRow.FeatureType}): END DATE Should NOT be reported more frequently" +
-                                $" than the Reporting Frequency(days) of [{ typedRow.ActivityCodeValidation.ReportingFrequency}]" +
-                                $" for Activity[{ typedRow.ActivityNumber}]," +
-                                $" Highway Unique [{typedRow.HighwayUnique}]," +
-                                $" GPS position from [{typedRow.StartLatitude},{typedRow.StartLongitude}]" +
-                                $" to [{typedRow.EndLatitude},{typedRow.EndLongitude}] with a tolerance of -/+ 100M");
-            }
+            
             if (warnings.Count > 0)
             {
                 SetWarningDetail(submissionRow, warnings);
             }
             return typedRow;
         }
+
+        private async Task<WorkReportGeometry> PerformSiteNumberValidationAsync(WorkReportGeometry row)
+        {
+            var typedRow = row.WorkReportTyped;
+            var submissionRow = _submissionRows[(decimal)typedRow.RowNum];
+            var warnings = new Dictionary<string, List<string>>();
+            
+            var threshold = _lookupService.GetThresholdLevel(typedRow.SpThresholdLevel);
+            decimal structureVariance = threshold.Warning;
+            var structureVarianceM = structureVariance / 1000;
+
+            var hasRestAreaWithinVariance = await WithinRestAreaVariance(typedRow, structureVarianceM);
+
+            if (!hasRestAreaWithinVariance)
+            {
+                if (typedRow.FeatureType == FeatureType.Line)
+                {
+                    
+                    warnings.AddItem("Site Validation", $"Site Number [{typedRow.SiteNumber}] is not found within " + 
+                        $"{structureVariance}M of the GPS position from [{typedRow.StartLatitude},{typedRow.StartLongitude}] " + 
+                        $"to [{typedRow.EndLatitude},{typedRow.EndLongitude}]");
+                }
+                else
+                {
+                    warnings.AddItem("Site Validation", $"Site Number [{typedRow.SiteNumber}] is not found within " + 
+                        $"{structureVariance}M of the GPS position [{typedRow.StartLatitude},{typedRow.StartLongitude}]");
+                }
+            }
+
+            if (warnings.Count > 0)
+            {
+                SetWarningDetail(submissionRow, warnings);
+            }
+
+            return row;
+        }
+
+        private async Task<WorkReportGeometry> PerformStructureValidationAsync(WorkReportGeometry row)
+        {
+            var typedRow = row.WorkReportTyped;
+            var submissionRow = _submissionRows[(decimal)typedRow.RowNum];
+            var warnings = new Dictionary<string, List<string>>();
+
+            var threshold = _lookupService.GetThresholdLevel(typedRow.SpThresholdLevel);
+            decimal structureVariance = threshold.Warning;
+            var structureVarianceM = structureVariance / 1000;
+
+            //structure checking
+            var hasStructureWithinVariance = await WithinStructureVariance(typedRow, structureVarianceM);
+            if (!hasStructureWithinVariance)
+            {
+                if (typedRow.FeatureType == FeatureType.Line)
+                {
+                    warnings.AddItem("Structure Validation", $"Structure Number [{typedRow.StructureNumber}] " + 
+                        $"is not found within {structureVariance}M of the GPS position from " +
+                        $"[{typedRow.StartLatitude},{typedRow.StartLongitude}] to [{typedRow.EndLatitude},{typedRow.EndLongitude}]");
+                } 
+                else
+                {
+                    warnings.AddItem("Structure Validation", $"Structure Number [{typedRow.StructureNumber}] " + 
+                        $"is not found within {structureVariance}M of the GPS position [{typedRow.StartLatitude},{typedRow.StartLongitude}]");
+                }
+            }
+
+            if (warnings.Count > 0)
+            {
+                SetWarningDetail(submissionRow, warnings);
+            }
+
+            return row;
+        }
+
+        private async Task<WorkReportGeometry> PerformRoadLengthValidationAsync(WorkReportGeometry row)
+        {
+            var warnings = new Dictionary<string, List<string>>();
+            var errors = new Dictionary<string, List<string>>();
+            var querySuccess = true;
+            var typedRow = row.WorkReportTyped;
+            var submissionRow = _submissionRows[(decimal)typedRow.RowNum];
+            typedRow.HighwayProfiles = new List<WorkReportHighwayProfile>();
+            typedRow.Guardrails = new List<WorkReportGuardrail>();
+
+            //surface type calls are different between Point & Line
+            if (typedRow.FeatureType == FeatureType.Point)
+            {
+                //get guardrails when activity rule calls for it
+                if (typedRow.ActivityCodeValidation.RoadLenghRuleExec == RoadLengthRules.GUARDRAIL_LEN_METERS)
+                {
+                    var grResult = await _spatialService.GetGuardrailAssociatedWithPointAsync(row.Geometry, row.WorkReportTyped.RecordNumber);
+                    if (grResult.result == SpValidationResult.Fail)
+                    {
+                        querySuccess = false;
+                        SetErrorDetail(submissionRow, errors, _statusService.FileLocationError);
+                    }
+                    else if (grResult.result == SpValidationResult.Success)
+                    {
+                        if (grResult.guardrail != null)
+                        {
+                            WorkReportGuardrail guardrail = new WorkReportGuardrail();
+                            guardrail.GuardrailType = grResult.guardrail.GuardrailType;
+                            guardrail.Length = grResult.guardrail.Length;
+
+                            typedRow.Guardrails.Add(guardrail);
+                        }
+
+                        querySuccess = (typedRow.Guardrails.Count() > 0);
+                    }
+                } 
+                else 
+                {
+                    //get highway profile
+                    var hpResult = await _spatialService.GetHighwayProfileAssocWithPointAsync(row.Geometry, row.WorkReportTyped.RecordNumber);
+                    if (hpResult.result == SpValidationResult.Fail)
+                    {
+                        querySuccess = false;
+                        SetErrorDetail(submissionRow, errors, _statusService.FileLocationError);
+                    }
+                    else if (hpResult.result == SpValidationResult.Success)
+                    {
+                        if (hpResult.highwayProfile != null)    //only add if type was returned
+                        {
+                            WorkReportHighwayProfile highwayProfile = new WorkReportHighwayProfile();
+                            highwayProfile.Length = hpResult.highwayProfile.Length;
+                            highwayProfile.NumberOfLanes = hpResult.highwayProfile.NumberOfLanes;
+
+                            typedRow.HighwayProfiles.Add(highwayProfile);
+                        }
+
+                        querySuccess = (typedRow.HighwayProfiles.Count() > 0);
+                    }
+                }
+
+                if (querySuccess)
+                {
+                    PerformRoadLengthValidation(typedRow);
+                } else
+                {
+                    warnings.AddItem("Road Length Validation", $"No Road Length Linear Feature Item(s) (HighwayProfile) " +
+                        $"found for Highway Unique [{typedRow.HighwayUnique}] at the GPS position");
+                }
+            }
+            else if (typedRow.FeatureType == FeatureType.Line)
+            {
+                //get guardrails when activity rule calls for it
+                if (typedRow.ActivityCodeValidation.RoadLenghRuleExec == RoadLengthRules.GUARDRAIL_LEN_METERS)
+                {
+                    var grResult = await _spatialService.GetGuardrailAssociatedWithLineAsync(row.Geometry, row.WorkReportTyped.RecordNumber);
+                    if (grResult.result == SpValidationResult.Fail)
+                    {
+                        querySuccess = false;
+                        SetErrorDetail(submissionRow, errors, _statusService.FileLocationError);
+                    }
+                    else if (grResult.result == SpValidationResult.Success)
+                    {
+                        foreach (var profile in grResult.guardrails)
+                        {
+                            WorkReportGuardrail guardrail = new WorkReportGuardrail();
+                            guardrail.GuardrailType = profile.GuardrailType;
+                            guardrail.Length = profile.Length;
+
+                            typedRow.Guardrails.Add(guardrail);
+                        }
+
+                        querySuccess = (typedRow.Guardrails.Count() > 0);
+                    }
+                }
+                else
+                {
+                    //get highway profile
+                    var hpResult = await _spatialService.GetHighwayProfileAssocWithLineAsync(row.Geometry, row.WorkReportTyped.RecordNumber);
+                    if (hpResult.result == SpValidationResult.Fail)
+                    {
+                        querySuccess = false;
+                        SetErrorDetail(submissionRow, errors, _statusService.FileLocationError);
+                    }
+                    else if (hpResult.result == SpValidationResult.Success)
+                    {
+                        foreach (var profile in hpResult.highwayProfiles)
+                        {
+                            WorkReportHighwayProfile highwayProfile = new WorkReportHighwayProfile();
+                            highwayProfile.Length = profile.Length;
+                            highwayProfile.NumberOfLanes = profile.NumberOfLanes;
+
+                            typedRow.HighwayProfiles.Add(highwayProfile);
+                        }
+
+                        querySuccess = (typedRow.HighwayProfiles.Count() > 0);
+                    }
+                }
+                
+                if (querySuccess)
+                {
+                    PerformRoadLengthValidation(typedRow);
+                } else
+                {
+                    warnings.AddItem("Road Length Validation", $"No Road Length Linear Feature Item(s) (HighwayProfile) " +
+                        $"found for Highway Unique [{typedRow.HighwayUnique}] at the GPS position");
+                }
+            }
+
+            if (warnings.Count > 0)
+            {
+                SetWarningDetail(submissionRow, warnings);
+            }
+
+            return row;
+        }
+
         private async Task<WorkReportGeometry> PerformMaintenanceClassValidationAsync(WorkReportGeometry row)
         {
             var errors = new Dictionary<string, List<string>>();
+            var warnings = new Dictionary<string, List<string>>();
+
             var typedRow = row.WorkReportTyped;
             var submissionRow = _submissionRows[(decimal)typedRow.RowNum];
             typedRow.MaintenanceClasses = new List<WorkReportMaintenanceClass>();
@@ -362,7 +609,7 @@ namespace Hmcr.Domain.Hangfire
             //surface type calls are different between Point & Line
             if (typedRow.FeatureType == FeatureType.Point)
             {
-                var result = await _spatialService.GetMaintenanceClassAssocWithPointAsync(row.Geometry);
+                var result = await _spatialService.GetMaintenanceClassAssocWithPointAsync(row.Geometry, row.WorkReportTyped.RecordNumber);
 
                 if (result.result == SpValidationResult.Fail)
                 {
@@ -379,13 +626,21 @@ namespace Hmcr.Domain.Hangfire
                         typedRow.MaintenanceClasses.Add(roadClass);
                     }
 
-                    PerformMaintenanceClassValidation(typedRow);
+                    //if we have no MC features we throw a warning on the row item
+                    if (typedRow.MaintenanceClasses.Count() > 0)
+                    {
+                        PerformMaintenanceClassValidation(typedRow);
+                    } else
+                    {
+                        warnings.AddItem("Road Class Validation", $"No Road Class Linear Feature Item(s) " +
+                            $"(Maintenance Class) Found for Highway Unique [{typedRow.HighwayUnique}] at the GPS position.");
+                    }
                 }
 
             }
             else if (typedRow.FeatureType == FeatureType.Line)
             {
-                var result = await _spatialService.GetMaintenanceClassAssocWithLineAsync(row.Geometry);
+                var result = await _spatialService.GetMaintenanceClassAssocWithLineAsync(row.Geometry, row.WorkReportTyped.RecordNumber);
                 if (result.result == SpValidationResult.Fail)
                 {
                     SetErrorDetail(submissionRow, errors, _statusService.FileLocationError);
@@ -401,8 +656,20 @@ namespace Hmcr.Domain.Hangfire
                         typedRow.MaintenanceClasses.Add(roadClass);
                     }
 
-                    PerformMaintenanceClassValidation(typedRow);
+                    if (typedRow.MaintenanceClasses.Count() > 0)
+                    {
+                        PerformMaintenanceClassValidation(typedRow);
+                    } else
+                    {
+                        warnings.AddItem("Road Class Validation", $"No Road Class Linear Feature Item(s) " +
+                            $"(Maintenance Class) Found for Highway Unique [{typedRow.HighwayUnique}] at the GPS position.");
+                    }
                 }
+            }
+
+            if (warnings.Count > 0)
+            {
+                SetWarningDetail(submissionRow, warnings);
             }
 
             return row;
@@ -410,6 +677,7 @@ namespace Hmcr.Domain.Hangfire
 
         private async Task<WorkReportGeometry> PerformSurfaceTypeValidationAsync(WorkReportGeometry row)
         {
+            var warnings = new Dictionary<string, List<string>>();
             var errors = new Dictionary<string, List<string>>();
             var typedRow = row.WorkReportTyped;
             var submissionRow = _submissionRows[(decimal)typedRow.RowNum];
@@ -418,7 +686,7 @@ namespace Hmcr.Domain.Hangfire
             //surface type calls are different between Point & Line
             if (typedRow.FeatureType == FeatureType.Point)
             {
-                var result = await _spatialService.GetSurfaceTypeAssocWithPointAsync(row.Geometry);
+                var result = await _spatialService.GetSurfaceTypeAssocWithPointAsync(row.Geometry, row.WorkReportTyped.RecordNumber);
 
                 if (result.result == SpValidationResult.Fail)
                 {
@@ -434,12 +702,19 @@ namespace Hmcr.Domain.Hangfire
                         typedRow.SurfaceTypes.Add(roadFeature);
                     }
 
-                    await PerformSurfaceTypeValidation(typedRow);
+                    if (typedRow.SurfaceTypes.Count() > 0)
+                    {
+                        await PerformSurfaceTypeValidation(typedRow);
+                    } else
+                    {
+                        warnings.AddItem("Surface Type Validation", $"No Surface Type Linear Feature Item(s) " +
+                            $"Found for Highway Unique[{typedRow.HighwayUnique}] at the GPS position.");
+                    }
                 }
             }
             else if (typedRow.FeatureType == FeatureType.Line)
             {
-                var result = await _spatialService.GetSurfaceTypeAssocWithLineAsync(row.Geometry);
+                var result = await _spatialService.GetSurfaceTypeAssocWithLineAsync(row.Geometry, row.WorkReportTyped.RecordNumber);
 
                 if (result.result == SpValidationResult.Fail)
                 {
@@ -457,8 +732,21 @@ namespace Hmcr.Domain.Hangfire
                         roadFeature.SurfaceType = type;
                         typedRow.SurfaceTypes.Add(roadFeature);
                     }
-                    await PerformSurfaceTypeValidation(typedRow);
+
+                    if (typedRow.SurfaceTypes.Count() > 0)
+                    {
+                        await PerformSurfaceTypeValidation(typedRow);
+                    } else
+                    {
+                        warnings.AddItem("Surface Type Validation", $"No Surface Type Linear Feature Item(s) " +
+                            $"Found for Highway Unique[{typedRow.HighwayUnique}] at the GPS position.");
+                    }
                 }
+            }
+
+            if (warnings.Count > 0)
+            {
+                SetWarningDetail(submissionRow, warnings);
             }
 
             return row;
@@ -498,17 +786,23 @@ namespace Hmcr.Domain.Hangfire
         {
             var submissionRow = _submissionRows[(decimal)typedRow.RowNum];
             var warnings = new Dictionary<string, List<string>>();
+            // accomplishment formatting in the ToString to strip trailing zeroes
+            string accomplishment = ((decimal)typedRow.Accomplishment).ToString("0.#####");
+            
+            //always perform data precision validation
+            if ((new[] { "site", "num", "ea" }).Contains(typedRow.UnitOfMeasure.ToLowerInvariant()) && !accomplishment.IsInteger())
+            {
+                warnings.AddItem("Data Precision Validation: Accomplishment",
+                    $"Accomplishment value of [{accomplishment}] should be a whole number for Unit of Measure [{typedRow.UnitOfMeasure}]" +
+                    $" for Activity Code [{typedRow.ActivityNumber}]");
+            }
+
+            //validate min/max value
             if (typedRow.ActivityCodeValidation.MinValue != null && typedRow.ActivityCodeValidation.MaxValue != null)
             {
-                string accomplishment = typedRow.Accomplishment.ToString();
                 string minValue = typedRow.ActivityCodeValidation.MinValue.ConvertDecimalToStringAndRemoveTrailing(); //remove trailing 0
                 string maxValue = typedRow.ActivityCodeValidation.MaxValue.ConvertDecimalToStringAndRemoveTrailing();
-                if ((new[] { "site", "num", "ea" }).Contains(typedRow.UnitOfMeasure.ToLowerInvariant()) && !accomplishment.IsInteger())
-                {
-                    warnings.AddItem("Data Precision Validation: Accomplishment", 
-                        $"Accomplishment value of [{accomplishment}] should be a whole number for Unit of Measure [{typedRow.UnitOfMeasure}]" +
-                        $" for Activity Code [{typedRow.ActivityNumber}]");
-                }
+                
                 if (accomplishment.ConvertStrToDecimal() < typedRow.ActivityCodeValidation.MinValue.ConvertNullableDecimal())
                 {
                     warnings.AddItem("Minimum / Maximum Value Validation: Accomplishment", 
@@ -522,10 +816,196 @@ namespace Hmcr.Domain.Hangfire
                         $" should be <= the Maximum Value [{maxValue}] allowed for the Activity [{typedRow.ActivityNumber}]");
                 }
             }
+
             if (warnings.Count > 0)
             {
                 SetWarningDetail(submissionRow, warnings);
             }
+        }
+
+        private void PerformRoadLengthValidation(WorkReportTyped typedRow)
+        {
+            var warnings = new Dictionary<string, List<string>>();
+            var submissionRow = _submissionRows[(decimal)typedRow.RowNum];
+            var totalRoadKM = 0.0;
+            var totalLaneKM = 0.0;
+            var accomplishment = (double)typedRow.Accomplishment;   //cast accomplishment as a double
+
+            if (typedRow.FeatureType == FeatureType.Line)
+            {
+                if (typedRow.ActivityCodeValidation.RoadLenghRuleExec == RoadLengthRules.GUARDRAIL_LEN_METERS)
+                {
+                    if (typedRow.Guardrails.Count > 0)
+                    {
+                        foreach (var guardrail in typedRow.Guardrails.Where(x => x.CrossSectionPosition != "M"))
+                        {
+                            totalRoadKM += guardrail.Length;
+                        }
+
+                        totalRoadKM += ((totalRoadKM * .10) > 0.2) ? 0.2 : (totalRoadKM * .10);
+                    }
+                }
+                else
+                {
+                    foreach (var profile in typedRow.HighwayProfiles)
+                    {
+                        totalRoadKM += profile.Length;
+                        totalLaneKM += profile.Length * profile.NumberOfLanes;
+                    }
+
+                    //if the total road km is less than 40m we need to perform some slightly different logic
+                    // grab the max number of lanes of highway profiles 
+                    if (totalRoadKM < 0.04)
+                    {
+                        var maxNumberOfLanes = (typedRow.HighwayProfiles.Count > 0) 
+                            ? typedRow.HighwayProfiles.Aggregate((i1, i2) => i1.NumberOfLanes > i2.NumberOfLanes ? i1 : i2).NumberOfLanes 
+                            : 1;
+                        
+                        totalRoadKM = 0.04;
+                        totalLaneKM = (maxNumberOfLanes <= 2) ? 0.08 : (totalRoadKM * maxNumberOfLanes);
+                    }
+                    else
+                    {
+                        //Add a tolerance of 10% to a maximum of 0.2KM (which is 0.1KM each side) to the Total RoadKM
+                        totalRoadKM += ((totalRoadKM * .10) > 0.2) ? 0.2 : (totalRoadKM * .10);
+                        //Add a tolerance of 10% to a maximum of 0.5km to the total LaneKM
+                        totalLaneKM += ((totalLaneKM * .10) > 0.5) ? 0.5 : (totalLaneKM * .10);
+                    }
+                }
+            }
+            else if (typedRow.FeatureType == FeatureType.Point)
+            {
+                if (typedRow.ActivityCodeValidation.RoadLenghRuleExec == RoadLengthRules.GUARDRAIL_LEN_METERS)
+                {
+                    if (typedRow.Guardrails.Count > 0)
+                    {
+                        foreach (var guardrail in typedRow.Guardrails.Where(x => x.CrossSectionPosition != "M"))
+                        {
+                            //add the tolerance for each guardrail record
+                            totalRoadKM += guardrail.Length += 0.04;
+                        }
+                    }
+                }
+                else
+                {
+                    var numberOfLanes = typedRow.HighwayProfiles.First().NumberOfLanes;
+                    totalRoadKM = 0.04;
+                    totalLaneKM = totalRoadKM * numberOfLanes;
+                }
+            }
+
+            var accomplishmentWarning = "";
+            if (typedRow.ActivityCodeValidation.RoadLenghRuleExec == RoadLengthRules.GUARDRAIL_LEN_METERS)
+            {
+                if (accomplishment > (totalRoadKM * 1000))
+                {
+                    accomplishmentWarning = $"Accomplishment value of [{accomplishment}] should be <= [{totalRoadKM * 1000}] Guardrail Length M";
+                }
+            } else
+            {
+                accomplishmentWarning = ValidateRoadLengthAccomplishment(typedRow.ActivityCodeValidation.RoadLenghRuleExec
+                    , accomplishment, totalLaneKM, totalRoadKM);
+            }
+            
+            if (accomplishmentWarning != "")
+            {
+                warnings.AddItem("Road Length Validation", accomplishmentWarning);
+            }
+
+            if (warnings.Count > 0)
+            {
+                SetWarningDetail(submissionRow, warnings);
+            }
+        }
+    
+        private string ValidateRoadLengthAccomplishment(string ruleExec, double accomplishment, double totalLaneKM, double totalRoadKM)
+        {
+            var message = "";
+
+            //perform the validation based on the rule
+            switch (ruleExec)
+            {
+                case RoadLengthRules.RATE_LANE_KM_TONNES1:
+                    if (accomplishment > (0.120 * (totalLaneKM * 1000) * 3.5))
+                    {
+                        message = $"Accomplishment value of [{accomplishment}] should be <= [0.120] * [{totalLaneKM}] Lane KM * 1000] * [3.5]";
+                    }
+                    break;
+                case RoadLengthRules.RATE_LANE_KM_TONNES2:
+                    if (accomplishment > (0.146 * (totalLaneKM * 1000) * 3.5))
+                    {
+                        message = $"Accomplishment value of [{accomplishment}] should be <= [0.146] * [{totalLaneKM}] Lane KM * 1000] * [3.5]";
+                    }
+                    break;
+                case RoadLengthRules.RATE_LANE_KM_LITRES1:
+                    if (accomplishment > (1.1 * (totalLaneKM * 1000) * 3.5))
+                    {
+                        message = $"Accomplishment value of [{accomplishment}] should be <= [1.1] * [{totalLaneKM}] Lane KM * 1000] * [3.5]";
+                    }
+                    break;
+                case RoadLengthRules.RATE_LANE_KM_35:
+                    if (accomplishment > (2.0 * (totalRoadKM * 1000) * 3.5))
+                    {
+                        message = $"Accomplishment value of [{accomplishment}] should be <= [2.0] * [{totalRoadKM}] Road KM * 1000.0] * [3.5]";
+                    }
+                    break;
+                case RoadLengthRules.RATE_LANE_KM_60:
+                    if (accomplishment > (3.0 * (totalRoadKM * 1000) * 6.0))
+                    {
+                        message = $"Accomplishment value of [{accomplishment}] should be <= [3.0 * [{totalRoadKM}] Road KM * 1000.0] * [6.0]";
+                    }
+                    break;
+                case RoadLengthRules.LANE_METERS_35:
+                    if (accomplishment > ((totalLaneKM * 1000) * 3.5))
+                    {
+                        message = $"Accomplishment value of [{accomplishment}] should be <=  [{totalLaneKM}] Lane KM * 1000.0] * [3.5]";
+                    }
+                    break;
+                case RoadLengthRules.LANE_KM:
+                    if (accomplishment > totalLaneKM)
+                    {
+                        message = $"Accomplishment value of [{accomplishment}] should be <= [{totalLaneKM}] Lane KM]";
+                    }
+                    break;
+                case RoadLengthRules.LANE_KM_20:
+                    if (accomplishment > (totalLaneKM * 2.0))
+                    {
+                        message = $"Accomplishment value of [{accomplishment}] should be <= [{totalLaneKM}] Lane KM] * 2.0";
+                    }
+                    break;
+                case RoadLengthRules.LANE_METERS:
+                    if (accomplishment > (totalLaneKM * 1000))
+                    {
+                        message = $"Accomplishment value of [{accomplishment}] should be <=  [{totalLaneKM}] Lane KM * 1000.0]";
+                    }
+                    break;
+                case RoadLengthRules.ROAD_KM:
+                    if (accomplishment > totalRoadKM)
+                    {
+                        message = $"Accomplishment value of [{accomplishment}] should be <= [{totalRoadKM}] Road KM]";
+                    }
+                    break;
+                case RoadLengthRules.ROAD_KM_20:
+                    if (accomplishment > (totalRoadKM * 2.0))
+                    {
+                        message = $"Accomplishment value of [{accomplishment}] should be <= [{totalRoadKM}] Road KM] * 2.0";
+                    }
+                    break;
+                case RoadLengthRules.ROAD_METERS:
+                    if (accomplishment > (totalRoadKM * 1000))
+                    {
+                        message = $"Accomplishment value of [{accomplishment}] should be <= [{totalRoadKM}] Road KM * 1000.0]";
+                    }
+                    break;
+                case RoadLengthRules.ROAD_METERS_20:
+                    if (accomplishment > (totalRoadKM * 1000) * 2.0)
+                    {
+                        message = $"Accomplishment value of [{accomplishment}] should be <= [{totalRoadKM}] Road KM * 1000.0] * 2.0";
+                    }
+                    break;
+            }
+
+            return message;
         }
 
         private void PerformMaintenanceClassValidation(WorkReportTyped typedRow)
@@ -544,8 +1024,6 @@ namespace Hmcr.Domain.Hangfire
             var summerUnmaintainedLen = typedRow.MaintenanceClasses.Where(x => x.SummerRating == "8").Sum(x => x.RoadLength);
             var summerTotal = summerMaintainedLen + summerUnmaintainedLen;
 
-            //TODO: the percentages need to be configurable using CODE LOOKUP
-            
             if (typedRow.FeatureType == FeatureType.Line)
             {
                 var proportionPercMaintenance = _validator.CodeLookup.Where(x => x.CodeSet == CodeSet.ValidatorProportion)
@@ -556,11 +1034,12 @@ namespace Hmcr.Domain.Hangfire
                     //determine proportion of not maintained to total, summer & winter
                     //if proportion of not maintained < 90% throw warning
                     if (((summerUnmaintainedLen / summerTotal) < (double)(proportionPercMaintenance / 100)) 
-                        || ((winterUnmaintainedLen / winterTotal) < (double)(proportionPercMaintenance / 100)))
+                        && ((winterUnmaintainedLen / winterTotal) < (double)(proportionPercMaintenance / 100)))
                     {
                         warnings.AddItem("Road Class Validation"
-                        , $"GPS position from [{typedRow.StartLatitude},{typedRow.StartLongitude}] " +
-                        $"to [{typedRow.EndLatitude},{typedRow.EndLongitude}] should be >= {proportionPercMaintenance}% Maintenance Class 8 or F");
+                            , $"GPS position from [{typedRow.StartLatitude},{typedRow.StartLongitude}]" +
+                            $"to [{typedRow.EndLatitude},{typedRow.EndLongitude}] for Highway Unique [{typedRow.HighwayUnique}] " + 
+                            $"should be >= {proportionPercMaintenance}% Maintenance Class 8 or F");
                     }
                 }
                 else if (typedRow.ActivityCodeValidation.RoadClassRuleExec == MaintenanceClassRules.NotClass8OrF)
@@ -568,11 +1047,12 @@ namespace Hmcr.Domain.Hangfire
                     //determine proportion of maintained to total, summer & winter
                     //if proportion of maintained < 90% throw warning
                     if (((summerMaintainedLen / summerTotal) < (double)(proportionPercMaintenance / 100)) 
-                        || ((winterMaintainedLen / winterTotal) < (double)(proportionPercMaintenance / 100)))
+                        && ((winterMaintainedLen / winterTotal) < (double)(proportionPercMaintenance / 100)))
                     {
                         warnings.AddItem("Road Class Validation"
-                        , $"GPS position from [{typedRow.StartLatitude},{typedRow.StartLongitude}] " +
-                        $"to [{typedRow.EndLatitude},{typedRow.EndLongitude}] should NOT be >= {proportionPercMaintenance}% Maintenance Class 8 or F");
+                            , $"GPS position from [{typedRow.StartLatitude},{typedRow.StartLongitude}] " +
+                            $"to [{typedRow.EndLatitude},{typedRow.EndLongitude}] for Highway Unique [{typedRow.HighwayUnique}] " + 
+                            $"should NOT be >= {proportionPercMaintenance}% Maintenance Class 8 or F");
                     }
                 }
             }
@@ -581,18 +1061,20 @@ namespace Hmcr.Domain.Hangfire
                 
                 if (typedRow.ActivityCodeValidation.RoadClassRuleExec == MaintenanceClassRules.Class8OrF)
                 {
-                    if (typedRow.MaintenanceClasses.First().WinterRating != "8" || typedRow.MaintenanceClasses.First().SummerRating != "F")
+                    if (typedRow.MaintenanceClasses.First().WinterRating != "F" && typedRow.MaintenanceClasses.First().SummerRating != "8")
                     {
                         warnings.AddItem("Road Class Validation"
-                            , $"GPS position [{typedRow.StartLatitude},{typedRow.StartLongitude}] should be Maintenance Class 8 or F");
+                            , $"GPS position [{typedRow.StartLatitude},{typedRow.StartLongitude}] for Highway Unique [{typedRow.HighwayUnique}] " + 
+                            $"should be Maintenance Class 8 or F");
                     }
                 }
                 else if (typedRow.ActivityCodeValidation.RoadClassRuleExec == MaintenanceClassRules.NotClass8OrF)
                 {
-                    if (typedRow.MaintenanceClasses.First().WinterRating == "8" || typedRow.MaintenanceClasses.First().SummerRating == "F")
+                    if (typedRow.MaintenanceClasses.First().WinterRating == "F" && typedRow.MaintenanceClasses.First().SummerRating == "8")
                     {
                         warnings.AddItem("Road Class Validation"
-                            , $"GPS position [{typedRow.StartLatitude},{typedRow.StartLongitude}] should NOT be Maintenance Class 8 or F");
+                            , $"GPS position [{typedRow.StartLatitude},{typedRow.StartLongitude}]  for Highway Unique [{typedRow.HighwayUnique}] " + 
+                            $"should NOT be Maintenance Class 8 or F");
                     }
                 }
             }
@@ -602,7 +1084,7 @@ namespace Hmcr.Domain.Hangfire
                 SetWarningDetail(submissionRow, warnings);
             }
         }
-
+        
         private async Task PerformSurfaceTypeValidation(WorkReportTyped typedRow)
         {
             var warnings = new Dictionary<string, List<string>>();
@@ -656,7 +1138,9 @@ namespace Hmcr.Domain.Hangfire
                                 var hasBridgeWithinVariance = await WithinBridgeStructureVariance(typedRow, (decimal)structureVarianceM);
                                 if (!hasBridgeWithinVariance)
                                 {
-                                    warnings.AddItem("Surface Type Validation", $"GPS position from [{typedRow.StartLatitude},{typedRow.StartLongitude}] to [{typedRow.EndLatitude},{typedRow.EndLongitude}] should be >= 80% paved surface or or be within {structureVariance}M of a Structure");
+                                    warnings.AddItem("Surface Type Validation", $"GPS position from [{typedRow.StartLatitude},{typedRow.StartLongitude}] " +
+                                        $"to [{typedRow.EndLatitude},{typedRow.EndLongitude}] should be >= 80% paved surface or be within " + 
+                                        $"{structureVariance}M of a Structure");
                                 }
                             }
                             else if (surfaceTypeRule == SurfaceTypeRules.PavedSurface)
@@ -718,13 +1202,14 @@ namespace Hmcr.Domain.Hangfire
                                 var hasBridgeWithinVariance = await WithinBridgeStructureVariance(typedRow, (decimal)structureVarianceM);
                                 if (!hasBridgeWithinVariance)
                                 {
-                                    warnings.AddItem("Surface Type Validation", $"GPS position [{typedRow.StartLatitude},{typedRow.StartLongitude}] should be paved or be within 100M of a Structure");
+                                    warnings.AddItem("Surface Type Validation", $"GPS position [{typedRow.StartLatitude},{typedRow.StartLongitude}] " +
+                                        $"should be paved or be within {structureVariance}M of a Structure");
                                 }
                             }
                             else
                             {
                                 warnings.AddItem("Surface Type Validation"
-                                    , $"GPS position [{typedRow.StartLatitude},{typedRow.StartLongitude}] should be paved");
+                                    , $"GPS position [{typedRow.StartLatitude},{typedRow.StartLongitude}] should be Paved");
                             }
                         }
 
@@ -733,7 +1218,7 @@ namespace Hmcr.Domain.Hangfire
                         if (!isUnpaved)
                         {
                             warnings.AddItem("Surface Type Validation"
-                                , $"GPS position [{typedRow.StartLatitude},{typedRow.StartLongitude}] should be non-paved");
+                                , $"GPS position [{typedRow.StartLatitude},{typedRow.StartLongitude}] should be Non-paved");
                         }
 
                         break;
@@ -753,30 +1238,111 @@ namespace Hmcr.Domain.Hangfire
                 SetWarningDetail(submissionRow, warnings);
             }
         }
-
+        
         private async Task<bool> WithinBridgeStructureVariance(WorkReportTyped typedRow, decimal structureVariance)
         {
+            //this function will return false by default if no structure features are returned
             var isBridgeWithinVariance = false;
+            var startOffset = 0.0M;
+            var endOffset = 0.0M;
 
-            var startOffset = typedRow.StartOffset - structureVariance;
-            var endOffset = ((typedRow.EndOffset == null) ? typedRow.StartOffset : typedRow.EndOffset) + structureVariance;
-
-            var result = await _spatialService.GetBridgeStructureOnRFISegment(typedRow.HighwayUnique);
-
-            var bridgeStructures = result.structures.Where(x => x.StructureType == StructureType.BRIDGE).ToList();
-            foreach (var bridge in bridgeStructures)
+            if (typedRow.StartOffset > typedRow.EndOffset)
             {
-                //we need to check if the start of the bridge is between the offset
-                // or if the end of the bridge is between the offset
-                if (((bridge.BeginKM >= startOffset) && (bridge.BeginKM <= endOffset))
-                    || ((bridge.EndKM >= startOffset) && (bridge.EndKM <= endOffset)))
+                startOffset = (decimal)typedRow.StartOffset + structureVariance;
+                endOffset = (decimal)((typedRow.EndOffset == null) ? typedRow.StartOffset : typedRow.EndOffset) - structureVariance;
+            } else
+            {
+                startOffset = (decimal)typedRow.StartOffset - structureVariance;
+                endOffset = (decimal)((typedRow.EndOffset == null) ? typedRow.StartOffset : typedRow.EndOffset) + structureVariance;
+            }
+            
+            var result = await _spatialService.GetStructuresOnRFISegmentAsync(typedRow.HighwayUnique, typedRow.RecordNumber);
+
+            if (result.structures.Count() > 0)
+            {
+                var bridgeStructures = result.structures.Where(x => x.StructureType == StructureType.BRIDGE).ToList();
+                foreach (var bridge in bridgeStructures)
                 {
-                    isBridgeWithinVariance = true;  // if we find one we can stop searching
-                    break;
+                    //we need to check if the start of the bridge is between the offset
+                    // or if the end of the bridge is between the offset
+                    if (((bridge.BeginKM >= startOffset) && (bridge.BeginKM <= endOffset))
+                        || ((bridge.EndKM >= startOffset) && (bridge.EndKM <= endOffset)))
+                    {
+                        isBridgeWithinVariance = true;  // if we find one we can stop searching
+                        break;
+                    }
                 }
             }
 
             return isBridgeWithinVariance;
+        }
+
+        private async Task<bool> WithinRestAreaVariance(WorkReportTyped typedRow, decimal structureVariance)
+        {
+            //this function will return false by default if no rest areas are returned
+            var isWithinVariance = false;
+            var startOffset = 0.0M;
+            var endOffset = 0.0M;
+            string siteNumber = typedRow.SiteNumber;
+
+            if (typedRow.StartOffset > typedRow.EndOffset)
+            {
+                startOffset = (decimal)typedRow.StartOffset + structureVariance;
+                endOffset = (decimal)((typedRow.EndOffset == null) ? typedRow.StartOffset : typedRow.EndOffset) - structureVariance;
+            }
+            else
+            {
+                startOffset = (decimal)typedRow.StartOffset - structureVariance;
+                endOffset = (decimal)((typedRow.EndOffset == null) ? typedRow.StartOffset : typedRow.EndOffset) + structureVariance;
+            }
+
+            var result = await _spatialService.GetRestAreasOnRFISegmentAsync(typedRow.HighwayUnique, typedRow.RecordNumber);
+
+            if (result.restAreas.Count() > 0)
+            {
+                var restAreas = result.restAreas.Where(x => x.SiteNumber == siteNumber).ToList();
+                foreach (var restArea in restAreas)
+                {
+                    //we need to check if the start of the structure is between the offset
+                    // or if the end of the structure is between the offset
+                    if ((restArea.LocationKM >= startOffset) && (restArea.LocationKM <= endOffset))
+                    {
+                        isWithinVariance = true;  // if we find one we can stop searching
+                        break;
+                    }
+                }
+            }
+
+            return isWithinVariance;
+        }
+
+        private async Task<bool> WithinStructureVariance(WorkReportTyped typedRow, decimal structureVariance)
+        {
+            //this function will return false by default if no structures are returned
+            var isWithinVariance = false;
+            var startOffset = typedRow.StartOffset - structureVariance;
+            var endOffset = ((typedRow.EndOffset == null) ? typedRow.StartOffset : typedRow.EndOffset) + structureVariance;
+            string structureNumber = typedRow.StructureNumber.TrimStart('0');
+
+            var result = await _spatialService.GetStructuresOnRFISegmentAsync(typedRow.HighwayUnique, typedRow.RecordNumber);
+
+            if (result.structures.Count() > 0)
+            {
+                var structures = result.structures.Where(x => x.StructureNumber == structureNumber).ToList();
+                foreach (var structure in structures)
+                {
+                    //we need to check if the start of the structure is between the offset
+                    // or if the end of the structure is between the offset
+                    if (((structure.BeginKM >= startOffset) && (structure.BeginKM <= endOffset))
+                        || ((structure.EndKM >= startOffset) && (structure.EndKM <= endOffset)))
+                    {
+                        isWithinVariance = true;  // if we find one we can stop searching
+                        break;
+                    }
+                }
+            }
+
+            return isWithinVariance;
         }
 
         private void PerformFieldValidation(Dictionary<string, List<string>> errors, WorkReportCsvDto untypedRow, ActivityCodeDto activityCode)
@@ -832,7 +1398,7 @@ namespace Hmcr.Domain.Hangfire
                 
                 if (errors.Count > 0)
                 {
-                    SetErrorDetail(submissionRow, errors, _statusService.FileLocationError);
+                    SetErrorDetail(submissionRow, errors, _statusService.FileServiceAreaError);
                 }
             }
             
@@ -886,6 +1452,7 @@ namespace Hmcr.Domain.Hangfire
                 {
                     errors.AddItem($"{Fields.EndLongitude}/{Fields.EndLatitude}", "Invalid range of GPS coordinates.");
                 }
+
                 PerformAnalyticalFieldValidation(typedRow);
                 if (errors.Count > 0)
                 {
@@ -898,17 +1465,22 @@ namespace Hmcr.Domain.Hangfire
         {
             var errors = new Dictionary<string, List<string>>();
             var typedRow = workReport.WorkReportTyped;
-
+            var warnings = new Dictionary<string, List<string>>();
             var start = new Chris.Models.Point((decimal)typedRow.StartLongitude, (decimal)typedRow.StartLatitude);
 
             //remeber that feature type line/point has been replaced either line or point in PerformGpsEitherLineOrPointValidation().
             if (typedRow.FeatureType == FeatureType.Point)
             {
                 var result = await _spatialService.ValidateGpsPointAsync(start, typedRow.HighwayUnique, Fields.HighwayUnique, typedRow.SpThresholdLevel, errors);
-
                 if (result.result == SpValidationResult.Fail)
                 {
                     SetErrorDetail(submissionRow, errors, _statusService.FileLocationError);
+                }
+                else if (result.result == SpValidationResult.NonSpatial && typedRow.ActivityCodeValidation.LocationCode != "A")
+                {
+                    if (typedRow.ActivityCodeValidation.LocationCode == "C") workReport.IsNonSpatial = true;
+                    warnings.AddItem("Road Length Validation", 
+                        $"Warning: The Highway Unique [{typedRow.HighwayUnique}] is not spatially enabled or has a known spatial exception");
                 }
                 else if (result.result == SpValidationResult.Success)
                 {
@@ -924,10 +1496,15 @@ namespace Hmcr.Domain.Hangfire
             {
                 var end = new Chris.Models.Point((decimal)typedRow.EndLongitude, (decimal)typedRow.EndLatitude);
                 var result = await _spatialService.ValidateGpsLineAsync(start, end, typedRow.HighwayUnique, Fields.HighwayUnique, typedRow.SpThresholdLevel, errors);
-
                 if (result.result == SpValidationResult.Fail)
                 {
                     SetErrorDetail(submissionRow, errors, _statusService.FileLocationError);
+                }
+                else if (result.result == SpValidationResult.NonSpatial && typedRow.ActivityCodeValidation.LocationCode != "A")
+                {
+                    if (typedRow.ActivityCodeValidation.LocationCode == "C") workReport.IsNonSpatial = true;
+                    warnings.AddItem("Road Length Validation",
+                        $"Warning: The Highway Unique [{typedRow.HighwayUnique}] is not spatially enabled or has a known spatial exception");
                 }
                 else if (result.result == SpValidationResult.Success)
                 {
@@ -941,6 +1518,7 @@ namespace Hmcr.Domain.Hangfire
                     submissionRow.EndVariance = result.endPointResult.Variance;
 
                     typedRow.WorkLength = typedRow.EndOffset - typedRow.StartOffset;
+                    typedRow.WorkLength = (typedRow.WorkLength < 0) ? typedRow.WorkLength * -1 : typedRow.WorkLength;
 
                     if (result.lines.Count == 1)
                     {
@@ -953,6 +1531,7 @@ namespace Hmcr.Domain.Hangfire
                             _logger.LogInformation($"[Hangfire] Row [{typedRow.RowNum}] [Original: Start[{typedRow.StartLongitude}/{typedRow.StartLatitude}]"
                                 + $" End[{typedRow.EndLongitude}/{typedRow.EndLatitude}] were converted to a point [{result.lines[0].Points[0].Longitude}/{result.lines[0].Points[0].Latitude}]");
 
+                            workReport.WorkReportTyped.FeatureType = FeatureType.Point;
                             workReport.Geometry = _geometryFactory.CreatePoint(result.lines[0].ToTopologyCoordinates()[0]);
                         }
                     }
@@ -968,13 +1547,18 @@ namespace Hmcr.Domain.Hangfire
                     }
                 }
             }
+            
+            if (warnings.Count > 0)
+            {
+                SetWarningDetail(submissionRow, warnings);
+            }
         }
 
         private async Task PerformSpatialLrsValidation(WorkReportGeometry workReport, HmrSubmissionRow submissionRow)
         {
             var errors = new Dictionary<string, List<string>>();
             var typedRow = workReport.WorkReportTyped;
-
+            var warnings = new Dictionary<string, List<string>>();
             //remeber that feature type line/point has been replaced either line or point in PerformGpsEitherLineOrPointValidation().
             if (typedRow.FeatureType == FeatureType.Point)
             {
@@ -983,6 +1567,12 @@ namespace Hmcr.Domain.Hangfire
                 if (result.result == SpValidationResult.Fail)
                 {
                     SetErrorDetail(submissionRow, errors, _statusService.FileLocationError);
+                }
+                else if (result.result == SpValidationResult.NonSpatial && typedRow.ActivityCodeValidation.LocationCode != "A")
+                {
+                    if (typedRow.ActivityCodeValidation.LocationCode == "C") workReport.IsNonSpatial = true;
+                    warnings.AddItem("Road Length Validation",
+                        $"Warning: The Highway Unique [{typedRow.HighwayUnique}] is not spatially enabled or has a known spatial exception");
                 }
                 else if (result.result == SpValidationResult.Success)
                 {
@@ -1004,6 +1594,12 @@ namespace Hmcr.Domain.Hangfire
                 {
                     SetErrorDetail(submissionRow, errors, _statusService.FileLocationError);
                 }
+                else if (result.result == SpValidationResult.NonSpatial && typedRow.ActivityCodeValidation.LocationCode != "A")
+                {
+                    if (typedRow.ActivityCodeValidation.LocationCode == "C") workReport.IsNonSpatial = true;
+                    warnings.AddItem("Road Length Validation",
+                        $"Warning: The Highway Unique [{typedRow.HighwayUnique}] is not spatially enabled or has a known spatial exception");
+                }
                 else if (result.result == SpValidationResult.Success)
                 {
                     typedRow.HighwayUniqueLength = result.rfiSegment.Length;
@@ -1018,6 +1614,7 @@ namespace Hmcr.Domain.Hangfire
                     submissionRow.EndVariance = typedRow.EndOffset - result.snappedEndOffset;
 
                     typedRow.WorkLength = result.snappedEndOffset - result.snappedStartOffset;
+                    typedRow.WorkLength = (typedRow.WorkLength < 0) ? typedRow.WorkLength * -1 : typedRow.WorkLength;
 
                     if (result.lines.Count == 1)
                     {
@@ -1044,6 +1641,10 @@ namespace Hmcr.Domain.Hangfire
                         workReport.Geometry = _geometryFactory.CreateMultiLineString(lineStrings.ToArray());
                     }
                 }
+            }
+            if (warnings.Count > 0)
+            {
+                SetWarningDetail(submissionRow, warnings);
             }
         }
 
@@ -1171,7 +1772,6 @@ namespace Hmcr.Domain.Hangfire
         #endregion
 
         #region Utility Functions
-
         private void CopyCalculatedFieldsFormUntypedRow(List<WorkReportTyped> typedRows, List<WorkReportCsvDto> untypedRows)
         {
             MethodLogger.LogEntry(_logger, _enableMethodLog, _methodLogHeader);
@@ -1216,6 +1816,8 @@ namespace Hmcr.Domain.Hangfire
             untypedRow.ActivityCodeValidation.ReportingFrequency = activityCode.ReportingFrequency;
             
             untypedRow.ActivityCodeValidation.ServiceAreaNumbers = activityCode.ServiceAreaNumbers;
+
+            untypedRow.ActivityCodeValidation.IsSiteNumRequired = activityCode.IsSiteNumRequired;
         }
 
         private string GetValidationEntityName(WorkReportCsvDto untypedRow, ActivityCodeDto activityCode)
@@ -1304,6 +1906,7 @@ namespace Hmcr.Domain.Hangfire
                 try
                 {
                     var row = csv.GetRecord<WorkReportTyped>();
+                    row.HighwayUnique = row.HighwayUnique.ToTrimAndUppercase();
                     rows.Add(row);
                     rowNum = (decimal)row.RowNum;
                     row.ServiceArea = _serviceArea.ConvertToServiceAreaNumber(row.ServiceArea);

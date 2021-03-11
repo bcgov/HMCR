@@ -36,5 +36,6 @@ namespace Hmcr.Data.Database.Entities
         public string ValidationStatus { get; set; }
         public DateTime? AppCreateTimestampUtc { get; set; }
         public DateTime? AppLastUpdateTimestampUtc { get; set; }
+        public DateTime? SubmissionDate { get; set; }
     }
 }

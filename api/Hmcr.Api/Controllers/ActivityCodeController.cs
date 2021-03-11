@@ -10,6 +10,8 @@ using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using System.Text;
+using System.Linq;
 
 namespace Hmcr.Api.Controllers
 {
@@ -32,7 +34,29 @@ namespace Hmcr.Api.Controllers
             int pageSize, int pageNumber, string orderBy = "activitynumber", string direction = "desc")
         {
             return Ok(await _activityCodeSvc.GetActivityCodesAsync(maintenanceTypes.ToStringArray(), locationCodes.ToDecimalArray(), isActive, searchText, pageSize, pageNumber, orderBy, direction));
-        }        
+        }
+
+        [HttpGet("exportactivities", Name = "ExportActivities")]
+        [RequiresPermission(Permissions.UserWrite)]
+        public async Task<IActionResult> GetActvitityCodesByFilterAsync(
+            string? maintenanceTypes, string? locationCodes, bool? isActive, string? searchText, string fileName)
+        {
+            fileName = fileName.IsEmpty() ? "export_activities.csv" : fileName;
+            
+            var exportedActivities = await _activityCodeSvc.GetActivityCodesByFilterAsync(maintenanceTypes.ToStringArray(), locationCodes.ToDecimalArray(), isActive, searchText);
+            
+            if (exportedActivities == null || exportedActivities.Count() == 0)
+            {
+                return NotFound();
+            }
+            
+            var csvReport = string.Join(Environment.NewLine, exportedActivities.Select(x => x.ToCsv()));
+            csvReport = $"{CsvUtils.GetCsvHeader<ActivityCodeSearchExportDto>()}{Environment.NewLine}{csvReport}";
+
+            var encoding = new UTF8Encoding();
+            var bytes = encoding.GetBytes(csvReport);
+            return File(bytes, "text/csv;charset=UTF-8", fileName);
+        }
 
         [HttpGet("{id}", Name = "GetActivityCode")]
         [RequiresPermission(Permissions.CodeRead)]

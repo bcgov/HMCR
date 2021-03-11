@@ -195,7 +195,10 @@ namespace Hmcr.Model.Utils
 
             return lowerCaseItems;
         }
-
+        public static string ToTrimAndUppercase(this string value)
+        {
+            return (value == null)?null:value.Trim().ToUpperInvariant();
+        }
         public static string RemoveQuestionMark(this string query)
         {
             return query.StartsWith("?") ? query.Substring(1) : query;

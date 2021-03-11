@@ -20,6 +20,7 @@
         public string DIVIDED_HIGHWAY_FLAG { get; set; }
         // used only by guardrail queries
         public string GUARDRAIL_TYPE { get; set; }
+        public string IIT_X_SECT { get; set; }
         // used only by structure queries
         public string RFI_UNIQUE { get; set; }
         public string IIT_INV_TYPE { get; set; }
@@ -27,5 +28,10 @@
         public decimal END_KM { get; set; }
         public double LENGTH_KM { get; set; }
         public string BMIS_STRUCTURE_TYPE { get; set; }
+        public string BMIS_STRUCTURE_NO { get; set; }
+        //used only by the rest area queries
+        public decimal LOC_KM { get; set; }
+        public string REST_AREA_NUMBER { get; set; }
+        public string REST_AREA_CLASS { get; set; }
     }
 }

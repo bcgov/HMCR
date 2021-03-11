@@ -45,5 +45,13 @@ namespace Hmcr.Data.Database.Entities
         public string ValidationStatus { get; set; }
         public DateTime? AppCreateTimestampUtc { get; set; }
         public DateTime? AppLastUpdateTimestampUtc { get; set; }
+        public DateTime? SubmissionDate { get; set; }
+        public int RecordVersionNumber { get; set; }
+        public string MinMaxValueValidWarning { get; set; }
+        public string DataPrecisionValidWarning { get; set; }
+        public string ReportingFreqValidWarning { get; set; }
+        public string SurfaceTypeValidWarning { get; set; }
+        public string RoadClassValidWarning { get; set; }
+        public string RoadLengthValidWarning { get; set; }
     }
 }

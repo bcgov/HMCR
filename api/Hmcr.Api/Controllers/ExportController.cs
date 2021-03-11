@@ -86,7 +86,6 @@ namespace Hmcr.Api.Controllers
             var query = BuildQuery(serviceAreaNumbers, fromDate, toDate, outputFormat, dateColName, endpointConfigName, false);
 
             var responseMessage = await _exportApi.ExportReport(query, endpointConfigName);
-
             var bytes = await responseMessage.Content.ReadAsByteArrayAsync();
 
             if (responseMessage.StatusCode == HttpStatusCode.OK)
@@ -280,7 +279,7 @@ namespace Hmcr.Api.Controllers
                 case "hmr:hmr_wildlife_report_vw":
                     return DateColNames.AccidentDate;
                 case "hmr:hmr_rockfall_report_vw":
-                    return DateColNames.ReportDate;
+                    return DateColNames.RockfallDate;
                 default:
                     return null;
             }

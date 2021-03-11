@@ -27,6 +27,7 @@ namespace Hmcr.Domain.Services
         Task<(bool NotFound, Dictionary<string, List<string>> Errors)> DeleteUserAsync(UserDeleteDto user);
         Task<HmrSystemUser> GetActiveUserEntityAsync(Guid userGuid);
         Task UpdateUserFromBceidAsync(Guid userGuid, string username, string userType, long concurrencyControlNumber);
+        Task<IEnumerable<UserSearchExportDto>> GetUsersByFilterAsync(decimal[]? serviceAreas, string[]? userTypes, string searchText, bool? isActive);
     }
     public class UserService : IUserService
     {
@@ -69,6 +70,10 @@ namespace Hmcr.Domain.Services
         public async Task<PagedDto<UserSearchDto>> GetUsersAsync(decimal[]? serviceAreas, string[]? userTypes, string searchText, bool? isActive, int pageSize, int pageNumber, string orderBy, string direction)
         {
             return await _userRepo.GetUsersAsync(serviceAreas, userTypes, searchText, isActive, pageSize, pageNumber, orderBy, direction);
+        }
+        public async Task<IEnumerable<UserSearchExportDto>> GetUsersByFilterAsync(decimal[]? serviceAreas, string[]? userTypes, string searchText, bool? isActive)
+        {
+            return await _userRepo.GetUsersByFilterAsync(serviceAreas, userTypes, searchText, isActive);
         }
 
         public async Task<UserDto> GetUserAsync(decimal systemUserId)

@@ -30,10 +30,13 @@ const defaultSearchFormValues = {
   reportTypeId: '',
   dateFrom: moment().subtract(1, 'months').startOf('month'),
   dateTo: moment().subtract(1, 'months').endOf('month'),
+  submissionDateFrom: null,
+  submissionDateTo: null,
   serviceAreaNumbers: [],
   highwayUnique: '',
   maintenanceTypeIds: [],
   activityNumberIds: [],
+  submissionNumber:'',
   outputFormat: 'csv',
 };
 
@@ -129,6 +132,15 @@ const ReportExport = ({
       }
     }
 
+    if (values.submissionNumber.length > 0) {
+      cql_filters.push(`SUBMISSION_OBJECT_ID = ${values.submissionNumber}`);
+    }
+    if (values.submissionDateFrom!== null && values.submissionDateTo!== null) {
+      var sdFrom = values.submissionDateFrom.startOf('day').format(Constants.DATE_TIME_FORMAT);
+      var sdTo = values.submissionDateTo.endOf('day').format(Constants.DATE_TIME_FORMAT);
+      cql_filters.push(`SUBMISSION_DATE BETWEEN '${sdFrom}' AND '${sdTo}'`);
+    }
+
     if (cql_filters.length > 0) {
       queryParams.cql_filter = cql_filters.join(' AND ');
     }
@@ -148,15 +160,11 @@ const ReportExport = ({
       .getReportExport(buildExportParams(values, dateFrom, dateTo))
       .then((response) => {
         const fileExtensionHeaders = response.headers['content-disposition'].match(/.csv|.json|.gml|.kml|.kmz/i);
-
         let fileName = `${values.reportTypeId}_Export_${dateFrom}-${dateTo}`;
         if (fileExtensionHeaders) fileName += fileExtensionHeaders[0];
-
         let data = response.data;
         if (fileName.indexOf('.json') > -1) data = JSON.stringify(data);
-
         FileSaver.saveAs(new Blob([data]), fileName);
-
         setExportResult({ fileName });
         setExportStage(EXPORT_STAGE.DONE);
       })
@@ -256,7 +264,7 @@ const ReportExport = ({
                           For Maintenance Work Reporting this refers to the <em>End Date</em>
                         </li>
                         <li>
-                          For Rockfall this refers to the <em>Report Date</em>
+                          For Rockfall this refers to the <em>Rockfall Date</em>
                         </li>
                         <li>
                           For Wildlife this corresponds to the <em>Accident Date</em>
@@ -303,6 +311,25 @@ const ReportExport = ({
                           </div>
                         </React.Fragment>
                       )}
+                    </div>
+                    <div className="d-flex mt-3">
+                      <div style={filterContainerStyle}>
+                        <FormInput type="text" name="submissionNumber" placeholder="Submission Number" />
+                      </div>
+                      <div className="d-flex align-items-center">
+                        <DateRangeField
+                          name="submissionDate"
+                          fromName="submissionDateFrom"
+                          toName="submissionDateTo"
+                          isOutsideRange={disableFutureDates}
+                        />
+                        <MouseoverTooltip id="tooltip_submission_datepicker">
+                          <ul style={{ paddingInlineStart: 10 }}>
+                          This Submission Date filter applies in addition to the applicable mandatory date range above. 
+                          Tip: To ensure all records submitted in this date range (and / or matching the entered Submission Number) will be included in the export, set the mandatory date range above to be sufficiently broad
+                          </ul>
+                        </MouseoverTooltip>
+                      </div>
                     </div>
                   </React.Fragment>
                 )}

@@ -13,15 +13,16 @@ namespace Hmcr.Chris
 {
     public interface IInventoryApi
     {
-        Task<List<SurfaceType>> GetSurfaceTypeAssociatedWithLine(NetTopologySuite.Geometries.Geometry geometry);
-        Task<SurfaceType> GetSurfaceTypeAssociatedWithPoint(NetTopologySuite.Geometries.Geometry geometry);
-        Task<List<MaintenanceClass>> GetMaintenanceClassesAssociatedWithLine(NetTopologySuite.Geometries.Geometry geometry);
-        Task<MaintenanceClass> GetMaintenanceClassesAssociatedWithPoint(NetTopologySuite.Geometries.Geometry geometry);
-        Task<HighwayProfile> GetHighwayProfileAssociatedWithPoint(NetTopologySuite.Geometries.Geometry geometry);
-        Task<List<HighwayProfile>> GetHighwayProfileAssociatedWithLine(NetTopologySuite.Geometries.Geometry geometry);
-        Task<Guardrail> GetGuardrailAssociatedWithPoint(NetTopologySuite.Geometries.Geometry geometry);
-        Task<List<Guardrail>> GetGuardrailAssociatedWithLine(NetTopologySuite.Geometries.Geometry geometry);
-        Task<List<Structure>> GetBridgeStructure(string rfiSegment);
+        Task<List<SurfaceType>> GetSurfaceTypeAssociatedWithLine(NetTopologySuite.Geometries.Geometry geometry, string recordNumber);
+        Task<SurfaceType> GetSurfaceTypeAssociatedWithPoint(NetTopologySuite.Geometries.Geometry geometry, string recordNumber);
+        Task<List<MaintenanceClass>> GetMaintenanceClassesAssociatedWithLine(NetTopologySuite.Geometries.Geometry geometry, string recordNumber);
+        Task<MaintenanceClass> GetMaintenanceClassesAssociatedWithPoint(NetTopologySuite.Geometries.Geometry geometry, string recordNumber);
+        Task<HighwayProfile> GetHighwayProfileAssociatedWithPoint(NetTopologySuite.Geometries.Geometry geometry, string recordNumber);
+        Task<List<HighwayProfile>> GetHighwayProfileAssociatedWithLine(NetTopologySuite.Geometries.Geometry geometry, string recordNumber);
+        Task<Guardrail> GetGuardrailAssociatedWithPoint(NetTopologySuite.Geometries.Geometry geometry, string recordNumber);
+        Task<List<Guardrail>> GetGuardrailAssociatedWithLine(NetTopologySuite.Geometries.Geometry geometry, string recordNumber);
+        Task<List<Structure>> GetStructuresOnRFISegment(string rfiSegment, string recordNumber);
+        Task<List<RestArea>> GetRestAreasOnRFISegment(string rfiSegment, string recordNumber);
     }
 
     public class InventoryApi : IInventoryApi
@@ -44,8 +45,8 @@ namespace Hmcr.Chris
             public const string MC_ASSOC_WITH_POINT = "MC_ASSOCIATED_WITH_POINT";
             public const string HP_ASSOC_WITH_LINE = "HP_ASSOCIATED_WITH_LINE";
             public const string HP_ASSOC_WITH_POINT = "HP_ASSOCIATED_WITH_POINT";
-            public const string GR_ASSOC_WITH_LINE = "GR_ASSOCIATED_WITH_POINT";
-            public const string GR_ASSOC_WITH_POINT = "GR_ASSOCIATED_WITH_LINE";
+            public const string GR_ASSOC_WITH_LINE = "GR_ASSOCIATED_WITH_LINE";
+            public const string GR_ASSOC_WITH_POINT = "GR_ASSOCIATED_WITH_POINT";
         }
         public static class InventoryParamType
         {
@@ -92,10 +93,26 @@ namespace Hmcr.Chris
                 }
             }
 
+            if (coordinates.Count() > 1)
+            {
+                //check the last item to see if it's a single since the GeoServer queries expect
+                // at least 2 pairs we'll need to make some adjustments if there is a group with 1 pair
+                // this won't exceed the paramter limit since it's 1000 (500 pairs). See HMCR-909
+                var count = geometryGroup.Count();
+                if (geometryGroup[count - 1].Count(g => g == ',') == 1)
+                {
+                    var lastGroup = geometryGroup[count - 1];
+                    var secondLastGroup = geometryGroup[count - 2];
+                    secondLastGroup += "\\," + lastGroup;   //append the previously last group to the 2nd last group text
+                    geometryGroup[count - 2] = secondLastGroup; //update the second last group
+                    geometryGroup.RemoveAt(count - 1);  //remove the last group
+                }
+            }
+
             return geometryGroup;
         }
 
-        public async Task<SurfaceType> GetSurfaceTypeAssociatedWithPoint(NetTopologySuite.Geometries.Geometry geometry)
+        public async Task<SurfaceType> GetSurfaceTypeAssociatedWithPoint(NetTopologySuite.Geometries.Geometry geometry,string recordNumber)
         {
             var body = "";
             var contents = "";
@@ -123,12 +140,12 @@ namespace Hmcr.Chris
             }
             catch (System.Exception ex)
             {
-                _logger.LogError($"Exception - GetSurfaceTypeAssociatedWithPoint: {body} - {contents}");
+                _logger.LogError($"Exception - GetSurfaceTypeAssociatedWithPoint({recordNumber}): {body} - {contents}");
                 throw ex;
             }
         }
 
-        public async Task<List<SurfaceType>> GetSurfaceTypeAssociatedWithLine(NetTopologySuite.Geometries.Geometry geometry)
+        public async Task<List<SurfaceType>> GetSurfaceTypeAssociatedWithLine(NetTopologySuite.Geometries.Geometry geometry, string recordNumber)
         {
             var body = "";
             var contents = "";
@@ -160,12 +177,12 @@ namespace Hmcr.Chris
             }
             catch (System.Exception ex)
             {
-                _logger.LogError($"Exception - GetSurfaceTypeAssociatedWithLine: {body} - {contents}");
+                _logger.LogError($"Exception - GetSurfaceTypeAssociatedWithLine({recordNumber}): {body} - {contents}");
                 throw ex;
             }
         }
 
-        public async Task<List<MaintenanceClass>> GetMaintenanceClassesAssociatedWithLine(NetTopologySuite.Geometries.Geometry geometry)
+        public async Task<List<MaintenanceClass>> GetMaintenanceClassesAssociatedWithLine(NetTopologySuite.Geometries.Geometry geometry, string recordNumber)
         {
             var body = "";
             var contents = "";
@@ -198,12 +215,12 @@ namespace Hmcr.Chris
             }
             catch (System.Exception ex)
             {
-                _logger.LogError($"Exception - GetMaintenanceClassesAssociatedWithLine: {body} - {contents}");
+                _logger.LogError($"Exception - GetMaintenanceClassesAssociatedWithLine({recordNumber}): {body} - {contents}");
                 throw ex;
             }
         }
 
-        public async Task<MaintenanceClass> GetMaintenanceClassesAssociatedWithPoint(NetTopologySuite.Geometries.Geometry geometry)
+        public async Task<MaintenanceClass> GetMaintenanceClassesAssociatedWithPoint(NetTopologySuite.Geometries.Geometry geometry, string recordNumber)
         {
             var body = "";
             var contents = "";
@@ -232,12 +249,12 @@ namespace Hmcr.Chris
             }
             catch (System.Exception ex)
             {
-                _logger.LogError($"Exception - GetMaintenanceClassesAssociatedWithPoint: {body} - {contents}");
+                _logger.LogError($"Exception - GetMaintenanceClassesAssociatedWithPoint({recordNumber}): {body} - {contents}");
                 throw ex;
             }
         }
 
-        public async Task<HighwayProfile> GetHighwayProfileAssociatedWithPoint(NetTopologySuite.Geometries.Geometry geometry)
+        public async Task<HighwayProfile> GetHighwayProfileAssociatedWithPoint(NetTopologySuite.Geometries.Geometry geometry, string recordNumber)
         {
             var body = "";
             var contents = "";
@@ -267,12 +284,12 @@ namespace Hmcr.Chris
             }
             catch (System.Exception ex)
             {
-                _logger.LogError($"Exception - GetHighwayProfileAssociatedWithPoint: {body} - {contents}");
+                _logger.LogError($"Exception - GetHighwayProfileAssociatedWithPoint({recordNumber}): {body} - {contents}");
                 throw ex;
             }
         }
 
-        public async Task<List<HighwayProfile>> GetHighwayProfileAssociatedWithLine(NetTopologySuite.Geometries.Geometry geometry)
+        public async Task<List<HighwayProfile>> GetHighwayProfileAssociatedWithLine(NetTopologySuite.Geometries.Geometry geometry, string recordNumber)
         {
             var body = "";
             var contents = "";
@@ -305,12 +322,12 @@ namespace Hmcr.Chris
             }
             catch (System.Exception ex)
             {
-                _logger.LogError($"Exception - GetHighwayProfileAssociatedWithLine: {body} - {contents}");
+                _logger.LogError($"Exception - GetHighwayProfileAssociatedWithLine({recordNumber}): {body} - {contents}");
                 throw ex;
             }
         }
 
-        public async Task<Guardrail> GetGuardrailAssociatedWithPoint(NetTopologySuite.Geometries.Geometry geometry)
+        public async Task<Guardrail> GetGuardrailAssociatedWithPoint(NetTopologySuite.Geometries.Geometry geometry, string recordNumber)
         {
             var body = "";
             var contents = "";
@@ -322,7 +339,7 @@ namespace Hmcr.Chris
 
                 foreach (var lineStringCoordinates in geometryGroup)
                 {
-                    body = string.Format(_queries.InventoryAssocWithPointQuery, InventoryParamType.POINT_COORDINATE, lineStringCoordinates, InventoryQueryTypeName.HP_ASSOC_WITH_POINT);
+                    body = string.Format(_queries.InventoryAssocWithPointQuery, InventoryParamType.POINT_COORDINATE, lineStringCoordinates, InventoryQueryTypeName.GR_ASSOC_WITH_POINT);
 
                     contents = await (await _api.PostWithRetry(_client, _path, body)).Content.ReadAsStringAsync();
 
@@ -331,6 +348,7 @@ namespace Hmcr.Chris
                     if (results.features.Length > 0)
                     {
                         guardrail.GuardrailType = results.features[0].properties.GUARDRAIL_TYPE;
+                        guardrail.CrossSectionPosition = results.features[0].properties.IIT_X_SECT;
                     }
                 }
 
@@ -338,12 +356,12 @@ namespace Hmcr.Chris
             }
             catch (System.Exception ex)
             {
-                _logger.LogError($"Exception - GetGuardrailAssociatedWithPoint: {body} - {contents}");
+                _logger.LogError($"Exception - GetGuardrailAssociatedWithPoint({recordNumber}): {body} - {contents}");
                 throw ex;
             }
         }
 
-        public async Task<List<Guardrail>> GetGuardrailAssociatedWithLine(NetTopologySuite.Geometries.Geometry geometry)
+        public async Task<List<Guardrail>> GetGuardrailAssociatedWithLine(NetTopologySuite.Geometries.Geometry geometry, string recordNumber)
         {
             var body = "";
             var contents = "";
@@ -355,7 +373,7 @@ namespace Hmcr.Chris
 
                 foreach (var lineStringCoordinates in geometryGroup)
                 {
-                    body = string.Format(_queries.InventoryAssocWithLineQuery, InventoryParamType.LINE_COORDINATE, lineStringCoordinates, InventoryQueryTypeName.HP_ASSOC_WITH_LINE);
+                    body = string.Format(_queries.InventoryAssocWithLineQuery, InventoryParamType.LINE_COORDINATE, lineStringCoordinates, InventoryQueryTypeName.GR_ASSOC_WITH_LINE);
 
                     contents = await (await _api.PostWithRetry(_client, _path, body)).Content.ReadAsStringAsync();
 
@@ -366,6 +384,7 @@ namespace Hmcr.Chris
                         Guardrail guardrail = new Guardrail();
                         guardrail.Length = feature.properties.CLIPPED_LENGTH_KM;
                         guardrail.GuardrailType = feature.properties.GUARDRAIL_TYPE;
+                        guardrail.CrossSectionPosition = feature.properties.IIT_X_SECT;
 
                         guardrails.Add(guardrail);
                     }
@@ -375,12 +394,12 @@ namespace Hmcr.Chris
             }
             catch (System.Exception ex)
             {
-                _logger.LogError($"Exception - GetGuardrailAssociatedWithLine: {body} - {contents}");
+                _logger.LogError($"Exception - GetGuardrailAssociatedWithLine({recordNumber}): {body} - {contents}");
                 throw ex;
             }
         }
 
-        public async Task<List<Structure>> GetBridgeStructure(string rfiSegment)
+        public async Task<List<Structure>> GetStructuresOnRFISegment(string rfiSegment, string recordNumber)
         {
             var query = "";
             var content = "";
@@ -398,7 +417,10 @@ namespace Hmcr.Chris
                 foreach (var feature in results.features)
                 {
                     Structure structure = new Structure();
-                    structure.StructureType = feature.properties.BMIS_STRUCTURE_TYPE;  //this may possibly be feature.properties.IIT_INV_TYPE
+                    structure.StructureType = feature.properties.BMIS_STRUCTURE_TYPE;
+                    // need to apply trim start '0' to strip leading zeros, if the structure number in the typed row
+                    //  had no alpha chars the CSV parse casts it as a number (ie. 00525 = 525)
+                    structure.StructureNumber = feature.properties.BMIS_STRUCTURE_NO.TrimStart('0');
                     structure.BeginKM = feature.properties.BEGIN_KM;
                     structure.EndKM = feature.properties.END_KM;
                     structure.Length = feature.properties.LENGTH_KM;
@@ -410,7 +432,41 @@ namespace Hmcr.Chris
             }
             catch (Exception ex)
             {
-                _logger.LogError($"Exception - GetBridgeStructure: {query} - {content}");
+                _logger.LogError($"Exception - GetStructuresOnRFISegment({recordNumber}): {query} - {content}");
+                throw ex;
+            }
+        }
+
+        public async Task<List<RestArea>> GetRestAreasOnRFISegment(string rfiSegment, string recordNumber)
+        {
+            var query = "";
+            var content = "";
+
+            try
+            {
+                query = _path + string.Format(_queries.RestAreaOnRfiSegment, rfiSegment);
+
+                content = await (await _api.GetWithRetry(_client, query)).Content.ReadAsStringAsync();
+
+                var results = JsonSerializer.Deserialize<FeatureCollection<object>>(content);
+
+                var restAreas = new List<RestArea>();
+
+                foreach (var feature in results.features)
+                {
+                    RestArea restArea = new RestArea();
+                    restArea.SiteNumber = feature.properties.REST_AREA_NUMBER;
+                    restArea.LocationKM = feature.properties.LOC_KM;
+                    restArea.Class = feature.properties.REST_AREA_CLASS;
+
+                    restAreas.Add(restArea);
+                }
+
+                return restAreas;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"Exception - GetRestAreasOnRFISegment({recordNumber}): {query} - {content}");
                 throw ex;
             }
         }

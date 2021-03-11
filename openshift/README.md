@@ -65,7 +65,7 @@ data:
   clientId: <service-client-id>
   clientSecret: <service-client-secret>
   hmcrPublic: <application-client-internal-id>
-  host: <sso-dev.pathfinder.gov.bc.ca>
+  host: <dev.oidc.gov.bc.ca>
   realmId: <realm-id>
 kind: Secret
 metadata:

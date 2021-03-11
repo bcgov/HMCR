@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 using System.Text.Json.Serialization;
-
+using Hmcr.Model.Utils;
 namespace Hmcr.Model.Dtos.User
 {
     public class UserSearchDto

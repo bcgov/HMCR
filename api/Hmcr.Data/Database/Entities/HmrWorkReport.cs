@@ -50,6 +50,7 @@ namespace Hmcr.Data.Database.Entities
         public DateTime DbAuditCreateTimestamp { get; set; }
         public string DbAuditLastUpdateUserid { get; set; }
         public DateTime DbAuditLastUpdateTimestamp { get; set; }
+        public int RecordVersionNumber { get; set; }
 
         public virtual HmrSubmissionRow Row { get; set; }
         public virtual HmrServiceArea ServiceAreaNavigation { get; set; }

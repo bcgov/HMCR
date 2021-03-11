@@ -181,7 +181,7 @@ CREATE TABLE [dbo].[HMR_ACTIVITY_CODE_RULE]  (
 	[ACTIVITY_RULE_NAME]            	nvarchar(150) NOT NULL,
 	[ACTIVITY_RULE_EXEC_NAME]       	varchar(150) NOT NULL,
 	[DISPLAY_ORDER]                 	numeric(3,0) NULL,
-	[END_DATE]                      	datetime NULL DEFAULT (getutcdate()),
+	[END_DATE]                      	datetime NULL,
 	[CONCURRENCY_CONTROL_NUMBER]    	bigint NOT NULL DEFAULT ((1)),
 	[DB_AUDIT_CREATE_USERID]        	varchar(30) NOT NULL DEFAULT (user_name()),
 	[DB_AUDIT_CREATE_TIMESTAMP]     	datetime NOT NULL DEFAULT (getutcdate()),
