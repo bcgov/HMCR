@@ -29,6 +29,7 @@ const phases = {
     url_prefix: "dev-",
     bceid_service: ".test",
     oas_server: "devoas4",
+    export_server: "devoas4",
     dotnet_env: "Development",
     transient: true,
   },
@@ -45,6 +46,7 @@ const phases = {
     url_prefix: "tst-",
     bceid_service: ".test",
     oas_server: "prdoas5",
+    export_server: "tstoas5",
     dotnet_env: "Staging",
   },
   uat: {
@@ -60,6 +62,7 @@ const phases = {
     url_prefix: "uat-",
     bceid_service: ".test",
     oas_server: "prdoas5",
+    export_server: "tstoas5",
     dotnet_env: "UAT",
   },
   prod: {
@@ -75,6 +78,7 @@ const phases = {
     url_prefix: "",
     bceid_service: "",
     oas_server: "prdoas5",
+    export_server: "prdoas5",
     dotnet_env: "Production",
   },
 };
