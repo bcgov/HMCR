@@ -37,6 +37,8 @@ module.exports = (settings) => {
           VERSION: phases[phase].tag,
           ENV: phases[phase].phase,
           HOST: phases[phase].host,
+          CPU: phases[phase].client_cpu,
+          MEMORY: phases[phase].client_memory,
         },
       }
     )
@@ -100,6 +102,8 @@ module.exports = (settings) => {
           HOST: phases[phase].host,
           ENV: phases[phase].phase,
           ASPNETCORE_ENVIRONMENT: phases[phase].dotnet_env,
+          CPU: phases[phase].api_cpu,
+          MEMORY: phases[phase].api_memory,
         },
       }
     )
@@ -116,6 +120,8 @@ module.exports = (settings) => {
           VERSION: phases[phase].tag,
           ENV: phases[phase].phase,
           ASPNETCORE_ENVIRONMENT: phases[phase].dotnet_env,
+          CPU: phases[phase].hangfire_cpu,
+          MEMORY: phases[phase].hangfire_memory,
         },
       }
     )
