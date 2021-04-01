@@ -77,9 +77,12 @@ namespace Hmcr.Api.Extensions
                 .SetCompatibilityVersion(CompatibilityVersion.Version_3_0);
         }
 
-        public static void AddHmcrDbContext(this IServiceCollection services, string connectionString)
+        public static void AddHmcrDbContext(this IServiceCollection services, string connectionString, bool enableSensitiveDataLogging)
         {
-            services.AddDbContext<AppDbContext>(options => options.UseSqlServer(connectionString, x => x.UseNetTopologySuite().CommandTimeout(1800)));
+            services.AddDbContext<AppDbContext>(options => {
+                options.UseSqlServer(connectionString, x => x.UseNetTopologySuite().CommandTimeout(1800));
+                options.EnableSensitiveDataLogging(enableSensitiveDataLogging);
+            });
         }
 
         public static void AddHmcrAutoMapper(this IServiceCollection services)
