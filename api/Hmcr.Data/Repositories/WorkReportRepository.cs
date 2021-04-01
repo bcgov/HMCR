@@ -111,7 +111,7 @@ namespace Hmcr.Data.Repositories
                 conflicts.Add(foundItem.WorkReportTyped.RecordNumber);
             }
 
-            return (conflicts.Count() > 0, conflicts);
+            return (conflicts.Count() > 0, TrimConflicts(conflicts));
         }
 
         public async Task<(bool itemExists, List<string> conflicts)> IsReportedWorkReportForLocationBAsync(WorkReportTyped workReportTyped, List<WorkReportGeometry> workReports)
@@ -152,7 +152,7 @@ namespace Hmcr.Data.Repositories
                 conflicts.Add(foundItem.WorkReportTyped.RecordNumber);
             }
 
-            return (conflicts.Count() > 0, conflicts);
+            return (conflicts.Count() > 0, TrimConflicts(conflicts));
         }
         
         public async Task<(bool itemExists, List<string> conflicts)> IsReportedWorkReportForLocationCAsync(WorkReportTyped workReportTyped, List<WorkReportGeometry> workReports)
@@ -251,7 +251,15 @@ namespace Hmcr.Data.Repositories
 
             conflicts = conflicts.Distinct().ToList();
             conflicts.Sort();
-            return (conflicts.Count() > 0, conflicts);
+            return (conflicts.Count() > 0, TrimConflicts(conflicts));
+        }
+
+        private List<string> TrimConflicts(List<string> conflicts)
+        {
+            if (conflicts.Count > 100)
+                return conflicts.Take(100).ToList();
+
+            return conflicts;
         }
 
         private (decimal startOffset, decimal endOffset) normalizeOffsets(decimal? startOffset, decimal? endOffset)
