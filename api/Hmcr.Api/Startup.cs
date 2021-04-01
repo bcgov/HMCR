@@ -28,10 +28,11 @@ namespace Hmcr.Api
         public void ConfigureServices(IServiceCollection services)
         {
             var connectionString = Configuration.GetValue<string>("ConnectionStrings:HMCR");
+            var enableSensitiveDataLogging = Configuration.GetValue<bool>("EnableSensitiveDataLogging");
 
             services.AddHttpContextAccessor();
             services.AddHmcrAuthentication(Configuration);
-            services.AddHmcrDbContext(connectionString);
+            services.AddHmcrDbContext(connectionString, enableSensitiveDataLogging);
             services.AddHmcrCors();
             services.AddHmcrControllers();
             services.AddHmcrAutoMapper();
