@@ -1,11 +1,11 @@
 "use strict";
-const { OpenShiftClientX } = require("pipeline-cli");
+const { OpenShiftClientX } = require("@bcgov/pipeline-cli");
 const path = require("path");
 
-const util = require('./util');
+const util = require("./util");
 const KeyCloakClient = require("./keycloak");
 
-module.exports = settings => {
+module.exports = (settings) => {
   const phases = settings.phases;
   const options = settings.options;
   const phase = options.env;
@@ -18,10 +18,13 @@ module.exports = settings => {
   );
   var objects = [];
   const kc = new KeyCloakClient(settings, oc);
-  const logDbSecret = util.getSecret(oc, phases[phase].namespace, `${phases[phase].name}-logdb${phases[phase].suffix}`);
+  const logDbSecret = util.getSecret(
+    oc,
+    phases[phase].namespace,
+    `${phases[phase].name}-logdb${phases[phase].suffix}`
+  );
 
   kc.addUris();
-  
 
   // The deployment of your cool app goes here ▼▼▼
   objects.push(
@@ -33,13 +36,15 @@ module.exports = settings => {
           SUFFIX: phases[phase].suffix,
           VERSION: phases[phase].tag,
           ENV: phases[phase].phase,
-          HOST: phases[phase].host
-        }
+          HOST: phases[phase].host,
+          CPU: phases[phase].client_cpu,
+          MEMORY: phases[phase].client_memory,
+        },
       }
     )
   );
 
-  if(!logDbSecret) {
+  if (!logDbSecret) {
     console.log("Adding logDb postgresql secret");
 
     objects.push(
@@ -48,7 +53,8 @@ module.exports = settings => {
         {
           param: {
             NAME: `${phases[phase].name}-logdb`,
-            SUFFIX: phases[phase].suffix, }
+            SUFFIX: phases[phase].suffix,
+          },
         }
       )
     );
@@ -62,8 +68,8 @@ module.exports = settings => {
           NAME: `${phases[phase].name}-logdb`,
           SUFFIX: phases[phase].suffix,
           VERSION: phases[phase].tag,
-          ENV: phases[phase].phase
-        }
+          ENV: phases[phase].phase,
+        },
       }
     )
   );
@@ -78,8 +84,8 @@ module.exports = settings => {
           BCEID_SERVICE: `https://gws1${phases[phase].bceid_service}.bceid.ca/webservices/client/v10/bceidservice.asmx`,
           EXPORT_URL: `https://${phases[phase].export_server}.apps.th.gov.bc.ca`,
           OAS_URL: `https://${phases[phase].oas_server}.apps.th.gov.bc.ca`,
-          GEOSERVER_TIMEOUT: 120
-        }
+          GEOSERVER_TIMEOUT: 120,
+        },
       }
     )
   );
@@ -95,8 +101,10 @@ module.exports = settings => {
           VERSION: phases[phase].tag,
           HOST: phases[phase].host,
           ENV: phases[phase].phase,
-          ASPNETCORE_ENVIRONMENT: phases[phase].dotnet_env
-        }
+          ASPNETCORE_ENVIRONMENT: phases[phase].dotnet_env,
+          CPU: phases[phase].api_cpu,
+          MEMORY: phases[phase].api_memory,
+        },
       }
     )
   );
@@ -111,8 +119,10 @@ module.exports = settings => {
           SUFFIX: phases[phase].suffix,
           VERSION: phases[phase].tag,
           ENV: phases[phase].phase,
-          ASPNETCORE_ENVIRONMENT: phases[phase].dotnet_env
-        }
+          ASPNETCORE_ENVIRONMENT: phases[phase].dotnet_env,
+          CPU: phases[phase].hangfire_cpu,
+          MEMORY: phases[phase].hangfire_memory,
+        },
       }
     )
   );

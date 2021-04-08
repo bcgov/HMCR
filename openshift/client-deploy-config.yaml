@@ -40,11 +40,11 @@ objects:
                   protocol: TCP
               resources:
                 requests:
-                  cpu: 250m
-                  memory: 32Mi
+                  cpu: ${CPU}
+                  memory: ${MEMORY}
                 limits:
-                  cpu: 250m
-                  memory: 64Mi
+                  cpu: ${CPU}
+                  memory: ${MEMORY}
               env:
                 - name: REACT_APP_SSO_HOST
                   valueFrom:
@@ -62,7 +62,7 @@ objects:
                       name: sso-configs-${ENV}
                       key: CLIENT_SSO_CLIENTID
                 - name: REACT_APP_API_HOST
-                  value: api-${HOST}                
+                  value: ${HOST}
                 - name: HMCR_DEPLOY_SUFFIX
                   value: ${SUFFIX}
       test: false
@@ -148,4 +148,14 @@ parameters:
     displayName: SOURCE_REPOSITORY_REF
     name: SOURCE_REPOSITORY_REF
     required: false
+    value: ""
+  - description: CPU
+    displayName: CPU Request
+    name: CPU
+    required: true
+    value: ""
+  - description: MEMORY
+    displayName: MEMORY Request
+    name: MEMORY
+    required: true
     value: ""

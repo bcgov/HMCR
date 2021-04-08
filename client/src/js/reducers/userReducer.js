@@ -8,7 +8,7 @@ const defaultState = {
   current: {},
 };
 
-export default (state = defaultState, action) => {
+const userReducer = (state = defaultState, action) => {
   switch (action.type) {
     case FETCH_CURRENT_USER:
       return { ...state, current: { ...state.current, ...action.payload } };
@@ -20,3 +20,5 @@ export default (state = defaultState, action) => {
       return state;
   }
 };
+
+export default userReducer;

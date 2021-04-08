@@ -24,7 +24,7 @@ objects:
             deploymentconfig: ${NAME}${SUFFIX}
         spec:
           containers:
-            - image: docker-registry.default.svc:5000/txkggj-tools/${IMAGE_STREAM_TAG}
+            - image: image-registry.openshift-image-registry.svc:5000/d3d940-tools/${IMAGE_STREAM_TAG}
               imagePullPolicy: IfNotPresent
               name: ${NAME}${SUFFIX}
               env:
@@ -64,7 +64,7 @@ objects:
                 tcpSocket:
                   port: 5432
                 initialDelaySeconds: 30
-                timeoutSeconds: 1
+                timeoutSeconds: 5
                 periodSeconds: 10
                 successThreshold: 1
                 failureThreshold: 3
@@ -100,7 +100,7 @@ objects:
             from:
               kind: ImageStreamTag
               name: ${IMAGE_STREAM_TAG}
-              namespace: txkggj-tools
+              namespace: d3d940-tools
           type: ImageChange
   - kind: PersistentVolumeClaim
     apiVersion: v1
@@ -156,7 +156,7 @@ parameters:
   - description: ImageStreamTag
     displayName: ImageStreamTag
     name: IMAGE_STREAM_TAG
-    value: "postgresql-10-rhel8:1"
+    value: "postgresql-10:1"
   - name: POSTGRESQL_DATABASE_NAME
     displayName: PostgreSQL Database Name
     description: The name of the PostgreSQL database.

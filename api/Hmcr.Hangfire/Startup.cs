@@ -31,9 +31,10 @@ namespace Hmcr.Hangfire
             var connectionString = Configuration.GetValue<string>("ConnectionStrings:HMCR");
             var runHangfireServer = Configuration.GetValue<bool>("Hangfire:EnableServer");
             var workerCount = Configuration.GetValue<int>("Hangfire:WorkerCount");
+            var enableSensitiveDataLogging = Configuration.GetValue<bool>("EnableSensitiveDataLogging");
 
             services.AddHttpContextAccessor();
-            services.AddHmcrDbContext(connectionString);
+            services.AddHmcrDbContext(connectionString, enableSensitiveDataLogging);
             services.AddHmcrAutoMapper();
             services.AddHmcrTypes();
             services.AddChrisHttpClient(Configuration);

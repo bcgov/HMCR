@@ -22,10 +22,19 @@ objects:
       creationTimestamp: null
       name: ${NAME}${SUFFIX}
     spec:
-      replicas: 1
+      replicas: 2
       selector:
         deploymentconfig: ${NAME}${SUFFIX}
-      strategy: {}
+      strategy:
+        activeDeadlineSeconds: 21600
+        resources: {}
+        rollingParams:
+          intervalSeconds: 1
+          maxSurge: 25%
+          maxUnavailable: 25%
+          timeoutSeconds: 600
+          updatePeriodSeconds: 1
+        type: Rolling
       template:
         metadata:
           creationTimestamp: null
@@ -34,7 +43,7 @@ objects:
         spec:
           initContainers: # check if logdb is ready, and only continue when true
             - name: check-logdb-ready
-              image: docker-registry.default.svc:5000/txkggj-tools/postgresql-10-rhel8:1
+              image: image-registry.openshift-image-registry.svc:5000/d3d940-tools/postgresql-10:1
               command:
                 [
                   "sh",
@@ -49,17 +58,18 @@ objects:
                   protocol: TCP
               resources:
                 requests:
-                  cpu: 500m
-                  memory: 768Mi
+                  cpu: ${CPU}
+                  memory: ${MEMORY}
                 limits:
-                  cpu: 1
-                  memory: 1Gi
+                  cpu: ${CPU}
+                  memory: ${MEMORY}
               livenessProbe:
                 httpGet:
                   path: /healthz
                   port: 8080
                 initialDelaySeconds: 15
-                periodSeconds: 5
+                timeoutSeconds: 5
+                periodSeconds: 10
               env:
                 - name: ConnectionStrings__HMCR
                   valueFrom:
@@ -166,4 +176,14 @@ parameters:
     displayName: SOURCE_REPOSITORY_REF
     name: SOURCE_REPOSITORY_REF
     required: false
+    value: ""
+  - description: CPU
+    displayName: CPU Request
+    name: CPU
+    required: true
+    value: ""
+  - description: MEMORY
+    displayName: MEMORY Request
+    name: MEMORY
+    required: true
     value: ""

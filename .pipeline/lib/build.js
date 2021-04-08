@@ -1,8 +1,8 @@
 "use strict";
-const { OpenShiftClientX } = require("pipeline-cli");
+const { OpenShiftClientX } = require("@bcgov/pipeline-cli");
 const path = require("path");
 
-module.exports = settings => {
+module.exports = (settings) => {
   const phases = settings.phases;
   const options = settings.options;
   const oc = new OpenShiftClientX(
@@ -24,7 +24,7 @@ module.exports = settings => {
           VERSION: settings.phases[phase].tag,
           SOURCE_REPOSITORY_URL: `${oc.git.uri}`,
           SOURCE_REPOSITORY_REF: `${oc.git.branch_ref}`,
-        }
+        },
       }
     )
   );
@@ -38,8 +38,8 @@ module.exports = settings => {
           SUFFIX: settings.phases[phase].suffix,
           VERSION: settings.phases[phase].tag,
           SOURCE_REPOSITORY_URL: `${oc.git.uri}`,
-          SOURCE_REPOSITORY_REF: `${oc.git.branch_ref}`
-        }
+          SOURCE_REPOSITORY_REF: `${oc.git.branch_ref}`,
+        },
       }
     )
   );
@@ -53,8 +53,8 @@ module.exports = settings => {
           SUFFIX: settings.phases[phase].suffix,
           VERSION: settings.phases[phase].tag,
           SOURCE_REPOSITORY_URL: `${oc.git.uri}`,
-          SOURCE_REPOSITORY_REF: `${oc.git.branch_ref}`
-        }
+          SOURCE_REPOSITORY_REF: `${oc.git.branch_ref}`,
+        },
       }
     )
   );

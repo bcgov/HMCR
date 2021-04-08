@@ -46,6 +46,7 @@ objects:
             "ConnectionStrings": {
                 "HMCR": "Server=(localdb)\\mssqllocaldb;Database=HMR_DEV;Trusted_Connection=True;MultipleActiveResultSets=true"
             },
+            "EnableSensitiveDataLogging": false,
             "Hangfire": {
                 "EnableServer": true,
                 "ReportJobIntervalInMinutes": 1,
