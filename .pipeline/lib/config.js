@@ -101,7 +101,7 @@ const phases = {
     hangfire_cpu: "1",
     hangfire_memory: "1Gi",
     api_cpu: "200m",
-    api_memory: "200Mi",
+    api_memory: "300Mi",
     client_cpu: "100m",
     client_memory: "100Mi",
   },
