@@ -103,7 +103,7 @@ const phases = {
     api_cpu: "200m",
     api_memory: "600Mi",
     client_cpu: "100m",
-    client_memory: "100Mi",
+    client_memory: "300Mi",
   },
 };
 
