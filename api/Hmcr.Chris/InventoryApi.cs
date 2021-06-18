@@ -1,28 +1,26 @@
 ﻿using Hmcr.Chris.Models;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
-using NetTopologySuite.Geometries;
+using NetTopologySuite.IO;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Net.Http;
 using System.Text.Json;
 using System.Threading.Tasks;
+using GJFeature = GeoJSON.Net.Feature;  // use an alias since Feature exists in HttpClients.Models
+using System.Xml;
 
 namespace Hmcr.Chris
 {
     public interface IInventoryApi
     {
-        Task<List<SurfaceType>> GetSurfaceTypeAssociatedWithLine(NetTopologySuite.Geometries.Geometry geometry, string recordNumber);
-        Task<SurfaceType> GetSurfaceTypeAssociatedWithPoint(NetTopologySuite.Geometries.Geometry geometry, string recordNumber);
-        Task<List<MaintenanceClass>> GetMaintenanceClassesAssociatedWithLine(NetTopologySuite.Geometries.Geometry geometry, string recordNumber);
-        Task<MaintenanceClass> GetMaintenanceClassesAssociatedWithPoint(NetTopologySuite.Geometries.Geometry geometry, string recordNumber);
-        Task<HighwayProfile> GetHighwayProfileAssociatedWithPoint(NetTopologySuite.Geometries.Geometry geometry, string recordNumber);
-        Task<List<HighwayProfile>> GetHighwayProfileAssociatedWithLine(NetTopologySuite.Geometries.Geometry geometry, string recordNumber);
-        Task<Guardrail> GetGuardrailAssociatedWithPoint(NetTopologySuite.Geometries.Geometry geometry, string recordNumber);
-        Task<List<Guardrail>> GetGuardrailAssociatedWithLine(NetTopologySuite.Geometries.Geometry geometry, string recordNumber);
         Task<List<Structure>> GetStructuresOnRFISegment(string rfiSegment, string recordNumber);
         Task<List<RestArea>> GetRestAreasOnRFISegment(string rfiSegment, string recordNumber);
+
+        Task<(GJFeature.FeatureCollection featureCollection, string errorMsg)> GetSurfaceType(string rfiSegmentName, string recordNumber);
+        Task<(GJFeature.FeatureCollection featureCollection, string errorMsg)> GetMaintenanceClass(string rfiSegmentName, string recordNumber);
+        Task<(GJFeature.FeatureCollection featureCollection, string errorMsg)> GetHighwayProfile(string rfiSegmentName, string recordNumber);
+        Task<(GJFeature.FeatureCollection featureCollection, string errorMsg)> GetGuardrail(string rfiSegmentName, string recordNumber);
     }
 
     public class InventoryApi : IInventoryApi
@@ -32,6 +30,7 @@ namespace Hmcr.Chris
         private IApi _api;
         private string _path;
         private ILogger<IInventoryApi> _logger;
+        private const string _maxFeatures = "500";
 
         /// <summary>
         /// Chris Query typeName values, used to call the Get Inventory
@@ -63,338 +62,134 @@ namespace Hmcr.Chris
             _logger = logger;
         }
 
-        /// <summary>
-        /// Utility function takes an array of coordinates and builds them 
-        /// into a string with a limit of 250 coordinate pairs in a group. 
-        /// The group is placed into a string array that is then returned 
-        /// for processing.
-        /// This is to deal with https://jira.th.gov.bc.ca/browse/HMCR-871 
-        /// in which GeoServer only accepts a max of 500 coordinate pairs
-        /// and also ensures we don't hit the 120sec timeout limit or 
-        /// MAX post size.
-        /// </summary>
-        /// <param name="coordinates"></param>
-        /// <returns></returns>
-        private List<string> BuildGeometryString(Coordinate[] coordinates)
+        public async Task<(GJFeature.FeatureCollection featureCollection, string errorMsg)> GetSurfaceType(string rfiSegmentName, string recordNumber)
         {
-            var geometryGroup = new List<string>();
-            var geometryLineString = "";
-            var coordinateCount = 0;
+            var query = "";
+            var content = "";
+            string errText = "";
 
-            foreach (Coordinate coordinate in coordinates)
-            {
-                geometryLineString += coordinate.X + "\\," + coordinate.Y + "\\,";
-                coordinateCount++;
-                if (coordinateCount == 250 || (coordinate == coordinates.Last()))
-                {
-                    geometryGroup.Add(geometryLineString.Substring(0, geometryLineString.Length - 2));
-                    geometryLineString = "";
-                    coordinateCount = 0;
-                }
-            }
-
-            if (coordinates.Count() > 1)
-            {
-                //check the last item to see if it's a single since the GeoServer queries expect
-                // at least 2 pairs we'll need to make some adjustments if there is a group with 1 pair
-                // this won't exceed the paramter limit since it's 1000 (500 pairs). See HMCR-909
-                var count = geometryGroup.Count();
-                if (geometryGroup[count - 1].Count(g => g == ',') == 1)
-                {
-                    var lastGroup = geometryGroup[count - 1];
-                    var secondLastGroup = geometryGroup[count - 2];
-                    secondLastGroup += "\\," + lastGroup;   //append the previously last group to the 2nd last group text
-                    geometryGroup[count - 2] = secondLastGroup; //update the second last group
-                    geometryGroup.RemoveAt(count - 1);  //remove the last group
-                }
-            }
-
-            return geometryGroup;
-        }
-
-        public async Task<SurfaceType> GetSurfaceTypeAssociatedWithPoint(NetTopologySuite.Geometries.Geometry geometry,string recordNumber)
-        {
-            var body = "";
-            var contents = "";
-            SurfaceType surfaceType = new SurfaceType();
+            GJFeature.FeatureCollection featureCollection = null;
 
             try
             {
-                var geometryGroup = BuildGeometryString(geometry.Coordinates);
+                query = _path + string.Format(_queries.InventoryAssociatedWithRFI, GeoServerEndpoint.SurfaceType, _maxFeatures, rfiSegmentName);
+                content = await (await _api.GetWithRetry(_client, query)).Content.ReadAsStringAsync();
 
-                foreach (var lineStringCoordinates in geometryGroup)
+                if (content.StartsWith("<"))
                 {
-                    body = string.Format(_queries.InventoryAssocWithPointQuery, InventoryParamType.POINT_COORDINATE, lineStringCoordinates, InventoryQueryTypeName.SURF_ASSOC_WITH_POINT);
-
-                    contents = await (await _api.PostWithRetry(_client, _path, body)).Content.ReadAsStringAsync();
-
-                    var results = JsonSerializer.Deserialize<FeatureCollection<object>>(contents);
-
-                    if (results.features.Length > 0)
-                    {
-                        surfaceType.Type = results.features[0].properties.SURFACE_TYPE;
-                    }
+                    //we got xml back.. it's likely an error, we should handle these
+                    XmlDocument xdoc = new XmlDocument();
+                    xdoc.LoadXml(content);
+                    errText = xdoc.InnerText.Replace("\n", "").Trim();
+                } else
+                {
+                    featureCollection = ParseJSONToFeatureCollection(content);
                 }
 
-                return surfaceType;
+                return (featureCollection, errText);
             }
             catch (System.Exception ex)
             {
-                _logger.LogError($"Exception - GetSurfaceTypeAssociatedWithPoint({recordNumber}): {body} - {contents}");
+                _logger.LogError($"Exception - GetSurfaceType({rfiSegmentName}, {recordNumber}): {query} - {content}");
                 throw ex;
             }
         }
 
-        public async Task<List<SurfaceType>> GetSurfaceTypeAssociatedWithLine(NetTopologySuite.Geometries.Geometry geometry, string recordNumber)
+        public async Task<(GJFeature.FeatureCollection featureCollection, string errorMsg)> GetMaintenanceClass(string rfiSegmentName, string recordNumber)
         {
-            var body = "";
-            var contents = "";
-            var surfaceTypes = new List<SurfaceType>();
+            var query = "";
+            var content = "";
+            string errText = "";
+            GJFeature.FeatureCollection featureCollection = null;
 
             try
             {
-                var geometryGroup = BuildGeometryString(geometry.Coordinates);
-
-                foreach (var lineStringCoordinates in geometryGroup)
+                query = _path + string.Format(_queries.InventoryAssociatedWithRFI, GeoServerEndpoint.MaintenanceClass, _maxFeatures, rfiSegmentName);
+                content = await (await _api.GetWithRetry(_client, query)).Content.ReadAsStringAsync();
+                
+                if (content.StartsWith("<"))
                 {
-                    body = string.Format(_queries.InventoryAssocWithLineQuery, InventoryParamType.LINE_COORDINATE, lineStringCoordinates, InventoryQueryTypeName.SURF_ASSOC_WITH_LINE);
-
-                    contents = await (await _api.PostWithRetry(_client, _path, body)).Content.ReadAsStringAsync();
-
-                    var results = JsonSerializer.Deserialize<FeatureCollection<object>>(contents);
-
-                    foreach (var feature in results.features)
-                    {
-                        SurfaceType surfaceType = new SurfaceType();
-                        surfaceType.Length = feature.properties.CLIPPED_LENGTH_KM;
-                        surfaceType.Type = feature.properties.SURFACE_TYPE;
-
-                        surfaceTypes.Add(surfaceType);
-                    }
+                    //we got xml back.. it's likely an error, we should handle these
+                    XmlDocument xdoc = new XmlDocument();
+                    xdoc.LoadXml(content);
+                    errText = xdoc.InnerText.Replace("\n", "").Trim();
+                }
+                else
+                {
+                    featureCollection = ParseJSONToFeatureCollection(content);
                 }
 
-                return surfaceTypes;
+                return (featureCollection, errText);
             }
             catch (System.Exception ex)
             {
-                _logger.LogError($"Exception - GetSurfaceTypeAssociatedWithLine({recordNumber}): {body} - {contents}");
+                _logger.LogError($"Exception - GetMaintenanceClass({rfiSegmentName}, {recordNumber}): {query} - {content}");
                 throw ex;
             }
         }
 
-        public async Task<List<MaintenanceClass>> GetMaintenanceClassesAssociatedWithLine(NetTopologySuite.Geometries.Geometry geometry, string recordNumber)
+        public async Task<(GJFeature.FeatureCollection featureCollection, string errorMsg)> GetHighwayProfile(string rfiSegmentName, string recordNumber)
         {
-            var body = "";
-            var contents = "";
-            var maintenanceClasses = new List<MaintenanceClass>();
-
+            var query = "";
+            var content = "";
+            string errText = "";
+            GJFeature.FeatureCollection featureCollection = null;
+            
             try
             {
-                var geometryGroup = BuildGeometryString(geometry.Coordinates);
+                query = _path + string.Format(_queries.InventoryAssociatedWithRFI, GeoServerEndpoint.HighwayProfile, _maxFeatures, rfiSegmentName);
+                content = await (await _api.GetWithRetry(_client, query)).Content.ReadAsStringAsync();
 
-                foreach (var lineStringCoordinates in geometryGroup)
+                if (content.StartsWith("<"))
                 {
-                    body = string.Format(_queries.InventoryAssocWithLineQuery, InventoryParamType.LINE_COORDINATE, lineStringCoordinates, InventoryQueryTypeName.MC_ASSOC_WITH_LINE);
-
-                    contents = await (await _api.PostWithRetry(_client, _path, body)).Content.ReadAsStringAsync();
-
-                    var results = JsonSerializer.Deserialize<FeatureCollection<object>>(contents);
-
-                    foreach (var feature in results.features)
-                    {
-                        MaintenanceClass maintenanceClass = new MaintenanceClass();
-                        maintenanceClass.Length = feature.properties.CLIPPED_LENGTH_KM;
-                        maintenanceClass.SummerRating = feature.properties.SUMMER_CLASS_RATING;
-                        maintenanceClass.WinterRating = feature.properties.WINTER_CLASS_RATING;
-
-                        maintenanceClasses.Add(maintenanceClass);
-                    }
+                    //we got xml back.. it's likely an error, we should handle these
+                    XmlDocument xdoc = new XmlDocument();
+                    xdoc.LoadXml(content);
+                    errText = xdoc.InnerText.Replace("\n", "").Trim();
+                }
+                else
+                {
+                    featureCollection = ParseJSONToFeatureCollection(content);
                 }
 
-                return maintenanceClasses;
+                return (featureCollection, errText);
             }
             catch (System.Exception ex)
             {
-                _logger.LogError($"Exception - GetMaintenanceClassesAssociatedWithLine({recordNumber}): {body} - {contents}");
+                _logger.LogError($"Exception - GetMaintenanceClass({rfiSegmentName}, {recordNumber}): {query} - {content}");
                 throw ex;
             }
         }
 
-        public async Task<MaintenanceClass> GetMaintenanceClassesAssociatedWithPoint(NetTopologySuite.Geometries.Geometry geometry, string recordNumber)
+        public async Task<(GJFeature.FeatureCollection featureCollection, string errorMsg)> GetGuardrail(string rfiSegmentName, string recordNumber)
         {
-            var body = "";
-            var contents = "";
-            MaintenanceClass maintenanceClass = new MaintenanceClass();
+            var query = "";
+            var content = "";
+            string errText = "";
+            GJFeature.FeatureCollection featureCollection = null;
 
             try
             {
-                var geometryGroup = BuildGeometryString(geometry.Coordinates);
+                query = _path + string.Format(_queries.InventoryAssociatedWithRFI, GeoServerEndpoint.Guardrail, _maxFeatures, rfiSegmentName);
+                content = await (await _api.GetWithRetry(_client, query)).Content.ReadAsStringAsync();
 
-                foreach (var lineStringCoordinates in geometryGroup)
+                if (content.StartsWith("<"))
                 {
-                    body = string.Format(_queries.InventoryAssocWithPointQuery, InventoryParamType.POINT_COORDINATE, lineStringCoordinates, InventoryQueryTypeName.MC_ASSOC_WITH_POINT);
-
-                    contents = await (await _api.PostWithRetry(_client, _path, body)).Content.ReadAsStringAsync();
-
-                    var results = JsonSerializer.Deserialize<FeatureCollection<object>>(contents);
-
-                    if (results.features.Length > 0)
-                    {
-                        maintenanceClass.SummerRating = results.features[0].properties.SUMMER_CLASS_RATING;
-                        maintenanceClass.WinterRating = results.features[0].properties.WINTER_CLASS_RATING;
-                    }
+                    //we got xml back.. it's likely an error, we should handle these
+                    XmlDocument xdoc = new XmlDocument();
+                    xdoc.LoadXml(content);
+                    errText = xdoc.InnerText.Replace("\n", "").Trim();
+                }
+                else
+                {
+                    featureCollection = ParseJSONToFeatureCollection(content);
                 }
 
-                return maintenanceClass;
+                return (featureCollection, errText);
             }
             catch (System.Exception ex)
             {
-                _logger.LogError($"Exception - GetMaintenanceClassesAssociatedWithPoint({recordNumber}): {body} - {contents}");
-                throw ex;
-            }
-        }
-
-        public async Task<HighwayProfile> GetHighwayProfileAssociatedWithPoint(NetTopologySuite.Geometries.Geometry geometry, string recordNumber)
-        {
-            var body = "";
-            var contents = "";
-            HighwayProfile highwayProfile = new HighwayProfile();
-
-            try
-            {
-                var geometryGroup = BuildGeometryString(geometry.Coordinates);
-
-                foreach (var lineStringCoordinates in geometryGroup)
-                {
-                    body = string.Format(_queries.InventoryAssocWithPointQuery, InventoryParamType.POINT_COORDINATE, lineStringCoordinates, InventoryQueryTypeName.HP_ASSOC_WITH_POINT);
-
-                    contents = await (await _api.PostWithRetry(_client, _path, body)).Content.ReadAsStringAsync();
-
-                    var results = JsonSerializer.Deserialize<FeatureCollection<object>>(contents);
-
-                    
-                    if (results.features.Length > 0)
-                    {
-                        highwayProfile.NumberOfLanes = results.features[0].properties.NUMBER_OF_LANES;
-                        highwayProfile.DividedHighwayFlag = results.features[0].properties.DIVIDED_HIGHWAY_FLAG;
-                    }
-                }
-
-                return highwayProfile;
-            }
-            catch (System.Exception ex)
-            {
-                _logger.LogError($"Exception - GetHighwayProfileAssociatedWithPoint({recordNumber}): {body} - {contents}");
-                throw ex;
-            }
-        }
-
-        public async Task<List<HighwayProfile>> GetHighwayProfileAssociatedWithLine(NetTopologySuite.Geometries.Geometry geometry, string recordNumber)
-        {
-            var body = "";
-            var contents = "";
-            var highwayProfiles = new List<HighwayProfile>();
-
-            try
-            {
-                var geometryGroup = BuildGeometryString(geometry.Coordinates);
-
-                foreach (var lineStringCoordinates in geometryGroup)
-                {
-                    body = string.Format(_queries.InventoryAssocWithLineQuery, InventoryParamType.LINE_COORDINATE, lineStringCoordinates, InventoryQueryTypeName.HP_ASSOC_WITH_LINE);
-
-                    contents = await (await _api.PostWithRetry(_client, _path, body)).Content.ReadAsStringAsync();
-
-                    var results = JsonSerializer.Deserialize<FeatureCollection<object>>(contents);
-
-                    foreach (var feature in results.features)
-                    {
-                        HighwayProfile highwayProfile = new HighwayProfile();
-                        highwayProfile.Length = feature.properties.CLIPPED_LENGTH_KM;
-                        highwayProfile.NumberOfLanes = feature.properties.NUMBER_OF_LANES;
-                        highwayProfile.DividedHighwayFlag = feature.properties.DIVIDED_HIGHWAY_FLAG;
-
-                        highwayProfiles.Add(highwayProfile);
-                    }
-                }
-
-                return highwayProfiles;
-            }
-            catch (System.Exception ex)
-            {
-                _logger.LogError($"Exception - GetHighwayProfileAssociatedWithLine({recordNumber}): {body} - {contents}");
-                throw ex;
-            }
-        }
-
-        public async Task<Guardrail> GetGuardrailAssociatedWithPoint(NetTopologySuite.Geometries.Geometry geometry, string recordNumber)
-        {
-            var body = "";
-            var contents = "";
-            Guardrail guardrail = new Guardrail();
-
-            try
-            {
-                var geometryGroup = BuildGeometryString(geometry.Coordinates);
-
-                foreach (var lineStringCoordinates in geometryGroup)
-                {
-                    body = string.Format(_queries.InventoryAssocWithPointQuery, InventoryParamType.POINT_COORDINATE, lineStringCoordinates, InventoryQueryTypeName.GR_ASSOC_WITH_POINT);
-
-                    contents = await (await _api.PostWithRetry(_client, _path, body)).Content.ReadAsStringAsync();
-
-                    var results = JsonSerializer.Deserialize<FeatureCollection<object>>(contents);
-
-                    if (results.features.Length > 0)
-                    {
-                        guardrail.GuardrailType = results.features[0].properties.GUARDRAIL_TYPE;
-                        guardrail.CrossSectionPosition = results.features[0].properties.IIT_X_SECT;
-                    }
-                }
-
-                return guardrail;
-            }
-            catch (System.Exception ex)
-            {
-                _logger.LogError($"Exception - GetGuardrailAssociatedWithPoint({recordNumber}): {body} - {contents}");
-                throw ex;
-            }
-        }
-
-        public async Task<List<Guardrail>> GetGuardrailAssociatedWithLine(NetTopologySuite.Geometries.Geometry geometry, string recordNumber)
-        {
-            var body = "";
-            var contents = "";
-            var guardrails = new List<Guardrail>();
-
-            try
-            {
-                var geometryGroup = BuildGeometryString(geometry.Coordinates);
-
-                foreach (var lineStringCoordinates in geometryGroup)
-                {
-                    body = string.Format(_queries.InventoryAssocWithLineQuery, InventoryParamType.LINE_COORDINATE, lineStringCoordinates, InventoryQueryTypeName.GR_ASSOC_WITH_LINE);
-
-                    contents = await (await _api.PostWithRetry(_client, _path, body)).Content.ReadAsStringAsync();
-
-                    var results = JsonSerializer.Deserialize<FeatureCollection<object>>(contents);
-
-                    foreach (var feature in results.features)
-                    {
-                        Guardrail guardrail = new Guardrail();
-                        guardrail.Length = feature.properties.CLIPPED_LENGTH_KM;
-                        guardrail.GuardrailType = feature.properties.GUARDRAIL_TYPE;
-                        guardrail.CrossSectionPosition = feature.properties.IIT_X_SECT;
-
-                        guardrails.Add(guardrail);
-                    }
-                }
-
-                return guardrails;
-            }
-            catch (System.Exception ex)
-            {
-                _logger.LogError($"Exception - GetGuardrailAssociatedWithLine({recordNumber}): {body} - {contents}");
+                _logger.LogError($"Exception - GetGuardrail({rfiSegmentName}, {recordNumber}): {query} - {content}");
                 throw ex;
             }
         }
@@ -469,6 +264,21 @@ namespace Hmcr.Chris
                 _logger.LogError($"Exception - GetRestAreasOnRFISegment({recordNumber}): {query} - {content}");
                 throw ex;
             }
+        }
+
+        public static GJFeature.FeatureCollection ParseJSONToFeatureCollection(string jsonContent)
+        {
+            //create NTS JSON reader
+            var reader = new GeoJsonReader();
+
+            // pass the geoJSON to the reader and cast return to FeatureCollection
+            var fc = reader.Read<GJFeature.FeatureCollection>(jsonContent);
+
+            // fail out if no featureCollection
+            if (fc == null)
+                return null;
+            else
+                return fc;
         }
     }
 }

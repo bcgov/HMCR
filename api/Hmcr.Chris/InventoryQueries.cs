@@ -3,6 +3,14 @@ using System.Reflection;
 
 namespace Hmcr.Chris
 {
+    public static class GeoServerEndpoint
+    {
+        public const string Guardrail = "GR_ASSOCIATED_WITH_RFI";
+        public const string HighwayProfile = "HP_ASSOCIATED_WITH_RFI";
+        public const string MaintenanceClass = "MC_ASSOCIATED_WITH_RFI";
+        public const string SurfaceType = "SURF_ASSOCIATED_WITH_RFI";
+    }
+
     public class InventoryQueries
     {
         private string _inventoryAssocWithLineQuery;
@@ -31,5 +39,8 @@ namespace Hmcr.Chris
 
         public readonly string RestAreaOnRfiSegment
             = "service=WFS&version=1.1.0&request=GetFeature&typeName=cwr:RA_BY_RFI&srsName=EPSG:4326&outputFormat=application/json&cql_filter=RFI_UNIQUE='{0}'";
+
+        public readonly string InventoryAssociatedWithRFI
+            = "service=WFS&version=1.0.0&request=GetFeature&typeName=cwr:{0}&maxFeatures={1}&srsName=EPSG:4326&outputFormat=application/json&viewParams=ne_unique:{2}";
     }
 }
