@@ -6,7 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-
+using GJFeature = GeoJSON.Net.Feature;  // use an alias since Feature exists in HttpClients.Models
 namespace Hmcr.Domain.Services
 {
     public interface ISpatialService
@@ -19,17 +19,14 @@ namespace Hmcr.Domain.Services
             (decimal offset, string rfiSegment, string rfiSegmentName, string thresholdLevel, Dictionary<string, List<string>> errors);
         Task<(SpValidationResult result, decimal snappedStartOffset, decimal snappedEndOffset, Point startPoint, Point endPoint, List<Line> lines, RfiSegment rfiSegment)> 
             ValidateLrsLineAsync(decimal startOffset, decimal endOffset, string rfiSegment, string rfiSegmentName, string thresholdLevel, Dictionary<string, List<string>> errors);
-        Task<(SpValidationResult result, List<SurfaceType> surfaceTypes)> GetSurfaceTypeAssocWithLineAsync(NetTopologySuite.Geometries.Geometry geometry, string recordNumber);
-        Task<(SpValidationResult result, SurfaceType surfaceType)> GetSurfaceTypeAssocWithPointAsync(NetTopologySuite.Geometries.Geometry geometry, string recordNumber);
-        Task<(SpValidationResult result, List<MaintenanceClass> maintenanceClasses)> GetMaintenanceClassAssocWithLineAsync(NetTopologySuite.Geometries.Geometry geometry, string recordNumber);
-        Task<(SpValidationResult result, MaintenanceClass maintenanceClass)> GetMaintenanceClassAssocWithPointAsync(NetTopologySuite.Geometries.Geometry geometry, string recordNumber);
+        
         Task<(SpValidationResult result, List<Structure> structures)> GetStructuresOnRFISegmentAsync(string rfiSegmentName, string recordNumber);
-        Task<(SpValidationResult result, HighwayProfile highwayProfile)> GetHighwayProfileAssocWithPointAsync(NetTopologySuite.Geometries.Geometry geometry, string recordNumber);
-        Task<(SpValidationResult result, List<HighwayProfile> highwayProfiles)> GetHighwayProfileAssocWithLineAsync(NetTopologySuite.Geometries.Geometry geometry, string recordNumber);
-        Task<(SpValidationResult result, List<Guardrail> guardrails)> GetGuardrailAssociatedWithLineAsync(NetTopologySuite.Geometries.Geometry geometry, string recordNumber);
-        Task<(SpValidationResult result, Guardrail guardrail)> GetGuardrailAssociatedWithPointAsync(NetTopologySuite.Geometries.Geometry geometry, string recordNumber);
         Task<(SpValidationResult result, List<RestArea> restAreas)> GetRestAreasOnRFISegmentAsync(string rfiSegmentName, string recordNumber);
 
+        Task<(SpValidationResult result, string message, List<SurfaceType> surfaceTypes)> GetSurfaceTypesAssocWithRFISegment(string rfiSegmentName, string recordNumber, decimal startOffset, decimal endOffset);
+        Task<(SpValidationResult result, string message, List<MaintenanceClass> maintenanceClasses)> GetMaintenanceClassAssocWithRFISegment(string rfiSegmentName, string recordNumber, decimal startOffset, decimal endOffset);
+        Task<(SpValidationResult result, string message, List<HighwayProfile> highwayProfiles)> GetHighwayProfileAssocWithRFISegment(string rfiSegmentName, string recordNumber, decimal startOffset, decimal endOffset);
+        Task<(SpValidationResult result, string message, List<Guardrail> guardrails)> GetGuardrailsAssocWithRFISegment(string rfiSegmentName, string recordNumber, decimal startOffset, decimal endOffset);
     }
 
     public class SpatialService : ISpatialService
@@ -254,67 +251,193 @@ namespace Hmcr.Domain.Services
             return (SpValidationResult.Success, rfiDetail);
         }
 
-        public async Task<(SpValidationResult result, List<SurfaceType> surfaceTypes)> GetSurfaceTypeAssocWithLineAsync(NetTopologySuite.Geometries.Geometry geometry, string recordNumber)
+        public async Task<(SpValidationResult result, string message, List<SurfaceType> surfaceTypes)> GetSurfaceTypesAssocWithRFISegment(string rfiSegmentName, string recordNumber, 
+            decimal startOffset, decimal endOffset)
         {
-            var surfaceTypes = await _inventoryApi.GetSurfaceTypeAssociatedWithLine(geometry, recordNumber);
+            var surfaceTypes = new List<SurfaceType>();
+            var validationResult = SpValidationResult.Success;
 
-            return (SpValidationResult.Success, surfaceTypes);
+            //retrieve the feature collection for the highway unique from the ogs endpoint
+            var (featureCollection, errorMsg) = await _inventoryApi.GetSurfaceType(rfiSegmentName, recordNumber);
+            
+            var foundFeatures = FindFeaturesWithinSegment(featureCollection, startOffset, endOffset);
+
+            if (foundFeatures.Features.Count > 0)
+            {
+                foreach (var feature in foundFeatures.Features)
+                {
+                    SurfaceType surfaceType = new SurfaceType();
+                    surfaceType.Length = (double)feature.Properties["LENGTH_KM"];
+                    surfaceType.Type = (string)feature.Properties["SURFACE_TYPE"];
+                    surfaceTypes.Add(surfaceType);
+                }
+            }
+            else
+            {
+                if (errorMsg.Length > 0)
+                    validationResult = SpValidationResult.Fail;
+            }
+
+            return (validationResult, errorMsg, surfaceTypes);
         }
 
-        public async Task<(SpValidationResult result, SurfaceType surfaceType)> GetSurfaceTypeAssocWithPointAsync(NetTopologySuite.Geometries.Geometry geometry, string recordNumber)
+        public async Task<(SpValidationResult result, string message, List<MaintenanceClass> maintenanceClasses)> GetMaintenanceClassAssocWithRFISegment(string rfiSegmentName, string recordNumber,
+            decimal startOffset, decimal endOffset)
         {
-            var surfaceType = await _inventoryApi.GetSurfaceTypeAssociatedWithPoint(geometry, recordNumber);
+            var maintenanceClasses = new List<MaintenanceClass>();
+            var validationResult = SpValidationResult.Success;
+            
+            var (featureCollection, errorMsg) = await _inventoryApi.GetMaintenanceClass(rfiSegmentName, recordNumber);
 
-            return (SpValidationResult.Success, surfaceType);
+            var foundFeatures = FindFeaturesWithinSegment(featureCollection, startOffset, endOffset);
+            
+            if (foundFeatures != null)
+            {
+                foreach (var feature in foundFeatures.Features)
+                {
+                    MaintenanceClass maintenanceClass = new MaintenanceClass();
+                    maintenanceClass.Length = (double)feature.Properties["LENGTH_KM"];
+                    maintenanceClass.SummerRating = (string)feature.Properties["SUMMER_CLASS_RATING"];
+                    maintenanceClass.WinterRating = (string)feature.Properties["WINTER_CLASS_RATING"];
+
+                    maintenanceClasses.Add(maintenanceClass);
+                }
+            }
+            else
+            {
+                if (errorMsg.Length > 0)
+                    validationResult = SpValidationResult.Fail;
+            }
+
+            return (validationResult, errorMsg, maintenanceClasses);
         }
 
-        public async Task<(SpValidationResult result, MaintenanceClass maintenanceClass)> GetMaintenanceClassAssocWithPointAsync(NetTopologySuite.Geometries.Geometry geometry, string recordNumber)
+        public async Task<(SpValidationResult result, string message, List<HighwayProfile> highwayProfiles)> GetHighwayProfileAssocWithRFISegment(string rfiSegmentName, string recordNumber,
+            decimal startOffset, decimal endOffset)
         {
-            var maintenanceClass = await _inventoryApi.GetMaintenanceClassesAssociatedWithPoint(geometry, recordNumber);
+            var highwayProfiles = new List<HighwayProfile>();
+            var validationResult = SpValidationResult.Success;
 
-            return (SpValidationResult.Success, maintenanceClass);
+            var (featureCollection, errorMsg) = await _inventoryApi.GetHighwayProfile(rfiSegmentName, recordNumber);
+
+            var foundFeatures = FindFeaturesWithinSegment(featureCollection, startOffset, endOffset);
+
+            if (foundFeatures.Features.Count > 0)
+            {
+                foreach (var feature in foundFeatures.Features)
+                {
+                    HighwayProfile highwayProfile = new HighwayProfile();
+                    highwayProfile.Length = (double)feature.Properties["LENGTH_KM"];
+                    highwayProfile.NumberOfLanes = Convert.ToInt32(feature.Properties["NUMBER_OF_LANES"]);
+                    highwayProfile.DividedHighwayFlag = (string)feature.Properties["DIVIDED_HIGHWAY_FLAG"];
+
+                    highwayProfiles.Add(highwayProfile);
+                }
+            }
+            else
+            {
+                if (errorMsg.Length > 0)
+                    validationResult = SpValidationResult.Fail;
+            }
+
+            return (validationResult, errorMsg, highwayProfiles);
         }
 
-        public async Task<(SpValidationResult result, List<MaintenanceClass> maintenanceClasses)> GetMaintenanceClassAssocWithLineAsync(NetTopologySuite.Geometries.Geometry geometry, string recordNumber)
+        public async Task<(SpValidationResult result, string message, List<Guardrail> guardrails)> GetGuardrailsAssocWithRFISegment(string rfiSegmentName, string recordNumber,
+            decimal startOffset, decimal endOffset)
         {
-            var maintenanceClasses = await _inventoryApi.GetMaintenanceClassesAssociatedWithLine(geometry, recordNumber);
+            var guardrails = new List<Guardrail>();
+            var validationResult = SpValidationResult.Success;
 
-            return (SpValidationResult.Success, maintenanceClasses);
+            var (featureCollection, errorMsg) = await _inventoryApi.GetGuardrail(rfiSegmentName, recordNumber);
+
+            var foundFeatures = FindFeaturesWithinSegment(featureCollection, startOffset, endOffset);
+
+            if (foundFeatures.Features.Count > 0)
+            {
+                foreach (var feature in foundFeatures.Features)
+                {
+                    Guardrail guardrail = new Guardrail();
+                    guardrail.Length = (double)feature.Properties["LENGTH_KM"];
+                    guardrail.GuardrailType = (string)feature.Properties["GUARDRAIL_TYPE"];
+
+                    guardrails.Add(guardrail);
+                }
+            }
+            else
+            {
+                if (errorMsg.Length > 0)
+                    validationResult = SpValidationResult.Fail;
+            }
+
+            return (validationResult, errorMsg, guardrails);
+        }
+
+
+        private GJFeature.FeatureCollection FindFeaturesWithinSegment(GJFeature.FeatureCollection featureCollection, decimal startOffset, decimal endOffset)
+        {
+            GJFeature.FeatureCollection foundFeatures = new GJFeature.FeatureCollection();
+
+            if (featureCollection != null)
+            {
+                //since we got the features for the entire highway we need to determine which ones actually fall within our offsets
+
+                //need to handle scenarios when the coordinates are 'backwards'
+                // to do this we'll set the end offset as the larger value and the start as the smaller
+                decimal adjStartOffset = (startOffset > endOffset) ? endOffset : startOffset;
+                decimal adjEndOffset = (startOffset > endOffset) ? startOffset : endOffset;
+                
+                decimal newStartOffset = adjStartOffset;
+
+                foreach (var feature in featureCollection.Features)
+                {
+                    //get the begin & end KM, have to use convert instead of explicit cast because of 0
+                    var beginKM = Convert.ToDecimal(feature.Properties["BEGIN_KM"]);
+                    var endKM = Convert.ToDecimal(feature.Properties["END_KM"]);
+
+                    //it's in our range
+                    if (newStartOffset <= adjEndOffset)
+                    {
+                        if ((newStartOffset >= beginKM) && (newStartOffset <= endKM))
+                        {
+                            var lengthKM = GetAdjustedLengthKM(adjStartOffset, adjEndOffset, beginKM, endKM, Convert.ToDecimal(feature.Properties["LENGTH_KM"]));
+                            newStartOffset += lengthKM;
+
+                            feature.Properties["LENGTH_KM"] = (double)lengthKM;
+
+                            foundFeatures.Features.Add(feature);
+                        }
+                    }
+                }
+            }
+            
+            return foundFeatures;
+        }
+
+        private decimal GetAdjustedLengthKM(decimal startOffset, decimal endOffset, decimal beginKM, decimal endKM, decimal lengthKM)
+        {
+            //length needs to be adjusted to segment begin
+            if (startOffset >= beginKM)
+            {
+                //don't let it go below zero
+                lengthKM -= Math.Max(startOffset - beginKM, 0);
+            }
+
+            //length needs to be adjusted to segment end
+            if (endOffset <= endKM)
+            {
+                lengthKM -= Math.Max(endKM - endOffset, 0);
+            }
+
+            return lengthKM;
         }
 
         public async Task<(SpValidationResult result, List<Structure> structures)> GetStructuresOnRFISegmentAsync(string rfiSegmentName, string recordNumber)
         {
             var structures = await _inventoryApi.GetStructuresOnRFISegment(rfiSegmentName, recordNumber);
 
+
             return (SpValidationResult.Success, structures);
-        }
-
-        public async Task<(SpValidationResult result, List<HighwayProfile> highwayProfiles)> GetHighwayProfileAssocWithLineAsync(NetTopologySuite.Geometries.Geometry geometry, string recordNumber)
-        {
-            var highwayProfiles = await _inventoryApi.GetHighwayProfileAssociatedWithLine(geometry, recordNumber);
-
-            return (SpValidationResult.Success, highwayProfiles);
-        }
-
-        public async Task<(SpValidationResult result, HighwayProfile highwayProfile)> GetHighwayProfileAssocWithPointAsync(NetTopologySuite.Geometries.Geometry geometry, string recordNumber)
-        {
-            var highwayProfile = await _inventoryApi.GetHighwayProfileAssociatedWithPoint(geometry, recordNumber);
-
-            return (SpValidationResult.Success, highwayProfile);
-        }
-
-        public async Task<(SpValidationResult result, List<Guardrail> guardrails)> GetGuardrailAssociatedWithLineAsync(NetTopologySuite.Geometries.Geometry geometry, string recordNumber)
-        {
-            var guardrails = await _inventoryApi.GetGuardrailAssociatedWithLine(geometry, recordNumber);
-
-            return (SpValidationResult.Success, guardrails);
-        }
-
-        public async Task<(SpValidationResult result, Guardrail guardrail)> GetGuardrailAssociatedWithPointAsync(NetTopologySuite.Geometries.Geometry geometry, string recordNumber)
-        {
-            var guardrail = await _inventoryApi.GetGuardrailAssociatedWithPoint(geometry, recordNumber);
-
-            return (SpValidationResult.Success, guardrail);
         }
 
         public async Task<(SpValidationResult result, List<RestArea> restAreas)> GetRestAreasOnRFISegmentAsync(string rfiSegmentName, string recordNumber)

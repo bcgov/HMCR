@@ -470,123 +470,71 @@ namespace Hmcr.Domain.Hangfire
             var submissionRow = _submissionRows[(decimal)typedRow.RowNum];
             typedRow.HighwayProfiles = new List<WorkReportHighwayProfile>();
             typedRow.Guardrails = new List<WorkReportGuardrail>();
-
-            //surface type calls are different between Point & Line
-            if (typedRow.FeatureType == FeatureType.Point)
+            
+            //get guardrails when activity rule calls for it
+            if (typedRow.ActivityCodeValidation.RoadLenghRuleExec == RoadLengthRules.GUARDRAIL_LEN_METERS)
             {
-                //get guardrails when activity rule calls for it
-                if (typedRow.ActivityCodeValidation.RoadLenghRuleExec == RoadLengthRules.GUARDRAIL_LEN_METERS)
+                var grResult = await _spatialService.GetGuardrailsAssocWithRFISegment(typedRow.HighwayUnique, typedRow.RecordNumber,
+                    typedRow.StartOffset.HasValue ? (decimal)typedRow.StartOffset : 0.0M, typedRow.EndOffset.HasValue ? (decimal)typedRow.EndOffset : 0.0M);
+
+                if (grResult.result == SpValidationResult.Fail)
                 {
-                    var grResult = await _spatialService.GetGuardrailAssociatedWithPointAsync(row.Geometry, row.WorkReportTyped.RecordNumber);
-                    if (grResult.result == SpValidationResult.Fail)
-                    {
-                        querySuccess = false;
-                        SetErrorDetail(submissionRow, errors, _statusService.FileLocationError);
-                    }
-                    else if (grResult.result == SpValidationResult.Success)
-                    {
-                        if (grResult.guardrail != null)
-                        {
-                            WorkReportGuardrail guardrail = new WorkReportGuardrail();
-                            guardrail.GuardrailType = grResult.guardrail.GuardrailType;
-                            guardrail.Length = grResult.guardrail.Length;
+                    querySuccess = false;
+                    if (grResult.message.Length > 0)
+                        errors.AddItem("GeoServer Error", $"Failed communicating with GeoServer, message returned: {grResult.message}. Contact the HMCR administrator for assistance");
 
-                            typedRow.Guardrails.Add(guardrail);
-                        }
-
-                        querySuccess = (typedRow.Guardrails.Count() > 0);
-                    }
-                } 
-                else 
-                {
-                    //get highway profile
-                    var hpResult = await _spatialService.GetHighwayProfileAssocWithPointAsync(row.Geometry, row.WorkReportTyped.RecordNumber);
-                    if (hpResult.result == SpValidationResult.Fail)
-                    {
-                        querySuccess = false;
-                        SetErrorDetail(submissionRow, errors, _statusService.FileLocationError);
-                    }
-                    else if (hpResult.result == SpValidationResult.Success)
-                    {
-                        if (hpResult.highwayProfile != null)    //only add if type was returned
-                        {
-                            WorkReportHighwayProfile highwayProfile = new WorkReportHighwayProfile();
-                            highwayProfile.Length = hpResult.highwayProfile.Length;
-                            highwayProfile.NumberOfLanes = hpResult.highwayProfile.NumberOfLanes;
-
-                            typedRow.HighwayProfiles.Add(highwayProfile);
-                        }
-
-                        querySuccess = (typedRow.HighwayProfiles.Count() > 0);
-                    }
+                    SetErrorDetail(submissionRow, errors, _statusService.FileLocationError);
                 }
+                else if (grResult.result == SpValidationResult.Success)
+                {
+                    foreach (var profile in grResult.guardrails)
+                    {
+                        WorkReportGuardrail guardrail = new WorkReportGuardrail();
+                        guardrail.GuardrailType = profile.GuardrailType;
+                        guardrail.Length = profile.Length;
 
-                if (querySuccess)
-                {
-                    PerformRoadLengthValidation(typedRow);
-                } else
-                {
-                    warnings.AddItem("Road Length Validation", $"No Road Length Linear Feature Item(s) (HighwayProfile) " +
-                        $"found for Highway Unique [{typedRow.HighwayUnique}] at the GPS position");
+                        typedRow.Guardrails.Add(guardrail);
+                    }
+
+                    querySuccess = (typedRow.Guardrails.Count() > 0);
                 }
             }
-            else if (typedRow.FeatureType == FeatureType.Line)
+            else
             {
-                //get guardrails when activity rule calls for it
-                if (typedRow.ActivityCodeValidation.RoadLenghRuleExec == RoadLengthRules.GUARDRAIL_LEN_METERS)
+                //get highway profile
+                var hpResult = await _spatialService.GetHighwayProfileAssocWithRFISegment(typedRow.HighwayUnique, typedRow.RecordNumber,
+                    typedRow.StartOffset.HasValue ? (decimal)typedRow.StartOffset : 0.0M, typedRow.EndOffset.HasValue ? (decimal)typedRow.EndOffset : 0.0M);
+
+                if (hpResult.result == SpValidationResult.Fail)
                 {
-                    var grResult = await _spatialService.GetGuardrailAssociatedWithLineAsync(row.Geometry, row.WorkReportTyped.RecordNumber);
-                    if (grResult.result == SpValidationResult.Fail)
-                    {
-                        querySuccess = false;
-                        SetErrorDetail(submissionRow, errors, _statusService.FileLocationError);
-                    }
-                    else if (grResult.result == SpValidationResult.Success)
-                    {
-                        foreach (var profile in grResult.guardrails)
-                        {
-                            WorkReportGuardrail guardrail = new WorkReportGuardrail();
-                            guardrail.GuardrailType = profile.GuardrailType;
-                            guardrail.Length = profile.Length;
-
-                            typedRow.Guardrails.Add(guardrail);
-                        }
-
-                        querySuccess = (typedRow.Guardrails.Count() > 0);
-                    }
+                    querySuccess = false;
+                    if (hpResult.message.Length > 0)
+                        errors.AddItem("GeoServer Error", $"Failed communicating with GeoServer, message returned: {hpResult.message}. Contact the HMCR administrator for assistance");
+                    SetErrorDetail(submissionRow, errors, _statusService.FileLocationError);
                 }
-                else
+                else if (hpResult.result == SpValidationResult.Success)
                 {
-                    //get highway profile
-                    var hpResult = await _spatialService.GetHighwayProfileAssocWithLineAsync(row.Geometry, row.WorkReportTyped.RecordNumber);
-                    if (hpResult.result == SpValidationResult.Fail)
+                    
+                    foreach (var profile in hpResult.highwayProfiles)
                     {
-                        querySuccess = false;
-                        SetErrorDetail(submissionRow, errors, _statusService.FileLocationError);
-                    }
-                    else if (hpResult.result == SpValidationResult.Success)
-                    {
-                        foreach (var profile in hpResult.highwayProfiles)
-                        {
-                            WorkReportHighwayProfile highwayProfile = new WorkReportHighwayProfile();
-                            highwayProfile.Length = profile.Length;
-                            highwayProfile.NumberOfLanes = profile.NumberOfLanes;
+                        WorkReportHighwayProfile highwayProfile = new WorkReportHighwayProfile();
+                        highwayProfile.Length = profile.Length;
+                        highwayProfile.NumberOfLanes = profile.NumberOfLanes;
 
-                            typedRow.HighwayProfiles.Add(highwayProfile);
-                        }
-
-                        querySuccess = (typedRow.HighwayProfiles.Count() > 0);
+                        typedRow.HighwayProfiles.Add(highwayProfile);
                     }
+
+                    querySuccess = (typedRow.HighwayProfiles.Count() > 0);
                 }
+            }
                 
-                if (querySuccess)
-                {
-                    PerformRoadLengthValidation(typedRow);
-                } else
-                {
-                    warnings.AddItem("Road Length Validation", $"No Road Length Linear Feature Item(s) (HighwayProfile) " +
-                        $"found for Highway Unique [{typedRow.HighwayUnique}] at the GPS position");
-                }
+            if (querySuccess)
+            {
+                PerformRoadLengthValidation(typedRow);
+            } else
+            {
+                warnings.AddItem("Road Length Validation", $"No Road Length Linear Feature Item(s) (HighwayProfile) " +
+                    $"found for Highway Unique [{typedRow.HighwayUnique}] at the GPS position");
             }
 
             if (warnings.Count > 0)
@@ -606,64 +554,35 @@ namespace Hmcr.Domain.Hangfire
             var submissionRow = _submissionRows[(decimal)typedRow.RowNum];
             typedRow.MaintenanceClasses = new List<WorkReportMaintenanceClass>();
 
-            //surface type calls are different between Point & Line
-            if (typedRow.FeatureType == FeatureType.Point)
+            var result = await _spatialService.GetMaintenanceClassAssocWithRFISegment(typedRow.HighwayUnique, typedRow.RecordNumber, 
+                typedRow.StartOffset.HasValue ? (decimal)typedRow.StartOffset : 0.0M, typedRow.EndOffset.HasValue ? (decimal)typedRow.EndOffset : 0.0M);
+            
+            if (result.result == SpValidationResult.Fail)
             {
-                var result = await _spatialService.GetMaintenanceClassAssocWithPointAsync(row.Geometry, row.WorkReportTyped.RecordNumber);
-
-                if (result.result == SpValidationResult.Fail)
-                {
-                    SetErrorDetail(submissionRow, errors, _statusService.FileLocationError);
-                }
-                else if (result.result == SpValidationResult.Success)
-                {
-                    if (result.maintenanceClass != null)    //only add if type was returned
-                    {
-                        WorkReportMaintenanceClass roadClass = new WorkReportMaintenanceClass();
-                        roadClass.WinterRating = result.maintenanceClass.WinterRating;
-                        roadClass.SummerRating = result.maintenanceClass.SummerRating;
-                        roadClass.RoadLength = result.maintenanceClass.Length;
-                        typedRow.MaintenanceClasses.Add(roadClass);
-                    }
-
-                    //if we have no MC features we throw a warning on the row item
-                    if (typedRow.MaintenanceClasses.Count() > 0)
-                    {
-                        PerformMaintenanceClassValidation(typedRow);
-                    } else
-                    {
-                        warnings.AddItem("Road Class Validation", $"No Road Class Linear Feature Item(s) " +
-                            $"(Maintenance Class) Found for Highway Unique [{typedRow.HighwayUnique}] at the GPS position.");
-                    }
-                }
-
+                if (result.message.Length > 0)
+                    errors.AddItem("GeoServer Error", $"Failed communicating with GeoServer, message returned: {result.message}. Contact the HMCR administrator for assistance");
+                SetErrorDetail(submissionRow, errors, _statusService.FileLocationError);
             }
-            else if (typedRow.FeatureType == FeatureType.Line)
+            else if (result.result == SpValidationResult.Success)
             {
-                var result = await _spatialService.GetMaintenanceClassAssocWithLineAsync(row.Geometry, row.WorkReportTyped.RecordNumber);
-                if (result.result == SpValidationResult.Fail)
+                    
+                foreach (var maintenanceClass in result.maintenanceClasses)
                 {
-                    SetErrorDetail(submissionRow, errors, _statusService.FileLocationError);
+                        
+                    WorkReportMaintenanceClass roadClass = new WorkReportMaintenanceClass();
+                    roadClass.WinterRating = maintenanceClass.WinterRating;
+                    roadClass.SummerRating = maintenanceClass.SummerRating;
+                    roadClass.RoadLength = maintenanceClass.Length;
+                    typedRow.MaintenanceClasses.Add(roadClass);
                 }
-                else if (result.result == SpValidationResult.Success)
-                {
-                    foreach (var maintenanceClass in result.maintenanceClasses)
-                    {
-                        WorkReportMaintenanceClass roadClass = new WorkReportMaintenanceClass();
-                        roadClass.WinterRating = maintenanceClass.WinterRating;
-                        roadClass.SummerRating = maintenanceClass.SummerRating;
-                        roadClass.RoadLength = maintenanceClass.Length;
-                        typedRow.MaintenanceClasses.Add(roadClass);
-                    }
 
-                    if (typedRow.MaintenanceClasses.Count() > 0)
-                    {
-                        PerformMaintenanceClassValidation(typedRow);
-                    } else
-                    {
-                        warnings.AddItem("Road Class Validation", $"No Road Class Linear Feature Item(s) " +
-                            $"(Maintenance Class) Found for Highway Unique [{typedRow.HighwayUnique}] at the GPS position.");
-                    }
+                if (typedRow.MaintenanceClasses.Count() > 0)
+                {
+                    PerformMaintenanceClassValidation(typedRow);
+                } else
+                {
+                    warnings.AddItem("Road Class Validation", $"No Road Class Linear Feature Item(s) " +
+                        $"(Maintenance Class) Found for Highway Unique [{typedRow.HighwayUnique}] at the GPS position.");
                 }
             }
 
@@ -683,64 +602,38 @@ namespace Hmcr.Domain.Hangfire
             var submissionRow = _submissionRows[(decimal)typedRow.RowNum];
             typedRow.SurfaceTypes = new List<WorkReportSurfaceType>();
 
-            //surface type calls are different between Point & Line
-            if (typedRow.FeatureType == FeatureType.Point)
+
+            // for this type of record the offsets won't be null so adding an explicit cast
+            var result = await _spatialService.GetSurfaceTypesAssocWithRFISegment(typedRow.HighwayUnique, typedRow.RecordNumber,
+                typedRow.StartOffset.HasValue ? (decimal)typedRow.StartOffset : 0.0M, typedRow.EndOffset.HasValue ? (decimal)typedRow.EndOffset : 0.0M);
+
+            if (result.result == SpValidationResult.Fail)
             {
-                var result = await _spatialService.GetSurfaceTypeAssocWithPointAsync(row.Geometry, row.WorkReportTyped.RecordNumber);
-
-                if (result.result == SpValidationResult.Fail)
-                {
-                    SetErrorDetail(submissionRow, errors, _statusService.FileLocationError);
-                }
-                else if (result.result == SpValidationResult.Success)
-                {
-                    if (result.surfaceType.Type != null)    //only add if type was returned
-                    {
-                        WorkReportSurfaceType roadFeature = new WorkReportSurfaceType();
-                        roadFeature.SurfaceLength = result.surfaceType.Length;
-                        roadFeature.SurfaceType = result.surfaceType.Type;
-                        typedRow.SurfaceTypes.Add(roadFeature);
-                    }
-
-                    if (typedRow.SurfaceTypes.Count() > 0)
-                    {
-                        await PerformSurfaceTypeValidation(typedRow);
-                    } else
-                    {
-                        warnings.AddItem("Surface Type Validation", $"No Surface Type Linear Feature Item(s) " +
-                            $"Found for Highway Unique[{typedRow.HighwayUnique}] at the GPS position.");
-                    }
-                }
+                if (result.message.Length > 0)
+                    errors.AddItem("GeoServer Error", $"Failed communicating with GeoServer, message returned: {result.message}. Contact the HMCR administrator for assistance");
+                SetErrorDetail(submissionRow, errors, _statusService.FileLocationError);
             }
-            else if (typedRow.FeatureType == FeatureType.Line)
+            else if (result.result == SpValidationResult.Success)
             {
-                var result = await _spatialService.GetSurfaceTypeAssocWithLineAsync(row.Geometry, row.WorkReportTyped.RecordNumber);
-
-                if (result.result == SpValidationResult.Fail)
+                var distinctTypes = result.surfaceTypes.Select(x => x.Type).Distinct().ToList();
+                  
+                foreach (string type in distinctTypes)
                 {
-                    SetErrorDetail(submissionRow, errors, _statusService.FileLocationError);
-                }
-                else if (result.result == SpValidationResult.Success)
-                {
-                    var distinctTypes = result.surfaceTypes.Select(x => x.Type).Distinct().ToList();
-                    foreach (string type in distinctTypes)
-                    {
-                        var totalLengthOfType = result.surfaceTypes.Where(x => x.Type == type).Sum(x => x.Length);
+                    var totalLengthOfType = result.surfaceTypes.Where(x => x.Type == type).Sum(x => x.Length);
                         
-                        WorkReportSurfaceType roadFeature = new WorkReportSurfaceType();
-                        roadFeature.SurfaceLength = totalLengthOfType;
-                        roadFeature.SurfaceType = type;
-                        typedRow.SurfaceTypes.Add(roadFeature);
-                    }
+                    WorkReportSurfaceType roadFeature = new WorkReportSurfaceType();
+                    roadFeature.SurfaceLength = totalLengthOfType;
+                    roadFeature.SurfaceType = type;
+                    typedRow.SurfaceTypes.Add(roadFeature);
+                }
 
-                    if (typedRow.SurfaceTypes.Count() > 0)
-                    {
-                        await PerformSurfaceTypeValidation(typedRow);
-                    } else
-                    {
-                        warnings.AddItem("Surface Type Validation", $"No Surface Type Linear Feature Item(s) " +
-                            $"Found for Highway Unique[{typedRow.HighwayUnique}] at the GPS position.");
-                    }
+                if (typedRow.SurfaceTypes.Count() > 0)
+                {
+                    await PerformSurfaceTypeValidation(typedRow);
+                } else
+                {
+                    warnings.AddItem("Surface Type Validation", $"No Surface Type Linear Feature Item(s) " +
+                        $"Found for Highway Unique[{typedRow.HighwayUnique}] at the GPS position.");
                 }
             }
 
