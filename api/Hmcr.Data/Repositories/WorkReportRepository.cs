@@ -35,8 +35,12 @@ namespace Hmcr.Data.Repositories
             {
                 workReport.WorkReportTyped.SubmissionObjectId = submission.SubmissionObjectId;
 
+                //HMCR-1063 Rockfall reports with same MCRR numbers submitted for different service areas were over writing the original
+                //  Investigation determined that this was also a possible issue for Work Reports
+                //  changed it from PartyID to ContractTermID which handles the service area and party distinction
                 var entity = await DbSet
-                    .Where(x => x.SubmissionObject.PartyId == submission.PartyId && x.RecordNumber == workReport.WorkReportTyped.RecordNumber)
+                    //.Where(x => x.SubmissionObject.PartyId == submission.PartyId && x.RecordNumber == workReport.WorkReportTyped.RecordNumber)
+                    .Where(x => x.SubmissionObject.ContractTermId == submission.ContractTermId && x.RecordNumber == workReport.WorkReportTyped.RecordNumber)
                     .FirstOrDefaultAsync();
 
                 if (entity == null)
