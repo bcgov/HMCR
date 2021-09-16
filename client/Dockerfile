@@ -3,9 +3,13 @@ LABEL maintainer="neal.li@gov.bc.ca"
 
 COPY . ./src
 
-RUN cd ./src && npm install --production && \
+RUN cd ./src && \
+    apk add --no-cache --virtual .gyp \
+    python \
+    make \
+    g++ && \
+    npm install --production && \
     npm run build
-
 
 FROM image-registry.openshift-image-registry.svc:5000/d3d940-tools/nginx-116-rhel8:1
 
