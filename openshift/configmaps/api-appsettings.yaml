@@ -39,6 +39,30 @@ objects:
               ],
               "Enrich": [ "FromLogContext", "WithMachineName" ]
             },
+            "Columns": {
+              "message": "RenderedMessageColumnWriter",
+              "message_template": "MessageTemplateColumnWriter",
+              "level": {
+                "Name": "LevelColumnWriter",
+                "Args": {
+                  "renderAsText": false
+                }
+              },
+              "timestamp": "TimestampColumnWriter",
+              "exception": "ExceptionColumnWriter",
+              "log_event": "LogEventSerializedColumnWriter",
+              "props_test": {
+                "Name": "PropertiesColumnWriter",
+                "Args": { "dbType": "Json" }
+              },
+              "machine_name": {
+                "Name": "SinglePropertyColumnWriter",
+                "Args": {
+                  "propertyName": "MachineName",
+                  "writeMethod": "Raw"
+                }
+              }
+            },
             "ConnectionStrings": {
                 "HMCR": "Server=localhost;Database=HMR_DEV;Trusted_Connection=True;MultipleActiveResultSets=true",
                 "SERILOG": "Host=localhost;Username=postgres;Password=postgres;Database=serilog;Port=9010"
