@@ -13,38 +13,35 @@ objects:
                 "SwaggerApiUrl": "/swagger/v1/swagger.json"
             },
             "Serilog": {
-                "MinimumLevel": {
+              "Using": [ "Serilog.Sinks.PostgreSQL.Configuration" ],
+              "MinimumLevel": {
                 "Default": "Information",
                 "Override": {
-                    "Microsoft": "Warning",
-                    "System": "Warning"
+                  "Microsoft": "Warning",
+                  "System": "Warning"
+                }
+              },
+              "WriteTo": [
+                {
+                  "Name": "Async",
+                  "Args": {
+                    "configure": [ { "Name": "Console" } ]
                   }
                 },
-                "WriteTo": [
-                  {
-                      "Name": "Async",
-                      "Args": {
-                          "configure": [
-                              { "Name": "Console" }
-                          ]
-                      }
-                  },
-                  {
-                      "Name": "HmcrPostgreSql",
-                      "Args": {
-                          "connectionString": "serilog",
-                          "tableName": "hmcr",
-                          "needAutoCreateTable": true
-                      }
+                {
+                  "Name": "PostgreSQL",
+                  "Args": {
+                    "connectionString": "SERILOG",
+                    "tableName": "hmr_log",
+                    "needAutoCreateTable": true
                   }
-                ],
-                "Enrich": [
-                  "FromLogContext",
-                  "WithMachineName"
-                ]
-            },  
+                }
+              ],
+              "Enrich": [ "FromLogContext", "WithMachineName" ]
+            },
             "ConnectionStrings": {
-                "HMCR": "Server=localhost;Database=HMR_DEV;Trusted_Connection=True;MultipleActiveResultSets=true"
+                "HMCR": "Server=localhost;Database=HMR_DEV;Trusted_Connection=True;MultipleActiveResultSets=true",
+                "SERILOG": "Host=localhost;Username=postgres;Password=postgres;Database=serilog;Port=9010"
             },
             "EnableSensitiveDataLogging": false,
             "Hangfire": {
