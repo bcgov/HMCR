@@ -3,13 +3,7 @@ LABEL maintainer="young-jin.chung@gov.bc.ca"
 
 COPY . ./src
 
-RUN cd ./src && \
-    apk add --no-cache --virtual .gyp \
-    python \
-    make \
-    g++ && \
-    npm install --production && \
-    npm run build
+RUN cd ./src && npm ci && npm run build
 
 FROM image-registry.openshift-image-registry.svc:5000/d3d940-tools/nginx-116-rhel8:1
 
