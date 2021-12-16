@@ -10,6 +10,8 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Serilog.Ui.PostgreSqlProvider.Extensions;
+using Serilog.Ui.Web;
 
 namespace Hmcr.Api
 {
@@ -42,6 +44,7 @@ namespace Hmcr.Api
             services.AddChrisHttpClient(Configuration);
             services.AddBceidSoapClient(Configuration);
             services.AddHmcrHealthCheck(connectionString);
+            services.AddSerilogUi(options => options.UseNpgSql(Configuration.GetValue<string>("ConnectionStrings:SERILOG"), "hmr_log"));
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env, ISubmissionObjectJobService jobService, 
@@ -57,6 +60,7 @@ namespace Hmcr.Api
             app.UseCors(Constants.HmcrOrigins);
             app.UseAuthentication();
             app.UseAuthorization();
+            app.UseSerilogUi();
             app.UseHmcrEndpoints();
             app.UseHmcrSwagger(env, Configuration.GetSection("Constants:SwaggerApiUrl").Value);
 

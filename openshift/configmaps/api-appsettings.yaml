@@ -9,42 +9,63 @@ objects:
         {
             "AllowedHosts": "*",
             "Constants": {
-                "Version": "2.0.3.0",
+                "Version": "2.0.4.0",
                 "SwaggerApiUrl": "/swagger/v1/swagger.json"
             },
             "Serilog": {
-                "MinimumLevel": {
+              "Using": [ "Serilog.Sinks.PostgreSQL.Configuration" ],
+              "MinimumLevel": {
                 "Default": "Information",
                 "Override": {
-                    "Microsoft": "Warning",
-                    "System": "Warning"
+                  "Microsoft": "Warning",
+                  "System": "Warning"
+                }
+              },
+              "WriteTo": [
+                {
+                  "Name": "Async",
+                  "Args": {
+                    "configure": [ { "Name": "Console" } ]
                   }
                 },
-                "WriteTo": [
-                  {
-                      "Name": "Async",
-                      "Args": {
-                          "configure": [
-                              { "Name": "Console" }
-                          ]
-                      }
-                  },
-                  {
-                      "Name": "HmcrPostgreSql",
-                      "Args": {
-                          "connectionString": "serilog",
-                          "tableName": "hmcr",
-                          "needAutoCreateTable": true
-                      }
+                {
+                  "Name": "PostgreSQL",
+                  "Args": {
+                    "connectionString": "SERILOG",
+                    "tableName": "hmr_log",
+                    "needAutoCreateTable": true
                   }
-                ],
-                "Enrich": [
-                  "FromLogContext",
-                  "WithMachineName"
-                ]
-            },  
+                }
+              ],
+              "Enrich": [ "FromLogContext", "WithMachineName" ]
+            },
+            "Columns": {
+              "message": "RenderedMessageColumnWriter",
+              "message_template": "MessageTemplateColumnWriter",
+              "level": {
+                "Name": "LevelColumnWriter",
+                "Args": {
+                  "renderAsText": false
+                }
+              },
+              "timestamp": "TimestampColumnWriter",
+              "exception": "ExceptionColumnWriter",
+              "log_event": "LogEventSerializedColumnWriter",
+              "props_test": {
+                "Name": "PropertiesColumnWriter",
+                "Args": { "dbType": "Json" }
+              },
+              "machine_name": {
+                "Name": "SinglePropertyColumnWriter",
+                "Args": {
+                  "propertyName": "MachineName",
+                  "writeMethod": "Raw"
+                }
+              }
+            },
             "ConnectionStrings": {
-                "HMCR": "Server=(localdb)\\mssqllocaldb;Database=HMR_DEV;Trusted_Connection=True;MultipleActiveResultSets=true"
+                "HMCR": "Server=localhost;Database=HMR_DEV;Trusted_Connection=True;MultipleActiveResultSets=true",
+                "SERILOG": "Host=localhost;Username=postgres;Password=postgres;Database=serilog;Port=9010"
             },
             "EnableSensitiveDataLogging": false,
             "Hangfire": {

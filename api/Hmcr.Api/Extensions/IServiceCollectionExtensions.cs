@@ -19,7 +19,6 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
-using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
 using NetCore.AutoRegisterDi;
 using System;
@@ -108,7 +107,6 @@ namespace Hmcr.Api.Extensions
             {
                 options.Authority = config.GetValue<string>("JWT:Authority");
                 options.Audience = config.GetValue<string>("JWT:Audience");
-                options.RequireHttpsMetadata = false;
                 options.IncludeErrorDetails = true;
                 options.EventsType = typeof(HmcrJwtBearerEvents);
             });

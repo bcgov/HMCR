@@ -4,6 +4,7 @@ const changeId = options.pr; //aka pull-request
 const version = "1.0.0";
 const name = "hmcr";
 
+Object.assign(options.git, { owner: "ychung-mot", repository: "HMCR" });
 const phases = {
   build: {
     namespace: "d3d940-tools",
@@ -25,7 +26,7 @@ const phases = {
     instance: `${name}-dev-${changeId}`,
     version: `${version}-${changeId}`,
     tag: `dev-${version}-${changeId}`,
-    host: `hmcr-${changeId}-d3d940-dev.apps.silver.devops.gov.bc.ca`,
+    host: `hmcr-d3d940-dev.apps.silver.devops.gov.bc.ca`,
     url_prefix: "dev-",
     bceid_service: ".test",
     oas_server: "devoas4",
