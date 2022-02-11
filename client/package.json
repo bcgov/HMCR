@@ -16,7 +16,7 @@
     "keycloak-js": "^9.0.3",
     "lodash": "^4.17.21",
     "moment": "^2.24.0",
-    "node-sass": "^6.0.1",
+    "node-sass": "^7.0.0",
     "prop-types": "^15.7.2",
     "query-string": "^6.11.1",
     "react": "^16.13.0",
