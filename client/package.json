@@ -34,6 +34,9 @@
     "redux-thunk": "^2.3.0",
     "yup": "^0.28.3"
   },
+  "overrides": {
+    "autoprefixer": "10.4.5"
+  },
   "devDependencies": {
     "redux-immutable-state-invariant": "^2.1.0"
   },
