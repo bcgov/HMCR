@@ -41,6 +41,18 @@ namespace Hmcr.Chris
                 client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", basicAuth);
             });
 
+            services.AddHttpClient<IJsonApi, JsonApi>(client =>
+            {
+                client.BaseAddress = new Uri(config.GetValue<string>("CHRIS:ExportUrl"));
+                client.Timeout = new TimeSpan(12, 0, config.GetValue<int>("Timeouts:ExportAPI"));
+                client.DefaultRequestHeaders.Clear();
+
+                var userId = config.GetValue<string>("ServiceAccount:User");
+                var password = config.GetValue<string>("ServiceAccount:Password");
+                var basicAuth = Convert.ToBase64String(Encoding.GetEncoding("ISO-8859-1").GetBytes($"{userId}:{password}"));
+                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", basicAuth);
+            });
+
             services.AddHttpClient<IInventoryApi, InventoryApi>(client =>
             {
                 client.BaseAddress = new Uri(config.GetValue<string>("CHRIS:OASUrl"));
