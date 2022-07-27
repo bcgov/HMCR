@@ -21,13 +21,13 @@ namespace Hmcr.Api.Controllers
     [ApiVersion("1.0")]
     [Route("api/reports")]
     [ApiController]
-    public class JasonController : HmcrControllerBase
+    public class JsonController : HmcrControllerBase
     {
         private HmcrCurrentUser _currentUser;
         private IJsonApi _exportApi;
         private const String format = "json";
 
-        public JasonController(HmcrCurrentUser currentUser, IJsonApi exportApi)
+        public JsonController(HmcrCurrentUser currentUser, IJsonApi exportApi)
         {
             _currentUser = currentUser;
             _exportApi = exportApi;
@@ -46,7 +46,7 @@ namespace Hmcr.Api.Controllers
         /// <param name="propertyName">Property names of the columns to export</param>
         /// <returns></returns>
 
-        [HttpGet("jsonfile", Name = "Report")]
+        [HttpGet("json", Name = "Report")]
         [RequiresPermission(Permissions.Export)]
         public async Task<IActionResult> ExportJsonFile(string serviceAreas, string typeName, DateTime fromDate, DateTime toDate, string cql_filter, string propertyName)
         {
