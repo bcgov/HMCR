@@ -6,7 +6,7 @@ metadata:
 labels:
   template: api-deploy
 objects:
-  - apiVersion: image.openshift.io/v1
+  - apiVersion: v1
     kind: ImageStream
     metadata:
       creationTimestamp: null
@@ -16,7 +16,7 @@ objects:
     spec:
       lookupPolicy:
         local: false
-  - apiVersion: deploy.openshift.io/v1
+  - apiVersion: v1
     kind: DeploymentConfig
     metadata:
       creationTimestamp: null
@@ -142,7 +142,7 @@ objects:
               name: ${NAME}:${VERSION}
           type: ImageChange
         - type: ConfigChange
-  - apiVersion: service.openshift.io/v1
+  - apiVersion: v1
     kind: Service
     metadata:
       creationTimestamp: null

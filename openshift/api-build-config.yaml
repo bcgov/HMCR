@@ -6,7 +6,7 @@ metadata:
 labels:
   template: api-build
 objects:
-  - apiVersion: "image.openshift.io/v1"
+  - apiVersion: "v1"
     kind: ImageStream
     metadata:
       name: postgresql-10
@@ -21,7 +21,7 @@ objects:
           name: "1"
           referencePolicy:
             type: Local
-  - apiVersion: "image.openshift.io/v1"
+  - apiVersion: "v1"
     kind: ImageStream
     metadata:
       name: dotnet-31-rhel7
@@ -36,7 +36,7 @@ objects:
           name: "3.1"
           referencePolicy:
             type: Local
-  - apiVersion: image.openshift.io/v1
+  - apiVersion: v1
     kind: ImageStream
     metadata:
       creationTimestamp: null
@@ -46,7 +46,7 @@ objects:
     spec:
       lookupPolicy:
         local: false
-  - apiVersion: build.openshift.io/v1
+  - apiVersion: v1
     kind: BuildConfig
     metadata:
       creationTimestamp: null

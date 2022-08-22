@@ -6,7 +6,7 @@ metadata:
 labels:
   template: client-build
 objects:
-  - apiVersion: image.openshift.io/v1
+  - apiVersion: v1
     kind: ImageStream
     metadata:
       name: node
@@ -21,7 +21,7 @@ objects:
           name: "1"
           referencePolicy:
             type: Local
-  - apiVersion: "image.openshift.io/v1"
+  - apiVersion: "v1"
     kind: ImageStream
     metadata:
       name: nginx-116-rhel8
@@ -36,7 +36,7 @@ objects:
           name: "1"
           referencePolicy:
             type: Local
-  - apiVersion: image.openshift.io/v1
+  - apiVersion: iv1
     kind: ImageStream
     metadata:
       creationTimestamp: null
@@ -46,7 +46,7 @@ objects:
     spec:
       lookupPolicy:
         local: false
-  - apiVersion: build.openshift.io/v1
+  - apiVersion: v1
     kind: BuildConfig
     metadata:
       creationTimestamp: null
@@ -71,7 +71,7 @@ objects:
         dockerStrategy:
           noCache: true
         type: Docker
-  - apiVersion: image.openshift.io/v1
+  - apiVersion: v1
     kind: ImageStream
     metadata:
       creationTimestamp: null
@@ -81,7 +81,7 @@ objects:
     spec:
       lookupPolicy:
         local: false
-  - apiVersion: build.openshift.io/v1
+  - apiVersion: v1
     kind: BuildConfig
     metadata:
       creationTimestamp: null
