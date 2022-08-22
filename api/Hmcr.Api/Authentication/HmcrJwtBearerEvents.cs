@@ -71,11 +71,10 @@ namespace Hmcr.Api.Authentication
             var isApiClient = false;
             bool.TryParse(principal.FindFirstValue(HmcrClaimTypes.KcIsApiClient), out isApiClient);
 
-            //preferred_username token has a form of "{username}@{directory}".
+            //preferred_username token has a form of "{guid}@{directory}".
             var preferredUsername = isApiClient ? principal.FindFirstValue(HmcrClaimTypes.KcApiUsername) : principal.FindFirstValue(HmcrClaimTypes.KcUsername);
-            var usernames = preferredUsername.Split("@");
-            var username = usernames[0].ToUpperInvariant();
-            var directory = usernames[1].ToUpperInvariant();
+            var username = principal.FindFirstValue(HmcrClaimTypes.KcApiUsername);
+            var directory = preferredUsername.Split("@")[1].ToUpperInvariant();
 
             var userGuidClaim = directory.ToUpperInvariant() == UserTypeDto.IDIR ? HmcrClaimTypes.KcIdirGuid : HmcrClaimTypes.KcBceidGuid;
             var userGuid = new Guid(principal.FindFirstValue(userGuidClaim));

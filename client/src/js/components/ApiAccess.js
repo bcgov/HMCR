@@ -101,7 +101,7 @@ const ApiAccess = ({ hideErrorDialog }) => {
     const sampleRequestPowershell =
       `$headers = New-Object "System.Collections.Generic.Dictionary[[String],[String]]"\n` +
       `$headers.Add("Authorization", "Bearer aaaabbbbccccdddd...")\n\n` +
-      `$response = Invoke-RestMethod '${sampleUrl}' -Method 'GET' -Headers $headers -Body $body\n` +
+      `$response = Invoke-RestMethod '${sampleUrl}' -Method 'GET' -Headers $headers\n` +
       `$response | ConvertTo-Json\n`;
 
     return (
