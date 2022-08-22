@@ -1,4 +1,4 @@
-apiVersion: v1
+apiVersion: template.openshift.io/v1
 kind: Template
 metadata:
   creationTimestamp: null
@@ -6,7 +6,7 @@ metadata:
 labels:
   template: client-build
 objects:
-  - apiVersion: image.openshift.io/v1
+  - apiVersion: v1
     kind: ImageStream
     metadata:
       name: node
