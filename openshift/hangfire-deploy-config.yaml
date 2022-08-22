@@ -6,7 +6,7 @@ metadata:
 labels:
   template: hangfire-deploy
 objects:
-  - apiVersion: v1
+  - apiVersion: template.openshift.io/v1
     kind: ImageStream
     metadata:
       creationTimestamp: null
@@ -16,7 +16,7 @@ objects:
     spec:
       lookupPolicy:
         local: false
-  - apiVersion: v1
+  - apiVersion: template.openshift.io/v1
     kind: DeploymentConfig
     metadata:
       creationTimestamp: null
@@ -118,7 +118,7 @@ objects:
               name: ${NAME}:${VERSION}
           type: ImageChange
         - type: ConfigChange
-  - apiVersion: v1
+  - apiVersion: template.openshift.io/v1
     kind: Service
     metadata:
       creationTimestamp: null

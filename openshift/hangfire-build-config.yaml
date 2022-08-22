@@ -6,7 +6,7 @@ metadata:
 labels:
   template: hangfire-build
 objects:
-  - apiVersion: "v1"
+  - apiVersion: "template.openshift.io/v1"
     kind: ImageStream
     metadata:
       name: dotnet-31-rhel7
@@ -21,7 +21,7 @@ objects:
           name: "3.1"
           referencePolicy:
             type: Local
-  - apiVersion: v1
+  - apiVersion: template.openshift.io/v1
     kind: ImageStream
     metadata:
       creationTimestamp: null
@@ -31,7 +31,7 @@ objects:
     spec:
       lookupPolicy:
         local: false
-  - apiVersion: v1
+  - apiVersion: template.openshift.io/v1
     kind: BuildConfig
     metadata:
       creationTimestamp: null
