@@ -6,7 +6,7 @@ metadata:
 labels:
   template: client-config
 objects:
-  - apiVersion: template.openshift.io/v1
+  - apiVersion: image.openshift.io/v1
     kind: ImageStream
     metadata:
       creationTimestamp: null
@@ -89,7 +89,7 @@ objects:
           targetPort: 8080
       selector:
         deploymentconfig: ${NAME}${SUFFIX}
-  - apiVersion: template.openshift.io/v1
+  - apiVersion: route.openshift.io/v1
     kind: Route
     metadata:
       annotations:
