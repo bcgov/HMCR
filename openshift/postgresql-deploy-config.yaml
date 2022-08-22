@@ -1,9 +1,9 @@
 kind: Template
-apiVersion: v1
+apiVersion: template.openshift.io/v1
 metadata:
   name: ${PROJECT_NAME}
 objects:
-  - apiVersion: v1
+  - apiVersion: template.openshift.io/v1
     kind: DeploymentConfig
     metadata:
       name: ${NAME}${SUFFIX}
@@ -103,7 +103,7 @@ objects:
               namespace: d3d940-tools
           type: ImageChange
   - kind: PersistentVolumeClaim
-    apiVersion: v1
+    apiVersion: template.openshift.io/v1
     metadata:
       name: ${NAME}${SUFFIX}
     selector:
@@ -116,7 +116,7 @@ objects:
         requests:
           storage: "${PERSISTENT_VOLUME_SIZE}"
   - kind: Service
-    apiVersion: v1
+    apiVersion: template.openshift.io/v1
     metadata:
       name: ${NAME}${SUFFIX}
     spec:
