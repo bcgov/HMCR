@@ -70,14 +70,19 @@ namespace Hmcr.Api.Authentication
         {
             var isApiClient = false;
             bool.TryParse(principal.FindFirstValue(HmcrClaimTypes.KcIsApiClient), out isApiClient);
+            isApiClient = true;
 
             //preferred_username token has a form of "{guid}@{directory}".
-            var preferredUsername = isApiClient ? principal.FindFirstValue(HmcrClaimTypes.KcApiUsername) : principal.FindFirstValue(HmcrClaimTypes.KcUsername);
+            //var preferredUsername = isApiClient ? principal.FindFirstValue(HmcrClaimTypes.KcApiUsername) : principal.FindFirstValue(HmcrClaimTypes.KcUsername);
+            var preferredUsername = principal.FindFirstValue(HmcrClaimTypes.KcUsername);
             var username = principal.FindFirstValue(HmcrClaimTypes.KcApiUsername);
             var directory = preferredUsername.Split("@")[1].ToUpperInvariant();
 
-            var userGuidClaim = directory.ToUpperInvariant() == UserTypeDto.IDIR ? HmcrClaimTypes.KcIdirGuid : HmcrClaimTypes.KcBceidGuid;
-            var userGuid = new Guid(principal.FindFirstValue(userGuidClaim));
+            //var userGuidClaim = directory.ToUpperInvariant() == UserTypeDto.IDIR ? HmcrClaimTypes.KcIdirGuid : HmcrClaimTypes.KcBceidGuid;
+            //var userGuid = new Guid(principal.FindFirstValue(userGuidClaim));
+
+            username = principal.FindFirstValue(HmcrClaimTypes.KcUsername).Split("@")[0].ToUpperInvariant(); ;
+            var userGuid = new Guid(Guid.Parse(username).ToString());
             var email = principal.FindFirstValue(ClaimTypes.Email).ToUpperInvariant();
 
             var user = await _userService.GetActiveUserEntityAsync(userGuid);
