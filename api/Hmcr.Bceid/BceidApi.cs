@@ -95,7 +95,6 @@ namespace Hmcr.Bceid
             }
 
             request.onlineServiceId = _client.Osid;
-
             var response = await _client.getAccountDetailAsync(request);
 
             if (response.code != ResponseCode.Success)

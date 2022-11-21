@@ -83,7 +83,7 @@ namespace Hmcr.Api.Authentication
 
             username = principal.FindFirstValue(HmcrClaimTypes.KcUsername).Split("@")[0].ToUpperInvariant(); ;
             var userGuid = new Guid(Guid.Parse(username).ToString());
-            var email = principal.FindFirstValue(ClaimTypes.Email).ToUpperInvariant();
+            var email = principal.FindFirstValue(ClaimTypes.Email)?.ToUpperInvariant();
 
             var user = await _userService.GetActiveUserEntityAsync(userGuid);
             if (user == null)
