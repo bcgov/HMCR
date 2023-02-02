@@ -76,14 +76,27 @@ namespace Hmcr.Api.Authentication
             //var preferredUsername = isApiClient ? principal.FindFirstValue(HmcrClaimTypes.KcApiUsername) : principal.FindFirstValue(HmcrClaimTypes.KcUsername);
             var preferredUsername = principal.FindFirstValue(HmcrClaimTypes.KcUsername);
             var username = principal.FindFirstValue(HmcrClaimTypes.KcApiUsername);
-            var directory = preferredUsername.Split("@")[1].ToUpperInvariant();
 
-            //var userGuidClaim = directory.ToUpperInvariant() == UserTypeDto.IDIR ? HmcrClaimTypes.KcIdirGuid : HmcrClaimTypes.KcBceidGuid;
-            //var userGuid = new Guid(principal.FindFirstValue(userGuidClaim));
+            var directory = "";
+            Guid userGuid = new Guid("00000000-0000-0000-0000-000000000000");
+            var email = "";
+            if (preferredUsername.Contains("@"))
+            {
+                directory = preferredUsername.Split("@")[1].ToUpperInvariant();
+                username = principal.FindFirstValue(HmcrClaimTypes.KcUsername).Split("@")[0].ToUpperInvariant();
+                userGuid = new Guid(Guid.Parse(username).ToString());
+                email = principal.FindFirstValue(ClaimTypes.Email)?.ToUpperInvariant();
 
-            username = principal.FindFirstValue(HmcrClaimTypes.KcUsername).Split("@")[0].ToUpperInvariant(); ;
-            var userGuid = new Guid(Guid.Parse(username).ToString());
-            var email = principal.FindFirstValue(ClaimTypes.Email)?.ToUpperInvariant();
+            }
+            else
+            {
+                
+                username = principal.FindFirstValue(HmcrClaimTypes.KcUsername).Split("@")[0].ToUpperInvariant();
+                userGuid = new Guid(principal.FindFirstValue("idir_userid")?.ToUpperInvariant());
+                email = principal.FindFirstValue(ClaimTypes.Email)?.ToUpperInvariant();
+
+            }
+            
 
             var user = await _userService.GetActiveUserEntityAsync(userGuid);
             if (user == null)
@@ -109,8 +122,8 @@ namespace Hmcr.Api.Authentication
             {
                 _curentUser.UserGuid = userGuid;
                 _curentUser.BusinessGuid = user.BusinessGuid;
-                _curentUser.BusinessLegalName = user.Party.BusinessLegalName;
-                _curentUser.BusinessNumber = user.Party.BusinessNumber ?? 0;
+                _curentUser.BusinessLegalName = user.Party?.BusinessLegalName;
+                _curentUser.BusinessNumber = user.Party?.BusinessNumber ?? 0;
                 _curentUser.UserType = UserTypeDto.BUSINESS;
             }
 
