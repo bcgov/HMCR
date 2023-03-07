@@ -113,7 +113,7 @@ namespace Hmcr.Api.Authentication
                 email = user.Email;
             }
 
-            if (directory == "IDIR")
+            if (directory.Equals("IDIR", StringComparison.OrdinalIgnoreCase))
             {
                 _curentUser.UserGuid = userGuid;
                 _curentUser.UserType = UserTypeDto.INTERNAL;

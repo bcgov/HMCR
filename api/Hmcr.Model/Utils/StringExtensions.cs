@@ -109,6 +109,20 @@ namespace Hmcr.Model.Utils
             return str.ToUpperInvariant() == UserTypeDto.BUSINESS;
         }
 
+        public static string ToShortDirectory(this string str)
+        {
+            var directoryStr = str.Trim().ToUpperInvariant();
+            switch (directoryStr)
+            {
+                case "BCEIDBUSINESS":
+                    return UserTypeDto.BCeId;
+                case "IDIR":
+                    return UserTypeDto.IDIR;
+                default:
+                    return directoryStr.Substring(0, 12);
+            }
+        }
+
         public static string GetSha256Hash(this string text)
         {
             if (string.IsNullOrEmpty(text))
