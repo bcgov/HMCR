@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.IdentityModel.Logging;
 using Serilog.Ui.PostgreSqlProvider.Extensions;
 using Serilog.Ui.Web;
 
@@ -29,6 +30,7 @@ namespace Hmcr.Api
 
         public void ConfigureServices(IServiceCollection services)
         {
+            IdentityModelEventSource.ShowPII = true;
             var connectionString = Configuration.GetValue<string>("ConnectionStrings:HMCR");
             var enableSensitiveDataLogging = Configuration.GetValue<bool>("EnableSensitiveDataLogging");
 

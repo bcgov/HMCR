@@ -1,5 +1,7 @@
 ﻿using Hmcr.Model;
 using Hmcr.Model.Dtos;
+using Hmcr.Model.Dtos.User;
+using Hmcr.Model.Utils;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using System;
@@ -66,14 +68,14 @@ namespace Hmcr.Data.Database.Entities
                 if (entry.Members.Any(m => m.Metadata.Name == AppCreateUserGuid)) //auditable entity
                 {
                     entry.Member(AppLastUpdateUserid).CurrentValue = _currentUser.Username;
-                    entry.Member(AppLastUpdateUserDirectory).CurrentValue = _currentUser.AuthDirName;
+                    entry.Member(AppLastUpdateUserDirectory).CurrentValue = _currentUser.AuthDirName.ToShortDirectory();
                     entry.Member(AppLastUpdateUserGuid).CurrentValue = _currentUser.UserGuid;
                     entry.Member(AppLastUpdateTimestamp).CurrentValue = currentTime; 
 
                     if (entry.State == EntityState.Added)
                     {
                         entry.Member(AppCreateUserid).CurrentValue = _currentUser.Username;
-                        entry.Member(AppCreateUserDirectory).CurrentValue = _currentUser.AuthDirName;
+                        entry.Member(AppCreateUserDirectory).CurrentValue = _currentUser.AuthDirName.ToShortDirectory();
                         entry.Member(AppCreateUserGuid).CurrentValue = _currentUser.UserGuid;
                         entry.Member(AppCreateTimestamp).CurrentValue = currentTime;
                         entry.Member(ConcurrencyControlNumber).CurrentValue = (long)1;
