@@ -25,7 +25,14 @@ objects:
                 {
                   "Name": "Async",
                   "Args": {
-                    "configure": [ { "Name": "Console" } ]
+                    "configure": [ 
+                      { 
+                        "Name": "Console",
+                        "Args": {
+                          "outputTemplate": "[{Timestamp:yyyy-MM-dd HH:mm:ss} {Level:u3}] {Message:lj}{NewLine}{Exception}"
+                        }
+                      } 
+                    ]
                   }
                 },
                 {
@@ -48,7 +55,12 @@ objects:
                   "renderAsText": false
                 }
               },
-              "timestamp": "TimestampColumnWriter",
+              "timestamp": {
+                "Name": "TimestampColumnWriter",
+                "Args": {
+                  "dbType": "Timestamp"
+                }
+              },
               "exception": "ExceptionColumnWriter",
               "log_event": "LogEventSerializedColumnWriter",
               "props_test": {
