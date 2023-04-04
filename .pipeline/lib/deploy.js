@@ -3,7 +3,6 @@ const { OpenShiftClientX } = require("@bcgov/pipeline-cli");
 const path = require("path");
 
 const util = require("./util");
-const KeyCloakClient = require("./keycloak");
 
 module.exports = (settings) => {
   const phases = settings.phases;
@@ -17,14 +16,11 @@ module.exports = (settings) => {
     path.resolve(__dirname, "../../openshift")
   );
   var objects = [];
-  const kc = new KeyCloakClient(settings, oc);
   const logDbSecret = util.getSecret(
     oc,
     phases[phase].namespace,
     `${phases[phase].name}-logdb${phases[phase].suffix}`
   );
-
-  kc.addUris();
 
   // The deployment of your cool app goes here ▼▼▼
   objects.push(
