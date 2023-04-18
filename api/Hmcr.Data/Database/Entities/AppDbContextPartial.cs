@@ -27,7 +27,7 @@ namespace Hmcr.Data.Database.Entities
         private const string AppLastUpdateUserGuid = "AppLastUpdateUserGuid";
         private const string AppLastUpdateTimestamp = "AppLastUpdateTimestamp";
 
-        private readonly ILogger _logger;
+        private readonly ILogger<AppDbContext> _logger;
         public readonly HmcrCurrentUser _currentUser;
 
         public AppDbContext(DbContextOptions<AppDbContext> options, ILogger<AppDbContext> logger, HmcrCurrentUser currentUser)
