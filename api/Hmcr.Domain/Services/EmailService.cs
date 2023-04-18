@@ -188,7 +188,7 @@ namespace Hmcr.Domain.Services
                 //        return true;
                 //}
 
-                //Console.WriteLine("Unable to validate certificate chain.");
+                //_logger.LogError("Unable to validate certificate chain.");
                 //return false;
 
                 return true;

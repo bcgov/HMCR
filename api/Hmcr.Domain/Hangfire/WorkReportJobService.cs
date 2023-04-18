@@ -257,7 +257,8 @@ namespace Hmcr.Domain.Hangfire
             /*** Time profiling ***
              * DateTime EndAt = DateTime.Now;
             TimeSpan TimeDifference = EndAt - StartAt;
-            Console.WriteLine("Total Duration in milliseconds: {0}", TimeDifference.TotalMilliseconds.ToString());*/
+            string durationMsStr = TimeDifference.TotalMilliseconds.ToString();
+            _logger.LogInformation($"Total Duration in milliseconds: {durationMsStr}");*/
 
             return workReports.ToList();
         }

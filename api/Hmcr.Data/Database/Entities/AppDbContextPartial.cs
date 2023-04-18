@@ -4,6 +4,7 @@ using Hmcr.Model.Dtos.User;
 using Hmcr.Model.Utils;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -26,11 +27,13 @@ namespace Hmcr.Data.Database.Entities
         private const string AppLastUpdateUserGuid = "AppLastUpdateUserGuid";
         private const string AppLastUpdateTimestamp = "AppLastUpdateTimestamp";
 
+        private readonly ILogger _logger;
         public readonly HmcrCurrentUser _currentUser;
 
-        public AppDbContext(DbContextOptions<AppDbContext> options, HmcrCurrentUser currentUser)
+        public AppDbContext(DbContextOptions<AppDbContext> options, ILogger<AppDbContext> logger, HmcrCurrentUser currentUser)
             : base(options)
         {
+            _logger = logger;
             _currentUser = currentUser;
         }
 
@@ -46,7 +49,8 @@ namespace Hmcr.Data.Database.Entities
             }
             catch (Exception e)
             {
-                Console.WriteLine(e);
+                string exceptionMessage = e.ToString();
+                _logger.LogError($"AppDbContext Exception: {exceptionMessage}");
                 throw;
             }
 
