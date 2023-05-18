@@ -74,6 +74,12 @@ namespace Hmcr.Domain.Services
                         }
                     }
 
+                    if (row == null)
+                    {
+                        errors.AddItem("File", "Row is empty. Please make sure that the report isn't empty, and doesn't have empty data rows");
+                        break;
+                    }
+
                     row.ServiceArea = serviceArea.ConvertToServiceAreaString(row.ServiceArea);
                     rows.Add(row);
                 }

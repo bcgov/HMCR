@@ -25,7 +25,14 @@ objects:
                 {
                   "Name": "Async",
                   "Args": {
-                    "configure": [ { "Name": "Console" } ]
+                    "configure": [ 
+                      { 
+                        "Name": "Console",
+                        "Args": {
+                          "outputTemplate": "[{Timestamp:yyyy-MM-dd HH:mm:ss} {Level:u3}] {Message:lj}{NewLine}{Exception}"
+                        }
+                      } 
+                    ]
                   }
                 },
                 {
@@ -48,7 +55,12 @@ objects:
                   "renderAsText": false
                 }
               },
-              "timestamp": "TimestampColumnWriter",
+              "timestamp": {
+                "Name": "TimestampColumnWriter",
+                "Args": {
+                  "dbType": "Timestamp"
+                }
+              },
               "exception": "ExceptionColumnWriter",
               "log_event": "LogEventSerializedColumnWriter",
               "props_test": {
@@ -141,12 +153,12 @@ parameters:
     displayName: EXPORT_URL
     name: EXPORT_URL
     required: true
-    value: "https://devoas1.apps.th.gov.bc.ca"
+    value: "https://tstoas5.apps.th.gov.bc.ca"
   - description: GeoServer CHRIS API URL
     displayName: OAS_URL
     name: OAS_URL
     required: true
-    value: "https://devoas1.apps.th.gov.bc.ca"
+    value: "https://prdoas5.apps.th.gov.bc.ca"
   - description: Default timeout value for CHRIS/GeoServer API calls
     displayName: GEOSERVER_TIMEOUT
     name: GEOSERVER_TIMEOUT
