@@ -17,8 +17,7 @@ objects:
         - annotations: null
           from:
             kind: DockerImage
-            # name: registry.redhat.io/dotnet/dotnet-31-rhel7:3.1-5
-            name: mcr.microsoft.com/dotnet/core/aspnet:3.1-alpine
+            name: registry.redhat.io/dotnet/dotnet-31-rhel7:3.1-5
           name: "3.1"
           referencePolicy:
             type: Local
@@ -65,8 +64,7 @@ objects:
               value: Hmcr.Hangfire/Hmcr.Hangfire.csproj
           from:
             kind: ImageStreamTag
-            # name: "dotnet-31-rhel7:3.1"
-            name: "3.1-alpine"
+            name: "dotnet-31-rhel7:3.1"
         type: Source
 parameters:
   - description: Name of the project (HMCR)
