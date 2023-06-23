@@ -65,7 +65,8 @@ objects:
               value: Hmcr.Hangfire/Hmcr.Hangfire.csproj
           from:
             kind: ImageStreamTag
-            name: "dotnet-31-rhel7:3.1"
+            # name: "dotnet-31-rhel7:3.1"
+            name: "3.1-alpine"
         type: Source
 parameters:
   - description: Name of the project (HMCR)
