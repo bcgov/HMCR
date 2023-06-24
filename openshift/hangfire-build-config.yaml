@@ -10,7 +10,7 @@ objects:
     kind: ImageStream
     metadata:
       # name: dotnet-31-rhel7
-      name: dotnet-70-rhel8:7.0
+      name: dotnet-70-rhel8
     spec:
       lookupPolicy:
         local: false
