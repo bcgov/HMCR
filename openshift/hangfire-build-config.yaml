@@ -9,8 +9,7 @@ objects:
   - apiVersion: "v1"
     kind: ImageStream
     metadata:
-      # name: dotnet-31-rhel7
-      name: dotnet-70-rhel8
+      name: dotnet-31-rhel7
     spec:
       lookupPolicy:
         local: false
@@ -18,10 +17,8 @@ objects:
         - annotations: null
           from:
             kind: DockerImage
-            # name: registry.redhat.io/dotnet/dotnet-31-rhel7:3.1-5
-            name: registry.redhat.io/rhel8/dotnet-70-runtime      
-          # name: "3.1"
-          name: "7.0"
+            name: registry.redhat.io/dotnet/dotnet-31-rhel7:3.1-40  
+          name: "3.1"
           referencePolicy:
             type: Local
   - apiVersion: v1
@@ -67,8 +64,7 @@ objects:
               value: Hmcr.Hangfire/Hmcr.Hangfire.csproj
           from:
             kind: ImageStreamTag
-            # name: "dotnet-31-rhel7:3.1"
-            name: "dotnet-70-rhel8:7.0"
+            name: "dotnet-31-rhel7:3.1"
         type: Source
 parameters:
   - description: Name of the project (HMCR)
