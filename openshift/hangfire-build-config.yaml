@@ -17,7 +17,7 @@ objects:
         - annotations: null
           from:
             kind: DockerImage
-            name: registry.redhat.io/dotnet/dotnet-31-rhel7:3.1-5
+            name: registry.redhat.io/dotnet/dotnet-31-rhel7:3.1-40  
           name: "3.1"
           referencePolicy:
             type: Local
