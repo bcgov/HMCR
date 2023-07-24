@@ -23,7 +23,7 @@ namespace Hmcr.Chris
             _client = client;
             _queries = new MapsQueries();
             _api = api;
-            _path = config.GetValue<string>("CHRIS:MapPath");
+            _path = config["CHRIS:MapPath"];
         }
 
         public async Task<bool> IsPointWithinServiceAreaQuery(decimal longitude, decimal latitude, string serviceAreaNumber)

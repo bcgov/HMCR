@@ -71,7 +71,7 @@ namespace Hmcr.Chris
             _client = client;
             _api = api;
             _queries = new OasQueries();
-            _path = config.GetValue<string>("CHRIS:OASPath");
+            _path = config["CHRIS:OASPath"];
             _logger = logger;
         }
 

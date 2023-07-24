@@ -26,7 +26,7 @@ namespace Hmcr.Chris
 
         public async Task<HttpResponseMessage> ExportReport(string query, string exportEndpointConfig)
         {
-            string path = _config.GetValue<string>($"CHRIS:{exportEndpointConfig}");
+            string path = _config[$"CHRIS:{exportEndpointConfig}"];
 
             //_client.BaseAddress.ToString() + path + "&" + query
             _logger.LogInformation($"ExportReport - Calling Export URL { _client.BaseAddress.ToString() + path + "&" + query}");
