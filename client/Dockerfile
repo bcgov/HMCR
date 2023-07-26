@@ -3,7 +3,7 @@ LABEL maintainer="young-jin.chung@gov.bc.ca"
 
 COPY . ./src
 
-RUN cd ./src && npm i --save @fortawesome/fontawesome-svg-core && npm ci && npm run build
+RUN cd ./src && npm install && npm ci && npm run build
 
 FROM image-registry.openshift-image-registry.svc:5000/d3d940-tools/nginx-116-rhel8:1
 
