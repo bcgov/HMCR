@@ -79,7 +79,7 @@ objects:
               value: Hmcr.Api/Hmcr.Api.csproj
           from:
             kind: ImageStreamTag
-            name: "dotnet-70-runtime:7.0-18"
+            name: "rhel8/dotnet-70-runtime:7.0-18"
         type: Source
 parameters:
   - description: Name of the project (HMCR)
