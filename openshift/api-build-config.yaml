@@ -24,7 +24,7 @@ objects:
   - apiVersion: "v1"
     kind: ImageStream
     metadata:
-      name: dotnet-31-rhel7
+      name: dotnet-70-runtime
     spec:
       lookupPolicy:
         local: false
@@ -79,7 +79,7 @@ objects:
               value: Hmcr.Api/Hmcr.Api.csproj
           from:
             kind: ImageStreamTag
-            name: "dotnet-31-rhel7:3.1"
+            name: "dotnet-70-runtime"
         type: Source
 parameters:
   - description: Name of the project (HMCR)
