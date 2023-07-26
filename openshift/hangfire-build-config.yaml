@@ -65,7 +65,8 @@ objects:
               value: Hmcr.Hangfire/Hmcr.Hangfire.csproj
           from:
             kind: ImageStreamTag
-            name: "rhel8/dotnet-70-runtime:7.0-18"
+            #name: "rhel8/dotnet-70-runtime:7.0-18"
+            name: "registry.redhat.io/rhel8/dotnet-70-runtim:7.0-18"
         type: Source
 parameters:
   - description: Name of the project (HMCR)
