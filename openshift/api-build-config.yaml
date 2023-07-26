@@ -81,7 +81,7 @@ objects:
           from:
             kind: ImageStreamTag
             #name: "rhel8/dotnet-70-runtime:7.0-18"
-            name: "dotnet-70-runtime:7.0-18"
+            name: "7.0-18"
         type: Source
 parameters:
   - description: Name of the project (HMCR)
