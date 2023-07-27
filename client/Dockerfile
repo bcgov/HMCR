@@ -3,6 +3,7 @@ LABEL maintainer="bruce.wang@gov.bc.ca"
 
 
 RUN npm --version
+RUN npm install -g npm@9.8.0
 COPY . ./src
 
 RUN cd ./src && npm ci && npm run build
