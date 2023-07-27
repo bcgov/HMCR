@@ -1,9 +1,10 @@
 FROM image-registry.openshift-image-registry.svc:5000/d3d940-tools/node-python:1 AS builder
 LABEL maintainer="bruce.wang@gov.bc.ca"
 
+RUN cat /etc/os-release
 RUN node --version
 RUN npm --version
-RUN sudo apt install --only-upgrade nodejs
+RUN apt install --only-upgrade nodejs
 
 COPY . ./src
 
