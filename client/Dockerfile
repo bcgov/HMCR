@@ -1,21 +1,8 @@
 FROM image-registry.openshift-image-registry.svc:5000/d3d940-tools/node-python:1 AS builder
 LABEL maintainer="bruce.wang@gov.bc.ca"
 
-#RUN find / -name "package-lock.json"
-#RUN find / -name "Dockerfile"
-RUN ls -al
-COPY . ./src
-RUN pwd
-RUN cd ./src
-RUN pwd
-RUN ls -l
-RUN pwd
-RUN cd src
-RUN ls -l
-# RUN cd ./src 
-RUN npm ci
-RUN npm run build
-
+RUN cd ./src && npm ci && npm run build
+ 
 FROM image-registry.openshift-image-registry.svc:5000/d3d940-tools/nginx-116-rhel8:1
 
 COPY --from=builder /src/build/. /tmp/src
