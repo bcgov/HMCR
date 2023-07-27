@@ -1,6 +1,8 @@
 FROM image-registry.openshift-image-registry.svc:5000/d3d940-tools/node-python:1 AS builder
 LABEL maintainer="bruce.wang@gov.bc.ca"
 
+
+RUN npm --version
 COPY . ./src
 
 RUN cd ./src && npm ci && npm run build
