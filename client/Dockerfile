@@ -3,7 +3,7 @@ LABEL maintainer="young-jin.chung@gov.bc.ca"
 
 COPY . ./src
 
-RUN cd ./src 
+# RUN cd ./src 
 RUN npm ci
 RUN npm run build
 
