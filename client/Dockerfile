@@ -5,6 +5,8 @@ LABEL maintainer="bruce.wang@gov.bc.ca"
 RUN ls -l
 COPY . ./src
 
+RUN cd ./src
+RUN ls -l
 # RUN cd ./src 
 RUN npm ci
 RUN npm run build
