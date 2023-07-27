@@ -2,13 +2,13 @@ FROM image-registry.openshift-image-registry.svc:5000/d3d940-tools/node-python:1
 LABEL maintainer="bruce.wang@gov.bc.ca"
 
 RUN cat /etc/os-release
-RUN node --version
-RUN npm --version
-RUN apk update
-RUN apk del nodejs
+#RUN node --version
+#RUN npm --version
+#RUN apk update
+#RUN apk del nodejs
 #RUN apk add curl
 #RUN curl -fsSL https://rpm.nodesource.com/setup_18.x | bash -
-RUN apk add nodejs
+#RUN apk add nodejs
 RUN node -v
 
 COPY . ./src
