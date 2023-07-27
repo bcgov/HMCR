@@ -2,7 +2,7 @@ FROM image-registry.openshift-image-registry.svc:5000/d3d940-tools/node-python:1
 LABEL maintainer="bruce.wang@gov.bc.ca"
 
 
-RUN dir/w
+RUN ls -l
 COPY . ./src
 
 # RUN cd ./src 
