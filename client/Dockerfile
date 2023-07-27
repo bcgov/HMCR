@@ -4,8 +4,12 @@ LABEL maintainer="bruce.wang@gov.bc.ca"
 
 RUN ls -l
 COPY . ./src
-
+RUN pwd
 RUN cd ./src
+RUN pwd
+RUN ls -l
+RUN pwd
+RUN cd src
 RUN ls -l
 # RUN cd ./src 
 RUN npm ci
