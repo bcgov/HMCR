@@ -4,6 +4,7 @@ LABEL maintainer="bruce.wang@gov.bc.ca"
 RUN cat /etc/os-release
 RUN node --version
 RUN npm --version
+RUN apk update
 RUN apk del nodejs
 RUN apk add curl
 RUN curl -fsSL https://rpm.nodesource.com/setup_18.x | bash -
