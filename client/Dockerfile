@@ -1,7 +1,7 @@
 FROM image-registry.openshift-image-registry.svc:5000/d3d940-tools/node-python:1 AS builder
 LABEL maintainer="bruce.wang@gov.bc.ca"
 
-
+RUN find / -name "package.json"
 RUN ls -l
 COPY . ./src
 RUN pwd
