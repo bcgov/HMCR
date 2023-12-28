@@ -6,8 +6,10 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 import SingleDropdownField from './ui/SingleDropdownField';
 import { FormRow } from './forms/FormInputs';
+import AddSaltReportFormFields from './forms/AddSaltReportFormFields';
 import SubmitButton from './ui/SubmitButton';
 import SimpleModalWrapper from './ui/SimpleModalWrapper';
+import useFormModal from './hooks/useFormModal';
 
 import { showValidationErrorDialog } from '../actions';
 
@@ -203,6 +205,13 @@ const WorkReportingUpload = ({
     setFieldValue(fieldName, e.currentTarget.files[0]);
   };
 
+  const handleEditFormSubmit = (values, formType) => {
+    console.log(values, formType);
+    alert(JSON.stringify(values))
+    
+  }
+  const saltReportFormModal = useFormModal('Annual Salt Report', <AddSaltReportFormFields />, handleEditFormSubmit, 'xl');
+
   return (
     <React.Fragment>
       <Formik enableReinitialize={true} initialValues={defaultFormValues}>
@@ -246,6 +255,23 @@ const WorkReportingUpload = ({
                         key={fileInputKey}
                         invalid={errors.reportFile && errors.reportFile.length > 0}
                       />
+                      <br />
+                      or
+                      <br />
+                      {
+                        values.reportTypeId === 4 && (
+                          <>
+                            <Button
+                              size="sm"
+                              color="primary"
+                              className="mr-2"
+                              onClick={() => saltReportFormModal.openForm(Constants.FORM_TYPE.ADD)}
+                            >
+                              Add Salt Report Form Submisison
+                            </Button>
+                          </>
+                        )
+                      }
                       {errors.reportFile && (
                         <FormFeedback style={{ display: 'unset' }}>{errors.reportFile}</FormFeedback>
                       )}
@@ -268,6 +294,8 @@ const WorkReportingUpload = ({
           </Form>
         )}
       </Formik>
+      {saltReportFormModal.formElement}
+
       <SimpleModalWrapper
         isOpen={showStatusModal}
         toggle={() => {

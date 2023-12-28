@@ -34,3 +34,20 @@ export const FormInput = ({ children, ...props }) => {
     </React.Fragment>
   );
 };
+
+export const FormRadioInput = ({ label, ...props }) => {
+  const [field, meta] = useField({ ...props, type: 'radio' });
+  return (
+    <div>
+      <CustomInput
+        type="radio"
+        {...field}
+        {...props}
+        label={label}
+        id={props.id || props.name}
+        invalid={meta.touched && meta.error ? true : false}
+      />
+      {meta.touched && meta.error && <FormFeedback>{meta.error}</FormFeedback>}
+    </div>
+  );
+};
