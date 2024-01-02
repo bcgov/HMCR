@@ -20,17 +20,25 @@ const defaultValues = {
   telephone: '',
   email: '',
   sect1: {
-    developed: '',
-    materialIdentified: null,
-    materialAchieved: null,
-    saltIdentified: null,
-    saltAchieved: null,
+    planDeveloped: "",
+    planReviewed: "",
+    planUpdated: "",
     training: {
-      manager: false,
-      supervisor: false,
-      operator: false,
-      mechanical: false,
-      patroller: false,
+      manager: "",
+      supervisor: "",
+      operator: "",
+      mechanical: "",
+      patroller: "",
+    },
+    objectives: {
+      materialStorage: {
+        identified: null,
+        achieved: null,
+      },
+      saltApplication: {
+        identified: null,
+        achieved: null,
+      },
     },
   },
   sect2: {
@@ -128,7 +136,6 @@ const defaultValues = {
     vehiclesWithConveyors: '',
     vehiclesWithPreWettingEquipment: '',
     vehiclesForDLA: '',
-    calibrationFrequency: '',
     weatherMonitoringSources: {
       infraredThermometer: {
         relied: false,
@@ -168,7 +175,7 @@ const defaultValues = {
   sect6: {
     snowDisposalSite: {
       used: false,
-      number: ''
+      number: '',
     },
     snowMelters: {
       used: false,
@@ -224,98 +231,173 @@ const defaultValues = {
   },
 };
 
-const validationSchema = Yup.object({
+const validationSchema = Yup.object().shape({
   serviceArea: Yup.string().required('Service area is required'),
   contactName: Yup.string().required('Contact name is required'),
   telephone: Yup.string()
     .matches(/^[0-9]+$/, 'Telephone must be a number')
     .required('Telephone is required'),
   email: Yup.string().email('Invalid email format').required('Email is required'),
-  sect1: Yup.object({
-    developed: Yup.string().required(),
-    materialIdentified: Yup.number(),
-    materialAchieved: Yup.number(),
-    saltIdentified: Yup.number(),
-    saltAchieved: Yup.number(),
-  }),
-  sect2: Yup.object({
-    roadTotalLength: Yup.number().required('Road total length is required'),
-  }),
-  sect3: Yup.object({
-    deicer: Yup.object({
-      nacl: Yup.number().nullable(true),
-      mgcl2: Yup.number().nullable(true),
-      cacl2: Yup.number().nullable(true),
-      acetate: Yup.number().nullable(true),
+  sect1: Yup.object().shape({
+    planDeveloped: Yup.string().required('Response is required'),
+    planReviewed: Yup.string().required('Response is required'),
+    planUpdated: Yup.string().required('Response is required'),
+    training: Yup.object().shape({
+      manager: Yup.string(),
+      supervisor: Yup.string(),
+      operator: Yup.string(),
+      mechanical: Yup.string(),
+      patroller: Yup.string(),
     }),
-    treatedAbrasives: Yup.object({
-      sandStoneDust: Yup.number().nullable(true),
-      nacl: Yup.number().nullable(true),
-      mgcl2: Yup.number().nullable(true),
-      cacl2: Yup.number().nullable(true),
-    }),
-    prewetting: Yup.object({
-      nacl: Yup.number().nullable(true),
-      mgcl2: Yup.number().nullable(true),
-      cacl2: Yup.number().nullable(true),
-      acetate: Yup.number().nullable(true),
-      nonchloride: Yup.number().nullable(true),
-    }),
-    pretreatment: Yup.object({
-      nacl: Yup.number().nullable(true),
-      mgcl2: Yup.number().nullable(true),
-      cacl2: Yup.number().nullable(true),
-      acetate: Yup.number().nullable(true),
-      nonchloride: Yup.number().nullable(true),
-    }),
-    antiicing: Yup.object({
-      nacl: Yup.number().nullable(true),
-      mgcl2: Yup.number().nullable(true),
-      cacl2: Yup.number().nullable(true),
-      acetate: Yup.number().nullable(true),
-      nonchloride: Yup.number().nullable(true),
+    objectives: Yup.object().shape({
+      materialStorage: Yup.object().shape({
+        identified: Yup.number().min(0, 'Cannot be negative').nullable(),
+        achieved: Yup.number().min(0, 'Cannot be negative').nullable(),
+      }),
+      saltApplication: Yup.object().shape({
+        identified: Yup.number().min(0, 'Cannot be negative').nullable(),
+        achieved: Yup.number().min(0, 'Cannot be negative').nullable(),
+      }),
     }),
   }),
-  sect4: Yup.object({
-    saltStorageTotal: Yup.number().nullable().required('Required'),
+  sect2: Yup.object().shape({
+    roadTotalLength: Yup.number()
+      .min(0, 'Total length of road cannot be negative')
+      .required('Total length of road is required'),
+
+    saltTotalDays: Yup.number()
+      .min(0, 'Number of days cannot be negative')
+      .required('Total number of days is required'),
+  }),
+  sect3: Yup.object().shape({
+    deicer: Yup.object().shape({
+      nacl: Yup.number().nullable(),
+      mgcl2: Yup.number().nullable(),
+      cacl2: Yup.number().nullable(),
+      acetate: Yup.number().nullable(),
+    }),
+    treatedAbrasives: Yup.object().shape({
+      sandStoneDust: Yup.number().nullable(),
+      nacl: Yup.number().nullable(),
+      mgcl2: Yup.number().nullable(),
+      cacl2: Yup.number().nullable(),
+    }),
+    prewetting: Yup.object().shape({
+      nacl: Yup.number().nullable(),
+      mgcl2: Yup.number().nullable(),
+      cacl2: Yup.number().nullable(),
+      acetate: Yup.number().nullable(),
+      nonchloride: Yup.number().nullable(),
+    }),
+    pretreatment: Yup.object().shape({
+      nacl: Yup.number().nullable(),
+      mgcl2: Yup.number().nullable(),
+      cacl2: Yup.number().nullable(),
+      acetate: Yup.number().nullable(),
+      nonchloride: Yup.number().nullable(),
+    }),
+    antiicing: Yup.object().shape({
+      nacl: Yup.number().nullable(),
+      mgcl2: Yup.number().nullable(),
+      cacl2: Yup.number().nullable(),
+      acetate: Yup.number().nullable(),
+      nonchloride: Yup.number().nullable(),
+    }),
+    multiChlorideA: Yup.object().shape({
+      litres: Yup.number(),
+      naClPercentage: Yup.number(),
+      mgCl2Percentage: Yup.number(),
+      caCl2Percentage: Yup.number(),
+    }),
+    multiChlorideB: Yup.object().shape({
+      litres: Yup.number(),
+      naClPercentage: Yup.number(),
+      mgCl2Percentage: Yup.number(),
+      caCl2Percentage: Yup.number(),
+    }),
+  }),
+  sect4: Yup.object().shape({
+    saltStorageTotal: Yup.number().min(0, 'Number of sites cannot be negative').nullable(),
     stockpiles: Yup.array().of(
-      Yup.object({
-        siteName: Yup.string(),
+      Yup.object().shape({
+        siteName: Yup.string().required('Site name is required'),
         motiOwned: Yup.boolean(),
-        roadSalts: Yup.object({
-          stockpilesTotal: Yup.number().nullable(),
-          onImpermeableSurface: Yup.number().nullable(),
-          underPermanentRoof: Yup.number().nullable(),
-          underTarp: Yup.number().nullable(),
+        roadSalts: Yup.object().shape({
+          stockpilesTotal: Yup.number().min(0, 'Number cannot be negative').nullable(),
+          onImpermeableSurface: Yup.number().min(0, 'Number cannot be negative').nullable(),
+          underPermanentRoof: Yup.number().min(0, 'Number cannot be negative').nullable(),
+          underTarp: Yup.number().min(0, 'Number cannot be negative').nullable(),
         }),
-        treatedAbrasives: Yup.object({
-          stockpilesTotal: Yup.number().nullable(),
-          onImpermeableSurface: Yup.number().nullable(),
-          underPermanentRoof: Yup.number().nullable(),
-          underTarp: Yup.number().nullable(),
+        treatedAbrasives: Yup.object().shape({
+          stockpilesTotal: Yup.number().min(0, 'Number cannot be negative').nullable(),
+          onImpermeableSurface: Yup.number().min(0, 'Number cannot be negative').nullable(),
+          underPermanentRoof: Yup.number().min(0, 'Number cannot be negative').nullable(),
+          underTarp: Yup.number().min(0, 'Number cannot be negative').nullable(),
         }),
+      })
+    ),
+    practices: Yup.array().of(
+      Yup.object().shape({
+        hasPlan: Yup.boolean(),
+        numSites: Yup.number().nullable(),
       })
     ),
   }),
-  sect5: Yup.object({}), // Define validations for sect5
-  sect6: Yup.object({}), // Define validations for sect6
-  sect7: Yup.object({
-    completedInventory: Yup.string(),
-    setVulnerableAreas: Yup.string(),
-    actionPlanPrepared: Yup.string(),
-    protectionMeasuresImplemented: Yup.string(),
-    environmentalMonitoringConducted: Yup.string(),
-    vulnerableAreas: Yup.array().of(
-      Yup.object({
-        highway: Yup.string(),
-        latitude: Yup.string(),
-        longitude: Yup.string(),
-        feature: Yup.string(),
-        type: Yup.string(),
-        protectionMeasures: Yup.string(),
-        monitoringInPlace: Yup.boolean(),
-      })
-    ),
+  sect5: Yup.object().shape({
+    numberOfVehicles: Yup.number()
+    .required('Number of vehicles is required')
+    .min(0, 'Number of vehicles cannot be negative'),
+
+    vehiclesForSaltApplication: Yup.number()
+      .min(0, 'Number cannot be negative')
+      .required('Number of vehicles for salt application is required'),
+
+    vehiclesWithConveyors: Yup.number()
+      .min(0, 'Number cannot be negative')
+      .required('Number of vehicles with conveyors is required'),
+
+    vehiclesWithPreWettingEquipment: Yup.number()
+      .min(0, 'Number cannot be negative')
+      .required('Number of vehicles with pre-wetting equipment is required'),
+
+    vehiclesForDLA: Yup.number().min(0, 'Number cannot be negative').required('Number of vehicles for DLA is required'),
+
+    weatherMonitoringSources: Yup.object().shape({
+      infraredThermometer: Yup.object().shape({
+        relied: Yup.boolean(),
+        number: Yup.number().min(0, 'Number cannot be negative').nullable(),
+      }),
+      meteorologicalService: Yup.object().shape({
+        relied: Yup.boolean(),
+      }),
+      fixedRWISStations: Yup.object().shape({
+        relied: Yup.boolean(),
+        number: Yup.number().min(0, 'Number cannot be negative').nullable(),
+      }),
+      mobileRWISMounted: Yup.object().shape({
+        relied: Yup.boolean(),
+        number: Yup.number().min(0, 'Number cannot be negative').nullable(),
+      }),
+    }),
+
+    maintenanceDecisionSupport: Yup.object().shape({
+      AVL: Yup.object().shape({
+        relied: Yup.boolean(),
+        number: Yup.number().min(0, 'Number cannot be negative').nullable(),
+      }),
+      saltApplicationRates: Yup.object().shape({
+        relied: Yup.boolean(),
+        number: Yup.number().min(0, 'Number cannot be negative').nullable(),
+      }),
+      applicationRateChart: Yup.object().shape({
+        relied: Yup.boolean(),
+        number: Yup.number().min(0, 'Number cannot be negative').nullable(),
+      }),
+      testingMDSS: Yup.object().shape({
+        relied: Yup.boolean(),
+        number: Yup.number().min(0, 'Number cannot be negative').nullable(),
+      }),
+    }),
   }),
 });
 
@@ -331,8 +413,6 @@ const AddSaltReportFormFields = ({ setInitialValues, formValues, setValidationSc
   }, []);
 
   if (loading || formValues === null) return <PageSpinner />;
-
-  setInitialValues(defaultValues);
 
   return (
     <React.Fragment>
@@ -374,8 +454,8 @@ const AddSaltReportFormFields = ({ setInitialValues, formValues, setValidationSc
           </Col>
           <Col>
             <div>
-              <FormRadioInput id="developed.no" name="sect1.developed" value="no" label="No" />
-              <FormRadioInput id="developed.yes" name="sect1.developed" value="yes" label="Yes" />
+              <FormRadioInput id="planDeveloped.no" name="sect1.planDeveloped" value="no" label="No" />
+              <FormRadioInput id="planDeveloped.yes" name="sect1.planDeveloped" value="yes" label="Yes" />
             </div>
           </Col>
         </Row>
@@ -384,8 +464,8 @@ const AddSaltReportFormFields = ({ setInitialValues, formValues, setValidationSc
           <Col sm={7}>In the past year, did your organization conduct a review of its salt management plan?</Col>
           <Col>
             <div>
-              <FormRadioInput id="reviewConducted.no" name="sect1.reviewConducted" value="no" label="No" />
-              <FormRadioInput id="reviewConducted.yes" name="sect1.reviewConducted" value="yes" label="Yes" />
+              <FormRadioInput id="planReviewed.no" name="sect1.planReviewed" value="no" label="No" />
+              <FormRadioInput id="planReviewed.yes" name="sect1.planReviewed" value="yes" label="Yes" />
             </div>
           </Col>
         </Row>
@@ -410,36 +490,36 @@ const AddSaltReportFormFields = ({ setInitialValues, formValues, setValidationSc
           <Col>
             <div>
               Manager(s)
-              <FormRadioInput id="manager.no" name="sect1.manager" value="no" label="No" />
-              <FormRadioInput id="manager.yes" name="sect1.manager" value="yes" label="Yes" />
+              <FormRadioInput id="manager.no" name="sect1.training.manager" value="no" label="No" />
+              <FormRadioInput id="manager.yes" name="sect1.training.manager" value="yes" label="Yes" />
             </div>
           </Col>
           <Col>
             <div>
               Supervisor(s)
-              <FormRadioInput id="supervisor.no" name="sect1.supervisor" value="no" label="No" />
-              <FormRadioInput id="supervisor.yes" name="sect1.supervisor" value="yes" label="Yes" />
+              <FormRadioInput id="supervisor.no" name="sect1.training.supervisor" value="no" label="No" />
+              <FormRadioInput id="supervisor.yes" name="sect1.training.supervisor" value="yes" label="Yes" />
             </div>
           </Col>
           <Col>
             <div>
               Operator(s)
-              <FormRadioInput id="operator.no" name="sect1.operator" value="no" label="No" />
-              <FormRadioInput id="operator.yes" name="sect1.operator" value="yes" label="Yes" />
+              <FormRadioInput id="operator.no" name="sect1.training.operator" value="no" label="No" />
+              <FormRadioInput id="operator.yes" name="sect1.training.operator" value="yes" label="Yes" />
             </div>
           </Col>
           <Col>
             <div>
               Mechanical
-              <FormRadioInput id="mechanical.no" name="sect1.mechanical" value="no" label="No" />
-              <FormRadioInput id="mechanical.yes" name="sect1.mechanical" value="yes" label="Yes" />
+              <FormRadioInput id="mechanical.no" name="sect1.training.mechanical" value="no" label="No" />
+              <FormRadioInput id="mechanical.yes" name="sect1.training.mechanical" value="yes" label="Yes" />
             </div>
           </Col>
           <Col>
             <div>
               Patroller(s)
-              <FormRadioInput id="patroller.no" name="sect1.patroller" value="no" label="No" />
-              <FormRadioInput id="patroller.yes" name="sect1.patroller" value="yes" label="Yes" />
+              <FormRadioInput id="patroller.no" name="sect1.training.patroller" value="no" label="No" />
+              <FormRadioInput id="patroller.yes" name="sect1.training.patroller" value="yes" label="Yes" />
             </div>
           </Col>
         </Row>
@@ -470,12 +550,12 @@ const AddSaltReportFormFields = ({ setInitialValues, formValues, setValidationSc
                       <td>Material Storage Facilities</td>
                       <td>
                         <FormGroup>
-                          <FormInput type="number" name="sect1.materialIdentified" />
+                          <FormInput type="number" name="sect1.objectives.materialStorage.identified" />
                         </FormGroup>
                       </td>
                       <td>
                         <FormGroup>
-                          <FormInput type="number" name="sect1.materialAchieved" />
+                          <FormInput type="number" name="sect1.objectives.materialStorage.achieved" />
                         </FormGroup>
                       </td>
                     </tr>
@@ -483,12 +563,12 @@ const AddSaltReportFormFields = ({ setInitialValues, formValues, setValidationSc
                       <td>Salt Application</td>
                       <td>
                         <FormGroup>
-                          <FormInput type="number" name="sect1.saltIdentified" />
+                          <FormInput type="number" name="sect1.objectives.saltApplication.identified" />
                         </FormGroup>
                       </td>
                       <td>
                         <FormGroup>
-                          <FormInput type="number" name="sect1.saltAchieved" />
+                          <FormInput type="number" name="sect1.objectives.saltApplication.achieved" />
                         </FormGroup>
                       </td>
                     </tr>
@@ -739,32 +819,32 @@ const AddSaltReportFormFields = ({ setInitialValues, formValues, setValidationSc
                     <tr>
                       <td>Multi-chloride A</td>
                       <td>
-                        <Field name="multiChlorideA.litres" type="number" as={Input} />
+                        <Field name="sect3.multiChlorideA.litres" type="number" as={Input} />
                       </td>
                       <td>
-                        <Field name="multiChlorideA.naClPercentage" type="number" as={Input} />
+                        <Field name="sect3.multiChlorideA.naClPercentage" type="number" as={Input} />
                       </td>
                       <td>
-                        <Field name="multiChlorideA.mgCl2Percentage" type="number" as={Input} />
+                        <Field name="sect3.multiChlorideA.mgCl2Percentage" type="number" as={Input} />
                       </td>
                       <td>
-                        <Field name="multiChlorideA.caCl2Percentage" type="number" as={Input} />
+                        <Field name="sect3.multiChlorideA.caCl2Percentage" type="number" as={Input} />
                       </td>
                     </tr>
                     {/* Multi-chloride B */}
                     <tr>
                       <td>Multi-chloride A</td>
                       <td>
-                        <Field name="multiChlorideB.litres" type="number" as={Input} />
+                        <Field name="sect3.multiChlorideB.litres" type="number" as={Input} />
                       </td>
                       <td>
-                        <Field name="multiChlorideB.naClPercentage" type="number" as={Input} />
+                        <Field name="sect3.multiChlorideB.naClPercentage" type="number" as={Input} />
                       </td>
                       <td>
-                        <Field name="multiChlorideB.mgCl2Percentage" type="number" as={Input} />
+                        <Field name="sect3.multiChlorideB.mgCl2Percentage" type="number" as={Input} />
                       </td>
                       <td>
-                        <Field name="multiChlorideB.caCl2Percentage" type="number" as={Input} />
+                        <Field name="sect3.multiChlorideB.caCl2Percentage" type="number" as={Input} />
                       </td>
                     </tr>
                   </tbody>
@@ -820,7 +900,7 @@ const AddSaltReportFormFields = ({ setInitialValues, formValues, setValidationSc
                           {formValues.sect4.stockpiles.map((site, index) => (
                             <tr key={index}>
                               <td>
-                                <FormInput type="number" name={`sect4.stockpiles.${index}.siteName`} />
+                                <FormInput name={`sect4.stockpiles.${index}.siteName`} />
                               </td>
                               <td>
                                 <FormCheckboxInput type="checkbox" name={`sect4.stockpiles.${index}.motiOwned`} />
@@ -941,7 +1021,7 @@ const AddSaltReportFormFields = ({ setInitialValues, formValues, setValidationSc
               <Col sm={1}>5.1</Col>
               <Col>a) Indicate the total number of vehicles (trucks) used for winter maintenance:</Col>
               <Col>
-                <Field name="sect5.totalVehicles" type="number" as={Input} />
+                <FormInput name="sect5.numberOfVehicles" type="number" />
               </Col>
             </Row>
             <Row>
@@ -962,25 +1042,25 @@ const AddSaltReportFormFields = ({ setInitialValues, formValues, setValidationSc
                     <tr>
                       <td>Total number of vehicles assigned to solid salt application</td>
                       <td>
-                        <Field name="sect5.vehiclesForSaltApplication" type="number" as={Input} />
+                        <FormInput name="sect5.vehiclesForSaltApplication" type="number" />
                       </td>
                     </tr>
                     <tr>
                       <td>Vehicles with conveyors and ground speed sensor electronic controller</td>
                       <td>
-                        <Field name="sect5.vehiclesWithConveyors" type="number" as={Input} />
+                        <FormInput name="sect5.vehiclesWithConveyors" type="number" />
                       </td>
                     </tr>
                     <tr>
                       <td>Vehicles equipped with pre-wetting equipment</td>
                       <td>
-                        <Field name="sect5.vehiclesWithPreWettingEquipment" type="number" as={Input} />
+                        <FormInput name="sect5.vehiclesWithPreWettingEquipment" type="number" />
                       </td>
                     </tr>
                     <tr>
                       <td>Vehicles designed for direct liquid application (DLA)</td>
                       <td>
-                        <Field name="sect5.vehiclesForDLA" type="number" as={Input} />
+                        <FormInput name="sect5.vehiclesForDLA" type="number" />
                       </td>
                     </tr>
                   </tbody>
@@ -1016,7 +1096,6 @@ const AddSaltReportFormFields = ({ setInitialValues, formValues, setValidationSc
                         <Field
                           type="checkbox"
                           name="sect5.weatherMonitoringSources.infraredThermometer.relied"
-                          value="Infrared Thermometer"
                           className="form-control"
                         />
                       </td>
@@ -1034,7 +1113,6 @@ const AddSaltReportFormFields = ({ setInitialValues, formValues, setValidationSc
                         <Field
                           type="checkbox"
                           name="sect5.weatherMonitoringSources.meteorologicalService.relied"
-                          value="Infrared Thermometer"
                           className="form-control"
                         />
                       </td>
@@ -1045,7 +1123,6 @@ const AddSaltReportFormFields = ({ setInitialValues, formValues, setValidationSc
                         <Field
                           type="checkbox"
                           name="sect5.weatherMonitoringSources.fixedRWISStations.relied"
-                          value="Infrared Thermometer"
                           className="form-control"
                         />
                       </td>
@@ -1063,7 +1140,6 @@ const AddSaltReportFormFields = ({ setInitialValues, formValues, setValidationSc
                         <Field
                           type="checkbox"
                           name="sect5.weatherMonitoringSources.mobileRWISMounted.relied"
-                          value="Infrared Thermometer"
                           className="form-control"
                         />
                       </td>
@@ -1107,13 +1183,12 @@ const AddSaltReportFormFields = ({ setInitialValues, formValues, setValidationSc
                       <td>
                         <Field
                           type="checkbox"
-                          name="sect5.weatherMonitoringSources.AVL.relied"
-                          value="Infrared Thermometer"
+                          name="sect5.maintenanceDecisionSupport.AVL.relied"
                           className="form-control"
                         />
                       </td>
                       <td>
-                        <Field type="number" name="sect5.weatherMonitoringSources.AVL.number" as={Input} />
+                        <Field type="number" name="sect5.maintenanceDecisionSupport.AVL.number" as={Input} />
                       </td>
                     </tr>
                     <tr>
@@ -1121,15 +1196,14 @@ const AddSaltReportFormFields = ({ setInitialValues, formValues, setValidationSc
                       <td>
                         <Field
                           type="checkbox"
-                          name="sect5.weatherMonitoringSources.saltApplicationRates.relied"
-                          value="Infrared Thermometer"
+                          name="sect5.maintenanceDecisionSupport.saltApplicationRates.relied"
                           className="form-control"
                         />
                       </td>
                       <td>
                         <Field
                           type="number"
-                          name="sect5.weatherMonitoringSources.saltApplicationRates.number"
+                          name="sect5.maintenanceDecisionSupport.saltApplicationRates.number"
                           as={Input}
                         />
                       </td>
@@ -1139,15 +1213,14 @@ const AddSaltReportFormFields = ({ setInitialValues, formValues, setValidationSc
                       <td>
                         <Field
                           type="checkbox"
-                          name="sect5.weatherMonitoringSources.applicationRateChart.relied"
-                          value="Infrared Thermometer"
+                          name="sect5.maintenanceDecisionSupport.applicationRateChart.relied"
                           className="form-control"
                         />
                       </td>
                       <td>
                         <Field
                           type="number"
-                          name="sect5.weatherMonitoringSources.applicationRateChart.number"
+                          name="sect5.maintenanceDecisionSupport.applicationRateChart.number"
                           as={Input}
                         />
                       </td>
@@ -1157,13 +1230,12 @@ const AddSaltReportFormFields = ({ setInitialValues, formValues, setValidationSc
                       <td>
                         <Field
                           type="checkbox"
-                          name="sect5.weatherMonitoringSources.testingMDSS.relied"
-                          value="Infrared Thermometer"
+                          name="sect5.maintenanceDecisionSupport.testingMDSS.relied"
                           className="form-control"
                         />
                       </td>
                       <td>
-                        <Field type="number" name="sect5.weatherMonitoringSources.testingMDSS.number" as={Input} />
+                        <Field type="number" name="sect5.maintenanceDecisionSupport.testingMDSS.number" as={Input} />
                       </td>
                     </tr>
                   </tbody>
@@ -1189,12 +1261,7 @@ const AddSaltReportFormFields = ({ setInitialValues, formValues, setValidationSc
                 <tr>
                   <td>6.1 Does your organization perform snow disposal at a designated site?</td>
                   <td>
-                    <Field
-                      type="checkbox"
-                      name="sect6.snowDisposalSite.used"
-                      value="Infrared Thermometer"
-                      className="form-control"
-                    />
+                    <Field type="checkbox" name="sect6.snowDisposalSite.used" className="form-control" />
                   </td>
                   <td>
                     <Field type="number" name="sect6.snowDisposalSite.number" as={Input} />
@@ -1203,23 +1270,13 @@ const AddSaltReportFormFields = ({ setInitialValues, formValues, setValidationSc
                 <tr>
                   <td>6.2 Does your organization use snow melters?</td>
                   <td>
-                    <Field
-                      type="checkbox"
-                      name="sect6.snowMelters.used"
-                      value="Infrared Thermometer"
-                      className="form-control"
-                    />
+                    <Field type="checkbox" name="sect6.snowMelters.used" className="form-control" />
                   </td>
                 </tr>
                 <tr>
                   <td>6.3 Is the meltwater from snow melters discharged though the storm sewer system?</td>
                   <td>
-                    <Field
-                      type="checkbox"
-                      name="sect6.meltwaterDisposalMethod.used"
-                      value="Infrared Thermometer"
-                      className="form-control"
-                    />
+                    <Field type="checkbox" name="sect6.meltwaterDisposalMethod.used" className="form-control" />
                   </td>
                 </tr>
               </tbody>
@@ -1310,7 +1367,7 @@ const AddSaltReportFormFields = ({ setInitialValues, formValues, setValidationSc
           </Col>
         </Row>
         <Row>
-          <Col className='my-2'>
+          <Col className="my-2">
             <h4>Types of Vulnerable Areas</h4>
             <Table bordered>
               <thead>
@@ -1324,33 +1381,63 @@ const AddSaltReportFormFields = ({ setInitialValues, formValues, setValidationSc
               <tbody>
                 <tr>
                   <td>Drinking Water (surface or ground water)</td>
-                  <td><Field name='sect7.typesOfVulnerableAreas.drinkingWater.areasIdentified' as={Input} /></td>
-                  <td><Field name='sect7.typesOfVulnerableAreas.drinkingWater.areasWithProtection' as={Input} /></td>
-                  <td><Field name='sect7.typesOfVulnerableAreas.drinkingWater.areasWithChloride' as={Input} /></td>
+                  <td>
+                    <Field type="number" name="sect7.typesOfVulnerableAreas.drinkingWater.areasIdentified" as={Input} />
+                  </td>
+                  <td>
+                    <Field type="number" name="sect7.typesOfVulnerableAreas.drinkingWater.areasWithProtection" as={Input} />
+                  </td>
+                  <td>
+                    <Field type="number" name="sect7.typesOfVulnerableAreas.drinkingWater.areasWithChloride" as={Input} />
+                  </td>
                 </tr>
                 <tr>
                   <td>Aquatic Life (lake and watercourse)</td>
-                  <td><Field name='sect7.typesOfVulnerableAreas.aquaticLife.areasIdentified' as={Input} /></td>
-                  <td><Field name='sect7.typesOfVulnerableAreas.aquaticLife.areasWithProtection' as={Input} /></td>
-                  <td><Field name='sect7.typesOfVulnerableAreas.aquaticLife.areasWithChloride' as={Input} /></td>
+                  <td>
+                    <Field type="number" name="sect7.typesOfVulnerableAreas.aquaticLife.areasIdentified" as={Input} />
+                  </td>
+                  <td>
+                    <Field type="number" name="sect7.typesOfVulnerableAreas.aquaticLife.areasWithProtection" as={Input} />
+                  </td>
+                  <td>
+                    <Field type="number" name="sect7.typesOfVulnerableAreas.aquaticLife.areasWithChloride" as={Input} />
+                  </td>
                 </tr>
                 <tr>
                   <td>Wetlands and associated aquatic life</td>
-                  <td><Field name='sect7.typesOfVulnerableAreas.wetlands.areasIdentified' as={Input} /></td>
-                  <td><Field name='sect7.typesOfVulnerableAreas.wetlands.areasWithProtection' as={Input} /></td>
-                  <td><Field name='sect7.typesOfVulnerableAreas.wetlands.areasWithChloride' as={Input} /></td>
+                  <td>
+                    <Field type="number" name="sect7.typesOfVulnerableAreas.wetlands.areasIdentified" as={Input} />
+                  </td>
+                  <td>
+                    <Field type="number" name="sect7.typesOfVulnerableAreas.wetlands.areasWithProtection" as={Input} />
+                  </td>
+                  <td>
+                    <Field type="number" name="sect7.typesOfVulnerableAreas.wetlands.areasWithChloride" as={Input} />
+                  </td>
                 </tr>
                 <tr>
                   <td>Delimited areas with terrestrial fauna/flora</td>
-                  <td><Field name='sect7.typesOfVulnerableAreas.delimitedAreas.areasIdentified' as={Input} /></td>
-                  <td><Field name='sect7.typesOfVulnerableAreas.delimitedAreas.areasWithProtection' as={Input} /></td>
-                  <td><Field name='sect7.typesOfVulnerableAreas.delimitedAreas.areasWithChloride' as={Input} /></td>
+                  <td>
+                    <Field type="number" name="sect7.typesOfVulnerableAreas.delimitedAreas.areasIdentified" as={Input} />
+                  </td>
+                  <td>
+                    <Field type="number" name="sect7.typesOfVulnerableAreas.delimitedAreas.areasWithProtection" as={Input} />
+                  </td>
+                  <td>
+                    <Field type="number" name="sect7.typesOfVulnerableAreas.delimitedAreas.areasWithChloride" as={Input} />
+                  </td>
                 </tr>
                 <tr>
                   <td>Valued Lands</td>
-                  <td><Field name='sect7.typesOfVulnerableAreas.valuedLands.areasIdentified' as={Input} /></td>
-                  <td><Field name='sect7.typesOfVulnerableAreas.valuedLands.areasWithProtection' as={Input} /></td>
-                  <td><Field name='sect7.typesOfVulnerableAreas.valuedLands.areasWithChloride' as={Input} /></td>
+                  <td>
+                    <Field type="number" name="sect7.typesOfVulnerableAreas.valuedLands.areasIdentified" as={Input} />
+                  </td>
+                  <td>
+                    <Field type="number" name="sect7.typesOfVulnerableAreas.valuedLands.areasWithProtection" as={Input} />
+                  </td>
+                  <td>
+                    <Field type="number" name="sect7.typesOfVulnerableAreas.valuedLands.areasWithChloride" as={Input} />
+                  </td>
                 </tr>
               </tbody>
             </Table>
