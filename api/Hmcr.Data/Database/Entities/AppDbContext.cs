@@ -68,6 +68,7 @@ namespace Hmcr.Data.Database.Entities
         public virtual DbSet<HmrWorkReport> HmrWorkReports { get; set; }
         public virtual DbSet<HmrWorkReportHist> HmrWorkReportHists { get; set; }
         public virtual DbSet<HmrWorkReportVw> HmrWorkReportVws { get; set; }
+        public virtual DbSet<HmrSaltReport> HmrSaltReports { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -6802,6 +6803,12 @@ namespace Hmcr.Data.Database.Entities
                 entity.Property(e => e.WorkReportId)
                     .HasColumnName("WORK_REPORT_ID")
                     .HasColumnType("numeric(9, 0)");
+            });
+
+            modelBuilder.Entity<HmrSaltReport>(entity =>
+            {
+                entity.ToTable("HMR_SALT_REPORT");
+                entity.HasKey(b => b.SaltReportId);
             });
 
             modelBuilder.HasSequence("FDBK_MSG_ID_SEQ")
