@@ -205,12 +205,21 @@ const WorkReportingUpload = ({
     setFieldValue(fieldName, e.currentTarget.files[0]);
   };
 
-  const handleEditFormSubmit = (values, formType) => {
-    console.log(values, formType);
-    alert(JSON.stringify(values))
-    
-  }
-  const saltReportFormModal = useFormModal('Annual Salt Report', <AddSaltReportFormFields />, handleEditFormSubmit, 'xl');
+  const handleSaltReportSubmit = (values, formType) => {
+    const stagingTableName = reportTypes.find((type) => 4 === type.id).stagingTableName;
+
+    const apiPath = Constants.REPORT_TYPES[stagingTableName].api;
+    console.log(stagingTableName, apiPath);
+    api.instance
+      .post(`${apiPath}`, {})
+  };
+
+  const saltReportFormModal = useFormModal(
+    'Annual Salt Report',
+    <AddSaltReportFormFields />,
+    handleSaltReportSubmit,
+    'xl'
+  );
 
   return (
     <React.Fragment>
@@ -258,20 +267,19 @@ const WorkReportingUpload = ({
                       <br />
                       or
                       <br />
-                      {
-                        values.reportTypeId === 4 && (
-                          <>
-                            <Button
-                              size="sm"
-                              color="primary"
-                              className="mr-2"
-                              onClick={() => saltReportFormModal.openForm(Constants.FORM_TYPE.ADD)}
-                            >
-                              Add Salt Report Form Submisison
-                            </Button>
-                          </>
-                        )
-                      }
+                      {values.reportTypeId === 4 && (
+                        <>
+                          <Button
+                            size="sm"
+                            color="primary"
+                            className="mr-2"
+                            type="button"
+                            onClick={() => saltReportFormModal.openForm(Constants.FORM_TYPE.ADD)}
+                          >
+                            Add Salt Report Form Submisison
+                          </Button>
+                        </>
+                      )}
                       {errors.reportFile && (
                         <FormFeedback style={{ display: 'unset' }}>{errors.reportFile}</FormFeedback>
                       )}
