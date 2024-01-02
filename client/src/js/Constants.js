@@ -30,6 +30,7 @@ export const API_PATHS = {
   ROCKFALL_REPORT: '/rockfallreports',
   WILDLIFE_REPORT: '/wildlifereports',
   WORK_REPORT: '/workreports',
+  SALT_REPORT: '/saltreports',
   SUBMISSIONS: '/submissionobjects',
   SUBMISSION_STATUS: '/submissionstatus',
   SUBMISSION_STREAMS: '/submissionstreams',
@@ -42,6 +43,7 @@ export const REPORT_TYPES = {
   HMR_WORK_REPORT: { api: API_PATHS.WORK_REPORT, name: 'HMR_WORK_REPORT' },
   HMR_ROCKFALL_REPORT: { api: API_PATHS.ROCKFALL_REPORT, name: 'HMR_ROCKFALL_REPORT' },
   HMR_WILDLIFE_REPORT: { api: API_PATHS.WILDLIFE_REPORT, name: 'HMR_WILDLIFE_REPORT' },
+  HMR_SALT_REPORT: { api: API_PATHS.SALT_REPORT, name: 'HMR_SALT_REPORT' },
 };
 
 export const PATHS = {
