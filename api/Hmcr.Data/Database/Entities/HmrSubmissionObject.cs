@@ -50,5 +50,6 @@ namespace Hmcr.Data.Database.Entities
         public virtual ICollection<HmrSubmissionRow> HmrSubmissionRows { get; set; }
         public virtual ICollection<HmrWildlifeReport> HmrWildlifeReports { get; set; }
         public virtual ICollection<HmrWorkReport> HmrWorkReports { get; set; }
+        public virtual ICollection<HmrWorkReport> HmrSaltReports { get; set; }
     }
 }
