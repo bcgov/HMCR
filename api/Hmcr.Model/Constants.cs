@@ -13,6 +13,7 @@ namespace Hmcr.Model
         public const string PacificTimeZone = "Pacific Standard Time";
         public const string SystemAdmin = "SYSTEM_ADMIN";
         public const string HmcrOrigins = "HmcrOrigins";
+        public const int CoordsMinimumDistance = 5;
     }
 
     public static class Reports

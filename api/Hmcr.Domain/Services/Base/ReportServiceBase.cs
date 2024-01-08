@@ -13,6 +13,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using NetTopologySuite.Geometries;
 
 namespace Hmcr.Domain.Services.Base
 {
@@ -326,6 +327,33 @@ namespace Hmcr.Domain.Services.Base
         protected static string[] ConvertServiceAreaToStrings(decimal serviceArea)
         {
             return new string[] { ((long)serviceArea).ToString(), string.Format("{0, 2:00}", serviceArea) };
+        }
+
+        // Parse and calculate distance based on provided coordinates
+        protected static double ParseAndCalculateDistance(string startLat, string startLon, string endLat, string endLon)
+        {
+            // Parse coordinates from strings to double values
+            if (!double.TryParse(startLat, out double startLatitude) ||
+                !double.TryParse(startLon, out double startLongitude) ||
+                !double.TryParse(endLat, out double endLatitude) ||
+                !double.TryParse(endLon, out double endLongitude)
+                )
+            {
+                throw new ArgumentException("Invalid coordinate format");
+            }
+
+            // Create points for the start and end coordinates
+            var startCoordinate = new Coordinate(startLongitude, startLatitude);
+            var endCoordinate = new Coordinate(endLongitude, endLatitude);
+
+            // Create point geometries
+            var startGeometry = new Point(startCoordinate);
+            var endGeometry = new Point(endCoordinate);
+
+            // Calculate the distance directly using Distance method
+            double distance = startGeometry.Distance(endGeometry); 
+
+            return distance;
         }
     }
 }

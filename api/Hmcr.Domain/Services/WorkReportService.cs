@@ -111,6 +111,18 @@ namespace Hmcr.Domain.Services
                     throw;
                 }
 
+                // TH-106937 Spatial validation step for start and end coordinates
+                // Start coordinate is required. Ensure end coordinate exists otherwise treat spatial data as a point.
+                if (!string.IsNullOrEmpty(row.EndLatitude) && !string.IsNullOrEmpty(row.EndLongitude))
+                {
+                    var distance = ParseAndCalculateDistance(row.StartLatitude, row.StartLongitude, row.EndLatitude, row.EndLongitude);
+                    
+                    if (distance <= Constants.CoordsMinimumDistance) {
+                        errors.AddItem("Coordinates", "Start and end coordinates obtained from Latitudes and Longitudes must be greater than 5 meters for all rows");
+                        break;
+                    }
+                }
+
                 if (!serviceAreastrings.Contains(row.ServiceArea))
                 {
                     errors.AddItem(Fields.ServiceArea, $"The file contains service area which is not {serviceAreastrings[0]}.");
