@@ -20,15 +20,15 @@ const defaultValues = {
   telephone: '',
   email: '',
   sect1: {
-    planDeveloped: "",
-    planReviewed: "",
-    planUpdated: "",
+    planDeveloped: '',
+    planReviewed: '',
+    planUpdated: '',
     training: {
-      manager: "",
-      supervisor: "",
-      operator: "",
-      mechanical: "",
-      patroller: "",
+      manager: '',
+      supervisor: '',
+      operator: '',
+      mechanical: '',
+      patroller: '',
     },
     objectives: {
       materialStorage: {
@@ -46,22 +46,22 @@ const defaultValues = {
     saltTotalDays: '',
   },
   sect3: {
-    deicer: { nacl: null, mgcl2: null, cacl2: null, acetate: null },
-    treatedAbrasives: { sandStoneDust: null, nacl: null, mgcl2: null, cacl2: null },
-    prewetting: { nacl: null, mgcl2: null, cacl2: null, acetate: null, nonchloride: null },
-    pretreatment: { nacl: null, mgcl2: null, cacl2: null, acetate: null, nonchloride: null },
-    antiicing: { nacl: null, mgcl2: null, cacl2: null, acetate: null, nonchloride: null },
+    deicer: { nacl: 0, mgcl2: 0, cacl2: 0, acetate: 0 },
+    treatedAbrasives: { sandStoneDust: 0, nacl: 0, mgcl2: 0, cacl2: 0 },
+    prewetting: { nacl: 0, mgcl2: 0, cacl2: 0, acetate: 0, nonchloride: 0 },
+    pretreatment: { nacl: 0, mgcl2: 0, cacl2: 0, acetate: 0, nonchloride: 0 },
+    antiicing: { nacl: 0, mgcl2: 0, cacl2: 0, acetate: 0, nonchloride: 0 },
     multiChlorideA: {
-      litres: '',
-      naClPercentage: '',
-      mgCl2Percentage: '',
-      caCl2Percentage: '',
+      litres: 0,
+      naClPercentage: 0,
+      mgCl2Percentage: 0,
+      caCl2Percentage: 0,
     },
     multiChlorideB: {
-      litres: '',
-      naClPercentage: '',
-      mgCl2Percentage: '',
-      caCl2Percentage: '',
+      litres: 0,
+      naClPercentage: 0,
+      mgCl2Percentage: 0,
+      caCl2Percentage: 0,
     },
   },
   sect4: {
@@ -131,51 +131,51 @@ const defaultValues = {
     ],
   },
   sect5: {
-    numberOfVehicles: '',
-    vehiclesForSaltApplication: '',
-    vehiclesWithConveyors: '',
-    vehiclesWithPreWettingEquipment: '',
-    vehiclesForDLA: '',
+    numberOfVehicles: 0,
+    vehiclesForSaltApplication: 0,
+    vehiclesWithConveyors: 0,
+    vehiclesWithPreWettingEquipment: 0,
+    vehiclesForDLA: 0,
     weatherMonitoringSources: {
       infraredThermometer: {
         relied: false,
-        number: '',
+        number: 0,
       },
       meteorologicalService: {
         relied: false,
       },
       fixedRWISStations: {
         relied: false,
-        number: '',
+        number: 0,
       },
       mobileRWISMounted: {
         relied: false,
-        number: '',
+        number: 0,
       },
     },
     maintenanceDecisionSupport: {
       AVL: {
         relied: false,
-        number: '',
+        number: 0,
       },
       saltApplicationRates: {
         relied: false,
-        number: '',
+        number: 0,
       },
       applicationRateChart: {
         relied: false,
-        number: '',
+        number: 0,
       },
       testingMDSS: {
         relied: false,
-        number: '',
+        number: 0,
       },
     },
   },
   sect6: {
     snowDisposalSite: {
       used: false,
-      number: '',
+      number: 0,
     },
     snowMelters: {
       used: false,
@@ -320,7 +320,7 @@ const validationSchema = Yup.object().shape({
     saltStorageTotal: Yup.number().min(0, 'Number of sites cannot be negative').nullable(),
     stockpiles: Yup.array().of(
       Yup.object().shape({
-        siteName: Yup.string().required('Site name is required'),
+        siteName: Yup.string(),
         motiOwned: Yup.boolean(),
         roadSalts: Yup.object().shape({
           stockpilesTotal: Yup.number().min(0, 'Number cannot be negative').nullable(),
@@ -345,8 +345,8 @@ const validationSchema = Yup.object().shape({
   }),
   sect5: Yup.object().shape({
     numberOfVehicles: Yup.number()
-    .required('Number of vehicles is required')
-    .min(0, 'Number of vehicles cannot be negative'),
+      .required('Number of vehicles is required')
+      .min(0, 'Number of vehicles cannot be negative'),
 
     vehiclesForSaltApplication: Yup.number()
       .min(0, 'Number cannot be negative')
@@ -999,10 +999,10 @@ const AddSaltReportFormFields = ({ setInitialValues, formValues, setValidationSc
                       <tr key={index}>
                         <td>{item.practice}</td>
                         <td>
-                          <Field name={`practices[${index}].hasPlan`} type="checkbox" className="form-control" />
+                          <Field name={`sect4.practices[${index}].hasPlan`} type="checkbox" className="form-control" />
                         </td>
                         <td>
-                          <Field name={`practices[${index}].numSites`} type="number" className="form-control" />
+                          <Field name={`sect4.practices[${index}].numSites`} type="number" className="form-control" />
                         </td>
                       </tr>
                     ))}
@@ -1385,10 +1385,18 @@ const AddSaltReportFormFields = ({ setInitialValues, formValues, setValidationSc
                     <Field type="number" name="sect7.typesOfVulnerableAreas.drinkingWater.areasIdentified" as={Input} />
                   </td>
                   <td>
-                    <Field type="number" name="sect7.typesOfVulnerableAreas.drinkingWater.areasWithProtection" as={Input} />
+                    <Field
+                      type="number"
+                      name="sect7.typesOfVulnerableAreas.drinkingWater.areasWithProtection"
+                      as={Input}
+                    />
                   </td>
                   <td>
-                    <Field type="number" name="sect7.typesOfVulnerableAreas.drinkingWater.areasWithChloride" as={Input} />
+                    <Field
+                      type="number"
+                      name="sect7.typesOfVulnerableAreas.drinkingWater.areasWithChloride"
+                      as={Input}
+                    />
                   </td>
                 </tr>
                 <tr>
@@ -1397,7 +1405,11 @@ const AddSaltReportFormFields = ({ setInitialValues, formValues, setValidationSc
                     <Field type="number" name="sect7.typesOfVulnerableAreas.aquaticLife.areasIdentified" as={Input} />
                   </td>
                   <td>
-                    <Field type="number" name="sect7.typesOfVulnerableAreas.aquaticLife.areasWithProtection" as={Input} />
+                    <Field
+                      type="number"
+                      name="sect7.typesOfVulnerableAreas.aquaticLife.areasWithProtection"
+                      as={Input}
+                    />
                   </td>
                   <td>
                     <Field type="number" name="sect7.typesOfVulnerableAreas.aquaticLife.areasWithChloride" as={Input} />
@@ -1418,13 +1430,25 @@ const AddSaltReportFormFields = ({ setInitialValues, formValues, setValidationSc
                 <tr>
                   <td>Delimited areas with terrestrial fauna/flora</td>
                   <td>
-                    <Field type="number" name="sect7.typesOfVulnerableAreas.delimitedAreas.areasIdentified" as={Input} />
+                    <Field
+                      type="number"
+                      name="sect7.typesOfVulnerableAreas.delimitedAreas.areasIdentified"
+                      as={Input}
+                    />
                   </td>
                   <td>
-                    <Field type="number" name="sect7.typesOfVulnerableAreas.delimitedAreas.areasWithProtection" as={Input} />
+                    <Field
+                      type="number"
+                      name="sect7.typesOfVulnerableAreas.delimitedAreas.areasWithProtection"
+                      as={Input}
+                    />
                   </td>
                   <td>
-                    <Field type="number" name="sect7.typesOfVulnerableAreas.delimitedAreas.areasWithChloride" as={Input} />
+                    <Field
+                      type="number"
+                      name="sect7.typesOfVulnerableAreas.delimitedAreas.areasWithChloride"
+                      as={Input}
+                    />
                   </td>
                 </tr>
                 <tr>
@@ -1433,7 +1457,11 @@ const AddSaltReportFormFields = ({ setInitialValues, formValues, setValidationSc
                     <Field type="number" name="sect7.typesOfVulnerableAreas.valuedLands.areasIdentified" as={Input} />
                   </td>
                   <td>
-                    <Field type="number" name="sect7.typesOfVulnerableAreas.valuedLands.areasWithProtection" as={Input} />
+                    <Field
+                      type="number"
+                      name="sect7.typesOfVulnerableAreas.valuedLands.areasWithProtection"
+                      as={Input}
+                    />
                   </td>
                   <td>
                     <Field type="number" name="sect7.typesOfVulnerableAreas.valuedLands.areasWithChloride" as={Input} />
