@@ -40,6 +40,7 @@ namespace Hmcr.Domain.Services
             var entity = new HmrSaltReport
             {
                 // Section 1
+                ServiceArea = dto.ServiceArea,
                 ContactName = dto.ContactName,
                 Telephone = dto.Telephone,
                 Email = dto.Email,
@@ -116,10 +117,10 @@ namespace Hmcr.Domain.Services
                 TestingSMDSTotal = dto.Sect5.MaintenanceDecisionSupport.TestingMDSS.Number,
 
                 // Section 6
-                SnowDisposalSiteUsed = dto.Sect6.SnowDisposalSiteUsed,
-                SnowMeltersUsed = dto.Sect6.SnowMeltersUsed,
-                MeltwaterDisposalMethodUsed = dto.Sect6.MeltwaterDisposalMethodUsed,
-                SnowDisposalSiteTotal = dto.Sect6.SnowDisposalSiteTotal,
+                SnowDisposalSiteUsed = dto.Sect6.Disposal.Used,
+                SnowMeltersUsed = dto.Sect6.SnowMelter.Used,
+                MeltwaterDisposalMethodUsed = dto.Sect6.Meltwater.Used,
+                SnowDisposalSiteTotal = dto.Sect6.Disposal.Total,
             };
 
             return entity;

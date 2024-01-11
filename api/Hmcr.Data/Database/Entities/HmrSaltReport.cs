@@ -5,7 +5,7 @@ namespace Hmcr.Data.Database.Entities
     public class HmrSaltReport
     {
         public int SaltReportId { get; set; }
-        public string ServiceArea { get; set; }
+        public int ServiceArea { get; set; }
         public string ContactName { get; set; }
         public string Telephone { get; set; }
         public string Email { get; set; }
@@ -75,7 +75,6 @@ namespace Hmcr.Data.Database.Entities
         public bool? FixedRWISStationsRelied { get; set; }
         public bool? MobileRWISMountedRelied { get; set; }
         public int InfraredThermometerTotal { get; set; }
-        public int MeteorologicalServiceTotal { get; set; }
         public int FixedRWISStationsTotal { get; set; }
         public int MobileRWISMountedTotal { get; set; }
         public bool? AVLRelied { get; set; }
@@ -91,7 +90,7 @@ namespace Hmcr.Data.Database.Entities
         public bool? SnowDisposalSiteUsed { get; set; }
         public bool? SnowMeltersUsed { get; set; }
         public bool? MeltwaterDisposalMethodUsed { get; set; }
-        public string SnowDisposalSiteTotal { get; set; }
+        public int SnowDisposalSiteTotal { get; set; }
 
         // Default
         public long ConcurrencyControlNumber { get; set; }

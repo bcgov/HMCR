@@ -6817,6 +6817,21 @@ namespace Hmcr.Data.Database.Entities
                     .HasDefaultValueSql("(NEXT VALUE FOR [HMR_SLT_RPT_ID_SEQ])")
                     .HasComment("A system generated unique identifier.");
 
+                entity.Property(e => e.ServiceArea)
+                    .HasColumnName("SERVICE_AREA")
+                    .HasColumnType("numeric(9, 0)")
+                    .HasComment("Unique identifier for SERVICE AREA");
+
+                entity.Property(e => e.ContactName)
+                    .HasColumnName("CONTACT_NAME")
+                    .HasMaxLength(200)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.Email)
+                    .HasColumnName("EMAIL")
+                    .HasMaxLength(100)
+                    .IsUnicode(false);
+
                 entity.Property(e => e.AppCreateTimestamp)
                     .HasColumnName("APP_CREATE_TIMESTAMP")
                     .HasColumnType("datetime")
