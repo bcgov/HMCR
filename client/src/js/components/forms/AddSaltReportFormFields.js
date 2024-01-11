@@ -165,14 +165,14 @@ const defaultValues = {
     },
   },
   sect6: {
-    snowDisposalSite: {
+    disposal: {
       used: false,
-      number: 0,
+      total: 0,
     },
-    snowMelters: {
+    snowMelter: {
       used: false,
     },
-    meltwaterDisposalMethod: {
+    meltwater: {
       used: false,
     },
   },
@@ -396,13 +396,32 @@ const validationSchema = Yup.object().shape({
 const AddSaltReportFormFields = ({ setInitialValues, formValues, setValidationSchema }) => {
   const [loading, setLoading] = useState(true);
 
+  const saveFormToSessionStorage = (values) => {
+    sessionStorage.setItem('formData', JSON.stringify(values));
+  };
+
+  const loadFromSessionStorage = () => {
+    const savedFormData = sessionStorage.getItem('formData');
+    return savedFormData ? JSON.parse(savedFormData) : defaultValues;
+  };
+
   useEffect(() => {
     setLoading(true);
     const defaultValidationSchema = validationSchema.shape({});
     setValidationSchema(defaultValidationSchema);
-    setInitialValues(defaultValues);
+    setInitialValues(loadFromSessionStorage());
     setLoading(false);
   }, []);
+
+  useEffect(() => {
+    // Save form data to local storage every second
+    const saveInterval = setInterval(() => {
+      saveFormToSessionStorage(formValues || defaultValues);
+    }, 1000);
+
+    // Clear the interval when the component unmounts
+    return () => clearInterval(saveInterval);
+  }, [formValues]);
 
   if (loading || formValues === null) return <PageSpinner />;
 
