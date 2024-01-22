@@ -69,6 +69,7 @@ namespace Hmcr.Data.Database.Entities
         public virtual DbSet<HmrWorkReportHist> HmrWorkReportHists { get; set; }
         public virtual DbSet<HmrWorkReportVw> HmrWorkReportVws { get; set; }
         public virtual DbSet<HmrSaltReport> HmrSaltReports { get; set; }
+        public virtual DbSet<HmrSaltStockpile> HmrSaltStockpiles { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -6808,7 +6809,13 @@ namespace Hmcr.Data.Database.Entities
             modelBuilder.Entity<HmrSaltReport>(entity =>
             {
                 entity.ToTable("HMR_SALT_REPORT");
-                entity.HasKey(b => b.SaltReportId)
+
+                entity.HasMany(e => e.Stockpiles)
+                    .WithOne(e => e.SaltReport)
+                    .HasForeignKey(e => e.SaltReportId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasKey(e => e.SaltReportId)
                     .HasName("HMR_SALT_REPORT_PK");
 
                 entity.Property(e => e.SaltReportId)
@@ -6910,6 +6917,22 @@ namespace Hmcr.Data.Database.Entities
                     .IsUnicode(false)
                     .HasDefaultValueSql("(user_name())")
                     .HasComment("Named database user who created record");
+            });
+
+            modelBuilder.Entity<HmrSaltStockpile>(entity => 
+            {
+                entity.ToTable("HMR_SALT_STOCKPILE");
+
+                entity.HasKey(e => e.StockPileId)
+                    .HasName("PK_HMR_SALT_STOCKPILE");
+
+                entity.Property(e => e.StockPileId)
+                    .HasColumnName("STOCKPILE_ID")
+                    .HasDefaultValueSql("(NEXT VALUE FOR [HMR_SLT_RPT_ID_SEQ])");
+
+                entity.Property(e => e.SaltReportId)
+                    .HasColumnName("SALT_REPORT_ID")
+                    .HasColumnType("numeric(9, 0)");
             });
 
             modelBuilder.HasSequence("FDBK_MSG_ID_SEQ")

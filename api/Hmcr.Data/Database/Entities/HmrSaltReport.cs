@@ -1,4 +1,6 @@
 using System;
+using System.Collections;
+using System.Collections.Generic;
 
 namespace Hmcr.Data.Database.Entities
 {
@@ -63,6 +65,32 @@ namespace Hmcr.Data.Database.Entities
         public int MultichlorideBNaclPercentage { get; set; }
         public int MultichlorideBMgcl2Percentage { get; set; }
         public int MultichlorideBCacl2Percentage { get; set; }
+
+        // Section 4
+        public int SaltStorageSitesTotal { get; set; }
+        public ICollection<HmrSaltStockpile> Stockpiles { get; set; }
+        public bool AllMaterialsHandledPlan { get; set; }
+        public bool EquipmentPreventsOverloadingPlan { get; set; }
+        public bool WastewaterSystemPlan { get; set; }
+        public bool ControlDiversionExternalWatersPlan { get; set; }
+        public bool DrainageCollectionSystemPlan { get; set; }
+        public bool OngoingCleanupPlan { get; set; }
+        public bool RiskManagementPlanPlan { get; set; }
+        public bool MunicipalSewerSystemPlan { get; set; }
+        public bool RemovalContainmentPlan { get; set; }
+        public bool WatercoursePlan { get; set; }
+        public bool OtherDischargePointPlan { get; set; }
+        public int AllMaterialsHandledSites { get; set; }
+        public int EquipmentPreventsOverloadingSites { get; set; }
+        public int WastewaterSystemSites { get; set; }
+        public int ControlDiversionExternalWatersSites { get; set; }
+        public int DrainageCollectionSystemSites { get; set; }
+        public int OngoingCleanupSites { get; set; }
+        public int RiskManagementPlanSites { get; set; }
+        public int MunicipalSewerSystemSites { get; set; }
+        public int RemovalContainmentSites { get; set; }
+        public int WatercourseSites { get; set; }
+        public int OtherDischargePointSites { get; set; }
 
         // Section 5
         public int NumberOfVehicles { get; set; }

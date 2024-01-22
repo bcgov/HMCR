@@ -1,7 +1,10 @@
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Hmcr.Data.Database.Entities;
 using Hmcr.Data.Repositories;
 using Hmcr.Model.Dtos.SaltReport;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Newtonsoft.Json.Linq;
 
 namespace Hmcr.Domain.Services
@@ -27,15 +30,16 @@ namespace Hmcr.Domain.Services
             // ValidateDto(dto)
 
             var saltReportEntity = MapDtoToEntity(dto);
+            var stockPileEntity = dto.Sect4.Stockpiles?.Select(MapStockpileDtoToEntity).ToList();
 
             // TODO: ADD ADDITIONAL BUSINESS LOGIC
             // CODE HERE...
             // ProcessBusinessRules(saltReport)
 
-            return await _repository.AddAsync(saltReportEntity);
+            return await _repository.AddAsync(saltReportEntity, stockPileEntity);
         }
 
-        private HmrSaltReport MapDtoToEntity(SaltReportDto dto)
+        private static HmrSaltReport MapDtoToEntity(SaltReportDto dto)
         {
             var entity = new HmrSaltReport
             {
@@ -94,6 +98,32 @@ namespace Hmcr.Domain.Services
                 MultichlorideBMgcl2Percentage = dto.Sect3.MultiChlorideB.Mgcl2Percentage,
                 MultichlorideBCacl2Percentage = dto.Sect3.MultiChlorideB.Cacl2Percentage,
 
+                // Section 4
+                SaltStorageSitesTotal = dto.Sect4.SaltStorageSitesTotal,
+                AllMaterialsHandledPlan = dto.Sect4.Practices.AllMaterialsHandled.HasPlan,
+                AllMaterialsHandledSites = dto.Sect4.Practices.AllMaterialsHandled.NumSites,
+                EquipmentPreventsOverloadingPlan = dto.Sect4.Practices.EquipmentPreventsOverloading.HasPlan,
+                EquipmentPreventsOverloadingSites = dto.Sect4.Practices.EquipmentPreventsOverloading.NumSites,
+                WastewaterSystemPlan = dto.Sect4.Practices.WastewaterSystem.HasPlan,
+                WastewaterSystemSites = dto.Sect4.Practices.WastewaterSystem.NumSites,
+                ControlDiversionExternalWatersPlan = dto.Sect4.Practices.ControlDiversionExternalWaters.HasPlan,
+                ControlDiversionExternalWatersSites = dto.Sect4.Practices.ControlDiversionExternalWaters.NumSites,
+                DrainageCollectionSystemPlan = dto.Sect4.Practices.DrainageCollectionSystem.HasPlan,
+                DrainageCollectionSystemSites = dto.Sect4.Practices.DrainageCollectionSystem.NumSites,
+                OngoingCleanupPlan = dto.Sect4.Practices.OngoingCleanup.HasPlan,
+                OngoingCleanupSites = dto.Sect4.Practices.OngoingCleanup.NumSites,
+                RiskManagementPlanPlan = dto.Sect4.Practices.RiskManagementPlan.HasPlan,
+                RiskManagementPlanSites = dto.Sect4.Practices.RiskManagementPlan.NumSites,
+                MunicipalSewerSystemPlan = dto.Sect4.Practices.MunicipalSewerSystem.HasPlan,
+                MunicipalSewerSystemSites = dto.Sect4.Practices.MunicipalSewerSystem.NumSites,
+                RemovalContainmentPlan = dto.Sect4.Practices.RemovalContainment.HasPlan,
+                RemovalContainmentSites = dto.Sect4.Practices.RemovalContainment.NumSites,
+                WatercoursePlan = dto.Sect4.Practices.Watercourse.HasPlan,
+                WatercourseSites = dto.Sect4.Practices.Watercourse.NumSites,
+                OtherDischargePointPlan = dto.Sect4.Practices.OtherDischargePoint.HasPlan,
+                OtherDischargePointSites = dto.Sect4.Practices.OtherDischargePoint.NumSites,
+
+
                 // Section 5
                 NumberOfVehicles = dto.Sect5.NumberOfVehicles,
                 VehiclesForSaltApplication = dto.Sect5.VehiclesForSaltApplication,
@@ -126,6 +156,22 @@ namespace Hmcr.Domain.Services
             return entity;
         }
 
+        private HmrSaltStockpile MapStockpileDtoToEntity(StockpileDto dto)
+        {
+            return new HmrSaltStockpile
+            {
+                SiteName = dto.SiteName,
+                MotiOwned = dto.MotiOwned,
+                RoadSaltStockpiles = dto.RoadSalts.Stockpiles,
+                RoadSaltOnImpermeableSurface = dto.RoadSalts.OnImpermeableSurface,
+                RoadSaltUnderPermanentRoof = dto.RoadSalts.UnderPermanentRoof,
+                RoadSaltUnderTarp = dto.RoadSalts.UnderTarp,
+                TreatedAbrasivesStockpiles = dto.TreatedAbrasives.Stockpiles,
+                TreatedAbrasivesOnImpermeableSurface = dto.TreatedAbrasives.OnImpermeableSurface,
+                TreatedAbrasivesUnderPermanentRoof = dto.TreatedAbrasives.UnderPermanentRoof,
+                TreatedAbrasivesUnderTarp = dto.TreatedAbrasives.UnderTarp,
+            };
+        }
         public void ValidateDto(SaltReportDto dto)
         {
             // Validation Logic

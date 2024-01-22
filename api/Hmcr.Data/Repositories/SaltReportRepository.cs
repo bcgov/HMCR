@@ -13,7 +13,7 @@ namespace Hmcr.Data.Repositories
 {
     public interface ISaltReportRepository
     {
-        Task<HmrSaltReport> AddAsync(HmrSaltReport saltReport);
+        Task<HmrSaltReport> AddAsync(HmrSaltReport saltReport, List<HmrSaltStockpile> stockpiles);
     }
 
     public class SaltReportRepository : HmcrRepositoryBase<HmrSaltReport>, ISaltReportRepository
@@ -26,16 +26,36 @@ namespace Hmcr.Data.Repositories
             _context = context;
         }
 
-        public async Task<HmrSaltReport> AddAsync(HmrSaltReport saltReport)
+        public async Task<HmrSaltReport> AddAsync(HmrSaltReport saltReport, List<HmrSaltStockpile> stockpiles)
         {
-            _context.HmrSaltReports.Add(saltReport);
-            // var entry = _context.Entry(saltReport);
-            // Console.WriteLine($"Entity State: {entry.State}");
+            using (var transaction = _context.Database.BeginTransaction())
+            {
+                try
+                {
+                    // Add to table HMR_SALT_REPORT
+                    _context.HmrSaltReports.Add(saltReport);
+                    // Save changes to generate HmrSaltReport's ID
+                    _context.SaveChanges();
 
-            Console.WriteLine(_context);
-            _context.SaveChanges();
+                    // Associate stockiples with the report
+                    foreach (var stockpile in stockpiles)
+                    {
+                        stockpile.SaltReportId = saltReport.SaltReportId;
+                        _context.HmrSaltStockpiles.Add(stockpile);
+                    }
+                    _context.SaveChanges();
 
-            // var affectedRows = await _context.SaveChangesAsync();
+                    // Commit the transaction if everything is successful
+                    transaction.Commit();
+                }
+                catch (Exception)
+                {
+                    // An exception occured, roll back the transaction
+                    transaction.Rollback();
+                    throw;
+                }
+            }
+
             return saltReport;
         }
     }

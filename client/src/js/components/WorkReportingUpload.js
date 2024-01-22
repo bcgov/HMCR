@@ -209,9 +209,8 @@ const WorkReportingUpload = ({
     const stagingTableName = reportTypes.find((type) => 4 === type.id).stagingTableName;
 
     const apiPath = Constants.REPORT_TYPES[stagingTableName].api;
-    console.log(stagingTableName, apiPath);
-    api.instance
-      .post(`${apiPath}`, {})
+    console.log(values);
+    api.instance.post(`${apiPath}`, values);
   };
 
   const saltReportFormModal = useFormModal(
@@ -220,6 +219,216 @@ const WorkReportingUpload = ({
     handleSaltReportSubmit,
     'xl'
   );
+
+  const testSendApi = (values, setFieldValue) => {
+    const stagingTableName = reportTypes.find((type) => 4 === type.id).stagingTableName;
+
+    const apiPath = Constants.REPORT_TYPES[stagingTableName].api;
+    console.log(stagingTableName, apiPath);
+    api.instance
+      .post(`${apiPath}`, {
+        serviceArea: 15,
+        contactName: 'TEST',
+        telephone: '4521545453',
+        email: 'i@gla.com',
+        sect1: {
+          planDeveloped: 'No',
+          planReviewed: 'No',
+          planUpdated: 'No',
+          training: {
+            manager: 'Yes',
+            supervisor: 'Yes',
+            operator: 'Yes',
+            mechanical: 'Yes',
+            patroller: 'Yes',
+          },
+          objectives: {
+            materialStorage: {
+              identified: 'No',
+              achieved: 'No',
+            },
+            saltApplication: {
+              identified: 'No',
+              achieved: 'No',
+            },
+          },
+        },
+        sect2: {
+          roadTotalLength: 32,
+          saltTotalDays: 32,
+        },
+        sect3: {
+          deicer: { nacl: 7, mgcl2: 7, cacl2: 7, acetate: 7 },
+          treatedAbrasives: { sandStoneDust: 7, nacl: 7, mgcl2: 7, cacl2: 7 },
+          prewetting: { nacl: 7, mgcl2: 7, cacl2: 7, acetate: 7, nonchloride: 7 },
+          pretreatment: { nacl: 7, mgcl2: 7, cacl2: 7, acetate: 7, nonchloride: 7 },
+          antiicing: { nacl: 7, mgcl2: 7, cacl2: 7, acetate: 7, nonchloride: 7 },
+          multiChlorideA: {
+            litres: 3,
+            naClPercentage: 3,
+            mgCl2Percentage: 3,
+            caCl2Percentage: 3,
+          },
+          multiChlorideB: {
+            litres: 3,
+            naClPercentage: 3,
+            mgCl2Percentage: 3,
+            caCl2Percentage: 3,
+          },
+        },
+        sect4: {
+          saltStorageSitesTotal: 3000,
+          stockpiles: [
+            {
+              siteName: 'JIRA',
+              motiOwned: false,
+              roadSalts: {
+                stockpilesTotal: 47,
+                onImpermeableSurface: 47,
+                underPermanentRoof: 47,
+                underTarp: 47,
+              },
+              treatedAbrasives: {
+                stockpilesTotal: 47,
+                onImpermeableSurface: 47,
+                underPermanentRoof: 47,
+                underTarp: 47,
+              },
+            },
+            {
+              siteName: 'Jenkins',
+              motiOwned: false,
+              roadSalts: {
+                stockpilesTotal: 47,
+                onImpermeableSurface: 47,
+                underPermanentRoof: 47,
+                underTarp: 47,
+              },
+              treatedAbrasives: {
+                stockpilesTotal: 47,
+                onImpermeableSurface: 47,
+                underPermanentRoof: 47,
+                underTarp: 47,
+              },
+            },
+          ],
+          practices: {
+            allMaterialsHandled: {
+              label: 'All materials are handled in a designated area characterized by an impermeable surface',
+              hasPlan: true,
+              numSites: 1237,
+            },
+            equipmentPreventsOverloading: {
+              label: 'Equipment to prevent overloading of trucks',
+              numSites: 1237,
+              hasPlan: true,
+            },
+            wastewaterSystem: {
+              label: 'System for collection and/or treatment of wastewater from cleaning of trucks',
+              numSites: 1237,
+              hasPlan: true,
+            },
+            controlDiversionExternalWaters: {
+              label: 'Control and diversion of external waters (non salt impacted',
+              numSites: 1237,
+              hasPlan: true,
+            },
+            drainageCollectionSystem: {
+              label: 'Drainage inside with collection systems for runoff of salt contaminated waters',
+              numSites: 1237,
+              hasPlan: true,
+            },
+            municipalSewerSystem: {
+              label: 'Specify discharge point into a municipal sewer system',
+              numSites: 1237,
+              hasPlan: true,
+            },
+            removalContainment: {
+              label: 'Specify discharge point into a containment for removal',
+              numSites: 1237,
+              hasPlan: true,
+            },
+            watercourse: {
+              label: 'Specify discharge point into a watercourse',
+              numSites: 1237,
+              hasPlan: true,
+            },
+            otherDischargePoint: {
+              label: 'Specify discharge point into (other)',
+              numSites: 1237,
+              hasPlan: false,
+            },
+            ongoingCleanup: {
+              label: 'Ongoing cleanup of the site surfaces, and spilled material is swept up quickly',
+              numSites: 1237,
+              hasPlan: false,
+            },
+            riskManagementPlan: {
+              label: 'Risk management and emergency measures plans are in place',
+              numSites: 1237,
+              hasPlan: false,
+            },
+          },
+        },
+        sect5: {
+          numberOfVehicles: 9,
+          vehiclesForSaltApplication: 9,
+          vehiclesWithConveyors: 9,
+          vehiclesWithPreWettingEquipment: 9,
+          vehiclesForDLA: 9,
+          weatherMonitoringSources: {
+            infraredThermometer: {
+              relied: false,
+              number: 9,
+            },
+            meteorologicalService: {
+              relied: false,
+            },
+            fixedRWISStations: {
+              relied: false,
+              number: 9,
+            },
+            mobileRWISMounted: {
+              relied: false,
+              number: 9,
+            },
+          },
+          maintenanceDecisionSupport: {
+            AVL: {
+              relied: false,
+              number: 9,
+            },
+            saltApplicationRates: {
+              relied: false,
+              number: 9,
+            },
+            applicationRateChart: {
+              relied: false,
+              number: 9,
+            },
+            testingMDSS: {
+              relied: false,
+              number: 9,
+            },
+          },
+        },
+        sect6: {
+          disposal: {
+            used: false,
+            total: 9,
+          },
+          snowMelter: {
+            used: false,
+          },
+          meltwater: {
+            used: false,
+          },
+        },
+      })
+      .then((response) => {
+        console.log(response);
+      });
+  };
 
   return (
     <React.Fragment>
@@ -230,7 +439,7 @@ const WorkReportingUpload = ({
               <FormRow name="reportTypeId" label="Report Type">
                 <SingleDropdownField defaultTitle="Select Report Type" items={reportTypes} name="reportTypeId" />
               </FormRow>
-              {values.reportTypeId && (
+              {values.reportTypeId !== 4 ? (
                 <React.Fragment>
                   <FormGroup row>
                     <Label for="reportFileBrowser" sm={3}>
@@ -241,9 +450,7 @@ const WorkReportingUpload = ({
                         File restrictions:{' '}
                         <ul>
                           <li>.csv files only</li>
-                          <li>
-                            Up to {reportTypes.find((o) => o.id === values.reportTypeId).fileSizeLimitMb}MB per file
-                          </li>
+                          <li>Up to 5MB per file</li>
                         </ul>
                       </Alert>
                       <CustomInput
@@ -264,22 +471,6 @@ const WorkReportingUpload = ({
                         key={fileInputKey}
                         invalid={errors.reportFile && errors.reportFile.length > 0}
                       />
-                      <br />
-                      or
-                      <br />
-                      {values.reportTypeId === 4 && (
-                        <>
-                          <Button
-                            size="sm"
-                            color="primary"
-                            className="mr-2"
-                            type="button"
-                            onClick={() => saltReportFormModal.openForm(Constants.FORM_TYPE.ADD)}
-                          >
-                            Add Salt Report Form Submisison
-                          </Button>
-                        </>
-                      )}
                       {errors.reportFile && (
                         <FormFeedback style={{ display: 'unset' }}>{errors.reportFile}</FormFeedback>
                       )}
@@ -297,6 +488,29 @@ const WorkReportingUpload = ({
                     </SubmitButton>
                   </div>
                 </React.Fragment>
+              ) : (
+                <>
+                  <FormGroup row>
+                    <Label for="reportFileBrowser" sm={3}>
+                      Fill Report
+                    </Label>
+                    <Col sm={9}>
+                      <Alert color="info">Changes are automatically saved within the browser session</Alert>
+                      <Button
+                        size="sm"
+                        color="primary"
+                        className="mr-2"
+                        type="button"
+                        onClick={() => saltReportFormModal.openForm(Constants.FORM_TYPE.ADD)}
+                      >
+                        Open Form
+                      </Button>
+                      <Button type="button" onClick={testSendApi}>
+                        test
+                      </Button>
+                    </Col>
+                  </FormGroup>
+                </>
               )}
             </React.Fragment>
           </Form>

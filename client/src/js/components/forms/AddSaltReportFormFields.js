@@ -5,6 +5,25 @@ import PageSpinner from '../ui/PageSpinner';
 import { FormRow, FormInput, FormCheckboxInput, FormRadioInput } from './FormInputs';
 import { Row, Col, FormGroup, Input, Table, Button } from 'reactstrap';
 import { Field, FieldArray } from 'formik';
+const tipAnalyticalValidation = [
+  <ul key="tipAnalyticalValidation_ul_key_1" style={{ paddingInlineStart: '20px' }}>
+    <li style={{ margin: '0 0 6px 0' }}>
+      Analytical Validations provide warnings when the activity accomplishment does not meet the defined parameters.
+    </li>
+    <li>
+      Minimum Value and Maximum Value check the accomplishment for an activity is within numerical limits, as defined.
+      No tolerances are added to the Minimum Value or Maximum Value calculations.
+    </li>
+    <li>
+      Reporting Frequency checks if the activity was reported in the same location, with locational specificity based on
+      the activity location code, within the defined period. A tolerance of 100 metres is added to the start and end
+      points for Location Code C activities to validate against previously reported instances. No time-based tolerance
+      is added to the Reporting Frequency calculation. Users can manually incorporate into the defined Reporting
+      Frequency a time-based tolerance (e.g. by setting the minimum number of days to ‘20’ for an activity that should
+      be completed monthly).
+    </li>
+  </ul>,
+];
 
 const defaultValues = {
   serviceArea: '',
@@ -76,51 +95,63 @@ const defaultValues = {
         },
       },
     ],
-    practices: [
-      {
-        practice: 'All materials are handled in a designated area characterized by an impermeable surface',
+    houseKeepingPractice: {
+      allMaterialsHandled: {
+        label: 'All materials are handled in a designated area characterized by an impermeable surface',
         hasPlan: false,
-        numSites: '',
+        numSites: 0,
       },
-      { practice: 'Equipment to prevent overloading of trucks', numSites: '', hasPlan: false },
-      {
-        practice: 'System for collection and/or treatment of wastewater from cleaning of trucks',
-        numSites: '',
-        hasPlan: false,
-      },
-      { practice: 'Control and diversion of external waters (non salt impacted', numSites: '', hasPlan: false },
-      {
-        practice: 'Drainage inside with collection systems for runoff of salt contaminated waters',
-        numSites: '',
+      equipmentPreventsOverloading: {
+        label: 'Equipment to prevent overloading of trucks',
+        numSites: 0,
         hasPlan: false,
       },
-      {
-        practice: 'Specify discharge point into a municipal sewer system',
-        numSites: '',
+      wastewaterSystem: {
+        label: 'System for collection and/or treatment of wastewater from cleaning of trucks',
+        numSites: 0,
         hasPlan: false,
       },
-      {
-        practice: 'Specify discharge point into a containment for removal',
-        numSites: '',
+      controlDiversionExternalWaters: {
+        label: 'Control and diversion of external waters (non salt impacted',
+        numSites: 0,
         hasPlan: false,
       },
-      {
-        practice: 'Specify discharge point into a watercourse',
-        numSites: '',
+      drainageCollectionSystem: {
+        label: 'Drainage inside with collection systems for runoff of salt contaminated waters',
+        numSites: 0,
         hasPlan: false,
       },
-      {
-        practice: 'Specify discharge point into (other)',
-        numSites: '',
+      municipalSewerSystem: {
+        label: 'Specify discharge point into a municipal sewer system',
+        numSites: 0,
         hasPlan: false,
       },
-      {
-        practice: 'Ongoing cleanup of the site surfaces, and spilled material is swept up quickly',
-        numSites: '',
+      removalContainment: {
+        label: 'Specify discharge point into a containment for removal',
+        numSites: 0,
         hasPlan: false,
       },
-      { practice: 'Risk management and emergency measures plans are in place', numSites: '', hasPlan: false },
-    ],
+      watercourse: {
+        label: 'Specify discharge point into a watercourse',
+        numSites: 0,
+        hasPlan: false,
+      },
+      otherDischargePoint: {
+        label: 'Specify discharge point into (other)',
+        numSites: 0,
+        hasPlan: false,
+      },
+      ongoingCleanup: {
+        label: 'Ongoing cleanup of the site surfaces, and spilled material is swept up quickly',
+        numSites: 0,
+        hasPlan: false,
+      },
+      riskManagementPlan: {
+        label: 'Risk management and emergency measures plans are in place',
+        numSites: 0,
+        hasPlan: false,
+      },
+    },
   },
   sect5: {
     numberOfVehicles: 0,
@@ -184,29 +215,29 @@ const defaultValues = {
     environmentalMonitoringConducted: false,
     typesOfVulnerableAreas: {
       drinkingWater: {
-        areasIdentified: '',
-        areasWithProtection: '',
-        areasWithChloride: '',
+        areasIdentified: 0,
+        areasWithProtection: 0,
+        areasWithChloride: 0,
       },
       aquaticLife: {
-        areasIdentified: '',
-        areasWithProtection: '',
-        areasWithChloride: '',
+        areasIdentified: 0,
+        areasWithProtection: 0,
+        areasWithChloride: 0,
       },
       wetlands: {
-        areasIdentified: '',
-        areasWithProtection: '',
-        areasWithChloride: '',
+        areasIdentified: 0,
+        areasWithProtection: 0,
+        areasWithChloride: 0,
       },
       delimitedAreas: {
-        areasIdentified: '',
-        areasWithProtection: '',
-        areasWithChloride: '',
+        areasIdentified: 0,
+        areasWithProtection: 0,
+        areasWithChloride: 0,
       },
       valuedLands: {
-        areasIdentified: '',
-        areasWithProtection: '',
-        areasWithChloride: '',
+        areasIdentified: 0,
+        areasWithProtection: 0,
+        areasWithChloride: 0,
       },
     },
     vulnerableAreas: [
@@ -328,7 +359,7 @@ const validationSchema = Yup.object().shape({
         }),
       })
     ),
-    practices: Yup.array().of(
+    houseKeepingPractice: Yup.array().of(
       Yup.object().shape({
         hasPlan: Yup.boolean(),
         numSites: Yup.number().nullable(),
@@ -497,36 +528,36 @@ const AddSaltReportFormFields = ({ setInitialValues, formValues, setValidationSc
             decision making? Indicate which levels of responsibility were offered training (new or refresher):
           </Col>
         </Row>
-        <Row className="my-4">
-          <Col>
+        <Row className="my-4 justify-content-center">
+          <Col xs={2}>
             <div>
               Manager(s)
               <FormRadioInput id="manager.no" name="sect1.training.manager" value="no" label="No" />
               <FormRadioInput id="manager.yes" name="sect1.training.manager" value="yes" label="Yes" />
             </div>
           </Col>
-          <Col>
+          <Col xs={2}>
             <div>
               Supervisor(s)
               <FormRadioInput id="supervisor.no" name="sect1.training.supervisor" value="no" label="No" />
               <FormRadioInput id="supervisor.yes" name="sect1.training.supervisor" value="yes" label="Yes" />
             </div>
           </Col>
-          <Col>
+          <Col xs={2}>
             <div>
               Operator(s)
               <FormRadioInput id="operator.no" name="sect1.training.operator" value="no" label="No" />
               <FormRadioInput id="operator.yes" name="sect1.training.operator" value="yes" label="Yes" />
             </div>
           </Col>
-          <Col>
+          <Col xs={2}>
             <div>
               Mechanical
               <FormRadioInput id="mechanical.no" name="sect1.training.mechanical" value="no" label="No" />
               <FormRadioInput id="mechanical.yes" name="sect1.training.mechanical" value="yes" label="Yes" />
             </div>
           </Col>
-          <Col>
+          <Col xs={2}>
             <div>
               Patroller(s)
               <FormRadioInput id="patroller.no" name="sect1.training.patroller" value="no" label="No" />
@@ -1006,14 +1037,18 @@ const AddSaltReportFormFields = ({ setInitialValues, formValues, setValidationSc
                     </tr>
                   </thead>
                   <tbody>
-                    {formValues.sect4.practices.map((item, index) => (
+                    {Object.entries(formValues.sect4.houseKeepingPractice).map(([key, value], index) => (
                       <tr key={index}>
-                        <td>{item.practice}</td>
+                        <td>{value.label}</td>
                         <td>
-                          <Field name={`sect4.practices[${index}].hasPlan`} type="checkbox" className="form-control" />
+                          <Field
+                            name={`sect4.houseKeepingPractice.${key}.hasPlan`}
+                            type="checkbox"
+                            className="form-control"
+                          />
                         </td>
                         <td>
-                          <Field name={`sect4.practices[${index}].numSites`} type="number" className="form-control" />
+                          <Field name={`sect4.houseKeepingPractice.${key}.numSites`} type="number" className="form-control" />
                         </td>
                       </tr>
                     ))}
@@ -1484,6 +1519,7 @@ const AddSaltReportFormFields = ({ setInitialValues, formValues, setValidationSc
         </Row>
         <Row className="my-2">
           <Col>
+            <h4>Types of Vulnerable Areas</h4>
             <FieldArray name="sect7.vulnerableAreas">
               {({ insert, remove }) => (
                 <>
