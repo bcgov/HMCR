@@ -17,6 +17,7 @@ namespace Hmcr.Domain.Services
     public interface ISaltReportService
     {
         Task<HmrSaltReport> CreateSaltReportAsync(SaltReportDto dto);
+        Task<Stream> ExportReportsToCsvAsync();
     }
 
     public class SaltReportService : ISaltReportService
@@ -67,6 +68,17 @@ namespace Hmcr.Domain.Services
         public void ProcessBusinessRules(HmrSaltReport saltReport)
         {
             // Business Logic
+        }
+
+        public async Task<IEnumerable<SaltReportDto>> GetSaltReportsAsync()
+        {
+            var saltReportEntities = await _repository.GetAllReportsAsync();
+
+            var a = saltReportEntities.ToList();
+
+            var saltReportDtos = _mapper.Map<IEnumerable<SaltReportDto>>(saltReportEntities);
+
+            return saltReportDtos;
         }
     }
 }

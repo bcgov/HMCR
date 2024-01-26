@@ -11,9 +11,10 @@ using AutoMapper;
 
 namespace Hmcr.Data.Repositories
 {
-    public interface ISaltReportRepository
+    public interface ISaltReportRepository : IHmcrRepositoryBase<HmrSaltReport>
     {
         Task<HmrSaltReport> AddAsync(HmrSaltReport saltReport, List<HmrSaltStockpile> stockpiles);
+        Task<IEnumerable<HmrSaltReport>> GetAllReportsAsync();
     }
 
     public class SaltReportRepository : HmcrRepositoryBase<HmrSaltReport>, ISaltReportRepository
@@ -37,14 +38,6 @@ namespace Hmcr.Data.Repositories
                     // Save changes to generate HmrSaltReport's ID
                     _context.SaveChanges();
 
-                    // Associate stockiples with the report
-                    foreach (var stockpile in stockpiles)
-                    {
-                        stockpile.SaltReportId = saltReport.SaltReportId;
-                        _context.HmrSaltStockpiles.Add(stockpile);
-                    }
-                    _context.SaveChanges();
-
                     // Commit the transaction if everything is successful
                     transaction.Commit();
                 }
@@ -57,6 +50,13 @@ namespace Hmcr.Data.Repositories
             }
 
             return saltReport;
+        }
+
+        public async Task<IEnumerable<HmrSaltReport>> GetAllReportsAsync()
+        {
+            return await _context.HmrSaltReports
+                .Include(report => report.Stockpiles)
+                .ToListAsync();
         }
     }
 }
