@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Hmcr.Model.Dtos.ServiceArea;
 
 namespace Hmcr.Model.Dtos.SaltReport
 {
@@ -15,6 +16,7 @@ namespace Hmcr.Model.Dtos.SaltReport
         public Sect4Dto Sect4 { get; set; }
         public Sect5Dto Sect5 { get; set; }
         public Sect6Dto Sect6 { get; set; }
+        public Sect7Dto Sect7 { get; set; }
     }
 
     public class Sect1Dto
@@ -94,7 +96,8 @@ namespace Hmcr.Model.Dtos.SaltReport
         public int SaltStorageSitesTotal { get; set; }
         public List<StockpileDto> Stockpiles { get; set; }
         public PracticesDto Practices { get; set; }
-        public class PracticesDto {
+        public class PracticesDto
+        {
             public class PracticeItemDto
             {
                 public string Label { get; set; }
@@ -114,7 +117,7 @@ namespace Hmcr.Model.Dtos.SaltReport
             public PracticeItemDto OtherDischargePoint { get; set; }
         }
     }
-    
+
     public class Sect5Dto
     {
         public int NumberOfVehicles { get; set; }
@@ -122,6 +125,8 @@ namespace Hmcr.Model.Dtos.SaltReport
         public int VehiclesWithConveyors { get; set; }
         public int VehiclesWithPreWettingEquipment { get; set; }
         public int VehiclesForDLA { get; set; }
+        public bool? RegularCalibration { get; set; }
+        public int? RegularCalibrationTotal { get; set; }
 
         public WeatherMonitoringSourcesDto WeatherMonitoringSources { get; set; }
         public MaintenanceDecisionSupportDto MaintenanceDecisionSupport { get; set; }
@@ -166,6 +171,32 @@ namespace Hmcr.Model.Dtos.SaltReport
         {
             public bool? Used { get; set; }
             public int Total { get; set; }
+        }
+    }
+
+    public class Sect7Dto
+    {
+        public string CompletedInventory { get; set; }
+        public string SetVulnerableAreas { get; set; }
+        public string ActionPlanPrepared { get; set; }
+        public string ProtectionMeasuresImplemented { get; set; }
+        public string EnvironmentalMonitoringConducted { get; set; }
+        public TypesOfVulnerableAreasDto TypesOfVulnerableAreas { get; set; }
+
+        public class TypesOfVulnerableAreasDto
+        {
+            public AreaDto DrinkingWater { get; set; }
+            public AreaDto AquaticLife { get; set; }
+            public AreaDto Wetlands { get; set; }
+            public AreaDto DelimitedAreas { get; set; }
+            public AreaDto ValuedLands { get; set; }
+
+            public class AreaDto
+            {
+                public int? AreasIdentified { get; set; }
+                public int? AreasWithProtection { get; set; }
+                public int? AreasWithChloride { get; set; }
+            }
         }
     }
 }

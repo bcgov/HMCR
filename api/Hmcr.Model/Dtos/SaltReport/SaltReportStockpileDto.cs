@@ -11,7 +11,7 @@ namespace Hmcr.Model.Dtos.SaltReport {
     }
 
     public class TotalDto {
-        public int Stockpiles { get; set; }
+        public int StockpilesTotal { get; set; }
         public int OnImpermeableSurface { get; set; }
         public int UnderPermanentRoof { get; set; }
         public int UnderTarp { get; set; }

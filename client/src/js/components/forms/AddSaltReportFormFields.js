@@ -64,15 +64,15 @@ const defaultValues = {
     antiicing: { nacl: 0, mgcl2: 0, cacl2: 0, acetate: 0, nonchloride: 0 },
     multiChlorideA: {
       litres: 0,
-      naClPercentage: 0,
-      mgCl2Percentage: 0,
-      caCl2Percentage: 0,
+      naclPercentage: 0,
+      mgcl2Percentage: 0,
+      cacl2Percentage: 0,
     },
     multiChlorideB: {
       litres: 0,
-      naClPercentage: 0,
-      mgCl2Percentage: 0,
-      caCl2Percentage: 0,
+      naclPercentage: 0,
+      mgcl2Percentage: 0,
+      cacl2Percentage: 0,
     },
   },
   sect4: {
@@ -159,6 +159,8 @@ const defaultValues = {
     vehiclesWithConveyors: 0,
     vehiclesWithPreWettingEquipment: 0,
     vehiclesForDLA: 0,
+    regularCalibration: null,
+    regularcalibrationtotal: null,
     weatherMonitoringSources: {
       infraredThermometer: {
         relied: false,
@@ -177,7 +179,7 @@ const defaultValues = {
       },
     },
     maintenanceDecisionSupport: {
-      AVL: {
+      avl: {
         relied: false,
         number: 0,
       },
@@ -208,36 +210,36 @@ const defaultValues = {
     },
   },
   sect7: {
-    completedInventory: false,
-    setVulnerableAreas: false,
-    actionPlanPrepared: false,
-    protectionMeasuresImplemented: false,
-    environmentalMonitoringConducted: false,
+    completedInventory: '',
+    setVulnerableAreas: '',
+    actionPlanPrepared: '',
+    protectionMeasuresImplemented: '',
+    environmentalMonitoringConducted: '',
     typesOfVulnerableAreas: {
       drinkingWater: {
-        areasIdentified: 0,
-        areasWithProtection: 0,
-        areasWithChloride: 0,
+        areasIdentified: null,
+        areasWithProtection: null,
+        areasWithChloride: null,
       },
       aquaticLife: {
-        areasIdentified: 0,
-        areasWithProtection: 0,
-        areasWithChloride: 0,
+        areasIdentified: null,
+        areasWithProtection: null,
+        areasWithChloride: null,
       },
       wetlands: {
-        areasIdentified: 0,
-        areasWithProtection: 0,
-        areasWithChloride: 0,
+        areasIdentified: null,
+        areasWithProtection: null,
+        areasWithChloride: null,
       },
       delimitedAreas: {
-        areasIdentified: 0,
-        areasWithProtection: 0,
-        areasWithChloride: 0,
+        areasIdentified: null,
+        areasWithProtection: null,
+        areasWithChloride: null,
       },
       valuedLands: {
-        areasIdentified: 0,
-        areasWithProtection: 0,
-        areasWithChloride: 0,
+        areasIdentified: null,
+        areasWithProtection: null,
+        areasWithChloride: null,
       },
     },
     vulnerableAreas: [
@@ -251,6 +253,139 @@ const defaultValues = {
         monitoringInPlace: false,
       },
     ],
+  },
+  appendix: {
+    materialStorage: {
+      newSaltDomeWithPad: { identified: 0, achieved: 0 },
+      newSaltDomeIndoorStorage: { identified: 0, achieved: 0 },
+      upgradeSaltStorageSites: { identified: 0, achieved: 0 },
+      constructPermanentCoverStructure: { identified: 0, achieved: 0 },
+      impermeablePadForAbrasives: { identified: 0, achieved: 0 },
+      expandInsideBuildingForAbrasives: { identified: 0, achieved: 0 },
+      useTarpsForAbrasives: { identified: 0, achieved: 0 },
+      reconfigureStorageCapacity: { identified: 0, achieved: 0 },
+      reconfigureOperationFacilities: { identified: 0, achieved: 0 },
+      designAreaForTruckLoading: { identified: 0, achieved: 0 },
+      controlTruckLoading: { identified: 0, achieved: 0 },
+      installEquipmentWashBay: { identified: 0, achieved: 0 },
+      designSiteForRunoffControl: { identified: 0, achieved: 0 },
+      manageSaltContaminatedWaters: { identified: 0, achieved: 0 },
+      spillPreventionPlan: { identified: 0, achieved: 0 },
+      removeContaminatedSnow: { identified: 0, achieved: 0 },
+      otherSpecify: { identified: 0, achieved: 0 },
+    },
+    saltApplication: {
+      installGroundSpeedControls: { identified: 0, achieved: 0 },
+      increasePreWettingEquipment: { identified: 0, achieved: 0 },
+      installLiquidAntiIcing: { identified: 0, achieved: 0 },
+      installInfraredThermometers: { identified: 0, achieved: 0 },
+      installAdditionalRWISStations: { identified: 0, achieved: 0 },
+      accessRWISData: { identified: 0, achieved: 0 },
+      installMobileRWIS: { identified: 0, achieved: 0 },
+      accessMeteorologicalService: { identified: 0, achieved: 0 },
+      adoptPreWettingMajorityNetwork: { identified: 0, achieved: 0 },
+      usePreTreatedSalt: { identified: 0, achieved: 0 },
+      adoptPreWettingOrTreatmentAbrasives: { identified: 0, achieved: 0 },
+      testingNewProducts: { identified: 0, achieved: 0 },
+      adoptAntiIcingStandard: { identified: 0, achieved: 0 },
+      installGPSAndComputerSystems: { identified: 0, achieved: 0 },
+      useChartForApplicationRates: { identified: 0, achieved: 0 },
+      useMDSS: { identified: 0, achieved: 0 },
+      reviewSaltUse: { identified: 0, achieved: 0 },
+      assessPlowingEfficiency: { identified: 0, achieved: 0 },
+      other: { identified: 0, achieved: 0 },
+    },
+    snowDisposal: {
+      developProgramPhaseOut: { identified: 0, achieved: 0 },
+      installNewSiteLowPermeability: { identified: 0, achieved: 0 },
+      upgradeExistingSiteLowPermeability: { identified: 0, achieved: 0 },
+      collectMeltWaterSpecificPoint: { identified: 0, achieved: 0 },
+      constructCollectionPond: { identified: 0, achieved: 0 },
+      otherSnowDisposal: { identified: 0, achieved: 0 },
+    },
+    vulnerableAreas: {
+      identifySaltVulnerableAreas: { identified: 0, achieved: 0 },
+      prioritizeAreasForAdditionalProtection: { identified: 0, achieved: 0 },
+      implementProtectionMitigationMeasures: { identified: 0, achieved: 0 },
+      conductEnvironmentalMonitoring: { identified: 0, achieved: 0 },
+      otherVulnerableAreas: { identified: 0, achieved: 0 },
+    },
+  },
+};
+
+const materialStorageAppendixLabel = {
+  materialStorage: {
+    newSaltDomeWithPad: 'Install a new salt dome(s) with an impervious pad',
+    newSaltDomeIndoorStorage:
+      'Install a new salt dome(s) with indoor storage for all salts and treated abrasives and inside loading capacity',
+    upgradeSaltStorageSites: 'Upgrade existing salt storage sites to add a permanent roof',
+    constructPermanentCoverStructure:
+      'Construct a permanent structure to cover salts (can be made of different rigid materials including wood, steel, aluminum, fibreglass, or fabric)',
+    impermeablePadForAbrasives: 'Install an impermeable pad to store treated abrasive',
+    expandInsideBuildingForAbrasives: 'Construct or expand inside building capacity to cover treated abrasives',
+    useTarpsForAbrasives: 'Use tarps to cover abrasives',
+    reconfigureStorageCapacity: 'Reconfigure storage capacity to store abrasives within an existing storage structure',
+    reconfigureOperationFacilities: 'Reconfigure operation facilities to conduct equipment washing inside',
+    designAreaForTruckLoading: 'Design an area specifically for truck loading',
+    controlTruckLoading: 'Establish a method to control truck loading',
+    installEquipmentWashBay:
+      'Install equipment wash bay (including collection and treatment of wastewater with oil/grit separator)',
+    designSiteForRunoffControl:
+      'Design the site to control runoff water and keep it away from working areas and material storage. Ensure water from outside is diverted from the storage sites.',
+    manageSaltContaminatedWaters:
+      'Design a collection system and manage salt contaminated waters. Select option for disposal: transported from the site for treatment, brine production, released to municipal storm water or release to the environment',
+    spillPreventionPlan:
+      'Ensure measures and a plan are in place to prevent or reduce the probability or the significance of a spill (e.g. recover mechanism for de-icing liquid tanks in case of leaking, regular inspection of installation and recording)',
+    removeContaminatedSnow:
+      'Remove and dispose of salt contaminated snow from the storage site in a snow disposal site',
+    otherSpecify: 'Other (specify):',
+  },
+  saltApplication: {
+    installGroundSpeedControls: 'Install ground speed oriented electronic spreader controls',
+    increasePreWettingEquipment: 'Increase the number of trucks with pre-wetting equipment (new or retro-fit)',
+    installLiquidAntiIcing: 'Install new or replacement of liquid anti-icing equipment',
+    installInfraredThermometers: 'Install infrared thermometers on vehicles',
+    installAdditionalRWISStations: 'Install additional fixed RWIS station(s)',
+    accessRWISData: 'Acquire access to RWIS data provided by others',
+    installMobileRWIS: 'Install mobile RWIS to be mounted on vehicle',
+    accessMeteorologicalService: 'Acquire access to meteorological service',
+    adoptPreWettingMajorityNetwork: 'Adopt pre-wetting practice on the vast majority of the road network',
+    usePreTreatedSalt: 'Use pre-treated salt on the vast majority of the road network',
+    adoptPreWettingOrTreatmentAbrasives: 'Adopt pre-wetting or pre-treatment of abrasives',
+    testingNewProducts:
+      'Testing of new products (e.g. organics, de-icer mixed to increase performance at different temperature)',
+    adoptAntiIcingStandard: 'Adopt anti-icing as a standard practice (early treatment)',
+    installGPSAndComputerSystems:
+      'Install GPS and computer system on trucks to record salt application rates & service mapping (route)',
+    useChartForApplicationRates:
+      'Use of a chart to make decisions on application rates adapted to the meteorological and pavement conditions and level of service',
+    useMDSS:
+      'Use of a maintenance decision support system that incorporates meteorological data, pavement temperatures and recommended application rates to respond to conditions and plan operations',
+    reviewSaltUse:
+      'Review yearly overall salt use, identify areas and operations where salt quantities could be reduced (i.e. reduction of the salt applied/road km/year). Ensure level of service for each roadway segment is adequate (check traffic to avoid over use of salt).',
+    assessPlowingEfficiency: 'Assess the efficiency of plowing operations (timing, type of plows and blades, etc.)',
+    other: 'Other (specify):',
+  },
+  snowDisposal: {
+    developProgramPhaseOut: 'Develop a program to phase out unacceptable snow disposal sites',
+    installNewSiteLowPermeability:
+      'Install a new snow disposal site(s), ensuring it is entirely on a low permeability surface',
+    upgradeExistingSiteLowPermeability:
+      'Upgrade an existing snow disposal site(s) and install a low permeability surface',
+    collectMeltWaterSpecificPoint: 'Collect all melt water and discharge at a specific point',
+    constructCollectionPond:
+      'Construct a collection pond to allow water to settle before its discharged, and control the time and rat of discharge',
+    otherSnowDisposal: 'Other (specify):',
+  },
+  vulnerableAreas: {
+    identifySaltVulnerableAreas: 'Identify salt vulnerable areas',
+    prioritizeAreasForAdditionalProtection:
+      'Prioritize areas where additional protection or mitigation measures will be implemented to eliminate or reduce road salt impacts',
+    implementProtectionMitigationMeasures:
+      'Implement additional protection or mitigation measures to eliminate or reduce road salt impacts on vulnerable areas',
+    conductEnvironmentalMonitoring:
+      'Conduct environmental monitoring to measure success of mitigation measures for protecting vulnerable areas',
+    otherVulnerableAreas: 'Other (specify):',
   },
 };
 
@@ -328,15 +463,15 @@ const validationSchema = Yup.object().shape({
     }),
     multiChlorideA: Yup.object().shape({
       litres: Yup.number(),
-      naClPercentage: Yup.number(),
-      mgCl2Percentage: Yup.number(),
-      caCl2Percentage: Yup.number(),
+      naclPercentage: Yup.number(),
+      mgcl2Percentage: Yup.number(),
+      cacl2Percentage: Yup.number(),
     }),
     multiChlorideB: Yup.object().shape({
       litres: Yup.number(),
-      naClPercentage: Yup.number(),
-      mgCl2Percentage: Yup.number(),
-      caCl2Percentage: Yup.number(),
+      naclPercentage: Yup.number(),
+      mgcl2Percentage: Yup.number(),
+      cacl2Percentage: Yup.number(),
     }),
   }),
   sect4: Yup.object().shape({
@@ -404,7 +539,7 @@ const validationSchema = Yup.object().shape({
     }),
 
     maintenanceDecisionSupport: Yup.object().shape({
-      AVL: Yup.object().shape({
+      avl: Yup.object().shape({
         relied: Yup.boolean(),
         number: Yup.number().min(0, 'Number cannot be negative').nullable(),
       }),
@@ -440,7 +575,8 @@ const AddSaltReportFormFields = ({ setInitialValues, formValues, setValidationSc
     setLoading(true);
     const defaultValidationSchema = validationSchema.shape({});
     setValidationSchema(defaultValidationSchema);
-    setInitialValues(loadFromSessionStorage());
+    // setInitialValues(loadFromSessionStorage());
+    setInitialValues(defaultValues);
     setLoading(false);
   }, []);
 
@@ -864,13 +1000,13 @@ const AddSaltReportFormFields = ({ setInitialValues, formValues, setValidationSc
                         <Field name="sect3.multiChlorideA.litres" type="number" as={Input} />
                       </td>
                       <td>
-                        <Field name="sect3.multiChlorideA.naClPercentage" type="number" as={Input} />
+                        <Field name="sect3.multiChlorideA.naclPercentage" type="number" as={Input} />
                       </td>
                       <td>
-                        <Field name="sect3.multiChlorideA.mgCl2Percentage" type="number" as={Input} />
+                        <Field name="sect3.multiChlorideA.mgcl2Percentage" type="number" as={Input} />
                       </td>
                       <td>
-                        <Field name="sect3.multiChlorideA.caCl2Percentage" type="number" as={Input} />
+                        <Field name="sect3.multiChlorideA.cacl2Percentage" type="number" as={Input} />
                       </td>
                     </tr>
                     {/* Multi-chloride B */}
@@ -880,13 +1016,13 @@ const AddSaltReportFormFields = ({ setInitialValues, formValues, setValidationSc
                         <Field name="sect3.multiChlorideB.litres" type="number" as={Input} />
                       </td>
                       <td>
-                        <Field name="sect3.multiChlorideB.naClPercentage" type="number" as={Input} />
+                        <Field name="sect3.multiChlorideB.naclPercentage" type="number" as={Input} />
                       </td>
                       <td>
-                        <Field name="sect3.multiChlorideB.mgCl2Percentage" type="number" as={Input} />
+                        <Field name="sect3.multiChlorideB.mgcl2Percentage" type="number" as={Input} />
                       </td>
                       <td>
-                        <Field name="sect3.multiChlorideB.caCl2Percentage" type="number" as={Input} />
+                        <Field name="sect3.multiChlorideB.cacl2Percentage" type="number" as={Input} />
                       </td>
                     </tr>
                   </tbody>
@@ -1048,7 +1184,11 @@ const AddSaltReportFormFields = ({ setInitialValues, formValues, setValidationSc
                           />
                         </td>
                         <td>
-                          <Field name={`sect4.houseKeepingPractice.${key}.numSites`} type="number" className="form-control" />
+                          <Field
+                            name={`sect4.houseKeepingPractice.${key}.numSites`}
+                            type="number"
+                            className="form-control"
+                          />
                         </td>
                       </tr>
                     ))}
@@ -1111,8 +1251,23 @@ const AddSaltReportFormFields = ({ setInitialValues, formValues, setValidationSc
                     </tr>
                   </tbody>
                 </Table>
+                <Row>
+                  <Col>
+                    Spreading equipment is regularly calibrated?
+                    <Field
+                      name="sect5.regularCalibration"
+                      type="checkbox"
+                      className="form-control"
+                    />
+                  </Col>
+                  <Col>
+                    Frequency
+                    <FormInput type="number" name="sect5.regularCalibrationTotal" placeholder="times per year" />
+                  </Col>
+                </Row>
               </Col>
             </Row>
+            <Row></Row>
           </Col>
         </Row>
         <Row className="my-4">
@@ -1229,12 +1384,12 @@ const AddSaltReportFormFields = ({ setInitialValues, formValues, setValidationSc
                       <td>
                         <Field
                           type="checkbox"
-                          name="sect5.maintenanceDecisionSupport.AVL.relied"
+                          name="sect5.maintenanceDecisionSupport.avl.relied"
                           className="form-control"
                         />
                       </td>
                       <td>
-                        <Field type="number" name="sect5.maintenanceDecisionSupport.AVL.number" as={Input} />
+                        <Field type="number" name="sect5.maintenanceDecisionSupport.avl.number" as={Input} />
                       </td>
                     </tr>
                     <tr>
@@ -1585,6 +1740,122 @@ const AddSaltReportFormFields = ({ setInitialValues, formValues, setValidationSc
             </FieldArray>
           </Col>
         </Row>
+      </section>
+      <section>
+        <Col>
+          <h4>Appendix A</h4>
+          <Table bordered>
+            <thead>
+              <tr>
+                <th>Material Storage Facilities</th>
+                <th>Identified</th>
+                <th>Achieved</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td colSpan={3}>
+                  Quality of salt supplied is verified through the following steps:
+                  <ol>
+                    <li>a quality control program is put in place</li>
+                    <li>humidity test on salt delivered</li>
+                    <li>granulometry and</li>
+                    <li>chemical analysis for salt concentration</li>
+                  </ol>
+                </td>
+              </tr>
+              {Object.entries(formValues.appendix.materialStorage).map(([key, value], index) => (
+                <tr key={index}>
+                  <td>{materialStorageAppendixLabel.materialStorage[key]}</td>
+                  <td>
+                    <Field name={`appendix.materialStorage.${key}.identified`} type="number" className="form-control" />
+                  </td>
+                  <td>
+                    <Field name={`appendix.materialStorage.${key}.achieved`} type="number" className="form-control" />
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </Table>
+          <Table bordered>
+            <thead>
+              <tr>
+                <th>Salt Application</th>
+                <th>Identified</th>
+                <th>Achieved</th>
+              </tr>
+            </thead>
+            <tbody>
+              {Object.entries(formValues.appendix.saltApplication).map(([key, value], index) => (
+                <tr key={index}>
+                  <td>{materialStorageAppendixLabel.saltApplication[key]}</td>
+                  {key === 'reviewSaltUse' ? null : (
+                    <>
+                      <td>
+                        <Field
+                          name={`appendix.saltApplication.${key}.identified`}
+                          type="number"
+                          className="form-control"
+                        />
+                      </td>
+                      <td>
+                        <Field
+                          name={`appendix.saltApplication.${key}.achieved`}
+                          type="number"
+                          className="form-control"
+                        />
+                      </td>
+                    </>
+                  )}
+                </tr>
+              ))}
+            </tbody>
+          </Table>
+          <Table bordered>
+            <thead>
+              <tr>
+                <th>Snow Disposal</th>
+                <th>Identified</th>
+                <th>Achieved</th>
+              </tr>
+            </thead>
+            <tbody>
+              {Object.entries(formValues.appendix.snowDisposal).map(([key, value], index) => (
+                <tr key={index}>
+                  <td>{materialStorageAppendixLabel.snowDisposal[key]}</td>
+                  <td>
+                    <Field name={`appendix.snowDisposal.${key}.identified`} type="number" className="form-control" />
+                  </td>
+                  <td>
+                    <Field name={`appendix.snowDisposal.${key}.achieved`} type="number" className="form-control" />
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </Table>
+          <Table bordered>
+            <thead>
+              <tr>
+                <th>Vulnerable Areas</th>
+                <th>Identified</th>
+                <th>Achieved</th>
+              </tr>
+            </thead>
+            <tbody>
+              {Object.entries(formValues.appendix.vulnerableAreas).map(([key, value], index) => (
+                <tr key={index}>
+                  <td>{materialStorageAppendixLabel.vulnerableAreas[key]}</td>
+                  <td>
+                    <Field name={`appendix.vulnerableAreas.${key}.identified`} type="number" className="form-control" />
+                  </td>
+                  <td>
+                    <Field name={`appendix.vulnerableAreas.${key}.achieved`} type="number" className="form-control" />
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </Table>
+        </Col>
       </section>
     </React.Fragment>
   );
