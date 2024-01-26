@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using Hmcr.Domain.Services;
 using System.Linq;
+using System.IO;
 
 namespace Hmcr.Api.Controllers
 {
@@ -40,6 +41,27 @@ namespace Hmcr.Api.Controllers
             catch (Exception ex)
             {
                 return StatusCode(500, "An error occured: " + ex.Message);
+            }
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetReports()
+        {
+            try
+            {
+                var csvStream = await _saltReportService.ExportReportsToCsvAsync();
+                if (csvStream == null || csvStream.Length == 0)
+                {
+                    return NotFound("CSV data not found or is empty.");
+                }
+
+                // Return the stream as a file
+                return File(csvStream, "text/csv", "report.csv");
+            }
+            catch (Exception ex)
+            {
+                // Log the exception (consider using a logging framework)
+                return StatusCode(500, "An error occurred while generating the report.");
             }
         }
     }
