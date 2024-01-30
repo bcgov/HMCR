@@ -1,6 +1,5 @@
-using System.Collections.Generic;
-
-namespace Hmcr.Model.Dtos.SaltReport {
+namespace Hmcr.Model.Dtos.SaltReport
+{
     public class StockpileDto {
         public int StockPileId { get; set; }
         public int SaltReportId { get; set; } // Foreign Key

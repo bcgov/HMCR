@@ -7,7 +7,7 @@ namespace Hmcr.Data.Database.Entities
 {
     public class HmrSaltReport
     {
-        public decimal SaltReportId { get; set; }
+        public int SaltReportId { get; set; }
         public int ServiceArea { get; set; }
         public string ContactName { get; set; }
         public string Telephone { get; set; }

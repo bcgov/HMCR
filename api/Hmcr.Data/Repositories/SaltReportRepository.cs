@@ -13,8 +13,9 @@ namespace Hmcr.Data.Repositories
 {
     public interface ISaltReportRepository : IHmcrRepositoryBase<HmrSaltReport>
     {
-        Task<HmrSaltReport> AddAsync(HmrSaltReport saltReport, List<HmrSaltStockpile> stockpiles);
+        Task<HmrSaltReport> AddReportAsync(HmrSaltReport saltReport);
         Task<IEnumerable<HmrSaltReport>> GetAllReportsAsync();
+        Task<HmrSaltReport> GetReportByIdAsync(int saltReportId);
     }
 
     public class SaltReportRepository : HmcrRepositoryBase<HmrSaltReport>, ISaltReportRepository
@@ -24,17 +25,17 @@ namespace Hmcr.Data.Repositories
         public SaltReportRepository(AppDbContext context, IMapper mapper)
             : base(context, mapper)
         {
-            _context = context;
+            _context = context ?? throw new ArgumentNullException(nameof(context));
         }
 
-        public async Task<HmrSaltReport> AddAsync(HmrSaltReport saltReport, List<HmrSaltStockpile> stockpiles)
+        public async Task<HmrSaltReport> AddReportAsync(HmrSaltReport saltReport)
         {
             using (var transaction = _context.Database.BeginTransaction())
             {
                 try
                 {
                     // Add to table HMR_SALT_REPORT
-                    _context.HmrSaltReports.Add(saltReport);
+                    await _context.HmrSaltReports.AddAsync(saltReport);
                     // Save changes to generate HmrSaltReport's ID
                     _context.SaveChanges();
 
@@ -57,6 +58,11 @@ namespace Hmcr.Data.Repositories
             return await _context.HmrSaltReports
                 .Include(report => report.Stockpiles)
                 .ToListAsync();
+        }
+
+        public async Task<HmrSaltReport> GetReportByIdAsync(int saltReportId)
+        {
+            return await _context.HmrSaltReports.FirstOrDefaultAsync(r => r.SaltReportId == saltReportId);
         }
     }
 }
