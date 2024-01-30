@@ -159,6 +159,9 @@ namespace Hmcr.Data.Database.Entities
         public int? ValuedLandsAreasWithProtection { get; set; }
         public int? ValuedLandsAreasWithChloride { get; set; }
 
+        // Appendix
+        public HmrSaltReportAppendix Appendix { get; set; }
+
         // Default
         public long ConcurrencyControlNumber { get; set; }
         public string AppCreateUserid { get; set; }

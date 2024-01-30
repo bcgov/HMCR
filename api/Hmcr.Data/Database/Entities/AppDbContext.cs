@@ -70,6 +70,7 @@ namespace Hmcr.Data.Database.Entities
         public virtual DbSet<HmrWorkReportVw> HmrWorkReportVws { get; set; }
         public virtual DbSet<HmrSaltReport> HmrSaltReports { get; set; }
         public virtual DbSet<HmrSaltStockpile> HmrSaltStockpiles { get; set; }
+        public virtual DbSet<HmrSaltReportAppendix> HmrSaltReportAppendixes { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -6815,6 +6816,11 @@ namespace Hmcr.Data.Database.Entities
                     .HasForeignKey(e => e.SaltReportId)
                     .OnDelete(DeleteBehavior.Cascade);
 
+                entity.HasOne(e => e.Appendix)
+                    .WithOne(e => e.SaltReport)
+                    .HasForeignKey<HmrSaltReportAppendix>(e => e.SaltReportId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
                 entity.HasKey(e => e.SaltReportId)
                     .HasName("HMR_SALT_REPORT_PK");
 
@@ -6928,6 +6934,22 @@ namespace Hmcr.Data.Database.Entities
 
                 entity.Property(e => e.StockPileId)
                     .HasColumnName("STOCKPILE_ID")
+                    .HasDefaultValueSql("(NEXT VALUE FOR [HMR_SLT_RPT_ID_SEQ])");
+
+                entity.Property(e => e.SaltReportId)
+                    .HasColumnName("SALT_REPORT_ID")
+                    .HasColumnType("numeric(9, 0)");
+            });
+
+            modelBuilder.Entity<HmrSaltReportAppendix>(entity => 
+            {
+                entity.ToTable("HMR_SALT_APPENDIX");
+
+                entity.HasKey(e => e.AppendixId)
+                    .HasName("PK_HMR_SALT_STOCKPILE");
+
+                entity.Property(e => e.AppendixId)
+                    .HasColumnName("APPENDIX_ID")
                     .HasDefaultValueSql("(NEXT VALUE FOR [HMR_SLT_RPT_ID_SEQ])");
 
                 entity.Property(e => e.SaltReportId)

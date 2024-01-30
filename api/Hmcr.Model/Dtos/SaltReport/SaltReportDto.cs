@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using Hmcr.Model.Dtos.ServiceArea;
 
 namespace Hmcr.Model.Dtos.SaltReport
 {
@@ -17,6 +16,7 @@ namespace Hmcr.Model.Dtos.SaltReport
         public Sect5Dto Sect5 { get; set; }
         public Sect6Dto Sect6 { get; set; }
         public Sect7Dto Sect7 { get; set; }
+        public AppendixDto Appendix { get; set; }
     }
 
     public class Sect1Dto
