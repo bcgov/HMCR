@@ -6,7 +6,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 import SingleDropdownField from './ui/SingleDropdownField';
 import { FormRow } from './forms/FormInputs';
-import AddSaltReportFormFields from './forms/AddSaltReportFormFields';
+import AddSaltReportFormFields from './forms/saltreport/AddSaltReportFormFields';
 import SubmitButton from './ui/SubmitButton';
 import SimpleModalWrapper from './ui/SimpleModalWrapper';
 import useFormModal from './hooks/useFormModal';
