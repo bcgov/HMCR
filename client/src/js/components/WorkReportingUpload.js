@@ -184,6 +184,13 @@ const WorkReportingUpload = ({
       });
   };
 
+  const handleSaltReportSubmit = (values, formType) => {
+    const stagingTableName = reportTypes.find((type) => values.reportTypeId === type.id).stagingTableName;
+    const apiPath = Constants.REPORT_TYPES[stagingTableName].api;
+
+    api.instance.post(`${apiPath}`, transformedValues);
+  };
+
   const validateFile = (e, setFieldValue, setFieldError, fieldName, sizeLimit) => {
     const file = e.currentTarget.files[0];
 
@@ -205,14 +212,6 @@ const WorkReportingUpload = ({
     setFieldValue(fieldName, e.currentTarget.files[0]);
   };
 
-  const handleSaltReportSubmit = (values, formType) => {
-    const stagingTableName = reportTypes.find((type) => 4 === type.id).stagingTableName;
-
-    const apiPath = Constants.REPORT_TYPES[stagingTableName].api;
-    console.log(values);
-    api.instance.post(`${apiPath}`, values);
-  };
-
   const saltReportFormModal = useFormModal(
     'Annual Salt Report',
     <AddSaltReportFormFields />,
@@ -220,214 +219,34 @@ const WorkReportingUpload = ({
     'xl'
   );
 
-  const testSendApi = (values, setFieldValue) => {
+  const testExportApi = () => {
     const stagingTableName = reportTypes.find((type) => 4 === type.id).stagingTableName;
 
     const apiPath = Constants.REPORT_TYPES[stagingTableName].api;
-    console.log(stagingTableName, apiPath);
-    api.instance
-      .post(`${apiPath}`, {
-        serviceArea: 15,
-        contactName: 'TEST',
-        telephone: '4521545453',
-        email: 'i@gla.com',
-        sect1: {
-          planDeveloped: 'No',
-          planReviewed: 'No',
-          planUpdated: 'No',
-          training: {
-            manager: 'Yes',
-            supervisor: 'Yes',
-            operator: 'Yes',
-            mechanical: 'Yes',
-            patroller: 'Yes',
-          },
-          objectives: {
-            materialStorage: {
-              identified: 'No',
-              achieved: 'No',
-            },
-            saltApplication: {
-              identified: 'No',
-              achieved: 'No',
-            },
-          },
-        },
-        sect2: {
-          roadTotalLength: 32,
-          saltTotalDays: 32,
-        },
-        sect3: {
-          deicer: { nacl: 7, mgcl2: 7, cacl2: 7, acetate: 7 },
-          treatedAbrasives: { sandStoneDust: 7, nacl: 7, mgcl2: 7, cacl2: 7 },
-          prewetting: { nacl: 7, mgcl2: 7, cacl2: 7, acetate: 7, nonchloride: 7 },
-          pretreatment: { nacl: 7, mgcl2: 7, cacl2: 7, acetate: 7, nonchloride: 7 },
-          antiicing: { nacl: 7, mgcl2: 7, cacl2: 7, acetate: 7, nonchloride: 7 },
-          multiChlorideA: {
-            litres: 3,
-            naClPercentage: 3,
-            mgCl2Percentage: 3,
-            caCl2Percentage: 3,
-          },
-          multiChlorideB: {
-            litres: 3,
-            naClPercentage: 3,
-            mgCl2Percentage: 3,
-            caCl2Percentage: 3,
-          },
-        },
-        sect4: {
-          saltStorageSitesTotal: 3000,
-          stockpiles: [
-            {
-              siteName: 'JIRA',
-              motiOwned: false,
-              roadSalts: {
-                stockpilesTotal: 47,
-                onImpermeableSurface: 47,
-                underPermanentRoof: 47,
-                underTarp: 47,
-              },
-              treatedAbrasives: {
-                stockpilesTotal: 47,
-                onImpermeableSurface: 47,
-                underPermanentRoof: 47,
-                underTarp: 47,
-              },
-            },
-            {
-              siteName: 'Jenkins',
-              motiOwned: false,
-              roadSalts: {
-                stockpilesTotal: 47,
-                onImpermeableSurface: 47,
-                underPermanentRoof: 47,
-                underTarp: 47,
-              },
-              treatedAbrasives: {
-                stockpilesTotal: 47,
-                onImpermeableSurface: 47,
-                underPermanentRoof: 47,
-                underTarp: 47,
-              },
-            },
-          ],
-          practices: {
-            allMaterialsHandled: {
-              label: 'All materials are handled in a designated area characterized by an impermeable surface',
-              hasPlan: true,
-              numSites: 1237,
-            },
-            equipmentPreventsOverloading: {
-              label: 'Equipment to prevent overloading of trucks',
-              numSites: 1237,
-              hasPlan: true,
-            },
-            wastewaterSystem: {
-              label: 'System for collection and/or treatment of wastewater from cleaning of trucks',
-              numSites: 1237,
-              hasPlan: true,
-            },
-            controlDiversionExternalWaters: {
-              label: 'Control and diversion of external waters (non salt impacted',
-              numSites: 1237,
-              hasPlan: true,
-            },
-            drainageCollectionSystem: {
-              label: 'Drainage inside with collection systems for runoff of salt contaminated waters',
-              numSites: 1237,
-              hasPlan: true,
-            },
-            municipalSewerSystem: {
-              label: 'Specify discharge point into a municipal sewer system',
-              numSites: 1237,
-              hasPlan: true,
-            },
-            removalContainment: {
-              label: 'Specify discharge point into a containment for removal',
-              numSites: 1237,
-              hasPlan: true,
-            },
-            watercourse: {
-              label: 'Specify discharge point into a watercourse',
-              numSites: 1237,
-              hasPlan: true,
-            },
-            otherDischargePoint: {
-              label: 'Specify discharge point into (other)',
-              numSites: 1237,
-              hasPlan: false,
-            },
-            ongoingCleanup: {
-              label: 'Ongoing cleanup of the site surfaces, and spilled material is swept up quickly',
-              numSites: 1237,
-              hasPlan: false,
-            },
-            riskManagementPlan: {
-              label: 'Risk management and emergency measures plans are in place',
-              numSites: 1237,
-              hasPlan: false,
-            },
-          },
-        },
-        sect5: {
-          numberOfVehicles: 9,
-          vehiclesForSaltApplication: 9,
-          vehiclesWithConveyors: 9,
-          vehiclesWithPreWettingEquipment: 9,
-          vehiclesForDLA: 9,
-          weatherMonitoringSources: {
-            infraredThermometer: {
-              relied: false,
-              number: 9,
-            },
-            meteorologicalService: {
-              relied: false,
-            },
-            fixedRWISStations: {
-              relied: false,
-              number: 9,
-            },
-            mobileRWISMounted: {
-              relied: false,
-              number: 9,
-            },
-          },
-          maintenanceDecisionSupport: {
-            AVL: {
-              relied: false,
-              number: 9,
-            },
-            saltApplicationRates: {
-              relied: false,
-              number: 9,
-            },
-            applicationRateChart: {
-              relied: false,
-              number: 9,
-            },
-            testingMDSS: {
-              relied: false,
-              number: 9,
-            },
-          },
-        },
-        sect6: {
-          disposal: {
-            used: false,
-            total: 9,
-          },
-          snowMelter: {
-            used: false,
-          },
-          meltwater: {
-            used: false,
-          },
-        },
-      })
-      .then((response) => {
-        console.log(response);
-      });
+    api.instance.get(`${apiPath}`, { responseType: 'blob' }).then((response) => {
+      // Create a new Blob object using the response data
+      const blob = new Blob([response.data], { type: 'text/csv' });
+
+      // Create a URL for the blob object
+      const downloadUrl = window.URL.createObjectURL(blob);
+
+      // Create a temporary link element
+      const link = document.createElement('a');
+      link.href = downloadUrl;
+      link.setAttribute('download', 'report.csv'); // Set the file name for download
+
+      // Append the link to the body
+      document.body.appendChild(link);
+
+      // Programmatically click the link to trigger the download
+      link.click();
+
+      // Remove the link after triggering the download
+      document.body.removeChild(link);
+
+      // Free up memory by revoking the created URL
+      window.URL.revokeObjectURL(downloadUrl);
+    });
   };
 
   return (
@@ -505,8 +324,8 @@ const WorkReportingUpload = ({
                       >
                         Open Form
                       </Button>
-                      <Button type="button" onClick={testSendApi}>
-                        test
+                      <Button type="button" onClick={testExportApi}>
+                        Export Test
                       </Button>
                     </Col>
                   </FormGroup>
