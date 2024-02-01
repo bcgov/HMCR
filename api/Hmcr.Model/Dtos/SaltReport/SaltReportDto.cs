@@ -43,14 +43,14 @@ namespace Hmcr.Model.Dtos.SaltReport
 
             public class MaterialStorageDto
             {
-                public string Identified { get; set; }
-                public string Achieved { get; set; }
+                public int? Identified { get; set; }
+                public int? Achieved { get; set; }
             }
 
             public class SaltApplicationDto
             {
-                public string Identified { get; set; }
-                public string Achieved { get; set; }
+                public int? Identified { get; set; }
+                public int? Achieved { get; set; }
             }
         }
     }
@@ -74,26 +74,26 @@ namespace Hmcr.Model.Dtos.SaltReport
         public class MaterialDto
         {
             // Section 3
-            public int SandstoneDust { get; set; }
-            public int Nacl { get; set; }
-            public int Mgcl2 { get; set; }
-            public int Cacl2 { get; set; }
-            public int Acetate { get; set; }
-            public int Nonchloride { get; set; }
+            public decimal? SandstoneDust { get; set; }
+            public decimal? Nacl { get; set; }
+            public decimal? Mgcl2 { get; set; }
+            public decimal? Cacl2 { get; set; }
+            public decimal? Acetate { get; set; }
+            public decimal? Nonchloride { get; set; }
         }
 
         public class MultiChlorideDto
         {
-            public int Litres { get; set; }
-            public int NaclPercentage { get; set; }
-            public int Mgcl2Percentage { get; set; }
-            public int Cacl2Percentage { get; set; }
+            public decimal? Litres { get; set; }
+            public decimal? NaclPercentage { get; set; }
+            public decimal? Mgcl2Percentage { get; set; }
+            public decimal? Cacl2Percentage { get; set; }
         }
     }
 
     public class Sect4Dto
     {
-        public int SaltStorageSitesTotal { get; set; }
+        public int? SaltStorageSitesTotal { get; set; }
         public List<StockpileDto> Stockpiles { get; set; }
         public PracticesDto Practices { get; set; }
         public class PracticesDto
@@ -101,8 +101,8 @@ namespace Hmcr.Model.Dtos.SaltReport
             public class PracticeItemDto
             {
                 public string Label { get; set; }
-                public bool HasPlan { get; set; }
-                public int NumSites { get; set; }
+                public bool? HasPlan { get; set; }
+                public int? NumSites { get; set; }
             }
             public PracticeItemDto AllMaterialsHandled { get; set; }
             public PracticeItemDto EquipmentPreventsOverloading { get; set; }
@@ -140,8 +140,8 @@ namespace Hmcr.Model.Dtos.SaltReport
 
             public class WMSDto
             {
-                public bool Relied { get; set; }
-                public int Number { get; set; }
+                public bool? Relied { get; set; }
+                public int? Number { get; set; }
             }
         }
 
@@ -154,8 +154,8 @@ namespace Hmcr.Model.Dtos.SaltReport
 
             public class MDSDto
             {
-                public bool Relied { get; set; }
-                public int Number { get; set; }
+                public bool? Relied { get; set; }
+                public int? Number { get; set; }
             }
         }
     }
@@ -170,7 +170,7 @@ namespace Hmcr.Model.Dtos.SaltReport
         public class SnowDisposalDto
         {
             public bool? Used { get; set; }
-            public int Total { get; set; }
+            public int? Total { get; set; }
         }
     }
 

@@ -71,8 +71,8 @@ namespace Hmcr.Model.Dtos.SaltReport
 
         public class ObjectivesDto
         {
-            public int Identified { get; set; }
-            public int Achieved { get; set; }
+            public int? Identified { get; set; }
+            public int? Achieved { get; set; }
         }
     }
 }

@@ -7,7 +7,7 @@ namespace Hmcr.Data.Database.Entities
         public int StockPileId { get; set; } // Primary Key
         public int SaltReportId { get; set; } // Foreign Key
         public HmrSaltReport SaltReport { get; set; } // Navigation property
-        public string? SiteName { get; set; }
+        public string SiteName { get; set; }
         public bool? MotiOwned { get; set; }
         public int? RoadSaltStockpilesTotal { get; set; }
         public int? RoadSaltOnImpermeableSurface { get; set; }

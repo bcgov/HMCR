@@ -20,55 +20,55 @@ namespace Hmcr.Data.Database.Entities
         public string OperatorTraining { get; set; }
         public string MechanicalTraining { get; set; }
         public string PatrollerTraining { get; set; }
-        public string MaterialStorageIdentified { get; set; }
-        public string MaterialStorageAchieved { get; set; }
-        public string SaltApplicationIdentified { get; set; }
-        public string SaltApplicationAchieved { get; set; }
+        public int? MaterialStorageIdentified { get; set; }
+        public int? MaterialStorageAchieved { get; set; }
+        public int? SaltApplicationIdentified { get; set; }
+        public int? SaltApplicationAchieved { get; set; }
 
         // Section 2
         public int RoadTotalLength { get; set; }
         public int SaltTotalDays { get; set; }
 
         // Section 3
-        public int DeicerNacl { get; set; }
-        public int DeicerMgcl2 { get; set; }
-        public int DeicerCacl2 { get; set; }
-        public int DeicerAcetate { get; set; }
+        public decimal? DeicerNacl { get; set; }
+        public decimal? DeicerMgcl2 { get; set; }
+        public decimal? DeicerCacl2 { get; set; }
+        public decimal? DeicerAcetate { get; set; }
 
-        public int TreatedAbrasivesSandstoneDust { get; set; }
-        public int TreatedAbrasivesNacl { get; set; }
-        public int TreatedAbrasivesMgcl2 { get; set; }
-        public int TreatedAbrasivesCacl2 { get; set; }
+        public decimal? TreatedAbrasivesSandstoneDust { get; set; }
+        public decimal? TreatedAbrasivesNacl { get; set; }
+        public decimal? TreatedAbrasivesMgcl2 { get; set; }
+        public decimal? TreatedAbrasivesCacl2 { get; set; }
 
-        public int PrewettingNacl { get; set; }
-        public int PrewettingMgcl2 { get; set; }
-        public int PrewettingCacl2 { get; set; }
-        public int PrewettingAcetate { get; set; }
-        public int PrewettingNonchloride { get; set; }
+        public decimal? PrewettingNacl { get; set; }
+        public decimal? PrewettingMgcl2 { get; set; }
+        public decimal? PrewettingCacl2 { get; set; }
+        public decimal? PrewettingAcetate { get; set; }
+        public decimal? PrewettingNonchloride { get; set; }
 
-        public int PretreatmentNacl { get; set; }
-        public int PretreatmentMgcl2 { get; set; }
-        public int PretreatmentCacl2 { get; set; }
-        public int PretreatmentAcetate { get; set; }
-        public int PretreatmentNonchloride { get; set; }
+        public decimal? PretreatmentNacl { get; set; }
+        public decimal? PretreatmentMgcl2 { get; set; }
+        public decimal? PretreatmentCacl2 { get; set; }
+        public decimal? PretreatmentAcetate { get; set; }
+        public decimal? PretreatmentNonchloride { get; set; }
 
-        public int AntiicingNacl { get; set; }
-        public int AntiicingMgcl2 { get; set; }
-        public int AntiicingCacl2 { get; set; }
-        public int AntiicingAcetate { get; set; }
-        public int AntiicingNonchloride { get; set; }
+        public decimal? AntiicingNacl { get; set; }
+        public decimal? AntiicingMgcl2 { get; set; }
+        public decimal? AntiicingCacl2 { get; set; }
+        public decimal? AntiicingAcetate { get; set; }
+        public decimal? AntiicingNonchloride { get; set; }
 
-        public int MultichlorideALitres { get; set; }
-        public int MultichlorideANaclPercentage { get; set; }
-        public int MultichlorideAMgcl2Percentage { get; set; }
-        public int MultichlorideACacl2Percentage { get; set; }
-        public int MultichlorideBLitres { get; set; }
-        public int MultichlorideBNaclPercentage { get; set; }
-        public int MultichlorideBMgcl2Percentage { get; set; }
-        public int MultichlorideBCacl2Percentage { get; set; }
+        public decimal? MultichlorideALitres { get; set; }
+        public decimal? MultichlorideANaclPercentage { get; set; }
+        public decimal? MultichlorideAMgcl2Percentage { get; set; }
+        public decimal? MultichlorideACacl2Percentage { get; set; }
+        public decimal? MultichlorideBLitres { get; set; }
+        public decimal? MultichlorideBNaclPercentage { get; set; }
+        public decimal? MultichlorideBMgcl2Percentage { get; set; }
+        public decimal? MultichlorideBCacl2Percentage { get; set; }
 
         // Section 4
-        public int SaltStorageSitesTotal { get; set; }
+        public int? SaltStorageSitesTotal { get; set; }
         public ICollection<HmrSaltStockpile> Stockpiles { get; set; }
         public int RoadSaltStockpilesTotal => Stockpiles?.Sum(x => x.RoadSaltStockpilesTotal) ?? 0;
         public int RoadSaltOnImpermeableSurface => Stockpiles?.Sum(x => x.RoadSaltOnImpermeableSurface) ?? 0;
@@ -78,30 +78,28 @@ namespace Hmcr.Data.Database.Entities
         public int TreatedAbrasivesOnImpermeableSurface => Stockpiles?.Sum(x => x.TreatedAbrasivesOnImpermeableSurface) ?? 0;
         public int TreatedAbrasivesUnderPermanentRoof => Stockpiles?.Sum(x => x.TreatedAbrasivesUnderPermanentRoof) ?? 0;
         public int TreatedAbrasivesUnderTarp => Stockpiles?.Sum(x => x.TreatedAbrasivesUnderTarp) ?? 0;
-        public bool AllMaterialsHandledPlan { get; set; }
-        public int AllMaterialsHandledSites { get; set; }
-        public bool EquipmentPreventsOverloadingPlan { get; set; }
-        public int EquipmentPreventsOverloadingSites { get; set; }
-        public bool WastewaterSystemPlan { get; set; }
-        public int WastewaterSystemSites { get; set; }
-        public bool ControlDiversionExternalWatersPlan { get; set; }
-        public int ControlDiversionExternalWatersSites { get; set; }
-        public bool DrainageCollectionSystemPlan { get; set; }
-        public int DrainageCollectionSystemSites { get; set; }
-
-        public bool MunicipalSewerSystemPlan { get; set; }
-        public int MunicipalSewerSystemSites { get; set; }
-        public bool RemovalContainmentPlan { get; set; }
-        public int RemovalContainmentSites { get; set; }
-        public bool WatercoursePlan { get; set; }
-        public int WatercourseSites { get; set; }
-        public bool OtherDischargePointPlan { get; set; }
-        public int OtherDischargePointSites { get; set; }
-
-        public bool OngoingCleanupPlan { get; set; }
-        public int OngoingCleanupSites { get; set; }
-        public bool RiskManagementPlanPlan { get; set; }
-        public int RiskManagementPlanSites { get; set; }
+        public bool? AllMaterialsHandledPlan { get; set; }
+        public int? AllMaterialsHandledSites { get; set; }
+        public bool? EquipmentPreventsOverloadingPlan { get; set; }
+        public int? EquipmentPreventsOverloadingSites { get; set; }
+        public bool? WastewaterSystemPlan { get; set; }
+        public int? WastewaterSystemSites { get; set; }
+        public bool? ControlDiversionExternalWatersPlan { get; set; }
+        public int? ControlDiversionExternalWatersSites { get; set; }
+        public bool? DrainageCollectionSystemPlan { get; set; }
+        public int? DrainageCollectionSystemSites { get; set; }
+        public bool? MunicipalSewerSystemPlan { get; set; }
+        public int? MunicipalSewerSystemSites { get; set; }
+        public bool? RemovalContainmentPlan { get; set; }
+        public int? RemovalContainmentSites { get; set; }
+        public bool? WatercoursePlan { get; set; }
+        public int? WatercourseSites { get; set; }
+        public bool? OtherDischargePointPlan { get; set; }
+        public int? OtherDischargePointSites { get; set; }
+        public bool? OngoingCleanupPlan { get; set; }
+        public int? OngoingCleanupSites { get; set; }
+        public bool? RiskManagementPlanPlan { get; set; }
+        public int? RiskManagementPlanSites { get; set; }
 
         // Section 5
         public int NumberOfVehicles { get; set; }
@@ -129,7 +127,7 @@ namespace Hmcr.Data.Database.Entities
 
         // Section 6
         public bool? SnowDisposalSiteUsed { get; set; }
-        public int SnowDisposalSiteTotal { get; set; }
+        public int? SnowDisposalSiteTotal { get; set; }
         public bool? SnowMeltersUsed { get; set; }
         public bool? MeltwaterDisposalMethodUsed { get; set; }
 
