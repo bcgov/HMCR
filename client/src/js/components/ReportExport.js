@@ -36,7 +36,7 @@ const defaultSearchFormValues = {
   highwayUnique: '',
   maintenanceTypeIds: [],
   activityNumberIds: [],
-  submissionNumber:'',
+  submissionNumber: '',
   outputFormat: 'csv',
 };
 
@@ -98,7 +98,7 @@ const ReportExport = ({
     const outputFormat = values.outputFormat;
 
     queryParams.typeName = `hmr:${values.reportTypeId}_VW`;
-    queryParams.propertyName = Constants.REPORT_EXPORT_FIELDS[values.reportTypeId].join(',');
+    queryParams.propertyName = Constants.REPORT_EXPORT_FIELDS[values.reportTypeId]?.join(',');
     queryParams.format = outputFormat;
 
     if (outputFormat !== 'csv') queryParams.propertyName += ',GEOMETRY';
@@ -135,7 +135,7 @@ const ReportExport = ({
     if (values.submissionNumber.length > 0) {
       cql_filters.push(`SUBMISSION_OBJECT_ID = ${values.submissionNumber}`);
     }
-    if (values.submissionDateFrom!== null && values.submissionDateTo!== null) {
+    if (values.submissionDateFrom !== null && values.submissionDateTo !== null) {
       var sdFrom = values.submissionDateFrom.startOf('day').format(Constants.DATE_TIME_FORMAT);
       var sdTo = values.submissionDateTo.endOf('day').format(Constants.DATE_TIME_FORMAT);
       cql_filters.push(`SUBMISSION_DATE BETWEEN '${sdFrom}' AND '${sdTo}'`);
@@ -145,6 +145,7 @@ const ReportExport = ({
       queryParams.cql_filter = cql_filters.join(' AND ');
     }
 
+    console.log(queryParams);
     return queryParams;
   };
 
@@ -156,32 +157,59 @@ const ReportExport = ({
     const dateFrom = values.dateFrom.startOf('day').format(Constants.DATE_DISPLAY_FORMAT);
     const dateTo = values.dateTo.endOf('day').format(Constants.DATE_DISPLAY_FORMAT);
 
-    api
-      .getReportExport(buildExportParams(values, dateFrom, dateTo))
-      .then((response) => {
-        const fileExtensionHeaders = response.headers['content-disposition'].match(/.csv|.json|.gml|.kml|.kmz/i);
-        let fileName = `${values.reportTypeId}_Export_${dateFrom}-${dateTo}`;
-        if (fileExtensionHeaders) fileName += fileExtensionHeaders[0];
-        let data = response.data;
-        if (fileName.indexOf('.json') > -1) data = JSON.stringify(data);
-        FileSaver.saveAs(new Blob([data]), fileName);
-        setExportResult({ fileName });
-        setExportStage(EXPORT_STAGE.DONE);
-      })
-      .catch((error) => {
-        if (error.response) {
-          const response = error.response;
+    if (values.reportTypeId === Constants.REPORT_TYPES.HMR_SALT_REPORT.name) {
+      console.log(buildExportParams(values, dateFrom, dateTo));
+      api
+        .getSaltReports(buildExportParams(values, dateFrom, dateTo))
+        .then((response) => {
+          let fileName = `${values.reportTypeId}_Export_${dateFrom}-${dateTo}`;
+          const blob = new Blob([response.data], { type: 'text/csv' });
+          FileSaver.saveAs(blob, fileName);
+          setExportResult({ fileName });
+          setExportStage(EXPORT_STAGE.DONE);
+        })
+        .catch((error) => {
+          if (error.response) {
+            const response = error.response;
 
-          if (response.status === 422) {
-            setExportResult({ error: error.response.data });
-            setExportStage(EXPORT_STAGE.ERROR);
-          } else if (response.status === 404) {
-            hideErrorDialog();
-            setExportStage(EXPORT_STAGE.NOT_FOUND);
+            if (response.status === 422) {
+              setExportResult({ error: error.response.data });
+              setExportStage(EXPORT_STAGE.ERROR);
+            } else if (response.status === 404) {
+              hideErrorDialog();
+              setExportStage(EXPORT_STAGE.NOT_FOUND);
+            }
           }
-        }
-      })
-      .finally(() => setSubmitting(false));
+        })
+        .finally(() => setSubmitting(false));
+    } else {
+      api
+        .getReportExport(buildExportParams(values, dateFrom, dateTo))
+        .then((response) => {
+          const fileExtensionHeaders = response.headers['content-disposition'].match(/.csv|.json|.gml|.kml|.kmz/i);
+          let fileName = `${values.reportTypeId}_Export_${dateFrom}-${dateTo}`;
+          if (fileExtensionHeaders) fileName += fileExtensionHeaders[0];
+          let data = response.data;
+          if (fileName.indexOf('.json') > -1) data = JSON.stringify(data);
+          FileSaver.saveAs(new Blob([data]), fileName);
+          setExportResult({ fileName });
+          setExportStage(EXPORT_STAGE.DONE);
+        })
+        .catch((error) => {
+          if (error.response) {
+            const response = error.response;
+
+            if (response.status === 422) {
+              setExportResult({ error: error.response.data });
+              setExportStage(EXPORT_STAGE.ERROR);
+            } else if (response.status === 404) {
+              hideErrorDialog();
+              setExportStage(EXPORT_STAGE.NOT_FOUND);
+            }
+          }
+        })
+        .finally(() => setSubmitting(false));
+    }
   };
 
   const renderContent = () => {
@@ -325,8 +353,10 @@ const ReportExport = ({
                         />
                         <MouseoverTooltip id="tooltip_submission_datepicker">
                           <ul style={{ paddingInlineStart: 10 }}>
-                          This Submission Date filter applies in addition to the applicable mandatory date range above. 
-                          Tip: To ensure all records submitted in this date range (and / or matching the entered Submission Number) will be included in the export, set the mandatory date range above to be sufficiently broad
+                            This Submission Date filter applies in addition to the applicable mandatory date range
+                            above. Tip: To ensure all records submitted in this date range (and / or matching the
+                            entered Submission Number) will be included in the export, set the mandatory date range
+                            above to be sufficiently broad
                           </ul>
                         </MouseoverTooltip>
                       </div>

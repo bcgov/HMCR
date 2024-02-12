@@ -15,6 +15,7 @@ import { showValidationErrorDialog } from '../actions';
 
 import * as Constants from '../Constants';
 import * as api from '../Api';
+import PageSpinner from './ui/PageSpinner';
 
 const defaultFormValues = { reportTypeId: null, reportFile: null };
 
@@ -55,11 +56,14 @@ const WorkReportingUpload = ({
   const [fileInputKey, setFileInputKey] = useState(Math.random());
   const [submitting, setSubmitting] = useState(false);
   const [showStatusModal, setShowStatusModal] = useState(false);
+  const [showSaltReportStatusModal, setShowSaltReportStatusModal] = useState(false);
   const [resubCheckStatus, setResubCheckStatus] = useState(null);
   const [savingStatus, setSavingStatus] = useState(null);
   const [errorMessages, setErrorMessages] = useState(null);
   const [completeMessage, setCompleteMessage] = useState(null);
+  const [saltReportCompleteMssage, setSaltReportCompleteMessage] = useState(null);
   const [reportTypes, setReportTypes] = useState([]);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     setReportTypes(Object.values(submissionStreams).filter((o) => o.isActive));
@@ -184,11 +188,25 @@ const WorkReportingUpload = ({
       });
   };
 
-  const handleSaltReportSubmit = (values, formType) => {
-    const stagingTableName = reportTypes.find((type) => values.reportTypeId === type.id).stagingTableName;
-    const apiPath = Constants.REPORT_TYPES[stagingTableName].api;
+  const handleSaltReportSubmit = async (values) => {
+    try {
+      saltReportFormModal.closeForm();
+      setLoading(true);
+      setShowSaltReportStatusModal(true);
 
-    api.instance.post(`${apiPath}`, transformedValues);
+      const stagingTableName = reportTypes.find((type) => values.reportTypeId === type.id).stagingTableName;
+      const apiPath = Constants.REPORT_TYPES[stagingTableName].api;
+      const response = await api.instance.post(apiPath, values);
+
+      console.log(response);
+      setSaltReportCompleteMessage(`Report successfully created. Details: ${(response.status, response.statusText)}`);
+    } catch (error) {
+      // Handle errors
+      console.error(error);
+      showValidationErrorDialog(error.response?.data || 'An unexpected error occurred');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const validateFile = (e, setFieldValue, setFieldError, fieldName, sizeLimit) => {
@@ -324,9 +342,9 @@ const WorkReportingUpload = ({
                       >
                         Open Form
                       </Button>
-                      <Button type="button" onClick={testExportApi}>
+                      {/* <Button type="button" onClick={testExportApi}>
                         Export Test
-                      </Button>
+                      </Button> */}
                     </Col>
                   </FormGroup>
                 </>
@@ -379,6 +397,19 @@ const WorkReportingUpload = ({
             </ul>
           </Alert>
         )}
+      </SimpleModalWrapper>
+
+      <SimpleModalWrapper
+        isOpen={showSaltReportStatusModal}
+        toggle={() => {
+          if (!submitting) setShowSaltReportStatusModal(false);
+        }}
+        backdrop="static"
+        title="Report Submission"
+        disableClose={submitting}
+        onComplete={resetMessages}
+      >
+        {saltReportCompleteMssage || <PageSpinner />}
       </SimpleModalWrapper>
     </React.Fragment>
   );

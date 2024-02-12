@@ -57,12 +57,19 @@ namespace Hmcr.Api.Controllers
             }
         }
 
-        [HttpGet]
-        public async Task<IActionResult> GetAllSaltReportsAsync()
+        [HttpGet("{param?}")]
+        public async Task<IActionResult> GetSaltReportsAsync(string serviceAreas, DateTime fromDate, DateTime toDate, string cql_filter)
         {
             try
             {
-                var csvStream = await _saltReportService.ExportReportsToCsvAsync();
+                var saltReportEntities = await _saltReportService.GetSaltReportEntitiesAsync(serviceAreas, fromDate, toDate, cql_filter);
+
+                if (!saltReportEntities.Any())
+                {
+                    return NotFound("No reports found matching the specified criteria.");
+                }
+                
+                var csvStream = _saltReportService.ConvertToCsvStream(saltReportEntities);
 
                 if (csvStream == null || csvStream.Length == 0)
                 {

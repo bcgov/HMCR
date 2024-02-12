@@ -16,6 +16,7 @@ namespace Hmcr.Data.Repositories
         Task<HmrSaltReport> AddReportAsync(HmrSaltReport saltReport);
         Task<IEnumerable<HmrSaltReport>> GetAllReportsAsync();
         Task<HmrSaltReport> GetReportByIdAsync(int saltReportId);
+        Task<IEnumerable<HmrSaltReport>> GetReportsAsync(string serviceAreas, DateTime? fromDate, DateTime? toDate, string cql_filter);
     }
 
     public class SaltReportRepository : HmcrRepositoryBase<HmrSaltReport>, ISaltReportRepository
@@ -58,6 +59,33 @@ namespace Hmcr.Data.Repositories
             return await _context.HmrSaltReports
                 .Include(report => report.Stockpiles)
                 .ToListAsync();
+        }
+
+        public async Task<IEnumerable<HmrSaltReport>> GetReportsAsync(string serviceAreas, DateTime? fromDate, DateTime? toDate, string cql_filter)
+        {
+            var query = _context.HmrSaltReports.AsQueryable();
+
+            // Apply service area filter if serviceAreas is not null or empty.
+            if (!string.IsNullOrWhiteSpace(serviceAreas))
+            {
+                var serviceAreaList = serviceAreas.Split(',').Select(area => int.Parse(area)).ToList();
+                query = query.Where(report => serviceAreaList.Contains(report.ServiceArea));
+            }
+
+            // Apply date range filter if fromDate and toDate are provided.
+            if (fromDate.HasValue && toDate.HasValue)
+            {
+                // Increase toDate by one day because initial toDate value starts at midnight
+                var adjustedToDate = toDate.Value.AddDays(1);
+                query = query.Where(report => report.AppCreateTimestamp >= fromDate.Value && report.AppCreateTimestamp <= adjustedToDate);
+                query = query.Include(report => report.Stockpiles);
+
+                return await query.ToListAsync();
+            }
+
+            // Nothing is provided; return all reports
+            return await GetAllReportsAsync();
+
         }
 
         public async Task<HmrSaltReport> GetReportByIdAsync(int saltReportId)

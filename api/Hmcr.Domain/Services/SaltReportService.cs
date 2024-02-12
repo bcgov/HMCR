@@ -16,10 +16,10 @@ namespace Hmcr.Domain.Services
     public interface ISaltReportService
     {
         Task<HmrSaltReport> CreateReportAsync(SaltReportDto dto);
-        Task<IEnumerable<SaltReportDto>> GetSaltReportsAsync();
-        Task<Stream> ExportReportsToCsvAsync();
+        Task<IEnumerable<SaltReportDto>> GetSaltReportDtosAsync();
         Task<SaltReportDto> GetSaltReportByIdAsync(int saltReportId);
-
+        Task<IEnumerable<HmrSaltReport>> GetSaltReportEntitiesAsync(string serviceAreas, DateTime fromDate, DateTime toDate, string cql_filter);
+        Stream ConvertToCsvStream(IEnumerable<HmrSaltReport> saltReportEntities);
     }
 
     public class SaltReportService : ISaltReportService
@@ -60,11 +60,16 @@ namespace Hmcr.Domain.Services
             // Business Logic
         }
 
-        public async Task<IEnumerable<SaltReportDto>> GetSaltReportsAsync()
+        public async Task<IEnumerable<SaltReportDto>> GetSaltReportDtosAsync()
         {
             var saltReportEntities = await _repository.GetAllReportsAsync();
 
             return _mapper.Map<IEnumerable<SaltReportDto>>(saltReportEntities);
+        }
+
+        public async Task<IEnumerable<HmrSaltReport>> GetSaltReportEntitiesAsync(string serviceAreas, DateTime fromDate, DateTime toDate, string cql_filter)
+        {
+            return await _repository.GetReportsAsync(serviceAreas, fromDate, toDate, cql_filter);
         }
 
         public async Task<SaltReportDto> GetSaltReportByIdAsync(int saltReportId)
@@ -74,14 +79,7 @@ namespace Hmcr.Domain.Services
             return saltReportEntity != null ? _mapper.Map<SaltReportDto>(saltReportEntity) : null;
         }
 
-        public async Task<Stream> ExportReportsToCsvAsync()
-        {
-            var saltReportEntities = await _repository.GetAllReportsAsync();
-
-            return ConvertToCsvStream(saltReportEntities);
-        }
-
-        private Stream ConvertToCsvStream(IEnumerable<HmrSaltReport> saltReportEntities)
+        public Stream ConvertToCsvStream(IEnumerable<HmrSaltReport> saltReportEntities)
         {
             var memoryStream = new MemoryStream();
             using var writer = new StreamWriter(memoryStream, leaveOpen: true);
