@@ -1,10 +1,15 @@
 using Microsoft.AspNetCore.Mvc;
 using Hmcr.Api.Controllers.Base;
 using Hmcr.Model.Dtos.SaltReport;
-using Hmcr.Data.Database.Entities;
 using System;
 using System.Threading.Tasks;
 using Hmcr.Domain.Services;
+using Hmcr.Api.Authorization;
+using Hmcr.Model;
+using System.Net;
+using Hmcr.Data.Repositories;
+using Hmcr.Model.Dtos.SubmissionObject;
+using System.Linq;
 
 namespace Hmcr.Api.Controllers
 {
@@ -14,15 +19,27 @@ namespace Hmcr.Api.Controllers
     public class SaltReportController : HmcrControllerBase
     {
         private readonly ISaltReportService _saltReportService;
+        private ISubmissionObjectService _submissionService;
+        private HmcrCurrentUser _currentUser;
 
-        public SaltReportController(ISaltReportService saltReportService)
+        public SaltReportController(ISaltReportService saltReportService, ISubmissionObjectService submissionService, HmcrCurrentUser currentUser)
         {
             _saltReportService = saltReportService ?? throw new ArgumentNullException(nameof(saltReportService));
+            _submissionService = submissionService;
+            _currentUser = currentUser;
         }
 
         [HttpPost]
+        [RequiresPermission(Permissions.FileUploadWrite)]
         public async Task<IActionResult> CreateSaltReportAsync([FromBody] SaltReportDto saltReport)
         {
+            var problem = IsServiceAreaAuthorized(_currentUser, saltReport.ServiceArea);
+
+            if (problem != null)
+            {
+                return Unauthorized(problem);
+            }
+
             if (saltReport == null)
             {
                 return BadRequest("Received salt report data is null");
