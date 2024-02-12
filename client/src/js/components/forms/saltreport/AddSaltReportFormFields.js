@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import PageSpinner from '../../ui/PageSpinner';
 import { FormRow, FormInput, FormCheckboxInput, FormRadioInput, FormNumberInput } from '../FormInputs';
 import { Row, Col, FormGroup, Input, Table, Button } from 'reactstrap';
-import { Field, FieldArray } from 'formik';
+import { Field, FieldArray, useFormikContext } from 'formik';
 import { validationSchema } from './ValidationSchema';
 import { defaultValues } from './DefaultValues';
 
@@ -98,6 +98,7 @@ const housekeepingPracticesLabel = {
 
 const AddSaltReportFormFields = ({ setInitialValues, formValues, setValidationSchema }) => {
   const [loading, setLoading] = useState(true);
+  const { errors, isSubmitting, isValidating, submitCount } = useFormikContext();
 
   const saveFormToSessionStorage = (values) => {
     sessionStorage.setItem('formData', JSON.stringify(values));
@@ -108,6 +109,30 @@ const AddSaltReportFormFields = ({ setInitialValues, formValues, setValidationSc
     return savedFormData ? JSON.parse(savedFormData) : defaultValues;
   };
 
+  // Takes in a array of errors, and recursively search for the property name to scroll to it
+  const scrollToFirstError = (errors, prefix = '') => {
+    for (const key in errors) {
+      if (errors.hasOwnProperty(key)) {
+        const error = errors[key];
+
+        if (typeof error === 'string') {
+          // This is a leaf node (string error message), so scroll to it
+          const selector = `[name="${prefix + key}"]`;
+
+          const errorField = document.querySelector(selector);
+          if (errorField) {
+            errorField.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            errorField.focus();
+            return; // Stop after scrolling to the first error
+          }
+        } else if (typeof error === 'object') {
+          // This is a nested object, so recurse
+          scrollToFirstError(error, `${prefix + key}.`);
+        }
+      }
+    }
+  };
+
   useEffect(() => {
     setLoading(true);
     const defaultValidationSchema = validationSchema.shape({});
@@ -115,7 +140,11 @@ const AddSaltReportFormFields = ({ setInitialValues, formValues, setValidationSc
     setInitialValues(loadFromSessionStorage());
     // setInitialValues(defaultValues);
     setLoading(false);
-  }, []);
+
+    if (isSubmitting && !isValidating && submitCount > 0) {
+      scrollToFirstError(errors);
+    }
+  }, [isSubmitting, isValidating, submitCount, errors]);
 
   useEffect(() => {
     // Save form data to local storage every second
