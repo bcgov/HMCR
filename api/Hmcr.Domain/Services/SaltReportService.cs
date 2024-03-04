@@ -91,7 +91,6 @@ namespace Hmcr.Domain.Services
             RegisterCsvConverters(csv);
             csv.WriteRecords(saltReportEntities);
 
-            csv.NextRecord();
             WriteTotals(writer, saltReportEntities);
 
             writer.Flush();

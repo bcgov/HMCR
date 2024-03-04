@@ -6,16 +6,13 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 import SingleDropdownField from './ui/SingleDropdownField';
 import { FormRow } from './forms/FormInputs';
-import AddSaltReportFormFields from './forms/saltreport/AddSaltReportFormFields';
 import SubmitButton from './ui/SubmitButton';
 import SimpleModalWrapper from './ui/SimpleModalWrapper';
-import useFormModal from './hooks/useFormModal';
 
 import { showValidationErrorDialog } from '../actions';
 
 import * as Constants from '../Constants';
 import * as api from '../Api';
-import PageSpinner from './ui/PageSpinner';
 
 const defaultFormValues = { reportTypeId: null, reportFile: null };
 
@@ -56,14 +53,11 @@ const WorkReportingUpload = ({
   const [fileInputKey, setFileInputKey] = useState(Math.random());
   const [submitting, setSubmitting] = useState(false);
   const [showStatusModal, setShowStatusModal] = useState(false);
-  const [showSaltReportStatusModal, setShowSaltReportStatusModal] = useState(false);
   const [resubCheckStatus, setResubCheckStatus] = useState(null);
   const [savingStatus, setSavingStatus] = useState(null);
   const [errorMessages, setErrorMessages] = useState(null);
   const [completeMessage, setCompleteMessage] = useState(null);
-  const [saltReportCompleteMssage, setSaltReportCompleteMessage] = useState(null);
   const [reportTypes, setReportTypes] = useState([]);
-  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     setReportTypes(Object.values(submissionStreams).filter((o) => o.isActive));
@@ -188,30 +182,6 @@ const WorkReportingUpload = ({
       });
   };
 
-  const handleSaltReportSubmit = async (values) => {
-    try {
-      saltReportFormModal.closeForm();
-      setLoading(true);
-      setShowSaltReportStatusModal(true);
-
-      debugger;
-      values.serviceArea = serviceArea;
-
-      const stagingTableName = reportTypes.find((type) => values.reportTypeId === type.id).stagingTableName;
-      const apiPath = Constants.REPORT_TYPES[stagingTableName].api;
-      const response = await api.instance.post(apiPath, values);
-
-      console.log(response);
-      setSaltReportCompleteMessage(`Report successfully created. Details: ${(response.status, response.statusText)}`);
-    } catch (error) {
-      // Handle errors
-      console.error(error);
-      showValidationErrorDialog(error.response?.data || 'An unexpected error occurred');
-    } finally {
-      setLoading(false);
-    }
-  };
-
   const validateFile = (e, setFieldValue, setFieldError, fieldName, sizeLimit) => {
     const file = e.currentTarget.files[0];
 
@@ -233,13 +203,6 @@ const WorkReportingUpload = ({
     setFieldValue(fieldName, e.currentTarget.files[0]);
   };
 
-  const saltReportFormModal = useFormModal(
-    'Annual Salt Report',
-    <AddSaltReportFormFields />,
-    handleSaltReportSubmit,
-    'xl'
-  );
-
   return (
     <React.Fragment>
       <Formik enableReinitialize={true} initialValues={defaultFormValues}>
@@ -249,59 +212,62 @@ const WorkReportingUpload = ({
               <FormRow name="reportTypeId" label="Report Type">
                 <SingleDropdownField defaultTitle="Select Report Type" items={reportTypes} name="reportTypeId" />
               </FormRow>
-
-              <React.Fragment>
-                <FormGroup row>
-                  <Label for="reportFileBrowser" sm={3}>
-                    Report File
-                  </Label>
-                  <Col sm={9}>
-                    <Alert color="info">
-                      File restrictions:{' '}
-                      <ul>
-                        <li>.csv files only</li>
-                        <li>Up to 5MB per file</li>
-                      </ul>
-                    </Alert>
-                    <CustomInput
-                      type="file"
-                      id="reportFileBrowser"
-                      name="reportFile"
-                      label="Select Report File"
-                      accept=".csv"
-                      onChange={(e) =>
-                        validateFile(
-                          e,
-                          setFieldValue,
-                          setFieldError,
-                          'reportFile',
-                          reportTypes.find((o) => o.id === values.reportTypeId).fileSizeLimitMb
-                        )
-                      }
-                      key={fileInputKey}
-                      invalid={errors.reportFile && errors.reportFile.length > 0}
-                    />
-                    {errors.reportFile && <FormFeedback style={{ display: 'unset' }}>{errors.reportFile}</FormFeedback>}
-                  </Col>
-                </FormGroup>
-                <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-                  <SubmitButton
-                    size="sm"
-                    type="Button"
-                    disabled={!values.reportFile || submitting || (errors.reportFile && errors.reportFile.length > 0)}
-                    submitting={submitting}
-                    onClick={() => handleSubmit(values, setFieldValue)}
-                  >
-                    Submit
-                  </SubmitButton>
-                </div>
-              </React.Fragment>
+              {values.reportTypeId && (
+                <React.Fragment>
+                  <FormGroup row>
+                    <Label for="reportFileBrowser" sm={3}>
+                      Report File
+                    </Label>
+                    <Col sm={9}>
+                      <Alert color="info">
+                        File restrictions:{' '}
+                        <ul>
+                          <li>.csv files only</li>
+                          <li>
+                            Up to {reportTypes.find((o) => o.id === values.reportTypeId).fileSizeLimitMb}MB per file
+                          </li>
+                        </ul>
+                      </Alert>
+                      <CustomInput
+                        type="file"
+                        id="reportFileBrowser"
+                        name="reportFile"
+                        label="Select Report File"
+                        accept=".csv"
+                        onChange={(e) =>
+                          validateFile(
+                            e,
+                            setFieldValue,
+                            setFieldError,
+                            'reportFile',
+                            reportTypes.find((o) => o.id === values.reportTypeId).fileSizeLimitMb
+                          )
+                        }
+                        key={fileInputKey}
+                        invalid={errors.reportFile && errors.reportFile.length > 0}
+                      />
+                      {errors.reportFile && (
+                        <FormFeedback style={{ display: 'unset' }}>{errors.reportFile}</FormFeedback>
+                      )}
+                    </Col>
+                  </FormGroup>
+                  <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+                    <SubmitButton
+                      size="sm"
+                      type="Button"
+                      disabled={!values.reportFile || submitting || (errors.reportFile && errors.reportFile.length > 0)}
+                      submitting={submitting}
+                      onClick={() => handleSubmit(values, setFieldValue)}
+                    >
+                      Submit
+                    </SubmitButton>
+                  </div>
+                </React.Fragment>
+              )}
             </React.Fragment>
           </Form>
         )}
       </Formik>
-      {saltReportFormModal.formElement}
-
       <SimpleModalWrapper
         isOpen={showStatusModal}
         toggle={() => {
@@ -344,19 +310,6 @@ const WorkReportingUpload = ({
             </ul>
           </Alert>
         )}
-      </SimpleModalWrapper>
-
-      <SimpleModalWrapper
-        isOpen={showSaltReportStatusModal}
-        toggle={() => {
-          if (!submitting) setShowSaltReportStatusModal(false);
-        }}
-        backdrop="static"
-        title="Report Submission"
-        disableClose={submitting}
-        onComplete={resetMessages}
-      >
-        {saltReportCompleteMssage || <PageSpinner />}
       </SimpleModalWrapper>
     </React.Fragment>
   );

@@ -13,6 +13,7 @@ namespace Hmcr.Domain.CsvHelpers
             Map(m => m.SaltReportId).Ignore();
 
             Map(m => m.Stockpiles).Ignore();
+            Map(m => m.Appendix).Ignore();
 
             Map(m => m.ConcurrencyControlNumber).Ignore();
             Map(m => m.AppCreateUserid).Ignore();
@@ -27,7 +28,6 @@ namespace Hmcr.Domain.CsvHelpers
             Map(m => m.DbAuditCreateTimestamp).Ignore();
             Map(m => m.DbAuditLastUpdateUserid).Ignore();
             Map(m => m.DbAuditLastUpdateTimestamp).Ignore();
-            // Map other properties...
         }
     }
 }

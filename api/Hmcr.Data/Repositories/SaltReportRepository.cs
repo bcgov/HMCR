@@ -76,7 +76,7 @@ namespace Hmcr.Data.Repositories
             if (fromDate.HasValue && toDate.HasValue)
             {
                 // Increase toDate by one day because initial toDate value starts at midnight
-                var adjustedToDate = toDate.Value.AddDays(1);
+                var adjustedToDate = toDate.Value.AddDays(2);
                 query = query.Where(report => report.AppCreateTimestamp >= fromDate.Value && report.AppCreateTimestamp <= adjustedToDate);
                 query = query.Include(report => report.Stockpiles);
 

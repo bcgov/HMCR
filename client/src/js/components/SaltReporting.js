@@ -13,6 +13,7 @@ import SimpleModalWrapper from './ui/SimpleModalWrapper';
 import PageSpinner from './ui/PageSpinner';
 import Authorize from './fragments/Authorize';
 import MaterialCard from './ui/MaterialCard';
+import UIHeader from './ui/UIHeader';
 
 const SaltReporting = ({ currentUser }) => {
   const [loading, setLoading] = useState(false);
@@ -54,6 +55,7 @@ const SaltReporting = ({ currentUser }) => {
     <>
       <Authorize requires={Constants.PERMISSIONS.FILE_W}>
         <MaterialCard>
+        <UIHeader>Annual Salt Report Form</UIHeader>
           <Row>
             <Col lg="8">
               <FormGroup row>
@@ -61,7 +63,7 @@ const SaltReporting = ({ currentUser }) => {
                   Fill Report
                 </Label>
                 <Col sm={9}>
-                  <Alert color="info">Changes are automatically saved within the browser session</Alert>
+                  <Alert color="info">Changes are automatically saved within the browser tab and discarded when this browser tab is closed.</Alert>
                   <Button
                     size="sm"
                     color="primary"

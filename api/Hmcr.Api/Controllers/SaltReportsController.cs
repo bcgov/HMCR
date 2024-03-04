@@ -21,12 +21,14 @@ namespace Hmcr.Api.Controllers
         private readonly ISaltReportService _saltReportService;
         private ISubmissionObjectService _submissionService;
         private HmcrCurrentUser _currentUser;
+        private IEmailService _emailService;
 
-        public SaltReportController(ISaltReportService saltReportService, ISubmissionObjectService submissionService, HmcrCurrentUser currentUser)
+        public SaltReportController(ISaltReportService saltReportService, ISubmissionObjectService submissionService, HmcrCurrentUser currentUser, IEmailService emailService)
         {
             _saltReportService = saltReportService ?? throw new ArgumentNullException(nameof(saltReportService));
             _submissionService = submissionService;
             _currentUser = currentUser;
+            _emailService = emailService;
         }
 
         [HttpPost]
@@ -48,6 +50,7 @@ namespace Hmcr.Api.Controllers
             try
             {
                 var createdReport = await _saltReportService.CreateReportAsync(saltReport);
+                // var a = _emailService.SendSaltReportSuccess(_currentUser);
 
                 return CreatedAtRoute(nameof(GetSaltReportAsync), new { id = createdReport.SaltReportId }, saltReport);
             }
