@@ -5,6 +5,11 @@ import { Row, Col, FormGroup, Input, Table, Button } from 'reactstrap';
 import { Field, FieldArray, useFormikContext } from 'formik';
 import { validationSchema } from './ValidationSchema';
 import { defaultValues } from './DefaultValues';
+import { tooltips } from './DefaultValues';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { Tooltip } from 'reactstrap';
+import { TooltipProvider } from '../../../contexts/TooltipContext';
+import { useTooltip } from '../../../contexts/TooltipContext';
 
 const materialStorageAppendixLabel = {
   materialStorage: {
@@ -109,6 +114,28 @@ const AddSaltReportFormFields = ({ setInitialValues, formValues, setValidationSc
     return savedFormData ? JSON.parse(savedFormData) : defaultValues;
   };
 
+  const CustomTooltip = ({ tipId, children }) => {
+    const { openTooltip, toggleTooltip } = useTooltip();
+
+    return (
+      <>
+        <span style={{ paddingLeft: '4px' }} href="#" id={tipId}>
+          <FontAwesomeIcon icon="question-circle" className="fa-color-primary ml-1 mr-1" />
+        </span>
+        <Tooltip
+          placement="bottom"
+          className="fieldset-tooltip"
+          autohide={false}
+          isOpen={openTooltip === tipId} // Open only if this tooltip's ID matches the openTooltip state
+          target={tipId}
+          toggle={() => toggleTooltip(tipId)} // Toggle this tooltip's visibility
+        >
+          <div>{children}</div>
+        </Tooltip>
+      </>
+    );
+  };
+
   // Takes in a array of errors, and recursively search for the property name to scroll to it
   const scrollToFirstError = (errors, prefix = '') => {
     for (const key in errors) {
@@ -159,7 +186,7 @@ const AddSaltReportFormFields = ({ setInitialValues, formValues, setValidationSc
   if (loading || formValues === null) return <PageSpinner />;
 
   return (
-    <React.Fragment>
+    <TooltipProvider>
       <Row>
         <Col>
           <FormRow name="serviceArea" label="Service Area">
@@ -272,8 +299,10 @@ const AddSaltReportFormFields = ({ setInitialValues, formValues, setValidationSc
             <Row>
               <Col sm={1}>1.5</Col>
               <Col>
-                Indicate the number of objectives<sup>1</sup> that were identified and achieved for this year in your
-                salt management plan within the following areas: (refer to Appendix A for a sample list of objectives)
+                Indicate the number of objectives
+                <CustomTooltip tipId="objectives">{tooltips.objectives}</CustomTooltip>
+                that were identified and achieved for this year in your salt management plan within the following areas:
+                (refer to Appendix A for a sample list of objectives)
               </Col>
             </Row>
             <Row className="my-2">
@@ -390,7 +419,10 @@ const AddSaltReportFormFields = ({ setInitialValues, formValues, setValidationSc
                       </td>
                     </tr>
                     <tr>
-                      <th>Acetate2</th>
+                      <th>
+                        Acetate
+                        <CustomTooltip tipId="acetate">{tooltips.acetate}</CustomTooltip>
+                      </th>
                       <td>
                         <FormNumberInput type="number" name="sect3.deicer.acetate" step="0.01" />
                       </td>
@@ -455,7 +487,10 @@ const AddSaltReportFormFields = ({ setInitialValues, formValues, setValidationSc
                       </td>
                     </tr>
                     <tr>
-                      <th>Non-chloride organic products3</th>
+                      <th>
+                        Non-chloride organic products
+                        <CustomTooltip tipId="nonchloride">{tooltips.nonchloride}</CustomTooltip>
+                      </th>
                       <td>
                         <FormNumberInput type="number" name="sect3.prewetting.nonchloride" step="0.01" />
                       </td>
@@ -540,8 +575,9 @@ const AddSaltReportFormFields = ({ setInitialValues, formValues, setValidationSc
             <Row>
               <Col sm={1}>3.2</Col>
               <Col>
-                If your organization uses multi-chloride liquids4, specify litres used and concentration for each salt
-                in the liquid:
+                If your organization uses multi-chloride liquids
+                <CustomTooltip tipId="liquids">{tooltips.liquids}</CustomTooltip>, specify litres used and concentration
+                for each salt in the liquid:
               </Col>
             </Row>
             <Row className="my-2">
@@ -873,7 +909,6 @@ const AddSaltReportFormFields = ({ setInitialValues, formValues, setValidationSc
                         <FormNumberInput
                           type="number"
                           name="sect5.weatherMonitoringSources.infraredThermometer.number"
-                          as={Input}
                         />
                       </td>
                     </tr>
@@ -897,11 +932,7 @@ const AddSaltReportFormFields = ({ setInitialValues, formValues, setValidationSc
                         />
                       </td>
                       <td>
-                        <FormNumberInput
-                          type="number"
-                          name="sect5.weatherMonitoringSources.fixedRWISStations.number"
-                          as={Input}
-                        />
+                        <FormNumberInput type="number" name="sect5.weatherMonitoringSources.fixedRWISStations.number" />
                       </td>
                     </tr>
                     <tr>
@@ -914,11 +945,7 @@ const AddSaltReportFormFields = ({ setInitialValues, formValues, setValidationSc
                         />
                       </td>
                       <td>
-                        <FormNumberInput
-                          type="number"
-                          name="sect5.weatherMonitoringSources.mobileRWISMounted.number"
-                          as={Input}
-                        />
+                        <FormNumberInput type="number" name="sect5.weatherMonitoringSources.mobileRWISMounted.number" />
                       </td>
                     </tr>
                   </tbody>
@@ -958,7 +985,7 @@ const AddSaltReportFormFields = ({ setInitialValues, formValues, setValidationSc
                         />
                       </td>
                       <td>
-                        <FormNumberInput type="number" name="sect5.maintenanceDecisionSupport.avl.number" as={Input} />
+                        <FormNumberInput type="number" name="sect5.maintenanceDecisionSupport.avl.number" />
                       </td>
                     </tr>
                     <tr>
@@ -974,7 +1001,6 @@ const AddSaltReportFormFields = ({ setInitialValues, formValues, setValidationSc
                         <FormNumberInput
                           type="number"
                           name="sect5.maintenanceDecisionSupport.saltApplicationRates.number"
-                          as={Input}
                         />
                       </td>
                     </tr>
@@ -991,7 +1017,6 @@ const AddSaltReportFormFields = ({ setInitialValues, formValues, setValidationSc
                         <FormNumberInput
                           type="number"
                           name="sect5.maintenanceDecisionSupport.applicationRateChart.number"
-                          as={Input}
                         />
                       </td>
                     </tr>
@@ -1005,11 +1030,7 @@ const AddSaltReportFormFields = ({ setInitialValues, formValues, setValidationSc
                         />
                       </td>
                       <td>
-                        <FormNumberInput
-                          type="number"
-                          name="sect5.maintenanceDecisionSupport.testingMDSS.number"
-                          as={Input}
-                        />
+                        <FormNumberInput type="number" name="sect5.maintenanceDecisionSupport.testingMDSS.number" />
                       </td>
                     </tr>
                   </tbody>
@@ -1038,7 +1059,7 @@ const AddSaltReportFormFields = ({ setInitialValues, formValues, setValidationSc
                     <Field type="checkbox" name="sect6.snowDisposalSite.used" className="form-control" />
                   </td>
                   <td>
-                    <FormNumberInput type="number" name="sect6.snowDisposalSite.number" as={Input} />
+                    <FormNumberInput type="number" name="sect6.snowDisposalSite.number" />
                   </td>
                 </tr>
                 <tr>
@@ -1156,121 +1177,79 @@ const AddSaltReportFormFields = ({ setInitialValues, formValues, setValidationSc
                 <tr>
                   <td>Drinking Water (surface or ground water)</td>
                   <td>
-                    <FormNumberInput
-                      type="number"
-                      name="sect7.typesOfVulnerableAreas.drinkingWater.areasIdentified"
-                      as={Input}
-                    />
+                    <FormNumberInput type="number" name="sect7.typesOfVulnerableAreas.drinkingWater.areasIdentified" />
                   </td>
                   <td>
                     <FormNumberInput
                       type="number"
                       name="sect7.typesOfVulnerableAreas.drinkingWater.areasWithProtection"
-                      as={Input}
                     />
                   </td>
                   <td>
                     <FormNumberInput
                       type="number"
                       name="sect7.typesOfVulnerableAreas.drinkingWater.areasWithChloride"
-                      as={Input}
                     />
                   </td>
                 </tr>
                 <tr>
                   <td>Aquatic Life (lake and watercourse)</td>
                   <td>
-                    <FormNumberInput
-                      type="number"
-                      name="sect7.typesOfVulnerableAreas.aquaticLife.areasIdentified"
-                      as={Input}
-                    />
+                    <FormNumberInput type="number" name="sect7.typesOfVulnerableAreas.aquaticLife.areasIdentified" />
                   </td>
                   <td>
                     <FormNumberInput
                       type="number"
                       name="sect7.typesOfVulnerableAreas.aquaticLife.areasWithProtection"
-                      as={Input}
                     />
                   </td>
                   <td>
-                    <FormNumberInput
-                      type="number"
-                      name="sect7.typesOfVulnerableAreas.aquaticLife.areasWithChloride"
-                      as={Input}
-                    />
+                    <FormNumberInput type="number" name="sect7.typesOfVulnerableAreas.aquaticLife.areasWithChloride" />
                   </td>
                 </tr>
                 <tr>
                   <td>Wetlands and associated aquatic life</td>
                   <td>
-                    <FormNumberInput
-                      type="number"
-                      name="sect7.typesOfVulnerableAreas.wetlands.areasIdentified"
-                      as={Input}
-                    />
+                    <FormNumberInput type="number" name="sect7.typesOfVulnerableAreas.wetlands.areasIdentified" />
                   </td>
                   <td>
-                    <FormNumberInput
-                      type="number"
-                      name="sect7.typesOfVulnerableAreas.wetlands.areasWithProtection"
-                      as={Input}
-                    />
+                    <FormNumberInput type="number" name="sect7.typesOfVulnerableAreas.wetlands.areasWithProtection" />
                   </td>
                   <td>
-                    <FormNumberInput
-                      type="number"
-                      name="sect7.typesOfVulnerableAreas.wetlands.areasWithChloride"
-                      as={Input}
-                    />
+                    <FormNumberInput type="number" name="sect7.typesOfVulnerableAreas.wetlands.areasWithChloride" />
                   </td>
                 </tr>
                 <tr>
                   <td>Delimited areas with terrestrial fauna/flora</td>
                   <td>
-                    <FormNumberInput
-                      type="number"
-                      name="sect7.typesOfVulnerableAreas.delimitedAreas.areasIdentified"
-                      as={Input}
-                    />
+                    <FormNumberInput type="number" name="sect7.typesOfVulnerableAreas.delimitedAreas.areasIdentified" />
                   </td>
                   <td>
                     <FormNumberInput
                       type="number"
                       name="sect7.typesOfVulnerableAreas.delimitedAreas.areasWithProtection"
-                      as={Input}
                     />
                   </td>
                   <td>
                     <FormNumberInput
                       type="number"
                       name="sect7.typesOfVulnerableAreas.delimitedAreas.areasWithChloride"
-                      as={Input}
                     />
                   </td>
                 </tr>
                 <tr>
                   <td>Valued Lands</td>
                   <td>
-                    <FormNumberInput
-                      type="number"
-                      name="sect7.typesOfVulnerableAreas.valuedLands.areasIdentified"
-                      as={Input}
-                    />
+                    <FormNumberInput type="number" name="sect7.typesOfVulnerableAreas.valuedLands.areasIdentified" />
                   </td>
                   <td>
                     <FormNumberInput
                       type="number"
                       name="sect7.typesOfVulnerableAreas.valuedLands.areasWithProtection"
-                      as={Input}
                     />
                   </td>
                   <td>
-                    <FormNumberInput
-                      type="number"
-                      name="sect7.typesOfVulnerableAreas.valuedLands.areasWithChloride"
-                      as={Input}
-                    />
+                    <FormNumberInput type="number" name="sect7.typesOfVulnerableAreas.valuedLands.areasWithChloride" />
                   </td>
                 </tr>
               </tbody>
@@ -1486,7 +1465,7 @@ const AddSaltReportFormFields = ({ setInitialValues, formValues, setValidationSc
           </Table>
         </Col>
       </section>
-    </React.Fragment>
+    </TooltipProvider>
   );
 };
 

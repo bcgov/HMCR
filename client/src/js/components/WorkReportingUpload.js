@@ -194,6 +194,9 @@ const WorkReportingUpload = ({
       setLoading(true);
       setShowSaltReportStatusModal(true);
 
+      debugger;
+      values.serviceArea = serviceArea;
+
       const stagingTableName = reportTypes.find((type) => values.reportTypeId === type.id).stagingTableName;
       const apiPath = Constants.REPORT_TYPES[stagingTableName].api;
       const response = await api.instance.post(apiPath, values);
@@ -237,36 +240,6 @@ const WorkReportingUpload = ({
     'xl'
   );
 
-  const testExportApi = () => {
-    const stagingTableName = reportTypes.find((type) => 4 === type.id).stagingTableName;
-
-    const apiPath = Constants.REPORT_TYPES[stagingTableName].api;
-    api.instance.get(`${apiPath}`, { responseType: 'blob' }).then((response) => {
-      // Create a new Blob object using the response data
-      const blob = new Blob([response.data], { type: 'text/csv' });
-
-      // Create a URL for the blob object
-      const downloadUrl = window.URL.createObjectURL(blob);
-
-      // Create a temporary link element
-      const link = document.createElement('a');
-      link.href = downloadUrl;
-      link.setAttribute('download', 'report.csv'); // Set the file name for download
-
-      // Append the link to the body
-      document.body.appendChild(link);
-
-      // Programmatically click the link to trigger the download
-      link.click();
-
-      // Remove the link after triggering the download
-      document.body.removeChild(link);
-
-      // Free up memory by revoking the created URL
-      window.URL.revokeObjectURL(downloadUrl);
-    });
-  };
-
   return (
     <React.Fragment>
       <Formik enableReinitialize={true} initialValues={defaultFormValues}>
@@ -276,79 +249,53 @@ const WorkReportingUpload = ({
               <FormRow name="reportTypeId" label="Report Type">
                 <SingleDropdownField defaultTitle="Select Report Type" items={reportTypes} name="reportTypeId" />
               </FormRow>
-              {values.reportTypeId !== 4 ? (
-                <React.Fragment>
-                  <FormGroup row>
-                    <Label for="reportFileBrowser" sm={3}>
-                      Report File
-                    </Label>
-                    <Col sm={9}>
-                      <Alert color="info">
-                        File restrictions:{' '}
-                        <ul>
-                          <li>.csv files only</li>
-                          <li>Up to 5MB per file</li>
-                        </ul>
-                      </Alert>
-                      <CustomInput
-                        type="file"
-                        id="reportFileBrowser"
-                        name="reportFile"
-                        label="Select Report File"
-                        accept=".csv"
-                        onChange={(e) =>
-                          validateFile(
-                            e,
-                            setFieldValue,
-                            setFieldError,
-                            'reportFile',
-                            reportTypes.find((o) => o.id === values.reportTypeId).fileSizeLimitMb
-                          )
-                        }
-                        key={fileInputKey}
-                        invalid={errors.reportFile && errors.reportFile.length > 0}
-                      />
-                      {errors.reportFile && (
-                        <FormFeedback style={{ display: 'unset' }}>{errors.reportFile}</FormFeedback>
-                      )}
-                    </Col>
-                  </FormGroup>
-                  <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-                    <SubmitButton
-                      size="sm"
-                      type="Button"
-                      disabled={!values.reportFile || submitting || (errors.reportFile && errors.reportFile.length > 0)}
-                      submitting={submitting}
-                      onClick={() => handleSubmit(values, setFieldValue)}
-                    >
-                      Submit
-                    </SubmitButton>
-                  </div>
-                </React.Fragment>
-              ) : (
-                <>
-                  <FormGroup row>
-                    <Label for="reportFileBrowser" sm={3}>
-                      Fill Report
-                    </Label>
-                    <Col sm={9}>
-                      <Alert color="info">Changes are automatically saved within the browser session</Alert>
-                      <Button
-                        size="sm"
-                        color="primary"
-                        className="mr-2"
-                        type="button"
-                        onClick={() => saltReportFormModal.openForm(Constants.FORM_TYPE.ADD)}
-                      >
-                        Open Form
-                      </Button>
-                      {/* <Button type="button" onClick={testExportApi}>
-                        Export Test
-                      </Button> */}
-                    </Col>
-                  </FormGroup>
-                </>
-              )}
+
+              <React.Fragment>
+                <FormGroup row>
+                  <Label for="reportFileBrowser" sm={3}>
+                    Report File
+                  </Label>
+                  <Col sm={9}>
+                    <Alert color="info">
+                      File restrictions:{' '}
+                      <ul>
+                        <li>.csv files only</li>
+                        <li>Up to 5MB per file</li>
+                      </ul>
+                    </Alert>
+                    <CustomInput
+                      type="file"
+                      id="reportFileBrowser"
+                      name="reportFile"
+                      label="Select Report File"
+                      accept=".csv"
+                      onChange={(e) =>
+                        validateFile(
+                          e,
+                          setFieldValue,
+                          setFieldError,
+                          'reportFile',
+                          reportTypes.find((o) => o.id === values.reportTypeId).fileSizeLimitMb
+                        )
+                      }
+                      key={fileInputKey}
+                      invalid={errors.reportFile && errors.reportFile.length > 0}
+                    />
+                    {errors.reportFile && <FormFeedback style={{ display: 'unset' }}>{errors.reportFile}</FormFeedback>}
+                  </Col>
+                </FormGroup>
+                <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+                  <SubmitButton
+                    size="sm"
+                    type="Button"
+                    disabled={!values.reportFile || submitting || (errors.reportFile && errors.reportFile.length > 0)}
+                    submitting={submitting}
+                    onClick={() => handleSubmit(values, setFieldValue)}
+                  >
+                    Submit
+                  </SubmitButton>
+                </div>
+              </React.Fragment>
             </React.Fragment>
           </Form>
         )}

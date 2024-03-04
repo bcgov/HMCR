@@ -58,6 +58,7 @@ export const PATHS = {
   ADMIN_ROLES: '/admin/roles',
   REPORT_EXPORT: '/export',
   REPORT_EXPORT_USER: '/user',
+  SALT_REPORTING: '/saltreporting',
   VERSION: '/version',
   DATA_ROOM: 'https://engineering.sp.th.gov.bc.ca/sites/service-areas-portal',
   MANUAL_AND_TEMPLATES:

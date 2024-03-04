@@ -26,8 +26,8 @@ namespace Hmcr.Data.Database.Entities
         public int? SaltApplicationAchieved { get; set; }
 
         // Section 2
-        public int RoadTotalLength { get; set; }
-        public int SaltTotalDays { get; set; }
+        public int? RoadTotalLength { get; set; }
+        public int? SaltTotalDays { get; set; }
 
         // Section 3
         public decimal? DeicerNacl { get; set; }

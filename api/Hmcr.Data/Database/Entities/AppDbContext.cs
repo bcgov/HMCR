@@ -2638,7 +2638,7 @@ namespace Hmcr.Data.Database.Entities
                 entity.HasKey(e => e.RoleId)
                     .HasName("HMR_ROLE_PK");
 
-                entity.ToTable("HMR_ROLE");
+                entity.ToTable("HMR_ROLE_2");
 
                 entity.HasComment("Role description table for groups of permissions.");
 
@@ -6934,7 +6934,9 @@ namespace Hmcr.Data.Database.Entities
 
                 entity.Property(e => e.StockPileId)
                     .HasColumnName("STOCKPILE_ID")
-                    .HasDefaultValueSql("(NEXT VALUE FOR [HMR_SLT_RPT_ID_SEQ])");
+                    .HasColumnType("numeric(9, 0)")
+                    .HasDefaultValueSql("(NEXT VALUE FOR [HMR_SLT_STOCKPILE_ID_SEQ])")
+                    .HasComment("A system generated unique identifier.");
 
                 entity.Property(e => e.SaltReportId)
                     .HasColumnName("SALT_REPORT_ID")
@@ -6950,6 +6952,7 @@ namespace Hmcr.Data.Database.Entities
 
                 entity.Property(e => e.AppendixId)
                     .HasColumnName("APPENDIX_ID")
+                    .HasColumnType("numeric(9, 0)")
                     .HasDefaultValueSql("(NEXT VALUE FOR [HMR_SLT_RPT_ID_SEQ])");
 
                 entity.Property(e => e.SaltReportId)

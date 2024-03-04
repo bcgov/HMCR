@@ -1,22 +1,9 @@
-const tipAnalyticalValidation = [
-  <ul key="tipAnalyticalValidation_ul_key_1" style={{ paddingInlineStart: '20px' }}>
-    <li style={{ margin: '0 0 6px 0' }}>
-      Analytical Validations provide warnings when the activity accomplishment does not meet the defined parameters.
-    </li>
-    <li>
-      Minimum Value and Maximum Value check the accomplishment for an activity is within numerical limits, as defined.
-      No tolerances are added to the Minimum Value or Maximum Value calculations.
-    </li>
-    <li>
-      Reporting Frequency checks if the activity was reported in the same location, with locational specificity based on
-      the activity location code, within the defined period. A tolerance of 100 metres is added to the start and end
-      points for Location Code C activities to validate against previously reported instances. No time-based tolerance
-      is added to the Reporting Frequency calculation. Users can manually incorporate into the defined Reporting
-      Frequency a time-based tolerance (e.g. by setting the minimum number of days to ‘20’ for an activity that should
-      be completed monthly).
-    </li>
-  </ul>,
-];
+export const tooltips = {
+  objectives: 'The salt management plan should include a description of planned improvements to be undertaken over time. Achievement of the objectives is an indicator of performance in the implementation of the salt management plan and will be taken into consideration in the second review of progress on the Code of Practice to be conducted by Environment Canada.',
+  acetate: 'calcium-magnesium or potassium acetates',
+  nonchloride: 'record only pure non-chloride (e.g. beet juice, corn bi-product, molasses or other organics), excluding pre-mixed blends with salt brine',
+  liquids: 'Describe multi-chloride liquids that contain more than one type of salt in the same mix'
+}
 
 export const defaultValues = {
   reportTypeId: 4,
