@@ -18,9 +18,10 @@ namespace Hmcr.Domain.Services
     public interface ISaltReportService
     {
         Task<HmrSaltReport> CreateReportAsync(SaltReportDto dto);
-        Task<IEnumerable<SaltReportDto>> GetSaltReportDtosAsync();
+        Task<IEnumerable<SaltReportDto>> GetAllSaltReportDtosAsync();
         Task<SaltReportDto> GetSaltReportByIdAsync(int saltReportId);
         Task<IEnumerable<HmrSaltReport>> GetSaltReportEntitiesAsync(string serviceAreas, DateTime fromDate, DateTime toDate, string cql_filter);
+        Task<IEnumerable<SaltReportDto>> GetSaltReportDtosAsync(string serviceAreas, DateTime fromDate, DateTime toDate, string cql_filter);
         Stream ConvertToCsvStream(IEnumerable<HmrSaltReport> saltReportEntities);
     }
 
@@ -62,11 +63,18 @@ namespace Hmcr.Domain.Services
             // Business Logic
         }
 
-        public async Task<IEnumerable<SaltReportDto>> GetSaltReportDtosAsync()
+        public async Task<IEnumerable<SaltReportDto>> GetAllSaltReportDtosAsync()
         {
             var saltReportEntities = await _repository.GetAllReportsAsync();
 
             return _mapper.Map<IEnumerable<SaltReportDto>>(saltReportEntities);
+        }
+
+        public async Task<IEnumerable<SaltReportDto>> GetSaltReportDtosAsync(string serviceAreas, DateTime fromDate, DateTime toDate, string cql_filter)
+        {
+            var saltReportEntities = await _repository.GetReportsAsync(serviceAreas, fromDate, toDate, cql_filter);
+            return _mapper.Map<IEnumerable<SaltReportDto>>(saltReportEntities);
+
         }
 
         public async Task<IEnumerable<HmrSaltReport>> GetSaltReportEntitiesAsync(string serviceAreas, DateTime fromDate, DateTime toDate, string cql_filter)

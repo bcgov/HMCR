@@ -234,6 +234,7 @@ namespace Hmcr.Data.Mappings
                 .ForMember(dest => dest.ValuedLandsAreasWithProtection, opt => opt.MapFrom(src => src.Sect7.TypesOfVulnerableAreas.ValuedLands.AreasWithProtection))
                 .ForMember(dest => dest.ValuedLandsAreasWithChloride, opt => opt.MapFrom(src => src.Sect7.TypesOfVulnerableAreas.ValuedLands.AreasWithChloride))
                 .ForMember(dest => dest.Appendix, opt => opt.MapFrom(src => src.Appendix))
+                .ForMember(dest => dest.AppCreateTimestamp, opt => opt.MapFrom(src => src.AppCreateTimestamp))
                 .ReverseMap();
 
             CreateMap<StockpileDto, HmrSaltStockpile>()

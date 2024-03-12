@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 
 namespace Hmcr.Model.Dtos.SaltReport
@@ -17,6 +18,8 @@ namespace Hmcr.Model.Dtos.SaltReport
         public Sect6Dto Sect6 { get; set; }
         public Sect7Dto Sect7 { get; set; }
         public AppendixDto Appendix { get; set; }
+        public DateTime AppCreateTimestamp { get; set; }
+
     }
 
     public class Sect1Dto
@@ -199,4 +202,5 @@ namespace Hmcr.Model.Dtos.SaltReport
             }
         }
     }
+
 }

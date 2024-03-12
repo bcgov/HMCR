@@ -145,7 +145,6 @@ const ReportExport = ({
       queryParams.cql_filter = cql_filters.join(' AND ');
     }
 
-    console.log(queryParams);
     return queryParams;
   };
 
@@ -158,7 +157,6 @@ const ReportExport = ({
     const dateTo = values.dateTo.endOf('day').format(Constants.DATE_DISPLAY_FORMAT);
 
     if (values.reportTypeId === Constants.REPORT_TYPES.HMR_SALT_REPORT.name) {
-      console.log(buildExportParams(values, dateFrom, dateTo));
       api
         .getSaltReports(buildExportParams(values, dateFrom, dateTo))
         .then((response) => {

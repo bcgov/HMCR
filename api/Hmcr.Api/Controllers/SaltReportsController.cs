@@ -10,6 +10,7 @@ using System.Net;
 using Hmcr.Data.Repositories;
 using Hmcr.Model.Dtos.SubmissionObject;
 using System.Linq;
+using System.Text.Json;
 
 namespace Hmcr.Api.Controllers
 {
@@ -60,27 +61,36 @@ namespace Hmcr.Api.Controllers
             }
         }
 
-        [HttpGet("{param?}")]
-        public async Task<IActionResult> GetSaltReportsAsync(string serviceAreas, DateTime fromDate, DateTime toDate, string cql_filter)
+        [HttpGet("{param?}", Name = "GetSaltReportsAsync")]
+        public async Task<IActionResult> GetSaltReportsAsync(string serviceAreas, string format, DateTime fromDate, DateTime toDate, string typeName)
         {
             try
             {
-                var saltReportEntities = await _saltReportService.GetSaltReportEntitiesAsync(serviceAreas, fromDate, toDate, cql_filter);
 
-                if (!saltReportEntities.Any())
+                // Decide the output format based on the 'format' parameter
+                switch (format.ToLower())
                 {
-                    return NotFound("No reports found matching the specified criteria.");
-                }
-                
-                var csvStream = _saltReportService.ConvertToCsvStream(saltReportEntities);
+                    case "csv":
+                        var saltReportEntities = await _saltReportService.GetSaltReportEntitiesAsync(serviceAreas, fromDate, toDate, typeName);
 
-                if (csvStream == null || csvStream.Length == 0)
-                {
-                    return NotFound("CSV data not found or is empty.");
-                }
+                        if (!saltReportEntities.Any())
+                        {
+                            return NotFound("No reports found matching the specified criteria.");
+                        }
+                        var csvStream = _saltReportService.ConvertToCsvStream(saltReportEntities);
+                        if (csvStream == null || csvStream.Length == 0)
+                        {
+                            return NotFound("CSV data not found or is empty.");
+                        }
+                        // Return the stream as a CSV file
+                        return File(csvStream, "text/csv", "salt_reports.csv");
 
-                // Return the stream as a file
-                return File(csvStream, "text/csv", "salt_reports.csv");
+                    case "json":
+                    default:
+                        var saltReportDtos = await _saltReportService.GetSaltReportDtosAsync(serviceAreas, fromDate, toDate, typeName);
+                        var json = JsonSerializer.Serialize(saltReportDtos);
+                        return Content(json, "application/json; charset=utf-8");
+                }
             }
             catch (Exception ex)
             {

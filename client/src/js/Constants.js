@@ -85,6 +85,7 @@ export const PERMISSIONS = {
   FILE_W: 'FILE_W',
   FILE_R: 'FILE_R',
   EXPORT: 'EXPORT',
+  SALT: 'SALT'
 };
 
 export const USER_TYPE = { INTERNAL: 'INTERNAL', BUSINESS: 'BUSINESS' };
