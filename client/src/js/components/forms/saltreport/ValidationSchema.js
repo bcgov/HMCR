@@ -220,15 +220,15 @@ export const validationSchema = Yup.object({
         otherwise: Yup.number().nullable(true),
       }),
   }),
-  //   sect7: Yup.object()
-  //     .shape({
-  //       completedInventory: Yup.string(),
-  //       setVulnerableAreas: Yup.string(),
-  //       actionPlanPrepared: Yup.string(),
-  //       protectionMeasuresImplemented: Yup.string(),
-  //       environmentalMonitoringConducted: Yup.string(),
-  //       typesOfVulnerableAreas: typesOfVulnerableAreasSchema,
-  //       vulnerableAreas: Yup.array().of(vulnerableAreaSchema),
-  //     })
-  //     .nullable(true),
+  sect7: Yup.object()
+    .shape({
+      completedInventory: Yup.string(),
+      setVulnerableAreas: Yup.string(),
+      actionPlanPrepared: Yup.string(),
+      protectionMeasuresImplemented: Yup.string(),
+      environmentalMonitoringConducted: Yup.string(),
+      typesOfVulnerableAreas: typesOfVulnerableAreasSchema,
+      vulnerableAreas: Yup.array().of(vulnerableAreaSchema),
+    })
+    .nullable(true),
 });

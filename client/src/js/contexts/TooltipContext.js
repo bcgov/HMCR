@@ -11,9 +11,9 @@ export const TooltipProvider = ({ children }) => {
 
   const toggleTooltip = (id) => {
     if (openTooltip === id) {
-      setOpenTooltip(null); // If the same tooltip is clicked, close it
+      setOpenTooltip(null);
     } else {
-      setOpenTooltip(id); // Open the clicked tooltip and close others
+      setOpenTooltip(id);
     }
   };
 
