@@ -313,9 +313,11 @@ const ReportExport = ({
                           name="serviceAreaNumbers"
                         />
                       </div>
-                      <div style={filterContainerStyle}>
-                        <FormInput type="text" name="highwayUnique" placeholder="Highway Unique" />
-                      </div>
+                      {formikProps.values.reportTypeId !== 'HMR_SALT_REPORT' && (
+                        <div style={filterContainerStyle}>
+                          <FormInput type="text" name="highwayUnique" placeholder="Highway Unique" />
+                        </div>
+                      )}
                       {formikProps.values.reportTypeId === 'HMR_WORK_REPORT' && (
                         <React.Fragment>
                           <div style={filterContainerStyle}>
@@ -342,22 +344,24 @@ const ReportExport = ({
                       <div style={filterContainerStyle}>
                         <FormInput type="text" name="submissionNumber" placeholder="Submission Number" />
                       </div>
-                      <div className="d-flex align-items-center">
-                        <DateRangeField
-                          name="submissionDate"
-                          fromName="submissionDateFrom"
-                          toName="submissionDateTo"
-                          isOutsideRange={disableFutureDates}
-                        />
-                        <MouseoverTooltip id="tooltip_submission_datepicker">
-                          <ul style={{ paddingInlineStart: 10 }}>
-                            This Submission Date filter applies in addition to the applicable mandatory date range
-                            above. Tip: To ensure all records submitted in this date range (and / or matching the
-                            entered Submission Number) will be included in the export, set the mandatory date range
-                            above to be sufficiently broad
-                          </ul>
-                        </MouseoverTooltip>
-                      </div>
+                      {formikProps.values.reportTypeId !== 'HMR_SALT_REPORT' && (
+                        <div className="d-flex align-items-center">
+                          <DateRangeField
+                            name="submissionDate"
+                            fromName="submissionDateFrom"
+                            toName="submissionDateTo"
+                            isOutsideRange={disableFutureDates}
+                          />
+                          <MouseoverTooltip id="tooltip_submission_datepicker">
+                            <ul style={{ paddingInlineStart: 10 }}>
+                              This Submission Date filter applies in addition to the applicable mandatory date range
+                              above. Tip: To ensure all records submitted in this date range (and / or matching the
+                              entered Submission Number) will be included in the export, set the mandatory date range
+                              above to be sufficiently broad
+                            </ul>
+                          </MouseoverTooltip>
+                        </div>
+                      )}
                     </div>
                   </React.Fragment>
                 )}

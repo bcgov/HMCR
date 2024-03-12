@@ -253,7 +253,8 @@ namespace Hmcr.Domain.Services
         {
             // Add custom boolean converter
             csv.Configuration.TypeConverterCache.AddConverter<bool>(new BooleanYesNoConverter());
-            csv.Configuration.TypeConverterCache.AddConverter<bool?>(new BooleanYesNoConverter()); // For nullable booleans
+            // For nullable booleans
+            csv.Configuration.TypeConverterCache.AddConverter<bool?>(new BooleanYesNoConverter());
 
             // Register the mapping
             csv.Configuration.RegisterClassMap<SaltReportMap>();

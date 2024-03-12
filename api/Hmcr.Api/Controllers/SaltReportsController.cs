@@ -51,7 +51,6 @@ namespace Hmcr.Api.Controllers
             try
             {
                 var createdReport = await _saltReportService.CreateReportAsync(saltReport);
-                // var a = _emailService.SendSaltReportSuccess(_currentUser);
 
                 return CreatedAtRoute(nameof(GetSaltReportAsync), new { id = createdReport.SaltReportId }, saltReport);
             }
@@ -94,7 +93,6 @@ namespace Hmcr.Api.Controllers
             }
             catch (Exception ex)
             {
-                // Log the exception (consider using a logging framework)
                 return StatusCode(500, "An error occurred while generating the report.");
             }
         }
