@@ -18,6 +18,7 @@ import UserAdmin from './components/UserAdmin';
 import RoleAdmin from './components/RoleAdmin';
 import ReportExport from './components/ReportExport';
 import WorkReporting from './components/WorkReporting';
+import SaltReporting from './components/SaltReporting';
 import Version from './components/Version';
 import ApiAccess from './components/ApiAccess';
 import WorkReportingSubmissionDetail from './components/WorkReportingSubmissionDetail';
@@ -124,6 +125,7 @@ const ContractorRoutes = (currentUser) => {
         <Route path={Constants.PATHS.REPORT_EXPORT} exact component={ReportExport} />
       </AuthorizedRoute>
       <Route path={Constants.PATHS.WORK_REPORTING} exact component={WorkReporting} />
+      <Route path={Constants.PATHS.SALT_REPORTING} exact component={SaltReporting} />
       <Route path={`${Constants.PATHS.WORK_REPORTING}/:submissionId`} component={WorkReportingSubmissionDetail} />
       {CommonRoutes()}
     </Switch>
@@ -170,6 +172,13 @@ const AdminRoutes = (currentUser) => {
         userType={Constants.USER_TYPE.INTERNAL}
       >
         <Route path={Constants.PATHS.WORK_REPORTING} exact component={WorkReporting} />
+      </AuthorizedRoute>
+      <AuthorizedRoute
+        path={Constants.PATHS.SALT_REPORTING}
+        requires={Constants.PERMISSIONS.FILE_R}
+        userType={Constants.USER_TYPE.INTERNAL}
+      >
+        <Route path={Constants.PATHS.SALT_REPORTING} exact component={SaltReporting} />
       </AuthorizedRoute>
       {CommonRoutes()}
     </Switch>
