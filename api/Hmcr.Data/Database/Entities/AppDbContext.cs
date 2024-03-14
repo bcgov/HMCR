@@ -2638,7 +2638,7 @@ namespace Hmcr.Data.Database.Entities
                 entity.HasKey(e => e.RoleId)
                     .HasName("HMR_ROLE_PK");
 
-                entity.ToTable("HMR_ROLE_2");
+                entity.ToTable("HMR_ROLE");
 
                 entity.HasComment("Role description table for groups of permissions.");
 
