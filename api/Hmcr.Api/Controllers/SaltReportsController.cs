@@ -6,9 +6,6 @@ using System.Threading.Tasks;
 using Hmcr.Domain.Services;
 using Hmcr.Api.Authorization;
 using Hmcr.Model;
-using System.Net;
-using Hmcr.Data.Repositories;
-using Hmcr.Model.Dtos.SubmissionObject;
 using System.Linq;
 using System.Text.Json;
 
@@ -20,39 +17,32 @@ namespace Hmcr.Api.Controllers
     public class SaltReportController : HmcrControllerBase
     {
         private readonly ISaltReportService _saltReportService;
-        private ISubmissionObjectService _submissionService;
         private HmcrCurrentUser _currentUser;
-        private IEmailService _emailService;
 
         public SaltReportController(ISaltReportService saltReportService, ISubmissionObjectService submissionService, HmcrCurrentUser currentUser, IEmailService emailService)
         {
             _saltReportService = saltReportService ?? throw new ArgumentNullException(nameof(saltReportService));
-            _submissionService = submissionService;
-            _currentUser = currentUser;
-            _emailService = emailService;
+            _currentUser = currentUser  ?? throw new ArgumentNullException(nameof(currentUser));
         }
 
         [HttpPost]
         [RequiresPermission(Permissions.FileUploadWrite)]
         public async Task<IActionResult> CreateSaltReportAsync([FromBody] SaltReportDto saltReport)
         {
-            var problem = IsServiceAreaAuthorized(_currentUser, saltReport.ServiceArea);
-
-            if (problem != null)
-            {
-                return Unauthorized(problem);
-            }
-
             if (saltReport == null)
             {
                 return BadRequest("Received salt report data is null");
             }
 
+            var problem = IsServiceAreaAuthorized(_currentUser, saltReport.ServiceArea);
+            if (problem != null)
+            {
+                return Unauthorized(problem);
+            }
+
             try
             {
                 var createdReport = await _saltReportService.CreateReportAsync(saltReport);
-                // var a = _emailService.SendSaltReportSuccess(_currentUser);
-
                 return CreatedAtRoute(nameof(GetSaltReportAsync), new { id = createdReport.SaltReportId }, saltReport);
             }
             catch (Exception ex)
@@ -61,11 +51,25 @@ namespace Hmcr.Api.Controllers
             }
         }
 
-        [HttpGet("{param?}", Name = "GetSaltReportsAsync")]
-        public async Task<IActionResult> GetSaltReportsAsync(string serviceAreas, string format, DateTime fromDate, DateTime toDate, string typeName)
+        [HttpGet("{id}", Name = "GetSaltReportAsync")]
+        public async Task<ActionResult<SaltReportDto>> GetSaltReportAsync(int id)
+        {
+            var saltReportDto = await _saltReportService.GetSaltReportByIdAsync(id);
+
+            if (saltReportDto == null)
+            {
+                return NotFound();
+            }
+
+            return Ok(saltReportDto);
+        }
+
+        [HttpGet(Name = "GetSaltReportsAsync")]
+        public async Task<IActionResult> GetSaltReportsAsync([FromQuery] string serviceAreas, [FromQuery] string format, [FromQuery] DateTime fromDate, [FromQuery] DateTime toDate, [FromQuery] string typeName)
         {
             try
             {
+                format = format?.ToLower() ?? "json";
 
                 // Decide the output format based on the 'format' parameter
                 switch (format.ToLower())
@@ -94,22 +98,9 @@ namespace Hmcr.Api.Controllers
             }
             catch (Exception ex)
             {
-                // Log the exception (consider using a logging framework)
                 return StatusCode(500, "An error occurred while generating the report.");
             }
         }
 
-        [HttpGet("{id}", Name = "GetSaltReportAsync")]
-        public async Task<ActionResult<SaltReportDto>> GetSaltReportAsync(int id)
-        {
-            var saltReportDto = await _saltReportService.GetSaltReportByIdAsync(id);
-
-            if (saltReportDto == null)
-            {
-                return NotFound();
-            }
-
-            return Ok(saltReportDto);
-        }
     }
 }
