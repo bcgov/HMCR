@@ -18,7 +18,6 @@ namespace Hmcr.Domain.Services
     public interface IEmailService
     {
         Task<bool> SendStatusEmailAsync(decimal submissionObjectId, FeedbackMessageUpdateDto feedbackMessage = null);
-        bool SendSaltReportSuccess(HmcrCurrentUser currentUser);
     }
 
     public class EmailService : IEmailService
@@ -38,7 +37,7 @@ namespace Hmcr.Domain.Services
         private IFeebackMessageRepository _feedbackRepo;
         private IUnitOfWork _unitOfWork;
 
-        public EmailService(IConfiguration config, IUserRepository userRepo, ILogger<EmailService> logger, ISubmissionObjectRepository submissionRepo, EmailBody emailBody,
+        public EmailService(IConfiguration config, IUserRepository userRepo, ILogger<EmailService> logger, ISubmissionObjectRepository submissionRepo, EmailBody emailBody, 
             IFeebackMessageRepository feedbackRepo, IUnitOfWork unitOfWork)
         {
             _config = config;
@@ -136,7 +135,7 @@ namespace Hmcr.Domain.Services
         {
             var recipients = new List<MailboxAddress>();
 
-            foreach (var user in _userRepo.GetActiveUsersByServiceAreaNumber(serviceAreaNumber))
+            foreach(var user in _userRepo.GetActiveUsersByServiceAreaNumber(serviceAreaNumber))
             {
                 if (user.Email.IsNotEmpty())
                     recipients.Add(new MailboxAddress(user.Email));
@@ -200,16 +199,5 @@ namespace Hmcr.Domain.Services
             client.Disconnect(true);
         }
 
-        public bool SendSaltReportSuccess(HmcrCurrentUser currentUser)
-        {
-            var recipients = new List<MailboxAddress>
-            {
-                new MailboxAddress(currentUser.Email)
-            };
-
-            SendEmail(recipients, "Submission Success", "Good Stuff", "Good stuff");
-
-            return true;
-        }
     }
 }
