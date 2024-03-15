@@ -1,8 +1,8 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Col, FormGroup, Label, Alert, Button, Row, Table } from 'reactstrap';
 import AddSaltReportFormFields from './forms/saltreport/AddSaltReportFormFields';
 import * as api from '../Api';
-import { connect } from 'react-redux';
+import { Formik, Form } from 'formik';
 import * as Constants from '../Constants';
 import useFormModal from './hooks/useFormModal';
 import { showValidationErrorDialog } from '../actions';
@@ -12,51 +12,55 @@ import Authorize from './fragments/Authorize';
 import MaterialCard from './ui/MaterialCard';
 import UIHeader from './ui/UIHeader';
 import moment from 'moment';
-import { usePDF } from 'react-to-pdf';
-import { pdfExportOptions } from './forms/saltreport/DefaultValues';
+import { connect } from 'react-redux';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
-const SaltReporting = ({ currentUser }) => {
+const SaltReporting = ({ currentUser, serviceAreas }) => {
   const [loading, setLoading] = useState(false);
   const [reportsData, setReportsData] = useState([]);
   const [showSaltReportStatusModal, setShowSaltReportStatusModal] = useState(false);
   const [saltReportCompleteMessage, setSaltReportCompleteMessage] = useState(null);
-  const { toPDF, targetRef } = usePDF(pdfExportOptions);
 
   useEffect(() => {
-    const fetchReports = async () => {
+    const fetchSaltReports = async () => {
+      setLoading(true);
+      const currentUserSAIds = currentUser.serviceAreas.map((sa) => sa.id).join();
       try {
-        const currentUserSAIds = currentUser.serviceAreas.map(sa => sa.id).join();
         const response = await api.getSaltReportsJson({
-          headers: { Accept: 'application/json' },
           fromDate: moment().subtract(5, 'years').format('YYYY-MM-DD HH:mm:ss'),
           toDate: moment().format('YYYY-MM-DD HH:mm:ss'),
-          format: 'json',
           serviceAreas: currentUserSAIds,
         });
         setReportsData(response.data || []);
       } catch (error) {
-        console.error('Error fetching salt reports:', error);
-        setReportsData([]); // Fallback to empty array
+        console.error('Fetching salt reports failed:', error);
+        setReportsData([]);
+      } finally {
+        setLoading(false);
       }
     };
 
-    fetchReports();
-  }, [currentUser]);
+    fetchSaltReports();
+  }, [currentUser.serviceAreas]);
 
-  const handleSaltReportSubmit = useCallback(async (values) => {
-    setLoading(true);
-    setShowSaltReportStatusModal(true);
+  const handleSaltReportSubmit = async (values) => {
     try {
+      saltReportFormModal.closeForm();
+      setShowSaltReportStatusModal(true);
+      setLoading(true);
+
       const stagingTableName = 'HMR_SALT_REPORT';
       const apiPath = Constants.REPORT_TYPES[stagingTableName].api;
       const response = await api.instance.post(apiPath, values);
-      setSaltReportCompleteMessage(`Report successfully created. Details: ${response.status}, ${response.statusText}`);
+
+      setSaltReportCompleteMessage(`Report successfully created. Details: ${response.status} ${response.statusText}.`);
     } catch (error) {
+      console.error('Submitting salt report failed:', error);
       showValidationErrorDialog(error.response?.data || 'An unexpected error occurred');
     } finally {
       setLoading(false);
     }
-  }, []);
+  };
 
   const saltReportFormModal = useFormModal(
     'Annual Salt Report',
@@ -65,71 +69,81 @@ const SaltReporting = ({ currentUser }) => {
     'xl'
   );
 
-  const downloadPdf = useCallback(async (index) => {
-    setShowSaltReportStatusModal(true);
-    await toPDF();
-    setShowSaltReportStatusModal(false);
-  }, [toPDF]);
-
-  const openSaltFormModal = useCallback(() => {
-    saltReportFormModal.openForm(Constants.FORM_TYPE.ADD);
-  }, [saltReportFormModal]);
-
   return (
     <>
       <Authorize requires={Constants.PERMISSIONS.FILE_W}>
         <MaterialCard>
           <UIHeader>Annual Salt Report Form</UIHeader>
-          <Row>
-            <Col lg="8">
-              <FormGroup row>
-                <Label for="reportFileBrowser" sm={3}>
-                  Fill Report
-                </Label>
-                <Col sm={9}>
-                  <Alert color="info">
-                    Changes are automatically saved within the browser tab and discarded when this browser tab is closed.
-                    <br />
-                    Provide a copy of current Salt Management Plan following form submission to: <a href="mailto: Maintenance.Programs@gov.bc.ca">Maintenance.Programs@gov.bc.ca</a>
-                  </Alert>
-                  <Button size="sm" color="primary" className="mr-2" type="button" onClick={openSaltFormModal}>
-                    Open Form
-                  </Button>
+          <Formik>
+            <Form>
+              <Row>
+                <Col lg="8">
+                  <FormGroup row>
+                    <Label for="reportFileBrowser" sm={3}>
+                      Fill Report
+                    </Label>
+                    <Col sm={9}>
+                      <Alert color="info">
+                        Changes are automatically saved within the browser tab and discarded when this browser tab is
+                        closed.
+                        <br />
+                        <br />
+                        Provide a copy of current Salt Management Plan following form submission to:{' '}
+                        <a href="mailto: Maintenance.Programs@gov.bc.ca">Maintenance.Programs@gov.bc.ca</a>
+                      </Alert>
+                      <Button
+                        size="sm"
+                        color="primary"
+                        className="mr-2"
+                        type="button"
+                        onClick={() => saltReportFormModal.openForm(Constants.FORM_TYPE.ADD)}
+                      >
+                        Open Form
+                      </Button>
+                    </Col>
+                  </FormGroup>
                 </Col>
-              </FormGroup>
-            </Col>
-          </Row>
+                <Col lg="4" />
+              </Row>
+            </Form>
+          </Formik>
         </MaterialCard>
         <MaterialCard>
-          {loading ? <PageSpinner /> : (
-            reportsData.length ? (
-              <Table responsive>
-                <thead>
-                  <tr>
-                    <th>Report ID</th>
-                    <th>Service Area</th>
-                    <th>Contact Name</th>
-                    <th>Date Created</th>
-                    <th></th>
+          <UIHeader>Past Submissions</UIHeader>
+          <Alert color="info">
+            Download is not available as we're currently working on making the forms you've submitted downloadable as PDF.
+          </Alert>
+          {loading ? (
+            <PageSpinner />
+          ) : reportsData.length > 0 ? (
+            <Table responsive>
+              <thead>
+                <tr>
+                  <th>Report ID</th>
+                  <th>Service Area</th>
+                  <th>Contact Name</th>
+                  <th>Date Created</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody>
+                {reportsData.map((item, index) => (
+                  <tr key={index}>
+                    <td>{item.SaltReportId}</td>
+                    <td>{item.ServiceArea}</td>
+                    <td>{item.ContactName}</td>
+                    <td>{moment(item.AppCreateTimestamp).format('LL')}</td>
+                    <td>
+                      <Button disabled size="sm" color="primary" className="mr-2" title="Download as PDF">
+                        <FontAwesomeIcon icon="download" />
+                      </Button>
+                    </td>
                   </tr>
-                </thead>
-                <tbody>
-                  {reportsData.map((item, index) => (
-                    <tr key={index}>
-                      <td>{item.SaltReportId}</td>
-                      <td>{item.ServiceArea}</td>
-                      <td>{item.ContactName}</td>
-                      <td>{moment(item.AppCreateTimestamp).toString()}</td>
-                      <td>
-                        <Button color="primary" onClick={() => downloadPdf(index)}>
-                          Download
-                        </Button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </Table>
-            ) : "No reports available."
+                ))}
+              </tbody>
+            </Table>
+          ) : (
+            <Alert color="warning">No reports found.</Alert>
           )}
         </MaterialCard>
       </Authorize>
@@ -139,9 +153,13 @@ const SaltReporting = ({ currentUser }) => {
         toggle={() => setShowSaltReportStatusModal(false)}
         backdrop="static"
         title="Report Submission"
+        disableClose={loading}
       >
         {saltReportCompleteMessage ? (
-          <Alert color="info">{saltReportCompleteMessage}</Alert>
+          <Alert color="info">
+            {saltReportCompleteMessage} Provide a copy of current Salt Management Plan following form submission to:{' '}
+            <a href="mailto: Maintenance.Programs@gov.bc.ca">Maintenance.Programs@gov.bc.ca</a>
+          </Alert>
         ) : (
           <PageSpinner />
         )}
@@ -150,7 +168,7 @@ const SaltReporting = ({ currentUser }) => {
   );
 };
 
-const mapStateToProps = state => ({
+const mapStateToProps = (state) => ({
   currentUser: state.user.current,
   serviceAreas: Object.values(state.serviceAreas),
 });
