@@ -90,17 +90,17 @@ namespace Hmcr.Data.Repositories
 
         public async Task<SubmissionObjectResultDto> GetSubmissionResultAsync(decimal submissionObjectId)
         {
-            var submission = await DbSet.AsNoTracking()
-                .Select(x => new SubmissionObjectResultDto
-                {
+            var submission = DbSet.Include(x => x.HmrSubmissionRows)
+                .AsNoTracking().Where(x => x.SubmissionObjectId == submissionObjectId)
+                .Select(x => new SubmissionObjectResultDto {
                     SubmissionObjectId = x.SubmissionObjectId,
                     FileName = x.FileName,
                     SubmissionStreamId = x.SubmissionStreamId,
-                    StreamName = x.SubmissionStream.StreamName,
+                    StreamName = (x.SubmissionStream != null) ? x.SubmissionStream.StreamName : "",
                     ServiceAreaNumber = x.ServiceAreaNumber,
                     SubmissionStatusId = x.SubmissionStatusId,
-                    SubmissionStatusCode = x.SubmissionStatus.StatusCode,
-                    Description = x.SubmissionStatus.Description,
+                    SubmissionStatusCode = (x.SubmissionStatus != null) ? x.SubmissionStatus.StatusCode : "",
+                    Description = (x.SubmissionStatus != null) ? x.SubmissionStatus.Description : "",
                     ErrorDetail = x.ErrorDetail,
                     AppCreateTimestamp = x.AppCreateTimestamp,
                     SubmissionRows = x.HmrSubmissionRows.Where(y => y.ErrorDetail != null || y.WarningDetail != null).Select(y => new SubmissionRowResultDto
@@ -117,10 +117,9 @@ namespace Hmcr.Data.Repositories
                         EndVariance = y.EndVariance,
                         RowNum = y.RowNum,
                         IsResubmitted = y.IsResubmitted ?? false
-                    }).OrderBy(y => y.RowNum)
-                })
-                .FirstOrDefaultAsync(x => x.SubmissionObjectId == submissionObjectId);
+                    }).OrderBy(y => y.RowNum).ToList()
 
+                }).FirstOrDefaultAsync().Result;
             return submission;
         }
 

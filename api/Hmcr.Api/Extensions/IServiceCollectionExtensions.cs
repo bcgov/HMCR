@@ -6,6 +6,7 @@ using Hmcr.Api.Authorization;
 using Hmcr.Data.Database;
 using Hmcr.Data.Database.Entities;
 using Hmcr.Data.Mappings;
+using Hmcr.Data.Repositories;
 using Hmcr.Domain.Services;
 using Hmcr.Model;
 using Hmcr.Model.JsonConverters;
@@ -182,6 +183,10 @@ namespace Hmcr.Api.Extensions
 
             //Jwt Bearer Handler
             services.AddScoped<HmcrJwtBearerEvents>();
+
+            //Salt Report
+            services.AddScoped<ISaltReportService, SaltReportService>();
+            services.AddScoped<ISaltReportRepository, SaltReportRepository>();
 
             services.AddSingleton<EmailBody>();
         }
