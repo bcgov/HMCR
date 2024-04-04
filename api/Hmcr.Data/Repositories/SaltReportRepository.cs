@@ -1,7 +1,5 @@
 using System.Collections.Generic;
 using Hmcr.Data.Database.Entities;
-using Hmcr.Model.Dtos.SaltReport;
-using Hmcr.Model.Utils;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Linq;
