@@ -6835,16 +6835,6 @@ namespace Hmcr.Data.Database.Entities
                     .HasColumnType("numeric(9, 0)")
                     .HasComment("Unique identifier for SERVICE AREA");
 
-                entity.Property(e => e.ContactName)
-                    .HasColumnName("CONTACT_NAME")
-                    .HasMaxLength(200)
-                    .IsUnicode(false);
-
-                entity.Property(e => e.Email)
-                    .HasColumnName("EMAIL")
-                    .HasMaxLength(100)
-                    .IsUnicode(false);
-
                 entity.Property(e => e.AppCreateTimestamp)
                     .HasColumnName("APP_CREATE_TIMESTAMP")
                     .HasColumnType("datetime")
@@ -6941,6 +6931,85 @@ namespace Hmcr.Data.Database.Entities
                 entity.Property(e => e.SaltReportId)
                     .HasColumnName("SALT_REPORT_ID")
                     .HasColumnType("numeric(9, 0)");
+
+                entity.Property(e => e.AppCreateTimestamp)
+                    .HasColumnName("APP_CREATE_TIMESTAMP")
+                    .HasColumnType("datetime")
+                    .HasComment("Date and time of record creation");
+
+                entity.Property(e => e.AppCreateUserDirectory)
+                    .IsRequired()
+                    .HasColumnName("APP_CREATE_USER_DIRECTORY")
+                    .HasMaxLength(12)
+                    .IsUnicode(false)
+                    .HasComment("Active Directory which retains source of truth for user idenifiers.");
+
+                entity.Property(e => e.AppCreateUserGuid)
+                    .HasColumnName("APP_CREATE_USER_GUID")
+                    .HasComment("Unique idenifier of user who created record");
+
+                entity.Property(e => e.AppCreateUserid)
+                    .IsRequired()
+                    .HasColumnName("APP_CREATE_USERID")
+                    .HasMaxLength(30)
+                    .IsUnicode(false)
+                    .HasComment("Unique idenifier of user who created record");
+
+                entity.Property(e => e.AppLastUpdateTimestamp)
+                    .HasColumnName("APP_LAST_UPDATE_TIMESTAMP")
+                    .HasColumnType("datetime")
+                    .HasComment("Date and time of last record update");
+
+                entity.Property(e => e.AppLastUpdateUserDirectory)
+                    .IsRequired()
+                    .HasColumnName("APP_LAST_UPDATE_USER_DIRECTORY")
+                    .HasMaxLength(12)
+                    .IsUnicode(false)
+                    .HasComment("Active Directory which retains source of truth for user idenifiers.");
+
+                entity.Property(e => e.AppLastUpdateUserGuid)
+                    .HasColumnName("APP_LAST_UPDATE_USER_GUID")
+                    .HasComment("Unique idenifier of user who last updated record");
+
+                entity.Property(e => e.AppLastUpdateUserid)
+                    .IsRequired()
+                    .HasColumnName("APP_LAST_UPDATE_USERID")
+                    .HasMaxLength(30)
+                    .IsUnicode(false)
+                    .HasComment("Unique idenifier of user who last updated record");
+
+                entity.Property(e => e.ConcurrencyControlNumber)
+                    .HasColumnName("CONCURRENCY_CONTROL_NUMBER")
+                    .HasDefaultValueSql("((1))")
+                    .HasComment("Record under edit indicator used for optomisitc record contention management.  If number differs from start of edit, then user will be prompted to that record has been updated by someone else.");
+
+                entity.Property(e => e.DbAuditCreateTimestamp)
+                    .HasColumnName("DB_AUDIT_CREATE_TIMESTAMP")
+                    .HasColumnType("datetime")
+                    .HasDefaultValueSql("(getutcdate())")
+                    .HasComment("Date and time record created in the database");
+
+                entity.Property(e => e.DbAuditCreateUserid)
+                    .IsRequired()
+                    .HasColumnName("DB_AUDIT_CREATE_USERID")
+                    .HasMaxLength(30)
+                    .IsUnicode(false)
+                    .HasDefaultValueSql("(user_name())")
+                    .HasComment("Named database user who created record");
+
+                entity.Property(e => e.DbAuditLastUpdateTimestamp)
+                    .HasColumnName("DB_AUDIT_LAST_UPDATE_TIMESTAMP")
+                    .HasColumnType("datetime")
+                    .HasDefaultValueSql("(getutcdate())")
+                    .HasComment("Date and time record was last updated in the database.");
+
+                entity.Property(e => e.DbAuditLastUpdateUserid)
+                    .IsRequired()
+                    .HasColumnName("DB_AUDIT_LAST_UPDATE_USERID")
+                    .HasMaxLength(30)
+                    .IsUnicode(false)
+                    .HasDefaultValueSql("(user_name())")
+                    .HasComment("Named database user who created record");
             });
 
             modelBuilder.Entity<HmrSaltReportAppendix>(entity => 
@@ -6958,6 +7027,85 @@ namespace Hmcr.Data.Database.Entities
                 entity.Property(e => e.SaltReportId)
                     .HasColumnName("SALT_REPORT_ID")
                     .HasColumnType("numeric(9, 0)");
+
+                entity.Property(e => e.AppCreateTimestamp)
+                    .HasColumnName("APP_CREATE_TIMESTAMP")
+                    .HasColumnType("datetime")
+                    .HasComment("Date and time of record creation");
+
+                entity.Property(e => e.AppCreateUserDirectory)
+                    .IsRequired()
+                    .HasColumnName("APP_CREATE_USER_DIRECTORY")
+                    .HasMaxLength(12)
+                    .IsUnicode(false)
+                    .HasComment("Active Directory which retains source of truth for user idenifiers.");
+
+                entity.Property(e => e.AppCreateUserGuid)
+                    .HasColumnName("APP_CREATE_USER_GUID")
+                    .HasComment("Unique idenifier of user who created record");
+
+                entity.Property(e => e.AppCreateUserid)
+                    .IsRequired()
+                    .HasColumnName("APP_CREATE_USERID")
+                    .HasMaxLength(30)
+                    .IsUnicode(false)
+                    .HasComment("Unique idenifier of user who created record");
+
+                entity.Property(e => e.AppLastUpdateTimestamp)
+                    .HasColumnName("APP_LAST_UPDATE_TIMESTAMP")
+                    .HasColumnType("datetime")
+                    .HasComment("Date and time of last record update");
+
+                entity.Property(e => e.AppLastUpdateUserDirectory)
+                    .IsRequired()
+                    .HasColumnName("APP_LAST_UPDATE_USER_DIRECTORY")
+                    .HasMaxLength(12)
+                    .IsUnicode(false)
+                    .HasComment("Active Directory which retains source of truth for user idenifiers.");
+
+                entity.Property(e => e.AppLastUpdateUserGuid)
+                    .HasColumnName("APP_LAST_UPDATE_USER_GUID")
+                    .HasComment("Unique idenifier of user who last updated record");
+
+                entity.Property(e => e.AppLastUpdateUserid)
+                    .IsRequired()
+                    .HasColumnName("APP_LAST_UPDATE_USERID")
+                    .HasMaxLength(30)
+                    .IsUnicode(false)
+                    .HasComment("Unique idenifier of user who last updated record");
+
+                entity.Property(e => e.ConcurrencyControlNumber)
+                    .HasColumnName("CONCURRENCY_CONTROL_NUMBER")
+                    .HasDefaultValueSql("((1))")
+                    .HasComment("Record under edit indicator used for optomisitc record contention management.  If number differs from start of edit, then user will be prompted to that record has been updated by someone else.");
+
+                entity.Property(e => e.DbAuditCreateTimestamp)
+                    .HasColumnName("DB_AUDIT_CREATE_TIMESTAMP")
+                    .HasColumnType("datetime")
+                    .HasDefaultValueSql("(getutcdate())")
+                    .HasComment("Date and time record created in the database");
+
+                entity.Property(e => e.DbAuditCreateUserid)
+                    .IsRequired()
+                    .HasColumnName("DB_AUDIT_CREATE_USERID")
+                    .HasMaxLength(30)
+                    .IsUnicode(false)
+                    .HasDefaultValueSql("(user_name())")
+                    .HasComment("Named database user who created record");
+
+                entity.Property(e => e.DbAuditLastUpdateTimestamp)
+                    .HasColumnName("DB_AUDIT_LAST_UPDATE_TIMESTAMP")
+                    .HasColumnType("datetime")
+                    .HasDefaultValueSql("(getutcdate())")
+                    .HasComment("Date and time record was last updated in the database.");
+
+                entity.Property(e => e.DbAuditLastUpdateUserid)
+                    .IsRequired()
+                    .HasColumnName("DB_AUDIT_LAST_UPDATE_USERID")
+                    .HasMaxLength(30)
+                    .IsUnicode(false)
+                    .HasDefaultValueSql("(user_name())")
+                    .HasComment("Named database user who created record");
             });
 
             modelBuilder.HasSequence("FDBK_MSG_ID_SEQ")
