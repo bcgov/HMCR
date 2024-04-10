@@ -1,8 +1,8 @@
 namespace Hmcr.Model.Dtos.SaltReport
 {
     public class StockpileDto {
-        public int StockPileId { get; set; }
-        public int SaltReportId { get; set; } // Foreign Key
+        public decimal StockPileId { get; set; }
+        public decimal SaltReportId { get; set; } // Foreign Key
         public string SiteName { get; set; }
         public bool? MotiOwned { get; set; }
         public TotalDto RoadSalts { get; set; }

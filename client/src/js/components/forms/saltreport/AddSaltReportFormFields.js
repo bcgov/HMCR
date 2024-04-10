@@ -10,6 +10,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Tooltip } from 'reactstrap';
 import { TooltipProvider } from '../../../contexts/TooltipContext';
 import { useTooltip } from '../../../contexts/TooltipContext';
+import { debounce } from 'lodash';
 
 const materialStorageAppendixLabel = {
   materialStorage: {
@@ -103,11 +104,35 @@ const housekeepingPracticesLabel = {
 
 const AddSaltReportFormFields = ({ setInitialValues, formValues, setValidationSchema }) => {
   const [loading, setLoading] = useState(true);
-  const { errors, isSubmitting, isValidating, submitCount } = useFormikContext();
+  const { errors, isValidating, submitCount, dirty } = useFormikContext();
 
-  const saveFormToSessionStorage = (values) => {
+  // Debounced function to save form data to sessionStorage
+  const debouncedSaveForm = debounce((values) => {
     sessionStorage.setItem('formData', JSON.stringify(values));
-  };
+  }, 3000); // Debounce time: 3 seconds
+
+  useEffect(() => {
+    setLoading(false);
+    const defaultValidationSchema = validationSchema.shape({});
+    setValidationSchema(defaultValidationSchema);
+    setInitialValues(loadFromSessionStorage());
+
+    return () => {
+      // Cleanup function
+      debouncedSaveForm.cancel(); // Cancel any pending debounced save operation
+    };
+  }, [setInitialValues, setValidationSchema]);
+
+  useEffect(() => {
+    if (!isValidating && submitCount > 0 && Object.keys(errors).length > 0) {
+      scrollToFirstError(errors);
+    }
+  }, [isValidating, submitCount, errors]);
+
+  useEffect(() => {
+    // Trigger debounced save when formValues change
+    debouncedSaveForm(formValues);
+  }, [formValues]); // Only re-run effect if formValues change
 
   const loadFromSessionStorage = () => {
     const savedFormData = sessionStorage.getItem('formData');
@@ -159,29 +184,6 @@ const AddSaltReportFormFields = ({ setInitialValues, formValues, setValidationSc
       }
     }
   };
-
-  useEffect(() => {
-    setLoading(true);
-    const defaultValidationSchema = validationSchema.shape({});
-    setValidationSchema(defaultValidationSchema);
-    setInitialValues(loadFromSessionStorage());
-    // setInitialValues(defaultValues);
-    setLoading(false);
-
-    if (isSubmitting && !isValidating && submitCount > 0) {
-      scrollToFirstError(errors);
-    }
-  }, [isSubmitting, isValidating, submitCount, errors]);
-
-  useEffect(() => {
-    // Save form data to local storage every second
-    const saveInterval = setInterval(() => {
-      saveFormToSessionStorage(formValues || defaultValues);
-    }, 3000);
-
-    // Clear the interval when the component unmounts
-    return () => clearInterval(saveInterval);
-  }, [formValues]);
 
   if (loading || formValues === null) return <PageSpinner />;
 

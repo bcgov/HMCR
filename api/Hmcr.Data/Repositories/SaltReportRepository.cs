@@ -66,7 +66,7 @@ namespace Hmcr.Data.Repositories
             // Apply service area filter if serviceAreas is not null or empty.
             if (!string.IsNullOrWhiteSpace(serviceAreas))
             {
-                var serviceAreaList = serviceAreas.Split(',').Select(area => int.Parse(area)).ToList();
+                var serviceAreaList = serviceAreas.Split(',').Select(decimal.Parse).ToList();
                 query = query.Where(report => serviceAreaList.Contains(report.ServiceArea));
             }
 

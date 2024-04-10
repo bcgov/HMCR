@@ -8,9 +8,9 @@ namespace Hmcr.Data.Database.Entities
 {
     public class HmrSaltReport
     {
-        public int SaltReportId { get; set; }
+        public decimal SaltReportId { get; set; }
 
-        public int ServiceArea { get; set; }
+        public decimal ServiceArea { get; set; }
 
         [Column("CNTCT_NAME")]
         public string ContactName { get; set; }

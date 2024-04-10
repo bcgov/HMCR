@@ -5,8 +5,8 @@ namespace Hmcr.Model.Dtos.SaltReport
 {
     public class SaltReportDto
     {
-        public int SaltReportId { get; set; }
-        public int ServiceArea { get; set; }
+        public decimal SaltReportId { get; set; }
+        public decimal ServiceArea { get; set; }
         public string ContactName { get; set; }
         public string Telephone { get; set; }
         public string Email { get; set; }

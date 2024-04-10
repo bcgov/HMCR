@@ -5,8 +5,8 @@ namespace Hmcr.Data.Database.Entities
 {
     public class HmrSaltStockpile
     {
-        public int StockPileId { get; set; } // Primary Key
-        public int SaltReportId { get; set; } // Foreign Key
+        public decimal StockPileId { get; set; } // Primary Key
+        public decimal SaltReportId { get; set; } // Foreign Key
         public HmrSaltReport SaltReport { get; set; } // Navigation property
 
         [Column("SITE_NAME")]

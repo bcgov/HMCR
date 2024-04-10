@@ -6822,7 +6822,7 @@ namespace Hmcr.Data.Database.Entities
                     .OnDelete(DeleteBehavior.Cascade);
 
                 entity.HasKey(e => e.SaltReportId)
-                    .HasName("HMR_SALT_REPORT_PK");
+                    .HasName("HMR_SLTRPT_PK");
 
                 entity.Property(e => e.SaltReportId)
                     .HasColumnName("SALT_REPORT_ID")
@@ -6915,12 +6915,12 @@ namespace Hmcr.Data.Database.Entities
                     .HasComment("Named database user who created record");
             });
 
-            modelBuilder.Entity<HmrSaltStockpile>(entity => 
+            modelBuilder.Entity<HmrSaltStockpile>(entity =>
             {
                 entity.ToTable("HMR_SALT_STOCKPILE");
 
                 entity.HasKey(e => e.StockPileId)
-                    .HasName("PK_HMR_SALT_STOCKPILE");
+                    .HasName("HMR_SLTSTP_PK");
 
                 entity.Property(e => e.StockPileId)
                     .HasColumnName("STOCKPILE_ID")
@@ -7012,17 +7012,17 @@ namespace Hmcr.Data.Database.Entities
                     .HasComment("Named database user who created record");
             });
 
-            modelBuilder.Entity<HmrSaltReportAppendix>(entity => 
+            modelBuilder.Entity<HmrSaltReportAppendix>(entity =>
             {
                 entity.ToTable("HMR_SALT_APPENDIX");
 
                 entity.HasKey(e => e.AppendixId)
-                    .HasName("PK_HMR_SALT_STOCKPILE");
+                    .HasName("HMR_SLTAPP_PK");
 
                 entity.Property(e => e.AppendixId)
                     .HasColumnName("APPENDIX_ID")
                     .HasColumnType("numeric(9, 0)")
-                    .HasDefaultValueSql("(NEXT VALUE FOR [HMR_SLT_RPT_ID_SEQ])");
+                    .HasDefaultValueSql("(NEXT VALUE FOR [HMR_SLT_APPENDIX_ID_SEQ])");
 
                 entity.Property(e => e.SaltReportId)
                     .HasColumnName("SALT_REPORT_ID")

@@ -2,8 +2,8 @@ namespace Hmcr.Model.Dtos.SaltReport
 {
     public class AppendixDto
     {
-        public int AppendixId { get; set; }
-        public int SaltReportId { get; set; } // Foreign Key
+        public decimal AppendixId { get; set; }
+        public decimal SaltReportId { get; set; } // Foreign Key
         public MaterialStorageDto MaterialStorage { get; set; }
         public SaltApplicationDto SaltApplication { get; set; }
         public SnowDisposalDto SnowDisposal { get; set; }

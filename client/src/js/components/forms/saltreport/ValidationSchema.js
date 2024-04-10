@@ -228,7 +228,6 @@ export const validationSchema = Yup.object({
       protectionMeasuresImplemented: Yup.string(),
       environmentalMonitoringConducted: Yup.string(),
       typesOfVulnerableAreas: typesOfVulnerableAreasSchema,
-      vulnerableAreas: Yup.array().of(vulnerableAreaSchema),
     })
     .nullable(true),
 });

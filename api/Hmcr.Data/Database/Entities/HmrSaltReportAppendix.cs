@@ -5,8 +5,8 @@ namespace Hmcr.Data.Database.Entities
 {
     public class HmrSaltReportAppendix
     {
-        public int AppendixId { get; set; } // Primary Key
-        public int SaltReportId { get; set; } // Foreign Key
+        public decimal AppendixId { get; set; } // Primary Key
+        public decimal SaltReportId { get; set; } // Foreign Key
         public HmrSaltReport SaltReport { get; set; } // Navigation property
 
         [Column("NEW_SALT_DOME_PAD_ID")]
