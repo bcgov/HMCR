@@ -66,7 +66,7 @@ const DataTableControl = ({
 
                   return (
                     <td key={column.key} className={column.maxWidth ? 'text-overflow-hiden' : ''} style={style}>
-                      {item[column.key]}
+                      {column.format ? column.format(item[column.key]) : item[column.key]}
                     </td>
                   );
                 })}
@@ -106,6 +106,7 @@ DataTableControl.propTypes = {
       heading: PropTypes.string.isRequired,
       key: PropTypes.string.isRequired,
       nosort: PropTypes.bool,
+      format: PropTypes.func
     })
   ).isRequired,
   editable: PropTypes.bool.isRequired,

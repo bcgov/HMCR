@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Col, FormGroup, Label, Alert, Button, Row, Table } from 'reactstrap';
+import { Col, FormGroup, Label, Alert, Button, Row } from 'reactstrap';
 import AddSaltReportFormFields from './forms/saltreport/AddSaltReportFormFields';
 import * as api from '../Api';
 import { Formik, Form } from 'formik';
@@ -13,35 +13,31 @@ import MaterialCard from './ui/MaterialCard';
 import UIHeader from './ui/UIHeader';
 import moment from 'moment';
 import { connect } from 'react-redux';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import DataTableWithPaginaionControl from './ui/DataTableWithPaginaionControl';
+import useSearchData from './hooks/useSearchData';
 
-const SaltReporting = ({ currentUser, serviceAreas }) => {
+const SaltReporting = ({ currentUser }) => {
   const [loading, setLoading] = useState(false);
-  const [reportsData, setReportsData] = useState([]);
   const [showSaltReportStatusModal, setShowSaltReportStatusModal] = useState(false);
   const [saltReportCompleteMessage, setSaltReportCompleteMessage] = useState(null);
 
-  useEffect(() => {
-    const fetchSaltReports = async () => {
-      setLoading(true);
-      const currentUserSAIds = currentUser.serviceAreas.map((sa) => sa.id).join();
-      try {
-        const response = await api.getSaltReportsJson({
-          fromDate: moment().subtract(5, 'years').format('YYYY-MM-DD HH:mm:ss'),
-          toDate: moment().format('YYYY-MM-DD HH:mm:ss'),
-          serviceAreas: currentUserSAIds,
-        });
-        setReportsData(response.data || []);
-      } catch (error) {
-        console.error('Fetching salt reports failed:', error);
-        setReportsData([]);
-      } finally {
-        setLoading(false);
-      }
-    };
+  var defaultSearchOptions = {
+    fromDate: moment().subtract(1, 'years').format('YYYY-MM-DD'),
+    toDate: moment().format('YYYY-MM-DD'),
+    serviceAreas: currentUser.serviceAreas.map((sa) => sa.id).join(','),
+    pageNumber: 1,
+    isActive: true,
+    pageSize: 5,
+    dataPath: Constants.API_PATHS.SALT_REPORT,
+  };
 
-    fetchSaltReports();
-  }, [currentUser.serviceAreas]);
+  const searchData = useSearchData(defaultSearchOptions);
+
+  useEffect(() => {
+    searchData.updateSearchOptions({
+      ...defaultSearchOptions,
+    });
+  }, []);
 
   const handleSaltReportSubmit = async (values) => {
     try {
@@ -61,6 +57,13 @@ const SaltReporting = ({ currentUser, serviceAreas }) => {
       setLoading(false);
     }
   };
+
+  const tableColumns = [
+    { heading: 'Report ID', key: 'saltReportId' },
+    { heading: 'Service Area', key: 'serviceArea' },
+    { heading: 'Contact Name', key: 'contactName' },
+    { heading: 'Date Created', key: 'appCreateTimestamp', format: (date) => moment(date).format('LLL') },
+  ];
 
   const saltReportFormModal = useFormModal(
     'Annual Salt Report',
@@ -108,44 +111,25 @@ const SaltReporting = ({ currentUser, serviceAreas }) => {
             </Form>
           </Formik>
         </MaterialCard>
-        <MaterialCard>
-          <UIHeader>Past Submissions</UIHeader>
-          <Alert color="info">
-            Download is not available as we're currently working on making the forms you've submitted downloadable as PDF.
-          </Alert>
-          {loading ? (
-            <PageSpinner />
-          ) : reportsData.length > 0 ? (
-            <Table responsive>
-              <thead>
-                <tr>
-                  <th>Report ID</th>
-                  <th>Service Area</th>
-                  <th>Contact Name</th>
-                  <th>Date Created</th>
-                  <th></th>
-                </tr>
-              </thead>
-              <tbody>
-                {reportsData.map((item, index) => (
-                  <tr key={index}>
-                    <td>{item.SaltReportId}</td>
-                    <td>{item.ServiceArea}</td>
-                    <td>{item.ContactName}</td>
-                    <td>{moment(item.AppCreateTimestamp).format('LL')}</td>
-                    <td>
-                      <Button disabled size="sm" color="primary" className="mr-2" title="Download as PDF">
-                        <FontAwesomeIcon icon="download" />
-                      </Button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </Table>
-          ) : (
-            <Alert color="warning">No reports found.</Alert>
-          )}
-        </MaterialCard>
+        {searchData.loading && <PageSpinner />}
+        {!searchData.loading && (
+          <MaterialCard>
+            <UIHeader>Past Submissions</UIHeader>
+            {searchData.data.length > 0 ? (
+              <DataTableWithPaginaionControl
+                dataList={searchData.data}
+                tableColumns={tableColumns}
+                searchPagination={searchData.pagination}
+                onPageNumberChange={searchData.handleChangePage}
+                onPageSizeChange={searchData.handleChangePageSize}
+                editable={false}
+                onHeadingSortClicked={searchData.handleHeadingSortClicked}
+              />
+            ) : (
+              <Alert color="warning">No reports found.</Alert>
+            )}
+          </MaterialCard>
+        )}
       </Authorize>
       {saltReportFormModal.formElement}
       <SimpleModalWrapper

@@ -183,7 +183,7 @@ namespace Hmcr.Data.Mappings
                 .ForMember(dest => dest.WatercourseSites, opt => opt.MapFrom(src => src.Sect4.Practices.Watercourse.NumSites))
                 .ForMember(dest => dest.OtherDischargePointPlan, opt => opt.MapFrom(src => src.Sect4.Practices.OtherDischargePoint.HasPlan))
                 .ForMember(dest => dest.OtherDischargePointSites, opt => opt.MapFrom(src => src.Sect4.Practices.OtherDischargePoint.NumSites))
-                .ForMember(dest => dest.Stockpiles, opt => opt.MapFrom(src => src.Sect4.Stockpiles))
+                .ForMember(dest => dest.Stockpiles, opt => opt.Ignore())
                 // Section 5
                 .ForMember(dest => dest.NumberOfVehicles, opt => opt.MapFrom(src => src.Sect5.NumberOfVehicles))
                 .ForMember(dest => dest.VehiclesForSaltApplication, opt => opt.MapFrom(src => src.Sect5.VehiclesForSaltApplication))
@@ -233,7 +233,7 @@ namespace Hmcr.Data.Mappings
                 .ForMember(dest => dest.ValuedLandsAreasIdentified, opt => opt.MapFrom(src => src.Sect7.TypesOfVulnerableAreas.ValuedLands.AreasIdentified))
                 .ForMember(dest => dest.ValuedLandsAreasWithProtection, opt => opt.MapFrom(src => src.Sect7.TypesOfVulnerableAreas.ValuedLands.AreasWithProtection))
                 .ForMember(dest => dest.ValuedLandsAreasWithChloride, opt => opt.MapFrom(src => src.Sect7.TypesOfVulnerableAreas.ValuedLands.AreasWithChloride))
-                .ForMember(dest => dest.Appendix, opt => opt.MapFrom(src => src.Appendix))
+                .ForMember(dest => dest.Appendix, opt => opt.Ignore())
                 .ForMember(dest => dest.AppCreateTimestamp, opt => opt.MapFrom(src => src.AppCreateTimestamp))
                 .ReverseMap();
 
