@@ -8,48 +8,58 @@ using Hmcr.Api.Authorization;
 using Hmcr.Model;
 using System.Linq;
 using System.Text.Json;
+using Microsoft.Extensions.Logging;
+using System.Data.Common;
+using System.Collections.Generic;
 
 namespace Hmcr.Api.Controllers
 {
     [ApiVersion("1.0")]
     [Route("api/saltreports")]
-    [ApiController]
     public class SaltReportController : HmcrControllerBase
     {
         private readonly ISaltReportService _saltReportService;
         private HmcrCurrentUser _currentUser;
+        private readonly ILogger<SaltReportController> _logger;
 
-        public SaltReportController(ISaltReportService saltReportService, ISubmissionObjectService submissionService, HmcrCurrentUser currentUser, IEmailService emailService)
+        public SaltReportController(ISaltReportService saltReportService, ILogger<SaltReportController> logger, ISubmissionObjectService submissionService, HmcrCurrentUser currentUser, IEmailService emailService)
         {
             _saltReportService = saltReportService ?? throw new ArgumentNullException(nameof(saltReportService));
-            _currentUser = currentUser  ?? throw new ArgumentNullException(nameof(currentUser));
+            _currentUser = currentUser ?? throw new ArgumentNullException(nameof(currentUser));
+            _logger = logger;
         }
 
         [HttpPost]
         [RequiresPermission(Permissions.FileUploadWrite)]
         public async Task<IActionResult> CreateSaltReportAsync([FromBody] SaltReportDto saltReport)
         {
+            _logger.LogInformation("Starting to create salt report");
             if (saltReport == null)
             {
+                _logger.LogWarning("Received salt report data is null");
                 return BadRequest("Received salt report data is null");
             }
 
             var problem = IsServiceAreaAuthorized(_currentUser, saltReport.ServiceArea);
             if (problem != null)
             {
+                _logger.LogWarning($"Service area not authorized: {problem}");
                 return Unauthorized(problem);
             }
 
             try
             {
                 var createdReport = await _saltReportService.CreateReportAsync(saltReport);
+                _logger.LogInformation($"Salt report created with ID: {createdReport.SaltReportId}");
                 return CreatedAtRoute(nameof(GetSaltReportAsync), new { id = createdReport.SaltReportId }, saltReport);
             }
             catch (Exception ex)
             {
-                return StatusCode(500, $"An error occured: {ex.Message}");
+                _logger.LogError(ex, "Unhandled exception in creating salt report");
+                return StatusCode(500, "An internal error occurred. Please try again later.");
             }
         }
+
 
         [HttpGet("{id}", Name = "GetSaltReportAsync")]
         public async Task<ActionResult<SaltReportDto>> GetSaltReportAsync(int id)
@@ -65,17 +75,22 @@ namespace Hmcr.Api.Controllers
         }
 
         [HttpGet(Name = "GetSaltReportsAsync")]
-        public async Task<IActionResult> GetSaltReportsAsync([FromQuery] string serviceAreas, [FromQuery] string format, [FromQuery] DateTime fromDate, [FromQuery] DateTime toDate, [FromQuery] string typeName)
+        public async Task<IActionResult> GetSaltReportsAsync([FromQuery] string serviceAreas, [FromQuery] string format, [FromQuery] DateTime fromDate, [FromQuery] DateTime toDate, int pageSize, int pageNumber)
         {
             try
             {
-                format = format?.ToLower() ?? "json";
+                if (string.IsNullOrWhiteSpace(serviceAreas))
+                {
+                    return BadRequest("Service areas cannot be null or empty.");
+                }
+                _logger.LogInformation($"Obtaining Reports for Service area: {serviceAreas}");
+                format = (format ?? "json").ToLower();
 
                 // Decide the output format based on the 'format' parameter
-                switch (format.ToLower())
+                switch (format)
                 {
                     case "csv":
-                        var saltReportEntities = await _saltReportService.GetSaltReportEntitiesAsync(serviceAreas, fromDate, toDate, typeName);
+                        var saltReportEntities = await _saltReportService.GetSaltReportEntitiesAsync(serviceAreas, fromDate, toDate).ConfigureAwait(false);
 
                         if (!saltReportEntities.Any())
                         {
@@ -91,14 +106,36 @@ namespace Hmcr.Api.Controllers
 
                     case "json":
                     default:
-                        var saltReportDtos = await _saltReportService.GetSaltReportDtosAsync(serviceAreas, fromDate, toDate, typeName);
-                        var json = JsonSerializer.Serialize(saltReportDtos);
-                        return Content(json, "application/json; charset=utf-8");
+                        try
+                        {
+                            var reports = await _saltReportService.GetSaltReportDtosAsync(serviceAreas, fromDate, toDate, pageSize, pageNumber);
+                            return Ok(reports);
+                        }
+                        catch (ArgumentException ex)
+                        {
+                            return BadRequest(ex.Message);
+                        }
+                        catch (Exception ex)
+                        {
+                            // Log the exception details here to diagnose issues.
+                            return StatusCode(500, "An internal server error occurred.");
+                        }
                 }
+            }
+            catch (ArgumentException ex)
+            {
+                _logger.LogError(ex, "Invalid argument.");
+                return BadRequest(ex.Message); // Return 400 Bad Request with error message
+            }
+            catch (DbException ex)
+            {
+                _logger.LogError(ex, "Database exception occurred.");
+                return StatusCode(500, "An error occurred while processing your request.");
             }
             catch (Exception ex)
             {
-                return StatusCode(500, "An error occurred while generating the report.");
+                _logger.LogError(ex, "An error occurred while processing the request.");
+                return StatusCode(500, "An error occurred while processing your request.");
             }
         }
 

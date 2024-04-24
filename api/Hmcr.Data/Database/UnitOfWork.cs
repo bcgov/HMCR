@@ -6,6 +6,7 @@ namespace Hmcr.Data.Database
     public interface IUnitOfWork
     {
         bool Commit();
+        Task<bool> CommitAsync();
     }
 
     public class UnitOfWork : IUnitOfWork
@@ -20,6 +21,11 @@ namespace Hmcr.Data.Database
         public bool Commit()
         {
             return _dbContext.SaveChanges() >= 0;
+        }
+
+        public async Task<bool> CommitAsync()
+        {
+            return await _dbContext.SaveChangesAsync() >= 0;
         }
     }
 }

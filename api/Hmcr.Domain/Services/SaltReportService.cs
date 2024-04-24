@@ -10,8 +10,11 @@ using CsvHelper;
 using System.Globalization;
 using Hmcr.Domain.CsvHelpers;
 using System;
-using Hmcr.Model;
-using System.Diagnostics;
+using Microsoft.Extensions.Logging;
+using System.Data.Common;
+using Hmcr.Data.Database;
+using Hmcr.Model.Dtos;
+using Microsoft.EntityFrameworkCore;
 
 namespace Hmcr.Domain.Services
 {
@@ -20,8 +23,8 @@ namespace Hmcr.Domain.Services
         Task<HmrSaltReport> CreateReportAsync(SaltReportDto dto);
         Task<IEnumerable<SaltReportDto>> GetAllSaltReportDtosAsync();
         Task<SaltReportDto> GetSaltReportByIdAsync(int saltReportId);
-        Task<IEnumerable<HmrSaltReport>> GetSaltReportEntitiesAsync(string serviceAreas, DateTime fromDate, DateTime toDate, string cql_filter);
-        Task<IEnumerable<SaltReportDto>> GetSaltReportDtosAsync(string serviceAreas, DateTime fromDate, DateTime toDate, string cql_filter);
+        Task<IEnumerable<HmrSaltReport>> GetSaltReportEntitiesAsync(string serviceAreas, DateTime fromDate, DateTime toDate);
+        Task<PagedDto<SaltReportDto>> GetSaltReportDtosAsync(string serviceAreas, DateTime? fromDate, DateTime? toDate, int pageSize, int pageNumber);
         Stream ConvertToCsvStream(IEnumerable<HmrSaltReport> saltReportEntities);
     }
 
@@ -29,29 +32,107 @@ namespace Hmcr.Domain.Services
     {
         private readonly ISaltReportRepository _repository;
         private readonly IMapper _mapper;
+        private readonly ILogger<SaltReportService> _logger;
+        private readonly IUnitOfWork _unitOfWork;
+        private readonly AppDbContext _context;
 
-        public SaltReportService(ISaltReportRepository repository, IMapper mapper)
+        public SaltReportService(AppDbContext context, ISaltReportRepository repository, IMapper mapper, ILogger<SaltReportService> logger, IUnitOfWork unitOfWork)
         {
             _repository = repository ?? throw new ArgumentNullException(nameof(repository));
             _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
+            _context = context;
         }
 
         public async Task<HmrSaltReport> CreateReportAsync(SaltReportDto dto)
         {
-            // TODO: DTO VALIDATION
-            // CODE HERE...
-            // ValidateDto(dto)
+            using (var transaction = _context.Database.BeginTransaction())
+            {
+                try
+                {
+                    _logger.LogInformation("Mapping main report");
+                    var saltReport = MapToEntity(dto);  // Only map the main report here
 
-            var saltReport = MapToEntity(dto);
+                    _logger.LogInformation("Adding main report entity to repository");
+                    _context.ChangeTracker.AutoDetectChangesEnabled = false;
+                    _context.HmrSaltReports.Add(saltReport);
+                    _context.ChangeTracker.AutoDetectChangesEnabled = true;
 
-            // TODO: ADD ADDITIONAL BUSINESS LOGIC
-            // CODE HERE...
-            // ProcessBusinessRules(saltReport)
+                    // Assuming saltReport.Stockpiles and saltReport.Appendix are populated
+                    // Detach the nested entities so they aren't tracked or saved by EF
+                    if (saltReport.Stockpiles != null)
+                    {
+                        foreach (var stockpile in saltReport.Stockpiles)
+                        {
+                            _context.Entry(stockpile).State = EntityState.Detached;
+                        }
+                    }
 
-            return await _repository.AddReportAsync(saltReport);
+                    if (saltReport.Appendix != null)
+                    {
+                        _context.Entry(saltReport.Appendix).State = EntityState.Detached;
+                    }
+                    _unitOfWork.Commit();
+
+                    _logger.LogInformation("Handling dependent entities");
+
+                    if (dto.Sect4.Stockpiles != null && dto.Sect4.Stockpiles.Any())
+                    {
+                        _logger.LogInformation("Mapping stockpiles");
+                        var stockpiles = MapToStockpiles(dto.Sect4.Stockpiles);  // Map stockpiles using AutoMapper
+                        foreach (var stockpile in stockpiles)
+                        {
+                            stockpile.SaltReportId = saltReport.SaltReportId;  // Set the foreign key
+                        }
+                        _logger.LogInformation("Adding stockpiles to repository");
+                        await _context.HmrSaltStockpiles.AddRangeAsync(stockpiles);
+                        _unitOfWork.Commit();  // Commit stockpiles
+                    }
+
+                    if (dto.Appendix != null)
+                    {
+                        _logger.LogInformation("Mapping and adding appendix");
+                        var appendix = MapToAppendix(dto.Appendix, saltReport.SaltReportId);  // Use the updated mapping method
+                        await _context.HmrSaltReportAppendixes.AddAsync(appendix);
+                        _unitOfWork.Commit();  // Commit appendix
+                    }
+
+                    transaction.Commit();
+                    return saltReport;
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Error in creating salt report, rolling back transaction");
+                    await transaction.RollbackAsync();
+                    throw;
+                }
+            }
         }
 
+
         private HmrSaltReport MapToEntity(SaltReportDto dto) => _mapper.Map<HmrSaltReport>(dto);
+        private HmrSaltReportAppendix MapToAppendix(AppendixDto dto, decimal saltReportId)
+        {
+            // Use AutoMapper to map from the DTO to the entity
+            var appendix = _mapper.Map<HmrSaltReportAppendix>(dto);
+
+            // Manually set the SaltReportId to link the appendix to the report
+            appendix.SaltReportId = saltReportId;
+
+            return appendix;
+        }
+
+        public List<HmrSaltStockpile> MapToStockpiles(List<StockpileDto> stockpileDtos)
+        {
+            // Ensure the list is not null before attempting to map
+            if (stockpileDtos == null) throw new ArgumentNullException(nameof(stockpileDtos));
+
+            // Use AutoMapper to map the list of DTOs to the list of entities
+            var stockpiles = _mapper.Map<List<HmrSaltStockpile>>(stockpileDtos);
+            return stockpiles;
+        }
+
 
         public void ValidateDto(SaltReportDto dto)
         {
@@ -63,23 +144,74 @@ namespace Hmcr.Domain.Services
             // Business Logic
         }
 
+        public class RepositoryException : Exception
+        {
+            public RepositoryException() { }
+
+            public RepositoryException(string message) : base(message) { }
+
+            public RepositoryException(string message, Exception innerException) : base(message, innerException) { }
+        }
+
         public async Task<IEnumerable<SaltReportDto>> GetAllSaltReportDtosAsync()
         {
-            var saltReportEntities = await _repository.GetAllReportsAsync();
+            try
+            {
+                var saltReportEntities = await _repository.GetAllReportsAsync();
+                _logger.LogInformation($"saltReportEntities.Count, {saltReportEntities.Count()} entities");
 
-            return _mapper.Map<IEnumerable<SaltReportDto>>(saltReportEntities);
+                return _mapper.Map<IEnumerable<SaltReportDto>>(saltReportEntities);
+            }
+            catch (ArgumentException ex)
+            {
+                _logger.LogError(ex, "Invalid argument in GetReportsAsync.");
+                throw;
+            }
+            catch (DbException ex)
+            {
+                _logger.LogError(ex, "Database exception occurred in GetReportsAsync.");
+                throw new RepositoryException("An error occurred while retrieving reports.", ex);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Exception occurred in GetReportsAsync.");
+                throw; // Re-throw exception to propagate it up the call stack
+            }
+
         }
 
-        public async Task<IEnumerable<SaltReportDto>> GetSaltReportDtosAsync(string serviceAreas, DateTime fromDate, DateTime toDate, string cql_filter)
+        public async Task<PagedDto<SaltReportDto>> GetSaltReportDtosAsync(string serviceAreas, DateTime? fromDate, DateTime? toDate, int pageSize, int pageNumber)
         {
-            var saltReportEntities = await _repository.GetReportsAsync(serviceAreas, fromDate, toDate, cql_filter);
-            return _mapper.Map<IEnumerable<SaltReportDto>>(saltReportEntities);
+            try
+            {
+                var saltReports = await _repository.GetPagedReportsAsync(serviceAreas, fromDate, toDate, pageSize, pageNumber).ConfigureAwait(false);
+                _logger.LogWarning("Salt report dtos received.");
 
+                return saltReports;
+            }
+            catch (ArgumentException ex)
+            {
+                _logger.LogError(ex, "Invalid argument in GetReportsAsync.");
+                throw;
+            }
+            catch (DbException ex)
+            {
+                _logger.LogError(ex, "Database exception occurred in GetReportsAsync.");
+                throw new RepositoryException("An error occurred while retrieving reports.", ex);
+            }
+            catch (Exception ex)
+            {
+                // Log the exception
+                _logger.LogError(ex, "An error occurred while getting salt report DTOs.");
+                // Return an empty enumerable or handle the error in another way
+                throw;
+            }
         }
 
-        public async Task<IEnumerable<HmrSaltReport>> GetSaltReportEntitiesAsync(string serviceAreas, DateTime fromDate, DateTime toDate, string cql_filter)
+
+        public async Task<IEnumerable<HmrSaltReport>> GetSaltReportEntitiesAsync(string serviceAreas, DateTime fromDate, DateTime toDate)
         {
-            return await _repository.GetReportsAsync(serviceAreas, fromDate, toDate, cql_filter);
+            return await _repository.GetReportsAsync(serviceAreas, fromDate, toDate);
         }
 
         public async Task<SaltReportDto> GetSaltReportByIdAsync(int saltReportId)
