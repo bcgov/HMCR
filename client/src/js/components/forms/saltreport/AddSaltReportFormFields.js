@@ -682,7 +682,11 @@ const AddSaltReportFormFields = ({ setInitialValues, formValues, setValidationSc
                                 <FormInput name={`sect4.stockpiles.${index}.siteName`} />
                               </td>
                               <td>
-                                <FormCheckboxInput type="checkbox" name={`sect4.stockpiles.${index}.motiOwned`} />
+                                <Field
+                                  name={`sect4.stockpiles.${index}.motiOwned`}
+                                  type="checkbox"
+                                  className="form-control"
+                                />
                               </td>
                               <td>
                                 <FormNumberInput
@@ -731,7 +735,7 @@ const AddSaltReportFormFields = ({ setInitialValues, formValues, setValidationSc
                               </td>
                               <td>
                                 <Button type="button" onClick={() => remove(index)}>
-                                  -
+                                  Remove row
                                 </Button>
                               </td>
                             </tr>
@@ -1269,10 +1273,10 @@ const AddSaltReportFormFields = ({ setInitialValues, formValues, setValidationSc
                         <th>Hwy #</th>
                         <th>Latitude</th>
                         <th>Longitude</th>
-                        <th>Feature</th>
+                        <th>Feature (ie: lake, stream)</th>
                         <th>Type</th>
-                        <th>Protection Measures</th>
-                        <th>Environmental Monitoring in Place?</th>
+                        <th>Type of Protection Measures (refer to Salt Management Plan)</th>
+                        <th>Is Environmental monitoring in place? (Tick for Yes)</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -1303,14 +1307,15 @@ const AddSaltReportFormFields = ({ setInitialValues, formValues, setValidationSc
                             <FormInput name={`sect7.vulnerableAreas.${index}.protectioneasures`} type="text" />
                           </td>
                           <td>
-                            <FormCheckboxInput
+                            <Field
                               name={`sect7.vulnerableAreas.${index}.monitoringInPlace`}
                               type="checkbox"
+                              className="form-control"
                             />
                           </td>
                           <td>
                             <Button type="button" onClick={() => remove(index)}>
-                              -
+                              Remove row
                             </Button>
                           </td>
                         </tr>
