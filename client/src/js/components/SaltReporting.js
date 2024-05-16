@@ -1,20 +1,20 @@
 import React, { useState, useEffect } from 'react';
-import { Col, FormGroup, Label, Alert, Button, Row } from 'reactstrap';
-import AddSaltReportFormFields from './forms/saltreport/AddSaltReportFormFields';
-import * as api from '../Api';
+import { connect } from 'react-redux';
 import { Formik, Form } from 'formik';
+import moment from 'moment';
+import * as api from '../Api';
 import * as Constants from '../Constants';
-import useFormModal from './hooks/useFormModal';
 import { showValidationErrorDialog } from '../actions';
-import SimpleModalWrapper from './ui/SimpleModalWrapper';
+import useFormModal from './hooks/useFormModal';
+import useSearchData from './hooks/useSearchData';
 import PageSpinner from './ui/PageSpinner';
-import Authorize from './fragments/Authorize';
+import SimpleModalWrapper from './ui/SimpleModalWrapper';
 import MaterialCard from './ui/MaterialCard';
 import UIHeader from './ui/UIHeader';
-import moment from 'moment';
-import { connect } from 'react-redux';
 import DataTableWithPaginaionControl from './ui/DataTableWithPaginaionControl';
-import useSearchData from './hooks/useSearchData';
+import Authorize from './fragments/Authorize';
+import AddSaltReportFormFields from './forms/saltreport/AddSaltReportFormFields';
+import { Col, FormGroup, Label, Alert, Button, Row } from 'reactstrap';
 
 const SaltReporting = ({ currentUser }) => {
   const [loading, setLoading] = useState(false);

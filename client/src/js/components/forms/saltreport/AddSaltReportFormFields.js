@@ -1,16 +1,16 @@
 import React, { useEffect, useState } from 'react';
-import PageSpinner from '../../ui/PageSpinner';
-import { FormRow, FormInput, FormCheckboxInput, FormRadioInput, FormNumberInput } from '../FormInputs';
-import { Row, Col, FormGroup, Input, Table, Button } from 'reactstrap';
+import { connect } from 'react-redux';
+import { debounce } from 'lodash';
+import _ from 'lodash';
 import { Field, FieldArray, useFormikContext } from 'formik';
 import { validationSchema } from './ValidationSchema';
-import { defaultValues } from './DefaultValues';
-import { tooltips } from './DefaultValues';
+import { defaultValues, tooltips } from './DefaultValues';
+import PageSpinner from '../../ui/PageSpinner';
+import SingleDropdownField from '../../ui/SingleDropdownField';
+import { TooltipProvider, useTooltip } from '../../../contexts/TooltipContext';
+import { FormRow, FormInput, FormCheckboxInput, FormRadioInput, FormNumberInput } from '../FormInputs';
+import { Row, Col, FormGroup, Table, Button, Tooltip } from 'reactstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { Tooltip } from 'reactstrap';
-import { TooltipProvider } from '../../../contexts/TooltipContext';
-import { useTooltip } from '../../../contexts/TooltipContext';
-import { debounce } from 'lodash';
 
 const materialStorageAppendixLabel = {
   materialStorage: {
@@ -102,14 +102,13 @@ const housekeepingPracticesLabel = {
   riskManagementPlan: 'Risk management and emergency measures plans are in place',
 };
 
-const AddSaltReportFormFields = ({ setInitialValues, formValues, setValidationSchema }) => {
+const AddSaltReportFormFields = ({ setInitialValues, formValues, setValidationSchema, currentUser }) => {
   const [loading, setLoading] = useState(true);
-  const { errors, isValidating, submitCount, dirty } = useFormikContext();
+  const { errors, submitCount, isSubmitting } = useFormikContext();
 
-  // Debounced function to save form data to sessionStorage
   const debouncedSaveForm = debounce((values) => {
     sessionStorage.setItem('formData', JSON.stringify(values));
-  }, 3000); // Debounce time: 3 seconds
+  }, 3000);
 
   useEffect(() => {
     setLoading(false);
@@ -118,21 +117,19 @@ const AddSaltReportFormFields = ({ setInitialValues, formValues, setValidationSc
     setInitialValues(loadFromSessionStorage());
 
     return () => {
-      // Cleanup function
-      debouncedSaveForm.cancel(); // Cancel any pending debounced save operation
+      debouncedSaveForm.cancel();
     };
   }, [setInitialValues, setValidationSchema]);
 
   useEffect(() => {
-    if (!isValidating && submitCount > 0 && Object.keys(errors).length > 0) {
+    if (isSubmitting && submitCount > 0 && Object.keys(errors).length > 0) {
       scrollToFirstError(errors);
     }
-  }, [isValidating, submitCount, errors]);
+  }, [isSubmitting, submitCount, errors]);
 
   useEffect(() => {
-    // Trigger debounced save when formValues change
     debouncedSaveForm(formValues);
-  }, [formValues]); // Only re-run effect if formValues change
+  }, [formValues]);
 
   const loadFromSessionStorage = () => {
     const savedFormData = sessionStorage.getItem('formData');
@@ -168,17 +165,15 @@ const AddSaltReportFormFields = ({ setInitialValues, formValues, setValidationSc
         const error = errors[key];
 
         if (typeof error === 'string') {
-          // This is a leaf node (string error message), so scroll to it
           const selector = `[name="${prefix + key}"]`;
 
           const errorField = document.querySelector(selector);
           if (errorField) {
             errorField.scrollIntoView({ behavior: 'smooth', block: 'center' });
             errorField.focus();
-            return; // Stop after scrolling to the first error
+            return;
           }
         } else if (typeof error === 'object') {
-          // This is a nested object, so recurse
           scrollToFirstError(error, `${prefix + key}.`);
         }
       }
@@ -192,7 +187,11 @@ const AddSaltReportFormFields = ({ setInitialValues, formValues, setValidationSc
       <Row>
         <Col>
           <FormRow name="serviceArea" label="Service Area">
-            <FormNumberInput name="serviceArea" label="Service Area" />
+            <SingleDropdownField
+              items={_.orderBy(currentUser.serviceAreas, ['id'])}
+              defaultTitle="Select Service Area"
+              name="serviceArea"
+            />
           </FormRow>
         </Col>
         <Col>
@@ -1471,4 +1470,10 @@ const AddSaltReportFormFields = ({ setInitialValues, formValues, setValidationSc
   );
 };
 
-export default AddSaltReportFormFields;
+const mapStateToProps = (state) => {
+  return {
+    currentUser: state.user.current,
+  };
+};
+
+export default connect(mapStateToProps)(AddSaltReportFormFields);
