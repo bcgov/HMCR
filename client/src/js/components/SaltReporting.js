@@ -20,6 +20,7 @@ const SaltReporting = ({ currentUser }) => {
   const [loading, setLoading] = useState(false);
   const [showSaltReportStatusModal, setShowSaltReportStatusModal] = useState(false);
   const [saltReportCompleteMessage, setSaltReportCompleteMessage] = useState(null);
+  const [saltReportSuccess, setSaltReportSuccess] = useState(false);
 
   var defaultSearchOptions = {
     fromDate: moment().subtract(1, 'years').format('YYYY-MM-DD'),
@@ -48,11 +49,15 @@ const SaltReporting = ({ currentUser }) => {
       const stagingTableName = 'HMR_SALT_REPORT';
       const apiPath = Constants.REPORT_TYPES[stagingTableName].api;
       const response = await api.instance.post(apiPath, values);
+      setLoading(false);
 
       setSaltReportCompleteMessage(`Report successfully created. Details: ${response.status} ${response.statusText}.`);
+      setSaltReportSuccess(true);
     } catch (error) {
-      console.error('Submitting salt report failed:', error);
-      showValidationErrorDialog(error.response?.data || 'An unexpected error occurred');
+      setLoading(false);
+      console.error(error);
+      setSaltReportCompleteMessage(`Report submission failed.  ${error.response?.data.error}`);
+      setSaltReportSuccess(false);
     } finally {
       setLoading(false);
     }
@@ -139,10 +144,15 @@ const SaltReporting = ({ currentUser }) => {
         title="Report Submission"
         disableClose={loading}
       >
-        {saltReportCompleteMessage ? (
+        {!loading && saltReportCompleteMessage ? (
           <Alert color="info">
-            {saltReportCompleteMessage} Provide a copy of current Salt Management Plan following form submission to:{' '}
-            <a href="mailto: Maintenance.Programs@gov.bc.ca">Maintenance.Programs@gov.bc.ca</a>
+            {saltReportCompleteMessage}
+            {saltReportSuccess && (
+              <>
+                Provide a copy of current Salt Management Plan following form submission to:{' '}
+                <a href="mailto:Maintenance.Programs@gov.bc.ca">Maintenance.Programs@gov.bc.ca</a>
+              </>
+            )}
           </Alert>
         ) : (
           <PageSpinner />

@@ -4,6 +4,7 @@ import * as Yup from 'yup';
 const decimalWithPrecision = (precision) => {
   return Yup.number()
     .nullable(true)
+    .max(99999999.99, 'Value must be less than or equal to 99,999,999.99')
     .test(
       'is-decimal',
       `Invalid format: number must have no more than ${precision} decimal places and be non-negative`,

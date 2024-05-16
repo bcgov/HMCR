@@ -49,8 +49,22 @@ namespace Hmcr.Api.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, "An internal error occurred. Please try again later.");
+                // Get the inner exception message if it exists
+                var innerExceptionMessage = ex.InnerException?.Message ?? "Please contact an administrator to resolve this issue.";
+
+                Console.Error.WriteLine($"Exception: {ex.Message}");
+                if (ex.InnerException != null)
+                {
+                    Console.Error.WriteLine($"Inner Exception: {innerExceptionMessage}");
+                }
+
+                return StatusCode(500, new
+                {
+                    message = "An internal error occurred. Please try again later.",
+                    error = $"500 Internal Server Error: {innerExceptionMessage}"
+                });
             }
+
         }
 
 
