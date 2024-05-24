@@ -1263,7 +1263,7 @@ const AddSaltReportFormFields = ({ setInitialValues, formValues, setValidationSc
         </Row>
         <Row className="my-2">
           <Col>
-            <h4>Types of Vulnerable Areas</h4>
+            <h4>List the Vulnerable Areas</h4>
             <FieldArray name="sect7.vulnerableAreas">
               {({ insert, remove }) => (
                 <>
@@ -1277,13 +1277,14 @@ const AddSaltReportFormFields = ({ setInitialValues, formValues, setValidationSc
                         <th>Type</th>
                         <th>Type of Protection Measures (refer to Salt Management Plan)</th>
                         <th>Is Environmental monitoring in place? (Tick for Yes)</th>
+                        <th>Comments</th>
                       </tr>
                     </thead>
                     <tbody>
                       {formValues.sect7.vulnerableAreas.map((area, index) => (
                         <tr key={index}>
                           <td>
-                            <FormInput name={`sect7.vulnerableAreas.${index}.highway`} type="text" />
+                            <FormInput name={`sect7.vulnerableAreas.${index}.highwayNumber`} type="text" />
                           </td>
                           <td>
                             <FormInput name={`sect7.vulnerableAreas.${index}.latitude`} type="text" />
@@ -1308,10 +1309,13 @@ const AddSaltReportFormFields = ({ setInitialValues, formValues, setValidationSc
                           </td>
                           <td>
                             <Field
-                              name={`sect7.vulnerableAreas.${index}.monitoringInPlace`}
+                              name={`sect7.vulnerableAreas.${index}.environmentalMonitoring`}
                               type="checkbox"
                               className="form-control"
                             />
+                          </td>
+                          <td>
+                            <FormInput name={`sect7.vulnerableAreas.${index}.comments`} type="text" />
                           </td>
                           <td>
                             <Button type="button" onClick={() => remove(index)}>

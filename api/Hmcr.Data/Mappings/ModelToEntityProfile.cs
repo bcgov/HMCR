@@ -234,6 +234,7 @@ namespace Hmcr.Data.Mappings
                 .ForMember(dest => dest.ValuedLandsAreasWithProtection, opt => opt.MapFrom(src => src.Sect7.TypesOfVulnerableAreas.ValuedLands.AreasWithProtection))
                 .ForMember(dest => dest.ValuedLandsAreasWithChloride, opt => opt.MapFrom(src => src.Sect7.TypesOfVulnerableAreas.ValuedLands.AreasWithChloride))
                 .ForMember(dest => dest.Appendix, opt => opt.Ignore())
+                .ForMember(dest => dest.VulnerableAreas, opt => opt.Ignore())
                 .ForMember(dest => dest.AppCreateTimestamp, opt => opt.MapFrom(src => src.AppCreateTimestamp))
                 .ReverseMap();
 
@@ -345,6 +346,18 @@ namespace Hmcr.Data.Mappings
                 .ForMember(dest => dest.ConductEnvironmentalMonitoringAchieved, opt => opt.MapFrom(src => src.VulnerableAreas.ConductEnvironmentalMonitoring.Achieved))
                 .ForMember(dest => dest.OtherVulnerableAreasIdentified, opt => opt.MapFrom(src => src.VulnerableAreas.OtherVulnerableAreas.Identified))
                 .ForMember(dest => dest.OtherVulnerableAreasAchieved, opt => opt.MapFrom(src => src.VulnerableAreas.OtherVulnerableAreas.Achieved))
+                .ReverseMap();
+
+            CreateMap<VulnareaDto, HmrSaltVulnArea>()
+                .ForMember(dest => dest.VulnerableAreaId, opt => opt.MapFrom(src => src.VulnerableAreaId))
+                .ForMember(dest => dest.HighwayNumber, opt => opt.MapFrom(src => src.HighwayNumber))
+                .ForMember(dest => dest.Latitude, opt => opt.MapFrom(src => src.Latitude))
+                .ForMember(dest => dest.Longitude, opt => opt.MapFrom(src => src.Longitude))
+                .ForMember(dest => dest.Feature, opt => opt.MapFrom(src => src.Feature))
+                .ForMember(dest => dest.Type, opt => opt.MapFrom(src => src.Type))
+                .ForMember(dest => dest.ProtectionMeasures, opt => opt.MapFrom(src => src.ProtectionMeasures))
+                .ForMember(dest => dest.EnvironmentalMonitoring, opt => opt.MapFrom(src => src.EnvironmentalMonitoring))
+                .ForMember(dest => dest.Comments, opt => opt.MapFrom(src => src.Comments))
                 .ReverseMap();
         }
     }

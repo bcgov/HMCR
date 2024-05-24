@@ -391,6 +391,7 @@ namespace Hmcr.Data.Database.Entities
         [Column("VAL_LANDS_CHLOR_ID")]
         public int? ValuedLandsAreasWithChloride { get; set; }
 
+        public ICollection<HmrSaltVulnArea> VulnerableAreas { get; set; }
 
         // Appendix
         public HmrSaltReportAppendix Appendix { get; set; }

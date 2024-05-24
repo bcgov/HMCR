@@ -145,7 +145,7 @@ const SaltReporting = ({ currentUser }) => {
         disableClose={loading}
       >
         {!loading && saltReportCompleteMessage ? (
-          <Alert color="info">
+          <Alert color={saltReportSuccess ? 'success' : 'danger'}>
             {saltReportCompleteMessage}
             {saltReportSuccess && (
               <>

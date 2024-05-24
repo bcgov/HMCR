@@ -214,13 +214,14 @@ export const defaultValues = {
     },
     vulnerableAreas: [
       {
-        highway: null,
+        highwayNumber: null,
         latitude: null,
         longitude: null,
         feature: null,
         type: null,
         protectionMeasures: null,
-        monitoringInPlace: false,
+        environmentalMonitoring: false,
+        comments: null
       },
     ],
   },

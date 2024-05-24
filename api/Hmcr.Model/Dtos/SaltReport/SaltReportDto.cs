@@ -201,6 +201,8 @@ namespace Hmcr.Model.Dtos.SaltReport
                 public int? AreasWithChloride { get; set; }
             }
         }
+
+        public List<VulnareaDto> VulnerableAreas { get; set; }
     }
 
 }

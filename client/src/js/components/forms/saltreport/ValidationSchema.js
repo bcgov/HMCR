@@ -12,6 +12,17 @@ const decimalWithPrecision = (precision) => {
     );
 };
 
+// Custom validator for coordinate with dynamic precision
+const coordinatePrecision = (precision) => {
+  return Yup.number()
+    .nullable(true)
+    .test(
+      'is-valid-lat-lon',
+      `Invalid format: number must have no more than ${precision} decimal places`,
+      (value) => value === null || new RegExp(`^-?\\d+(\\.\\d{1,${precision}})?$`).test(value)
+    );
+};
+
 const stockpileSchema = Yup.object().shape({
   siteName: Yup.string(),
   motiOwned: Yup.boolean(),
@@ -32,58 +43,74 @@ const stockpileSchema = Yup.object().shape({
 const houseKeepingPracticeSchema = Yup.object().shape({
   allMaterialsHandled: Yup.object().shape({
     hasPlan: Yup.boolean(),
-    numSites: Yup.number().nullable().min(0, 'Cannot be negative').integer(),
+    numSites: Yup.number().integer('Must be an integer').min(0, 'Cannot be negative').nullable(),
+    
   }),
   equipmentPreventsOverloading: Yup.object().shape({
-    numSites: Yup.number().nullable().min(0, 'Cannot be negative').integer(),
+    numSites: Yup.number().integer('Must be an integer').min(0, 'Cannot be negative').nullable(),
+    
     hasPlan: Yup.boolean(),
   }),
   wastewaterSystem: Yup.object().shape({
-    numSites: Yup.number().nullable().min(0, 'Cannot be negative').integer(),
+    numSites: Yup.number().integer('Must be an integer').min(0, 'Cannot be negative').nullable(),
+    
     hasPlan: Yup.boolean(),
   }),
   controlDiversionExternalWaters: Yup.object().shape({
-    numSites: Yup.number().nullable().min(0, 'Cannot be negative').integer(),
+    numSites: Yup.number().integer('Must be an integer').min(0, 'Cannot be negative').nullable(),
+    
     hasPlan: Yup.boolean(),
   }),
   drainageCollectionSystem: Yup.object().shape({
-    numSites: Yup.number().nullable().min(0, 'Cannot be negative').integer(),
+    numSites: Yup.number().integer('Must be an integer').min(0, 'Cannot be negative').nullable(),
+    
     hasPlan: Yup.boolean(),
   }),
   municipalSewerSystem: Yup.object().shape({
-    numSites: Yup.number().nullable().min(0, 'Cannot be negative').integer(),
+    numSites: Yup.number().integer('Must be an integer').min(0, 'Cannot be negative').nullable(),
+    
     hasPlan: Yup.boolean(),
   }),
   removalContainment: Yup.object().shape({
-    numSites: Yup.number().nullable().min(0, 'Cannot be negative').integer(),
+    numSites: Yup.number().integer('Must be an integer').min(0, 'Cannot be negative').nullable(),
+    
     hasPlan: Yup.boolean(),
   }),
   watercourse: Yup.object().shape({
-    numSites: Yup.number().nullable().min(0, 'Cannot be negative').integer(),
+    numSites: Yup.number().integer('Must be an integer').min(0, 'Cannot be negative').nullable(),
+    
     hasPlan: Yup.boolean(),
   }),
   otherDischargePoint: Yup.object().shape({
-    numSites: Yup.number().nullable().min(0, 'Cannot be negative').integer(),
+    numSites: Yup.number().integer('Must be an integer').min(0, 'Cannot be negative').nullable(),
+    
     hasPlan: Yup.boolean(),
   }),
   ongoingCleanup: Yup.object().shape({
-    numSites: Yup.number().nullable().min(0, 'Cannot be negative').integer(),
+    numSites: Yup.number().integer('Must be an integer').min(0, 'Cannot be negative').nullable(),
+    
     hasPlan: Yup.boolean(),
   }),
   riskManagementPlan: Yup.object().shape({
-    numSites: Yup.number().nullable().min(0, 'Cannot be negative').integer(),
+    numSites: Yup.number().integer('Must be an integer').min(0, 'Cannot be negative').nullable(),
+    
     hasPlan: Yup.boolean(),
   }),
 });
 
 const vulnerableAreaSchema = Yup.object().shape({
-  highway: Yup.string().nullable(),
-  latitude: decimalWithPrecision(5),
-  longitude: decimalWithPrecision(5),
+  highwayNumber: Yup.string().nullable(),
+  latitude: coordinatePrecision(6)
+    .min(-90, 'Latitude must be greater than or equal to -90')
+    .max(90, 'Latitude must be less than or equal to 90'),
+  longitude: coordinatePrecision(6)
+    .min(-180, 'Longitude must be greater than or equal to -180')
+    .max(180, 'Longitude must be less than or equal to 180'),
   feature: Yup.string().nullable(),
-  type: Yup.string(),
-  protectionMeasures: Yup.string(),
-  monitoringInPlace: Yup.boolean(),
+  type: Yup.string().nullable(),
+  protectionMeasures: Yup.string().nullable(),
+  environmentalMonitoring: Yup.boolean().nullable(),
+  comments: Yup.string().nullable(),
 });
 
 const typesOfVulnerableAreasSchema = Yup.object().shape({
@@ -229,6 +256,7 @@ export const validationSchema = Yup.object({
       protectionMeasuresImplemented: Yup.string(),
       environmentalMonitoringConducted: Yup.string(),
       typesOfVulnerableAreas: typesOfVulnerableAreasSchema,
+      vulnerableAreas: Yup.array().of(vulnerableAreaSchema),
     })
     .nullable(true),
 });
