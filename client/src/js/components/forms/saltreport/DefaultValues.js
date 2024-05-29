@@ -58,24 +58,7 @@ export const defaultValues = {
   },
   sect4: {
     saltStorageSitesTotal: null,
-    stockpiles: [
-      {
-        siteName: '',
-        motiOwned: false,
-        roadSalts: {
-          stockpilesTotal: null,
-          onImpermeableSurface: null,
-          underPermanentRoof: null,
-          underTarp: null,
-        },
-        treatedAbrasives: {
-          stockpilesTotal: null,
-          onImpermeableSurface: null,
-          underPermanentRoof: null,
-          underTarp: null,
-        },
-      },
-    ],
+    stockpiles: [],
     practices: {
       allMaterialsHandled: {
         hasPlan: false,
@@ -212,18 +195,7 @@ export const defaultValues = {
         areasWithChloride: null,
       },
     },
-    vulnerableAreas: [
-      {
-        highwayNumber: null,
-        latitude: null,
-        longitude: null,
-        feature: null,
-        type: null,
-        protectionMeasures: null,
-        environmentalMonitoring: false,
-        comments: null
-      },
-    ],
+    vulnerableAreas: [],
   },
   appendix: {
     materialStorage: {

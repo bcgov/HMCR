@@ -385,8 +385,8 @@ const AddSaltReportFormFields = ({ setInitialValues, formValues, setValidationSc
             <Row>
               <Col sm={1}>3.1</Col>
               <Col>
-                Indicate the number of objectives<sup>1</sup> that were identified and achieved for this year in your
-                salt management plan within the following areas: (refer to Appendix A for a sample list of objectives)
+                Provide the total quantity of material used for winter road maintenance (including sidewalks) as of May
+                31st 2024. (If your organization uses multi-chloride<sup>4</sup> products, see question 3.2)
               </Col>
             </Row>
             <Row className="my-2">
@@ -408,13 +408,17 @@ const AddSaltReportFormFields = ({ setInitialValues, formValues, setValidationSc
                       </td>
                     </tr>
                     <tr>
-                      <th>Magnesium chloride (MgCl2)</th>
+                      <th>
+                        Magnesium chloride (MgCl<sub>2</sub>)
+                      </th>
                       <td>
                         <FormNumberInput type="number" name="sect3.deicer.mgcl2" step="0.01" />
                       </td>
                     </tr>
                     <tr>
-                      <th>Calcium chloride (CaCl2)</th>
+                      <th>
+                        Calcium chloride (CaCl<sub>2</sub>)
+                      </th>
                       <td>
                         <FormNumberInput type="number" name="sect3.deicer.cacl2" step="0.01" />
                       </td>
@@ -447,13 +451,17 @@ const AddSaltReportFormFields = ({ setInitialValues, formValues, setValidationSc
                       </td>
                     </tr>
                     <tr>
-                      <th>Magnesium chloride (MgCl2)</th>
+                      <th>
+                        Magnesium chloride (MgCl<sub>2</sub>)
+                      </th>
                       <td>
                         <FormNumberInput type="number" name="sect3.treatedAbrasives.mgcl2" step="0.01" />
                       </td>
                     </tr>
                     <tr>
-                      <th>Calcium chloride (CaCl2)</th>
+                      <th>
+                        Calcium chloride (CaCl<sub>2</sub>)
+                      </th>
                       <td>
                         <FormNumberInput type="number" name="sect3.treatedAbrasives.cacl2" step="0.01" />
                       </td>
@@ -470,19 +478,25 @@ const AddSaltReportFormFields = ({ setInitialValues, formValues, setValidationSc
                       </td>
                     </tr>
                     <tr>
-                      <th>Magnesium chloride (MgCl2)</th>
+                      <th>
+                        Magnesium chloride (MgCl<sub>2</sub>)
+                      </th>
                       <td>
                         <FormNumberInput type="number" name="sect3.prewetting.mgcl2" step="0.01" />
                       </td>
                     </tr>
                     <tr>
-                      <th>Calcium chloride (CaCl2)</th>
+                      <th>
+                        Calcium chloride (CaCl<sub>2</sub>)
+                      </th>
                       <td>
                         <FormNumberInput type="number" name="sect3.prewetting.cacl2" step="0.01" />
                       </td>
                     </tr>
                     <tr>
-                      <th>Acetate2</th>
+                      <th>
+                        Acetate<sup>2</sup>
+                      </th>
                       <td>
                         <FormNumberInput type="number" name="sect3.prewetting.acetate" step="0.01" />
                       </td>
@@ -507,19 +521,25 @@ const AddSaltReportFormFields = ({ setInitialValues, formValues, setValidationSc
                       </td>
                     </tr>
                     <tr>
-                      <th>Magnesium chloride (MgCl2)</th>
+                      <th>
+                        Magnesium chloride (MgCl<sub>2</sub>)
+                      </th>
                       <td>
                         <FormNumberInput type="number" name="sect3.pretreatment.mgcl2" step="0.01" />
                       </td>
                     </tr>
                     <tr>
-                      <th>Calcium chloride (CaCl2)</th>
+                      <th>
+                        Calcium chloride (CaCl<sub>2</sub>)
+                      </th>
                       <td>
                         <FormNumberInput type="number" name="sect3.pretreatment.cacl2" step="0.01" />
                       </td>
                     </tr>
                     <tr>
-                      <th>Acetate2</th>
+                      <th>
+                        Acetate<sup>2</sup>
+                      </th>
                       <td>
                         <FormNumberInput type="number" name="sect3.pretreatment.acetate" step="0.01" />
                       </td>
@@ -542,19 +562,25 @@ const AddSaltReportFormFields = ({ setInitialValues, formValues, setValidationSc
                       </td>
                     </tr>
                     <tr>
-                      <th>Magnesium chloride (MgCl2)</th>
+                      <th>
+                        Magnesium chloride (MgCl<sub>2</sub>)
+                      </th>
                       <td>
                         <FormNumberInput type="number" name="sect3.antiicing.mgcl2" step="0.01" />
                       </td>
                     </tr>
                     <tr>
-                      <th>Calcium chloride (CaCl2)</th>
+                      <th>
+                        Calcium chloride (CaCl<sub>2</sub>)
+                      </th>
                       <td>
                         <FormNumberInput type="number" name="sect3.antiicing.cacl2" step="0.01" />
                       </td>
                     </tr>
                     <tr>
-                      <th>Acetate2</th>
+                      <th>
+                        Acetate<sup>2</sup>
+                      </th>
                       <td>
                         <FormNumberInput type="number" name="sect3.antiicing.acetate" step="0.01" />
                       </td>
@@ -647,8 +673,8 @@ const AddSaltReportFormFields = ({ setInitialValues, formValues, setValidationSc
             <Row>
               <Col sm={1}>4.2</Col>
               <Col>
-                Indicate the number of objectives<sup>1</sup> that were identified and achieved for this year in your
-                salt management plan within the following areas: (refer to Appendix A for a sample list of objectives)
+                Provide the number of stockpiles that are stored under the following conditions. If your organization
+                manages more than one site, provide the information for each site (insert additional rows as needed to table below)
               </Col>
             </Row>
             <Row className="my-2">
@@ -735,7 +761,7 @@ const AddSaltReportFormFields = ({ setInitialValues, formValues, setValidationSc
                               </td>
                               <td>
                                 <Button type="button" onClick={() => remove(index)}>
-                                  Remove row
+                                  Remove
                                 </Button>
                               </td>
                             </tr>
@@ -762,7 +788,7 @@ const AddSaltReportFormFields = ({ setInitialValues, formValues, setValidationSc
                           })
                         }
                       >
-                        Add Row
+                        Add Stockpile
                       </Button>
                     </>
                   )}
@@ -776,8 +802,9 @@ const AddSaltReportFormFields = ({ setInitialValues, formValues, setValidationSc
             <Row>
               <Col sm={1}>4.3</Col>
               <Col>
-                Indicate the number of objectives<sup>1</sup> that were identified and achieved for this year in your
-                salt management plan within the following areas: (refer to Appendix A for a sample list of objectives)
+                Provide the characteristics of your storage site design and the working activities that support good
+                housekeeping practices. If your organization manages more than one site, indicate the number of sites
+                with the given characteristic.
               </Col>
             </Row>
             <Row className="my-2">
@@ -1061,22 +1088,22 @@ const AddSaltReportFormFields = ({ setInitialValues, formValues, setValidationSc
                 <tr>
                   <td>6.1 Does your organization perform snow disposal at a designated site?</td>
                   <td>
-                    <Field type="checkbox" name="sect6.snowDisposalSite.used" className="form-control" />
+                    <Field type="checkbox" name="sect6.disposal.used" className="form-control" />
                   </td>
                   <td>
-                    <FormNumberInput type="number" name="sect6.snowDisposalSite.number" />
+                    <FormNumberInput type="number" name="sect6.disposal.total" />
                   </td>
                 </tr>
                 <tr>
                   <td>6.2 Does your organization use snow melters?</td>
                   <td>
-                    <Field type="checkbox" name="sect6.snowMelters.used" className="form-control" />
+                    <Field type="checkbox" name="sect6.snowMelter.used" className="form-control" />
                   </td>
                 </tr>
                 <tr>
                   <td>6.3 Is the meltwater from snow melters discharged though the storm sewer system?</td>
                   <td>
-                    <Field type="checkbox" name="sect6.meltwaterDisposalMethod.used" className="form-control" />
+                    <Field type="checkbox" name="sect6.meltwater.used" className="form-control" />
                   </td>
                 </tr>
               </tbody>
@@ -1263,7 +1290,7 @@ const AddSaltReportFormFields = ({ setInitialValues, formValues, setValidationSc
         </Row>
         <Row className="my-2">
           <Col>
-            <h4>List the Vulnerable Areas</h4>
+            <h4>List the Vulnerable Areas in your Service Area: (insert additional rows as needed to table below)</h4>
             <FieldArray name="sect7.vulnerableAreas">
               {({ insert, remove }) => (
                 <>
@@ -1287,16 +1314,17 @@ const AddSaltReportFormFields = ({ setInitialValues, formValues, setValidationSc
                             <FormInput name={`sect7.vulnerableAreas.${index}.highwayNumber`} type="text" />
                           </td>
                           <td>
-                            <FormInput name={`sect7.vulnerableAreas.${index}.latitude`} type="text" />
+                            <FormNumberInput name={`sect7.vulnerableAreas.${index}.latitude`} type="number" />
                           </td>
                           <td>
-                            <FormInput name={`sect7.vulnerableAreas.${index}.longitude`} type="text" />
+                            <FormNumberInput name={`sect7.vulnerableAreas.${index}.longitude`} type="number" />
                           </td>
                           <td>
                             <FormInput name={`sect7.vulnerableAreas.${index}.feature`} type="text" />
                           </td>
                           <td>
                             <Field name={`sect7.vulnerableAreas.${index}.type`} as="select">
+                              <option value="">Select an option</option>
                               <option value="drinkingwater">Drinking Water</option>
                               <option value="aquatic">Aquatic Life</option>
                               <option value="wetlands">Wetlands</option>
@@ -1319,7 +1347,7 @@ const AddSaltReportFormFields = ({ setInitialValues, formValues, setValidationSc
                           </td>
                           <td>
                             <Button type="button" onClick={() => remove(index)}>
-                              Remove row
+                              Remove
                             </Button>
                           </td>
                         </tr>
