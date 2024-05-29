@@ -343,19 +343,30 @@ GO
 DROP SEQUENCE [dbo].[HMR_SALT_REPORT_H_ID_SEQ];
 GO
 
+-- Step 1: Find the IDs of the inserted role and permission
+DECLARE @RoleID INT;
+DECLARE @PermissionID INT;
+
+SELECT @RoleID = [ROLE_ID] 
+FROM [dbo].[HMR_ROLE]
+WHERE [NAME] = 'Salt Reporting' AND [DESCRIPTION] = 'Submit and view Submitted Annual Salt Report';
+
+SELECT @PermissionID = [PERMISSION_ID] 
+FROM [dbo].[HMR_PERMISSION]
+WHERE [NAME] = 'SALT' AND [DESCRIPTION] = 'Salt Reporting';
+
+-- Step 2: Delete from HMR_USER_ROLE using the captured RoleID
+DELETE FROM [dbo].[HMR_USER_ROLE]
+WHERE [ROLE_ID] = @RoleID;
+
+-- Step 3: Delete from HMR_ROLE_PERMISSION using the captured RoleID and PermissionID
 DELETE FROM [dbo].[HMR_ROLE_PERMISSION]
-WHERE [PERMISSION_ID] IN (
-    SELECT [PERMISSION_ID]
-    FROM [dbo].[HMR_PERMISSION]
-    WHERE [NAME] = 'SALT'
-);
-GO
+WHERE [ROLE_ID] = @RoleID AND [PERMISSION_ID] = @PermissionID;
 
+-- Step 4: Delete from HMR_ROLE
+DELETE FROM [dbo].[HMR_ROLE]
+WHERE [ROLE_ID] = @RoleID;
+
+-- Step 5: Delete from HMR_PERMISSION
 DELETE FROM [dbo].[HMR_PERMISSION]
-WHERE [NAME] = 'SALT';
-GO
-
-IF OBJECT_ID('[dbo].[hmr_error_handling]', 'P') IS NOT NULL
-BEGIN
-    DROP PROCEDURE [dbo].[hmr_error_handling];
-END;
+WHERE [PERMISSION_ID] = @PermissionID;
