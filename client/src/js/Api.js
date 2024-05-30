@@ -74,6 +74,8 @@ export const getSurfaceTypeRules = () => instance.get(Constants.API_PATHS.RULE_S
 export const getRoadClassRules = () => instance.get(Constants.API_PATHS.RULE_ROAD_CLASS);
 
 export const getReportExport = (params) => instance.get(Constants.API_PATHS.REPORT_EXPORT, { params: {...params } });
+export const getSaltReports = (params) => instance.get(Constants.API_PATHS.SALT_REPORT, { params: {...params }, responseType: 'blob' });
+export const getSaltReportsJson = (params) => instance.get(Constants.API_PATHS.SALT_REPORT, { params: {...params }});
 export const getExportSupportedFormats = () => instance.get(Constants.API_PATHS.SUPPORTED_FORMATS);
 
 export const getApiClient = () => instance.get(`${Constants.API_PATHS.USER}/api-client`);

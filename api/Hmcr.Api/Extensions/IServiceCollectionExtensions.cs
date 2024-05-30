@@ -6,6 +6,7 @@ using Hmcr.Api.Authorization;
 using Hmcr.Data.Database;
 using Hmcr.Data.Database.Entities;
 using Hmcr.Data.Mappings;
+using Hmcr.Data.Repositories;
 using Hmcr.Domain.Services;
 using Hmcr.Model;
 using Hmcr.Model.JsonConverters;
@@ -16,6 +17,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Authorization;
 using Microsoft.AspNetCore.Mvc.Versioning;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
@@ -78,7 +80,8 @@ namespace Hmcr.Api.Extensions
 
         public static void AddHmcrDbContext(this IServiceCollection services, string connectionString, bool enableSensitiveDataLogging)
         {
-            services.AddDbContext<AppDbContext>(options => {
+            services.AddDbContext<AppDbContext>(options =>
+            {
                 options.UseSqlServer(connectionString, x => x.UseNetTopologySuite().CommandTimeout(1800));
                 options.EnableSensitiveDataLogging(enableSensitiveDataLogging);
             });
@@ -182,6 +185,10 @@ namespace Hmcr.Api.Extensions
 
             //Jwt Bearer Handler
             services.AddScoped<HmcrJwtBearerEvents>();
+
+            //Salt Report
+            services.AddScoped<ISaltReportService, SaltReportService>();
+            services.AddScoped<ISaltReportRepository, SaltReportRepository>();
 
             services.AddSingleton<EmailBody>();
         }

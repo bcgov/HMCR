@@ -58,7 +58,7 @@ namespace Hmcr.Chris
             _client = client;
             _queries = new InventoryQueries();
             _api = api;
-            _path = config.GetValue<string>("CHRIS:OASPath");
+            _path = config["CHRIS:OASPath"];
             _logger = logger;
         }
 

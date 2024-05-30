@@ -30,6 +30,7 @@ export const API_PATHS = {
   ROCKFALL_REPORT: '/rockfallreports',
   WILDLIFE_REPORT: '/wildlifereports',
   WORK_REPORT: '/workreports',
+  SALT_REPORT: '/saltreports',
   SUBMISSIONS: '/submissionobjects',
   SUBMISSION_STATUS: '/submissionstatus',
   SUBMISSION_STREAMS: '/submissionstreams',
@@ -42,6 +43,7 @@ export const REPORT_TYPES = {
   HMR_WORK_REPORT: { api: API_PATHS.WORK_REPORT, name: 'HMR_WORK_REPORT' },
   HMR_ROCKFALL_REPORT: { api: API_PATHS.ROCKFALL_REPORT, name: 'HMR_ROCKFALL_REPORT' },
   HMR_WILDLIFE_REPORT: { api: API_PATHS.WILDLIFE_REPORT, name: 'HMR_WILDLIFE_REPORT' },
+  HMR_SALT_REPORT: { api: API_PATHS.SALT_REPORT, name: 'HMR_SALT_REPORT' },
 };
 
 export const PATHS = {
@@ -56,6 +58,7 @@ export const PATHS = {
   ADMIN_ROLES: '/admin/roles',
   REPORT_EXPORT: '/export',
   REPORT_EXPORT_USER: '/user',
+  SALT_REPORTING: '/saltreporting',
   VERSION: '/version',
   DATA_ROOM: 'https://engineering.sp.th.gov.bc.ca/sites/service-areas-portal',
   MANUAL_AND_TEMPLATES:
@@ -82,6 +85,7 @@ export const PERMISSIONS = {
   FILE_W: 'FILE_W',
   FILE_R: 'FILE_R',
   EXPORT: 'EXPORT',
+  SALT: 'SALT'
 };
 
 export const USER_TYPE = { INTERNAL: 'INTERNAL', BUSINESS: 'BUSINESS' };

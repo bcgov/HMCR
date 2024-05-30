@@ -98,6 +98,7 @@ namespace Hmcr.Model
         public const string WorkReport = "HMR_WORK_REPORT";
         public const string RockfallReport = "HMR_ROCKFALL_REPORT";
         public const string WildlifeReport = "HMR_WILDLIFE_REPORT";
+        public const string SaltReport = "HMR_SALT_REPORT";
     }
 
     public static class StatusType

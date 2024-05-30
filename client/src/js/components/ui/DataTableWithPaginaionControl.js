@@ -29,6 +29,7 @@ DataTableWithPaginaionControl.propTypes = {
       heading: PropTypes.string.isRequired,
       key: PropTypes.string.isRequired,
       nosort: PropTypes.bool,
+      format: PropTypes.func
     })
   ).isRequired,
   editable: PropTypes.bool.isRequired,
