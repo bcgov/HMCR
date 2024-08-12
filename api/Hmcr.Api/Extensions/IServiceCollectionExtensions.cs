@@ -129,6 +129,9 @@ namespace Hmcr.Api.Extensions
                 var filePath = Path.Combine(System.AppContext.BaseDirectory, "Hmcr.Api.xml");
                 options.IncludeXmlComments(filePath);
 
+                // Ensure swagger is aware of namespace and class hierarchy, replacing occurrences of such cases with . for readability.
+                options.CustomSchemaIds(type => type.FullName.Replace('+', '.'));
+
                 var securitySchema = new OpenApiSecurityScheme
                 {
                     Description = "JWT Authorization header using the Bearer scheme. Example: \"Authorization: Bearer {token}\"",
