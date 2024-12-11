@@ -193,16 +193,10 @@ namespace Hmcr.Domain.Services.Base
             if (contract == null)
             {
                 submission.FileHash = null; //it's an error outside of the file; user can submit the same file again and the system should be able to accept it.
-                errors.AddItem(DateFieldName, $"Cannot find the contract term for this file");
+                errors.AddItem(DateFieldName, $"Contract term not found for the submission. The contract may have expired, or a row shows an end date beyond the contract's expiration.");
                 return (errors, submission);
             }
 
-            if (contract.PartyId == null)
-            {
-                submission.FileHash = null; //it's an error outside of the file; user can submit the same file again and the system should be able to accept it.
-                errors.AddItem(DateFieldName, $"Cannot find the party ID for this file");
-                return (errors, submission);
-            }
 
             submission.PartyId = contract.PartyId;
             submission.ContractTermId = contract.ContractTermId;

@@ -34,7 +34,7 @@ namespace Hmcr.Domain.Hangfire
         public WildlifeReportJobService(IUnitOfWork unitOfWork, ILogger<IWildlifeReportJobService> logger,
             ISubmissionStatusService statusService, ISubmissionObjectRepository submissionRepo, IServiceAreaService serviceAreaService,
             ISumbissionRowRepository submissionRowRepo, IWildlifeReportRepository wildlifeReportRepo, IFieldValidatorService validator,
-            IEmailService emailService, IConfiguration config, 
+            IEmailService emailService, IConfiguration config,
             ISpatialService spatialService, ILookupCodeService lookupService)
              : base(unitOfWork, statusService, submissionRepo, serviceAreaService, submissionRowRepo, emailService, logger, config, validator, spatialService, lookupService)
         {
@@ -327,9 +327,29 @@ namespace Hmcr.Domain.Hangfire
             CsvHelperUtils.Config(errors, csv, false);
             csv.Configuration.RegisterClassMap<WildlifeReportCsvDtoMap>();
 
-            var rows = GetRecords(csv);
+            var rows = GetRecords(csv).Select(row => SanitizeRow(row)).ToList();
 
-            return (rows, string.Join(',', csv.Context.HeaderRecord).Replace("\"", ""));
+            var headers = string.Join(',', csv.Context.HeaderRecord)
+                                .Replace("\"", "")
+                                .Replace("\0", "");
+
+            return (rows, headers);
+        }
+
+        private WildlifeReportCsvDto SanitizeRow(WildlifeReportCsvDto row)
+        {
+            foreach (var property in typeof(WildlifeReportCsvDto).GetProperties())
+            {
+                if (property.PropertyType == typeof(string))
+                {
+                    var value = (string)property.GetValue(row);
+                    if (value != null)
+                    {
+                        property.SetValue(row, value.Replace("\0", ""));
+                    }
+                }
+            }
+            return row;
         }
 
         private List<WildlifeReportCsvDto> GetRecords(CsvReader csv)
