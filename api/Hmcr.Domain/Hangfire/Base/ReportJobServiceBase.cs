@@ -83,7 +83,7 @@ namespace Hmcr.Domain.Hangfire.Base
                 {
                     ((HmcrRepositoryBase<HmrSubmissionObject>)_submissionRepo).RollBackEntities();
 
-                    _submission.ErrorDetail = FileError.UnknownException;
+                    _submission.ErrorDetail = $"{FileError.UnknownException}: {ex.Message}";
                     _submission.SubmissionStatusId = _statusService.FileUnexpectedError;
                     await CommitAndSendEmailAsync();
                 }

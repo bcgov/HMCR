@@ -1,16 +1,41 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using System.Reflection;
+using System.Text;
+using System.Xml;
+using System.Xml.Linq;
+using System.Xml.Schema;
 
 namespace Hmcr.Chris
 {
     public class OasQueries
     {
         private string _pointOnRfiSeqQuery;
+
         public string PointOnRfiSegQuery
         {
-            get {
-                var folder = Path.Combine(Path.GetDirectoryName(Assembly.GetEntryAssembly().Location), "XmlTemplates");
-                return _pointOnRfiSeqQuery ?? (_pointOnRfiSeqQuery = File.ReadAllText(Path.Combine(folder, "IsPointOnRfiSegment.xml"))); 
+            get
+            {
+                if (_pointOnRfiSeqQuery == null)
+                {
+                    var folder = Path.Combine(Path.GetDirectoryName(Assembly.GetEntryAssembly().Location), "XmlTemplates");
+                    var templatePath = Path.Combine(folder, "IsPointOnRfiSegment.xml");
+
+                    try
+                    {
+                        var xmlTemplate = File.ReadAllText(templatePath, Encoding.UTF8);
+
+                        xmlTemplate = xmlTemplate.Replace("\0", "");
+
+                        _pointOnRfiSeqQuery = xmlTemplate;
+                    }
+                    catch (Exception ex)
+                    {
+                        throw new InvalidOperationException($"Failed to process the XML template at '{templatePath}': {ex.Message}", ex);
+                    }
+                }
+
+                return _pointOnRfiSeqQuery;
             }
         }
 

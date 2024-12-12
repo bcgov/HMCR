@@ -29,13 +29,13 @@ namespace Hmcr.Domain.Hangfire
     }
 
     public class RockfallReportJobService : ReportJobServiceBase, IRockfallReportJobService
-    {        
+    {
         private IRockfallReportRepository _rockfallReportRepo;
         private readonly string _thresholdSpLevel = ThresholdSpLevels.Level1;
 
-        public RockfallReportJobService(IUnitOfWork unitOfWork, ILogger<IRockfallReportJobService> logger, 
+        public RockfallReportJobService(IUnitOfWork unitOfWork, ILogger<IRockfallReportJobService> logger,
             ISubmissionStatusService statusService, ISubmissionObjectRepository submissionRepo, IServiceAreaService serviceAreaService,
-            ISumbissionRowRepository submissionRowRepo, IRockfallReportRepository rockfallReportRepo, IFieldValidatorService validator, 
+            ISumbissionRowRepository submissionRowRepo, IRockfallReportRepository rockfallReportRepo, IFieldValidatorService validator,
             IEmailService emailService, IConfiguration config,
             ISpatialService spatialService, ILookupCodeService lookupService)
             : base(unitOfWork, statusService, submissionRepo, serviceAreaService, submissionRowRepo, emailService, logger, config, validator, spatialService, lookupService)
@@ -81,7 +81,7 @@ namespace Hmcr.Domain.Hangfire
 
                 submissionRow.RowStatusId = _statusService.RowSuccess; //set the initial row status as success 
                 untypedRow.HighwayUnique = untypedRow.HighwayUnique.ToTrimAndUppercase();
-                
+
                 //rockfall requires Y/N fields to be set to Uppercase, see HMCR-643
                 untypedRow.HeavyPrecip = untypedRow.HeavyPrecip.ToTrimAndUppercase();
                 untypedRow.FreezeThaw = untypedRow.FreezeThaw.ToTrimAndUppercase();
@@ -496,10 +496,31 @@ namespace Hmcr.Domain.Hangfire
             CsvHelperUtils.Config(errors, csv, false);
             csv.Configuration.RegisterClassMap<RockfallReportCsvDtoMap>();
 
-            var rows = GetRecords(csv);
+            var rows = GetRecords(csv).Select(row => SanitizeRow(row)).ToList();
 
-            return (rows, string.Join(',', csv.Context.HeaderRecord).Replace("\"", ""));
+            var headers = string.Join(',', csv.Context.HeaderRecord)
+                                .Replace("\"", "")
+                                .Replace("\0", "");
+
+            return (rows, headers);
         }
+
+        private RockfallReportCsvDto SanitizeRow(RockfallReportCsvDto row)
+        {
+            foreach (var property in typeof(RockfallReportCsvDto).GetProperties())
+            {
+                if (property.PropertyType == typeof(string))
+                {
+                    var value = (string)property.GetValue(row);
+                    if (value != null)
+                    {
+                        property.SetValue(row, value.Replace("\0", ""));
+                    }
+                }
+            }
+            return row;
+        }
+
 
         private List<RockfallReportCsvDto> GetRecords(CsvReader csv)
         {
