@@ -12,6 +12,7 @@ using System.Data.Common;
 using Hmcr.Model.Dtos.SaltReport;
 using Hmcr.Model.Dtos;
 using Microsoft.Identity.Client;
+using System.IO;
 
 namespace Hmcr.Data.Repositories
 {
@@ -24,12 +25,16 @@ namespace Hmcr.Data.Repositories
         Task<PagedDto<SaltReportDto>> GetPagedReportsAsync(string serviceAreas, DateTime? fromDate, DateTime? toDate, int pageSize, int pageNumber);
         Task AddStockpilesAsync(IEnumerable<HmrSaltStockpile> stockpiles);
         Task AddAppendixAsync(HmrSaltReportAppendix appendix);
+        byte[] GetPdfTemplate(string templateName);
+        void SaveFilledPdf(string fileName, byte[] pdfData);
     }
 
     public class SaltReportRepository : HmcrRepositoryBase<HmrSaltReport>, ISaltReportRepository
     {
         private readonly AppDbContext _context;
         private readonly ILogger<SaltReportRepository> _logger;
+        private readonly string _templatePath = "Templates";
+        private readonly string _outputPath = "Output";
 
         public SaltReportRepository(AppDbContext context, IMapper mapper, ILogger<SaltReportRepository> logger)
             : base(context, mapper)
@@ -175,13 +180,25 @@ namespace Hmcr.Data.Repositories
 
         public async Task<HmrSaltReport> GetReportByIdAsync(int saltReportId)
         {
-            return await _context.HmrSaltReports.FirstOrDefaultAsync(r => r.SaltReportId == saltReportId);
             return await _context.HmrSaltReports
                 .Include(x => x.Appendix)
                 .Include(x => x.Stockpiles)
                 .FirstOrDefaultAsync(x => x.SaltReportId == saltReportId);
         }
 
+        public byte[] GetPdfTemplate(string templateName)
+        {
+            string filePath = Path.Combine(_templatePath, templateName);
+            if (!File.Exists(filePath))
+                throw new FileNotFoundException($"Template {templateName} not found.");
+
+            return File.ReadAllBytes(filePath);
+        }
+
+        public void SaveFilledPdf(string fileName, byte[] pdfData)
+        {
+            string filePath = Path.Combine(_outputPath, fileName);
+            File.WriteAllBytes(filePath, pdfData);
         }
     }
 }
