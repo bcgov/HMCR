@@ -14,6 +14,8 @@ const DataTableControl = ({
   onEditClicked,
   onDeleteClicked,
   onHeadingSortClicked,
+  showExportButton,
+  onExportClicked,
 }) => {
   const handleEditClicked = (id) => {
     if (onEditClicked) onEditClicked(id);
@@ -41,6 +43,7 @@ const DataTableControl = ({
                 <th></th>
               </Authorize>
             )}
+            {showExportButton && <th>Actions</th>}
           </tr>
         </thead>
         <tbody>
@@ -89,6 +92,16 @@ const DataTableControl = ({
                       ></DeleteButton>
                     </td>
                   </Authorize>
+                )}
+                {showExportButton && (
+                  <td>
+                    <FontAwesomeButton
+                      icon="download"
+                      className="mr-1"
+                      onClick={() => onExportClicked(item.saltReportId)}
+                      title="Export Report"
+                    />
+                  </td>
                 )}
               </tr>
             );
