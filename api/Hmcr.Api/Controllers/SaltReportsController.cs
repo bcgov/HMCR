@@ -11,6 +11,9 @@ using System.Text.Json;
 using Microsoft.Extensions.Logging;
 using System.Data.Common;
 using System.Collections.Generic;
+using Hmcr.Domain.PdfHelpers;
+using System.Reflection;
+
 
 namespace Hmcr.Api.Controllers
 {
@@ -69,16 +72,41 @@ namespace Hmcr.Api.Controllers
 
 
         [HttpGet("{id}", Name = "GetSaltReportAsync")]
-        public async Task<ActionResult<SaltReportDto>> GetSaltReportAsync(int id)
+        public async Task<ActionResult<SaltReportDto>> GetSaltReportAsync(int id, [FromQuery] bool isPdf)
         {
-            var saltReportDto = await _saltReportService.GetSaltReportByIdAsync(id);
-
-            if (saltReportDto == null)
+            try
             {
-                return NotFound();
-            }
+                var saltReportDto = await _saltReportService.GetSaltReportByIdAsync(id);
 
-            return Ok(saltReportDto);
+                if (saltReportDto == null)
+                {
+                    return NotFound();
+                }
+
+                if (isPdf)
+                {
+                    try
+                    {
+                        var mapper = new SaltReportPdfMapper();
+                        // Map SaltReportDto to a Dictionary<string, string>
+                        var pdfData = mapper.MapDtoToPdfData(saltReportDto);
+
+                        // Use the PdfService to fill the PDF
+                        var pdfBytes = _saltReportService.FillPdf("saltreport.pdf", pdfData);
+                        return File(pdfBytes, "application/pdf", $"salt_report_{id}.pdf");
+                    }
+                    catch (Exception ex)
+                    {
+                        return BadRequest(ex.Message);
+                    }
+                }
+
+                return Ok(saltReportDto);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest($"An error occurred: {ex.Message}");
+            }
         }
 
         [HttpGet(Name = "GetSaltReportsAsync")]
