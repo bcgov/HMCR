@@ -110,7 +110,7 @@ namespace Hmcr.Api.Controllers
         }
 
         [HttpGet(Name = "GetSaltReportsAsync")]
-        public async Task<IActionResult> GetSaltReportsAsync([FromQuery] string serviceAreas, [FromQuery] string format, [FromQuery] DateTime fromDate, [FromQuery] DateTime toDate, int pageSize, int pageNumber)
+        public async Task<IActionResult> GetSaltReportsAsync([FromQuery] string serviceAreas, [FromQuery] string format, [FromQuery] DateTime fromDate, [FromQuery] DateTime toDate, int pageSize, int pageNumber, string orderBy = "saltReportId", string direction = "desc")
         {
             try
             {
@@ -142,7 +142,7 @@ namespace Hmcr.Api.Controllers
                     default:
                         try
                         {
-                            var reports = await _saltReportService.GetSaltReportDtosAsync(serviceAreas, fromDate, toDate, pageSize, pageNumber);
+                            var reports = await _saltReportService.GetSaltReportDtosAsync(serviceAreas, fromDate, toDate, pageSize, pageNumber, orderBy, direction);
                             return Ok(reports);
                         }
                         catch (ArgumentException ex)

@@ -13,6 +13,7 @@ using Hmcr.Model.Dtos.SaltReport;
 using Hmcr.Model.Dtos;
 using Microsoft.Identity.Client;
 using System.IO;
+using System.Linq.Dynamic.Core;
 
 namespace Hmcr.Data.Repositories
 {
@@ -22,7 +23,7 @@ namespace Hmcr.Data.Repositories
         Task<IEnumerable<HmrSaltReport>> GetAllReportsAsync();
         Task<HmrSaltReport> GetReportByIdAsync(int saltReportId);
         Task<IEnumerable<HmrSaltReport>> GetReportsAsync(string serviceAreas, DateTime? fromDate, DateTime? toDate);
-        Task<PagedDto<SaltReportDto>> GetPagedReportsAsync(string serviceAreas, DateTime? fromDate, DateTime? toDate, int pageSize, int pageNumber);
+        Task<PagedDto<SaltReportDto>> GetPagedReportsAsync(string serviceAreas, DateTime? fromDate, DateTime? toDate, int pageSize, int pageNumber, string orderBy, string direction);
         Task AddStockpilesAsync(IEnumerable<HmrSaltStockpile> stockpiles);
         Task AddAppendixAsync(HmrSaltReportAppendix appendix);
         byte[] GetPdfTemplate(string templateName);
@@ -65,7 +66,7 @@ namespace Hmcr.Data.Repositories
                 .ToListAsync();
         }
 
-        public async Task<PagedDto<SaltReportDto>> GetPagedReportsAsync(string serviceAreas, DateTime? fromDate, DateTime? toDate, int pageSize = 5, int pageNumber = 0)
+        public async Task<PagedDto<SaltReportDto>> GetPagedReportsAsync(string serviceAreas, DateTime? fromDate, DateTime? toDate, int pageSize, int pageNumber, string orderBy, string direction)
         {
             if (fromDate.HasValue && toDate.HasValue && fromDate > toDate)
             {
@@ -90,15 +91,16 @@ namespace Hmcr.Data.Repositories
 
             int totalCount = await query.CountAsync();
 
+             var orderedQuery = query.OrderBy($"{orderBy} {direction}");
+
             // Mapping to DTOs
-            var reports = await query.Select(report => new SaltReportDto
+            var reports = await orderedQuery.Select(report => new SaltReportDto
             {
                 SaltReportId = report.SaltReportId,
                 AppCreateTimestamp = report.AppCreateTimestamp,
                 ServiceArea = report.ServiceArea,
                 ContactName = report.ContactName
             })
-            .OrderBy(report => report.AppCreateTimestamp)
             .Skip((pageNumber - 1) * pageSize)
             .Take(pageSize)
             .ToListAsync();
@@ -109,7 +111,9 @@ namespace Hmcr.Data.Repositories
                 PageNumber = pageNumber,
                 PageSize = pageSize,
                 TotalCount = totalCount,
-                SourceList = reports
+                SourceList = reports,
+                OrderBy = orderBy,
+                Direction = direction
             };
         }
 

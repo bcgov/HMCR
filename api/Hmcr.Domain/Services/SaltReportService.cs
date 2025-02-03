@@ -32,7 +32,7 @@ namespace Hmcr.Domain.Services
         Task<IEnumerable<SaltReportDto>> GetAllSaltReportDtosAsync();
         Task<SaltReportDto> GetSaltReportByIdAsync(int saltReportId);
         Task<IEnumerable<HmrSaltReport>> GetSaltReportEntitiesAsync(string serviceAreas, DateTime fromDate, DateTime toDate);
-        Task<PagedDto<SaltReportDto>> GetSaltReportDtosAsync(string serviceAreas, DateTime? fromDate, DateTime? toDate, int pageSize, int pageNumber);
+        Task<PagedDto<SaltReportDto>> GetSaltReportDtosAsync(string serviceAreas, DateTime? fromDate, DateTime? toDate, int pageSize, int pageNumber, string orderBy, string direction);
         Stream ConvertToCsvStream(IEnumerable<HmrSaltReport> saltReportEntities);
         public byte[] FillPdf(string templateName, Dictionary<string, string> data);
     }
@@ -186,11 +186,11 @@ namespace Hmcr.Domain.Services
 
         }
 
-        public async Task<PagedDto<SaltReportDto>> GetSaltReportDtosAsync(string serviceAreas, DateTime? fromDate, DateTime? toDate, int pageSize, int pageNumber)
+        public async Task<PagedDto<SaltReportDto>> GetSaltReportDtosAsync(string serviceAreas, DateTime? fromDate, DateTime? toDate, int pageSize, int pageNumber, string orderBy, string direction)
         {
             try
             {
-                var saltReports = await _repository.GetPagedReportsAsync(serviceAreas, fromDate, toDate, pageSize, pageNumber).ConfigureAwait(false);
+                var saltReports = await _repository.GetPagedReportsAsync(serviceAreas, fromDate, toDate, pageSize, pageNumber, orderBy, direction).ConfigureAwait(false);
                 _logger.LogWarning("Salt report dtos received.");
 
                 return saltReports;
