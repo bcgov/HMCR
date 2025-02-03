@@ -236,7 +236,8 @@ namespace Hmcr.Data.Mappings
                 .ForMember(dest => dest.Appendix, opt => opt.Ignore())
                 .ForMember(dest => dest.VulnerableAreas, opt => opt.Ignore())
                 .ForMember(dest => dest.AppCreateTimestamp, opt => opt.MapFrom(src => src.AppCreateTimestamp))
-                .ReverseMap();
+                .ReverseMap()
+                .ForPath(dest => dest.Sect4.Stockpiles, opt => opt.MapFrom(src => src.Stockpiles));
 
             CreateMap<StockpileDto, HmrSaltStockpile>()
                 .ForMember(dest => dest.SiteName, opt => opt.MapFrom(src => src.SiteName))
