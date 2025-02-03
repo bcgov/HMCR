@@ -176,6 +176,12 @@ namespace Hmcr.Data.Repositories
         public async Task<HmrSaltReport> GetReportByIdAsync(int saltReportId)
         {
             return await _context.HmrSaltReports.FirstOrDefaultAsync(r => r.SaltReportId == saltReportId);
+            return await _context.HmrSaltReports
+                .Include(x => x.Appendix)
+                .Include(x => x.Stockpiles)
+                .FirstOrDefaultAsync(x => x.SaltReportId == saltReportId);
+        }
+
         }
     }
 }
