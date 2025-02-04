@@ -58,8 +58,8 @@ namespace Hmcr.Api
 
             app.UseExceptionMiddleware();
             app.UseHmcrHealthCheck();
-            app.UseRouting();
             app.UseCors(Constants.HmcrOrigins);
+            app.UseRouting();
             app.UseAuthentication();
             app.UseAuthorization();
             app.UseSerilogUi();

@@ -9,6 +9,10 @@ module.exports = (settings) => {
   const options = settings.options;
   const phase = options.env;
   const changeId = phases[phase].changeId;
+  const imageAPI = phases[phase].imageRegistry.api;
+  const imageClient = phases[phase].imageRegistry.client;
+  const imageHangfire = phases[phase].imageRegistry.hangfire;
+
   const oc = new OpenShiftClientX(
     Object.assign({ namespace: phases[phase].namespace }, options)
   );
@@ -35,6 +39,7 @@ module.exports = (settings) => {
           HOST: phases[phase].host,
           CPU: phases[phase].client_cpu,
           MEMORY: phases[phase].client_memory,
+          IMAGE_CLIENT: imageClient,
         },
       }
     )
@@ -100,6 +105,7 @@ module.exports = (settings) => {
           ASPNETCORE_ENVIRONMENT: phases[phase].dotnet_env,
           CPU: phases[phase].api_cpu,
           MEMORY: phases[phase].api_memory,
+          IMAGE_API: imageAPI,
         },
       }
     )
@@ -118,6 +124,7 @@ module.exports = (settings) => {
           ASPNETCORE_ENVIRONMENT: phases[phase].dotnet_env,
           CPU: phases[phase].hangfire_cpu,
           MEMORY: phases[phase].hangfire_memory,
+          IMAGE_HANGFIRE: imageHangfire,
         },
       }
     )

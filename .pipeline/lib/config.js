@@ -3,6 +3,7 @@ const options = require("@bcgov/pipeline-cli").Util.parseArguments();
 const changeId = options.pr; //aka pull-request
 const version = "1.0.0";
 const name = "hmcr";
+const registryBase = "image-registry.openshift-image-registry.svc:5000";
 
 Object.assign(options.git, { owner: "ychung-mot", repository: "HMCR" });
 const phases = {
@@ -39,6 +40,11 @@ const phases = {
     api_memory: "512Mi",
     client_cpu: "100m",
     client_memory: "100Mi",
+    imageRegistry: {
+      api: `${registryBase}/d3d940-dev/hmcr-api:dev-${version}-${changeId}`,
+      client: `${registryBase}/d3d940-dev/hmcr-client:dev-${version}-${changeId}`,
+      hangfire: `${registryBase}/d3d940-dev/hmcr-hangfire:dev-${version}-${changeId}`,
+    },
   },
   test: {
     namespace: "d3d940-test",
@@ -61,6 +67,11 @@ const phases = {
     api_memory: "512Mi",
     client_cpu: "100m",
     client_memory: "100Mi",
+    imageRegistry: {
+      api: `${registryBase}/d3d940-test/hmcr-api:${version}`,
+      client: `${registryBase}/d3d940-test/hmcr-client:${version}`,
+      hangfire: `${registryBase}/d3d940-test/hmcr-hangfire:${version}`,
+    },
   },
   uat: {
     namespace: "d3d940-test",
@@ -83,6 +94,11 @@ const phases = {
     api_memory: "512Mi",
     client_cpu: "100m",
     client_memory: "100Mi",
+    imageRegistry: {
+      api: `${registryBase}/d3d940-uat/hmcr-api:${version}`,
+      client: `${registryBase}/d3d940-uat/hmcr-client:${version}`,
+      hangfire: `${registryBase}/d3d940-uat/hmcr-hangfire:${version}`,
+    },
   },
   prod: {
     namespace: "d3d940-prod",
@@ -105,6 +121,11 @@ const phases = {
     api_memory: "600Mi",
     client_cpu: "100m",
     client_memory: "300Mi",
+    imageRegistry: {
+      api: `${registryBase}/d3d940-prod/hmcr-api:${version}`,
+      client: `${registryBase}/d3d940-prod/hmcr-client:${version}`,
+      hangfire: `${registryBase}/d3d940-prod/hmcr-hangfire:${version}`,
+    },
   },
 };
 
