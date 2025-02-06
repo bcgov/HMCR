@@ -27,13 +27,13 @@ objects:
       replicas: 1
       selector:
         matchLabels:
-          deploymentConfig: ${NAME}${SUFFIX}
+          app: ${NAME}${SUFFIX}
       strategy: {}
       template:
         metadata:
           creationTimestamp: null
           labels:
-            deploymentConfig: ${NAME}${SUFFIX}
+            app: ${NAME}${SUFFIX}
             deploymentconfig: ${NAME}${SUFFIX}
         spec:
           containers:
