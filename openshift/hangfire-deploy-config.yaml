@@ -30,14 +30,11 @@ objects:
           app: ${NAME}${SUFFIX}
       strategy:
         activeDeadlineSeconds: 21600
-        resources: {}
-        rollingParams:
-          intervalSeconds: 1
-          maxSurge: 25%
-          maxUnavailable: 25%
-          timeoutSeconds: 600
-          updatePeriodSeconds: 1
-        type: RollingUpdate
+        type: Recreate
+        recreateParams: 
+          pre: {} 
+          mid: {}
+          post: {}
       template:
         metadata:
           creationTimestamp: null
@@ -54,7 +51,7 @@ objects:
                   "until pg_isready -h ${LOGDB_NAME}${SUFFIX} -p 5432;  do echo waiting for database; sleep 2; done;",
                 ]
           containers:
-            - image: ${IMAGE_HANGFIRE}
+            - image: image-registry.openshift-image-registry.svc:5000/d3d940-${ENV}/${NAME}:${VERSION}
               name: hangfire
               ports:
                 - containerPort: 8080
@@ -116,7 +113,7 @@ objects:
           protocol: TCP
           targetPort: 8080
       selector:
-          deploymentconfig: ${NAME}${SUFFIX}
+          app: ${NAME}${SUFFIX}
 parameters:
   - description: Name of the project (HMCR)
     displayName: PROJECT_NAME
@@ -173,6 +170,4 @@ parameters:
     name: MEMORY
     required: true
     value: ""
-  - name: IMAGE_HANGFIRE
-    description: The container image for the hangfire
-    required: true
+

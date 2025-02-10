@@ -66,7 +66,7 @@ const Header = ({ currentUser }) => {
               alt="B.C. Government Logo"
             />
           </NavbarBrand>
-          <div className="navbar-brand">MoTI Maintenance Contractor Reporting</div>
+          <div className="navbar-brand">MoTI Contractor Reporting</div>
           <NavbarToggler onClick={toggleNavbar} />
           {/* <Collapse> is needed to keep justify-content: space-between maintain correct spacing */}
           <Collapse isOpen={!collapsed} navbar />
