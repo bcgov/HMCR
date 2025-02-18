@@ -13,6 +13,8 @@ module.exports = (settings) => {
   const templatesLocalBaseUrl = oc.toFileUrl(
     path.resolve(__dirname, "../../openshift")
   );
+  const githubRunNumber = process.env.GITHUB_RUN_NUMBER || "manual";
+  const version = options.version || `v1.0.${githubRunNumber}`;
 
   objects.push(
     ...oc.processDeploymentTemplate(
@@ -21,7 +23,7 @@ module.exports = (settings) => {
         param: {
           NAME: `${settings.phases[phase].name}-client`,
           SUFFIX: settings.phases[phase].suffix,
-          VERSION: settings.phases[phase].tag,
+          VERSION: version,
           SOURCE_REPOSITORY_URL: `${oc.git.uri}`,
           SOURCE_REPOSITORY_REF: `${oc.git.branch_ref}`,
         },
@@ -36,7 +38,7 @@ module.exports = (settings) => {
         param: {
           NAME: `${settings.phases[phase].name}-api`,
           SUFFIX: settings.phases[phase].suffix,
-          VERSION: settings.phases[phase].tag,
+          VERSION: version,
           SOURCE_REPOSITORY_URL: `${oc.git.uri}`,
           SOURCE_REPOSITORY_REF: `${oc.git.branch_ref}`,
         },
@@ -51,7 +53,7 @@ module.exports = (settings) => {
         param: {
           NAME: `${settings.phases[phase].name}-hangfire`,
           SUFFIX: settings.phases[phase].suffix,
-          VERSION: settings.phases[phase].tag,
+          VERSION: version,
           SOURCE_REPOSITORY_URL: `${oc.git.uri}`,
           SOURCE_REPOSITORY_REF: `${oc.git.branch_ref}`,
         },

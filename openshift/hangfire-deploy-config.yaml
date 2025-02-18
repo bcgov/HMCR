@@ -51,7 +51,8 @@ objects:
                   "until pg_isready -h ${LOGDB_NAME}${SUFFIX} -p 5432;  do echo waiting for database; sleep 2; done;",
                 ]
           containers:
-            - image: image-registry.openshift-image-registry.svc:5000/d3d940-${ENV}/${NAME}:${VERSION}
+            - image: image-registry.openshift-image-registry.svc:5000/${NAMESPACE}/${NAME}:${VERSION}
+              imagePullPolicy: Always
               name: hangfire
               ports:
                 - containerPort: 8080
@@ -170,4 +171,8 @@ parameters:
     name: MEMORY
     required: true
     value: ""
-
+  - description: NAMESPACE
+    displayName: NAMESPACE
+    name: NAMESPACE
+    required: true
+    value: ""

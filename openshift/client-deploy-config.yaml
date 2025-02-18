@@ -37,7 +37,8 @@ objects:
             deploymentconfig: ${NAME}${SUFFIX}
         spec:
           containers:
-            - image: image-registry.openshift-image-registry.svc:5000/d3d940-${ENV}/${NAME}:${VERSION}
+            - image: image-registry.openshift-image-registry.svc:5000/${NAMESPACE}/${NAME}:${VERSION}
+              imagePullPolicy: Always
               name: client
               ports:
                 - containerPort: 8080
@@ -144,5 +145,10 @@ parameters:
   - description: MEMORY
     displayName: MEMORY Request
     name: MEMORY
+    required: true
+    value: ""
+  - description: NAMESPACE
+    displayName: NAMESPACE
+    name: NAMESPACE
     required: true
     value: ""

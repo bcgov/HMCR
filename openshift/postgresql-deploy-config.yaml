@@ -87,6 +87,17 @@ objects:
                 persistentVolumeClaim:
                   claimName: ${NAME}${SUFFIX}
       test: false
+      triggers:
+        - type: ConfigChange
+        - imageChangeParams:
+            automatic: true
+            containerNames:
+              - ${NAME}${SUFFIX}
+            from:
+              kind: ImageStreamTag
+              name: ${IMAGE_STREAM_TAG}
+              namespace: d3d940-tools
+          type: ImageChange
   - kind: PersistentVolumeClaim
     apiVersion: v1
     metadata:
@@ -102,6 +113,8 @@ objects:
     apiVersion: v1
     metadata:
       name: ${NAME}${SUFFIX}
+    selector:
+        app: ${NAME}${SUFFIX}
     spec:
       ports:
         - name: postgresql
