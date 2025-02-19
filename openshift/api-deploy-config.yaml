@@ -16,29 +16,30 @@ objects:
     spec:
       lookupPolicy:
         local: false
-  - apiVersion: v1
-    kind: DeploymentConfig
+  - apiVersion: apps/v1
+    kind: Deployment
     metadata:
       creationTimestamp: null
       name: ${NAME}${SUFFIX}
+      labels:
+        app: ${NAME}${SUFFIX}
     spec:
       replicas: 1
       selector:
-        deploymentconfig: ${NAME}${SUFFIX}
+        matchLabels:
+          app: ${NAME}${SUFFIX}
       strategy:
         activeDeadlineSeconds: 21600
-        rollingParams:
-          intervalSeconds: 1
-          maxSurge: 1
-          maxUnavailable: 1
-          timeoutSeconds: 600
-          updatePeriodSeconds: 1
-        type: Rolling
+        type: Recreate
+        recreateParams:
+          pre: {}
+          mid: {}
+          post: {}
       template:
         metadata:
           creationTimestamp: null
           labels:
-            deploymentconfig: ${NAME}${SUFFIX}
+            app: ${NAME}${SUFFIX}
         spec:
           initContainers: # check if logdb is ready, and only continue when true
             - name: check-logdb-ready
@@ -50,18 +51,12 @@ objects:
                   "until pg_isready -h ${LOGDB_NAME}${SUFFIX} -p 5432;  do echo waiting for database; sleep 2; done;",
                 ]
           containers:
-            - image: ${NAME}:${VERSION}
+            - image: image-registry.openshift-image-registry.svc:5000/${NAMESPACE}/${NAME}:${VERSION}
+              imagePullPolicy: Always
               name: api
               ports:
                 - containerPort: 8080
                   protocol: TCP
-              resources:
-                requests:
-                  cpu: ${CPU}
-                  memory: ${MEMORY}
-                limits:
-                  cpu: ${CPU}
-                  memory: ${MEMORY}
               livenessProbe:
                 httpGet:
                   path: /healthz
@@ -132,16 +127,6 @@ objects:
                 defaultMode: 420
                 name: api-appsettings-${ENV}
       test: false
-      triggers:
-        - imageChangeParams:
-            automatic: true
-            containerNames:
-              - api
-            from:
-              kind: ImageStreamTag
-              name: ${NAME}:${VERSION}
-          type: ImageChange
-        - type: ConfigChange
   - apiVersion: v1
     kind: Service
     metadata:
@@ -154,7 +139,7 @@ objects:
           protocol: TCP
           targetPort: 8080
       selector:
-        deploymentconfig: ${NAME}${SUFFIX}
+        app: ${NAME}${SUFFIX}
   - apiVersion: route.openshift.io/v1
     kind: Route
     metadata:
@@ -233,5 +218,10 @@ parameters:
   - description: MEMORY
     displayName: MEMORY Request
     name: MEMORY
+    required: true
+    value: ""
+  - description: NAMESPACE
+    displayName: NAMESPACE
+    name: NAMESPACE
     required: true
     value: ""

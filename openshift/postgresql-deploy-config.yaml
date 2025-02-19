@@ -3,14 +3,17 @@ apiVersion: template.openshift.io/v1
 metadata:
   name: ${PROJECT_NAME}
 objects:
-  - apiVersion: v1
-    kind: DeploymentConfig
+  - apiVersion: apps/v1
+    kind: Deployment
     metadata:
       name: ${NAME}${SUFFIX}
+      labels:
+        app: ${NAME}${SUFFIX}
     spec:
       replicas: 1
       selector:
-        deploymentconfig: ${NAME}${SUFFIX}
+        matchLabels:
+          app: ${NAME}${SUFFIX}
       strategy:
         activeDeadlineSeconds: 21600
         resources: {}
@@ -21,7 +24,7 @@ objects:
         metadata:
           name: ${NAME}${SUFFIX}
           labels:
-            deploymentconfig: ${NAME}${SUFFIX}
+            app: ${NAME}${SUFFIX}
         spec:
           containers:
             - image: image-registry.openshift-image-registry.svc:5000/d3d940-tools/${IMAGE_STREAM_TAG}
@@ -48,13 +51,6 @@ objects:
               ports:
                 - containerPort: 5432
                   protocol: TCP
-              resources:
-                requests:
-                  cpu: 10m
-                  memory: 128Mi
-                limits:
-                  cpu: 250m
-                  memory: 512Mi
               terminationMessagePath: /dev/termination-log
               terminationMessagePolicy: File
               volumeMounts:
@@ -106,8 +102,6 @@ objects:
     apiVersion: v1
     metadata:
       name: ${NAME}${SUFFIX}
-    selector:
-        deploymentconfig: ${NAME}${SUFFIX}
     spec:
       storageClassName: "${PERSISTENT_VOLUME_CLASS}"
       accessModes:
@@ -119,6 +113,8 @@ objects:
     apiVersion: v1
     metadata:
       name: ${NAME}${SUFFIX}
+    selector:
+        app: ${NAME}${SUFFIX}
     spec:
       ports:
         - name: postgresql
@@ -126,7 +122,7 @@ objects:
           port: 5432
           targetPort: 5432
       selector:
-        deploymentconfig: ${NAME}${SUFFIX}
+        app: ${NAME}${SUFFIX}
 parameters:
   - description: Name of the project (HMCR)
     displayName: PROJECT_NAME

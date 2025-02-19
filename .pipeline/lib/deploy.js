@@ -9,9 +9,12 @@ module.exports = (settings) => {
   const options = settings.options;
   const phase = options.env;
   const changeId = phases[phase].changeId;
+  const version = options.version || `${phases[phase].phase}-1.0.0`;
+
   const oc = new OpenShiftClientX(
     Object.assign({ namespace: phases[phase].namespace }, options)
   );
+
   const templatesLocalBaseUrl = oc.toFileUrl(
     path.resolve(__dirname, "../../openshift")
   );
@@ -30,11 +33,12 @@ module.exports = (settings) => {
         param: {
           NAME: `${phases[phase].name}-client`,
           SUFFIX: phases[phase].suffix,
-          VERSION: phases[phase].tag,
+          VERSION: version,
           ENV: phases[phase].phase,
           HOST: phases[phase].host,
           CPU: phases[phase].client_cpu,
           MEMORY: phases[phase].client_memory,
+          NAMESPACE: phases[phase].namespace,
         },
       }
     )
@@ -63,7 +67,7 @@ module.exports = (settings) => {
         param: {
           NAME: `${phases[phase].name}-logdb`,
           SUFFIX: phases[phase].suffix,
-          VERSION: phases[phase].tag,
+          VERSION: version,
           ENV: phases[phase].phase,
         },
       }
@@ -94,12 +98,13 @@ module.exports = (settings) => {
           NAME: `${phases[phase].name}-api`,
           LOGDB_NAME: `${phases[phase].name}-logdb`,
           SUFFIX: phases[phase].suffix,
-          VERSION: phases[phase].tag,
+          VERSION: version,
           HOST: phases[phase].host,
           ENV: phases[phase].phase,
           ASPNETCORE_ENVIRONMENT: phases[phase].dotnet_env,
           CPU: phases[phase].api_cpu,
           MEMORY: phases[phase].api_memory,
+          NAMESPACE: phases[phase].namespace,
         },
       }
     )
@@ -113,11 +118,12 @@ module.exports = (settings) => {
           NAME: `${phases[phase].name}-hangfire`,
           LOGDB_NAME: `${phases[phase].name}-logdb`,
           SUFFIX: phases[phase].suffix,
-          VERSION: phases[phase].tag,
+          VERSION: version,
           ENV: phases[phase].phase,
           ASPNETCORE_ENVIRONMENT: phases[phase].dotnet_env,
           CPU: phases[phase].hangfire_cpu,
           MEMORY: phases[phase].hangfire_memory,
+          NAMESPACE: phases[phase].namespace,
         },
       }
     )
@@ -136,5 +142,70 @@ module.exports = (settings) => {
     phases.build.namespace,
     phases.build.tag
   );
-  oc.applyAndDeploy(objects, phases[phase].instance);
+
+  let imageExists = false;
+  
+  oc.applyAndDeploy(objects, phases[phase].instance)
+    .then(() => {
+      const imageNames = ["hmcr-api", "hmcr-client", "hmcr-hangfire"];
+
+      imageExists = imageNames.every((imageName) => {
+        try {
+          const imageSha = oc.raw("get", [
+            "istag",
+            `${imageName}:${version}`,
+            "-n",
+            "d3d940-tools",
+            "-o",
+            "json",
+          ]);
+          if (!imageSha) {
+            console.error(
+              `❌ Error: No built image found for ${imageName}:${version}`
+            );
+            return false;
+          }
+
+          console.log(`🔄 Tagging built image as 'latest' for ${imageName}`);
+
+          oc.raw("tag", [
+            `d3d940-tools/${imageName}:${version}`,
+            `d3d940-tools/${imageName}:latest`,
+          ]);
+
+          console.log(
+            `✅ Successfully tagged ${imageName}:${version} as latest.`
+          );
+          return true;
+        } catch (error) {
+          console.error(error.message);
+          return false;
+        }
+      });
+
+      console.log("✅ All images are now tagged as latest.");
+    })
+    .finally(() => {
+      if (!imageExists) {
+        console.log("❌ Skipping final tagging because image does not exist.");
+        return;
+      }
+      const imageNames = ["hmcr-api", "hmcr-client", "hmcr-hangfire"];
+
+      imageNames.forEach((imageName) => {
+        const sourceImage = `d3d940-tools/${imageName}:latest`;
+        const targetImage = `${phases[phase].namespace}/${imageName}`;
+
+        console.log(
+          `🔄 Tagging Image for Deployment: ${sourceImage} -> ${targetImage}`
+        );
+
+        // Tag the image for the specific deployment environment
+        oc.raw("tag", [`${sourceImage}`, `${targetImage}:${version}`]);
+
+        console.log(
+          `✅ Image successfully tagged for ${phase}: ${targetImage}`
+        );
+      });
+    });
 };

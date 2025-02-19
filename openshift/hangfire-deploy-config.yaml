@@ -16,30 +16,30 @@ objects:
     spec:
       lookupPolicy:
         local: false
-  - apiVersion: v1
-    kind: DeploymentConfig
+  - apiVersion: apps/v1
+    kind: Deployment
     metadata:
       creationTimestamp: null
       name: ${NAME}${SUFFIX}
+      labels:
+        app: ${NAME}${SUFFIX}
     spec:
       replicas: 2
       selector:
-        deploymentconfig: ${NAME}${SUFFIX}
+        matchLabels:
+          app: ${NAME}${SUFFIX}
       strategy:
         activeDeadlineSeconds: 21600
-        resources: {}
-        rollingParams:
-          intervalSeconds: 1
-          maxSurge: 25%
-          maxUnavailable: 25%
-          timeoutSeconds: 600
-          updatePeriodSeconds: 1
-        type: Rolling
+        type: Recreate
+        recreateParams: 
+          pre: {} 
+          mid: {}
+          post: {}
       template:
         metadata:
           creationTimestamp: null
           labels:
-            deploymentconfig: ${NAME}${SUFFIX}
+            app: ${NAME}${SUFFIX}
         spec:
           initContainers: # check if logdb is ready, and only continue when true
             - name: check-logdb-ready
@@ -51,18 +51,12 @@ objects:
                   "until pg_isready -h ${LOGDB_NAME}${SUFFIX} -p 5432;  do echo waiting for database; sleep 2; done;",
                 ]
           containers:
-            - image: ${NAME}:${VERSION}
+            - image: image-registry.openshift-image-registry.svc:5000/${NAMESPACE}/${NAME}:${VERSION}
+              imagePullPolicy: Always
               name: hangfire
               ports:
                 - containerPort: 8080
                   protocol: TCP
-              resources:
-                requests:
-                  cpu: ${CPU}
-                  memory: ${MEMORY}
-                limits:
-                  cpu: ${CPU}
-                  memory: ${MEMORY}
               livenessProbe:
                 httpGet:
                   path: /healthz
@@ -108,16 +102,6 @@ objects:
                 defaultMode: 420
                 name: api-appsettings-${ENV}
       test: false
-      triggers:
-        - imageChangeParams:
-            automatic: true
-            containerNames:
-              - hangfire
-            from:
-              kind: ImageStreamTag
-              name: ${NAME}:${VERSION}
-          type: ImageChange
-        - type: ConfigChange
   - apiVersion: v1
     kind: Service
     metadata:
@@ -130,7 +114,7 @@ objects:
           protocol: TCP
           targetPort: 8080
       selector:
-        deploymentconfig: ${NAME}${SUFFIX}
+          app: ${NAME}${SUFFIX}
 parameters:
   - description: Name of the project (HMCR)
     displayName: PROJECT_NAME
@@ -185,5 +169,10 @@ parameters:
   - description: MEMORY
     displayName: MEMORY Request
     name: MEMORY
+    required: true
+    value: ""
+  - description: NAMESPACE
+    displayName: NAMESPACE
+    name: NAMESPACE
     required: true
     value: ""

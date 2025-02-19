@@ -13,7 +13,7 @@ defaults:
 jobs:
 
   clean-build-dev:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     defaults:
       run:
         working-directory: ./.pipeline

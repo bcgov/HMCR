@@ -29,13 +29,15 @@ jobs:
       - uses: actions/checkout@v2
       - uses: actions/setup-node@v2
         with:
-          node-version: "12"
+          node-version: "18"
+      - name: Set Version
+        run: echo "VERSION=v1.0.${{ github.run_number }}" >> $GITHUB_ENV
       - name: Build
         run: |
           oc version
           oc login --token=${{ secrets.OPENSHIFT_TOKEN}} --server=${{ secrets.OPENSHIFT_SERVER_URL }}
           npm ci
-          DEBUG=* npm run build -- --pr=${{ github.event.pull_request.number }} --git.branch.name=${{github.head_ref}} --git.ref=${{github.head_ref}}
+          DEBUG=* npm run build -- --pr=${{ github.event.pull_request.number }} --git.branch.name=${{github.head_ref}} --git.ref=${{github.head_ref}} --version=${VERSION}
 
   deploy-to-dev:
     runs-on: ubuntu-22.04
@@ -47,13 +49,15 @@ jobs:
       - uses: actions/checkout@v2
       - uses: actions/setup-node@v2
         with:
-          node-version: "12"
+          node-version: "18"
+      - name: Set Version
+        run: echo "VERSION=v1.0.${{ github.run_number }}" >> $GITHUB_ENV
       - name: Deploy the image
         run: |
           oc version
           oc login --token=${{ secrets.OPENSHIFT_TOKEN}} --server=${{ secrets.OPENSHIFT_SERVER_URL }}
           npm ci
-          DEBUG=* npm run deploy -- --pr=${{ github.event.pull_request.number }} --env=dev --git.branch.name=${{github.head_ref}} --git.ref=${{github.head_ref}}
+          DEBUG=* npm run deploy -- --pr=${{ github.event.pull_request.number }} --env=dev --git.branch.name=${{github.head_ref}} --git.ref=${{github.head_ref}} --version=${VERSION}
 
   deploy-to-test:
     needs: [build, deploy-to-dev]
@@ -67,13 +71,15 @@ jobs:
       - uses: actions/checkout@v2
       - uses: actions/setup-node@v2
         with:
-          node-version: "12"
+          node-version: "18"
+      - name: Set Version
+        run: echo "VERSION=v1.0.${{ github.run_number }}" >> $GITHUB_ENV
       - name: Deploy the image
         run: |
           oc version
           oc login --token=${{ secrets.OPENSHIFT_TOKEN}} --server=${{ secrets.OPENSHIFT_SERVER_URL }}
           npm ci
-          DEBUG=* npm run deploy -- --pr=${{ github.event.pull_request.number }} --env=test --git.branch.name=${{github.head_ref}} --git.ref=${{github.head_ref}}
+          DEBUG=* npm run deploy -- --pr=${{ github.event.pull_request.number }} --env=test --git.branch.name=${{github.head_ref}} --git.ref=${{github.head_ref}} --version=${VERSION}
 
   deploy-to-uat:
     needs: [build, deploy-to-test]
@@ -87,13 +93,15 @@ jobs:
       - uses: actions/checkout@v2
       - uses: actions/setup-node@v2
         with:
-          node-version: "12"
+          node-version: "18"
+      - name: Set Version
+        run: echo "VERSION=v1.0.${{ github.run_number }}" >> $GITHUB_ENV
       - name: Deploy the image
         run: |
           oc version
           oc login --token=${{ secrets.OPENSHIFT_TOKEN}} --server=${{ secrets.OPENSHIFT_SERVER_URL }}
           npm ci
-          DEBUG=* npm run deploy -- --pr=${{ github.event.pull_request.number }} --env=uat --git.branch.name=${{github.head_ref}} --git.ref=${{github.head_ref}}
+          DEBUG=* npm run deploy -- --pr=${{ github.event.pull_request.number }} --env=uat --git.branch.name=${{github.head_ref}} --git.ref=${{github.head_ref}} --version=${VERSION}
 
   deploy-to-prod:
     needs: [build, deploy-to-uat]
@@ -107,10 +115,12 @@ jobs:
       - uses: actions/checkout@v2
       - uses: actions/setup-node@v2
         with:
-          node-version: "12"
+          node-version: "18"
+      - name: Set Version
+        run: echo "VERSION=v1.0.${{ github.run_number }}" >> $GITHUB_ENV
       - name: Deploy the image
         run: |
           oc version
           oc login --token=${{ secrets.OPENSHIFT_TOKEN}} --server=${{ secrets.OPENSHIFT_SERVER_URL }}
           npm ci
-          DEBUG=* npm run deploy -- --pr=${{ github.event.pull_request.number }} --env=prod --git.branch.name=${{github.head_ref}} --git.ref=${{github.head_ref}}
+          DEBUG=* npm run deploy -- --pr=${{ github.event.pull_request.number }} --env=prod --git.branch.name=${{github.head_ref}} --git.ref=${{github.head_ref}} --version=${VERSION}
