@@ -1,6 +1,7 @@
 "use strict";
 const options = require("@bcgov/pipeline-cli").Util.parseArguments();
-const changeId = process.env.GITHUB_RUN_NUMBER; //aka pull-request
+const changeId = process.env.GITHUB_RUN_NUMBER;
+const prId = options.pr //aka pull-request
 const version = "v1.0.";
 const name = "hmcr";
 
@@ -11,10 +12,10 @@ const phases = {
     name: `${name}`,
     phase: "build",
     changeId: changeId,
-    suffix: `-build-${changeId}`,
+    suffix: `-build.${changeId}`,
     instance: `${name}-build-${changeId}`,
     version: `${version}${changeId}`,
-    tag: `build-${version}${changeId}`,
+    tag: `build-${version}${prId}`,
     transient: true,
   },
   dev: {
