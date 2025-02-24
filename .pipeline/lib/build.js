@@ -14,7 +14,7 @@ module.exports = (settings) => {
     path.resolve(__dirname, "../../openshift")
   );
   const githubRunNumber = process.env.GITHUB_RUN_NUMBER || "manual";
-  const version = `v1.0.${options.changeId}`;
+  const version = phases[phase].tag;
   console.log("Building version: " + version);
 
   objects.push(
