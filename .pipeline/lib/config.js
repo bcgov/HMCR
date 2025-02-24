@@ -1,6 +1,6 @@
 "use strict";
 const options = require("@bcgov/pipeline-cli").Util.parseArguments();
-const changeId = options.pr; //aka pull-request
+const changeId = process.env.GITHUB_RUN_NUMBER; //aka pull-request
 const version = "1.0.0";
 const name = "hmcr";
 
