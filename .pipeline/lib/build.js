@@ -14,7 +14,7 @@ module.exports = (settings) => {
     path.resolve(__dirname, "../../openshift")
   );
   const githubRunNumber = process.env.GITHUB_RUN_NUMBER || "manual";
-  const version = options.version || `v1.0.${githubRunNumber}`;
+  const version = `v1.0.${githubRunNumber}`;
 
   objects.push(
     ...oc.processDeploymentTemplate(
