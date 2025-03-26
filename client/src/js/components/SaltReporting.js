@@ -129,6 +129,11 @@ const SaltReporting = ({ currentUser }) => {
                 onPageSizeChange={searchData.handleChangePageSize}
                 editable={false}
                 onHeadingSortClicked={searchData.handleHeadingSortClicked}
+                showExportButton={true}
+                onExportClicked={(saltReportId) => {
+                  console.log(`Exporting report with ID: ${saltReportId}`);
+                  api.getSaltReportById(saltReportId, { isPdf: true });
+                }}
               />
             ) : (
               <Alert color="warning">No reports found.</Alert>

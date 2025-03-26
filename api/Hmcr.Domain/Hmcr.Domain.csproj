@@ -3,6 +3,14 @@
     <TargetFramework>net8.0</TargetFramework>
   </PropertyGroup>
   <ItemGroup>
+    <None Remove="PdfTemplates\saltreport.pdf" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="PdfTemplates\saltreport.pdf" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="CsvHelper" Version="15.0.0" />
     <PackageReference Include="Hangfire.Core" Version="1.7.9" />
     <PackageReference Include="itext7" Version="9.0.0" />
