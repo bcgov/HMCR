@@ -143,6 +143,24 @@ module.exports = (settings) => {
     phases.build.tag
   );
 
+  // Ensure image streams are imported before proceeding
+  const imageNames = ["hmcr-api", "hmcr-client", "hmcr-hangfire"];
+  imageNames.forEach((imageName) => {
+    try {
+      console.log(`🔄 Importing image stream for ${imageName}`);
+      oc.raw("import-image", [
+        `${imageName}:${phases.build.tag}`,
+        `--from=d3d940-tools/${imageName}:${phases.build.tag}`,
+        "--confirm",
+        "-n",
+        phases.build.namespace,
+      ]);
+      console.log(`✅ Successfully imported image stream for ${imageName}`);
+    } catch (error) {
+      console.error(`❌ Failed to import image stream for ${imageName}: ${error.message}`);
+    }
+  });
+
   let imageExists = false;
   
   oc.applyAndDeploy(objects, phases[phase].instance)

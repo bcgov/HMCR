@@ -31,12 +31,6 @@ module.exports = (settings) => {
     )
   );
 
-  oc.raw("tag", [
-    `d3d940-tools/${settings.phases[phase].name}-client:${version}`,
-    `${settings.phases[phase].name}-client:${settings.phases[phase].suffix}-${version}`,
-    "--reference-policy=local",
-  ]);
-
   objects.push(
     ...oc.processDeploymentTemplate(
       `${templatesLocalBaseUrl}/api-build-config.yaml`,
