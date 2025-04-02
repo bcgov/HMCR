@@ -9,7 +9,9 @@ module.exports = (settings) => {
   const options = settings.options;
   const phase = options.env;
   const changeId = phases[phase].changeId;
-  const version = options.version || `${phases[phase].phase}-1.0.0`;
+  const githubRunNumber = process.env.GITHUB_RUN_NUMBER;
+  const version = options.version || `v1.0.${githubRunNumber}`;
+  console.log(`🚀 Using version: ${version}`);
 
   const oc = new OpenShiftClientX(
     Object.assign({ namespace: phases[phase].namespace }, options)
@@ -140,8 +142,26 @@ module.exports = (settings) => {
     objects,
     phases[phase].tag,
     phases.build.namespace,
-    phases.build.tag
+    version
   );
+
+  // Ensure image streams are imported before proceeding
+  const imageNames = ["hmcr-api", "hmcr-client", "hmcr-hangfire"];
+  imageNames.forEach((imageName) => {
+    try {
+      console.log(`🔄 Importing image stream for ${imageName}`);
+      oc.raw("import-image", [
+        `${imageName}:${phases.build.tag}`,
+        `--from=d3d940-tools/${imageName}:${phases.build.tag}`,
+        "--confirm",
+        "-n",
+        phases.build.namespace,
+      ]);
+      console.log(`✅ Successfully imported image stream for ${imageName}`);
+    } catch (error) {
+      console.error(`❌ Failed to import image stream for ${imageName}: ${error.message}`);
+    }
+  });
 
   let imageExists = false;
   
