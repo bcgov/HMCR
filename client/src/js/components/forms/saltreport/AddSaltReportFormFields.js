@@ -385,6 +385,7 @@ const AddSaltReportFormFields = ({ setInitialValues, formValues, setValidationSc
             <Row>
               <Col sm={1}>3.1</Col>
               <Col>
+                {/* Needs yearly update */}
                 Provide the total quantity of material used for winter road maintenance (including sidewalks) as of May
                 31st 2025. (If your organization uses multi-chloride<sup>4</sup> products, see question 3.2)
               </Col>
