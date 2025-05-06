@@ -312,7 +312,7 @@ const AddSaltReportFormFields = ({ setInitialValues, formValues, setValidationSc
                   <thead>
                     <tr>
                       <th rowSpan={2}>Areas for Improvement</th>
-                      <th colSpan={2}>Number of Objectives for Winter 2022/23</th>
+                      <th colSpan={2}>Number of Objectives for Winter 2024/2025</th>
                     </tr>
                     <tr>
                       <th># Identified</th>
@@ -386,7 +386,7 @@ const AddSaltReportFormFields = ({ setInitialValues, formValues, setValidationSc
               <Col sm={1}>3.1</Col>
               <Col>
                 Provide the total quantity of material used for winter road maintenance (including sidewalks) as of May
-                31st 2024. (If your organization uses multi-chloride<sup>4</sup> products, see question 3.2)
+                31st 2025. (If your organization uses multi-chloride<sup>4</sup> products, see question 3.2)
               </Col>
             </Row>
             <Row className="my-2">
