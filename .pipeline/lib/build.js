@@ -16,6 +16,8 @@ module.exports = (settings) => {
   const githubRunNumber = process.env.GITHUB_RUN_NUMBER || "manual";
   const version = options.version || `v1.0.${githubRunNumber}`;
 
+  console.log(`🚀 VERSION USED is ${version}`)
+
   objects.push(
     ...oc.processDeploymentTemplate(
       `${templatesLocalBaseUrl}/client-build-config.yaml`,

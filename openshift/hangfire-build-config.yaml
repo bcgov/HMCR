@@ -17,7 +17,7 @@ objects:
         - annotations: null
           from:
             kind: DockerImage
-            name: registry.redhat.io/rhel8/dotnet-80:8.0-14
+            name: registry.redhat.io/rhel8/dotnet-80:8.0-16
           name: "8.0"
           referencePolicy:
             type: Local
@@ -64,7 +64,7 @@ objects:
               value: Hmcr.Hangfire/Hmcr.Hangfire.csproj
           from:
             kind: ImageStreamTag
-            name: "dotnet-80:8.0-14"
+            name: "dotnet-80:8.0-16"
         type: Source
 parameters:
   - description: Name of the project (HMCR)
