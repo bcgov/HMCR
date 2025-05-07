@@ -97,7 +97,7 @@ module.exports = class KeyCloakClient {
     }
   }
 
-  async remmoveUris() {
+  async removeUris() {
     await this.init();
     
     console.log("Attempting to remove RedirectUri and WebOrigins");

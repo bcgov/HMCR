@@ -29,7 +29,7 @@ module.exports = (settings) => {
     if (phases.hasOwnProperty(k)) {
       const phase = phases[k];
 
-      if (k === "dev") kc.remmoveUris();
+      // if (k === "dev") kc.removeUris();
 
       let buildConfigs = oc.get("bc", {
         selector: `app=${phase.instance},env-id=${phase.changeId},!shared,github-repo=${oc.git.repository},github-owner=${oc.git.owner}`,
