@@ -1,9 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-
   <PropertyGroup>
-    <TargetFramework>net7.0</TargetFramework>
+    <TargetFramework>net8.0</TargetFramework>
   </PropertyGroup>
-
   <ItemGroup>
     <None Remove="PdfTemplates\saltreport.pdf" />
   </ItemGroup>
@@ -19,12 +17,10 @@
     <PackageReference Include="itext7.bouncy-castle-adapter" Version="9.0.0" />
     <PackageReference Include="MailKit" Version="2.5.1" />
   </ItemGroup>
-
   <ItemGroup>
     <ProjectReference Include="..\Hmcr.Bceid\Hmcr.Bceid.csproj" />
     <ProjectReference Include="..\Hmcr.Chris\Hmcr.Chris.csproj" />
     <ProjectReference Include="..\Hmcr.Data\Hmcr.Data.csproj" />
     <ProjectReference Include="..\Hmcr.Model\Hmcr.Model.csproj" />
   </ItemGroup>
-
 </Project>
