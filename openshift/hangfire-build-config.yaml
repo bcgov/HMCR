@@ -18,7 +18,7 @@ objects:
           from:
             kind: DockerImage
             name: registry.redhat.io/rhel8/dotnet-80:8.0-16
-          name: "8.0"
+          name: "8.0-16"
           referencePolicy:
             type: Local
   - apiVersion: v1
