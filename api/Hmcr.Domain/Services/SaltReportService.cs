@@ -15,6 +15,14 @@ using System.Data.Common;
 using Hmcr.Data.Database;
 using Hmcr.Model.Dtos;
 using Microsoft.EntityFrameworkCore;
+using iText.Kernel.Pdf;
+using iText.Forms;
+using iText.Forms.Fields;
+using System.Reflection;
+using iText.Layout;
+using Org.BouncyCastle.Crypto.Agreement;
+using iText.Layout.Element;
+using iText.Layout.Properties;
 
 namespace Hmcr.Domain.Services
 {
@@ -24,8 +32,9 @@ namespace Hmcr.Domain.Services
         Task<IEnumerable<SaltReportDto>> GetAllSaltReportDtosAsync();
         Task<SaltReportDto> GetSaltReportByIdAsync(int saltReportId);
         Task<IEnumerable<HmrSaltReport>> GetSaltReportEntitiesAsync(string serviceAreas, DateTime fromDate, DateTime toDate);
-        Task<PagedDto<SaltReportDto>> GetSaltReportDtosAsync(string serviceAreas, DateTime? fromDate, DateTime? toDate, int pageSize, int pageNumber);
+        Task<PagedDto<SaltReportDto>> GetSaltReportDtosAsync(string serviceAreas, DateTime? fromDate, DateTime? toDate, int pageSize, int pageNumber, string orderBy, string direction);
         Stream ConvertToCsvStream(IEnumerable<HmrSaltReport> saltReportEntities);
+        public byte[] FillPdf(string templateName, Dictionary<string, string> data);
     }
 
     public class SaltReportService : ISaltReportService
@@ -177,11 +186,11 @@ namespace Hmcr.Domain.Services
 
         }
 
-        public async Task<PagedDto<SaltReportDto>> GetSaltReportDtosAsync(string serviceAreas, DateTime? fromDate, DateTime? toDate, int pageSize, int pageNumber)
+        public async Task<PagedDto<SaltReportDto>> GetSaltReportDtosAsync(string serviceAreas, DateTime? fromDate, DateTime? toDate, int pageSize, int pageNumber, string orderBy, string direction)
         {
             try
             {
-                var saltReports = await _repository.GetPagedReportsAsync(serviceAreas, fromDate, toDate, pageSize, pageNumber).ConfigureAwait(false);
+                var saltReports = await _repository.GetPagedReportsAsync(serviceAreas, fromDate, toDate, pageSize, pageNumber, orderBy, direction).ConfigureAwait(false);
                 _logger.LogWarning("Salt report dtos received.");
 
                 return saltReports;
@@ -397,5 +406,57 @@ namespace Hmcr.Domain.Services
             csv.Configuration.HasHeaderRecord = false;
         }
 
+        public Dictionary<string, string> ExtractFields(string templateName)
+        {
+            var pdfBytes = _repository.GetPdfTemplate(templateName);
+
+            using (var pdfReader = new PdfReader(new MemoryStream(pdfBytes)))
+            using (var pdfDoc = new PdfDocument(pdfReader))
+            {
+                var form = PdfAcroForm.GetAcroForm(pdfDoc, false);
+                var fields = form?.GetAllFormFields();
+
+                if (fields == null) return new Dictionary<string, string>();
+
+                return fields.ToDictionary(field => field.Key, field => field.Value.GetValueAsString());
+            }
+        }
+
+        public byte[] FillPdf(string resourceName, Dictionary<string, string> data)
+        {
+            var assembly = Assembly.GetExecutingAssembly();
+            var resourcePath = $"Hmcr.Domain.PdfTemplates.{resourceName}";
+
+            using var resourceStream = assembly.GetManifestResourceStream(resourcePath)
+                ?? throw new FileNotFoundException($"Resource '{resourcePath}' not found.");
+            
+            using var pdfReader = new PdfReader(resourceStream);
+            using var memoryStream = new MemoryStream();
+            using var pdfWriter = new PdfWriter(memoryStream);
+            using var pdfDoc = new PdfDocument(pdfReader, pdfWriter);
+
+            var form = PdfAcroForm.GetAcroForm(pdfDoc, true);
+
+            foreach (var fieldEntry in data)
+            {
+                var field = form.GetField(fieldEntry.Key);
+
+                if (field != null)
+                {
+                    field.SetValue(fieldEntry.Value);
+                    field.SetFontSize(10);
+                    field.SetJustification(TextAlignment.CENTER);
+                }
+                else
+                {
+                    Console.WriteLine($"Field '{fieldEntry.Key}' not found in the PDF.");
+                }
+            }
+            form.FlattenFields();
+            pdfDoc.Close();
+
+            // Return the filled PDF as byte array
+            return memoryStream.ToArray();
+        }
     }
 }

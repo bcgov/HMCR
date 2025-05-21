@@ -29,7 +29,8 @@ module.exports = (settings) => {
     if (phases.hasOwnProperty(k)) {
       const phase = phases[k];
 
-      if (k === "dev") kc.remmoveUris();
+      // Reset keycloack realm uris in dev
+      if (k === "dev") kc.removeUris();
 
       let buildConfigs = oc.get("bc", {
         selector: `app=${phase.instance},env-id=${phase.changeId},!shared,github-repo=${oc.git.repository},github-owner=${oc.git.owner}`,
