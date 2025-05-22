@@ -4,14 +4,14 @@ module.exports = function (app) {
   app.use(
     '/api',
     createProxyMiddleware({
-      target: 'http://' + process.env.REACT_APP_API_HOST,
+      target: 'http://' + process.env.VITE_API_HOST,
       changeOrigin: true,
     })
   ),
     app.use(
       '/swagger',
       createProxyMiddleware({
-        target: 'http://' + process.env.REACT_APP_API_HOST,
+        target: 'http://' + process.env.VITE_API_HOST,
         changeOrigin: true,
       })
     );

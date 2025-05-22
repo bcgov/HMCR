@@ -44,22 +44,22 @@ objects:
                 - containerPort: 8080
                   protocol: TCP
               env:
-                - name: REACT_APP_SSO_HOST
+                - name: VITE_SSO_HOST
                   valueFrom:
                     secretKeyRef:
                       name: sso-configs-${ENV}
                       key: CLIENT_SSO_HOST
-                - name: REACT_APP_SSO_REALM
+                - name: VITE_SSO_REALM
                   valueFrom:
                     secretKeyRef:
                       name: sso-configs-${ENV}
                       key: CLIENT_SSO_REALM
-                - name: REACT_APP_SSO_CLIENT
+                - name: VITE_SSO_CLIENT
                   valueFrom:
                     secretKeyRef:
                       name: sso-configs-${ENV}
                       key: CLIENT_SSO_CLIENTID
-                - name: REACT_APP_API_HOST
+                - name: VITE_API_HOST
                   value: ${HOST}
                 - name: HMCR_DEPLOY_SUFFIX
                   value: ${SUFFIX}

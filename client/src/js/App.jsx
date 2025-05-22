@@ -4,26 +4,24 @@ import { BrowserRouter, Route, Switch, Redirect } from 'react-router-dom';
 import { Container } from 'reactstrap';
 import { toast } from 'react-toastify';
 
-import 'react-dates/initialize';
-import 'react-dates/lib/css/_datepicker.css';
+
 
 import 'react-toastify/dist/ReactToastify.css';
 
-import AuthorizedRoute from './components/fragments/AuthorizedRoute';
-import Main from './components/Main';
-import Footer from './components/fragments/Footer';
-import Header from './components/fragments/Header';
-import ActivityAdmin from './components/ActivityAdmin';
-import UserAdmin from './components/UserAdmin';
-import RoleAdmin from './components/RoleAdmin';
-import ReportExport from './components/ReportExport';
-import WorkReporting from './components/WorkReporting';
-import SaltReporting from './components/SaltReporting';
-import Version from './components/Version';
-import ApiAccess from './components/ApiAccess';
-import WorkReportingSubmissionDetail from './components/WorkReportingSubmissionDetail';
-import ErrorBoundary from './components/ErrorBoundary';
-
+import AuthorizedRoute from './components/fragments/AuthorizedRoute.jsx';
+import Main from './components/Main.jsx';
+import Footer from './components/fragments/Footer.jsx';
+import Header from './components/fragments/Header.jsx';
+import ActivityAdmin from './components/ActivityAdmin.jsx';
+import UserAdmin from './components/UserAdmin.jsx';
+import RoleAdmin from './components/RoleAdmin.jsx';
+import ReportExport from './components/ReportExport.jsx';
+import WorkReporting from './components/WorkReporting.jsx';
+import SaltReporting from './components/SaltReporting.jsx';
+import Version from './components/Version.jsx';
+import ApiAccess from './components/ApiAccess.jsx';
+import WorkReportingSubmissionDetail from './components/WorkReportingSubmissionDetail.jsx';
+import ErrorBoundary from './components/ErrorBoundary.jsx';
 import addIconsToLibrary from './fontAwesome';
 import * as Constants from './Constants';
 
