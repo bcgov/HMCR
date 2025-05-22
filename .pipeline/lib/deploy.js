@@ -9,7 +9,7 @@ module.exports = (settings) => {
   const options = settings.options;
   const phase = options.env;
   const changeId = phases[phase].changeId;
-  const githubRunNumber = process.env.GITHUB_RUN_NUMBER;
+  const githubRunNumber = import.meta.env.GITHUB_RUN_NUMBER;
   const version = options.version || `v1.0.${githubRunNumber}`;
   console.log(`🚀 Using version: ${version}`);
 

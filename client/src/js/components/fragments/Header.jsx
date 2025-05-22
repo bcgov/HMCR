@@ -53,14 +53,14 @@ const Header = ({ currentUser }) => {
           <NavbarBrand tag={Link} onClick={hideNavbar} to="/">
             <img
               className="img-fluid d-none d-md-block"
-              src={`${process.env.PUBLIC_URL}/images/bcid-logo-rev-en.svg`}
+              src={`${import.meta.env.PUBLIC_URL}/images/bcid-logo-rev-en.svg`}
               width="181"
               height="44"
               alt="B.C. Government Logo"
             />
             <img
               className="img-fluid d-md-none"
-              src={`${process.env.PUBLIC_URL}/images/bcid-symbol-rev.svg`}
+              src={`${import.meta.env.PUBLIC_URL}/images/bcid-symbol-rev.svg`}
               width="64"
               height="44"
               alt="B.C. Government Logo"

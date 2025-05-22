@@ -7,12 +7,11 @@ import { DateRangePicker } from 'react-dates';
 import queryString from 'query-string';
 import _ from 'lodash';
 
-import DataTableWithPaginaionControl from './ui/DataTableWithPaginaionControl';
-import PageSpinner from './ui/PageSpinner';
-import FontAwesomeButton from './ui/FontAwesomeButton';
-import WorkReportingSubmissionDetail from './WorkReportingSubmissionDetail';
+import DataTableWithPaginaionControl from './ui/DataTableWithPaginaionControl.jsx';
+import PageSpinner from './ui/PageSpinner.jsx';
+import FontAwesomeButton from './ui/FontAwesomeButton.jsx';
+import WorkReportingSubmissionDetail from './WorkReportingSubmissionDetail.jsx';
 import useSearchData from './hooks/useSearchData';
-
 import * as Constants from '../Constants';
 import { stringifyQueryParams } from '../utils';
 
