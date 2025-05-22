@@ -21,13 +21,11 @@
     "prop-types": "^15.7.2",
     "query-string": "^6.11.1",
     "react": "^16.13.0",
-    "react-app-polyfill": "^1.0.6",
     "react-clipboard.js": "^2.0.16",
     "react-dates": "^21.8.0",
     "react-dom": "^16.13.0",
     "react-redux": "^7.2.0",
     "react-router-dom": "^5.1.2",
-    "react-scripts": "^5.0.1",
     "react-toastify": "^5.5.0",
     "reactstrap": "^8.4.1",
     "redux": "^4.0.5",
@@ -53,21 +51,5 @@
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
-  },
-  "eslintConfig": {
-    "extends": "react-app"
-  },
-  "browserslist": {
-    "production": [
-      ">0.2%",
-      "not dead",
-      "not op_mini all"
-    ],
-    "development": [
-      "last 1 chrome version",
-      "last 1 firefox version",
-      "last 1 safari version",
-      "ie 11"
-    ]
   }
 }
