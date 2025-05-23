@@ -28,15 +28,16 @@ a:not(.btn):focus {
 }
 
 .list-group .list-group-item-action {
-  @include hover-focus {
+  &:hover,
+  &:focus {
     text-decoration: underline;
   }
 }
 
 // Header, adds the gold bottom border and shadow
 header nav {
-  background-color: theme-color(primary-nav);
-  border-bottom: 2px solid theme-color(bcgold);
+  background-color: var(--bs-primary-nav);
+  border-bottom: 2px solid var(--bs-bcgold);
   &.shadow {
     box-shadow: 0 3px 3px 1px $header-box-shadow-color;
   }
@@ -50,7 +51,8 @@ main {
 
 // Underline navbar links when active
 .navbar-nav .nav-link {
-  @include hover-focus {
+  &:hover,
+  &:focus {
     text-decoration: underline;
   }
 }

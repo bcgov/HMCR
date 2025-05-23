@@ -58,7 +58,7 @@
       .SingleDatePickerInput_calendarIcon {
         padding: 0 10px;
         margin: 0;
-        background-color: theme-color(primary);
+        background-color: var(--bs-primary);
 
         border-radius: 0;
         border-top-right-radius: $input-border-radius;
@@ -72,8 +72,8 @@
       .CalendarDay__selected,
       .CalendarDay__selected:active,
       .CalendarDay__selected:hover {
-        background: theme-color(primary);
-        border: 1px double theme-color(primary);
+        background: var(--bs-primary);
+        border: 1px double var(--bs-primary);
       }
     }
 
@@ -89,7 +89,7 @@
 
 .DatePickerWrapper.is-invalid {
   .DateRangePickerInput__withBorder {
-    border: 1px solid theme-color(danger);
+    border: 1px solid var(--bs-danger);
   }
 }
 
@@ -101,7 +101,7 @@
 
   .DateRangePickerInput_calendarIcon {
     margin-right: 0;
-    background-color: theme-color(primary);
+    background-color: var(--bs-primary);
 
     border-radius: 0;
     border-top-right-radius: $input-border-radius;
@@ -115,21 +115,21 @@
   }
 
   .DateInput_input__focused {
-    border-bottom: 2px solid theme-color(primary);
+    border-bottom: 2px solid var(--bs-primary);
   }
 
   .CalendarDay__selected,
   .CalendarDay__selected:active,
   .CalendarDay__selected:hover {
-    background: theme-color(primary);
-    border: 1px double theme-color(primary);
+    background: var(--bs-primary);
+    border: 1px double var(--bs-primary);
   }
 
   .CalendarDay__selected_span,
   .CalendarDay__hovered_span,
   .CalendarDay__hovered_span:hover {
-    background: theme-color(info);
-    border: 1px double theme-color(info);
+    background: var(--bs-info);
+    border: 1px double var(--bs-info);
     color: white;
   }
 }

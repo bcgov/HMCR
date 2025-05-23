@@ -69,19 +69,19 @@ h6 {
 }
 
 .fa-color-primary {
-  color: theme-color(primary);
+  color: var(--bs-primary);
 }
 
 .fa-color-success {
-  color: theme-color(success);
+  color: var(--bs-success);
 }
 
 .fa-color-danger {
-  color: theme-color(danger);
+  color: var(--bs-danger);
 }
 
 .fa-color-warning {
-  color: theme-color(warning);
+  color: var(--bs-warning);
 }
 
 .modal-dialog.modal-xl {
@@ -94,11 +94,11 @@ ul.no-bullet {
 }
 
 .Toastify__toast--info {
-  background-color: theme-color(primary);
+  background-color: var(--bs-primary);
 }
 
 .Toastify__toast--success {
-  background-color: theme-color(success);
+  background-color: var(--bs-success);
 }
 
 .Toastify__toast--warning {
