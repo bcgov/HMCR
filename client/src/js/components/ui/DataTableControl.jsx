@@ -24,7 +24,7 @@ const DataTableControl = ({
   return (
     <React.Fragment>
       <Table size="sm" responsive hover>
-        <thead className="thead-dark">
+        <thead class="thead-dark">
           <tr>
             {tableColumns.map((column) => {
               let style = { whiteSpace: 'nowrap' };
@@ -68,7 +68,7 @@ const DataTableControl = ({
                   }
 
                   return (
-                    <td key={column.key} className={column.maxWidth ? 'text-overflow-hiden' : ''} style={style}>
+                    <td key={column.key} className={column.maxWidth ? 'text-overflow-hidden' : ''} style={style}>
                       {column.format ? column.format(item[column.key]) : item[column.key]}
                     </td>
                   );
@@ -78,7 +78,7 @@ const DataTableControl = ({
                     <td style={{ width: '1%', whiteSpace: 'nowrap' }}>
                       <FontAwesomeButton
                         icon="edit"
-                        className="mr-1"
+                        className="me-1"
                         onClick={() => handleEditClicked(item.id)}
                         title="Edit Record"
                       />
@@ -97,7 +97,7 @@ const DataTableControl = ({
                   <td>
                     <FontAwesomeButton
                       icon="download"
-                      className="mr-1"
+                      className="me-1"
                       onClick={() => onExportClicked(item.saltReportId)}
                       title="Export Report"
                     />

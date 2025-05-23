@@ -78,7 +78,7 @@ const DeleteButton = ({
             </div>
           )}
 
-          <div className="text-right mt-3">
+          <div className="text-end mt-3">
             <ButtonGroup>
               <Button color="danger" size="sm" onClick={handleConfirmDelete}>
                 {permanentDelete ? 'Delete' : buttonText}

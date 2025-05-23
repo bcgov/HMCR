@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { CustomInput, FormFeedback } from 'reactstrap';
+import { Input, FormFeedback } from 'reactstrap';
 import { FieldArray, useField, useFormikContext } from 'formik';
 
 const MultiSelect = (props) => {
@@ -45,10 +45,9 @@ const MultiSelect = (props) => {
         }`}
       >
         {showSelectAll && (
-          <CustomInput
+          <Input
             type="checkbox"
             id={`${name}_select_all`}
-            label="Select All"
             value="select_all"
             checked={selectAll}
             onBlur={handleBlur}
@@ -64,11 +63,10 @@ const MultiSelect = (props) => {
               const description = item.description ? item.description : item.name;
               const displayName = description;
               return (
-                <CustomInput
+                <Input
                   key={item.id}
                   type="checkbox"
                   id={`${name}_${item.id}`}
-                  label={displayName}
                   value={item.id}
                   checked={values[name].includes(item.id)}
                   onBlur={handleBlur}

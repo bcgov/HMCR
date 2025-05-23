@@ -69,7 +69,7 @@ h6 {
 }
 
 .fa-color-primary {
-  color: var(--bs-primary);
+  color: map-get($theme-colors, primary);
 }
 
 .fa-color-success {
@@ -94,7 +94,7 @@ ul.no-bullet {
 }
 
 .Toastify__toast--info {
-  background-color: var(--bs-primary);
+  background-color: map-get($theme-colors, primary);
 }
 
 .Toastify__toast--success {

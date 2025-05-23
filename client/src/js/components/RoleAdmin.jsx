@@ -138,8 +138,8 @@ const RoleAdmin = ({ showValidationErrorDialog }) => {
                 <Col />
                 <Col />
                 <Col>
-                  <div className="float-right">
-                    <SubmitButton className="mr-2" disabled={searchData.loading} submitting={searchData.loading}>
+                  <div className="float-end">
+                    <SubmitButton className="me-2" disabled={searchData.loading} submitting={searchData.loading}>
                       Search
                     </SubmitButton>
                     <Button type="reset">Reset</Button>
@@ -156,7 +156,7 @@ const RoleAdmin = ({ showValidationErrorDialog }) => {
             <Button
               size="sm"
               color="primary"
-              className="float-right mb-3"
+              className="float-end mb-3"
               onClick={() => formModal.openForm(Constants.FORM_TYPE.ADD)}
             >
               Add Role

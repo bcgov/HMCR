@@ -17,6 +17,8 @@ $theme-colors: (
   bcgold: #fcba19,
 );
 
+$primary: #38598a;
+
 // Add our font as default
 $font-family-sans-serif:
   Myriad-Pro,
@@ -45,8 +47,8 @@ $navbar-dark-toggler-border-color: rgba(255, 255, 255, 0.6);
 $footer-separator-color: #4b5e73;
 
 // Table header
-$table-dark-bg: var(--bs-primary);
-$table-dark-border-color: var(--bs-primary);
+$table-dark-bg: var(--bs-primary-nav);
+$table-dark-border-color: map-get($theme-colors, primary);
 
 // Slightly darker borders
 $gray-400: #ced4da;

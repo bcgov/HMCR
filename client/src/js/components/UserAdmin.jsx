@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 
 import { useLocation } from 'react-router-dom';
 import { connect } from 'react-redux';
-import { Row, Col, Button,Alert, Spinner } from 'reactstrap';
+import { Row, Col, Button, Alert, Spinner } from 'reactstrap';
 import { Formik, Form, Field } from 'formik';
 import queryString from 'query-string';
 import * as Yup from 'yup';
@@ -19,7 +19,7 @@ import useSearchData from './hooks/useSearchData';
 import useFormModal from './hooks/useFormModal';
 import EditUserFormFields from './forms/EditUserFormFields';
 import SimpleModalWrapper from './ui/SimpleModalWrapper';
-import { showValidationErrorDialog,hideErrorDialog } from '../actions';
+import { showValidationErrorDialog, hideErrorDialog } from '../actions';
 import FileSaver from 'file-saver';
 import * as Constants from '../Constants';
 import * as api from '../Api';
@@ -67,7 +67,7 @@ const EXPORT_STAGE = {
   DONE: 'DONE',
 };
 
-const UserAdmin = ({ serviceAreas, userStatuses, userTypes, showValidationErrorDialog,hideErrorDialog }) => {
+const UserAdmin = ({ serviceAreas, userStatuses, userTypes, showValidationErrorDialog, hideErrorDialog }) => {
   const location = useLocation();
   const searchData = useSearchData(defaultSearchOptions);
   const [searchInitialValues, setSearchInitialValues] = useState(defaultSearchFormValues);
@@ -125,8 +125,7 @@ const UserAdmin = ({ serviceAreas, userStatuses, userTypes, showValidationErrorD
       pageNumber: 1,
     };
     searchData.updateSearchOptions(options);
-    if(isExport)
-    {
+    if (isExport) {
       setIsExport(false);
       submitExport(values);
     }
@@ -152,7 +151,7 @@ const UserAdmin = ({ serviceAreas, userStatuses, userTypes, showValidationErrorD
       searchText,
       serviceAreas,
       userTypes: userTypeIds,
-      fileName:'user_export.csv',
+      fileName: 'user_export.csv',
     };
     return options;
   };
@@ -187,7 +186,7 @@ const UserAdmin = ({ serviceAreas, userStatuses, userTypes, showValidationErrorD
         .finally(() => formModal.setSubmitting(false));
     }
   };
-  
+
   const submitExport = (values) => {
     setExporting(true);
     setShowModal(true);
@@ -278,15 +277,15 @@ const UserAdmin = ({ serviceAreas, userStatuses, userTypes, showValidationErrorD
 
   return (
     <React.Fragment>
-        <Formik
-          initialValues={searchInitialValues}
-          enableReinitialize={true}
-          onSubmit={(values) => handleSearchFormSubmit(values)}
-          onReset={handleSearchFormReset}
-        >
-          {(formikProps) => (
-            <React.Fragment>
-              <MaterialCard>
+      <Formik
+        initialValues={searchInitialValues}
+        enableReinitialize={true}
+        onSubmit={(values) => handleSearchFormSubmit(values)}
+        onReset={handleSearchFormReset}
+      >
+        {(formikProps) => (
+          <React.Fragment>
+            <MaterialCard>
               <UIHeader>User Management</UIHeader>
               <Form>
                 <Row form>
@@ -314,8 +313,8 @@ const UserAdmin = ({ serviceAreas, userStatuses, userTypes, showValidationErrorD
                     <MultiDropdownField {...formikProps} items={userStatuses} name="statusId" title="User Status" />
                   </Col>
                   <Col>
-                    <div className="float-right">
-                      <SubmitButton className="mr-2" disabled={searchData.loading} submitting={searchData.loading}>
+                    <div className="float-end">
+                      <SubmitButton className="me-2" disabled={searchData.loading} submitting={searchData.loading}>
                         Search
                       </SubmitButton>
                       <Button type="reset">Reset</Button>
@@ -323,27 +322,31 @@ const UserAdmin = ({ serviceAreas, userStatuses, userTypes, showValidationErrorD
                   </Col>
                 </Row>
               </Form>
-              </MaterialCard>
-              <Authorize requires={Constants.PERMISSIONS.USER_W}>
-                <Row>
-                  <Col>
-                    <div className="float-right mb-3">
-                      <Button size="sm" color="primary" className="mr-2" onClick={() => setAddUserWizardIsOpen(true)}>
-                        Add User
-                      </Button>
-                      <Button size="sm" color="primary" onClick={() => {
+            </MaterialCard>
+            <Authorize requires={Constants.PERMISSIONS.USER_W}>
+              <Row>
+                <Col>
+                  <div className="float-end mb-3">
+                    <Button size="sm" color="primary" className="me-2" onClick={() => setAddUserWizardIsOpen(true)}>
+                      Add User
+                    </Button>
+                    <Button
+                      size="sm"
+                      color="primary"
+                      onClick={() => {
                         setIsExport(true);
                         formikProps.submitForm();
-                      }}>
-                        Export
-                      </Button>
-                    </div>
-                  </Col>
-                </Row>
-              </Authorize>
-            </React.Fragment>
-          )}
-       </Formik>
+                      }}
+                    >
+                      Export
+                    </Button>
+                  </div>
+                </Col>
+              </Row>
+            </Authorize>
+          </React.Fragment>
+        )}
+      </Formik>
       {searchData.loading && <PageSpinner />}
       {!searchData.loading && (
         <MaterialCard>
@@ -396,4 +399,4 @@ const mapStateToProps = (state) => {
   };
 };
 
-export default connect(mapStateToProps, { showValidationErrorDialog, hideErrorDialog  })(UserAdmin);
+export default connect(mapStateToProps, { showValidationErrorDialog, hideErrorDialog })(UserAdmin);

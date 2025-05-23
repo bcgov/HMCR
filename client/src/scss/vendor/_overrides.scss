@@ -34,6 +34,12 @@ a:not(.btn):focus {
   }
 }
 
+thead.thead-dark th {
+  background-color: var(--bs-primary) !important;
+  color: #fff !important;
+}
+
+
 // Header, adds the gold bottom border and shadow
 header nav {
   background-color: var(--bs-primary-nav);

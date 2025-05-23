@@ -50,7 +50,7 @@ const Header = ({ currentUser }) => {
     <header className="mb-3">
       <Navbar expand="lg" className="navbar-dark">
         <Container>
-          <NavbarBrand tag={Link} onClick={hideNavbar} to="/">
+          <NavbarBrand tag={Link} onClick={hideNavbar} to="/" className="d-flex align-items-center gap-2">
             <img
               className="img-fluid d-none d-md-block"
               src={'/images/bcid-logo-rev-en.svg'}
@@ -65,8 +65,8 @@ const Header = ({ currentUser }) => {
               height="44"
               alt="B.C. Government Logo"
             />
+            <div className="navbar-brand">MoTI Maintenance Contractor Reporting</div>
           </NavbarBrand>
-          <div className="navbar-brand">MoTI Maintenance Contractor Reporting</div>
           <NavbarToggler onClick={toggleNavbar} />
           {/* <Collapse> is needed to keep justify-content: space-between maintain correct spacing */}
           <Collapse isOpen={!collapsed} navbar />

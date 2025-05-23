@@ -27,7 +27,7 @@ const submissionRowErrors = (rowNum, errorDetail) => {
     <ul style={{ paddingInlineStart: '20px' }}>
       {parseErrorDetailJson(errorDetail).map((error) => (
         <li key={`${rowNum}_${error.field}`}>
-          <strong className="mr-1">{error.field}:</strong>
+          <strong className="me-1">{error.field}:</strong>
           <ul>
             {error.messages.map((msg, k) => (
               <li key={`${rowNum}_${error.field}_${k}`}>{`${msg} `}</li>
@@ -120,7 +120,7 @@ const WorkReportingSubmissionDetail = ({ toggle, submission }) => {
     return (
       <React.Fragment>
         <span>Submission #: {submissionResultData.id}</span>
-        <span className="ml-3 mr-3">
+        <span className="ms-3 me-3">
           Submission Date: {moment(submissionResultData.appCreateTimestamp).format(Constants.DATE_DISPLAY_FORMAT)}
         </span>
         <span>Service Area: {submissionResultData.serviceAreaNumber}</span>
@@ -159,7 +159,7 @@ const WorkReportingSubmissionDetail = ({ toggle, submission }) => {
             <Button
               size="sm"
               color="primary"
-              className="mr-2"
+              className="me-2"
               onClick={() =>
                 api
                   .getSubmissionFile(submissionResultData.id)
