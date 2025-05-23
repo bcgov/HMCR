@@ -1,3 +1,4 @@
 import { createBrowserHistory } from 'history';
 
-export default createBrowserHistory({ basename: import.meta.env.PUBLIC_URL });
+const base = import.meta.env.VITE_BASE_URL?.replace(/\/+$/, '') || '/';
+export default createBrowserHistory({ basename: base });
