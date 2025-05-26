@@ -1,9 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { Popover, PopoverHeader, PopoverBody, ButtonGroup, Button } from 'reactstrap';
-import { SingleDatePicker } from 'react-dates';
-import moment from 'moment';
+import {
+  Popover,
+  PopoverHeader,
+  PopoverBody,
+  ButtonGroup,
+  Button,
+} from 'reactstrap';
 
 import FontAwesomeButton from './FontAwesomeButton';
+import SingleDateInput from './SingleDateInput';
 
 const DeleteButton = ({
   buttonId,
@@ -17,27 +22,21 @@ const DeleteButton = ({
 }) => {
   const [popoverOpen, setPopoverOpen] = useState(false);
   const [date, setDate] = useState(null);
-  const [focusedInput, setFocusedInput] = useState(false);
-  const [focusClassName, setFocusClassName] = useState('');
   const [buttonText, setButtonText] = useState('Disable');
 
   useEffect(() => {
     if (defaultEndDate) {
-      setDate(moment(defaultEndDate));
+      const parsed = new Date(defaultEndDate);
+      setDate(isNaN(parsed.getTime()) ? null : parsed);
       setButtonText('Update');
     } else {
       setDate(null);
+      setButtonText('Disable');
     }
   }, [defaultEndDate, popoverOpen]);
 
   const togglePopover = () => {
     setPopoverOpen(!popoverOpen);
-  };
-
-  const handleDatePickerFocusChange = (focused) => {
-    setFocusedInput(focused);
-
-    focused ? setFocusClassName('focused') : setFocusClassName('');
   };
 
   const handleConfirmDelete = () => {
@@ -48,9 +47,20 @@ const DeleteButton = ({
   const iconName = permanentDelete ? 'trash-alt' : 'ban';
 
   return (
-    <React.Fragment>
-      <FontAwesomeButton color="danger" icon={iconName} id={buttonId} {...props} />
-      <Popover placement="auto-start" isOpen={popoverOpen} target={buttonId} toggle={togglePopover} trigger="legacy">
+    <>
+      <FontAwesomeButton
+        color="danger"
+        icon={iconName}
+        id={buttonId}
+        {...props}
+      />
+      <Popover
+        placement="auto-start"
+        isOpen={popoverOpen}
+        target={buttonId}
+        toggle={togglePopover}
+        trigger="legacy"
+      >
         <PopoverHeader>Are you sure?</PopoverHeader>
         <PopoverBody>
           {permanentDelete ? (
@@ -58,22 +68,13 @@ const DeleteButton = ({
               This will <strong>permanently</strong> delete the record.
             </div>
           ) : (
-            <div className={`DatePickerWrapper ${focusClassName}`}>
-              <SingleDatePicker
+            <div style={{ marginBottom: '1rem' }}>
+              <SingleDateInput
                 id={`${buttonId}_endDate`}
-                date={date}
-                onDateChange={(date) => setDate(date)}
-                focused={focusedInput}
-                onFocusChange={({ focused }) => handleDatePickerFocusChange(focused)}
-                hideKeyboardShortcutsPanel={true}
-                numberOfMonths={1}
-                small
-                block
-                noBorder
-                showDefaultInputIcon={true}
-                showClearDate={true}
-                inputIconPosition="after"
+                value={date}
+                onChange={setDate}
                 placeholder="End Date"
+                maxDate={new Date()}
               />
             </div>
           )}
@@ -90,7 +91,7 @@ const DeleteButton = ({
           </div>
         </PopoverBody>
       </Popover>
-    </React.Fragment>
+    </>
   );
 };
 

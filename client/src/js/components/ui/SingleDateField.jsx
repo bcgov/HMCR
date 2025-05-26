@@ -1,40 +1,69 @@
-import React, { useState } from 'react';
-import { SingleDatePicker } from 'react-dates';
+import React, { useState, useRef, useEffect } from 'react';
+import { Calendar } from 'react-date-range';
 import { Field, useFormikContext } from 'formik';
+import { InputGroup, InputGroupText, Input, FormFeedback } from 'reactstrap';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { format, isValid } from 'date-fns';
 
+import 'react-date-range/dist/styles.css';
+import 'react-date-range/dist/theme/default.css';
 import * as Constants from '../../Constants';
 
-const SingleDatePickerWithFormik = ({ field: { name }, placeholder, style, isOutsideRange }) => {
-  const [focusedInput, setFocusedInput] = useState(false);
-  const [focusClassName, setFocusClassName] = useState('');
+const SingleDatePickerWithFormik = ({
+  field: { name },
+  placeholder,
+  style,
+  isOutsideRange, // not used here — you can map it to minDate/maxDate if needed
+  form: { errors, submitCount, touched },
+}) => {
   const { values, setFieldValue } = useFormikContext();
+  const wrapperRef = useRef(null);
+  const [open, setOpen] = useState(false);
 
-  const handleFocusChanged = (focused) => {
-    setFocusedInput(focused);
+  const selectedDate = values[name] ? new Date(values[name]) : null;
+  const showError = (submitCount > 0 || touched?.[name]) && errors?.[name];
 
-    focused ? setFocusClassName('focused') : setFocusClassName('');
+  const handleChange = (date) => {
+    setFieldValue(name, date);
+    setOpen(false);
   };
 
+  // Close on outside click
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (wrapperRef.current && !wrapperRef.current.contains(event.target)) {
+        setOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
   return (
-    <div className={`DatePickerWrapper ${focusClassName}`} style={style}>
-      <SingleDatePicker
-        id={name}
-        date={values[name]}
-        onDateChange={(date) => setFieldValue(name, date)}
-        focused={focusedInput}
-        onFocusChange={({ focused }) => handleFocusChanged(focused)}
-        hideKeyboardShortcutsPanel={true}
-        numberOfMonths={1}
-        small
-        block
-        noBorder
-        showDefaultInputIcon={true}
-        showClearDate={true}
-        inputIconPosition="after"
-        placeholder={placeholder}
-        isOutsideRange={isOutsideRange}
-        displayFormat={Constants.DATE_DISPLAY_FORMAT}
-      />
+    <div className={`DatePickerWrapper position-relative ${showError ? 'is-invalid' : ''}`} style={style} ref={wrapperRef}>
+      <InputGroup onClick={() => setOpen(!open)} style={{ cursor: 'pointer', width: '250px' }}>
+        <Input
+          readOnly
+          value={isValid(selectedDate) ? format(selectedDate, Constants.DATE_DISPLAY_FORMAT) : ''}
+          placeholder={placeholder}
+          className={showError ? 'is-invalid' : ''}
+        />
+        <InputGroupText>
+          <FontAwesomeIcon icon="calendar-alt" />
+        </InputGroupText>
+      </InputGroup>
+      {showError && <FormFeedback style={{ display: 'block' }}>{errors[name]}</FormFeedback>}
+
+      {open && (
+        <div style={{ position: 'absolute', zIndex: 10 }}>
+          <Calendar
+            date={selectedDate || new Date()}
+            onChange={handleChange}
+            showDateDisplay={false}
+            color="#38598a"
+          />
+        </div>
+      )}
     </div>
   );
 };

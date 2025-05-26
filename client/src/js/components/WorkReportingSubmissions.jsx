@@ -1,12 +1,25 @@
 import React, { useState, useEffect, forwardRef, useImperativeHandle } from 'react';
 import { useHistory } from 'react-router-dom';
 import { connect } from 'react-redux';
-import { Button, Row, Col, Input, UncontrolledPopover, PopoverBody, PopoverHeader, Progress } from 'reactstrap';
+import {
+  Button,
+  Row,
+  Col,
+  Input,
+  UncontrolledPopover,
+  PopoverBody,
+  PopoverHeader,
+  Progress,
+} from 'reactstrap';
 import moment from 'moment';
-import DateRangePicker from 'react-dates';
 import queryString from 'query-string';
 import _ from 'lodash';
+import { DateRange } from 'react-date-range';
+import { format, endOfDay, isBefore, parseISO } from 'date-fns';
 
+import 'react-date-range/dist/styles.css';
+import 'react-date-range/dist/theme/default.css';
+import DateRangeInput from './ui/DateRangeInput.jsx';
 import DataTableWithPaginaionControl from './ui/DataTableWithPaginaionControl.jsx';
 import PageSpinner from './ui/PageSpinner.jsx';
 import FontAwesomeButton from './ui/FontAwesomeButton.jsx';
@@ -15,7 +28,7 @@ import useSearchData from './hooks/useSearchData';
 import * as Constants from '../Constants';
 import { stringifyQueryParams } from '../utils';
 
-const startDateLimit = moment('2019-01-01');
+const startDateLimit = new Date('2019-01-01');
 
 const tableColumns = [
   { heading: 'Submission #', key: 'id', nosort: true },
@@ -28,8 +41,8 @@ const tableColumns = [
 ];
 
 const defaultSearchOptions = {
-  dateFrom: moment().subtract(1, 'months'),
-  dateTo: moment(),
+  dateFrom: new Date(moment().subtract(1, 'months')),
+  dateTo: new Date(),
   searchText: '',
   direction: Constants.SORT_DIRECTION.DESCENDING,
   dataPath: Constants.API_PATHS.SUBMISSIONS,
@@ -50,11 +63,21 @@ const WorkReportingSubmissions = ({ serviceArea, submissionStatuses }, ref) => {
   const [searchText, setSearchText] = useState(defaultSearchOptions.searchText);
 
   const [showResultScreen, setShowResultScreen] = useState({ isOpen: false, submission: null });
+  const [showCalendar, setShowCalendar] = useState(false);
 
   // Date picker
   const [focusedInput, setFocusedInput] = useState(null);
   const [dateFrom, setDateFrom] = useState(defaultSearchOptions.dateFrom);
   const [dateTo, setDateTo] = useState(defaultSearchOptions.dateTo);
+  const [hasPickedStart, setHasPickedStart] = useState(false);
+
+  const [dateRange, setDateRange] = useState([
+    {
+      startDate: defaultSearchOptions.dateFrom,
+      endDate: defaultSearchOptions.dateTo,
+      key: 'selection',
+    },
+  ]);
 
   useImperativeHandle(ref, () => ({
     refresh() {
@@ -82,23 +105,30 @@ const WorkReportingSubmissions = ({ serviceArea, submissionStatuses }, ref) => {
     setSearchText(options.searchText);
     setDateFrom(options.dateFrom);
     setDateTo(options.dateTo);
-
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Update the service area search options when serviceArea is changed
   useEffect(() => {
     if (searchData.searchOptions) {
       if (searchData.searchOptions.serviceAreaNumber !== serviceArea) {
-        searchData.updateSearchOptions({ ...searchData.searchOptions, serviceAreaNumber: serviceArea, serviceArea });
+        searchData.updateSearchOptions({
+          ...searchData.searchOptions,
+          serviceAreaNumber: serviceArea,
+          serviceArea,
+        });
       }
     }
   }, [serviceArea, searchData]);
 
   const handleDateChanged = (dateFrom, dateTo) => {
-    if (!(dateFrom && dateTo && dateFrom.isSameOrBefore(dateTo))) return;
+    if (!(dateFrom && dateTo && isBefore(dateFrom, dateTo))) return;
 
-    searchData.updateSearchOptions({ ...searchData.searchOptions, dateFrom, dateTo, pageNumber: 1 });
+    searchData.updateSearchOptions({
+      ...searchData.searchOptions,
+      dateFrom,
+      dateTo,
+      pageNumber: 1,
+    });
   };
 
   const handleSearchFormSubmit = () =>
@@ -108,7 +138,11 @@ const WorkReportingSubmissions = ({ serviceArea, submissionStatuses }, ref) => {
     setDateFrom(defaultSearchOptions.dateFrom);
     setDateTo(defaultSearchOptions.dateTo);
     setSearchText(defaultSearchOptions.searchText);
-    searchData.updateSearchOptions({ ...defaultSearchOptions, serviceAreaNumber: serviceArea, serviceArea });
+    searchData.updateSearchOptions({
+      ...defaultSearchOptions,
+      serviceAreaNumber: serviceArea,
+      serviceArea,
+    });
   };
 
   return (
@@ -118,28 +152,20 @@ const WorkReportingSubmissions = ({ serviceArea, submissionStatuses }, ref) => {
           <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between' }}>
             <div>
               <span className="me-2">Report Submit Date</span>
-              <DateRangePicker
-                startDate={dateFrom}
-                startDateId="searchStartDate"
-                endDate={dateTo}
-                endDateId="searchEndDate"
-                onDatesChange={({ startDate, endDate }) => {
-                  setDateFrom(startDate);
-                  setDateTo(endDate);
-                  handleDateChanged(startDate, endDate);
-                }}
-                focusedInput={focusedInput}
-                onFocusChange={(focusedInput) => setFocusedInput(focusedInput)}
-                showDefaultInputIcon
-                hideKeyboardShortcutsPanel
-                inputIconPosition="after"
-                small
-                displayFormat={Constants.DATE_DISPLAY_FORMAT}
-                startDatePlaceholderText="Date From"
-                endDatePlaceholderText="Date To"
-                isOutsideRange={(date) => date.isBefore(startDateLimit) || moment().endOf('day').isBefore(date)}
-                minimumNights={0}
-              />
+              <div style={{ position: 'relative', display: 'inline-block' }}>
+                <DateRangeInput
+                  startDate={dateFrom}
+                  endDate={dateTo}
+                  onChange={({ startDate, endDate }) => {
+                    setDateFrom(startDate);
+                    setDateTo(endDate);
+                    handleDateChanged(startDate, endDate);
+                  }}
+                  minDate={new Date('2019-01-01')}
+                  maxDate={new Date()}
+                />
+              </div>
+
               <div
                 style={{
                   position: 'relative',
@@ -162,10 +188,20 @@ const WorkReportingSubmissions = ({ serviceArea, submissionStatuses }, ref) => {
                   }}
                 />
               </div>
-              <Button color="primary" type="button" className="ms-2" onClick={handleSearchFormSubmit}>
+              <Button
+                color="primary"
+                type="button"
+                className="ms-2"
+                onClick={handleSearchFormSubmit}
+              >
                 Search
               </Button>
-              <Button color="secondary" type="button" className="ms-2" onClick={handleSearchFormReset}>
+              <Button
+                color="secondary"
+                type="button"
+                className="ms-2"
+                onClick={handleSearchFormReset}
+              >
                 Reset
               </Button>
             </div>
@@ -190,7 +226,9 @@ const WorkReportingSubmissions = ({ serviceArea, submissionStatuses }, ref) => {
                 dataList={searchData.data.map((item) => {
                   const itemStatus = submissionStatuses[item.submissionStatusCode];
                   const progressBarLength =
-                    (itemStatus.stage < 0 ? maxValidationStages : itemStatus.stage / maxValidationStages) * 100;
+                    (itemStatus.stage < 0
+                      ? maxValidationStages
+                      : itemStatus.stage / maxValidationStages) * 100;
 
                   return {
                     ...item,
@@ -226,7 +264,11 @@ const WorkReportingSubmissions = ({ serviceArea, submissionStatuses }, ref) => {
                           color="link"
                           icon="question-circle"
                         />
-                        <UncontrolledPopover trigger="focus" placement="auto" target={`tooltip_${item.id}`}>
+                        <UncontrolledPopover
+                          trigger="focus"
+                          placement="auto"
+                          target={`tooltip_${item.id}`}
+                        >
                           <PopoverHeader>{itemStatus.description}</PopoverHeader>
                           <PopoverBody>{itemStatus.longDescription}</PopoverBody>
                         </UncontrolledPopover>
@@ -250,7 +292,8 @@ const WorkReportingSubmissions = ({ serviceArea, submissionStatuses }, ref) => {
           toggle={() => {
             setShowResultScreen({ isOpen: false });
             const params = queryString.parse(history.location.search);
-            if (params.showResult) history.push(`?${stringifyQueryParams(_.omit(params, ['showResult']))}`);
+            if (params.showResult)
+              history.push(`?${stringifyQueryParams(_.omit(params, ['showResult']))}`);
           }}
         />
       )}
@@ -266,4 +309,6 @@ const mapStateToProps = (state) => {
   };
 };
 
-export default connect(mapStateToProps, null, null, { forwardRef: true })(refWorkReportingSubmissions);
+export default connect(mapStateToProps, null, null, { forwardRef: true })(
+  refWorkReportingSubmissions
+);

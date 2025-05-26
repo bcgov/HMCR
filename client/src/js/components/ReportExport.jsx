@@ -5,9 +5,9 @@ import { Formik, Form } from 'formik';
 import * as Yup from 'yup';
 import moment from 'moment';
 import FileSaver from 'file-saver';
+import { subMonths, startOfMonth, endOfMonth } from 'date-fns';
 
 import { fetchActivityCodesDropdown, hideErrorDialog } from '../actions';
-
 import MaterialCard from './ui/MaterialCard';
 import UIHeader from './ui/UIHeader';
 import SingleDropdownField from './ui/SingleDropdownField';
@@ -17,7 +17,6 @@ import { FormInput } from './forms/FormInputs';
 import SimpleModalWrapper from './ui/SimpleModalWrapper';
 import PageSpinner from './ui/PageSpinner';
 import MouseoverTooltip from './ui/MouseoverTooltip';
-
 import * as Constants from '../Constants';
 import * as api from '../Api';
 
@@ -28,8 +27,8 @@ const filterContainerStyle = {
 
 const defaultSearchFormValues = {
   reportTypeId: '',
-  dateFrom: moment().subtract(1, 'months').startOf('month'),
-  dateTo: moment().subtract(1, 'months').endOf('month'),
+  dateFrom: startOfMonth(subMonths(new Date(), 1)),
+  dateTo: endOfMonth(subMonths(new Date(), 1)),
   submissionDateFrom: null,
   submissionDateTo: null,
   serviceAreaNumbers: [],
