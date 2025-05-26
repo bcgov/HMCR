@@ -274,13 +274,13 @@ namespace Hmcr.Domain.Hangfire.Base
             if (row.StartVariance != null && row.StartVariance > threasholdInKm)
             {
                 //row.WarningDetail = string.Format(RowWarning.VarianceWarning, "Start", start, rfiSegment, threshold.Warning);
-                warnings.AddItem("Start GPS Variance", string.Format("{0} {1} is is not on the Highway Unique [{2}] within the warning threshold [{3}] metres",
+                warnings.AddItem("Start GPS Variance", string.Format("{0} {1} is not on the Highway Unique [{2}] within the warning threshold [{3}] metres",
                     "Start", start, rfiSegment, threshold.Warning));
             }
             else if (row.EndVariance != null && row.EndVariance > threasholdInKm)
             {
                 //row.WarningDetail = string.Format(RowWarning.VarianceWarning, "End", end, rfiSegment, threshold.Warning);
-                warnings.AddItem("End GPS Variance", string.Format("{0} {1} is is not on the Highway Unique [{2}] within the warning threshold [{3}] metres",
+                warnings.AddItem("End GPS Variance", string.Format("{0} {1} is not on the Highway Unique [{2}] within the warning threshold [{3}] metres",
                     "End", end, rfiSegment, threshold.Warning));
             }
 

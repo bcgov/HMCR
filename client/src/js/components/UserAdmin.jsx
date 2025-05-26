@@ -12,7 +12,7 @@ import MaterialCard from './ui/MaterialCard';
 import UIHeader from './ui/UIHeader';
 import MultiDropdownField from './ui/MultiDropdownField';
 import AddUserWizard from './forms/AddUserWizard';
-import DataTableWithPaginaionControl from './ui/DataTableWithPaginaionControl';
+import DataTableWithPaginationControl from './ui/DataTableWithPaginationControl';
 import SubmitButton from './ui/SubmitButton';
 import PageSpinner from './ui/PageSpinner';
 import useSearchData from './hooks/useSearchData';
@@ -351,7 +351,7 @@ const UserAdmin = ({ serviceAreas, userStatuses, userTypes, showValidationErrorD
       {!searchData.loading && (
         <MaterialCard>
           {data.length > 0 && (
-            <DataTableWithPaginaionControl
+            <DataTableWithPaginationControl
               dataList={data}
               tableColumns={tableColumns}
               searchPagination={searchData.pagination}

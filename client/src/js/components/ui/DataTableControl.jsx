@@ -68,7 +68,7 @@ const DataTableControl = ({
                   }
 
                   return (
-                    <td key={column.key} className={column.maxWidth ? 'text-overflow-hiden' : ''} style={style}>
+                    <td key={column.key} className={column.maxWidth ? 'text-overflow-hidden' : ''} style={style}>
                       {column.format ? column.format(item[column.key]) : item[column.key]}
                     </td>
                   );

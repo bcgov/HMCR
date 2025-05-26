@@ -20,7 +20,7 @@ import { format, endOfDay, isBefore, parseISO } from 'date-fns';
 import 'react-date-range/dist/styles.css';
 import 'react-date-range/dist/theme/default.css';
 import DateRangeInput from './ui/DateRangeInput.jsx';
-import DataTableWithPaginaionControl from './ui/DataTableWithPaginaionControl.jsx';
+import DataTableWithPaginationControl from './ui/DataTableWithPaginationControl.jsx';
 import PageSpinner from './ui/PageSpinner.jsx';
 import FontAwesomeButton from './ui/FontAwesomeButton.jsx';
 import WorkReportingSubmissionDetail from './WorkReportingSubmissionDetail.jsx';
@@ -222,7 +222,7 @@ const WorkReportingSubmissions = ({ serviceArea, submissionStatuses }, ref) => {
         <Row>
           <Col>
             {searchData.data.length > 0 && (
-              <DataTableWithPaginaionControl
+              <DataTableWithPaginationControl
                 dataList={searchData.data.map((item) => {
                   const itemStatus = submissionStatuses[item.submissionStatusCode];
                   const progressBarLength =

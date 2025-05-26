@@ -9,7 +9,7 @@ import Authorize from './fragments/Authorize';
 import MaterialCard from './ui/MaterialCard';
 import UIHeader from './ui/UIHeader';
 import MultiDropdownField from './ui/MultiDropdownField';
-import DataTableWithPaginaionControl from './ui/DataTableWithPaginaionControl';
+import DataTableWithPaginationControl from './ui/DataTableWithPaginationControl';
 import SubmitButton from './ui/SubmitButton';
 import PageSpinner from './ui/PageSpinner';
 import useSearchData from './hooks/useSearchData';
@@ -328,7 +328,7 @@ const ActivityAdmin = ({ maintenanceTypes, locationCodes, unitOfMeasures,showVal
       {!searchData.loading && (
         <MaterialCard>
           {data.length > 0 && (
-            <DataTableWithPaginaionControl
+            <DataTableWithPaginationControl
               dataList={data}
               tableColumns={tableColumns}
               searchPagination={searchData.pagination}

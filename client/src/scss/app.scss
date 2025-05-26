@@ -43,12 +43,12 @@ h6 {
   padding: 0.1rem 0.3rem;
 }
 
-.text-overflow-hiden {
+.text-overflow-hidden {
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
-.text-overflow-hiden:hover {
+.text-overflow-hidden:hover {
   overflow: visible;
   word-wrap: break-word;
 }

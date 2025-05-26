@@ -11,7 +11,7 @@ import PageSpinner from './ui/PageSpinner';
 import SimpleModalWrapper from './ui/SimpleModalWrapper';
 import MaterialCard from './ui/MaterialCard';
 import UIHeader from './ui/UIHeader';
-import DataTableWithPaginaionControl from './ui/DataTableWithPaginaionControl';
+import DataTableWithPaginationControl from './ui/DataTableWithPaginationControl';
 import Authorize from './fragments/Authorize';
 import AddSaltReportFormFields from './forms/saltreport/AddSaltReportFormFields';
 import { Col, FormGroup, Label, Alert, Button, Row } from 'reactstrap';
@@ -121,7 +121,7 @@ const SaltReporting = ({ currentUser }) => {
           <MaterialCard>
             <UIHeader>Past Submissions</UIHeader>
             {searchData.data.length > 0 ? (
-              <DataTableWithPaginaionControl
+              <DataTableWithPaginationControl
                 dataList={searchData.data}
                 tableColumns={tableColumns}
                 searchPagination={searchData.pagination}

@@ -5,7 +5,7 @@ import _ from 'lodash';
 import PaginationControl from './PaginationControl';
 import DataTableControl from './DataTableControl';
 
-const DataTableWithPaginaionControl = ({ searchPagination, onPageNumberChange, onPageSizeChange, ...props }) => {
+const DataTableWithPaginationControl = ({ searchPagination, onPageNumberChange, onPageSizeChange, ...props }) => {
   return (
     <React.Fragment>
       <DataTableControl {..._.omit(props, ['searchPagination', 'onPageNumberChange', 'onPageSizeChange'])} />
@@ -22,7 +22,7 @@ const DataTableWithPaginaionControl = ({ searchPagination, onPageNumberChange, o
   );
 };
 
-DataTableWithPaginaionControl.propTypes = {
+DataTableWithPaginationControl.propTypes = {
   dataList: PropTypes.arrayOf(PropTypes.object).isRequired,
   tableColumns: PropTypes.arrayOf(
     PropTypes.shape({
@@ -49,8 +49,8 @@ DataTableWithPaginaionControl.propTypes = {
   onHeadingSortClicked: PropTypes.func,
 };
 
-DataTableWithPaginaionControl.defaultProps = {
+DataTableWithPaginationControl.defaultProps = {
   editable: false,
 };
 
-export default DataTableWithPaginaionControl;
+export default DataTableWithPaginationControl;
