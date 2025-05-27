@@ -1,16 +1,11 @@
-// eslint-disable-next-line import/no-unresolved
 import Keycloak from 'keycloak-js';
 
 import * as api from './Api';
 
 const keycloakConfig = {
   url: window.RUNTIME_REACT_APP_SSO_HOST ? window.RUNTIME_REACT_APP_SSO_HOST : import.meta.env.VITE_SSO_HOST,
-  realm: window.RUNTIME_REACT_APP_SSO_REALM
-    ? window.RUNTIME_REACT_APP_SSO_REALM
-    : import.meta.env.VITE_SSO_REALM,
-  clientId: window.RUNTIME_REACT_APP_SSO_CLIENT
-    ? window.RUNTIME_REACT_APP_SSO_CLIENT
-    : import.meta.env.VITE_SSO_CLIENT,
+  realm: window.RUNTIME_REACT_APP_SSO_REALM ? window.RUNTIME_REACT_APP_SSO_REALM : import.meta.env.VITE_SSO_REALM,
+  clientId: window.RUNTIME_REACT_APP_SSO_CLIENT ? window.RUNTIME_REACT_APP_SSO_CLIENT : import.meta.env.VITE_SSO_CLIENT,
 };
 
 export const keycloak = new Keycloak(keycloakConfig);
@@ -44,8 +39,8 @@ export const init = (onSuccess) => {
           })
           .catch(() => {
             keycloak.login();
-          })
-      )
+          }),
+      ),
   );
 };
 

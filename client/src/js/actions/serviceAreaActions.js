@@ -1,6 +1,5 @@
 import * as api from '../Api';
 import * as Constants from '../Constants';
-
 import { FETCH_SERVICE_AREAS } from './types';
 
 export const fetchServiceAreas = () => (dispatch) => {

@@ -1,17 +1,16 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { useHistory } from 'react-router-dom';
-import { connect } from 'react-redux';
-import { Row, Col } from 'reactstrap';
 import _ from 'lodash';
 import queryString from 'query-string';
+import React, { useState, useEffect, useRef } from 'react';
+import { connect } from 'react-redux';
+import { useHistory } from 'react-router-dom';
+import { Row, Col } from 'reactstrap';
 
-import SingleDropdown from './ui/SingleDropdown';
-import MaterialCard from './ui/MaterialCard';
-import UIHeader from './ui/UIHeader';
-import WorkReportingUpload from './WorkReportingUpload';
-import WorkReportingSubmissions from './WorkReportingSubmissions';
 import Authorize from './fragments/Authorize';
-
+import MaterialCard from './ui/MaterialCard';
+import SingleDropdown from './ui/SingleDropdown';
+import UIHeader from './ui/UIHeader';
+import WorkReportingSubmissions from './WorkReportingSubmissions';
+import WorkReportingUpload from './WorkReportingUpload';
 import * as Constants from '../Constants';
 
 const WorkReporting = ({ currentUser }) => {

@@ -1,25 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import {
-  Popover,
-  PopoverHeader,
-  PopoverBody,
-  ButtonGroup,
-  Button,
-} from 'reactstrap';
+import { Popover, PopoverHeader, PopoverBody, ButtonGroup, Button } from 'reactstrap';
 
 import FontAwesomeButton from './FontAwesomeButton';
 import SingleDateInput from './SingleDateInput';
 
-const DeleteButton = ({
-  buttonId,
-  children,
-  itemId,
-  defaultEndDate,
-  onDeleteClicked,
-  onComplete,
-  permanentDelete,
-  ...props
-}) => {
+const DeleteButton = ({ buttonId, children, itemId, defaultEndDate, onDeleteClicked, onComplete, permanentDelete, ...props }) => {
   const [popoverOpen, setPopoverOpen] = useState(false);
   const [date, setDate] = useState(null);
   const [buttonText, setButtonText] = useState('Disable');
@@ -48,20 +33,8 @@ const DeleteButton = ({
 
   return (
     <>
-      <FontAwesomeButton
-        color="danger"
-        icon={iconName}
-        id={buttonId}
-        {...props}
-        className="text-white"
-      />
-      <Popover
-        placement="auto-start"
-        isOpen={popoverOpen}
-        target={buttonId}
-        toggle={togglePopover}
-        trigger="legacy"
-      >
+      <FontAwesomeButton color="danger" icon={iconName} id={buttonId} {...props} className="text-white" />
+      <Popover placement="auto-start" isOpen={popoverOpen} target={buttonId} toggle={togglePopover} trigger="legacy">
         <PopoverHeader>Are you sure?</PopoverHeader>
         <PopoverBody>
           {permanentDelete ? (
@@ -70,13 +43,7 @@ const DeleteButton = ({
             </div>
           ) : (
             <div style={{ marginBottom: '1rem' }}>
-              <SingleDateInput
-                id={`${buttonId}_endDate`}
-                value={date}
-                onChange={setDate}
-                placeholder="End Date"
-                minDate={new Date()}
-              />
+              <SingleDateInput id={`${buttonId}_endDate`} value={date} onChange={setDate} placeholder="End Date" minDate={new Date()} />
             </div>
           )}
 

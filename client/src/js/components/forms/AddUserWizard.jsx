@@ -1,19 +1,17 @@
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { Formik, Form } from 'formik';
 import React, { useEffect, useState } from 'react';
 import { connect } from 'react-redux';
 import { Alert, Button, Modal, ModalHeader, ModalBody, ModalFooter, Row, Col, FormGroup, Label } from 'reactstrap';
-import { Formik, Form } from 'formik';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
-import PageSpinner from '../ui/PageSpinner';
-import MultiSelect from '../ui/MultiSelect';
-import SingleDropdownField from '../ui/SingleDropdownField';
 import { FormInput, FormRow } from './FormInputs';
-import SubmitButton from '../ui/SubmitButton';
-
 import { showValidationErrorDialog, hideErrorDialog } from '../../actions';
-
-import * as Constants from '../../Constants';
 import * as api from '../../Api';
+import * as Constants from '../../Constants';
+import MultiSelect from '../ui/MultiSelect';
+import PageSpinner from '../ui/PageSpinner';
+import SingleDropdownField from '../ui/SingleDropdownField';
+import SubmitButton from '../ui/SubmitButton';
 
 const WIZARD_STATE = {
   SEARCH: 'SEARCH',
@@ -65,14 +63,7 @@ const AddUserSearch = ({ userTypes, submitting, toggle, values, handleSubmit }) 
         <Button color="secondary" size="sm" type="button" onClick={toggle}>
           Cancel
         </Button>
-        <SubmitButton
-          color="primary"
-          type="button"
-          size="sm"
-          disabled={submitting || !values.userType || !values.username}
-          submitting={submitting}
-          onClick={() => handleSubmit(values)}
-        >
+        <SubmitButton color="primary" type="button" size="sm" disabled={submitting || !values.userType || !values.username} submitting={submitting} onClick={() => handleSubmit(values)}>
           Next
         </SubmitButton>
       </ModalFooter>
@@ -117,11 +108,7 @@ const AddUserSearchResult = ({ status, data, userTypes, setWizardState }) => {
           type="button"
           size="sm"
           disabled={status !== WIZARD_STATE.SEARCH_SUCCESS}
-          onClick={() =>
-            status === WIZARD_STATE.SEARCH_SUCCESS
-              ? setWizardState(WIZARD_STATE.USER_SETUP)
-              : setWizardState(WIZARD_STATE.SEARCH)
-          }
+          onClick={() => (status === WIZARD_STATE.SEARCH_SUCCESS ? setWizardState(WIZARD_STATE.USER_SETUP) : setWizardState(WIZARD_STATE.SEARCH))}
         >
           Next
         </Button>
@@ -138,9 +125,7 @@ const AddUserSetupUser = ({ serviceAreas, values, submitting, setWizardState }) 
     api
       .getRoles()
       .then((response) => {
-        const data = response.data.sourceList
-          .filter((r) => r.isActive === true)
-          .map((r) => ({ ...r, description: r.name }));
+        const data = response.data.sourceList.filter((r) => r.isActive === true).map((r) => ({ ...r, description: r.name }));
 
         if (values.userType === Constants.USER_TYPE.BUSINESS) setRoles(data.filter((r) => r.isInternal === false));
         else setRoles(data);
@@ -171,12 +156,7 @@ const AddUserSetupUser = ({ serviceAreas, values, submitting, setWizardState }) 
         <Button color="secondary" type="button" size="sm" onClick={() => setWizardState(WIZARD_STATE.SEARCH)}>
           Back
         </Button>
-        <SubmitButton
-          color="primary"
-          size="sm"
-          disabled={values.userRoleIds.length === 0 || submitting}
-          submitting={submitting}
-        >
+        <SubmitButton color="primary" size="sm" disabled={values.userRoleIds.length === 0 || submitting} submitting={submitting}>
           Submit
         </SubmitButton>
       </ModalFooter>
@@ -202,15 +182,7 @@ const AddUserSetupUserSuccess = ({ toggle }) => {
   );
 };
 
-const AddUserWizard = ({
-  isOpen,
-  toggle,
-  userTypes,
-  serviceAreas,
-  showValidationErrorDialog,
-  hideErrorDialog,
-  validationSchema,
-}) => {
+const AddUserWizard = ({ isOpen, toggle, userTypes, serviceAreas, showValidationErrorDialog, hideErrorDialog, validationSchema }) => {
   const [wizardState, setWizardState] = useState(WIZARD_STATE.SEARCH);
   const [submitting, setSubmitting] = useState(false);
   const [bceidAccount, setBceidAccount] = useState(null);
@@ -250,36 +222,14 @@ const AddUserWizard = ({
     switch (wizardState) {
       case WIZARD_STATE.SEARCH_SUCCESS:
       case WIZARD_STATE.SEARCH_FAIL:
-        return (
-          <AddUserSearchResult
-            setWizardState={setWizardState}
-            userTypes={userTypes}
-            data={bceidAccount}
-            status={wizardState}
-          />
-        );
+        return <AddUserSearchResult setWizardState={setWizardState} userTypes={userTypes} data={bceidAccount} status={wizardState} />;
       case WIZARD_STATE.USER_SETUP:
-        return (
-          <AddUserSetupUser
-            setWizardState={setWizardState}
-            serviceAreas={serviceAreas}
-            values={values}
-            submitting={submitting}
-          />
-        );
+        return <AddUserSetupUser setWizardState={setWizardState} serviceAreas={serviceAreas} values={values} submitting={submitting} />;
       case WIZARD_STATE.USER_SETUP_CONFIRM:
         return <AddUserSetupUserSuccess toggle={toggle} />;
       case WIZARD_STATE.SEARCH:
       default:
-        return (
-          <AddUserSearch
-            userTypes={userTypes}
-            submitting={submitting}
-            toggle={toggle}
-            values={values}
-            handleSubmit={handleBceidSearchSubmit}
-          />
-        );
+        return <AddUserSearch userTypes={userTypes} submitting={submitting} toggle={toggle} values={values} handleSubmit={handleBceidSearchSubmit} />;
     }
   };
 

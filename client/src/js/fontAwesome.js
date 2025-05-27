@@ -1,4 +1,5 @@
 import { library } from '@fortawesome/fontawesome-svg-core';
+import { faCheckCircle as farCheckCircle } from '@fortawesome/free-regular-svg-icons';
 import {
   faCalendarAlt,
   faEdit,
@@ -16,7 +17,6 @@ import {
   faEye,
   faEyeSlash,
 } from '@fortawesome/free-solid-svg-icons';
-import { faCheckCircle as farCheckCircle } from '@fortawesome/free-regular-svg-icons';
 
 const addIconsToLibrary = () => {
   library.add(faCalendarAlt);

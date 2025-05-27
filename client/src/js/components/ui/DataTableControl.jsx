@@ -1,22 +1,12 @@
-import React from 'react';
 import PropTypes from 'prop-types';
+import React from 'react';
 import { Table, Badge } from 'reactstrap';
 
-import Authorize from '../fragments/Authorize';
-import FontAwesomeButton from './FontAwesomeButton';
 import DeleteButton from './DeleteButton';
+import FontAwesomeButton from './FontAwesomeButton';
+import Authorize from '../fragments/Authorize';
 
-const DataTableControl = ({
-  dataList,
-  tableColumns,
-  editable,
-  editPermissionName,
-  onEditClicked,
-  onDeleteClicked,
-  onHeadingSortClicked,
-  showExportButton,
-  onExportClicked,
-}) => {
+const DataTableControl = ({ dataList, tableColumns, editable, editPermissionName, onEditClicked, onDeleteClicked, onHeadingSortClicked, showExportButton, onExportClicked }) => {
   const handleEditClicked = (id) => {
     if (onEditClicked) onEditClicked(id);
   };
@@ -51,16 +41,7 @@ const DataTableControl = ({
             return (
               <tr key={index}>
                 {tableColumns.map((column) => {
-                  if (column.key === 'isActive')
-                    return (
-                      <td key={column.key}>
-                        {item[column.key] ? (
-                          <Badge color="success">Active</Badge>
-                        ) : (
-                          <Badge color="danger">Inactive</Badge>
-                        )}
-                      </td>
-                    );
+                  if (column.key === 'isActive') return <td key={column.key}>{item[column.key] ? <Badge color="success">Active</Badge> : <Badge color="danger">Inactive</Badge>}</td>;
 
                   let style = { position: 'relative' };
                   if (column.maxWidth) {
@@ -76,12 +57,7 @@ const DataTableControl = ({
                 {editable && (
                   <Authorize requires={editPermissionName}>
                     <td style={{ width: '1%', whiteSpace: 'nowrap' }}>
-                      <FontAwesomeButton
-                        icon="edit"
-                        className="me-1"
-                        onClick={() => handleEditClicked(item.id)}
-                        title="Edit Record"
-                      />
+                      <FontAwesomeButton icon="edit" className="me-1" onClick={() => handleEditClicked(item.id)} title="Edit Record" />
                       <DeleteButton
                         itemId={item.id}
                         buttonId={`item_${item.id}_delete`}
@@ -95,12 +71,7 @@ const DataTableControl = ({
                 )}
                 {showExportButton && (
                   <td>
-                    <FontAwesomeButton
-                      icon="download"
-                      className="me-1"
-                      onClick={() => onExportClicked(item.saltReportId)}
-                      title="Export Report"
-                    />
+                    <FontAwesomeButton icon="download" className="me-1" onClick={() => onExportClicked(item.saltReportId)} title="Export Report" />
                   </td>
                 )}
               </tr>
@@ -119,8 +90,8 @@ DataTableControl.propTypes = {
       heading: PropTypes.string.isRequired,
       key: PropTypes.string.isRequired,
       nosort: PropTypes.bool,
-      format: PropTypes.func
-    })
+      format: PropTypes.func,
+    }),
   ).isRequired,
   editable: PropTypes.bool.isRequired,
   editPermissionName: PropTypes.string,

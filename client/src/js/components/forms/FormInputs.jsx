@@ -1,6 +1,6 @@
+import { useField } from 'formik';
 import React from 'react';
 import { Col, FormGroup, Label, Input, FormFeedback } from 'reactstrap';
-import { useField } from 'formik';
 
 export const FormRow = ({ name, label, children }) => {
   return (
@@ -69,14 +69,7 @@ export const FormRadioInput = ({ label, ...props }) => {
 
   return (
     <div className="form-check">
-      <Input
-        type="radio"
-        className="form-check-input"
-        id={inputId}
-        {...field}
-        {...props}
-        invalid={meta.touched && meta.error ? true : false}
-      />
+      <Input type="radio" className="form-check-input" id={inputId} {...field} {...props} invalid={meta.touched && meta.error ? true : false} />
       <label className="form-check-label" htmlFor={inputId}>
         {label}
       </label>
@@ -84,4 +77,3 @@ export const FormRadioInput = ({ label, ...props }) => {
     </div>
   );
 };
-

@@ -1,9 +1,9 @@
-import React from 'react';
-import PropTypes from 'prop-types';
 import _ from 'lodash';
+import PropTypes from 'prop-types';
+import React from 'react';
 
-import PaginationControl from './PaginationControl';
 import DataTableControl from './DataTableControl';
+import PaginationControl from './PaginationControl';
 
 const DataTableWithPaginationControl = ({ searchPagination, onPageNumberChange, onPageSizeChange, ...props }) => {
   return (
@@ -29,8 +29,8 @@ DataTableWithPaginationControl.propTypes = {
       heading: PropTypes.string.isRequired,
       key: PropTypes.string.isRequired,
       nosort: PropTypes.bool,
-      format: PropTypes.func
-    })
+      format: PropTypes.func,
+    }),
   ).isRequired,
   editable: PropTypes.bool.isRequired,
   editPermissionName: PropTypes.string,

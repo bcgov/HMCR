@@ -1,10 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { Row, Col } from 'reactstrap';
 
+import * as api from '../Api';
 import MaterialCard from './ui/MaterialCard';
 import UIHeader from './ui/UIHeader';
-
-import * as api from '../Api';
 
 const Version = () => {
   const [versionInfo, setVersionInfo] = useState({});

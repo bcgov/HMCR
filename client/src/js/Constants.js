@@ -61,8 +61,7 @@ export const PATHS = {
   SALT_REPORTING: '/saltreporting',
   VERSION: '/version',
   DATA_ROOM: 'https://engineering.sp.th.gov.bc.ca/sites/service-areas-portal',
-  MANUAL_AND_TEMPLATES:
-    'https://www2.gov.bc.ca/gov/content/transportation/transportation-infrastructure/contracting-to-transportation/highway-bridge-maintenance/highway-maintenance/reporting',
+  MANUAL_AND_TEMPLATES: 'https://www2.gov.bc.ca/gov/content/transportation/transportation-infrastructure/contracting-to-transportation/highway-bridge-maintenance/highway-maintenance/reporting',
 };
 
 export const MESSAGE_DATE_FORMAT = 'YYYY-MM-DD hh:mmA';
@@ -85,7 +84,7 @@ export const PERMISSIONS = {
   FILE_W: 'FILE_W',
   FILE_R: 'FILE_R',
   EXPORT: 'EXPORT',
-  SALT: 'SALT'
+  SALT: 'SALT',
 };
 
 export const USER_TYPE = { INTERNAL: 'INTERNAL', BUSINESS: 'BUSINESS' };
@@ -119,9 +118,7 @@ export const SORT_DIRECTION = {
   DESCENDING: 'desc',
 };
 
-export const DEFAULT_PAGE_SIZE_OPTIONS = import.meta.env.VITE_DEFAULT_PAGE_SIZE_OPTIONS.split(',').map((o) =>
-  parseInt(o)
-);
+export const DEFAULT_PAGE_SIZE_OPTIONS = import.meta.env.VITE_DEFAULT_PAGE_SIZE_OPTIONS.split(',').map((o) => parseInt(o));
 
 export const DEFAULT_PAGE_SIZE = parseInt(import.meta.env.VITE_DEFAULT_PAGE_SIZE);
 
@@ -226,5 +223,5 @@ export const REPORT_EXPORT_FIELDS = {
     'FILE_NAME',
     'RECORD_VERSION_NUMBER',
     'SUBMISSION_DATE',
-  ]
+  ],
 };

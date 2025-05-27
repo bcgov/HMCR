@@ -1,9 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { connect } from 'react-redux';
 
-import PageSpinner from './ui/PageSpinner';
-import ErrorDialogModal from './ui/ErrorDialogModal';
-
 import {
   fetchCurrentUser,
   fetchServiceAreas,
@@ -18,8 +15,10 @@ import {
   fetchThresholdLevels,
   fetchRoadLengthRules,
   fetchSurfaceTypeRules,
-  fetchRoadClassRules
+  fetchRoadClassRules,
 } from '../actions';
+import ErrorDialogModal from './ui/ErrorDialogModal';
+import PageSpinner from './ui/PageSpinner';
 
 const Main = ({
   errorDialog,
@@ -37,7 +36,7 @@ const Main = ({
   fetchThresholdLevels,
   fetchRoadLengthRules,
   fetchSurfaceTypeRules,
-  fetchRoadClassRules
+  fetchRoadClassRules,
 }) => {
   const [loading, setLoading] = useState(true);
 
@@ -56,7 +55,7 @@ const Main = ({
       fetchThresholdLevels(),
       fetchRoadLengthRules(),
       fetchSurfaceTypeRules(),
-      fetchRoadClassRules()
+      fetchRoadClassRules(),
     ]).then(() => setLoading(false));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -89,5 +88,5 @@ export default connect(mapStateToProps, {
   fetchThresholdLevels,
   fetchRoadLengthRules,
   fetchSurfaceTypeRules,
-  fetchRoadClassRules
+  fetchRoadClassRules,
 })(Main);

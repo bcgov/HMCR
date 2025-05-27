@@ -1,22 +1,12 @@
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { format, isValid } from 'date-fns';
 import React, { useState, useRef, useEffect } from 'react';
 import { DateRange } from 'react-date-range';
 import { InputGroup, InputGroupText, Input } from 'reactstrap';
-import { format, isValid } from 'date-fns';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import 'react-date-range/dist/styles.css';
 import 'react-date-range/dist/theme/default.css';
 
-const DateRangeInput = ({
-  startDate,
-  endDate,
-  onChange,
-  minDate,
-  maxDate,
-  showError = false,
-  errorText = 'Required',
-  disabled = false,
-  months = 2,
-}) => {
+const DateRangeInput = ({ startDate, endDate, onChange, minDate, maxDate, showError = false, errorText = 'Required', disabled = false, months = 2 }) => {
   const wrapperRef = useRef(null);
   const [open, setOpen] = useState(false);
 
@@ -62,9 +52,7 @@ const DateRangeInput = ({
       <InputGroup onClick={() => !disabled && setOpen(!open)} style={{ width: '250px', cursor: 'pointer' }}>
         <Input
           readOnly
-          value={`${isValid(range[0].startDate) ? format(range[0].startDate, 'yyyy-MM-dd') : ''} - ${
-            isValid(range[0].endDate) ? format(range[0].endDate, 'yyyy-MM-dd') : ''
-          }`}
+          value={`${isValid(range[0].startDate) ? format(range[0].startDate, 'yyyy-MM-dd') : ''} - ${isValid(range[0].endDate) ? format(range[0].endDate, 'yyyy-MM-dd') : ''}`}
           className={showError ? 'is-invalid' : ''}
           disabled={disabled}
         />
@@ -72,7 +60,11 @@ const DateRangeInput = ({
           <FontAwesomeIcon icon="calendar-alt" />
         </InputGroupText>
       </InputGroup>
-      {showError && <div className="invalid-feedback" style={{ display: 'block' }}>{errorText}</div>}
+      {showError && (
+        <div className="invalid-feedback" style={{ display: 'block' }}>
+          {errorText}
+        </div>
+      )}
       {open && (
         <div style={{ position: 'absolute', zIndex: 1000 }}>
           <DateRange

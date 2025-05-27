@@ -1,20 +1,21 @@
-import React, { useState, useEffect } from 'react';
-import { connect } from 'react-redux';
 import { Formik, Form } from 'formik';
 import moment from 'moment';
+import React, { useState, useEffect } from 'react';
+import { connect } from 'react-redux';
+import { Col, FormGroup, Label, Alert, Button, Row } from 'reactstrap';
+
+import { showValidationErrorDialog } from '../actions';
 import * as api from '../Api';
 import * as Constants from '../Constants';
-import { showValidationErrorDialog } from '../actions';
+import AddSaltReportFormFields from './forms/saltreport/AddSaltReportFormFields';
+import Authorize from './fragments/Authorize';
 import useFormModal from './hooks/useFormModal';
 import useSearchData from './hooks/useSearchData';
+import DataTableWithPaginationControl from './ui/DataTableWithPaginationControl';
+import MaterialCard from './ui/MaterialCard';
 import PageSpinner from './ui/PageSpinner';
 import SimpleModalWrapper from './ui/SimpleModalWrapper';
-import MaterialCard from './ui/MaterialCard';
 import UIHeader from './ui/UIHeader';
-import DataTableWithPaginationControl from './ui/DataTableWithPaginationControl';
-import Authorize from './fragments/Authorize';
-import AddSaltReportFormFields from './forms/saltreport/AddSaltReportFormFields';
-import { Col, FormGroup, Label, Alert, Button, Row } from 'reactstrap';
 
 const SaltReporting = ({ currentUser }) => {
   const [loading, setLoading] = useState(false);
@@ -70,12 +71,7 @@ const SaltReporting = ({ currentUser }) => {
     { heading: 'Date Created', key: 'appCreateTimestamp', format: (date) => moment(date).format('LLL') },
   ];
 
-  const saltReportFormModal = useFormModal(
-    'Annual Salt Report',
-    <AddSaltReportFormFields />,
-    handleSaltReportSubmit,
-    'xl'
-  );
+  const saltReportFormModal = useFormModal('Annual Salt Report', <AddSaltReportFormFields />, handleSaltReportSubmit, 'xl');
 
   return (
     <>
@@ -92,20 +88,12 @@ const SaltReporting = ({ currentUser }) => {
                     </Label>
                     <Col sm={9}>
                       <Alert color="info">
-                        Changes are automatically saved within the browser tab and discarded when this browser tab is
-                        closed.
+                        Changes are automatically saved within the browser tab and discarded when this browser tab is closed.
                         <br />
                         <br />
-                        Provide a copy of current Salt Management Plan following form submission to:{' '}
-                        <a href="mailto: Maintenance.Programs@gov.bc.ca">Maintenance.Programs@gov.bc.ca</a>
+                        Provide a copy of current Salt Management Plan following form submission to: <a href="mailto: Maintenance.Programs@gov.bc.ca">Maintenance.Programs@gov.bc.ca</a>
                       </Alert>
-                      <Button
-                        size="sm"
-                        color="primary"
-                        className="me-2"
-                        type="button"
-                        onClick={() => saltReportFormModal.openForm(Constants.FORM_TYPE.ADD)}
-                      >
+                      <Button size="sm" color="primary" className="me-2" type="button" onClick={() => saltReportFormModal.openForm(Constants.FORM_TYPE.ADD)}>
                         Open Form
                       </Button>
                     </Col>
@@ -142,20 +130,13 @@ const SaltReporting = ({ currentUser }) => {
         )}
       </Authorize>
       {saltReportFormModal.formElement}
-      <SimpleModalWrapper
-        isOpen={showSaltReportStatusModal}
-        toggle={() => setShowSaltReportStatusModal(false)}
-        backdrop="static"
-        title="Report Submission"
-        disableClose={loading}
-      >
+      <SimpleModalWrapper isOpen={showSaltReportStatusModal} toggle={() => setShowSaltReportStatusModal(false)} backdrop="static" title="Report Submission" disableClose={loading}>
         {!loading && saltReportCompleteMessage ? (
           <Alert color={saltReportSuccess ? 'success' : 'danger'}>
             {saltReportCompleteMessage}
             {saltReportSuccess && (
               <>
-                Provide a copy of current Salt Management Plan following form submission to:{' '}
-                <a href="mailto:Maintenance.Programs@gov.bc.ca">Maintenance.Programs@gov.bc.ca</a>
+                Provide a copy of current Salt Management Plan following form submission to: <a href="mailto:Maintenance.Programs@gov.bc.ca">Maintenance.Programs@gov.bc.ca</a>
               </>
             )}
           </Alert>

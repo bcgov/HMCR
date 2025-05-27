@@ -1,26 +1,24 @@
-import React, { useState, useEffect } from 'react';
-import { useLocation } from 'react-router-dom';
-import { connect } from 'react-redux';
-import { Row, Col, Button } from 'reactstrap';
 import { Formik, Form, Field } from 'formik';
 import queryString from 'query-string';
-
-import Authorize from './fragments/Authorize';
-import MaterialCard from './ui/MaterialCard';
-import UIHeader from './ui/UIHeader';
-import MultiDropdownField from './ui/MultiDropdownField';
-import DataTableWithPaginationControl from './ui/DataTableWithPaginationControl';
-import SubmitButton from './ui/SubmitButton';
-import PageSpinner from './ui/PageSpinner';
-import useSearchData from './hooks/useSearchData';
-import useFormModal from './hooks/useFormModal';
-import EditRoleFormFields from './forms/EditRoleFormFields';
+import React, { useState, useEffect } from 'react';
+import { connect } from 'react-redux';
+import { useLocation } from 'react-router-dom';
+import { Row, Col, Button } from 'reactstrap';
 
 import { showValidationErrorDialog } from '../actions';
-
-import * as Constants from '../Constants';
 import * as api from '../Api';
+import * as Constants from '../Constants';
 import { buildStatusIdArray } from '../utils';
+import EditRoleFormFields from './forms/EditRoleFormFields';
+import Authorize from './fragments/Authorize';
+import useFormModal from './hooks/useFormModal';
+import useSearchData from './hooks/useSearchData';
+import DataTableWithPaginationControl from './ui/DataTableWithPaginationControl';
+import MaterialCard from './ui/MaterialCard';
+import MultiDropdownField from './ui/MultiDropdownField';
+import PageSpinner from './ui/PageSpinner';
+import SubmitButton from './ui/SubmitButton';
+import UIHeader from './ui/UIHeader';
 
 const defaultSearchFormValues = { searchText: '', statusId: [Constants.ACTIVE_STATUS.ACTIVE] };
 
@@ -115,12 +113,7 @@ const RoleAdmin = ({ showValidationErrorDialog }) => {
     <React.Fragment>
       <MaterialCard>
         <UIHeader>Role and Permissions Management</UIHeader>
-        <Formik
-          initialValues={searchInitialValues}
-          enableReinitialize={true}
-          onSubmit={(values) => handleSearchFormSubmit(values)}
-          onReset={handleSearchFormReset}
-        >
+        <Formik initialValues={searchInitialValues} enableReinitialize={true} onSubmit={(values) => handleSearchFormSubmit(values)} onReset={handleSearchFormReset}>
           {(formikProps) => (
             <Form>
               <Row form>
@@ -128,12 +121,7 @@ const RoleAdmin = ({ showValidationErrorDialog }) => {
                   <Field type="text" name="searchText" placeholder="Role/Description" className="form-control" />
                 </Col>
                 <Col>
-                  <MultiDropdownField
-                    {...formikProps}
-                    title="Role Status"
-                    items={Constants.ACTIVE_STATUS_ARRAY}
-                    name="statusId"
-                  />
+                  <MultiDropdownField {...formikProps} title="Role Status" items={Constants.ACTIVE_STATUS_ARRAY} name="statusId" />
                 </Col>
                 <Col />
                 <Col />
@@ -153,12 +141,7 @@ const RoleAdmin = ({ showValidationErrorDialog }) => {
       <Authorize requires={Constants.PERMISSIONS.ROLE_W}>
         <Row>
           <Col>
-            <Button
-              size="sm"
-              color="primary"
-              className="float-end mb-3"
-              onClick={() => formModal.openForm(Constants.FORM_TYPE.ADD)}
-            >
+            <Button size="sm" color="primary" className="float-end mb-3" onClick={() => formModal.openForm(Constants.FORM_TYPE.ADD)}>
               Add Role
             </Button>
           </Col>

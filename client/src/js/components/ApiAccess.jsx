@@ -1,17 +1,15 @@
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import React, { useState, useEffect } from 'react';
 import { connect } from 'react-redux';
-import { Alert, Button, FormGroup, Label, Row, Col, Input, InputGroup } from 'reactstrap';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { toast } from 'react-toastify';
-
-import MaterialCard from './ui/MaterialCard';
-import UIHeader from './ui/UIHeader';
-import PageSpinner from './ui/PageSpinner';
+import { Alert, Button, FormGroup, Label, Row, Col, Input, InputGroup } from 'reactstrap';
 
 import { hideErrorDialog } from '../actions';
-
 import * as api from '../Api';
 import { keycloak } from '../Keycloak';
+import MaterialCard from './ui/MaterialCard';
+import PageSpinner from './ui/PageSpinner';
+import UIHeader from './ui/UIHeader';
 
 const ApiAccess = ({ hideErrorDialog }) => {
   const [loading, setLoading] = useState(true);
@@ -76,9 +74,7 @@ const ApiAccess = ({ hideErrorDialog }) => {
     const accessTokenPowershell =
       `$headers = New-Object "System.Collections.Generic.Dictionary[[String],[String]]"\n` +
       `$headers.Add("Content-Type", "application/x-www-form-urlencoded")\n\n` +
-      `$body = "grant_type=client_credentials&client_id=${
-        apiClient ? apiClient.clientId : '<client_id>'
-      }&client_secret=<client_secret>"\n\n` +
+      `$body = "grant_type=client_credentials&client_id=${apiClient ? apiClient.clientId : '<client_id>'}&client_secret=<client_secret>"\n\n` +
       `$response = Invoke-RestMethod '${tokenUrl}' -Method 'POST' -Headers $headers -Body $body\n` +
       `$response | ConvertTo-Json\n`;
 
@@ -128,9 +124,8 @@ const ApiAccess = ({ hideErrorDialog }) => {
         </div>
         <h3>Using HMCR API</h3>
         <p>
-          Once you have crated a valid <strong>access_token</strong> from the previous step then you are ready to use
-          HMCR API. To use the access token you simply need to set your <strong>Authorization</strong> header in your
-          HTTP requests. Please see the following examples.
+          Once you have crated a valid <strong>access_token</strong> from the previous step then you are ready to use HMCR API. To use the access token you simply need to set your{' '}
+          <strong>Authorization</strong> header in your HTTP requests. Please see the following examples.
         </p>
         <small>cURL</small>
         <div className="code-block">
@@ -161,14 +156,7 @@ const ApiAccess = ({ hideErrorDialog }) => {
                 </Label>
                 <Col>
                   <InputGroup size="sm">
-                    <Input
-                      type="text"
-                      name="clientId"
-                      id="clientId"
-                      placeholder="Client Id"
-                      value={apiClient.clientId}
-                      readOnly
-                    />
+                    <Input type="text" name="clientId" id="clientId" placeholder="Client Id" value={apiClient.clientId} readOnly />
                     <Button
                       color="primary"
                       onClick={() => {
@@ -187,14 +175,7 @@ const ApiAccess = ({ hideErrorDialog }) => {
                 </Label>
                 <Col>
                   <InputGroup size="sm">
-                    <Input
-                      type={showSecret ? 'text' : 'password'}
-                      name="clientSecret"
-                      id="clientSecret"
-                      placeholder="Client Secret"
-                      value={apiClient.clientSecret}
-                      readOnly
-                    />
+                    <Input type={showSecret ? 'text' : 'password'} name="clientSecret" id="clientSecret" placeholder="Client Secret" value={apiClient.clientSecret} readOnly />
                     <Button color="primary" onClick={() => setShowSecret(!showSecret)}>
                       <FontAwesomeIcon icon={showSecret ? 'eye-slash' : 'eye'} />
                     </Button>
@@ -244,13 +225,9 @@ const ApiAccess = ({ hideErrorDialog }) => {
         for a list of usable APIs.
       </p>
       <h2>API Access Client</h2>
-      <p>
-        An API Access Client is needed to obtain access to the HMCR REST API.{' '}
-        {!apiClient && <React.Fragment>You can create one below.</React.Fragment>}
-      </p>
+      <p>An API Access Client is needed to obtain access to the HMCR REST API. {!apiClient && <React.Fragment>You can create one below.</React.Fragment>}</p>
       <Alert color="warning">
-        <strong>Warning!</strong> The API Access Client should be kept confidential. It will have the same access level
-        as your regular login and should be treated as such.
+        <strong>Warning!</strong> The API Access Client should be kept confidential. It will have the same access level as your regular login and should be treated as such.
       </Alert>
       {loading && <PageSpinner />}
       {renderCreateButton()}

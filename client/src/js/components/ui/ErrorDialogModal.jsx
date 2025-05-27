@@ -1,21 +1,11 @@
-import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
+import React, { useState, useEffect } from 'react';
 import { connect } from 'react-redux';
 import { Alert, Button, Modal, ModalHeader, ModalBody, ModalFooter } from 'reactstrap';
 
 import { hideErrorDialog } from '../../actions';
 
-const ErrorDialogModal = ({
-  isOpen,
-  title,
-  message,
-  statusCode,
-  errors,
-  path,
-  method,
-  hideErrorDialog,
-  hidePrimaryButton,
-}) => {
+const ErrorDialogModal = ({ isOpen, title, message, statusCode, errors, path, method, hideErrorDialog, hidePrimaryButton }) => {
   const [clicked, setClicked] = useState(false);
 
   useEffect(() => {
@@ -42,8 +32,7 @@ const ErrorDialogModal = ({
           {statusCode && path && method && (
             <p>
               <small>
-                A <strong>{method}</strong> request to <strong className="text-primary">{path}</strong> has returned a{' '}
-                <strong className="text-danger">{statusCode}</strong> status code.
+                A <strong>{method}</strong> request to <strong className="text-primary">{path}</strong> has returned a <strong className="text-danger">{statusCode}</strong> status code.
               </small>
             </p>
           )}
@@ -61,13 +50,7 @@ const ErrorDialogModal = ({
         </ModalBody>
         <ModalFooter>
           {!hidePrimaryButton && (
-            <Button
-              size="sm"
-              color="primary"
-              disabled={clicked}
-              onClick={() => handleOnClick(true)}
-              style={{ minWidth: '50px' }}
-            >
+            <Button size="sm" color="primary" disabled={clicked} onClick={() => handleOnClick(true)} style={{ minWidth: '50px' }}>
               Reload
             </Button>
           )}

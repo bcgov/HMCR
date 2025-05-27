@@ -1,28 +1,26 @@
-import React, { useState, useEffect } from 'react';
-import { useLocation } from 'react-router-dom';
-import { connect } from 'react-redux';
-import { Row, Col, Button, Alert, Spinner } from 'reactstrap';
+import FileSaver from 'file-saver';
 import { Formik, Form, Field } from 'formik';
 import queryString from 'query-string';
+import React, { useState, useEffect } from 'react';
+import { connect } from 'react-redux';
+import { useLocation } from 'react-router-dom';
+import { Row, Col, Button, Alert, Spinner } from 'reactstrap';
 
-import Authorize from './fragments/Authorize';
-import MaterialCard from './ui/MaterialCard';
-import UIHeader from './ui/UIHeader';
-import MultiDropdownField from './ui/MultiDropdownField';
-import DataTableWithPaginationControl from './ui/DataTableWithPaginationControl';
-import SubmitButton from './ui/SubmitButton';
-import PageSpinner from './ui/PageSpinner';
-import useSearchData from './hooks/useSearchData';
-import useFormModal from './hooks/useFormModal';
-import EditActivityFormFields from './forms/EditActivityFormFields';
-
-import SimpleModalWrapper from './ui/SimpleModalWrapper';
 import { showValidationErrorDialog } from '../actions';
-import FileSaver from 'file-saver';
-
-import * as Constants from '../Constants';
 import * as api from '../Api';
-import { buildStatusIdArray,isValueNotEmpty,toNumberOrNull,toStringOrEmpty,toStringWithCommasOrEmpty,isValueEmpty } from '../utils';
+import * as Constants from '../Constants';
+import { buildStatusIdArray, isValueNotEmpty, toNumberOrNull, toStringOrEmpty, toStringWithCommasOrEmpty, isValueEmpty } from '../utils';
+import EditActivityFormFields from './forms/EditActivityFormFields';
+import Authorize from './fragments/Authorize';
+import useFormModal from './hooks/useFormModal';
+import useSearchData from './hooks/useSearchData';
+import DataTableWithPaginationControl from './ui/DataTableWithPaginationControl';
+import MaterialCard from './ui/MaterialCard';
+import MultiDropdownField from './ui/MultiDropdownField';
+import PageSpinner from './ui/PageSpinner';
+import SimpleModalWrapper from './ui/SimpleModalWrapper';
+import SubmitButton from './ui/SubmitButton';
+import UIHeader from './ui/UIHeader';
 
 const defaultSearchFormValues = { searchText: '', maintenanceTypeIds: [], statusId: [Constants.ACTIVE_STATUS.ACTIVE] };
 
@@ -50,7 +48,7 @@ const EXPORT_STAGE = {
   DONE: 'DONE',
 };
 
-const ActivityAdmin = ({ maintenanceTypes, locationCodes, unitOfMeasures,showValidationErrorDialog, hideErrorDialog }) => {
+const ActivityAdmin = ({ maintenanceTypes, locationCodes, unitOfMeasures, showValidationErrorDialog, hideErrorDialog }) => {
   const location = useLocation();
   const searchData = useSearchData(defaultSearchOptions);
   const [searchInitialValues, setSearchInitialValues] = useState(defaultSearchFormValues);
@@ -113,11 +111,7 @@ const ActivityAdmin = ({ maintenanceTypes, locationCodes, unitOfMeasures,showVal
     if (permanentDelete) {
       api.deleteActivityCode(activityId).then(() => searchData.refresh());
     } else {
-      api
-        .getActivityCode(activityId)
-        .then((response) =>
-          api.putActivityCode(activityId, { ...response.data, endDate }).then(() => searchData.refresh())
-        );
+      api.getActivityCode(activityId).then((response) => api.putActivityCode(activityId, { ...response.data, endDate }).then(() => searchData.refresh()));
     }
   };
 
@@ -135,10 +129,9 @@ const ActivityAdmin = ({ maintenanceTypes, locationCodes, unitOfMeasures,showVal
       }
       values.minValue = toNumberOrNull(values.minValue);
       values.maxValue = toNumberOrNull(values.maxValue);
-      values.reportingFrequency = toNumberOrNull(values.reportingFrequency );
-      if(isValueNotEmpty(values.minValue) && isValueEmpty(values.maxValue))
-      {
-        values.maxValue = (['site','num','ea'].includes(values.unitOfMeasure)) ? 999999999:999999999.99;
+      values.reportingFrequency = toNumberOrNull(values.reportingFrequency);
+      if (isValueNotEmpty(values.minValue) && isValueEmpty(values.maxValue)) {
+        values.maxValue = ['site', 'num', 'ea'].includes(values.unitOfMeasure) ? 999999999 : 999999999.99;
       }
       if (formType === Constants.FORM_TYPE.ADD) {
         api
@@ -146,7 +139,7 @@ const ActivityAdmin = ({ maintenanceTypes, locationCodes, unitOfMeasures,showVal
           .then(() => {
             values.minValue = toStringWithCommasOrEmpty(values.minValue);
             values.maxValue = toStringWithCommasOrEmpty(values.maxValue);
-            values.reportingFrequency = toStringOrEmpty(values.reportingFrequency );
+            values.reportingFrequency = toStringOrEmpty(values.reportingFrequency);
             formModal.closeForm();
             searchData.refresh();
           })
@@ -158,7 +151,7 @@ const ActivityAdmin = ({ maintenanceTypes, locationCodes, unitOfMeasures,showVal
           .then(() => {
             values.minValue = toStringWithCommasOrEmpty(values.minValue);
             values.maxValue = toStringWithCommasOrEmpty(values.maxValue);
-            values.reportingFrequency = toStringOrEmpty(values.reportingFrequency );
+            values.reportingFrequency = toStringOrEmpty(values.reportingFrequency);
             formModal.closeForm();
             searchData.refresh();
           })
@@ -176,7 +169,7 @@ const ActivityAdmin = ({ maintenanceTypes, locationCodes, unitOfMeasures,showVal
       .getActivityCodeExport(buildExportParams(values))
       .then((response) => {
         const fileExtensionHeaders = response.headers['content-disposition'].match(/.csv/i);
-        
+
         let fileName = `activitycode_export`;
         if (fileExtensionHeaders) fileName += fileExtensionHeaders[0];
 
@@ -204,7 +197,7 @@ const ActivityAdmin = ({ maintenanceTypes, locationCodes, unitOfMeasures,showVal
       .finally(() => setExporting(false));
   };
 
-  const formModal = useFormModal('Activity', <EditActivityFormFields />, handleEditFormSubmit,'xl');
+  const formModal = useFormModal('Activity', <EditActivityFormFields />, handleEditFormSubmit, 'xl');
 
   const data = searchData.data.map((item) => ({
     ...item,
@@ -214,7 +207,7 @@ const ActivityAdmin = ({ maintenanceTypes, locationCodes, unitOfMeasures,showVal
     canDelete: !item.isReferenced,
   }));
 
-    const renderContent = () => {
+  const renderContent = () => {
     switch (exportStage) {
       case EXPORT_STAGE.NOT_FOUND:
         return (
@@ -263,12 +256,7 @@ const ActivityAdmin = ({ maintenanceTypes, locationCodes, unitOfMeasures,showVal
     <React.Fragment>
       <MaterialCard>
         <UIHeader>Activity Number Management</UIHeader>
-        <Formik
-          initialValues={searchInitialValues}
-          enableReinitialize={true}
-          onSubmit={(values) => handleSearchFormSubmit(values)}
-          onReset={handleSearchFormReset}
-        >
+        <Formik initialValues={searchInitialValues} enableReinitialize={true} onSubmit={(values) => handleSearchFormSubmit(values)} onReset={handleSearchFormReset}>
           {(formikProps) => (
             <Form>
               <Row form>
@@ -276,20 +264,10 @@ const ActivityAdmin = ({ maintenanceTypes, locationCodes, unitOfMeasures,showVal
                   <Field type="text" name="searchText" placeholder="Activity Number/Name" className="form-control" />
                 </Col>
                 <Col>
-                  <MultiDropdownField
-                    {...formikProps}
-                    title="Maintenance Type"
-                    items={maintenanceTypes}
-                    name="maintenanceTypeIds"
-                  />
+                  <MultiDropdownField {...formikProps} title="Maintenance Type" items={maintenanceTypes} name="maintenanceTypeIds" />
                 </Col>
                 <Col>
-                  <MultiDropdownField
-                    {...formikProps}
-                    title="Activity Status"
-                    items={Constants.ACTIVE_STATUS_ARRAY}
-                    name="statusId"
-                  />
+                  <MultiDropdownField {...formikProps} title="Activity Status" items={Constants.ACTIVE_STATUS_ARRAY} name="statusId" />
                 </Col>
                 <Col />
                 <Col>
@@ -309,16 +287,11 @@ const ActivityAdmin = ({ maintenanceTypes, locationCodes, unitOfMeasures,showVal
         <Row>
           <Col>
             <div className="float-end mb-3">
-              <Button
-                size="sm"
-                color="primary"
-                className="me-2"
-                onClick={() => formModal.openForm(Constants.FORM_TYPE.ADD)}
-              >
+              <Button size="sm" color="primary" className="me-2" onClick={() => formModal.openForm(Constants.FORM_TYPE.ADD)}>
                 Add Activity
               </Button>
               <Button size="sm" color="primary" onClick={(values) => submitExport(searchData)}>
-                  Export
+                Export
               </Button>
             </div>
           </Col>

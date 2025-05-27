@@ -1,7 +1,7 @@
-import React, { useState, useMemo, useEffect } from 'react';
-import PropTypes from 'prop-types';
-import { DropdownToggle, DropdownMenu, UncontrolledDropdown, Label, Input } from 'reactstrap';
 import { FieldArray } from 'formik';
+import PropTypes from 'prop-types';
+import React, { useState, useMemo, useEffect } from 'react';
+import { DropdownToggle, DropdownMenu, UncontrolledDropdown, Label, Input } from 'reactstrap';
 
 const maxSelectedItemDisplay = 2;
 
@@ -34,7 +34,7 @@ const MultiDropdownField = ({ values, setFieldValue, items, name, title, searcha
       setFieldValue(
         name,
         displayItems.map((o) => o.id),
-        true
+        true,
       );
     else setFieldValue(name, [], true);
   };

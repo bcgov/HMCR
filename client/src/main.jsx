@@ -2,8 +2,8 @@ import React, { lazy, Suspense } from 'react';
 import { createRoot } from 'react-dom/client';
 import { Provider } from 'react-redux';
 
-import store from './js/store';
 import * as Keycloak from './js/Keycloak';
+import store from './js/store';
 
 // Lazy-load your main App component
 const App = lazy(() => import('./js/App'));
@@ -17,6 +17,6 @@ Keycloak.init(() => {
       <Suspense fallback={<div></div>}>
         <App />
       </Suspense>
-    </Provider>
+    </Provider>,
   );
 });

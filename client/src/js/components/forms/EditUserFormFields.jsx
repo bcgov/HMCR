@@ -1,25 +1,16 @@
+import { parseISO } from 'date-fns';
 import React, { useEffect, useState } from 'react';
 import { connect } from 'react-redux';
-import { parseISO } from 'date-fns';
 
-import MultiSelect from '../ui/MultiSelect';
-import SingleDateField from '../ui/SingleDateField';
-import SingleDropdownField from '../ui/SingleDropdownField';
-import PageSpinner from '../ui/PageSpinner';
 import { FormRow, FormInput } from './FormInputs';
-
 import * as api from '../../Api';
 import * as Constants from '../../Constants';
+import MultiSelect from '../ui/MultiSelect';
+import PageSpinner from '../ui/PageSpinner';
+import SingleDateField from '../ui/SingleDateField';
+import SingleDropdownField from '../ui/SingleDropdownField';
 
-const EditUserFormFields = ({
-  setInitialValues,
-  formValues,
-  setValidationSchema,
-  userId,
-  serviceAreas,
-  userTypes,
-  validationSchema,
-}) => {
+const EditUserFormFields = ({ setInitialValues, formValues, setValidationSchema, userId, serviceAreas, userTypes, validationSchema }) => {
   const [loading, setLoading] = useState(true);
   const [roles, setRoles] = useState([]);
 
@@ -39,7 +30,10 @@ const EditUserFormFields = ({
         return api.getRoles().then((response) => {
           const data = response.data.sourceList
             .filter((r) => r.isActive === true)
-            .map((r) => ({ ...r, description: r.name }));
+            .map((r) => ({
+              ...r,
+              description: r.name,
+            }));
 
           if (userType === Constants.USER_TYPE.BUSINESS) setRoles(data.filter((r) => r.isInternal === false));
           else setRoles(data);

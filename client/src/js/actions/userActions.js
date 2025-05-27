@@ -1,5 +1,4 @@
 import * as api from '../Api';
-
 import { FETCH_CURRENT_USER, FETCH_USER_TYPES, FETCH_USER_STATUSES } from './types';
 
 export const fetchCurrentUser = () => (dispatch) => {

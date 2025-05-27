@@ -1,16 +1,15 @@
-import React, { useEffect, useState } from 'react';
-import { Button, Modal, ModalBody, ModalHeader } from 'reactstrap';
-import moment from 'moment';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import FileSaver from 'file-saver';
+import moment from 'moment';
+import React, { useEffect, useState } from 'react';
 import Clipboard from 'react-clipboard.js';
 import { toast } from 'react-toastify';
+import { Button, Modal, ModalBody, ModalHeader } from 'reactstrap';
 
-import PageSpinner from './ui/PageSpinner';
-
-import * as Constants from '../Constants';
 import * as api from '../Api';
+import * as Constants from '../Constants';
 import DataTableControl from './ui/DataTableControl';
+import PageSpinner from './ui/PageSpinner';
 
 const errorTableColumns = [
   { heading: 'Row #', key: 'rowNum', nosort: true },
@@ -45,11 +44,7 @@ const createRowString = (json, rowNum, recordNumber, serviceAreaNumber) => {
   if (json) {
     const errorDetail = parseErrorDetailJson(json);
 
-    result += errorDetail
-      .map((field) =>
-        field.messages.map((msg) => `${rowNum}\t${serviceAreaNumber}\t${recordNumber}\t${field.field}\t"${msg}"`)
-      )
-      .join('\n');
+    result += errorDetail.map((field) => field.messages.map((msg) => `${rowNum}\t${serviceAreaNumber}\t${recordNumber}\t${field.field}\t"${msg}"`)).join('\n');
     result += '\n';
   }
 
@@ -60,9 +55,7 @@ const createClipboardText = (data) => {
   let clipboardData = '';
 
   clipboardData += 'submission #\tsubmission date\tservice area\n';
-  clipboardData += `${data.id}\t${moment(data.appCreateTimestamp).format(Constants.DATE_DISPLAY_FORMAT)}\t${
-    data.serviceAreaNumber
-  }\n`;
+  clipboardData += `${data.id}\t${moment(data.appCreateTimestamp).format(Constants.DATE_DISPLAY_FORMAT)}\t${data.serviceAreaNumber}\n`;
 
   clipboardData += 'file name\treport type\tstatus\n';
   clipboardData += `${data.fileName}\t${data.streamName}\t${data.description}\n`;
@@ -120,9 +113,7 @@ const WorkReportingSubmissionDetail = ({ toggle, submission }) => {
     return (
       <React.Fragment>
         <span>Submission #: {submissionResultData.id}</span>
-        <span className="ms-3 me-3">
-          Submission Date: {moment(submissionResultData.appCreateTimestamp).format(Constants.DATE_DISPLAY_FORMAT)}
-        </span>
+        <span className="ms-3 me-3">Submission Date: {moment(submissionResultData.appCreateTimestamp).format(Constants.DATE_DISPLAY_FORMAT)}</span>
         <span>Service Area: {submissionResultData.serviceAreaNumber}</span>
       </React.Fragment>
     );
@@ -160,11 +151,7 @@ const WorkReportingSubmissionDetail = ({ toggle, submission }) => {
               size="sm"
               color="primary"
               className="me-2"
-              onClick={() =>
-                api
-                  .getSubmissionFile(submissionResultData.id)
-                  .then((response) => FileSaver.saveAs(new Blob([response.data]), submissionResultData.fileName))
-              }
+              onClick={() => api.getSubmissionFile(submissionResultData.id).then((response) => FileSaver.saveAs(new Blob([response.data]), submissionResultData.fileName))}
               title="Download original submission"
             >
               <FontAwesomeIcon icon="download" /> Original
@@ -196,7 +183,7 @@ const WorkReportingSubmissionDetail = ({ toggle, submission }) => {
           serviceArea: submissionResultData.serviceAreaNumber,
           fieldName: field.field,
           message: field.messages.map((msg, k) => <div key={`${rowNum}_${field.field}_${k}`}>{msg}</div>),
-        })
+        }),
       );
 
     return result;

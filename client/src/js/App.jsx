@@ -1,29 +1,27 @@
 import React from 'react';
 import { connect } from 'react-redux';
 import { BrowserRouter, Route, Switch, Redirect } from 'react-router-dom';
-import { Container } from 'reactstrap';
 import { toast } from 'react-toastify';
-
-
+import { Container } from 'reactstrap';
 
 import 'react-toastify/dist/ReactToastify.css';
 
+import ActivityAdmin from './components/ActivityAdmin.jsx';
+import ApiAccess from './components/ApiAccess.jsx';
+import ErrorBoundary from './components/ErrorBoundary.jsx';
 import AuthorizedRoute from './components/fragments/AuthorizedRoute.jsx';
-import Main from './components/Main.jsx';
 import Footer from './components/fragments/Footer.jsx';
 import Header from './components/fragments/Header.jsx';
-import ActivityAdmin from './components/ActivityAdmin.jsx';
-import UserAdmin from './components/UserAdmin.jsx';
-import RoleAdmin from './components/RoleAdmin.jsx';
+import Main from './components/Main.jsx';
 import ReportExport from './components/ReportExport.jsx';
-import WorkReporting from './components/WorkReporting.jsx';
+import RoleAdmin from './components/RoleAdmin.jsx';
 import SaltReporting from './components/SaltReporting.jsx';
+import UserAdmin from './components/UserAdmin.jsx';
 import Version from './components/Version.jsx';
-import ApiAccess from './components/ApiAccess.jsx';
+import WorkReporting from './components/WorkReporting.jsx';
 import WorkReportingSubmissionDetail from './components/WorkReportingSubmissionDetail.jsx';
-import ErrorBoundary from './components/ErrorBoundary.jsx';
-import addIconsToLibrary from './fontAwesome';
 import * as Constants from './Constants';
+import addIconsToLibrary from './fontAwesome';
 
 import '../scss/app.scss';
 
@@ -115,11 +113,7 @@ const ContractorRoutes = (currentUser) => {
       <Route path={Constants.PATHS.HOME} exact>
         <Redirect to={getLastVistedPath(currentUser)} />
       </Route>
-      <AuthorizedRoute
-        path={Constants.PATHS.REPORT_EXPORT}
-        requires={Constants.PERMISSIONS.EXPORT}
-        userType={Constants.USER_TYPE.BUSINESS}
-      >
+      <AuthorizedRoute path={Constants.PATHS.REPORT_EXPORT} requires={Constants.PERMISSIONS.EXPORT} userType={Constants.USER_TYPE.BUSINESS}>
         <Route path={Constants.PATHS.REPORT_EXPORT} exact component={ReportExport} />
       </AuthorizedRoute>
       <Route path={Constants.PATHS.WORK_REPORTING} exact component={WorkReporting} />
@@ -136,46 +130,22 @@ const AdminRoutes = (currentUser) => {
       <Route path={Constants.PATHS.HOME} exact>
         <Redirect to={getLastVistedPath(currentUser)} />
       </Route>
-      <AuthorizedRoute
-        path={Constants.PATHS.ADMIN_ACTIVITIES}
-        requires={Constants.PERMISSIONS.CODE_R}
-        userType={Constants.USER_TYPE.INTERNAL}
-      >
+      <AuthorizedRoute path={Constants.PATHS.ADMIN_ACTIVITIES} requires={Constants.PERMISSIONS.CODE_R} userType={Constants.USER_TYPE.INTERNAL}>
         <Route path={Constants.PATHS.ADMIN_ACTIVITIES} exact component={ActivityAdmin} />
       </AuthorizedRoute>
-      <AuthorizedRoute
-        path={Constants.PATHS.ADMIN_USERS}
-        requires={Constants.PERMISSIONS.USER_R}
-        userType={Constants.USER_TYPE.INTERNAL}
-      >
+      <AuthorizedRoute path={Constants.PATHS.ADMIN_USERS} requires={Constants.PERMISSIONS.USER_R} userType={Constants.USER_TYPE.INTERNAL}>
         <Route path={Constants.PATHS.ADMIN_USERS} exact component={UserAdmin} />
       </AuthorizedRoute>
-      <AuthorizedRoute
-        path={Constants.PATHS.ADMIN_ROLES}
-        requires={Constants.PERMISSIONS.ROLE_R}
-        userType={Constants.USER_TYPE.INTERNAL}
-      >
+      <AuthorizedRoute path={Constants.PATHS.ADMIN_ROLES} requires={Constants.PERMISSIONS.ROLE_R} userType={Constants.USER_TYPE.INTERNAL}>
         <Route path={Constants.PATHS.ADMIN_ROLES} exact component={RoleAdmin} />
       </AuthorizedRoute>
-      <AuthorizedRoute
-        path={Constants.PATHS.REPORT_EXPORT}
-        requires={Constants.PERMISSIONS.EXPORT}
-        userType={Constants.USER_TYPE.INTERNAL}
-      >
+      <AuthorizedRoute path={Constants.PATHS.REPORT_EXPORT} requires={Constants.PERMISSIONS.EXPORT} userType={Constants.USER_TYPE.INTERNAL}>
         <Route path={Constants.PATHS.REPORT_EXPORT} exact component={ReportExport} />
       </AuthorizedRoute>
-      <AuthorizedRoute
-        path={Constants.PATHS.WORK_REPORTING}
-        requires={Constants.PERMISSIONS.FILE_R}
-        userType={Constants.USER_TYPE.INTERNAL}
-      >
+      <AuthorizedRoute path={Constants.PATHS.WORK_REPORTING} requires={Constants.PERMISSIONS.FILE_R} userType={Constants.USER_TYPE.INTERNAL}>
         <Route path={Constants.PATHS.WORK_REPORTING} exact component={WorkReporting} />
       </AuthorizedRoute>
-      <AuthorizedRoute
-        path={Constants.PATHS.SALT_REPORTING}
-        requires={Constants.PERMISSIONS.FILE_R}
-        userType={Constants.USER_TYPE.INTERNAL}
-      >
+      <AuthorizedRoute path={Constants.PATHS.SALT_REPORTING} requires={Constants.PERMISSIONS.FILE_R} userType={Constants.USER_TYPE.INTERNAL}>
         <Route path={Constants.PATHS.SALT_REPORTING} exact component={SaltReporting} />
       </AuthorizedRoute>
       {CommonRoutes()}

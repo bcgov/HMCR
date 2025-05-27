@@ -1,32 +1,23 @@
-import React, { useState, useEffect, forwardRef, useImperativeHandle } from 'react';
-import { useHistory } from 'react-router-dom';
-import { connect } from 'react-redux';
-import {
-  Button,
-  Row,
-  Col,
-  Input,
-  UncontrolledPopover,
-  PopoverBody,
-  PopoverHeader,
-  Progress,
-} from 'reactstrap';
+import { format, endOfDay, isBefore, parseISO } from 'date-fns';
+import _ from 'lodash';
 import moment from 'moment';
 import queryString from 'query-string';
-import _ from 'lodash';
+import React, { useState, useEffect, forwardRef, useImperativeHandle } from 'react';
 import { DateRange } from 'react-date-range';
-import { format, endOfDay, isBefore, parseISO } from 'date-fns';
+import { connect } from 'react-redux';
+import { useHistory } from 'react-router-dom';
+import { Button, Row, Col, Input, UncontrolledPopover, PopoverBody, PopoverHeader, Progress } from 'reactstrap';
 
 import 'react-date-range/dist/styles.css';
 import 'react-date-range/dist/theme/default.css';
-import DateRangeInput from './ui/DateRangeInput.jsx';
-import DataTableWithPaginationControl from './ui/DataTableWithPaginationControl.jsx';
-import PageSpinner from './ui/PageSpinner.jsx';
-import FontAwesomeButton from './ui/FontAwesomeButton.jsx';
-import WorkReportingSubmissionDetail from './WorkReportingSubmissionDetail.jsx';
-import useSearchData from './hooks/useSearchData';
 import * as Constants from '../Constants';
 import { stringifyQueryParams } from '../utils';
+import useSearchData from './hooks/useSearchData';
+import DataTableWithPaginationControl from './ui/DataTableWithPaginationControl.jsx';
+import DateRangeInput from './ui/DateRangeInput.jsx';
+import FontAwesomeButton from './ui/FontAwesomeButton.jsx';
+import PageSpinner from './ui/PageSpinner.jsx';
+import WorkReportingSubmissionDetail from './WorkReportingSubmissionDetail.jsx';
 
 const startDateLimit = new Date('2019-01-01');
 
@@ -131,8 +122,7 @@ const WorkReportingSubmissions = ({ serviceArea, submissionStatuses }, ref) => {
     });
   };
 
-  const handleSearchFormSubmit = () =>
-    searchData.updateSearchOptions({ ...searchData.searchOptions, searchText, pageNumber: 1 });
+  const handleSearchFormSubmit = () => searchData.updateSearchOptions({ ...searchData.searchOptions, searchText, pageNumber: 1 });
 
   const handleSearchFormReset = () => {
     setDateFrom(defaultSearchOptions.dateFrom);
@@ -188,31 +178,15 @@ const WorkReportingSubmissions = ({ serviceArea, submissionStatuses }, ref) => {
                   }}
                 />
               </div>
-              <Button
-                color="primary"
-                type="button"
-                className="ms-2"
-                onClick={handleSearchFormSubmit}
-              >
+              <Button color="primary" type="button" className="ms-2" onClick={handleSearchFormSubmit}>
                 Search
               </Button>
-              <Button
-                color="secondary"
-                type="button"
-                className="ms-2"
-                onClick={handleSearchFormReset}
-              >
+              <Button color="secondary" type="button" className="ms-2" onClick={handleSearchFormReset}>
                 Reset
               </Button>
             </div>
             <div>
-              <FontAwesomeButton
-                size="sm"
-                icon="sync"
-                spin={searchData.loading}
-                disabled={searchData.loading}
-                onClick={() => searchData.refresh()}
-              />
+              <FontAwesomeButton size="sm" icon="sync" spin={searchData.loading} disabled={searchData.loading} onClick={() => searchData.refresh()} />
             </div>
           </div>
         </Col>
@@ -225,50 +199,27 @@ const WorkReportingSubmissions = ({ serviceArea, submissionStatuses }, ref) => {
               <DataTableWithPaginationControl
                 dataList={searchData.data.map((item) => {
                   const itemStatus = submissionStatuses[item.submissionStatusCode];
-                  const progressBarLength =
-                    (itemStatus.stage < 0
-                      ? maxValidationStages
-                      : itemStatus.stage / maxValidationStages) * 100;
+                  const progressBarLength = (itemStatus.stage < 0 ? maxValidationStages : itemStatus.stage / maxValidationStages) * 100;
 
                   return {
                     ...item,
                     name: `${item.firstName} ${item.lastName}`,
-                    date: moment(item.appCreateTimestamp)
-                      .utc(item.appCreateTimestamp, Constants.MESSAGE_DATE_FORMAT)
-                      .local()
-                      .format(Constants.DATE_DISPLAY_FORMAT),
+                    date: moment(item.appCreateTimestamp).utc(item.appCreateTimestamp, Constants.MESSAGE_DATE_FORMAT).local().format(Constants.DATE_DISPLAY_FORMAT),
                     id: (
-                      <Button
-                        color="link"
-                        size="sm"
-                        onClick={() => setShowResultScreen({ isOpen: true, submission: item.id })}
-                      >
+                      <Button color="link" size="sm" onClick={() => setShowResultScreen({ isOpen: true, submission: item.id })}>
                         {item.id}
                       </Button>
                     ),
                     description: (
                       <React.Fragment>
                         {item.description}
-                        <Progress
-                          className="thin-underline"
-                          color={stageColors(itemStatus.stage)}
-                          value={progressBarLength}
-                        ></Progress>
+                        <Progress className="thin-underline" color={stageColors(itemStatus.stage)} value={progressBarLength}></Progress>
                       </React.Fragment>
                     ),
                     longDescription: (
                       <React.Fragment>
-                        <FontAwesomeButton
-                          id={`tooltip_${item.id}`}
-                          className="fa-color-primary"
-                          color="link"
-                          icon="question-circle"
-                        />
-                        <UncontrolledPopover
-                          trigger="focus"
-                          placement="auto"
-                          target={`tooltip_${item.id}`}
-                        >
+                        <FontAwesomeButton id={`tooltip_${item.id}`} className="fa-color-primary" color="link" icon="question-circle" />
+                        <UncontrolledPopover trigger="focus" placement="auto" target={`tooltip_${item.id}`}>
                           <PopoverHeader>{itemStatus.description}</PopoverHeader>
                           <PopoverBody>{itemStatus.longDescription}</PopoverBody>
                         </UncontrolledPopover>
@@ -292,8 +243,7 @@ const WorkReportingSubmissions = ({ serviceArea, submissionStatuses }, ref) => {
           toggle={() => {
             setShowResultScreen({ isOpen: false });
             const params = queryString.parse(history.location.search);
-            if (params.showResult)
-              history.push(`?${stringifyQueryParams(_.omit(params, ['showResult']))}`);
+            if (params.showResult) history.push(`?${stringifyQueryParams(_.omit(params, ['showResult']))}`);
           }}
         />
       )}
@@ -309,6 +259,4 @@ const mapStateToProps = (state) => {
   };
 };
 
-export default connect(mapStateToProps, null, null, { forwardRef: true })(
-  refWorkReportingSubmissions
-);
+export default connect(mapStateToProps, null, null, { forwardRef: true })(refWorkReportingSubmissions);

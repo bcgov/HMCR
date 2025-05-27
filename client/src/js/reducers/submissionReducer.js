@@ -20,7 +20,7 @@ const submissionReducer = (state = defaultState, action) => {
               ...stream,
               fileSizeLimitMb: stream.fileSizeLimit / 1024 / 1024,
             })),
-            'stagingTableName'
+            'stagingTableName',
           ),
         },
       };

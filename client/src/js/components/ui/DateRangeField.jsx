@@ -1,14 +1,9 @@
-import React from 'react';
 import { Field, useFormikContext } from 'formik';
+import React from 'react';
 
 import DateRangeInput from './DateRangeInput';
 
-const DateRangePickerWithFormik = ({
-  name,
-  fromName,
-  toName,
-  form: { errors, submitCount, touched },
-}) => {
+const DateRangePickerWithFormik = ({ name, fromName, toName, form: { errors, submitCount, touched } }) => {
   const { values, setFieldValue } = useFormikContext();
 
   const handleChange = ({ startDate, endDate }) => {
@@ -16,18 +11,9 @@ const DateRangePickerWithFormik = ({
     setFieldValue(toName, endDate, true);
   };
 
-  const showError =
-    (submitCount > 0 || touched?.[fromName] || touched?.[toName]) &&
-    (errors?.[fromName] || errors?.[toName]);
+  const showError = (submitCount > 0 || touched?.[fromName] || touched?.[toName]) && (errors?.[fromName] || errors?.[toName]);
 
-  return (
-    <DateRangeInput
-      startDate={values[fromName]}
-      endDate={values[toName]}
-      onChange={handleChange}
-      showError={showError}
-    />
-  );
+  return <DateRangeInput startDate={values[fromName]} endDate={values[toName]} onChange={handleChange} showError={showError} />;
 };
 
 const DateRangeField = (props) => {

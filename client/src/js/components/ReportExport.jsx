@@ -1,23 +1,23 @@
+import { startOfMonth, endOfMonth, subMonths } from 'date-fns';
+import FileSaver from 'file-saver';
+import { Formik, Form } from 'formik';
 import React, { useState, useEffect } from 'react';
 import { connect } from 'react-redux';
 import { Alert, Button, Spinner } from 'reactstrap';
-import { Formik, Form } from 'formik';
 import * as Yup from 'yup';
-import { startOfMonth, endOfMonth, subMonths } from 'date-fns';
-import FileSaver from 'file-saver';
 
 import { fetchActivityCodesDropdown, hideErrorDialog } from '../actions';
-import MaterialCard from './ui/MaterialCard';
-import UIHeader from './ui/UIHeader';
-import SingleDropdownField from './ui/SingleDropdownField';
-import DateRangeField from './ui/DateRangeField';
-import MultiDropdownField from './ui/MultiDropdownField';
-import { FormInput } from './forms/FormInputs';
-import SimpleModalWrapper from './ui/SimpleModalWrapper';
-import PageSpinner from './ui/PageSpinner';
-import MouseoverTooltip from './ui/MouseoverTooltip';
-import * as Constants from '../Constants';
 import * as api from '../Api';
+import * as Constants from '../Constants';
+import { FormInput } from './forms/FormInputs';
+import DateRangeField from './ui/DateRangeField';
+import MaterialCard from './ui/MaterialCard';
+import MouseoverTooltip from './ui/MouseoverTooltip';
+import MultiDropdownField from './ui/MultiDropdownField';
+import PageSpinner from './ui/PageSpinner';
+import SimpleModalWrapper from './ui/SimpleModalWrapper';
+import SingleDropdownField from './ui/SingleDropdownField';
+import UIHeader from './ui/UIHeader';
 
 const filterContainerStyle = {
   width: '200px',
@@ -52,15 +52,7 @@ const EXPORT_STAGE = {
   DONE: 'DONE',
 };
 
-const ReportExport = ({
-  reportTypes,
-  maintenanceTypes,
-  serviceAreas,
-  currentUser,
-  activityCodes,
-  fetchActivityCodesDropdown,
-  hideErrorDialog,
-}) => {
+const ReportExport = ({ reportTypes, maintenanceTypes, serviceAreas, currentUser, activityCodes, fetchActivityCodesDropdown, hideErrorDialog }) => {
   const [validServiceAreas, setValidServiceAreas] = useState([]);
   const [submitting, setSubmitting] = useState(false);
   const [showModal, setShowModal] = useState(false);
@@ -85,8 +77,7 @@ const ReportExport = ({
 
   const disableFutureDates = (date) => date.isAfter(moment().endOf('day'));
 
-  const isRequiredFieldsSet = (formikProps) =>
-    formikProps.values.reportTypeId && formikProps.values.dateFrom && formikProps.values.dateTo;
+  const isRequiredFieldsSet = (formikProps) => formikProps.values.reportTypeId && formikProps.values.dateFrom && formikProps.values.dateTo;
 
   const buildExportParams = (values, dateFrom, dateTo) => {
     const queryParams = {};
@@ -257,13 +248,7 @@ const ReportExport = ({
 
   return (
     <React.Fragment>
-      <Formik
-        initialValues={defaultSearchFormValues}
-        enableReinitialize={true}
-        onSubmit={submitExport}
-        onReset={() => {}}
-        validationSchema={validationSchema}
-      >
+      <Formik initialValues={defaultSearchFormValues} enableReinitialize={true} onSubmit={submitExport} onReset={() => {}} validationSchema={validationSchema}>
         {(formikProps) => (
           <React.Fragment>
             <MaterialCard>
@@ -274,12 +259,7 @@ const ReportExport = ({
                     <SingleDropdownField defaultTitle="Select Report Type" items={reportTypes} name="reportTypeId" />
                   </div>
                   <div className="d-flex align-items-center">
-                    <DateRangeField
-                      name="reportDate"
-                      fromName="dateFrom"
-                      toName="dateTo"
-                      isOutsideRange={disableFutureDates}
-                    />
+                    <DateRangeField name="reportDate" fromName="dateFrom" toName="dateTo" isOutsideRange={disableFutureDates} />
                     <MouseoverTooltip id="tooltip_datepicker">
                       <ul style={{ paddingInlineStart: 10 }}>
                         <li>
@@ -302,12 +282,7 @@ const ReportExport = ({
                     </div>
                     <div className="d-flex">
                       <div style={filterContainerStyle}>
-                        <MultiDropdownField
-                          {...formikProps}
-                          title="Service Area"
-                          items={validServiceAreas}
-                          name="serviceAreaNumbers"
-                        />
+                        <MultiDropdownField {...formikProps} title="Service Area" items={validServiceAreas} name="serviceAreaNumbers" />
                       </div>
                       {formikProps.values.reportTypeId !== 'HMR_SALT_REPORT' && (
                         <div style={filterContainerStyle}>
@@ -317,21 +292,10 @@ const ReportExport = ({
                       {formikProps.values.reportTypeId === 'HMR_WORK_REPORT' && (
                         <React.Fragment>
                           <div style={filterContainerStyle}>
-                            <MultiDropdownField
-                              {...formikProps}
-                              title="Maintenance Type"
-                              items={maintenanceTypes}
-                              name="maintenanceTypeIds"
-                            />
+                            <MultiDropdownField {...formikProps} title="Maintenance Type" items={maintenanceTypes} name="maintenanceTypeIds" />
                           </div>
                           <div style={filterContainerStyle}>
-                            <MultiDropdownField
-                              {...formikProps}
-                              title="Activity Number"
-                              items={activityCodes}
-                              name="activityNumberIds"
-                              searchable={true}
-                            />
+                            <MultiDropdownField {...formikProps} title="Activity Number" items={activityCodes} name="activityNumberIds" searchable={true} />
                           </div>
                         </React.Fragment>
                       )}
@@ -342,18 +306,11 @@ const ReportExport = ({
                       </div>
                       {formikProps.values.reportTypeId !== 'HMR_SALT_REPORT' && (
                         <div className="d-flex align-items-center">
-                          <DateRangeField
-                            name="submissionDate"
-                            fromName="submissionDateFrom"
-                            toName="submissionDateTo"
-                            isOutsideRange={disableFutureDates}
-                          />
+                          <DateRangeField name="submissionDate" fromName="submissionDateFrom" toName="submissionDateTo" isOutsideRange={disableFutureDates} />
                           <MouseoverTooltip id="tooltip_submission_datepicker">
                             <ul style={{ paddingInlineStart: 10 }}>
-                              This Submission Date filter applies in addition to the applicable mandatory date range
-                              above. Tip: To ensure all records submitted in this date range (and / or matching the
-                              entered Submission Number) will be included in the export, set the mandatory date range
-                              above to be sufficiently broad
+                              This Submission Date filter applies in addition to the applicable mandatory date range above. Tip: To ensure all records submitted in this date range (and / or matching
+                              the entered Submission Number) will be included in the export, set the mandatory date range above to be sufficiently broad
                             </ul>
                           </MouseoverTooltip>
                         </div>

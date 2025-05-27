@@ -1,9 +1,10 @@
 export const tooltips = {
-  objectives: 'The salt management plan should include a description of planned improvements to be undertaken over time. Achievement of the objectives is an indicator of performance in the implementation of the salt management plan and will be taken into consideration in the second review of progress on the Code of Practice to be conducted by Environment Canada.',
+  objectives:
+    'The salt management plan should include a description of planned improvements to be undertaken over time. Achievement of the objectives is an indicator of performance in the implementation of the salt management plan and will be taken into consideration in the second review of progress on the Code of Practice to be conducted by Environment Canada.',
   acetate: 'calcium-magnesium or potassium acetates',
   nonchloride: 'record only pure non-chloride (e.g. beet juice, corn bi-product, molasses or other organics), excluding pre-mixed blends with salt brine',
-  liquids: 'Describe multi-chloride liquids that contain more than one type of salt in the same mix'
-}
+  liquids: 'Describe multi-chloride liquids that contain more than one type of salt in the same mix',
+};
 
 export const defaultValues = {
   reportTypeId: 4,

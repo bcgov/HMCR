@@ -1,29 +1,28 @@
-import React, { useState, useEffect } from 'react';
-
-import { useLocation } from 'react-router-dom';
-import { connect } from 'react-redux';
-import { Row, Col, Button, Alert, Spinner } from 'reactstrap';
+import FileSaver from 'file-saver';
 import { Formik, Form, Field } from 'formik';
 import queryString from 'query-string';
+import React, { useState, useEffect } from 'react';
+import { connect } from 'react-redux';
+import { useLocation } from 'react-router-dom';
+import { Row, Col, Button, Alert, Spinner } from 'reactstrap';
 import * as Yup from 'yup';
 
-import Authorize from './fragments/Authorize';
-import MaterialCard from './ui/MaterialCard';
-import UIHeader from './ui/UIHeader';
-import MultiDropdownField from './ui/MultiDropdownField';
-import AddUserWizard from './forms/AddUserWizard';
-import DataTableWithPaginationControl from './ui/DataTableWithPaginationControl';
-import SubmitButton from './ui/SubmitButton';
-import PageSpinner from './ui/PageSpinner';
-import useSearchData from './hooks/useSearchData';
-import useFormModal from './hooks/useFormModal';
-import EditUserFormFields from './forms/EditUserFormFields';
-import SimpleModalWrapper from './ui/SimpleModalWrapper';
 import { showValidationErrorDialog, hideErrorDialog } from '../actions';
-import FileSaver from 'file-saver';
-import * as Constants from '../Constants';
 import * as api from '../Api';
+import * as Constants from '../Constants';
 import { buildStatusIdArray } from '../utils';
+import AddUserWizard from './forms/AddUserWizard';
+import EditUserFormFields from './forms/EditUserFormFields';
+import Authorize from './fragments/Authorize';
+import useFormModal from './hooks/useFormModal';
+import useSearchData from './hooks/useSearchData';
+import DataTableWithPaginationControl from './ui/DataTableWithPaginationControl';
+import MaterialCard from './ui/MaterialCard';
+import MultiDropdownField from './ui/MultiDropdownField';
+import PageSpinner from './ui/PageSpinner';
+import SimpleModalWrapper from './ui/SimpleModalWrapper';
+import SubmitButton from './ui/SubmitButton';
+import UIHeader from './ui/UIHeader';
 
 const defaultSearchFormValues = {
   serviceAreaIds: [],
@@ -90,9 +89,7 @@ const UserAdmin = ({ serviceAreas, userStatuses, userTypes, showValidationErrorD
     searchData.updateSearchOptions(options);
 
     const searchText = options.searchText || '';
-    const serviceAreaIds = options.serviceAreas
-      ? options.serviceAreas.split(',').map((id) => parseInt(id))
-      : defaultSearchFormValues.serviceAreaIds;
+    const serviceAreaIds = options.serviceAreas ? options.serviceAreas.split(',').map((id) => parseInt(id)) : defaultSearchFormValues.serviceAreaIds;
     const userTypeIds = options.userTypes ? options.userTypes.split(',') : defaultSearchFormValues.userTypeIds;
 
     setSearchInitialValues({
@@ -219,11 +216,7 @@ const UserAdmin = ({ serviceAreas, userStatuses, userTypes, showValidationErrorD
       })
       .finally(() => setExporting(false));
   };
-  const formModal = useFormModal(
-    'User',
-    <EditUserFormFields validationSchema={validationSchema} />,
-    handleEditFormSubmit
-  );
+  const formModal = useFormModal('User', <EditUserFormFields validationSchema={validationSchema} />, handleEditFormSubmit);
 
   const data = Object.values(searchData.data).map((user) => ({
     ...user,
@@ -277,12 +270,7 @@ const UserAdmin = ({ serviceAreas, userStatuses, userTypes, showValidationErrorD
 
   return (
     <React.Fragment>
-      <Formik
-        initialValues={searchInitialValues}
-        enableReinitialize={true}
-        onSubmit={(values) => handleSearchFormSubmit(values)}
-        onReset={handleSearchFormReset}
-      >
+      <Formik initialValues={searchInitialValues} enableReinitialize={true} onSubmit={(values) => handleSearchFormSubmit(values)} onReset={handleSearchFormReset}>
         {(formikProps) => (
           <React.Fragment>
             <MaterialCard>
@@ -290,21 +278,10 @@ const UserAdmin = ({ serviceAreas, userStatuses, userTypes, showValidationErrorD
               <Form>
                 <Row form>
                   <Col>
-                    <Field
-                      type="text"
-                      name="searchText"
-                      placeholder="User Id/Name/Organization"
-                      className="form-control"
-                    />
+                    <Field type="text" name="searchText" placeholder="User Id/Name/Organization" className="form-control" />
                   </Col>
                   <Col>
-                    <MultiDropdownField
-                      {...formikProps}
-                      items={serviceAreas}
-                      name="serviceAreaIds"
-                      title="Service Area"
-                      searchable={true}
-                    />
+                    <MultiDropdownField {...formikProps} items={serviceAreas} name="serviceAreaIds" title="Service Area" searchable={true} />
                   </Col>
                   <Col>
                     <MultiDropdownField {...formikProps} items={userTypes} name="userTypeIds" title="User Type" />
@@ -368,13 +345,7 @@ const UserAdmin = ({ serviceAreas, userStatuses, userTypes, showValidationErrorD
         </MaterialCard>
       )}
       {formModal.formElement}
-      {addUserWizardIsOpen && (
-        <AddUserWizard
-          isOpen={addUserWizardIsOpen}
-          toggle={handleAddUserWizardClose}
-          validationSchema={validationSchema}
-        />
-      )}
+      {addUserWizardIsOpen && <AddUserWizard isOpen={addUserWizardIsOpen} toggle={handleAddUserWizardClose} validationSchema={validationSchema} />}
       <SimpleModalWrapper
         isOpen={showModal}
         toggle={() => {

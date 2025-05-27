@@ -1,18 +1,16 @@
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { Formik, Form } from 'formik';
 import React, { useState, useEffect } from 'react';
 import { connect } from 'react-redux';
 import { Col, FormGroup, FormFeedback, Label, Input, Spinner, Alert, Button } from 'reactstrap';
-import { Formik, Form } from 'formik';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-
-import SingleDropdownField from './ui/SingleDropdownField';
-import { FormRow } from './forms/FormInputs';
-import SubmitButton from './ui/SubmitButton';
-import SimpleModalWrapper from './ui/SimpleModalWrapper';
 
 import { showValidationErrorDialog } from '../actions';
-
-import * as Constants from '../Constants';
 import * as api from '../Api';
+import * as Constants from '../Constants';
+import { FormRow } from './forms/FormInputs';
+import SimpleModalWrapper from './ui/SimpleModalWrapper';
+import SingleDropdownField from './ui/SingleDropdownField';
+import SubmitButton from './ui/SubmitButton';
 
 const defaultFormValues = { reportTypeId: null, reportFile: null };
 
@@ -42,14 +40,7 @@ const updateUploadStatusMessage = (state, status) => {
   }
 };
 
-const WorkReportingUpload = ({
-  currentUser,
-  showValidationErrorDialog,
-  serviceArea,
-  handleFileSubmitted,
-  submissionStreams,
-  ...props
-}) => {
+const WorkReportingUpload = ({ currentUser, showValidationErrorDialog, serviceArea, handleFileSubmitted, submissionStreams, ...props }) => {
   const [fileInputKey, setFileInputKey] = useState(Math.random());
   const [submitting, setSubmitting] = useState(false);
   const [showStatusModal, setShowStatusModal] = useState(false);
@@ -96,9 +87,7 @@ const WorkReportingUpload = ({
   };
 
   const handleCheckResubmissions = (apiPath, data, resetCallback) => {
-    setResubCheckStatus(
-      updateUploadStatusMessage(Constants.UPLOAD_STATE.RESUB_CHECK, Constants.UPLOAD_STATE_STATUS.START)
-    );
+    setResubCheckStatus(updateUploadStatusMessage(Constants.UPLOAD_STATE.RESUB_CHECK, Constants.UPLOAD_STATE_STATUS.START));
     api.instance
       .post(`${apiPath}/resubmissions`, data)
       .then((response) => {
@@ -120,12 +109,7 @@ const WorkReportingUpload = ({
                     size="sm"
                     className="me-2"
                     onClick={() => {
-                      setResubCheckStatus(
-                        updateUploadStatusMessage(
-                          Constants.UPLOAD_STATE.RESUB_CHECK,
-                          Constants.UPLOAD_STATE_STATUS.COMPLETE
-                        )
-                      );
+                      setResubCheckStatus(updateUploadStatusMessage(Constants.UPLOAD_STATE.RESUB_CHECK, Constants.UPLOAD_STATE_STATUS.COMPLETE));
                       handleUploadFile(apiPath, data, resetCallback);
                     }}
                   >
@@ -142,19 +126,15 @@ const WorkReportingUpload = ({
                   </Button>
                 </div>
               </Alert>
-            </React.Fragment>
+            </React.Fragment>,
           );
         } else {
-          setResubCheckStatus(
-            updateUploadStatusMessage(Constants.UPLOAD_STATE.RESUB_CHECK, Constants.UPLOAD_STATE_STATUS.COMPLETE)
-          );
+          setResubCheckStatus(updateUploadStatusMessage(Constants.UPLOAD_STATE.RESUB_CHECK, Constants.UPLOAD_STATE_STATUS.COMPLETE));
           handleUploadFile(apiPath, data, resetCallback);
         }
       })
       .catch((error) => {
-        setResubCheckStatus(
-          updateUploadStatusMessage(Constants.UPLOAD_STATE.RESUB_CHECK, Constants.UPLOAD_STATE_STATUS.ERROR)
-        );
+        setResubCheckStatus(updateUploadStatusMessage(Constants.UPLOAD_STATE.RESUB_CHECK, Constants.UPLOAD_STATE_STATUS.ERROR));
         setErrorMessages(error.response.data.errors);
         resetCallback();
         handleFileSubmitted();
@@ -166,9 +146,7 @@ const WorkReportingUpload = ({
     api.instance
       .post(apiPath, data)
       .then((response) => {
-        setSavingStatus(
-          updateUploadStatusMessage(Constants.UPLOAD_STATE.SAVING, Constants.UPLOAD_STATE_STATUS.COMPLETE)
-        );
+        setSavingStatus(updateUploadStatusMessage(Constants.UPLOAD_STATE.SAVING, Constants.UPLOAD_STATE_STATUS.COMPLETE));
         setCompleteMessage(response.data);
         resetCallback();
       })
@@ -223,9 +201,7 @@ const WorkReportingUpload = ({
                         File restrictions:{' '}
                         <ul>
                           <li>.csv files only</li>
-                          <li>
-                            Up to {reportTypes.find((o) => o.id === values.reportTypeId).fileSizeLimitMb}MB per file
-                          </li>
+                          <li>Up to {reportTypes.find((o) => o.id === values.reportTypeId).fileSizeLimitMb}MB per file</li>
                         </ul>
                       </Alert>
                       <Input
@@ -233,21 +209,11 @@ const WorkReportingUpload = ({
                         id="reportFileBrowser"
                         name="reportFile"
                         accept=".csv"
-                        onChange={(e) =>
-                          validateFile(
-                            e,
-                            setFieldValue,
-                            setFieldError,
-                            'reportFile',
-                            reportTypes.find((o) => o.id === values.reportTypeId).fileSizeLimitMb
-                          )
-                        }
+                        onChange={(e) => validateFile(e, setFieldValue, setFieldError, 'reportFile', reportTypes.find((o) => o.id === values.reportTypeId).fileSizeLimitMb)}
                         key={fileInputKey}
                         invalid={errors.reportFile && errors.reportFile.length > 0}
                       />
-                      {errors.reportFile && (
-                        <FormFeedback style={{ display: 'unset' }}>{errors.reportFile}</FormFeedback>
-                      )}
+                      {errors.reportFile && <FormFeedback style={{ display: 'unset' }}>{errors.reportFile}</FormFeedback>}
                     </Col>
                   </FormGroup>
                   <div style={{ display: 'flex', justifyContent: 'flex-end' }}>

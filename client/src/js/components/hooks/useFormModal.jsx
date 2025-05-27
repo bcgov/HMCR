@@ -1,12 +1,11 @@
+import { Formik, Form } from 'formik';
 import React, { useState } from 'react';
 import { Button, Modal, ModalHeader, ModalBody, ModalFooter } from 'reactstrap';
-import { Formik, Form } from 'formik';
-
-import SubmitButton from '../ui/SubmitButton';
 
 import * as Constants from '../../Constants';
+import SubmitButton from '../ui/SubmitButton';
 
-const useFormModal = (formTitle, formFieldsChildElement, handleFormSubmit,modSize) => {
+const useFormModal = (formTitle, formFieldsChildElement, handleFormSubmit, modSize) => {
   // This is needed until Formik fixes its own setSubmitting function
   const [submitting, setSubmitting] = useState(false);
   const [initialValues, setInitialValues] = useState(null);
@@ -31,17 +30,12 @@ const useFormModal = (formTitle, formFieldsChildElement, handleFormSubmit,modSiz
   const onFormSubmit = (values) => handleFormSubmit(values, formType);
 
   const title = formType === Constants.FORM_TYPE.ADD ? `Add ${formTitle}` : `Edit ${formTitle}`;
-  modSize = (modSize===null )?'sm':modSize;
+  modSize = modSize === null ? 'sm' : modSize;
   const formModal = () => {
     return (
       <Modal isOpen={isOpen} toggle={toggle} backdrop="static" size={modSize}>
         <ModalHeader toggle={toggle}>{title}</ModalHeader>
-        <Formik
-          enableReinitialize={true}
-          initialValues={initialValues}
-          validationSchema={validationSchema}
-          onSubmit={onFormSubmit}
-        >
+        <Formik enableReinitialize={true} initialValues={initialValues} validationSchema={validationSchema} onSubmit={onFormSubmit}>
           {({ dirty, values }) => (
             <Form>
               <ModalBody>
