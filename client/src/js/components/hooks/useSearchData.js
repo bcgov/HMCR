@@ -4,7 +4,6 @@ import _ from 'lodash';
 import moment from 'moment';
 
 import { updateQueryParamsFromHistory } from '../../utils';
-
 import * as api from '../../Api';
 import * as Constants from '../../Constants';
 
@@ -71,12 +70,22 @@ const useSearchData = (defaultSearchOptions) => {
   useEffect(() => {
     const updateHistoryLocationSearch = () => {
       if (!history) {
-        console.warn('userSearchData: history object is null, skipping updating query params');
+        console.warn('useSearchData: history object is null, skipping updating query params');
         return;
       }
 
+      const queryOptions = { ...searchOptions };
+      ['dateFrom', 'dateTo'].forEach((key) => {
+        const date = queryOptions[key];
+        if (moment.isMoment(date)) {
+          queryOptions[key] = date.format('YYYY-MM-DD');
+        } else if (date instanceof Date && !isNaN(date.getTime())) {
+          queryOptions[key] = moment(date).format('YYYY-MM-DD');
+        }
+      });
+
       history.push(
-        `?${updateQueryParamsFromHistory(history, _.omit(searchOptions, ['serviceAreaNumber', 'dataPath']))}`
+        `?${updateQueryParamsFromHistory(history, _.omit(queryOptions, ['serviceAreaNumber', 'dataPath']))}`
       );
     };
 
@@ -86,25 +95,20 @@ const useSearchData = (defaultSearchOptions) => {
       const dataPath = searchOptions.dataPath;
       const options = { ...searchOptions };
 
-      // convert moment objects to string
-      Object.keys(options).forEach((key) => {
-        if (moment.isMoment(options[key])) {
-          if (key === 'dateTo') {
-            options[key] = moment(options[key]).endOf('day').format(Constants.DATE_UTC_FORMAT);
-
-            return;
-          } else if (key === 'dateFrom') {
-            options[key] = moment(options[key]).startOf('day').format(Constants.DATE_UTC_FORMAT);
-
-            return;
-          }
-
-          options[key] = moment(options[key]).format(Constants.DATE_UTC_FORMAT);
+      ['dateFrom', 'dateTo'].forEach((key) => {
+        const date = options[key];
+        if (moment.isMoment(date)) {
+          options[key] = key === 'dateFrom'
+            ? date.startOf('day').format(Constants.DATE_UTC_FORMAT)
+            : date.endOf('day').format(Constants.DATE_UTC_FORMAT);
+        } else if (date instanceof Date && !isNaN(date.getTime())) {
+          options[key] = key === 'dateFrom'
+            ? moment(date).startOf('day').format(Constants.DATE_UTC_FORMAT)
+            : moment(date).endOf('day').format(Constants.DATE_UTC_FORMAT);
         }
       });
 
       if (!options.pageSize) options.pageSize = Constants.DEFAULT_PAGE_SIZE;
-
       if (!options.pageNumber) options.pageNumber = 1;
 
       setLoading(true);

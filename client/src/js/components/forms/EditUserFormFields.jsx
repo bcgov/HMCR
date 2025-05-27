@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { connect } from 'react-redux';
-import moment from 'moment';
+import { parseISO } from 'date-fns';
 
 import MultiSelect from '../ui/MultiSelect';
 import SingleDateField from '../ui/SingleDateField';
@@ -31,7 +31,7 @@ const EditUserFormFields = ({
       .then((response) => {
         setInitialValues({
           ...response.data,
-          endDate: response.data.endDate ? moment(response.data.endDate) : null,
+          endDate: response.data.endDate ? parseISO(response.data.endDate) : null,
         });
 
         const userType = response.data.userType;

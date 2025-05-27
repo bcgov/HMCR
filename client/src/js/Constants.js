@@ -69,7 +69,7 @@ export const MESSAGE_DATE_FORMAT = 'YYYY-MM-DD hh:mmA';
 
 export const DATE_DISPLAY_FORMAT = 'yyyy-MM-dd';
 
-export const DATE_UTC_FORMAT = 'YYYY-MM-DDTHH:mm';
+export const DATE_UTC_FORMAT = 'yyyy-MM-DTHH:mm';
 
 export const DATE_TIME_FORMAT = 'YYYY-MM-DD HH:mm:ss';
 

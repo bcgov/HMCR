@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import * as Yup from 'yup';
-import moment from 'moment';
+import { parseISO } from 'date-fns';
 
 import MultiSelect from '../ui/MultiSelect';
 import SingleDateField from '../ui/SingleDateField';
@@ -42,14 +42,13 @@ const EditRoleFormFields = ({ setInitialValues, formValues, setValidationSchema,
         return api.getRole(roleId).then((response) => {
           setInitialValues({
             ...response.data,
-            endDate: response.data.endDate ? moment(response.data.endDate) : null,
+            endDate: response.data.endDate ? parseISO(response.data.endDate) : null,
           });
           setIsReferenced(response.data.isReferenced);
           setLoading(false);
         });
       }
     });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   if (loading || formValues === null) return <PageSpinner />;

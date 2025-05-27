@@ -12,8 +12,8 @@ const DateRangePickerWithFormik = ({
   const { values, setFieldValue } = useFormikContext();
 
   const handleChange = ({ startDate, endDate }) => {
-    setFieldValue(fromName, startDate);
-    setFieldValue(toName, endDate);
+    setFieldValue(fromName, startDate, true);
+    setFieldValue(toName, endDate, true);
   };
 
   const showError =

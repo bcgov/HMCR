@@ -3,9 +3,8 @@ import { connect } from 'react-redux';
 import { Alert, Button, Spinner } from 'reactstrap';
 import { Formik, Form } from 'formik';
 import * as Yup from 'yup';
-import moment from 'moment';
+import { startOfMonth, endOfMonth, subMonths } from 'date-fns';
 import FileSaver from 'file-saver';
-import { subMonths, startOfMonth, endOfMonth } from 'date-fns';
 
 import { fetchActivityCodesDropdown, hideErrorDialog } from '../actions';
 import MaterialCard from './ui/MaterialCard';
@@ -41,8 +40,8 @@ const defaultSearchFormValues = {
 
 const validationSchema = Yup.object({
   reportTypeId: Yup.string().required('Required').trim(),
-  dateFrom: Yup.object().required('Required'),
-  dateTo: Yup.object().required('Required'),
+  dateFrom: Yup.date().required('Required'),
+  dateTo: Yup.date().required('Required'),
   outputFormat: Yup.string().required('Reuired'),
 });
 
@@ -82,8 +81,6 @@ const ReportExport = ({
       .getExportSupportedFormats()
       .then((response) => setSupportedFormats(response.data))
       .finally(() => setLoading(false));
-
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const disableFutureDates = (date) => date.isAfter(moment().endOf('day'));

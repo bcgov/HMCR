@@ -1,7 +1,8 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useRef, useEffect, useState } from 'react';
 import { Calendar } from 'react-date-range';
-import { InputGroup, InputGroupText, Input, FormFeedback } from 'reactstrap';
+import { InputGroup, InputGroupText, Input, FormFeedback, Button } from 'reactstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faCalendarAlt, faTimesCircle } from '@fortawesome/free-solid-svg-icons';
 import { format, isValid } from 'date-fns';
 
 import 'react-date-range/dist/styles.css';
@@ -17,27 +18,28 @@ const SingleDateInput = ({
   placeholder = 'Select Date',
   disabled = false,
   id,
+  style = {},
 }) => {
   const wrapperRef = useRef(null);
   const [open, setOpen] = useState(false);
 
-  const handleOutsideClick = (e) => {
-    if (wrapperRef.current && !wrapperRef.current.contains(e.target)) {
-      setOpen(false);
-    }
-  };
-
   useEffect(() => {
-    document.addEventListener('mousedown', handleOutsideClick);
-    return () => document.removeEventListener('mousedown', handleOutsideClick);
+    const handleClickOutside = (event) => {
+      if (wrapperRef.current && !wrapperRef.current.contains(event.target)) {
+        setOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  const displayValue = isValid(new Date(value)) ? format(new Date(value), 'yyyy-MM-dd') : '';
+  const displayValue = value && isValid(new Date(value)) ? format(new Date(value), 'yyyy-MM-dd') : '';
 
   return (
     <div
       className={`SingleDateInputWrapper position-relative ${showError ? 'is-invalid' : ''}`}
       ref={wrapperRef}
+      style={style}
     >
       <InputGroup
         onClick={() => !disabled && setOpen(!open)}
@@ -51,8 +53,20 @@ const SingleDateInput = ({
           disabled={disabled}
           id={id}
         />
+        {value && !disabled && (
+          <InputGroupText
+            onClick={(e) => {
+              e.stopPropagation();
+              onChange(null);
+              setOpen(false);
+            }}
+            style={{ cursor: 'pointer' }}
+          >
+            <FontAwesomeIcon icon={faTimesCircle} />
+          </InputGroupText>
+        )}
         <InputGroupText>
-          <FontAwesomeIcon icon="calendar-alt" />
+          <FontAwesomeIcon icon={faCalendarAlt} />
         </InputGroupText>
       </InputGroup>
 
@@ -61,15 +75,15 @@ const SingleDateInput = ({
       {open && (
         <div style={{ position: 'absolute', zIndex: 1000 }}>
           <Calendar
-            date={isValid(new Date(value)) ? new Date(value) : new Date()}
-            onChange={(selectedDate) => {
-              onChange(selectedDate);
+            date={value && isValid(new Date(value)) ? new Date(value) : new Date()}
+            onChange={(date) => {
+              onChange(date);
               setOpen(false);
             }}
-            color="#38598a"
             minDate={minDate}
             maxDate={maxDate}
             showDateDisplay={false}
+            color="#38598a"
           />
         </div>
       )}

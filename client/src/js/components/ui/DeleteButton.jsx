@@ -74,7 +74,7 @@ const DeleteButton = ({
                 value={date}
                 onChange={setDate}
                 placeholder="End Date"
-                maxDate={new Date()}
+                minDate={new Date()}
               />
             </div>
           )}
