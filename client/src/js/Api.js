@@ -1,7 +1,6 @@
 import axios from 'axios';
 
 import store from './store';
-
 import { SHOW_ERROR_DIALOG_MODAL } from './actions/types';
 import { buildApiErrorObject } from './utils';
 import * as Constants from './Constants';
@@ -18,9 +17,9 @@ instance.interceptors.response.use(
         return response;
     },
     (error) => {
-        if (!error.response || error.response.status !== 422)
+        if (!error.response || error.response.status !== 422) {
             store.dispatch({ type: SHOW_ERROR_DIALOG_MODAL, payload: buildApiErrorObject(error.response) });
-
+        }
         return Promise.reject(error);
     }
 );
@@ -32,7 +31,9 @@ export const getUserTypes = () => instance.get(Constants.API_PATHS.USER_TYPES);
 export const postUser = (userData) => instance.post(Constants.API_PATHS.USER, userData);
 export const putUser = (id, userData) => instance.put(`${Constants.API_PATHS.USER}/${id}`, userData);
 export const deleteUser = (id, endDate) =>
-    instance.delete(`${Constants.API_PATHS.USER}/${id}`, { data: { id, endDate } });
+    instance.delete(`${Constants.API_PATHS.USER}/${id}`, {
+        data: { id, endDate },
+    });
 export const searchUsers = (params) => instance.get(Constants.API_PATHS.USER, { params: {...params } });
 export const getUserBceidAccount = (userType, username) =>
     instance.get(`${Constants.API_PATHS.USER_BCEID_ACCOUNT}/${userType}/${username}`);
@@ -44,7 +45,9 @@ export const searchRoles = (params) => instance.get(Constants.API_PATHS.ROLE, { 
 export const postRole = (roleData) => instance.post(Constants.API_PATHS.ROLE, roleData);
 export const putRole = (id, roleData) => instance.put(`${Constants.API_PATHS.ROLE}/${id}`, roleData);
 export const deleteRole = (id, endDate) =>
-    instance.delete(`${Constants.API_PATHS.ROLE}/${id}`, { data: { id, endDate } });
+    instance.delete(`${Constants.API_PATHS.ROLE}/${id}`, {
+        data: { id, endDate },
+    });
 
 export const getPermissions = () => instance.get(Constants.API_PATHS.PERMISSIONS);
 
@@ -86,27 +89,25 @@ export const getVersion = () => instance.get(Constants.API_PATHS.VERSION);
 
 export const getSaltReportById = async (id, params) => {
     try {
-      const response = await instance.get(`${Constants.API_PATHS.SALT_REPORT}/${id}`, {
-        params: { ...params },
-        responseType: 'blob',
-      });
-  
-      // Trigger download
-      if (params.isPdf) {
-        const blob = new Blob([response.data], { type: 'application/pdf' });
-        const url = window.URL.createObjectURL(blob);
-        const link = document.createElement('a');
-        link.href = url;
-        link.download = `salt_report_${id}.pdf`;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-      } else {
-        // Return JSON for other cases
-        return response.data;
-      }
+        const response = await instance.get(`${Constants.API_PATHS.SALT_REPORT}/${id}`, {
+            params: { ...params },
+            responseType: 'blob',
+        });
+
+        if (params.isPdf) {
+            const blob = new Blob([response.data], { type: 'application/pdf' });
+            const url = window.URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `salt_report_${id}.pdf`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        } else {
+            return response.data;
+        }
     } catch (error) {
-      console.error('Error fetching salt report:', error);
-      throw error;
+        store.dispatch({ type: SHOW_ERROR_DIALOG_MODAL, payload: buildApiErrorObject(error.response) });
+        throw error;
     }
-  };
+};
