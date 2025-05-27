@@ -53,6 +53,7 @@ const DeleteButton = ({
         icon={iconName}
         id={buttonId}
         {...props}
+        className="text-white"
       />
       <Popover
         placement="auto-start"

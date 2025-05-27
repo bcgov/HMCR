@@ -17,6 +17,12 @@ $theme-colors: (
   bcgold: #fcba19,
 );
 
+$pagination-active-bg: map-get($theme-colors, primary);
+$pagination-active-border-color: map-get($theme-colors, primary);
+$pagination-active-color: #fff;
+
+$info-bg-subtle: #eaf2fa;
+
 $primary: #38598a;
 
 // Add our font as default

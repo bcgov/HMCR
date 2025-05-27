@@ -65,16 +65,23 @@ export const FormNumberInput = ({ children, name, ...props }) => {
 
 export const FormRadioInput = ({ label, ...props }) => {
   const [field, meta] = useField({ ...props, type: 'radio' });
+  const inputId = props.id || `${props.name}_${props.value}`;
+
   return (
-    <div>
+    <div className="form-check">
       <Input
         type="radio"
+        className="form-check-input"
+        id={inputId}
         {...field}
         {...props}
-        id={props.id || props.name}
         invalid={meta.touched && meta.error ? true : false}
       />
+      <label className="form-check-label" htmlFor={inputId}>
+        {label}
+      </label>
       {meta.touched && meta.error && <FormFeedback>{meta.error}</FormFeedback>}
     </div>
   );
 };
+
