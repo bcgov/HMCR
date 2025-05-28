@@ -13,7 +13,7 @@ module.exports = (settings) => {
   const templatesLocalBaseUrl = oc.toFileUrl(
     path.resolve(__dirname, "../../openshift")
   );
-  const githubRunNumber = import.meta.env.GITHUB_RUN_NUMBER || "manual";
+  const githubRunNumber = process.env.GITHUB_RUN_NUMBER || "manual";
   const version = options.version || `v1.0.${githubRunNumber}`;
 
   console.log(`🚀 VERSION USED is ${version}`)

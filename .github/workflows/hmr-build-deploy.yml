@@ -29,7 +29,7 @@ jobs:
       - uses: actions/checkout@v2
       - uses: actions/setup-node@v2
         with:
-          node-version: "18"
+          node-version: "24"
       - name: Set Version
         run: echo "VERSION=v1.0.${{ github.run_number }}" >> $GITHUB_ENV
       - name: Build
@@ -49,7 +49,7 @@ jobs:
       - uses: actions/checkout@v2
       - uses: actions/setup-node@v2
         with:
-          node-version: "18"
+          node-version: "24"
       - name: Set Version
         run: echo "VERSION=v1.0.${{ github.run_number }}" >> $GITHUB_ENV
       - name: Deploy the image
@@ -71,7 +71,7 @@ jobs:
       - uses: actions/checkout@v2
       - uses: actions/setup-node@v2
         with:
-          node-version: "18"
+          node-version: "24"
       - name: Set Version
         run: echo "VERSION=v1.0.${{ github.run_number }}" >> $GITHUB_ENV
       - name: Deploy the image
@@ -93,7 +93,7 @@ jobs:
       - uses: actions/checkout@v2
       - uses: actions/setup-node@v2
         with:
-          node-version: "18"
+          node-version: "24"
       - name: Set Version
         run: echo "VERSION=v1.0.${{ github.run_number }}" >> $GITHUB_ENV
       - name: Deploy the image
@@ -115,7 +115,7 @@ jobs:
       - uses: actions/checkout@v2
       - uses: actions/setup-node@v2
         with:
-          node-version: "18"
+          node-version: "24"
       - name: Set Version
         run: echo "VERSION=v1.0.${{ github.run_number }}" >> $GITHUB_ENV
       - name: Deploy the image
