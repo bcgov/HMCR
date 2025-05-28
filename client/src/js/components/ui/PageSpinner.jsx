@@ -1,4 +1,3 @@
-
 import { Spinner } from 'reactstrap';
 
 const PageSpinner = () => {

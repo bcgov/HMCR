@@ -7,6 +7,7 @@ import jsxA11y from 'eslint-plugin-jsx-a11y';
 import prettierPlugin from 'eslint-plugin-prettier';
 import react from 'eslint-plugin-react';
 import reactHooks from 'eslint-plugin-react-hooks';
+import globals from 'globals';
 
 export default [
   js.configs.recommended,
@@ -23,9 +24,8 @@ export default [
         },
       },
       globals: {
-        console: 'readonly',
-        document: 'readonly',
-        window: 'readonly',
+        ...globals.browser,
+        ...globals.node,
       },
     },
     plugins: {

@@ -1,6 +1,5 @@
 import { Field, useFormikContext } from 'formik';
 
-
 import DateRangeInput from './DateRangeInput';
 
 const DateRangePickerWithFormik = ({ fromName, toName, form: { errors, submitCount, touched } }) => {

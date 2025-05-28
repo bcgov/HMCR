@@ -1,4 +1,3 @@
-
 import { connect } from 'react-redux';
 import { BrowserRouter, Route, Switch, Redirect } from 'react-router-dom';
 import { toast } from 'react-toastify';

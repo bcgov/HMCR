@@ -1,5 +1,4 @@
 import PropTypes from 'prop-types';
-
 import { Table, Badge } from 'reactstrap';
 
 import DeleteButton from './DeleteButton';

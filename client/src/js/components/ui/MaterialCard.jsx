@@ -1,5 +1,3 @@
-
-
 const MaterialCard = ({ children, ...rest }) => {
   return (
     <div className="material-card-container" {...rest}>

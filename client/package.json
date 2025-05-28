@@ -24,6 +24,7 @@
     "date-fns": "^4.1.0",
     "file-saver": "^2.0.2",
     "formik": "^2.1.4",
+    "globals": "^16.2.0",
     "keycloak-js": "^26.2.0",
     "lodash": "^4.17.21",
     "moment": "^2.24.0",

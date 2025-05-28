@@ -1,5 +1,4 @@
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-
 import { Button } from 'reactstrap';
 
 const FontAwesomeButton = (props) => {

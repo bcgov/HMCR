@@ -56,7 +56,6 @@ const SaltReporting = ({ currentUser }) => {
       setSaltReportSuccess(true);
     } catch (error) {
       setLoading(false);
-      console.error(error);
       setSaltReportCompleteMessage(`Report submission failed.  ${error.response?.data.error}`);
       setSaltReportSuccess(false);
     } finally {
@@ -145,7 +144,6 @@ const SaltReporting = ({ currentUser }) => {
                 onHeadingSortClicked={searchData.handleHeadingSortClicked}
                 showExportButton={true}
                 onExportClicked={(saltReportId) => {
-                  console.log(`Exporting report with ID: ${saltReportId}`);
                   api.getSaltReportById(saltReportId, {
                     isPdf: true,
                   });

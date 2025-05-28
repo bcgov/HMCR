@@ -1,7 +1,6 @@
 import _ from 'lodash';
 import PropTypes from 'prop-types';
 
-
 import DataTableControl from './DataTableControl';
 import PaginationControl from './PaginationControl';
 
