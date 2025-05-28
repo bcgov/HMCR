@@ -16,8 +16,17 @@ import SingleDateField from '../ui/SingleDateField';
 import SingleDropdownField from '../ui/SingleDropdownField';
 
 const tipAnalyticalValidation = [
-  <ul key="tipAnalyticalValidation_ul_key_1" style={{ paddingInlineStart: '20px' }}>
-    <li style={{ margin: '0 0 6px 0' }}>
+  <ul
+    key="tipAnalyticalValidation_ul_key_1"
+    style={{
+      paddingInlineStart: '20px',
+    }}
+  >
+    <li
+      style={{
+        margin: '0 0 6px 0',
+      }}
+    >
       Analytical Validations provide warnings when the activity accomplishment does not meet the defined parameters.
     </li>
     <li>
@@ -36,12 +45,25 @@ const tipAnalyticalValidation = [
 ];
 
 const tipHighwayAttributeValidation = [
-  <ul key="tipHighwayAttributeValidation_ul_key_1" style={{ paddingInlineStart: '20px' }}>
-    <li style={{ margin: '0 0 6px 0' }}>
+  <ul
+    key="tipHighwayAttributeValidation_ul_key_1"
+    style={{
+      paddingInlineStart: '20px',
+    }}
+  >
+    <li
+      style={{
+        margin: '0 0 6px 0',
+      }}
+    >
       Highway Attribute Validations provide warnings for Location Code C activities when the features of the reported
       location and/or accomplishment do not meet the defined parameters.
     </li>
-    <li style={{ margin: '0 0 6px 0' }}>
+    <li
+      style={{
+        margin: '0 0 6px 0',
+      }}
+    >
       Road Length checks the accomplishment against the road length (either Road KM or Lane KM), or against Guardrail
       Length, as defined in each individual rule. Several rules account for the road length to be multiplied by one or
       more factors to accommodate non kilometre-based units of measure. Multiplying factors include conversion factors
@@ -51,7 +73,11 @@ const tipHighwayAttributeValidation = [
       an estimated Road KM length of 40m (30m as permitted by the Reporting Manual and 10m tolerance), with Lane KM
       calculated based on the number of lanes at the point.
     </li>
-    <li style={{ margin: '0 0 6px 0' }}>
+    <li
+      style={{
+        margin: '0 0 6px 0',
+      }}
+    >
       Surface Type checks that the location of the record has the appropriate surface type based on the selected rule.
       For point items, the surface type must match the point exactly and no tolerance is incorporated. For line items, a
       tolerance of 80% is incorporated (i.e. if the rule is “GPS on Paved Surface” and 80% or more of the surface types
@@ -101,6 +127,7 @@ const validationSchema = Yup.object({
   minValue: Yup.number()
     .transform((_value, originalValue) => {
       if (isValueEmpty(originalValue.replace(/,/g, ''))) return null;
+
       return Number(originalValue.replace(/,/g, ''));
     })
     .min(0, 'Must be greater than or equal to 0')
@@ -110,18 +137,21 @@ const validationSchema = Yup.object({
       if (isValueEmpty(this.parent.minValue)) {
         return true;
       }
+
       if (this.parent.minValue > 999999999.99) {
         return this.createError({
           message: 'Must be less than or equal to 999,999,999.99',
           path: 'minValue',
         });
       }
+
       if (!isValidDecimal(this.parent.minValue, 2)) {
         return this.createError({
           message: 'Must be less than or equal to two decimal positions',
           path: 'minValue',
         });
       }
+
       if (isValueNotEmpty(this.parent.maxValue)) {
         if (Number(this.parent.maxValue) !== 0 && this.parent.maxValue < this.parent.minValue) {
           return this.createError({
@@ -130,6 +160,7 @@ const validationSchema = Yup.object({
           });
         }
       }
+
       if (['site', 'num', 'ea'].includes(this.parent.unitOfMeasure)) {
         if (!isInteger(this.parent.minValue)) {
           return this.createError({
@@ -138,11 +169,13 @@ const validationSchema = Yup.object({
           });
         }
       }
+
       return true;
     }),
   maxValue: Yup.number()
     .transform((_value, originalValue) => {
       if (isValueEmpty(originalValue.replace(/,/g, ''))) return null;
+
       return Number(originalValue.replace(/,/g, ''));
     })
     .nullable()
@@ -151,18 +184,21 @@ const validationSchema = Yup.object({
       if (isValueEmpty(this.parent.maxValue)) {
         return true;
       }
+
       if (Number(this.parent.maxValue) <= 0) {
         return this.createError({
           message: 'Must be greater than 0',
           path: 'maxValue',
         });
       }
+
       if (Number(this.parent.maxValue) > 999999999.99) {
         return this.createError({
           message: 'Must be less than or equal to 999,999,999.99',
           path: 'maxValue',
         });
       }
+
       if (!isValidDecimal(this.parent.maxValue, 2)) {
         return this.createError({
           message: 'Must be less than or equal to two decimal positions',
@@ -178,6 +214,7 @@ const validationSchema = Yup.object({
           });
         }
       }
+
       if (['site', 'num', 'ea'].includes(this.parent.unitOfMeasure)) {
         if (!isInteger(this.parent.maxValue)) {
           return this.createError({
@@ -186,6 +223,7 @@ const validationSchema = Yup.object({
           });
         }
       }
+
       return true;
     }),
   reportingFrequency: Yup.number()
@@ -195,6 +233,7 @@ const validationSchema = Yup.object({
     .typeError('Must be whole number')
     .integer('Must be whole number'),
 });
+
 const EditActivityFormFields = ({
   setInitialValues,
   formValues,
@@ -219,6 +258,7 @@ const EditActivityFormFields = ({
   const roadLengthRuleDefaultId = roadLengthRules.find((rlr) => rlr.name === 'Not Applicable').id;
   const surfaceTypeRuleDefaultId = surfaceTypeRules.find((str) => str.name === 'Not Applicable').id;
   const roadClassRuleDefaultId = roadClassRules.find((rcr) => rcr.name === 'Not Applicable').id;
+
   useEffect(() => {
     // Add validation for point line feature when location code is C.
     // Need to get the id value of location code C
@@ -265,6 +305,7 @@ const EditActivityFormFields = ({
             if (response.data.locationCodeId === locationCodes.find((code) => code.name === 'B').id)
               return locationCodes.filter((location) => location.name !== 'C');
           }
+
           return locationCodes;
         });
 
@@ -272,6 +313,7 @@ const EditActivityFormFields = ({
           if (formType === Constants.FORM_TYPE.EDIT) {
             if (response.data.locationCodeId === locationCodes.find((code) => code.name === 'A').id) return true;
           }
+
           return false;
         });
 
@@ -287,13 +329,13 @@ const EditActivityFormFields = ({
                 (feature) => feature.id === pointLineType || feature.id === response.data.featureType,
               );
           }
+
           return featureTypes;
         });
 
         setLoading(false);
       });
     }
-
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -419,7 +461,6 @@ const EditActivityFormFields = ({
           </Row>
         </React.Fragment>
       )}
-
       <Row>
         <Col></Col>
         <Col>

@@ -16,7 +16,9 @@ const AuthorizedRoute = ({ children, currentUser, requires, userType, ...rest })
           <Redirect
             to={{
               pathname: Constant.PATHS.UNAUTHORIZED,
-              state: { from: location },
+              state: {
+                from: location,
+              },
             }}
           />
         )

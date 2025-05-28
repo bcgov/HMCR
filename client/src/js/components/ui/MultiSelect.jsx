@@ -4,8 +4,9 @@ import { Input, FormFeedback } from 'reactstrap';
 
 const MultiSelect = (props) => {
   const { items, name, handleBlur, showSelectAll, selectClass } = props;
+
   // eslint-disable-next-line
-  const [field, meta] = useField(props);
+  const [, meta] = useField(props);
   const selectClassName =
     selectClass === null || selectClass === undefined || selectClass === '' ? 'form-control multi-select' : selectClass;
 
@@ -66,6 +67,7 @@ const MultiSelect = (props) => {
             items.map((item) => {
               const description = item.description ? item.description : item.name;
               const checkboxId = `${name}_${item.id}`;
+
               return (
                 <div key={item.id} className="form-check">
                   <Input

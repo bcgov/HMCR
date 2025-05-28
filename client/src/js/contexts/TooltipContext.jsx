@@ -17,5 +17,14 @@ export const TooltipProvider = ({ children }) => {
     }
   };
 
-  return <TooltipContext.Provider value={{ openTooltip, toggleTooltip }}>{children}</TooltipContext.Provider>;
+  return (
+    <TooltipContext.Provider
+      value={{
+        openTooltip,
+        toggleTooltip,
+      }}
+    >
+      {children}
+    </TooltipContext.Provider>
+  );
 };

@@ -13,7 +13,9 @@ const MouseoverTooltip = (props) => {
         className="fa-color-primary ms-1 me-1 fieldset-tooltip"
         onMouseOver={() => setIsOpen(true)}
         onMouseOut={() => setIsOpen(false)}
-        style={{ cursor: 'pointer' }}
+        style={{
+          cursor: 'pointer',
+        }}
       />
       <Popover placement="top" isOpen={isOpen} target={props.id}>
         <PopoverBody>{props.children}</PopoverBody>

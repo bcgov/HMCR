@@ -27,7 +27,9 @@ const DataTableControl = ({
         <thead class="thead-dark">
           <tr>
             {tableColumns.map((column) => {
-              let style = { whiteSpace: 'nowrap' };
+              let style = {
+                whiteSpace: 'nowrap',
+              };
 
               if (column.maxWidth) style.maxWidth = column.maxWidth;
 
@@ -62,7 +64,10 @@ const DataTableControl = ({
                       </td>
                     );
 
-                  let style = { position: 'relative' };
+                  let style = {
+                    position: 'relative',
+                  };
+
                   if (column.maxWidth) {
                     style.maxWidth = column.maxWidth;
                   }
@@ -75,7 +80,12 @@ const DataTableControl = ({
                 })}
                 {editable && (
                   <Authorize requires={editPermissionName}>
-                    <td style={{ width: '1%', whiteSpace: 'nowrap' }}>
+                    <td
+                      style={{
+                        width: '1%',
+                        whiteSpace: 'nowrap',
+                      }}
+                    >
                       <FontAwesomeButton
                         icon="edit"
                         className="me-1"

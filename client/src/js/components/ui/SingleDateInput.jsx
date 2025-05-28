@@ -3,8 +3,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { format, isValid } from 'date-fns';
 import React, { useRef, useEffect, useState } from 'react';
 import { Calendar } from 'react-date-range';
-import { InputGroup, InputGroupText, Input, FormFeedback, Button } from 'reactstrap';
-
+import { InputGroup, InputGroupText, Input, FormFeedback } from 'reactstrap';
 import 'react-date-range/dist/styles.css';
 import 'react-date-range/dist/theme/default.css';
 
@@ -29,6 +28,7 @@ const SingleDateInput = ({
         setOpen(false);
       }
     };
+
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
@@ -43,7 +43,10 @@ const SingleDateInput = ({
     >
       <InputGroup
         onClick={() => !disabled && setOpen(!open)}
-        style={{ width: '250px', cursor: disabled ? 'not-allowed' : 'pointer' }}
+        style={{
+          width: '250px',
+          cursor: disabled ? 'not-allowed' : 'pointer',
+        }}
       >
         <Input
           readOnly
@@ -60,7 +63,9 @@ const SingleDateInput = ({
               onChange(null);
               setOpen(false);
             }}
-            style={{ cursor: 'pointer' }}
+            style={{
+              cursor: 'pointer',
+            }}
           >
             <FontAwesomeIcon icon={faTimesCircle} />
           </InputGroupText>
@@ -69,11 +74,22 @@ const SingleDateInput = ({
           <FontAwesomeIcon icon={faCalendarAlt} />
         </InputGroupText>
       </InputGroup>
-
-      {showError && <FormFeedback style={{ display: 'block' }}>{errorText}</FormFeedback>}
-
+      {showError && (
+        <FormFeedback
+          style={{
+            display: 'block',
+          }}
+        >
+          {errorText}
+        </FormFeedback>
+      )}
       {open && (
-        <div style={{ position: 'absolute', zIndex: 1000 }}>
+        <div
+          style={{
+            position: 'absolute',
+            zIndex: 1000,
+          }}
+        >
           <Calendar
             date={value && isValid(new Date(value)) ? new Date(value) : new Date()}
             onChange={(date) => {

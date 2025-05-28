@@ -36,7 +36,8 @@ const ErrorDialogModal = ({
         <ModalBody>
           {message && (
             <p>
-              <strong>Error:</strong> {message}
+              <strong>Error:</strong>
+              {message}
             </p>
           )}
           {statusCode && path && method && (
@@ -51,7 +52,12 @@ const ErrorDialogModal = ({
             <Alert color="danger">
               <ul>
                 {Object.values(errors).map((error, index) => (
-                  <li key={index} style={{ marginLeft: '-32px' }}>
+                  <li
+                    key={index}
+                    style={{
+                      marginLeft: '-32px',
+                    }}
+                  >
                     {error}
                   </li>
                 ))}
@@ -66,7 +72,9 @@ const ErrorDialogModal = ({
               color="primary"
               disabled={clicked}
               onClick={() => handleOnClick(true)}
-              style={{ minWidth: '50px' }}
+              style={{
+                minWidth: '50px',
+              }}
             >
               Reload
             </Button>
@@ -92,4 +100,6 @@ ErrorDialogModal.propTypes = {
   hidePrimaryButton: PropTypes.bool,
 };
 
-export default connect(null, { hideErrorDialog })(ErrorDialogModal);
+export default connect(null, {
+  hideErrorDialog,
+})(ErrorDialogModal);

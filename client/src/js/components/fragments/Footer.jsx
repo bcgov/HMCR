@@ -1,6 +1,4 @@
 import React from 'react';
-// import { NavLink as RRNavLink } from 'react-router-dom';
-// import { Container, Navbar, Nav, NavItem, NavLink } from 'reactstrap';
 
 const Footer = () => {
   return (

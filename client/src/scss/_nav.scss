@@ -1,7 +1,7 @@
 @import './vendor/bootstrap-theme.scss';
 
 @mixin main-nav-colors($background-color) {
-  $background-color: map-get($theme-colors, "secondary-nav") or #5475a7;
+  $background-color: map-get($theme-colors, 'secondary-nav') or #5475a7;
   $nav-link-active-bg: lighten($background-color, 10%);
 
   padding: 0 1rem;

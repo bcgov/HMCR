@@ -126,7 +126,8 @@ const Header = ({ currentUser }) => {
             <Nav className="navbar-nav ms-auto">
               <NavItem>
                 <Button color="link" onClick={() => Keycloak.logout()}>
-                  <FontAwesomeIcon icon="user" /> {`${currentUser.username},  Logout`}
+                  <FontAwesomeIcon icon="user" />
+                  {`${currentUser.username},  Logout`}
                 </Button>
               </NavItem>
             </Nav>

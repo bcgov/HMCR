@@ -20,7 +20,10 @@ import PageSpinner from './ui/PageSpinner';
 import SubmitButton from './ui/SubmitButton';
 import UIHeader from './ui/UIHeader';
 
-const defaultSearchFormValues = { searchText: '', statusId: [Constants.ACTIVE_STATUS.ACTIVE] };
+const defaultSearchFormValues = {
+  searchText: '',
+  statusId: [Constants.ACTIVE_STATUS.ACTIVE],
+};
 
 const defaultSearchOptions = {
   searchText: '',
@@ -29,9 +32,19 @@ const defaultSearchOptions = {
 };
 
 const tableColumns = [
-  { heading: 'Role Name', key: 'name' },
-  { heading: 'Role Description', key: 'description' },
-  { heading: 'Active', key: 'isActive', nosort: true },
+  {
+    heading: 'Role Name',
+    key: 'name',
+  },
+  {
+    heading: 'Role Description',
+    key: 'description',
+  },
+  {
+    heading: 'Active',
+    key: 'isActive',
+    nosort: true,
+  },
 ];
 
 const RoleAdmin = ({ showValidationErrorDialog }) => {
@@ -52,7 +65,6 @@ const RoleAdmin = ({ showValidationErrorDialog }) => {
 
     searchData.updateSearchOptions(options);
     setSearchInitialValues({ ...searchInitialValues, searchText, statusId: buildStatusIdArray(options.isActive) });
-
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -60,6 +72,7 @@ const RoleAdmin = ({ showValidationErrorDialog }) => {
     const searchText = values.searchText.trim() || null;
 
     let isActive = null;
+
     if (values.statusId.length === 1) {
       isActive = values.statusId[0] === 'ACTIVE';
     }
@@ -74,7 +87,9 @@ const RoleAdmin = ({ showValidationErrorDialog }) => {
   };
 
   const onEditClicked = (roleId) => {
-    formModal.openForm(Constants.FORM_TYPE.EDIT, { roleId });
+    formModal.openForm(Constants.FORM_TYPE.EDIT, {
+      roleId,
+    });
   };
 
   const onDeleteClicked = (roleId, endDate) => {
@@ -187,4 +202,6 @@ const RoleAdmin = ({ showValidationErrorDialog }) => {
   );
 };
 
-export default connect(null, { showValidationErrorDialog })(RoleAdmin);
+export default connect(null, {
+  showValidationErrorDialog,
+})(RoleAdmin);

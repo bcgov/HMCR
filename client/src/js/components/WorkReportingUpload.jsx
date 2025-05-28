@@ -12,7 +12,10 @@ import SimpleModalWrapper from './ui/SimpleModalWrapper';
 import SingleDropdownField from './ui/SingleDropdownField';
 import SubmitButton from './ui/SubmitButton';
 
-const defaultFormValues = { reportTypeId: null, reportFile: null };
+const defaultFormValues = {
+  reportTypeId: null,
+  reportFile: null,
+};
 
 const isFileCsvType = (file) => file && file.name.endsWith('.csv');
 
@@ -20,10 +23,13 @@ const updateUploadStatusIcon = (status) => {
   switch (status) {
     case Constants.UPLOAD_STATE_STATUS.COMPLETE:
       return <FontAwesomeIcon icon="check-circle" className="fa-color-success" />;
+
     case Constants.UPLOAD_STATE_STATUS.ERROR:
       return <FontAwesomeIcon icon="times-circle" className="fa-color-danger" />;
+
     case Constants.UPLOAD_STATE_STATUS.WARNING:
       return <FontAwesomeIcon icon="exclamation-circle" className="fa-color-warning" />;
+
     default:
       return <Spinner size="sm" color="primary" />;
   }
@@ -33,21 +39,16 @@ const updateUploadStatusMessage = (state, status) => {
   switch (state) {
     case Constants.UPLOAD_STATE.RESUB_CHECK:
       return <div>Checking for re-submitted rows... {updateUploadStatusIcon(status)}</div>;
+
     case Constants.UPLOAD_STATE.SAVING:
       return <div>Saving report data... {updateUploadStatusIcon(status)}</div>;
+
     default:
       throw new Error('updateUploadStatusMessage state not set');
   }
 };
 
-const WorkReportingUpload = ({
-  currentUser,
-  showValidationErrorDialog,
-  serviceArea,
-  handleFileSubmitted,
-  submissionStreams,
-  ...props
-}) => {
+const WorkReportingUpload = ({ serviceArea, handleFileSubmitted, submissionStreams }) => {
   const [fileInputKey, setFileInputKey] = useState(Math.random());
   const [submitting, setSubmitting] = useState(false);
   const [showStatusModal, setShowStatusModal] = useState(false);
@@ -76,6 +77,7 @@ const WorkReportingUpload = ({
   const handleSubmit = (values, setFieldValue) => {
     const stagingTableName = reportTypes.find((type) => values.reportTypeId === type.id).stagingTableName;
     const apiPath = Constants.REPORT_TYPES[stagingTableName].api;
+
     if (!apiPath) return;
 
     const reset = () => {
@@ -84,6 +86,7 @@ const WorkReportingUpload = ({
     };
 
     const formData = new FormData();
+
     formData.append('reportFile', values.reportFile);
     formData.append('serviceAreaNumber', serviceArea);
 
@@ -112,7 +115,12 @@ const WorkReportingUpload = ({
                   ))}
                 </ul>
                 <p>Would you like to overwrite the existing database values?</p>
-                <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+                <div
+                  style={{
+                    display: 'flex',
+                    justifyContent: 'flex-end',
+                  }}
+                >
                   <Button
                     color="danger"
                     size="sm"
@@ -244,11 +252,22 @@ const WorkReportingUpload = ({
                         invalid={errors.reportFile && errors.reportFile.length > 0}
                       />
                       {errors.reportFile && (
-                        <FormFeedback style={{ display: 'unset' }}>{errors.reportFile}</FormFeedback>
+                        <FormFeedback
+                          style={{
+                            display: 'unset',
+                          }}
+                        >
+                          {errors.reportFile}
+                        </FormFeedback>
                       )}
                     </Col>
                   </FormGroup>
-                  <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+                  <div
+                    style={{
+                      display: 'flex',
+                      justifyContent: 'flex-end',
+                    }}
+                  >
                     <SubmitButton
                       size="sm"
                       type="Button"
@@ -280,10 +299,19 @@ const WorkReportingUpload = ({
         {errorMessages && Object.keys(errorMessages).length > 0 && (
           <Alert color="danger">
             <p>Upload unsuccessful. The following errors were found:</p>
-            <ul style={{ marginLeft: '-40px' }}>
+            <ul
+              style={{
+                marginLeft: '-40px',
+              }}
+            >
               {Object.keys(errorMessages).map((key) => {
                 return (
-                  <li key={key} style={{ listStyleType: 'none' }}>
+                  <li
+                    key={key}
+                    style={{
+                      listStyleType: 'none',
+                    }}
+                  >
                     {key}:
                     <ul>
                       {errorMessages[key].map((message, index) => (
@@ -319,4 +347,6 @@ const mapStateToProps = (state) => {
   };
 };
 
-export default connect(mapStateToProps, { showValidationErrorDialog })(WorkReportingUpload);
+export default connect(mapStateToProps, {
+  showValidationErrorDialog,
+})(WorkReportingUpload);

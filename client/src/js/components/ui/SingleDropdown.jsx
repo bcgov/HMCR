@@ -13,12 +13,12 @@ const SingleDropdown = (props) => {
     fieldMeta,
     errorStyle,
   } = props;
+
   const [title, setTitle] = useState(defaultTitle);
 
   useEffect(() => {
     const item = items.find((o) => {
       // disable strict type checking
-
       return o.id == value;
     });
 
@@ -56,11 +56,17 @@ const SingleDropdown = (props) => {
   };
 
   return (
-    <div style={{ padding: '0' }}>
+    <div
+      style={{
+        padding: '0',
+      }}
+    >
       <UncontrolledDropdown
         className={`form-control form-input ${disabled ? 'disabled' : ''} ${isInvalidClassName}`}
         disabled={disabled}
-        style={{ padding: '0' }}
+        style={{
+          padding: '0',
+        }}
       >
         <DropdownToggle caret onBlur={handleOnBlur}>
           {title}

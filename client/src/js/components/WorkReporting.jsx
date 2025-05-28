@@ -46,7 +46,12 @@ const WorkReporting = ({ currentUser }) => {
                   value={serviceArea}
                   handleOnChange={(serviceArea) => {
                     setServiceArea(serviceArea);
-                    history.push('?' + queryString.stringify({ serviceArea }));
+                    history.push(
+                      '?' +
+                        queryString.stringify({
+                          serviceArea,
+                        }),
+                    );
                   }}
                 />
               </Col>

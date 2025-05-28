@@ -40,13 +40,37 @@ const defaultSearchOptions = {
 };
 
 const tableColumns = [
-  { heading: 'User Type', key: 'userType' },
-  { heading: 'First Name', key: 'firstName' },
-  { heading: 'Last Name', key: 'lastName' },
-  { heading: 'User ID', key: 'username' },
-  { heading: 'Organization', key: 'businessLegalName' },
-  { heading: 'Service Areas', key: 'serviceAreas', nosort: true, maxWidth: '100px' },
-  { heading: 'Active', key: 'isActive', nosort: true },
+  {
+    heading: 'User Type',
+    key: 'userType',
+  },
+  {
+    heading: 'First Name',
+    key: 'firstName',
+  },
+  {
+    heading: 'Last Name',
+    key: 'lastName',
+  },
+  {
+    heading: 'User ID',
+    key: 'username',
+  },
+  {
+    heading: 'Organization',
+    key: 'businessLegalName',
+  },
+  {
+    heading: 'Service Areas',
+    key: 'serviceAreas',
+    nosort: true,
+    maxWidth: '100px',
+  },
+  {
+    heading: 'Active',
+    key: 'isActive',
+    nosort: true,
+  },
 ];
 
 const validationSchema = Yup.object({
@@ -92,6 +116,7 @@ const UserAdmin = ({ serviceAreas, userStatuses, userTypes, showValidationErrorD
     const serviceAreaIds = options.serviceAreas
       ? options.serviceAreas.split(',').map((id) => parseInt(id))
       : defaultSearchFormValues.serviceAreaIds;
+
     const userTypeIds = options.userTypes ? options.userTypes.split(',') : defaultSearchFormValues.userTypeIds;
 
     setSearchInitialValues({
@@ -101,7 +126,6 @@ const UserAdmin = ({ serviceAreas, userStatuses, userTypes, showValidationErrorD
       serviceAreaIds,
       userTypeIds,
     });
-
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -111,6 +135,7 @@ const UserAdmin = ({ serviceAreas, userStatuses, userTypes, showValidationErrorD
     const searchText = values.searchText.trim() || null;
 
     let isActive = null;
+
     if (values.statusId.length === 1) {
       isActive = values.statusId[0] === 'ACTIVE';
     }
@@ -123,7 +148,9 @@ const UserAdmin = ({ serviceAreas, userStatuses, userTypes, showValidationErrorD
       userTypes: userTypeIds,
       pageNumber: 1,
     };
+
     searchData.updateSearchOptions(options);
+
     if (isExport) {
       setIsExport(false);
       submitExport(values);
@@ -141,9 +168,11 @@ const UserAdmin = ({ serviceAreas, userStatuses, userTypes, showValidationErrorD
     const searchText = values.searchText.trim() || null;
 
     let isActive = null;
+
     if (values.statusId.length === 1) {
       isActive = values.statusId[0] === 'ACTIVE';
     }
+
     const options = {
       ...searchData.searchOptions,
       isActive,
@@ -152,11 +181,14 @@ const UserAdmin = ({ serviceAreas, userStatuses, userTypes, showValidationErrorD
       userTypes: userTypeIds,
       fileName: 'user_export.csv',
     };
+
     return options;
   };
 
   const onEditClicked = (userId) => {
-    formModal.openForm(Constants.FORM_TYPE.EDIT, { userId });
+    formModal.openForm(Constants.FORM_TYPE.EDIT, {
+      userId,
+    });
   };
 
   const onDeleteClicked = (userId, endDate) => {
@@ -195,12 +227,17 @@ const UserAdmin = ({ serviceAreas, userStatuses, userTypes, showValidationErrorD
       .then((response) => {
         const fileExtensionHeaders = response.headers['content-disposition'].match(/.csv|.json|.gml|.kml|.kmz/i);
         let fileName = `user_export`;
+
         if (fileExtensionHeaders) fileName += fileExtensionHeaders[0];
+
         let data = response.data;
+
         if (fileName.indexOf('.json') > -1) data = JSON.stringify(data);
 
         FileSaver.saveAs(new Blob([data]), fileName);
-        setExportResult({ fileName });
+        setExportResult({
+          fileName,
+        });
         setExportStage(EXPORT_STAGE.DONE);
       })
       .catch((error) => {
@@ -208,7 +245,9 @@ const UserAdmin = ({ serviceAreas, userStatuses, userTypes, showValidationErrorD
           const response = error.response;
 
           if (response.status === 422) {
-            setExportResult({ error: error.response.data });
+            setExportResult({
+              error: error.response.data,
+            });
             setExportStage(EXPORT_STAGE.ERROR);
           } else if (response.status === 404) {
             hideErrorDialog();
@@ -218,6 +257,7 @@ const UserAdmin = ({ serviceAreas, userStatuses, userTypes, showValidationErrorD
       })
       .finally(() => setExporting(false));
   };
+
   const formModal = useFormModal(
     'User',
     <EditUserFormFields validationSchema={validationSchema} />,
@@ -240,6 +280,7 @@ const UserAdmin = ({ serviceAreas, userStatuses, userTypes, showValidationErrorD
             <p>There are no results matching the provided search criterion</p>
           </Alert>
         );
+
       case EXPORT_STAGE.ERROR:
         return (
           <Alert color="danger">
@@ -249,6 +290,7 @@ const UserAdmin = ({ serviceAreas, userStatuses, userTypes, showValidationErrorD
             <p>{exportResult.error.detail}</p>
           </Alert>
         );
+
       case EXPORT_STAGE.DONE:
         return (
           <Alert color="success">
@@ -261,6 +303,7 @@ const UserAdmin = ({ serviceAreas, userStatuses, userTypes, showValidationErrorD
             </p>
           </Alert>
         );
+
       default:
         return (
           <div className="text-center">
@@ -391,6 +434,7 @@ const UserAdmin = ({ serviceAreas, userStatuses, userTypes, showValidationErrorD
 
 const mapStateToProps = (state) => {
   const userTypes = Object.values(state.user.types);
+
   return {
     serviceAreas: Object.values(state.serviceAreas),
     userStatuses: Object.values(state.user.statuses),
@@ -398,4 +442,7 @@ const mapStateToProps = (state) => {
   };
 };
 
-export default connect(mapStateToProps, { showValidationErrorDialog, hideErrorDialog })(UserAdmin);
+export default connect(mapStateToProps, {
+  showValidationErrorDialog,
+  hideErrorDialog,
+})(UserAdmin);

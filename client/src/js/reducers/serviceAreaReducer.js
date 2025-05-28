@@ -8,6 +8,7 @@ const serviceAreaReducer = (state = defaultState, action) => {
   switch (action.type) {
     case FETCH_SERVICE_AREAS:
       return { ...state, ..._.mapKeys(action.payload, 'id') };
+
     default:
       return state;
   }

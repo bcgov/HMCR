@@ -7,11 +7,18 @@ const FieldSet = (props) => {
   const tipId = targetId === undefined || targetId === null || targetId === '' ? 'TooltipForFieldsetId' : targetId;
   const [tooltipOpen, setTooltipOpen] = useState(false);
   const toggle = () => setTooltipOpen(!tooltipOpen);
+
   return (
     <fieldset className="form-control fieldset">
       <legend className="form-control legend">
         {legendname}
-        <span style={{ paddingLeft: '4px' }} href="#" id={tipId}>
+        <span
+          style={{
+            paddingLeft: '4px',
+          }}
+          href="#"
+          id={tipId}
+        >
           <FontAwesomeIcon
             id={'question-circle' + props.id}
             icon="question-circle"
@@ -33,4 +40,5 @@ const FieldSet = (props) => {
     </fieldset>
   );
 };
+
 export default FieldSet;

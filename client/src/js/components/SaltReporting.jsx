@@ -4,7 +4,6 @@ import React, { useState, useEffect } from 'react';
 import { connect } from 'react-redux';
 import { Col, FormGroup, Label, Alert, Button, Row } from 'reactstrap';
 
-import { showValidationErrorDialog } from '../actions';
 import * as api from '../Api';
 import * as Constants from '../Constants';
 import AddSaltReportFormFields from './forms/saltreport/AddSaltReportFormFields';
@@ -50,6 +49,7 @@ const SaltReporting = ({ currentUser }) => {
       const stagingTableName = 'HMR_SALT_REPORT';
       const apiPath = Constants.REPORT_TYPES[stagingTableName].api;
       const response = await api.instance.post(apiPath, values);
+
       setLoading(false);
 
       setSaltReportCompleteMessage(`Report successfully created. Details: ${response.status} ${response.statusText}.`);
@@ -65,10 +65,23 @@ const SaltReporting = ({ currentUser }) => {
   };
 
   const tableColumns = [
-    { heading: 'Report ID', key: 'saltReportId' },
-    { heading: 'Service Area', key: 'serviceArea' },
-    { heading: 'Contact Name', key: 'contactName' },
-    { heading: 'Date Created', key: 'appCreateTimestamp', format: (date) => moment(date).format('LLL') },
+    {
+      heading: 'Report ID',
+      key: 'saltReportId',
+    },
+    {
+      heading: 'Service Area',
+      key: 'serviceArea',
+    },
+    {
+      heading: 'Contact Name',
+      key: 'contactName',
+    },
+    {
+      heading: 'Date Created',
+      key: 'appCreateTimestamp',
+      format: (date) => moment(date).format('LLL'),
+    },
   ];
 
   const saltReportFormModal = useFormModal(
@@ -133,7 +146,9 @@ const SaltReporting = ({ currentUser }) => {
                 showExportButton={true}
                 onExportClicked={(saltReportId) => {
                   console.log(`Exporting report with ID: ${saltReportId}`);
-                  api.getSaltReportById(saltReportId, { isPdf: true });
+                  api.getSaltReportById(saltReportId, {
+                    isPdf: true,
+                  });
                 }}
               />
             ) : (

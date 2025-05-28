@@ -5,7 +5,6 @@ import { toast } from 'react-toastify';
 import { Container } from 'reactstrap';
 
 import 'react-toastify/dist/ReactToastify.css';
-
 import ActivityAdmin from './components/ActivityAdmin.jsx';
 import ApiAccess from './components/ApiAccess.jsx';
 import ErrorBoundary from './components/ErrorBoundary.jsx';
@@ -22,7 +21,6 @@ import WorkReporting from './components/WorkReporting.jsx';
 import WorkReportingSubmissionDetail from './components/WorkReportingSubmissionDetail.jsx';
 import * as Constants from './Constants';
 import addIconsToLibrary from './fontAwesome';
-
 import '../scss/app.scss';
 
 toast.configure({
@@ -66,8 +64,10 @@ const Routes = (currentUser) => {
   switch (currentUser.userType) {
     case Constants.USER_TYPE.INTERNAL:
       return AdminRoutes(currentUser);
+
     case Constants.USER_TYPE.BUSINESS:
       return ContractorRoutes(currentUser);
+
     default:
       return <Redirect to={Constants.PATHS.UNAUTHORIZED} />;
   }

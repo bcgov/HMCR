@@ -28,22 +28,31 @@ const codeLookupsReducer = (state = defaultState, action) => {
   switch (action.type) {
     case FETCH_MAINTENANCE_TYPES:
       return { ...state, maintenanceTypes: _.orderBy(action.payload, ['name']) };
+
     case FETCH_UNIT_OF_MEASURES:
       return { ...state, unitOfMeasures: _.orderBy(action.payload, ['name']) };
+
     case FETCH_LOCATION_CODES:
       return { ...state, locationCodes: _.orderBy(action.payload, ['name']) };
+
     case FETCH_FEATURE_TYPES:
       return { ...state, featureTypes: _.orderBy(action.payload, ['name']) };
+
     case FETCH_ACTIVITY_CODES_DROPDOWN:
       return { ...state, activityCodes: action.payload };
+
     case FETCH_THRESHOLD_LEVELS:
       return { ...state, thresholdLevels: action.payload };
+
     case FETCH_ROAD_LENGTH_RULES:
       return { ...state, roadLengthRules: _.orderBy(action.payload, ['displayOrder']) };
+
     case FETCH_SURFACE_TYPE_RULES:
       return { ...state, surfaceTypeRules: _.orderBy(action.payload, ['displayOrder']) };
+
     case FETCH_ROAD_CLASS_RULES:
       return { ...state, roadClassRules: _.orderBy(action.payload, ['displayOrder']) };
+
     default:
       return state;
   }

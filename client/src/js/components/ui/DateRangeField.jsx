@@ -3,7 +3,7 @@ import React from 'react';
 
 import DateRangeInput from './DateRangeInput';
 
-const DateRangePickerWithFormik = ({ name, fromName, toName, form: { errors, submitCount, touched } }) => {
+const DateRangePickerWithFormik = ({ fromName, toName, form: { errors, submitCount, touched } }) => {
   const { values, setFieldValue } = useFormikContext();
 
   const handleChange = ({ startDate, endDate }) => {

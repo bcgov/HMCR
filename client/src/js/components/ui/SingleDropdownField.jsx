@@ -11,6 +11,7 @@ const SingleDropdownField = (props) => {
 
   useEffect(() => {
     const selectedItem = items.find((o) => o.id === field.value);
+
     if (selectedItem) {
       setTitle(selectedItem.name);
     } else {
@@ -26,7 +27,9 @@ const SingleDropdownField = (props) => {
   let isInvalidClassName = '';
 
   if (meta.touched && meta.error) {
-    style = { display: 'block' };
+    style = {
+      display: 'block',
+    };
     isInvalidClassName = 'is-invalid';
   }
 

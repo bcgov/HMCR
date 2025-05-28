@@ -25,6 +25,7 @@ export const FormCheckboxInput = ({ children, ...props }) => {
 
 export const FormInput = ({ children, ...props }) => {
   const [field, meta] = useField({ ...props, type: 'checkbox' });
+
   return (
     <React.Fragment>
       <Input {...field} {...props} invalid={meta.error && meta.touched}>
@@ -41,6 +42,7 @@ export const FormNumberInput = ({ children, name, ...props }) => {
 
   const handleChange = (e) => {
     let value = e.target.value;
+
     if (value === '') {
       // Set the value to null if the input is cleared
       setValue(null);

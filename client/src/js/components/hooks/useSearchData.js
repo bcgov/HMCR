@@ -18,12 +18,14 @@ const useSearchData = (defaultSearchOptions) => {
     hasNextPage: null,
     totalCount: null,
   });
+
   const [loading, setLoading] = useState(false);
   const [searchOptions, setSearchOptions] = useState(null);
   const [refreshTrigger, setRefreshTrigger] = useState(null);
 
   const updateSearchOptions = (options) => {
     if (!options.pageNumber) options.pageNumber = 1;
+
     if (!options.pageSize) options.pageSize = Constants.DEFAULT_PAGE_SIZE;
 
     setSearchOptions(options);
@@ -55,7 +57,11 @@ const useSearchData = (defaultSearchOptions) => {
 
       if (history) {
         history.push(
-          `?${updateQueryParamsFromHistory(history, _.omit(defaultSearchOptions, ['serviceAreaNumber', 'dataPath']), true)}`,
+          `?${updateQueryParamsFromHistory(
+            history,
+            _.omit(defaultSearchOptions, ['serviceAreaNumber', 'dataPath']),
+            true,
+          )}`,
         );
       }
     } else {
@@ -71,8 +77,10 @@ const useSearchData = (defaultSearchOptions) => {
       }
 
       const queryOptions = { ...searchOptions };
+
       ['dateFrom', 'dateTo'].forEach((key) => {
         const date = queryOptions[key];
+
         if (moment.isMoment(date)) {
           queryOptions[key] = date.format('YYYY-MM-DD');
         } else if (date instanceof Date && !isNaN(date.getTime())) {
@@ -93,6 +101,7 @@ const useSearchData = (defaultSearchOptions) => {
 
       ['dateFrom', 'dateTo'].forEach((key) => {
         const date = options[key];
+
         if (moment.isMoment(date)) {
           options[key] =
             key === 'dateFrom'
@@ -107,11 +116,14 @@ const useSearchData = (defaultSearchOptions) => {
       });
 
       if (!options.pageSize) options.pageSize = Constants.DEFAULT_PAGE_SIZE;
+
       if (!options.pageNumber) options.pageNumber = 1;
 
       setLoading(true);
       api.instance
-        .get(dataPath, { params: { ..._.omit(options, ['dataPath']) } })
+        .get(dataPath, {
+          params: { ..._.omit(options, ['dataPath']) },
+        })
         .then((response) => {
           setData(response.data.sourceList);
 
@@ -121,7 +133,14 @@ const useSearchData = (defaultSearchOptions) => {
           const totalCount = parseInt(response.data.totalCount);
           const pageCount = parseInt(response.data.pageCount);
 
-          setPagination({ hasPreviousPage, hasNextPage, pageNumber, pageSize, totalCount, pageCount });
+          setPagination({
+            hasPreviousPage,
+            hasNextPage,
+            pageNumber,
+            pageSize,
+            totalCount,
+            pageCount,
+          });
         })
         .finally(() => setLoading(false));
     };

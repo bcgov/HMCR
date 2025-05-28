@@ -29,7 +29,11 @@ import SimpleModalWrapper from './ui/SimpleModalWrapper';
 import SubmitButton from './ui/SubmitButton';
 import UIHeader from './ui/UIHeader';
 
-const defaultSearchFormValues = { searchText: '', maintenanceTypeIds: [], statusId: [Constants.ACTIVE_STATUS.ACTIVE] };
+const defaultSearchFormValues = {
+  searchText: '',
+  maintenanceTypeIds: [],
+  statusId: [Constants.ACTIVE_STATUS.ACTIVE],
+};
 
 const defaultSearchOptions = {
   searchText: '',
@@ -39,13 +43,35 @@ const defaultSearchOptions = {
 };
 
 const tableColumns = [
-  { heading: 'Activity Number', key: 'activityNumber' },
-  { heading: 'Name', key: 'activityName' },
-  { heading: 'Unit', key: 'unitOfMeasure' },
-  { heading: 'Maintenance Type', key: 'maintenanceType' },
-  { heading: 'Location Code', key: 'locationCode' },
-  { heading: 'Feature Type', key: 'featureType' },
-  { heading: 'Active', key: 'isActive', nosort: true },
+  {
+    heading: 'Activity Number',
+    key: 'activityNumber',
+  },
+  {
+    heading: 'Name',
+    key: 'activityName',
+  },
+  {
+    heading: 'Unit',
+    key: 'unitOfMeasure',
+  },
+  {
+    heading: 'Maintenance Type',
+    key: 'maintenanceType',
+  },
+  {
+    heading: 'Location Code',
+    key: 'locationCode',
+  },
+  {
+    heading: 'Feature Type',
+    key: 'featureType',
+  },
+  {
+    heading: 'Active',
+    key: 'isActive',
+    nosort: true,
+  },
 ];
 
 const EXPORT_STAGE = {
@@ -83,7 +109,6 @@ const ActivityAdmin = ({
 
     searchData.updateSearchOptions(options);
     setSearchInitialValues({ ...searchInitialValues, searchText, statusId: buildStatusIdArray(options.isActive) });
-
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -92,6 +117,7 @@ const ActivityAdmin = ({
     const maintenanceTypes = values.maintenanceTypeIds.join(',') || null;
 
     let isActive = null;
+
     if (values.statusId.length === 1) {
       isActive = values.statusId[0] === 'ACTIVE';
     }
@@ -112,12 +138,13 @@ const ActivityAdmin = ({
     const maintenanceTypes = searchData.searchOptions.maintenanceTypes;
     const isActive = searchData.searchOptions.isActive;
 
-    const options = { ...searchData.searchOptions, isActive, searchText, maintenanceTypes };
-    return options;
+    return { ...searchData.searchOptions, isActive, searchText, maintenanceTypes };
   };
 
   const onEditClicked = (activityId) => {
-    formModal.openForm(Constants.FORM_TYPE.EDIT, { activityId });
+    formModal.openForm(Constants.FORM_TYPE.EDIT, {
+      activityId,
+    });
   };
 
   const onDeleteClicked = (activityId, endDate, permanentDelete) => {
@@ -144,12 +171,15 @@ const ActivityAdmin = ({
         values.roadLengthRule = 0;
         values.surfaceTypeRule = 0;
       }
+
       values.minValue = toNumberOrNull(values.minValue);
       values.maxValue = toNumberOrNull(values.maxValue);
       values.reportingFrequency = toNumberOrNull(values.reportingFrequency);
+
       if (isValueNotEmpty(values.minValue) && isValueEmpty(values.maxValue)) {
         values.maxValue = ['site', 'num', 'ea'].includes(values.unitOfMeasure) ? 999999999 : 999999999.99;
       }
+
       if (formType === Constants.FORM_TYPE.ADD) {
         api
           .postActivityCode(values)
@@ -188,14 +218,18 @@ const ActivityAdmin = ({
         const fileExtensionHeaders = response.headers['content-disposition'].match(/.csv/i);
 
         let fileName = `activitycode_export`;
+
         if (fileExtensionHeaders) fileName += fileExtensionHeaders[0];
 
         let data = response.data;
+
         if (fileName.indexOf('.json') > -1) data = JSON.stringify(data);
 
         FileSaver.saveAs(new Blob([data]), fileName);
 
-        setExportResult({ fileName });
+        setExportResult({
+          fileName,
+        });
         setExportStage(EXPORT_STAGE.DONE);
       })
       .catch((error) => {
@@ -203,7 +237,9 @@ const ActivityAdmin = ({
           const response = error.response;
 
           if (response.status === 422) {
-            setExportResult({ error: error.response.data });
+            setExportResult({
+              error: error.response.data,
+            });
             setExportStage(EXPORT_STAGE.ERROR);
           } else if (response.status === 404) {
             hideErrorDialog();
@@ -235,6 +271,7 @@ const ActivityAdmin = ({
             <p>There are no results matching the provided search criterion</p>
           </Alert>
         );
+
       case EXPORT_STAGE.ERROR:
         return (
           <Alert color="danger">
@@ -244,6 +281,7 @@ const ActivityAdmin = ({
             <p>{exportResult.error.detail}</p>
           </Alert>
         );
+
       case EXPORT_STAGE.DONE:
         return (
           <Alert color="success">
@@ -256,6 +294,7 @@ const ActivityAdmin = ({
             </p>
           </Alert>
         );
+
       default:
         return (
           <div className="text-center">
@@ -327,7 +366,7 @@ const ActivityAdmin = ({
               >
                 Add Activity
               </Button>
-              <Button size="sm" color="primary" onClick={(values) => submitExport(searchData)}>
+              <Button size="sm" color="primary" onClick={() => submitExport(searchData)}>
                 Export
               </Button>
             </div>
@@ -378,4 +417,6 @@ const mapStateToProps = (state) => {
   };
 };
 
-export default connect(mapStateToProps, { showValidationErrorDialog })(ActivityAdmin);
+export default connect(mapStateToProps, {
+  showValidationErrorDialog,
+})(ActivityAdmin);

@@ -19,9 +19,8 @@ const MultiDropdownField = ({ values, setFieldValue, items, name, title, searcha
   const displayItems = useMemo(() => {
     if (textFilter.trim().length > 0) {
       const pattern = new RegExp(textFilter.trim(), 'i');
-      const filteredItems = items.filter((item) => pattern.test(item.name));
 
-      return filteredItems;
+      return items.filter((item) => pattern.test(item.name));
     }
 
     return items;
@@ -84,6 +83,7 @@ const MultiDropdownField = ({ values, setFieldValue, items, name, title, searcha
             <div className="multi-menu">
               {displayItems.map((item) => {
                 const displayName = item.name;
+
                 return (
                   <div key={item.id} className="multi-item">
                     <Label check className="multi-item-label">
@@ -112,19 +112,14 @@ const MultiDropdownField = ({ values, setFieldValue, items, name, title, searcha
 MultiDropdownField.propTypes = {
   // Formik form values
   values: PropTypes.object.isRequired,
-
   // Formik setFieldValue
   setFieldValue: PropTypes.func.isRequired,
-
   // Dropdown items
   items: PropTypes.array.isRequired,
-
   // Formik field name
   name: PropTypes.string.isRequired,
-
   // Default title of dropdown
   title: PropTypes.string.isRequired,
-
   // Enable search text field
   searchable: PropTypes.bool,
 };

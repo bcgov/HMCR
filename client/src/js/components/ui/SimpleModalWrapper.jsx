@@ -12,6 +12,7 @@ const SimpleModalWrapper = ({ isOpen, toggle, title, children, disableClose, onC
           size="sm"
           onClick={() => {
             toggle();
+
             if (onComplete) onComplete();
           }}
           disabled={disableClose}

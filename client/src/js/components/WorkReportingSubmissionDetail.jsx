@@ -12,18 +12,42 @@ import DataTableControl from './ui/DataTableControl';
 import PageSpinner from './ui/PageSpinner';
 
 const errorTableColumns = [
-  { heading: 'Row #', key: 'rowNum', nosort: true },
-  { heading: 'Service Area', key: 'serviceArea', nosort: true },
-  { heading: 'Record Number', key: 'recordNumber', nosort: true },
-  { heading: 'Field', key: 'fieldName', nosort: true },
-  { heading: 'Message', key: 'message', nosort: true },
+  {
+    heading: 'Row #',
+    key: 'rowNum',
+    nosort: true,
+  },
+  {
+    heading: 'Service Area',
+    key: 'serviceArea',
+    nosort: true,
+  },
+  {
+    heading: 'Record Number',
+    key: 'recordNumber',
+    nosort: true,
+  },
+  {
+    heading: 'Field',
+    key: 'fieldName',
+    nosort: true,
+  },
+  {
+    heading: 'Message',
+    key: 'message',
+    nosort: true,
+  },
 ];
 
 const parseErrorDetailJson = (json) => JSON.parse(json).fieldMessages;
 
 const submissionRowErrors = (rowNum, errorDetail) => {
   return (
-    <ul style={{ paddingInlineStart: '20px' }}>
+    <ul
+      style={{
+        paddingInlineStart: '20px',
+      }}
+    >
       {parseErrorDetailJson(errorDetail).map((error) => (
         <li key={`${rowNum}_${error.field}`}>
           <strong className="me-1">{error.field}:</strong>
@@ -127,31 +151,45 @@ const WorkReportingSubmissionDetail = ({ toggle, submission }) => {
 
   const submissionObject = () => {
     return (
-      <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+      <div
+        style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+        }}
+      >
         <div>
           <ul className="no-bullet">
             <li>
-              <strong>File name:</strong> {submissionResultData.fileName}
+              <strong>File name:</strong>
+              {submissionResultData.fileName}
             </li>
             <li>
-              <strong>Report Type:</strong> {submissionResultData.streamName}
+              <strong>Report Type:</strong>
+              {submissionResultData.streamName}
             </li>
             {submissionResultData.numResubmitRows > 0 && (
               <li>
-                <strong>Re-submitted Records:</strong> {submissionResultData.numResubmitRows}
+                <strong>Re-submitted Records:</strong>
+                {submissionResultData.numResubmitRows}
               </li>
             )}
             <li>
-              <strong>Status:</strong> {submissionResultData.description}
+              <strong>Status:</strong>
+              {submissionResultData.description}
             </li>
             {submissionResultData.errorDetail && (
               <li>
-                <strong>Status Detail:</strong> <ul>{submissionRowErrors(0, submissionResultData.errorDetail)}</ul>
+                <strong>Status Detail:</strong>
+                <ul>{submissionRowErrors(0, submissionResultData.errorDetail)}</ul>
               </li>
             )}
           </ul>
         </div>
-        <div style={{ whiteSpace: 'nowrap' }}>
+        <div
+          style={{
+            whiteSpace: 'nowrap',
+          }}
+        >
           {submissionResultData.submissionStatusCode !== 'FE' && (
             <Button
               size="sm"

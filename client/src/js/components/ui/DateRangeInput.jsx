@@ -41,8 +41,12 @@ const DateRangeInput = ({
   const handleChange = (ranges) => {
     const { startDate, endDate } = ranges.selection;
     setRange([ranges.selection]);
+
     if (onChange) {
-      onChange({ startDate, endDate });
+      onChange({
+        startDate,
+        endDate,
+      });
     }
   };
 
@@ -53,13 +57,20 @@ const DateRangeInput = ({
         setOpen(false);
       }
     };
+
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
   return (
     <div className={`DateRangeInputWrapper position-relative ${showError ? 'is-invalid' : ''}`} ref={wrapperRef}>
-      <InputGroup onClick={() => !disabled && setOpen(!open)} style={{ width: '250px', cursor: 'pointer' }}>
+      <InputGroup
+        onClick={() => !disabled && setOpen(!open)}
+        style={{
+          width: '250px',
+          cursor: 'pointer',
+        }}
+      >
         <Input
           readOnly
           value={`${isValid(range[0].startDate) ? format(range[0].startDate, 'yyyy-MM-dd') : ''} - ${isValid(range[0].endDate) ? format(range[0].endDate, 'yyyy-MM-dd') : ''}`}
@@ -71,12 +82,22 @@ const DateRangeInput = ({
         </InputGroupText>
       </InputGroup>
       {showError && (
-        <div className="invalid-feedback" style={{ display: 'block' }}>
+        <div
+          className="invalid-feedback"
+          style={{
+            display: 'block',
+          }}
+        >
           {errorText}
         </div>
       )}
       {open && (
-        <div style={{ position: 'absolute', zIndex: 1000 }}>
+        <div
+          style={{
+            position: 'absolute',
+            zIndex: 1000,
+          }}
+        >
           <DateRange
             ranges={range}
             onChange={handleChange}

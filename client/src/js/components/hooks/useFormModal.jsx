@@ -30,6 +30,7 @@ const useFormModal = (formTitle, formFieldsChildElement, handleFormSubmit, modSi
   const onFormSubmit = (values) => handleFormSubmit(values, formType);
 
   const title = formType === Constants.FORM_TYPE.ADD ? `Add ${formTitle}` : `Edit ${formTitle}`;
+
   modSize = modSize === null ? 'sm' : modSize;
   const formModal = () => {
     return (

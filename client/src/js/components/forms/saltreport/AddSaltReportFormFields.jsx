@@ -2,7 +2,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Field, FieldArray, useFormikContext } from 'formik';
 import { debounce } from 'lodash';
 import _ from 'lodash';
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { connect } from 'react-redux';
 import { Row, Col, FormGroup, Table, Button, Tooltip } from 'reactstrap';
 
@@ -11,7 +11,7 @@ import { validationSchema } from './ValidationSchema';
 import { TooltipProvider, useTooltip } from '../../../contexts/TooltipContext';
 import PageSpinner from '../../ui/PageSpinner';
 import SingleDropdownField from '../../ui/SingleDropdownField';
-import { FormRow, FormInput, FormCheckboxInput, FormRadioInput, FormNumberInput } from '../FormInputs';
+import { FormRow, FormInput, FormRadioInput, FormNumberInput } from '../FormInputs';
 
 const materialStorageAppendixLabel = {
   materialStorage: {
@@ -142,7 +142,13 @@ const AddSaltReportFormFields = ({ setInitialValues, formValues, setValidationSc
 
     return (
       <>
-        <span style={{ paddingLeft: '4px' }} href="#" id={tipId}>
+        <span
+          style={{
+            paddingLeft: '4px',
+          }}
+          href="#"
+          id={tipId}
+        >
           <FontAwesomeIcon icon="question-circle" className="fa-color-primary ms-1 me-1" />
         </span>
         <Tooltip
@@ -169,8 +175,12 @@ const AddSaltReportFormFields = ({ setInitialValues, formValues, setValidationSc
           const selector = `[name="${prefix + key}"]`;
 
           const errorField = document.querySelector(selector);
+
           if (errorField) {
-            errorField.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            errorField.scrollIntoView({
+              behavior: 'smooth',
+              block: 'center',
+            });
             errorField.focus();
             return;
           }
@@ -309,7 +319,12 @@ const AddSaltReportFormFields = ({ setInitialValues, formValues, setValidationSc
             </Row>
             <Row className="my-2">
               <Col>
-                <Table bordered style={{ tableLayout: 'fixed' }}>
+                <Table
+                  bordered
+                  style={{
+                    tableLayout: 'fixed',
+                  }}
+                >
                   <thead>
                     <tr>
                       <th rowSpan={2}>Areas for Improvement</th>
@@ -393,7 +408,12 @@ const AddSaltReportFormFields = ({ setInitialValues, formValues, setValidationSc
             </Row>
             <Row className="my-2">
               <Col>
-                <Table bordered style={{ tableLayout: 'fixed' }}>
+                <Table
+                  bordered
+                  style={{
+                    tableLayout: 'fixed',
+                  }}
+                >
                   <thead>
                     <tr>
                       <th colSpan={2}>Solids</th>
@@ -404,7 +424,6 @@ const AddSaltReportFormFields = ({ setInitialValues, formValues, setValidationSc
                     <tr>
                       <th rowSpan={4}>De-icers</th>
                       <th>Sodium chloride (NaCl)</th>
-
                       <td>
                         <FormNumberInput type="number" name="sect3.deicer.nacl" step="0.01" />
                       </td>
@@ -685,7 +704,12 @@ const AddSaltReportFormFields = ({ setInitialValues, formValues, setValidationSc
                 <FieldArray name="sect4.stockpiles">
                   {({ insert, remove }) => (
                     <>
-                      <Table bordered style={{ tableLayout: 'fixed' }}>
+                      <Table
+                        bordered
+                        style={{
+                          tableLayout: 'fixed',
+                        }}
+                      >
                         <thead>
                           <tr>
                             <th rowSpan={2}>Site Name</th>
@@ -1297,7 +1321,12 @@ const AddSaltReportFormFields = ({ setInitialValues, formValues, setValidationSc
             <FieldArray name="sect7.vulnerableAreas">
               {({ insert, remove }) => (
                 <>
-                  <Table bordered style={{ tableLayout: 'fixed' }}>
+                  <Table
+                    bordered
+                    style={{
+                      tableLayout: 'fixed',
+                    }}
+                  >
                     <thead>
                       <tr>
                         <th>Hwy #</th>

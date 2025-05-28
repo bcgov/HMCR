@@ -93,6 +93,7 @@ const ApiAccess = ({ hideErrorDialog }) => {
     const location = window.location;
     const sampleUrl = `${location.protocol}//${location.host}/api/version`;
     const sampleRequestcUrl = `curl --location --request GET '${sampleUrl}' \\\n--header 'Authorization: Bearer aaaabbbbccccdddd...'`;
+
     const sampleRequestPowershell =
       `$headers = New-Object "System.Collections.Generic.Dictionary[[String],[String]]"\n` +
       `$headers.Add("Authorization", "Bearer aaaabbbbccccdddd...")\n\n` +
@@ -256,4 +257,6 @@ const ApiAccess = ({ hideErrorDialog }) => {
   );
 };
 
-export default connect(null, { hideErrorDialog })(ApiAccess);
+export default connect(null, {
+  hideErrorDialog,
+})(ApiAccess);

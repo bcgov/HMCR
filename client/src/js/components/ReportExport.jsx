@@ -131,6 +131,7 @@ const ReportExport = ({
     if (values.submissionNumber.length > 0) {
       cql_filters.push(`SUBMISSION_OBJECT_ID = ${values.submissionNumber}`);
     }
+
     if (values.submissionDateFrom !== null && values.submissionDateTo !== null) {
       var sdFrom = values.submissionDateFrom.startOf('day').format(Constants.DATE_TIME_FORMAT);
       var sdTo = values.submissionDateTo.endOf('day').format(Constants.DATE_TIME_FORMAT);
@@ -157,9 +158,13 @@ const ReportExport = ({
         .getSaltReports(buildExportParams(values, dateFrom, dateTo))
         .then((response) => {
           let fileName = `${values.reportTypeId}_Export_${dateFrom}-${dateTo}`;
-          const blob = new Blob([response.data], { type: 'text/csv' });
+          const blob = new Blob([response.data], {
+            type: 'text/csv',
+          });
           FileSaver.saveAs(blob, fileName);
-          setExportResult({ fileName });
+          setExportResult({
+            fileName,
+          });
           setExportStage(EXPORT_STAGE.DONE);
         })
         .catch((error) => {
@@ -167,7 +172,9 @@ const ReportExport = ({
             const response = error.response;
 
             if (response.status === 422) {
-              setExportResult({ error: error.response.data });
+              setExportResult({
+                error: error.response.data,
+              });
               setExportStage(EXPORT_STAGE.ERROR);
             } else if (response.status === 404) {
               hideErrorDialog();
@@ -182,11 +189,17 @@ const ReportExport = ({
         .then((response) => {
           const fileExtensionHeaders = response.headers['content-disposition'].match(/.csv|.json|.gml|.kml|.kmz/i);
           let fileName = `${values.reportTypeId}_Export_${dateFrom}-${dateTo}`;
+
           if (fileExtensionHeaders) fileName += fileExtensionHeaders[0];
+
           let data = response.data;
+
           if (fileName.indexOf('.json') > -1) data = JSON.stringify(data);
+
           FileSaver.saveAs(new Blob([data]), fileName);
-          setExportResult({ fileName });
+          setExportResult({
+            fileName,
+          });
           setExportStage(EXPORT_STAGE.DONE);
         })
         .catch((error) => {
@@ -194,7 +207,9 @@ const ReportExport = ({
             const response = error.response;
 
             if (response.status === 422) {
-              setExportResult({ error: error.response.data });
+              setExportResult({
+                error: error.response.data,
+              });
               setExportStage(EXPORT_STAGE.ERROR);
             } else if (response.status === 404) {
               hideErrorDialog();
@@ -217,6 +232,7 @@ const ReportExport = ({
             <p>There are no results matching the provided search criterion</p>
           </Alert>
         );
+
       case EXPORT_STAGE.ERROR:
         return (
           <Alert color="danger">
@@ -226,6 +242,7 @@ const ReportExport = ({
             <p>{exportResult.error.detail}</p>
           </Alert>
         );
+
       case EXPORT_STAGE.DONE:
         return (
           <Alert color="success">
@@ -238,6 +255,7 @@ const ReportExport = ({
             </p>
           </Alert>
         );
+
       default:
         return (
           <div className="text-center">
@@ -281,7 +299,11 @@ const ReportExport = ({
                       isOutsideRange={disableFutureDates}
                     />
                     <MouseoverTooltip id="tooltip_datepicker">
-                      <ul style={{ paddingInlineStart: 10 }}>
+                      <ul
+                        style={{
+                          paddingInlineStart: 10,
+                        }}
+                      >
                         <li>
                           For Maintenance Work Reporting this refers to the <em>End Date</em>
                         </li>
@@ -349,7 +371,11 @@ const ReportExport = ({
                             isOutsideRange={disableFutureDates}
                           />
                           <MouseoverTooltip id="tooltip_submission_datepicker">
-                            <ul style={{ paddingInlineStart: 10 }}>
+                            <ul
+                              style={{
+                                paddingInlineStart: 10,
+                              }}
+                            >
                               This Submission Date filter applies in addition to the applicable mandatory date range
                               above. Tip: To ensure all records submitted in this date range (and / or matching the
                               entered Submission Number) will be included in the export, set the mandatory date range
@@ -365,7 +391,12 @@ const ReportExport = ({
             </MaterialCard>
             {isRequiredFieldsSet(formikProps) && (
               <div className="d-flex justify-content-end">
-                <div style={{ width: '100px' }} className="me-2">
+                <div
+                  style={{
+                    width: '100px',
+                  }}
+                  className="me-2"
+                >
                   <SingleDropdownField defaultTitle="Export Format" items={supportedFormats} name="outputFormat" />
                 </div>
                 <Button color="primary" size="sm" type="button" onClick={formikProps.submitForm} className="me-2">
@@ -404,4 +435,7 @@ const mapStateToProps = (state) => {
   };
 };
 
-export default connect(mapStateToProps, { fetchActivityCodesDropdown, hideErrorDialog })(ReportExport);
+export default connect(mapStateToProps, {
+  fetchActivityCodesDropdown,
+  hideErrorDialog,
+})(ReportExport);

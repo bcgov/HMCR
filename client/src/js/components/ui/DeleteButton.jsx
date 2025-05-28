@@ -51,7 +51,11 @@ const DeleteButton = ({
               This will <strong>permanently</strong> delete the record.
             </div>
           ) : (
-            <div style={{ marginBottom: '1rem' }}>
+            <div
+              style={{
+                marginBottom: '1rem',
+              }}
+            >
               <SingleDateInput
                 id={`${buttonId}_endDate`}
                 value={date}
@@ -61,7 +65,6 @@ const DeleteButton = ({
               />
             </div>
           )}
-
           <div className="text-end mt-3">
             <ButtonGroup>
               <Button color="danger" size="sm" onClick={handleConfirmDelete}>

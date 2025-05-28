@@ -1,9 +1,8 @@
-import { format, endOfDay, isBefore, parseISO } from 'date-fns';
+import { isBefore } from 'date-fns';
 import _ from 'lodash';
 import moment from 'moment';
 import queryString from 'query-string';
 import React, { useState, useEffect, forwardRef, useImperativeHandle } from 'react';
-import { DateRange } from 'react-date-range';
 import { connect } from 'react-redux';
 import { useHistory } from 'react-router-dom';
 import { Button, Row, Col, Input, UncontrolledPopover, PopoverBody, PopoverHeader, Progress } from 'reactstrap';
@@ -19,16 +18,42 @@ import FontAwesomeButton from './ui/FontAwesomeButton.jsx';
 import PageSpinner from './ui/PageSpinner.jsx';
 import WorkReportingSubmissionDetail from './WorkReportingSubmissionDetail.jsx';
 
-const startDateLimit = new Date('2019-01-01');
-
 const tableColumns = [
-  { heading: 'Submission #', key: 'id', nosort: true },
-  { heading: 'File', key: 'fileName', nosort: true },
-  { heading: 'Submitted Date', key: 'date', nosort: true },
-  { heading: 'Submitted By', key: 'name', nosort: true },
-  { heading: 'Report Type', key: 'streamName', nosort: true },
-  { heading: 'Submission Status', key: 'description', nosort: true },
-  { heading: '', key: 'longDescription', nosort: true },
+  {
+    heading: 'Submission #',
+    key: 'id',
+    nosort: true,
+  },
+  {
+    heading: 'File',
+    key: 'fileName',
+    nosort: true,
+  },
+  {
+    heading: 'Submitted Date',
+    key: 'date',
+    nosort: true,
+  },
+  {
+    heading: 'Submitted By',
+    key: 'name',
+    nosort: true,
+  },
+  {
+    heading: 'Report Type',
+    key: 'streamName',
+    nosort: true,
+  },
+  {
+    heading: 'Submission Status',
+    key: 'description',
+    nosort: true,
+  },
+  {
+    heading: '',
+    key: 'longDescription',
+    nosort: true,
+  },
 ];
 
 const defaultSearchOptions = {
@@ -40,6 +65,7 @@ const defaultSearchOptions = {
 };
 
 const maxValidationStages = 5;
+
 const stageColors = (stage) => {
   if (stage >= 1 && stage <= maxValidationStages - 1) return 'danger';
 
@@ -53,22 +79,14 @@ const WorkReportingSubmissions = ({ serviceArea, submissionStatuses }, ref) => {
   const searchData = useSearchData(defaultSearchOptions);
   const [searchText, setSearchText] = useState(defaultSearchOptions.searchText);
 
-  const [showResultScreen, setShowResultScreen] = useState({ isOpen: false, submission: null });
-  const [showCalendar, setShowCalendar] = useState(false);
+  const [showResultScreen, setShowResultScreen] = useState({
+    isOpen: false,
+    submission: null,
+  });
 
   // Date picker
-  const [focusedInput, setFocusedInput] = useState(null);
   const [dateFrom, setDateFrom] = useState(defaultSearchOptions.dateFrom);
   const [dateTo, setDateTo] = useState(defaultSearchOptions.dateTo);
-  const [hasPickedStart, setHasPickedStart] = useState(false);
-
-  const [dateRange, setDateRange] = useState([
-    {
-      startDate: defaultSearchOptions.dateFrom,
-      endDate: defaultSearchOptions.dateTo,
-      key: 'selection',
-    },
-  ]);
 
   useImperativeHandle(ref, () => ({
     refresh() {
@@ -89,7 +107,10 @@ const WorkReportingSubmissions = ({ serviceArea, submissionStatuses }, ref) => {
     };
 
     if (params.showResult) {
-      setShowResultScreen({ isOpen: true, submission: params.showResult });
+      setShowResultScreen({
+        isOpen: true,
+        submission: params.showResult,
+      });
     }
 
     searchData.updateSearchOptions(options);
@@ -140,10 +161,21 @@ const WorkReportingSubmissions = ({ serviceArea, submissionStatuses }, ref) => {
     <React.Fragment>
       <Row className="mb-3">
         <Col>
-          <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between' }}>
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'flex-end',
+              justifyContent: 'space-between',
+            }}
+          >
             <div>
               <span className="me-2">Report Submit Date</span>
-              <div style={{ position: 'relative', display: 'inline-block' }}>
+              <div
+                style={{
+                  position: 'relative',
+                  display: 'inline-block',
+                }}
+              >
                 <DateRangeInput
                   startDate={dateFrom}
                   endDate={dateTo}
@@ -156,7 +188,6 @@ const WorkReportingSubmissions = ({ serviceArea, submissionStatuses }, ref) => {
                   maxDate={new Date()}
                 />
               </div>
-
               <div
                 style={{
                   position: 'relative',
@@ -168,7 +199,10 @@ const WorkReportingSubmissions = ({ serviceArea, submissionStatuses }, ref) => {
               >
                 <Input
                   type="text"
-                  style={{ position: 'absolute', top: '15px' }}
+                  style={{
+                    position: 'absolute',
+                    top: '15px',
+                  }}
                   placeholder="Name"
                   value={searchText}
                   onChange={(e) => setSearchText(e.target.value)}
@@ -220,7 +254,12 @@ const WorkReportingSubmissions = ({ serviceArea, submissionStatuses }, ref) => {
                       <Button
                         color="link"
                         size="sm"
-                        onClick={() => setShowResultScreen({ isOpen: true, submission: item.id })}
+                        onClick={() =>
+                          setShowResultScreen({
+                            isOpen: true,
+                            submission: item.id,
+                          })
+                        }
                       >
                         {item.id}
                       </Button>
@@ -265,8 +304,11 @@ const WorkReportingSubmissions = ({ serviceArea, submissionStatuses }, ref) => {
         <WorkReportingSubmissionDetail
           submission={showResultScreen.submission}
           toggle={() => {
-            setShowResultScreen({ isOpen: false });
+            setShowResultScreen({
+              isOpen: false,
+            });
             const params = queryString.parse(history.location.search);
+
             if (params.showResult) history.push(`?${stringifyQueryParams(_.omit(params, ['showResult']))}`);
           }}
         />
@@ -283,4 +325,6 @@ const mapStateToProps = (state) => {
   };
 };
 
-export default connect(mapStateToProps, null, null, { forwardRef: true })(refWorkReportingSubmissions);
+export default connect(mapStateToProps, null, null, {
+  forwardRef: true,
+})(refWorkReportingSubmissions);

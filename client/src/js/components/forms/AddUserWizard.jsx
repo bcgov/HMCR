@@ -81,7 +81,13 @@ const AddUserSearch = ({ userTypes, submitting, toggle, values, handleSubmit }) 
 const AddUserSearchResult = ({ status, data, userTypes, setWizardState }) => {
   const displayRow = (label, text) => (
     <Row>
-      <Col xs={3} style={{ display: 'flex', justifyContent: 'flex-end' }}>
+      <Col
+        xs={3}
+        style={{
+          display: 'flex',
+          justifyContent: 'flex-end',
+        }}
+      >
         <strong>{label}</strong>
       </Col>
       <Col>{text}</Col>
@@ -256,6 +262,7 @@ const AddUserWizard = ({
             status={wizardState}
           />
         );
+
       case WIZARD_STATE.USER_SETUP:
         return (
           <AddUserSetupUser
@@ -265,8 +272,10 @@ const AddUserWizard = ({
             submitting={submitting}
           />
         );
+
       case WIZARD_STATE.USER_SETUP_CONFIRM:
         return <AddUserSetupUserSuccess toggle={toggle} />;
+
       case WIZARD_STATE.SEARCH:
       default:
         return (
@@ -298,4 +307,7 @@ const mapStateToProps = (state) => {
   };
 };
 
-export default connect(mapStateToProps, { showValidationErrorDialog, hideErrorDialog })(AddUserWizard);
+export default connect(mapStateToProps, {
+  showValidationErrorDialog,
+  hideErrorDialog,
+})(AddUserWizard);
