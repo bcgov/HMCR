@@ -39,7 +39,7 @@ export default defineConfig(({ mode }) => {
     },
     build: {
       outDir: 'build',
-      sourcemap: mode !== 'production',
+      sourcemap: true,
     },
     base: env.VITE_BASE_URL || '/',
     define: {
