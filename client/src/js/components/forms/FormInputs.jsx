@@ -1,5 +1,4 @@
 import { useField } from 'formik';
-import React from 'react';
 import { Col, FormGroup, Label, Input, FormFeedback } from 'reactstrap';
 
 export const FormRow = ({ name, label, children }) => {
@@ -27,12 +26,12 @@ export const FormInput = ({ children, ...props }) => {
   const [field, meta] = useField({ ...props, type: 'checkbox' });
 
   return (
-    <React.Fragment>
+    <>
       <Input {...field} {...props} invalid={meta.error && meta.touched}>
         {children}
       </Input>
       {meta.error && meta.touched && <FormFeedback>{meta.error}</FormFeedback>}
-    </React.Fragment>
+    </>
   );
 };
 
@@ -56,12 +55,12 @@ export const FormNumberInput = ({ children, name, ...props }) => {
   };
 
   return (
-    <React.Fragment>
+    <>
       <Input type="number" {...field} {...props} invalid={meta.error && meta.touched} onChange={handleChange}>
         {children}
       </Input>
       {meta.error && meta.touched && <FormFeedback>{meta.error}</FormFeedback>}
-    </React.Fragment>
+    </>
   );
 };
 

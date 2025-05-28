@@ -1,5 +1,5 @@
 import { parseISO } from 'date-fns';
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { connect } from 'react-redux';
 
 import { FormRow, FormInput } from './FormInputs';
@@ -54,7 +54,7 @@ const EditUserFormFields = ({
   if (loading || formValues === null) return <PageSpinner />;
 
   return (
-    <React.Fragment>
+    <>
       <FormRow name="userType" label="User Type*">
         <SingleDropdownField defaultTitle="Select User Type" items={userTypes} name="userType" disabled />
       </FormRow>
@@ -70,7 +70,7 @@ const EditUserFormFields = ({
       <FormRow name="endDate" label="End Date">
         <SingleDateField name="endDate" placeholder="End Date" />
       </FormRow>
-    </React.Fragment>
+    </>
   );
 };
 

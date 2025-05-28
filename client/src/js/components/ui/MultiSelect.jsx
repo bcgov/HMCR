@@ -1,11 +1,10 @@
 import { FieldArray, useField, useFormikContext } from 'formik';
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Input, FormFeedback } from 'reactstrap';
 
 const MultiSelect = (props) => {
   const { items, name, handleBlur, showSelectAll, selectClass } = props;
 
-  // eslint-disable-next-line
   const [, meta] = useField(props);
   const selectClassName =
     selectClass === null || selectClass === undefined || selectClass === '' ? 'form-control multi-select' : selectClass;
@@ -40,7 +39,7 @@ const MultiSelect = (props) => {
   updateSelectAll();
 
   return (
-    <React.Fragment>
+    <>
       <div
         className={`${selectClassName} ${meta.touched && meta.error && typeof meta.error === 'string' && meta.value.length === 0 ? 'is-invalid' : ''}`}
       >
@@ -93,7 +92,7 @@ const MultiSelect = (props) => {
       {meta.touched && meta.error && typeof meta.error && meta.value.length === 0 && (
         <FormFeedback>{meta.error}</FormFeedback>
       )}
-    </React.Fragment>
+    </>
   );
 };
 

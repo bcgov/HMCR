@@ -1,5 +1,5 @@
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { connect } from 'react-redux';
 import { toast } from 'react-toastify';
 import { Alert, Button, FormGroup, Label, Row, Col, Input, InputGroup } from 'reactstrap';
@@ -53,11 +53,11 @@ const ApiAccess = ({ hideErrorDialog }) => {
     return (
       !loading &&
       !apiClient && (
-        <React.Fragment>
+        <>
           <Button size="sm" color="primary" onClick={onCreateClientClick} disabled={createClicked}>
             {createClicked && <FontAwesomeIcon icon="sync" spin />} Create Client
           </Button>
-        </React.Fragment>
+        </>
       )
     );
   };
@@ -101,7 +101,7 @@ const ApiAccess = ({ hideErrorDialog }) => {
       `$response | ConvertTo-Json\n`;
 
     return (
-      <React.Fragment>
+      <>
         <h2 className="mt-2">Usage</h2>
         <p>
           This section will describe to how to obtain an access token (
@@ -141,7 +141,7 @@ const ApiAccess = ({ hideErrorDialog }) => {
         <div className="code-block">
           <pre>{JSON.stringify(version, null, 4)}</pre>
         </div>
-      </React.Fragment>
+      </>
     );
   };
 
@@ -149,7 +149,7 @@ const ApiAccess = ({ hideErrorDialog }) => {
     return (
       !loading &&
       apiClient && (
-        <React.Fragment>
+        <>
           <Row>
             <Col md={6}>
               <FormGroup row>
@@ -218,7 +218,7 @@ const ApiAccess = ({ hideErrorDialog }) => {
               </Row>
             </Col>
           </Row>
-        </React.Fragment>
+        </>
       )
     );
   };
@@ -243,7 +243,7 @@ const ApiAccess = ({ hideErrorDialog }) => {
       <h2>API Access Client</h2>
       <p>
         An API Access Client is needed to obtain access to the HMCR REST API.{' '}
-        {!apiClient && <React.Fragment>You can create one below.</React.Fragment>}
+        {!apiClient && <>You can create one below.</>}
       </p>
       <Alert color="warning">
         <strong>Warning!</strong> The API Access Client should be kept confidential. It will have the same access level

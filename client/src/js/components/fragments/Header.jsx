@@ -1,5 +1,5 @@
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { connect } from 'react-redux';
 import { useLocation } from 'react-router-dom';
 import { Link } from 'react-router-dom';
@@ -76,7 +76,7 @@ const Header = ({ currentUser }) => {
           <Collapse isOpen={!collapsed} navbar>
             <Nav className="navbar-nav">
               {currentUser.userType === Constants.USER_TYPE.INTERNAL && (
-                <React.Fragment>
+                <>
                   <Authorize requires={Constants.PERMISSIONS.CODE_R}>
                     <NavLinkWithMatch hideNavbar={hideNavbar} to={Constants.PATHS.ADMIN_ACTIVITIES} text="Activities" />
                   </Authorize>
@@ -90,7 +90,7 @@ const Header = ({ currentUser }) => {
                       text="Roles and Permissions"
                     />
                   </Authorize>
-                </React.Fragment>
+                </>
               )}
               <Authorize requires={Constants.PERMISSIONS.FILE_R}>
                 <NavLinkWithMatch hideNavbar={hideNavbar} to={Constants.PATHS.WORK_REPORTING} text="Work Reporting" />

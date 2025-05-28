@@ -1,6 +1,6 @@
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { format, isValid } from 'date-fns';
-import React, { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { DateRange } from 'react-date-range';
 import { InputGroup, InputGroupText, Input } from 'reactstrap';
 import 'react-date-range/dist/styles.css';

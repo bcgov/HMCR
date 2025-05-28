@@ -1,12 +1,12 @@
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Popover, PopoverBody } from 'reactstrap';
 
 const MouseoverTooltip = (props) => {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
-    <React.Fragment>
+    <>
       <FontAwesomeIcon
         id={props.id}
         icon="question-circle"
@@ -20,7 +20,7 @@ const MouseoverTooltip = (props) => {
       <Popover placement="top" isOpen={isOpen} target={props.id}>
         <PopoverBody>{props.children}</PopoverBody>
       </Popover>
-    </React.Fragment>
+    </>
   );
 };
 

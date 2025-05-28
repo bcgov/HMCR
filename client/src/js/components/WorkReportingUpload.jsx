@@ -1,6 +1,6 @@
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Formik, Form } from 'formik';
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { connect } from 'react-redux';
 import { Col, FormGroup, FormFeedback, Label, Input, Spinner, Alert, Button } from 'reactstrap';
 
@@ -105,7 +105,7 @@ const WorkReportingUpload = ({ serviceArea, handleFileSubmitted, submissionStrea
       .then((response) => {
         if (response.data && response.data.length > 0) {
           setResubCheckStatus(
-            <React.Fragment>
+            <>
               {updateUploadStatusMessage(Constants.UPLOAD_STATE.RESUB_CHECK, Constants.UPLOAD_STATE_STATUS.WARNING)}
               <Alert color="warning">
                 <p>The following rows are different from the existing data in the database:</p>
@@ -148,7 +148,7 @@ const WorkReportingUpload = ({ serviceArea, handleFileSubmitted, submissionStrea
                   </Button>
                 </div>
               </Alert>
-            </React.Fragment>,
+            </>,
           );
         } else {
           setResubCheckStatus(
@@ -210,16 +210,16 @@ const WorkReportingUpload = ({ serviceArea, handleFileSubmitted, submissionStrea
   };
 
   return (
-    <React.Fragment>
+    <>
       <Formik enableReinitialize={true} initialValues={defaultFormValues}>
         {({ values, errors, setFieldValue, setFieldError }) => (
           <Form>
-            <React.Fragment>
+            <>
               <FormRow name="reportTypeId" label="Report Type">
                 <SingleDropdownField defaultTitle="Select Report Type" items={reportTypes} name="reportTypeId" />
               </FormRow>
               {values.reportTypeId && (
-                <React.Fragment>
+                <>
                   <FormGroup row>
                     <Label for="reportFileBrowser" sm={3}>
                       Report File
@@ -278,9 +278,9 @@ const WorkReportingUpload = ({ serviceArea, handleFileSubmitted, submissionStrea
                       Submit
                     </SubmitButton>
                   </div>
-                </React.Fragment>
+                </>
               )}
-            </React.Fragment>
+            </>
           </Form>
         )}
       </Formik>
@@ -336,7 +336,7 @@ const WorkReportingUpload = ({ serviceArea, handleFileSubmitted, submissionStrea
           </Alert>
         )}
       </SimpleModalWrapper>
-    </React.Fragment>
+    </>
   );
 };
 

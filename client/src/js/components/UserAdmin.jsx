@@ -1,7 +1,7 @@
 import FileSaver from 'file-saver';
 import { Formik, Form, Field } from 'formik';
 import queryString from 'query-string';
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { connect } from 'react-redux';
 import { useLocation } from 'react-router-dom';
 import { Row, Col, Button, Alert, Spinner } from 'reactstrap';
@@ -318,7 +318,7 @@ const UserAdmin = ({ serviceAreas, userStatuses, userTypes, showValidationErrorD
   };
 
   return (
-    <React.Fragment>
+    <>
       <Formik
         initialValues={searchInitialValues}
         enableReinitialize={true}
@@ -326,7 +326,7 @@ const UserAdmin = ({ serviceAreas, userStatuses, userTypes, showValidationErrorD
         onReset={handleSearchFormReset}
       >
         {(formikProps) => (
-          <React.Fragment>
+          <>
             <MaterialCard>
               <UIHeader>User Management</UIHeader>
               <Form>
@@ -386,7 +386,7 @@ const UserAdmin = ({ serviceAreas, userStatuses, userTypes, showValidationErrorD
                 </Col>
               </Row>
             </Authorize>
-          </React.Fragment>
+          </>
         )}
       </Formik>
       {searchData.loading && <PageSpinner />}
@@ -428,7 +428,7 @@ const UserAdmin = ({ serviceAreas, userStatuses, userTypes, showValidationErrorD
       >
         {renderContent()}
       </SimpleModalWrapper>
-    </React.Fragment>
+    </>
   );
 };
 

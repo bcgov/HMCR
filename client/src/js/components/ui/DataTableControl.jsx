@@ -1,5 +1,5 @@
 import PropTypes from 'prop-types';
-import React from 'react';
+
 import { Table, Badge } from 'reactstrap';
 
 import DeleteButton from './DeleteButton';
@@ -22,7 +22,7 @@ const DataTableControl = ({
   };
 
   return (
-    <React.Fragment>
+    <>
       <Table size="sm" responsive hover>
         <thead class="thead-dark">
           <tr>
@@ -118,7 +118,7 @@ const DataTableControl = ({
           })}
         </tbody>
       </Table>
-    </React.Fragment>
+    </>
   );
 };
 

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Popover, PopoverHeader, PopoverBody, ButtonGroup, Button } from 'reactstrap';
 
 import FontAwesomeButton from './FontAwesomeButton';

@@ -2,7 +2,7 @@ import { isBefore } from 'date-fns';
 import _ from 'lodash';
 import moment from 'moment';
 import queryString from 'query-string';
-import React, { useState, useEffect, forwardRef, useImperativeHandle } from 'react';
+import { useState, useEffect, forwardRef, useImperativeHandle } from 'react';
 import { connect } from 'react-redux';
 import { useHistory } from 'react-router-dom';
 import { Button, Row, Col, Input, UncontrolledPopover, PopoverBody, PopoverHeader, Progress } from 'reactstrap';
@@ -158,7 +158,7 @@ const WorkReportingSubmissions = ({ serviceArea, submissionStatuses }, ref) => {
   };
 
   return (
-    <React.Fragment>
+    <>
       <Row className="mb-3">
         <Col>
           <div
@@ -265,17 +265,17 @@ const WorkReportingSubmissions = ({ serviceArea, submissionStatuses }, ref) => {
                       </Button>
                     ),
                     description: (
-                      <React.Fragment>
+                      <>
                         {item.description}
                         <Progress
                           className="thin-underline"
                           color={stageColors(itemStatus.stage)}
                           value={progressBarLength}
                         ></Progress>
-                      </React.Fragment>
+                      </>
                     ),
                     longDescription: (
-                      <React.Fragment>
+                      <>
                         <FontAwesomeButton
                           id={`tooltip_${item.id}`}
                           className="fa-color-primary"
@@ -286,7 +286,7 @@ const WorkReportingSubmissions = ({ serviceArea, submissionStatuses }, ref) => {
                           <PopoverHeader>{itemStatus.description}</PopoverHeader>
                           <PopoverBody>{itemStatus.longDescription}</PopoverBody>
                         </UncontrolledPopover>
-                      </React.Fragment>
+                      </>
                     ),
                   };
                 })}
@@ -313,7 +313,7 @@ const WorkReportingSubmissions = ({ serviceArea, submissionStatuses }, ref) => {
           }}
         />
       )}
-    </React.Fragment>
+    </>
   );
 };
 

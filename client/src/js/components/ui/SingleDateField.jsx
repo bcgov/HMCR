@@ -1,5 +1,4 @@
 import { Field, useFormikContext } from 'formik';
-import React from 'react';
 
 import SingleDateInput from './SingleDateInput';
 

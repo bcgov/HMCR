@@ -1,6 +1,6 @@
 import { Formik, Form, Field } from 'formik';
 import queryString from 'query-string';
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { connect } from 'react-redux';
 import { useLocation } from 'react-router-dom';
 import { Row, Col, Button } from 'reactstrap';
@@ -125,7 +125,7 @@ const RoleAdmin = ({ showValidationErrorDialog }) => {
   const formModal = useFormModal('Role', <EditRoleFormFields />, handleEditFormSubmit);
 
   return (
-    <React.Fragment>
+    <>
       <MaterialCard>
         <UIHeader>Role and Permissions Management</UIHeader>
         <Formik
@@ -198,7 +198,7 @@ const RoleAdmin = ({ showValidationErrorDialog }) => {
         </MaterialCard>
       )}
       {formModal.formElement}
-    </React.Fragment>
+    </>
   );
 };
 

@@ -1,4 +1,3 @@
-import React from 'react';
 import { Button, Spinner } from 'reactstrap';
 
 const SubmitButton = ({ submitting, disabled, children, type, ...props }) => {

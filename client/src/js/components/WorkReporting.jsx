@@ -1,6 +1,6 @@
 import _ from 'lodash';
 import queryString from 'query-string';
-import React, { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { connect } from 'react-redux';
 import { useHistory } from 'react-router-dom';
 import { Row, Col } from 'reactstrap';
@@ -32,7 +32,7 @@ const WorkReporting = ({ currentUser }) => {
   };
 
   return (
-    <React.Fragment>
+    <>
       <MaterialCard>
         <UIHeader>Report Upload</UIHeader>
         <Row>
@@ -61,7 +61,7 @@ const WorkReporting = ({ currentUser }) => {
         </Row>
       </MaterialCard>
       {serviceArea && (
-        <React.Fragment>
+        <>
           <Authorize requires={Constants.PERMISSIONS.FILE_W}>
             <MaterialCard>
               <Row>
@@ -75,9 +75,9 @@ const WorkReporting = ({ currentUser }) => {
           <MaterialCard>
             <WorkReportingSubmissions serviceArea={serviceArea} ref={submissionsRef} />
           </MaterialCard>
-        </React.Fragment>
+        </>
       )}
-    </React.Fragment>
+    </>
   );
 };
 

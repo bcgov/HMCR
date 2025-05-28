@@ -1,5 +1,5 @@
 import { useFormikContext, useField } from 'formik';
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 
 import SingleDropdown from './SingleDropdown';
 

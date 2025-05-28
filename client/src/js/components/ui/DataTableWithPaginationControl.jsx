@@ -1,13 +1,13 @@
 import _ from 'lodash';
 import PropTypes from 'prop-types';
-import React from 'react';
+
 
 import DataTableControl from './DataTableControl';
 import PaginationControl from './PaginationControl';
 
 const DataTableWithPaginationControl = ({ searchPagination, onPageNumberChange, onPageSizeChange, ...props }) => {
   return (
-    <React.Fragment>
+    <>
       <DataTableControl {..._.omit(props, ['searchPagination', 'onPageNumberChange', 'onPageSizeChange'])} />
       <PaginationControl
         currentPage={searchPagination.pageNumber}
@@ -18,7 +18,7 @@ const DataTableWithPaginationControl = ({ searchPagination, onPageNumberChange, 
         totalCount={searchPagination.totalCount}
         itemCount={props.dataList.length}
       />
-    </React.Fragment>
+    </>
   );
 };
 

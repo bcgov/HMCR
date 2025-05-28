@@ -1,5 +1,3 @@
-import React from 'react';
-
 const UIHeader = ({ children }) => {
   return (
     <div className="ui-header">

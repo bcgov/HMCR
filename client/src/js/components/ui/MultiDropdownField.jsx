@@ -1,6 +1,6 @@
 import { FieldArray } from 'formik';
 import PropTypes from 'prop-types';
-import React, { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { DropdownToggle, DropdownMenu, UncontrolledDropdown, Label, Input } from 'reactstrap';
 
 const maxSelectedItemDisplay = 2;

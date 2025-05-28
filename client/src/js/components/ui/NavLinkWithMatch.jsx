@@ -1,5 +1,5 @@
 import PropTypes from 'prop-types';
-import React from 'react';
+
 import { NavLink as RRNavLink } from 'react-router-dom';
 import { NavItem, NavLink } from 'reactstrap';
 

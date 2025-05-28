@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { connect } from 'react-redux';
 
 import {
@@ -61,10 +61,10 @@ const Main = ({
   }, []);
 
   return (
-    <React.Fragment>
+    <>
       {loading ? <PageSpinner /> : children}
       {errorDialog.show && <ErrorDialogModal isOpen={errorDialog.show} {...errorDialog} />}
-    </React.Fragment>
+    </>
   );
 };
 

@@ -1,4 +1,4 @@
-import React from 'react';
+
 import { connect } from 'react-redux';
 import { BrowserRouter, Route, Switch, Redirect } from 'react-router-dom';
 import { toast } from 'react-toastify';
@@ -38,7 +38,7 @@ const App = ({ currentUser }) => {
   return (
     <Main>
       <BrowserRouter>
-        <React.Fragment>
+        <>
           <Header />
           <Container>
             <ErrorBoundary>
@@ -46,7 +46,7 @@ const App = ({ currentUser }) => {
             </ErrorBoundary>
           </Container>
           <Footer />
-        </React.Fragment>
+        </>
       </BrowserRouter>
     </Main>
   );

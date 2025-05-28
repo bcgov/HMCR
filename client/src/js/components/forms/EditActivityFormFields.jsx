@@ -1,6 +1,6 @@
 import { isInteger } from 'lodash';
 import moment from 'moment';
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { connect } from 'react-redux';
 import { Row, Col } from 'reactstrap';
 import * as Yup from 'yup';
@@ -342,7 +342,7 @@ const EditActivityFormFields = ({
   if (loading || formValues === null) return <PageSpinner />;
 
   return (
-    <React.Fragment>
+    <>
       <Row>
         <Col>
           <FormRow name="activityNumber" label="Activity Code*">
@@ -420,7 +420,7 @@ const EditActivityFormFields = ({
         </Col>
       </Row>
       {formValues.locationCodeId === locationCodeCId && (
-        <React.Fragment>
+        <>
           <Row>
             <Col className="col colmargin1">
               <FormRow name="featureType" label="Feature Type*">
@@ -459,7 +459,7 @@ const EditActivityFormFields = ({
               </FieldSet>
             </Col>
           </Row>
-        </React.Fragment>
+        </>
       )}
       <Row>
         <Col></Col>
@@ -469,7 +469,7 @@ const EditActivityFormFields = ({
           </FormRow>
         </Col>
       </Row>
-    </React.Fragment>
+    </>
   );
 };
 

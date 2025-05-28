@@ -1,7 +1,7 @@
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import FileSaver from 'file-saver';
 import moment from 'moment';
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import Clipboard from 'react-clipboard.js';
 import { toast } from 'react-toastify';
 import { Button, Modal, ModalBody, ModalHeader } from 'reactstrap';
@@ -139,13 +139,13 @@ const WorkReportingSubmissionDetail = ({ toggle, submission }) => {
 
   const submissionHeader = () => {
     return (
-      <React.Fragment>
+      <>
         <span>Submission #: {submissionResultData.id}</span>
         <span className="ms-3 me-3">
           Submission Date: {moment(submissionResultData.appCreateTimestamp).format(Constants.DATE_DISPLAY_FORMAT)}
         </span>
         <span>Service Area: {submissionResultData.serviceAreaNumber}</span>
-      </React.Fragment>
+      </>
     );
   };
 
@@ -249,20 +249,20 @@ const WorkReportingSubmissionDetail = ({ toggle, submission }) => {
     });
 
     return (
-      <React.Fragment>
+      <>
         {rowErrorData.length > 0 && (
-          <React.Fragment>
+          <>
             <strong>Data Errors:</strong>
             <DataTableControl dataList={rowErrorData} tableColumns={errorTableColumns} />
-          </React.Fragment>
+          </>
         )}
         {rowWarningData.length > 0 && (
-          <React.Fragment>
+          <>
             <strong>Warnings:</strong>
             <DataTableControl dataList={rowWarningData} tableColumns={errorTableColumns} />
-          </React.Fragment>
+          </>
         )}
-      </React.Fragment>
+      </>
     );
   };
 
@@ -273,10 +273,10 @@ const WorkReportingSubmissionDetail = ({ toggle, submission }) => {
         {loading ? (
           <PageSpinner />
         ) : (
-          <React.Fragment>
+          <>
             {submissionObject()}
             {submissionRows()}
-          </React.Fragment>
+          </>
         )}
       </ModalBody>
     </Modal>

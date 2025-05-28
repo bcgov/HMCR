@@ -1,5 +1,5 @@
 import { parseISO } from 'date-fns';
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import * as Yup from 'yup';
 
 import { FormRow, FormInput, FormCheckboxInput } from './FormInputs';
@@ -53,7 +53,7 @@ const EditRoleFormFields = ({ setInitialValues, formValues, setValidationSchema,
   if (loading || formValues === null) return <PageSpinner />;
 
   return (
-    <React.Fragment>
+    <>
       <FormRow name="name" label="Role Name*">
         <FormInput type="text" name="name" placeholder="Role Name" />
       </FormRow>
@@ -69,7 +69,7 @@ const EditRoleFormFields = ({ setInitialValues, formValues, setValidationSchema,
       <FormRow name="endDate" label="End Date">
         <SingleDateField name="endDate" placeholder="End Date" />
       </FormRow>
-    </React.Fragment>
+    </>
   );
 };
 

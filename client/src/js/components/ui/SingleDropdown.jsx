@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { DropdownToggle, DropdownMenu, UncontrolledDropdown, DropdownItem, FormFeedback } from 'reactstrap';
 
 const SingleDropdown = (props) => {

@@ -1,7 +1,7 @@
 import { startOfMonth, endOfMonth, subMonths } from 'date-fns';
 import FileSaver from 'file-saver';
 import { Formik, Form } from 'formik';
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { connect } from 'react-redux';
 import { Alert, Button, Spinner } from 'reactstrap';
 import * as Yup from 'yup';
@@ -274,7 +274,7 @@ const ReportExport = ({
   }
 
   return (
-    <React.Fragment>
+    <>
       <Formik
         initialValues={defaultSearchFormValues}
         enableReinitialize={true}
@@ -283,7 +283,7 @@ const ReportExport = ({
         validationSchema={validationSchema}
       >
         {(formikProps) => (
-          <React.Fragment>
+          <>
             <MaterialCard>
               <UIHeader>Report Export</UIHeader>
               <Form>
@@ -318,7 +318,7 @@ const ReportExport = ({
                   </div>
                 </div>
                 {isRequiredFieldsSet(formikProps) && (
-                  <React.Fragment>
+                  <>
                     <div className="mt-3 mb-1">
                       <strong>Optional filters</strong>
                     </div>
@@ -337,7 +337,7 @@ const ReportExport = ({
                         </div>
                       )}
                       {formikProps.values.reportTypeId === 'HMR_WORK_REPORT' && (
-                        <React.Fragment>
+                        <>
                           <div style={filterContainerStyle}>
                             <MultiDropdownField
                               {...formikProps}
@@ -355,7 +355,7 @@ const ReportExport = ({
                               searchable={true}
                             />
                           </div>
-                        </React.Fragment>
+                        </>
                       )}
                     </div>
                     <div className="d-flex mt-3">
@@ -385,7 +385,7 @@ const ReportExport = ({
                         </div>
                       )}
                     </div>
-                  </React.Fragment>
+                  </>
                 )}
               </Form>
             </MaterialCard>
@@ -407,7 +407,7 @@ const ReportExport = ({
                 </Button>
               </div>
             )}
-          </React.Fragment>
+          </>
         )}
       </Formik>
       <SimpleModalWrapper
@@ -421,7 +421,7 @@ const ReportExport = ({
       >
         {renderContent()}
       </SimpleModalWrapper>
-    </React.Fragment>
+    </>
   );
 };
 

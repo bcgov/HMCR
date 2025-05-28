@@ -1,6 +1,6 @@
 import { Formik, Form } from 'formik';
 import moment from 'moment';
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { connect } from 'react-redux';
 import { Col, FormGroup, Label, Alert, Button, Row } from 'reactstrap';
 

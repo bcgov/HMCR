@@ -1,6 +1,6 @@
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Formik, Form } from 'formik';
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { connect } from 'react-redux';
 import { Alert, Button, Modal, ModalHeader, ModalBody, ModalFooter, Row, Col, FormGroup, Label } from 'reactstrap';
 
@@ -32,7 +32,7 @@ const defaultValues = {
 
 const AddUserSearch = ({ userTypes, submitting, toggle, values, handleSubmit }) => {
   return (
-    <React.Fragment>
+    <>
       <ModalBody>
         <Row>
           <Col>
@@ -74,7 +74,7 @@ const AddUserSearch = ({ userTypes, submitting, toggle, values, handleSubmit }) 
           Next
         </SubmitButton>
       </ModalFooter>
-    </React.Fragment>
+    </>
   );
 };
 
@@ -95,7 +95,7 @@ const AddUserSearchResult = ({ status, data, userTypes, setWizardState }) => {
   );
 
   return (
-    <React.Fragment>
+    <>
       <ModalBody>
         <Alert color={status === WIZARD_STATE.SEARCH_SUCCESS ? 'success' : 'danger'}>
           <strong>User {status !== WIZARD_STATE.SEARCH_SUCCESS && 'Not'} Found</strong>
@@ -103,12 +103,12 @@ const AddUserSearchResult = ({ status, data, userTypes, setWizardState }) => {
           {displayRow('User ID', data.username)}
           {displayRow('User Type', userTypes.find((o) => o.id === data.userType).name)}
           {status === WIZARD_STATE.SEARCH_SUCCESS && (
-            <React.Fragment>
+            <>
               {displayRow('First Name', data.firstName)}
               {displayRow('Last Name', data.lastName)}
               {displayRow('Email', data.email)}
               {data.businessLegalName && displayRow('Company', data.businessLegalName)}
-            </React.Fragment>
+            </>
           )}
         </Alert>
       </ModalBody>
@@ -130,7 +130,7 @@ const AddUserSearchResult = ({ status, data, userTypes, setWizardState }) => {
           Next
         </Button>
       </ModalFooter>
-    </React.Fragment>
+    </>
   );
 };
 
@@ -153,12 +153,12 @@ const AddUserSetupUser = ({ serviceAreas, values, submitting, setWizardState }) 
   }, [values.userType]);
 
   return (
-    <React.Fragment>
+    <>
       <ModalBody>
         {loading ? (
           <PageSpinner />
         ) : (
-          <React.Fragment>
+          <>
             <p>
               <strong>Select roles and service areas for the new user</strong>
             </p>
@@ -168,7 +168,7 @@ const AddUserSetupUser = ({ serviceAreas, values, submitting, setWizardState }) 
             <FormRow name="serviceAreaNumbers" label="Service Areas*">
               <MultiSelect items={serviceAreas} name="serviceAreaNumbers" showSelectAll={true} />
             </FormRow>
-          </React.Fragment>
+          </>
         )}
       </ModalBody>
       <ModalFooter>
@@ -184,13 +184,13 @@ const AddUserSetupUser = ({ serviceAreas, values, submitting, setWizardState }) 
           Submit
         </SubmitButton>
       </ModalFooter>
-    </React.Fragment>
+    </>
   );
 };
 
 const AddUserSetupUserSuccess = ({ toggle }) => {
   return (
-    <React.Fragment>
+    <>
       <ModalBody>
         <div className="text-center">
           <FontAwesomeIcon icon={['far', 'check-circle']} size="10x" className="fa-color-success" />
@@ -202,7 +202,7 @@ const AddUserSetupUserSuccess = ({ toggle }) => {
           Finish
         </Button>
       </ModalFooter>
-    </React.Fragment>
+    </>
   );
 };
 

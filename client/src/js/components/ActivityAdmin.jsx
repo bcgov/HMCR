@@ -1,7 +1,7 @@
 import FileSaver from 'file-saver';
 import { Formik, Form, Field } from 'formik';
 import queryString from 'query-string';
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { connect } from 'react-redux';
 import { useLocation } from 'react-router-dom';
 import { Row, Col, Button, Alert, Spinner } from 'reactstrap';
@@ -309,7 +309,7 @@ const ActivityAdmin = ({
   };
 
   return (
-    <React.Fragment>
+    <>
       <MaterialCard>
         <UIHeader>Activity Number Management</UIHeader>
         <Formik
@@ -405,7 +405,7 @@ const ActivityAdmin = ({
       >
         {renderContent()}
       </SimpleModalWrapper>
-    </React.Fragment>
+    </>
   );
 };
 
