@@ -38,7 +38,7 @@ export default defineConfig(({ mode }) => {
       },
     },
     build: {
-      outDir: 'dist',
+      outDir: 'build',
       sourcemap: mode !== 'production',
     },
     base: env.VITE_BASE_URL || '/',
