@@ -17,5 +17,5 @@ COPY --from=builder /src/nginx.conf.tmpl /tmp/src/nginx.conf.tmpl
 RUN $STI_SCRIPTS_PATH/assemble
 
 COPY --from=builder /src/nginx-start/start.sh /opt/app-root/src/start.sh
-RUN chmod +x /opt/app-root/src/start.sh
-CMD ["/opt/app-root/src/start.sh"]
+CMD ["sh", "/opt/app-root/src/start.sh"]
+
