@@ -11,4 +11,4 @@ echo "window.RUNTIME_REACT_APP_API_HOST='${VITE_API_HOST}';" >> $JS_PATH
 echo "---> Creating nginx.conf ..."
 envsubst '${HMCR_DEPLOY_SUFFIX}' < /tmp/src/nginx.conf.tmpl > /etc/nginx/nginx.conf
 
-exec "$@"
+exec nginx -g "daemon off;"
