@@ -89,6 +89,11 @@ http {
             proxy_pass http://hmcr-api${HMCR_DEPLOY_SUFFIX}:8080/swagger/;
         }
 
+        location = /env.config.js {
+            root /opt/app-root/src;
+            add_header Cache-Control "no-store";
+        }
+
         location / {
             root   /opt/app-root/src;
             index  index.html index.htm;
