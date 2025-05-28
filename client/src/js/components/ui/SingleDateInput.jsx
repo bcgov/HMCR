@@ -8,7 +8,18 @@ import { InputGroup, InputGroupText, Input, FormFeedback, Button } from 'reactst
 import 'react-date-range/dist/styles.css';
 import 'react-date-range/dist/theme/default.css';
 
-const SingleDateInput = ({ value, onChange, minDate, maxDate, showError = false, errorText = 'Required', placeholder = 'Select Date', disabled = false, id, style = {} }) => {
+const SingleDateInput = ({
+  value,
+  onChange,
+  minDate,
+  maxDate,
+  showError = false,
+  errorText = 'Required',
+  placeholder = 'Select Date',
+  disabled = false,
+  id,
+  style = {},
+}) => {
   const wrapperRef = useRef(null);
   const [open, setOpen] = useState(false);
 
@@ -25,9 +36,23 @@ const SingleDateInput = ({ value, onChange, minDate, maxDate, showError = false,
   const displayValue = value && isValid(new Date(value)) ? format(new Date(value), 'yyyy-MM-dd') : '';
 
   return (
-    <div className={`SingleDateInputWrapper position-relative ${showError ? 'is-invalid' : ''}`} ref={wrapperRef} style={style}>
-      <InputGroup onClick={() => !disabled && setOpen(!open)} style={{ width: '250px', cursor: disabled ? 'not-allowed' : 'pointer' }}>
-        <Input readOnly value={displayValue} placeholder={placeholder} className={showError ? 'is-invalid' : ''} disabled={disabled} id={id} />
+    <div
+      className={`SingleDateInputWrapper position-relative ${showError ? 'is-invalid' : ''}`}
+      ref={wrapperRef}
+      style={style}
+    >
+      <InputGroup
+        onClick={() => !disabled && setOpen(!open)}
+        style={{ width: '250px', cursor: disabled ? 'not-allowed' : 'pointer' }}
+      >
+        <Input
+          readOnly
+          value={displayValue}
+          placeholder={placeholder}
+          className={showError ? 'is-invalid' : ''}
+          disabled={disabled}
+          id={id}
+        />
         {value && !disabled && (
           <InputGroupText
             onClick={(e) => {

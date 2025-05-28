@@ -4,7 +4,16 @@ import { Popover, PopoverHeader, PopoverBody, ButtonGroup, Button } from 'reacts
 import FontAwesomeButton from './FontAwesomeButton';
 import SingleDateInput from './SingleDateInput';
 
-const DeleteButton = ({ buttonId, children, itemId, defaultEndDate, onDeleteClicked, onComplete, permanentDelete, ...props }) => {
+const DeleteButton = ({
+  buttonId,
+  children,
+  itemId,
+  defaultEndDate,
+  onDeleteClicked,
+  onComplete,
+  permanentDelete,
+  ...props
+}) => {
   const [popoverOpen, setPopoverOpen] = useState(false);
   const [date, setDate] = useState(null);
   const [buttonText, setButtonText] = useState('Disable');
@@ -43,7 +52,13 @@ const DeleteButton = ({ buttonId, children, itemId, defaultEndDate, onDeleteClic
             </div>
           ) : (
             <div style={{ marginBottom: '1rem' }}>
-              <SingleDateInput id={`${buttonId}_endDate`} value={date} onChange={setDate} placeholder="End Date" minDate={new Date()} />
+              <SingleDateInput
+                id={`${buttonId}_endDate`}
+                value={date}
+                onChange={setDate}
+                placeholder="End Date"
+                minDate={new Date()}
+              />
             </div>
           )}
 

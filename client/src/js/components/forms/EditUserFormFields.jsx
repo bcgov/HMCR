@@ -10,7 +10,15 @@ import PageSpinner from '../ui/PageSpinner';
 import SingleDateField from '../ui/SingleDateField';
 import SingleDropdownField from '../ui/SingleDropdownField';
 
-const EditUserFormFields = ({ setInitialValues, formValues, setValidationSchema, userId, serviceAreas, userTypes, validationSchema }) => {
+const EditUserFormFields = ({
+  setInitialValues,
+  formValues,
+  setValidationSchema,
+  userId,
+  serviceAreas,
+  userTypes,
+  validationSchema,
+}) => {
   const [loading, setLoading] = useState(true);
   const [roles, setRoles] = useState([]);
 

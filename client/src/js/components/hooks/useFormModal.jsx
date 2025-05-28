@@ -35,7 +35,12 @@ const useFormModal = (formTitle, formFieldsChildElement, handleFormSubmit, modSi
     return (
       <Modal isOpen={isOpen} toggle={toggle} backdrop="static" size={modSize}>
         <ModalHeader toggle={toggle}>{title}</ModalHeader>
-        <Formik enableReinitialize={true} initialValues={initialValues} validationSchema={validationSchema} onSubmit={onFormSubmit}>
+        <Formik
+          enableReinitialize={true}
+          initialValues={initialValues}
+          validationSchema={validationSchema}
+          onSubmit={onFormSubmit}
+        >
           {({ dirty, values }) => (
             <Form>
               <ModalBody>

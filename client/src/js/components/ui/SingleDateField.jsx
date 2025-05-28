@@ -3,7 +3,16 @@ import React from 'react';
 
 import SingleDateInput from './SingleDateInput';
 
-const FormikDateWrapper = ({ field: { name }, form: { errors, touched, submitCount }, placeholder, style, minDate, maxDate, disabled, id }) => {
+const FormikDateWrapper = ({
+  field: { name },
+  form: { errors, touched, submitCount },
+  placeholder,
+  style,
+  minDate,
+  maxDate,
+  disabled,
+  id,
+}) => {
   const { setFieldValue, values } = useFormikContext();
   const value = values[name];
 

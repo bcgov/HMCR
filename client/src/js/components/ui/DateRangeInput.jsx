@@ -6,7 +6,17 @@ import { InputGroup, InputGroupText, Input } from 'reactstrap';
 import 'react-date-range/dist/styles.css';
 import 'react-date-range/dist/theme/default.css';
 
-const DateRangeInput = ({ startDate, endDate, onChange, minDate, maxDate, showError = false, errorText = 'Required', disabled = false, months = 2 }) => {
+const DateRangeInput = ({
+  startDate,
+  endDate,
+  onChange,
+  minDate,
+  maxDate,
+  showError = false,
+  errorText = 'Required',
+  disabled = false,
+  months = 2,
+}) => {
   const wrapperRef = useRef(null);
   const [open, setOpen] = useState(false);
 

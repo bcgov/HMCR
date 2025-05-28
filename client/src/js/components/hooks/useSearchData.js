@@ -40,7 +40,10 @@ const useSearchData = (defaultSearchOptions) => {
   };
 
   const handleHeadingSortClicked = (headingKey) => {
-    const direction = !searchOptions.direction || searchOptions.direction === Constants.SORT_DIRECTION.ASCENDING ? Constants.SORT_DIRECTION.DESCENDING : Constants.SORT_DIRECTION.ASCENDING;
+    const direction =
+      !searchOptions.direction || searchOptions.direction === Constants.SORT_DIRECTION.ASCENDING
+        ? Constants.SORT_DIRECTION.DESCENDING
+        : Constants.SORT_DIRECTION.ASCENDING;
 
     const options = { ...searchOptions, pageNumber: 1, orderBy: headingKey, direction };
     setSearchOptions(options);
@@ -51,7 +54,9 @@ const useSearchData = (defaultSearchOptions) => {
       updateSearchOptions(defaultSearchOptions);
 
       if (history) {
-        history.push(`?${updateQueryParamsFromHistory(history, _.omit(defaultSearchOptions, ['serviceAreaNumber', 'dataPath']), true)}`);
+        history.push(
+          `?${updateQueryParamsFromHistory(history, _.omit(defaultSearchOptions, ['serviceAreaNumber', 'dataPath']), true)}`,
+        );
       }
     } else {
       setRefreshTrigger(Math.random());
@@ -75,7 +80,9 @@ const useSearchData = (defaultSearchOptions) => {
         }
       });
 
-      history.push(`?${updateQueryParamsFromHistory(history, _.omit(queryOptions, ['serviceAreaNumber', 'dataPath']))}`);
+      history.push(
+        `?${updateQueryParamsFromHistory(history, _.omit(queryOptions, ['serviceAreaNumber', 'dataPath']))}`,
+      );
     };
 
     const loadData = () => {
@@ -87,9 +94,15 @@ const useSearchData = (defaultSearchOptions) => {
       ['dateFrom', 'dateTo'].forEach((key) => {
         const date = options[key];
         if (moment.isMoment(date)) {
-          options[key] = key === 'dateFrom' ? date.startOf('day').format(Constants.DATE_UTC_FORMAT) : date.endOf('day').format(Constants.DATE_UTC_FORMAT);
+          options[key] =
+            key === 'dateFrom'
+              ? date.startOf('day').format(Constants.DATE_UTC_FORMAT)
+              : date.endOf('day').format(Constants.DATE_UTC_FORMAT);
         } else if (date instanceof Date && !isNaN(date.getTime())) {
-          options[key] = key === 'dateFrom' ? moment(date).startOf('day').format(Constants.DATE_UTC_FORMAT) : moment(date).endOf('day').format(Constants.DATE_UTC_FORMAT);
+          options[key] =
+            key === 'dateFrom'
+              ? moment(date).startOf('day').format(Constants.DATE_UTC_FORMAT)
+              : moment(date).endOf('day').format(Constants.DATE_UTC_FORMAT);
         }
       });
 

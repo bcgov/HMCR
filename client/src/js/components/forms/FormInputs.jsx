@@ -69,7 +69,14 @@ export const FormRadioInput = ({ label, ...props }) => {
 
   return (
     <div className="form-check">
-      <Input type="radio" className="form-check-input" id={inputId} {...field} {...props} invalid={meta.touched && meta.error ? true : false} />
+      <Input
+        type="radio"
+        className="form-check-input"
+        id={inputId}
+        {...field}
+        {...props}
+        invalid={meta.touched && meta.error ? true : false}
+      />
       <label className="form-check-label" htmlFor={inputId}>
         {label}
       </label>

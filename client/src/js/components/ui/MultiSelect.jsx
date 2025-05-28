@@ -6,7 +6,8 @@ const MultiSelect = (props) => {
   const { items, name, handleBlur, showSelectAll, selectClass } = props;
   // eslint-disable-next-line
   const [field, meta] = useField(props);
-  const selectClassName = selectClass === null || selectClass === undefined || selectClass === '' ? 'form-control multi-select' : selectClass;
+  const selectClassName =
+    selectClass === null || selectClass === undefined || selectClass === '' ? 'form-control multi-select' : selectClass;
 
   const { values, setFieldValue } = useFormikContext();
   const selectedValues = values[name];
@@ -39,7 +40,9 @@ const MultiSelect = (props) => {
 
   return (
     <React.Fragment>
-      <div className={`${selectClassName} ${meta.touched && meta.error && typeof meta.error === 'string' && meta.value.length === 0 ? 'is-invalid' : ''}`}>
+      <div
+        className={`${selectClassName} ${meta.touched && meta.error && typeof meta.error === 'string' && meta.value.length === 0 ? 'is-invalid' : ''}`}
+      >
         {showSelectAll && (
           <div className="form-check">
             <Input
@@ -85,7 +88,9 @@ const MultiSelect = (props) => {
           }
         </FieldArray>
       </div>
-      {meta.touched && meta.error && typeof meta.error && meta.value.length === 0 && <FormFeedback>{meta.error}</FormFeedback>}
+      {meta.touched && meta.error && typeof meta.error && meta.value.length === 0 && (
+        <FormFeedback>{meta.error}</FormFeedback>
+      )}
     </React.Fragment>
   );
 };

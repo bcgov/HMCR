@@ -5,7 +5,17 @@ import { Alert, Button, Modal, ModalHeader, ModalBody, ModalFooter } from 'react
 
 import { hideErrorDialog } from '../../actions';
 
-const ErrorDialogModal = ({ isOpen, title, message, statusCode, errors, path, method, hideErrorDialog, hidePrimaryButton }) => {
+const ErrorDialogModal = ({
+  isOpen,
+  title,
+  message,
+  statusCode,
+  errors,
+  path,
+  method,
+  hideErrorDialog,
+  hidePrimaryButton,
+}) => {
   const [clicked, setClicked] = useState(false);
 
   useEffect(() => {
@@ -32,7 +42,8 @@ const ErrorDialogModal = ({ isOpen, title, message, statusCode, errors, path, me
           {statusCode && path && method && (
             <p>
               <small>
-                A <strong>{method}</strong> request to <strong className="text-primary">{path}</strong> has returned a <strong className="text-danger">{statusCode}</strong> status code.
+                A <strong>{method}</strong> request to <strong className="text-primary">{path}</strong> has returned a{' '}
+                <strong className="text-danger">{statusCode}</strong> status code.
               </small>
             </p>
           )}
@@ -50,7 +61,13 @@ const ErrorDialogModal = ({ isOpen, title, message, statusCode, errors, path, me
         </ModalBody>
         <ModalFooter>
           {!hidePrimaryButton && (
-            <Button size="sm" color="primary" disabled={clicked} onClick={() => handleOnClick(true)} style={{ minWidth: '50px' }}>
+            <Button
+              size="sm"
+              color="primary"
+              disabled={clicked}
+              onClick={() => handleOnClick(true)}
+              style={{ minWidth: '50px' }}
+            >
               Reload
             </Button>
           )}

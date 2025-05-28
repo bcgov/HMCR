@@ -89,7 +89,9 @@ const UserAdmin = ({ serviceAreas, userStatuses, userTypes, showValidationErrorD
     searchData.updateSearchOptions(options);
 
     const searchText = options.searchText || '';
-    const serviceAreaIds = options.serviceAreas ? options.serviceAreas.split(',').map((id) => parseInt(id)) : defaultSearchFormValues.serviceAreaIds;
+    const serviceAreaIds = options.serviceAreas
+      ? options.serviceAreas.split(',').map((id) => parseInt(id))
+      : defaultSearchFormValues.serviceAreaIds;
     const userTypeIds = options.userTypes ? options.userTypes.split(',') : defaultSearchFormValues.userTypeIds;
 
     setSearchInitialValues({
@@ -216,7 +218,11 @@ const UserAdmin = ({ serviceAreas, userStatuses, userTypes, showValidationErrorD
       })
       .finally(() => setExporting(false));
   };
-  const formModal = useFormModal('User', <EditUserFormFields validationSchema={validationSchema} />, handleEditFormSubmit);
+  const formModal = useFormModal(
+    'User',
+    <EditUserFormFields validationSchema={validationSchema} />,
+    handleEditFormSubmit,
+  );
 
   const data = Object.values(searchData.data).map((user) => ({
     ...user,
@@ -270,7 +276,12 @@ const UserAdmin = ({ serviceAreas, userStatuses, userTypes, showValidationErrorD
 
   return (
     <React.Fragment>
-      <Formik initialValues={searchInitialValues} enableReinitialize={true} onSubmit={(values) => handleSearchFormSubmit(values)} onReset={handleSearchFormReset}>
+      <Formik
+        initialValues={searchInitialValues}
+        enableReinitialize={true}
+        onSubmit={(values) => handleSearchFormSubmit(values)}
+        onReset={handleSearchFormReset}
+      >
         {(formikProps) => (
           <React.Fragment>
             <MaterialCard>
@@ -278,10 +289,21 @@ const UserAdmin = ({ serviceAreas, userStatuses, userTypes, showValidationErrorD
               <Form>
                 <Row form>
                   <Col>
-                    <Field type="text" name="searchText" placeholder="User Id/Name/Organization" className="form-control" />
+                    <Field
+                      type="text"
+                      name="searchText"
+                      placeholder="User Id/Name/Organization"
+                      className="form-control"
+                    />
                   </Col>
                   <Col>
-                    <MultiDropdownField {...formikProps} items={serviceAreas} name="serviceAreaIds" title="Service Area" searchable={true} />
+                    <MultiDropdownField
+                      {...formikProps}
+                      items={serviceAreas}
+                      name="serviceAreaIds"
+                      title="Service Area"
+                      searchable={true}
+                    />
                   </Col>
                   <Col>
                     <MultiDropdownField {...formikProps} items={userTypes} name="userTypeIds" title="User Type" />
@@ -345,7 +367,13 @@ const UserAdmin = ({ serviceAreas, userStatuses, userTypes, showValidationErrorD
         </MaterialCard>
       )}
       {formModal.formElement}
-      {addUserWizardIsOpen && <AddUserWizard isOpen={addUserWizardIsOpen} toggle={handleAddUserWizardClose} validationSchema={validationSchema} />}
+      {addUserWizardIsOpen && (
+        <AddUserWizard
+          isOpen={addUserWizardIsOpen}
+          toggle={handleAddUserWizardClose}
+          validationSchema={validationSchema}
+        />
+      )}
       <SimpleModalWrapper
         isOpen={showModal}
         toggle={() => {

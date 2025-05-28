@@ -3,7 +3,20 @@ import React, { useState, useEffect } from 'react';
 import { connect } from 'react-redux';
 import { useLocation } from 'react-router-dom';
 import { Link } from 'react-router-dom';
-import { Button, Container, Collapse, Navbar, NavbarToggler, NavbarBrand, Nav, NavItem, UncontrolledDropdown, DropdownToggle, DropdownMenu, DropdownItem } from 'reactstrap';
+import {
+  Button,
+  Container,
+  Collapse,
+  Navbar,
+  NavbarToggler,
+  NavbarBrand,
+  Nav,
+  NavItem,
+  UncontrolledDropdown,
+  DropdownToggle,
+  DropdownMenu,
+  DropdownItem,
+} from 'reactstrap';
 
 import * as api from '../../Api';
 import * as Constants from '../../Constants';
@@ -37,8 +50,20 @@ const Header = ({ currentUser }) => {
       <Navbar expand="lg" className="navbar-dark">
         <Container>
           <NavbarBrand tag={Link} onClick={hideNavbar} to="/" className="d-flex align-items-center gap-2">
-            <img className="img-fluid d-none d-md-block" src={'/images/bcid-logo-rev-en.svg'} width="181" height="44" alt="B.C. Government Logo" />
-            <img className="img-fluid d-md-none" src={'/images/bcid-symbol-rev.svg'} width="64" height="44" alt="B.C. Government Logo" />
+            <img
+              className="img-fluid d-none d-md-block"
+              src={'/images/bcid-logo-rev-en.svg'}
+              width="181"
+              height="44"
+              alt="B.C. Government Logo"
+            />
+            <img
+              className="img-fluid d-md-none"
+              src={'/images/bcid-symbol-rev.svg'}
+              width="64"
+              height="44"
+              alt="B.C. Government Logo"
+            />
             <div className="navbar-brand">MoTI Maintenance Contractor Reporting</div>
           </NavbarBrand>
           <NavbarToggler onClick={toggleNavbar} />
@@ -59,7 +84,11 @@ const Header = ({ currentUser }) => {
                     <NavLinkWithMatch hideNavbar={hideNavbar} to={Constants.PATHS.ADMIN_USERS} text="Users" />
                   </Authorize>
                   <Authorize requires={Constants.PERMISSIONS.ROLE_R}>
-                    <NavLinkWithMatch hideNavbar={hideNavbar} to={Constants.PATHS.ADMIN_ROLES} text="Roles and Permissions" />
+                    <NavLinkWithMatch
+                      hideNavbar={hideNavbar}
+                      to={Constants.PATHS.ADMIN_ROLES}
+                      text="Roles and Permissions"
+                    />
                   </Authorize>
                 </React.Fragment>
               )}

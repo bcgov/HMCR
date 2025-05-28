@@ -117,8 +117,14 @@ const houseKeepingPracticeSchema = Yup.object().shape({
 
 const vulnerableAreaSchema = Yup.object().shape({
   highwayNumber: Yup.string().max(16).nullable(true),
-  latitude: coordinatePrecision(6).min(-90, 'Latitude must be greater than or equal to -90').max(90, 'Latitude must be less than or equal to 90').nullable(true), // aligns with LAT decimal(9,6)
-  longitude: coordinatePrecision(6).min(-180, 'Longitude must be greater than or equal to -180').max(180, 'Longitude must be less than or equal to 180').nullable(true), // aligns with LONG decimal(9,6)
+  latitude: coordinatePrecision(6)
+    .min(-90, 'Latitude must be greater than or equal to -90')
+    .max(90, 'Latitude must be less than or equal to 90')
+    .nullable(true), // aligns with LAT decimal(9,6)
+  longitude: coordinatePrecision(6)
+    .min(-180, 'Longitude must be greater than or equal to -180')
+    .max(180, 'Longitude must be less than or equal to 180')
+    .nullable(true), // aligns with LONG decimal(9,6)
   feature: Yup.string().max(255).nullable(true),
   type: Yup.string().max(255).nullable(true),
   protectionMeasures: Yup.string().max(255).nullable(true),
@@ -287,16 +293,31 @@ export const validationSchema = Yup.object({
   sect5: Yup.object()
     .shape({
       numberOfVehicles: Yup.number().integer().min(0).nullable(true).required('Number of Vehicles is required'),
-      vehiclesForSaltApplication: Yup.number().integer().min(0).nullable(true).required('Vehicles for Salt Application is required'),
-      vehiclesWithConveyors: Yup.number().integer().min(0).nullable(true).required('Vehicles with Conveyors is required'),
-      vehiclesWithPreWettingEquipment: Yup.number().integer().min(0).nullable(true).required('Vehicles with Pre-Wetting Equipment is required'),
+      vehiclesForSaltApplication: Yup.number()
+        .integer()
+        .min(0)
+        .nullable(true)
+        .required('Vehicles for Salt Application is required'),
+      vehiclesWithConveyors: Yup.number()
+        .integer()
+        .min(0)
+        .nullable(true)
+        .required('Vehicles with Conveyors is required'),
+      vehiclesWithPreWettingEquipment: Yup.number()
+        .integer()
+        .min(0)
+        .nullable(true)
+        .required('Vehicles with Pre-Wetting Equipment is required'),
       vehiclesForDLA: Yup.number().integer().min(0).nullable(true).required('Vehicles for DLA is required'),
       regularCalibration: Yup.boolean().nullable(true),
       regularCalibrationTotal: Yup.number()
         .nullable(true)
         .when('regularCalibration', {
           is: true,
-          then: Yup.number().integer().min(0, 'Frequency must be non-negative').required('Frequency number is required when equipment is regularly calibrated'),
+          then: Yup.number()
+            .integer()
+            .min(0, 'Frequency must be non-negative')
+            .required('Frequency number is required when equipment is regularly calibrated'),
           otherwise: Yup.number().integer().nullable(true),
         }),
       weatherMonitoringSources: Yup.object()

@@ -4,7 +4,16 @@ import { Input, Pagination, PaginationItem, PaginationLink } from 'reactstrap';
 
 import * as Constants from '../../Constants';
 
-const PaginationControl = ({ currentPage, pageCount, onPageChange, pageSize, pageSizeOptions, onPageSizeChange, totalCount, itemCount }) => {
+const PaginationControl = ({
+  currentPage,
+  pageCount,
+  onPageChange,
+  pageSize,
+  pageSizeOptions,
+  onPageSizeChange,
+  totalCount,
+  itemCount,
+}) => {
   const pageItems = [];
 
   for (let i = 1; i <= pageCount; i++) {
@@ -25,7 +34,15 @@ const PaginationControl = ({ currentPage, pageCount, onPageChange, pageSize, pag
       <span>{`${(currentPage - 1) * pageSize + 1} - ${(currentPage - 1) * pageSize + itemCount} of ${totalCount}`}</span>
       {!(pageCount <= 1 && pageSize === pageSizeOptions[0]) && (
         <Pagination size="sm" aria-label="Pagination">
-          <Input bsSize="sm" type="select" name="select" className="ms-2 me-2" style={{ width: '100px' }} onChange={handlePageSizeChange} value={pageSize}>
+          <Input
+            bsSize="sm"
+            type="select"
+            name="select"
+            className="ms-2 me-2"
+            style={{ width: '100px' }}
+            onChange={handlePageSizeChange}
+            value={pageSize}
+          >
             {pageSizeOptions.map((count) => (
               <option key={count} value={count}>{`Show ${count}`}</option>
             ))}

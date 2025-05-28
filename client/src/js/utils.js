@@ -33,7 +33,8 @@ export const updateQueryParamsFromHistory = (history, newParam, overwrite) => {
 
   let processedParams = { ..._.pickBy(newParam, _.identity) };
   Object.keys(processedParams).forEach((key) => {
-    if (moment.isMoment(processedParams[key])) processedParams[key] = processedParams[key].format(Constants.DATE_DISPLAY_FORMAT);
+    if (moment.isMoment(processedParams[key]))
+      processedParams[key] = processedParams[key].format(Constants.DATE_DISPLAY_FORMAT);
   });
 
   if (!overwrite) processedParams = { ...params, ...processedParams };

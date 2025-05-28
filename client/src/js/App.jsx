@@ -113,7 +113,11 @@ const ContractorRoutes = (currentUser) => {
       <Route path={Constants.PATHS.HOME} exact>
         <Redirect to={getLastVistedPath(currentUser)} />
       </Route>
-      <AuthorizedRoute path={Constants.PATHS.REPORT_EXPORT} requires={Constants.PERMISSIONS.EXPORT} userType={Constants.USER_TYPE.BUSINESS}>
+      <AuthorizedRoute
+        path={Constants.PATHS.REPORT_EXPORT}
+        requires={Constants.PERMISSIONS.EXPORT}
+        userType={Constants.USER_TYPE.BUSINESS}
+      >
         <Route path={Constants.PATHS.REPORT_EXPORT} exact component={ReportExport} />
       </AuthorizedRoute>
       <Route path={Constants.PATHS.WORK_REPORTING} exact component={WorkReporting} />
@@ -130,22 +134,46 @@ const AdminRoutes = (currentUser) => {
       <Route path={Constants.PATHS.HOME} exact>
         <Redirect to={getLastVistedPath(currentUser)} />
       </Route>
-      <AuthorizedRoute path={Constants.PATHS.ADMIN_ACTIVITIES} requires={Constants.PERMISSIONS.CODE_R} userType={Constants.USER_TYPE.INTERNAL}>
+      <AuthorizedRoute
+        path={Constants.PATHS.ADMIN_ACTIVITIES}
+        requires={Constants.PERMISSIONS.CODE_R}
+        userType={Constants.USER_TYPE.INTERNAL}
+      >
         <Route path={Constants.PATHS.ADMIN_ACTIVITIES} exact component={ActivityAdmin} />
       </AuthorizedRoute>
-      <AuthorizedRoute path={Constants.PATHS.ADMIN_USERS} requires={Constants.PERMISSIONS.USER_R} userType={Constants.USER_TYPE.INTERNAL}>
+      <AuthorizedRoute
+        path={Constants.PATHS.ADMIN_USERS}
+        requires={Constants.PERMISSIONS.USER_R}
+        userType={Constants.USER_TYPE.INTERNAL}
+      >
         <Route path={Constants.PATHS.ADMIN_USERS} exact component={UserAdmin} />
       </AuthorizedRoute>
-      <AuthorizedRoute path={Constants.PATHS.ADMIN_ROLES} requires={Constants.PERMISSIONS.ROLE_R} userType={Constants.USER_TYPE.INTERNAL}>
+      <AuthorizedRoute
+        path={Constants.PATHS.ADMIN_ROLES}
+        requires={Constants.PERMISSIONS.ROLE_R}
+        userType={Constants.USER_TYPE.INTERNAL}
+      >
         <Route path={Constants.PATHS.ADMIN_ROLES} exact component={RoleAdmin} />
       </AuthorizedRoute>
-      <AuthorizedRoute path={Constants.PATHS.REPORT_EXPORT} requires={Constants.PERMISSIONS.EXPORT} userType={Constants.USER_TYPE.INTERNAL}>
+      <AuthorizedRoute
+        path={Constants.PATHS.REPORT_EXPORT}
+        requires={Constants.PERMISSIONS.EXPORT}
+        userType={Constants.USER_TYPE.INTERNAL}
+      >
         <Route path={Constants.PATHS.REPORT_EXPORT} exact component={ReportExport} />
       </AuthorizedRoute>
-      <AuthorizedRoute path={Constants.PATHS.WORK_REPORTING} requires={Constants.PERMISSIONS.FILE_R} userType={Constants.USER_TYPE.INTERNAL}>
+      <AuthorizedRoute
+        path={Constants.PATHS.WORK_REPORTING}
+        requires={Constants.PERMISSIONS.FILE_R}
+        userType={Constants.USER_TYPE.INTERNAL}
+      >
         <Route path={Constants.PATHS.WORK_REPORTING} exact component={WorkReporting} />
       </AuthorizedRoute>
-      <AuthorizedRoute path={Constants.PATHS.SALT_REPORTING} requires={Constants.PERMISSIONS.FILE_R} userType={Constants.USER_TYPE.INTERNAL}>
+      <AuthorizedRoute
+        path={Constants.PATHS.SALT_REPORTING}
+        requires={Constants.PERMISSIONS.FILE_R}
+        userType={Constants.USER_TYPE.INTERNAL}
+      >
         <Route path={Constants.PATHS.SALT_REPORTING} exact component={SaltReporting} />
       </AuthorizedRoute>
       {CommonRoutes()}

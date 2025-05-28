@@ -122,7 +122,8 @@ const WorkReportingSubmissions = ({ serviceArea, submissionStatuses }, ref) => {
     });
   };
 
-  const handleSearchFormSubmit = () => searchData.updateSearchOptions({ ...searchData.searchOptions, searchText, pageNumber: 1 });
+  const handleSearchFormSubmit = () =>
+    searchData.updateSearchOptions({ ...searchData.searchOptions, searchText, pageNumber: 1 });
 
   const handleSearchFormReset = () => {
     setDateFrom(defaultSearchOptions.dateFrom);
@@ -186,7 +187,13 @@ const WorkReportingSubmissions = ({ serviceArea, submissionStatuses }, ref) => {
               </Button>
             </div>
             <div>
-              <FontAwesomeButton size="sm" icon="sync" spin={searchData.loading} disabled={searchData.loading} onClick={() => searchData.refresh()} />
+              <FontAwesomeButton
+                size="sm"
+                icon="sync"
+                spin={searchData.loading}
+                disabled={searchData.loading}
+                onClick={() => searchData.refresh()}
+              />
             </div>
           </div>
         </Col>
@@ -199,26 +206,43 @@ const WorkReportingSubmissions = ({ serviceArea, submissionStatuses }, ref) => {
               <DataTableWithPaginationControl
                 dataList={searchData.data.map((item) => {
                   const itemStatus = submissionStatuses[item.submissionStatusCode];
-                  const progressBarLength = (itemStatus.stage < 0 ? maxValidationStages : itemStatus.stage / maxValidationStages) * 100;
+                  const progressBarLength =
+                    (itemStatus.stage < 0 ? maxValidationStages : itemStatus.stage / maxValidationStages) * 100;
 
                   return {
                     ...item,
                     name: `${item.firstName} ${item.lastName}`,
-                    date: moment(item.appCreateTimestamp).utc(item.appCreateTimestamp, Constants.MESSAGE_DATE_FORMAT).local().format(Constants.DATE_DISPLAY_FORMAT),
+                    date: moment(item.appCreateTimestamp)
+                      .utc(item.appCreateTimestamp, Constants.MESSAGE_DATE_FORMAT)
+                      .local()
+                      .format(Constants.DATE_DISPLAY_FORMAT),
                     id: (
-                      <Button color="link" size="sm" onClick={() => setShowResultScreen({ isOpen: true, submission: item.id })}>
+                      <Button
+                        color="link"
+                        size="sm"
+                        onClick={() => setShowResultScreen({ isOpen: true, submission: item.id })}
+                      >
                         {item.id}
                       </Button>
                     ),
                     description: (
                       <React.Fragment>
                         {item.description}
-                        <Progress className="thin-underline" color={stageColors(itemStatus.stage)} value={progressBarLength}></Progress>
+                        <Progress
+                          className="thin-underline"
+                          color={stageColors(itemStatus.stage)}
+                          value={progressBarLength}
+                        ></Progress>
                       </React.Fragment>
                     ),
                     longDescription: (
                       <React.Fragment>
-                        <FontAwesomeButton id={`tooltip_${item.id}`} className="fa-color-primary" color="link" icon="question-circle" />
+                        <FontAwesomeButton
+                          id={`tooltip_${item.id}`}
+                          className="fa-color-primary"
+                          color="link"
+                          icon="question-circle"
+                        />
                         <UncontrolledPopover trigger="focus" placement="auto" target={`tooltip_${item.id}`}>
                           <PopoverHeader>{itemStatus.description}</PopoverHeader>
                           <PopoverBody>{itemStatus.longDescription}</PopoverBody>

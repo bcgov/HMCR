@@ -17,15 +17,20 @@ import SingleDropdownField from '../ui/SingleDropdownField';
 
 const tipAnalyticalValidation = [
   <ul key="tipAnalyticalValidation_ul_key_1" style={{ paddingInlineStart: '20px' }}>
-    <li style={{ margin: '0 0 6px 0' }}>Analytical Validations provide warnings when the activity accomplishment does not meet the defined parameters.</li>
-    <li>
-      Minimum Value and Maximum Value check the accomplishment for an activity is within numerical limits, as defined. No tolerances are added to the Minimum Value or Maximum Value calculations.
+    <li style={{ margin: '0 0 6px 0' }}>
+      Analytical Validations provide warnings when the activity accomplishment does not meet the defined parameters.
     </li>
     <li>
-      Reporting Frequency checks if the activity was reported in the same location, with locational specificity based on the activity location code, within the defined period. A tolerance of 100
-      metres is added to the start and end points for Location Code C activities to validate against previously reported instances. No time-based tolerance is added to the Reporting Frequency
-      calculation. Users can manually incorporate into the defined Reporting Frequency a time-based tolerance (e.g. by setting the minimum number of days to ‘20’ for an activity that should be
-      completed monthly).
+      Minimum Value and Maximum Value check the accomplishment for an activity is within numerical limits, as defined.
+      No tolerances are added to the Minimum Value or Maximum Value calculations.
+    </li>
+    <li>
+      Reporting Frequency checks if the activity was reported in the same location, with locational specificity based on
+      the activity location code, within the defined period. A tolerance of 100 metres is added to the start and end
+      points for Location Code C activities to validate against previously reported instances. No time-based tolerance
+      is added to the Reporting Frequency calculation. Users can manually incorporate into the defined Reporting
+      Frequency a time-based tolerance (e.g. by setting the minimum number of days to ‘20’ for an activity that should
+      be completed monthly).
     </li>
   </ul>,
 ];
@@ -33,24 +38,32 @@ const tipAnalyticalValidation = [
 const tipHighwayAttributeValidation = [
   <ul key="tipHighwayAttributeValidation_ul_key_1" style={{ paddingInlineStart: '20px' }}>
     <li style={{ margin: '0 0 6px 0' }}>
-      Highway Attribute Validations provide warnings for Location Code C activities when the features of the reported location and/or accomplishment do not meet the defined parameters.
+      Highway Attribute Validations provide warnings for Location Code C activities when the features of the reported
+      location and/or accomplishment do not meet the defined parameters.
     </li>
     <li style={{ margin: '0 0 6px 0' }}>
-      Road Length checks the accomplishment against the road length (either Road KM or Lane KM), or against Guardrail Length, as defined in each individual rule. Several rules account for the road
-      length to be multiplied by one or more factors to accommodate non kilometre-based units of measure. Multiplying factors include conversion factors (e.g. 1km=1,000m), application rates (e.g. 2.0
-      litres/m2) or lane width factors to calculate surface area (e.g. lane width = 3.5m). A 10% tolerance is added to the Total Road KM (to a 200m maximum) and Total Lane KM (to a 500m maximum) and
-      Barrier Length (to a 200m maximum) for the validation calculations. Point items are calculated with an estimated Road KM length of 40m (30m as permitted by the Reporting Manual and 10m
-      tolerance), with Lane KM calculated based on the number of lanes at the point.
+      Road Length checks the accomplishment against the road length (either Road KM or Lane KM), or against Guardrail
+      Length, as defined in each individual rule. Several rules account for the road length to be multiplied by one or
+      more factors to accommodate non kilometre-based units of measure. Multiplying factors include conversion factors
+      (e.g. 1km=1,000m), application rates (e.g. 2.0 litres/m2) or lane width factors to calculate surface area (e.g.
+      lane width = 3.5m). A 10% tolerance is added to the Total Road KM (to a 200m maximum) and Total Lane KM (to a 500m
+      maximum) and Barrier Length (to a 200m maximum) for the validation calculations. Point items are calculated with
+      an estimated Road KM length of 40m (30m as permitted by the Reporting Manual and 10m tolerance), with Lane KM
+      calculated based on the number of lanes at the point.
     </li>
     <li style={{ margin: '0 0 6px 0' }}>
-      Surface Type checks that the location of the record has the appropriate surface type based on the selected rule. For point items, the surface type must match the point exactly and no tolerance
-      is incorporated. For line items, a tolerance of 80% is incorporated (i.e. if the rule is “GPS on Paved Surface” and 80% or more of the surface types within the start and end GPS points are
-      paved, then the record is accepted). Paved surfaces include CHRIS surface types 1-4; non-paved surfaces include CHRIS surface types 5-6; unconstructed roads have a CHRIS surface type of E or F.
+      Surface Type checks that the location of the record has the appropriate surface type based on the selected rule.
+      For point items, the surface type must match the point exactly and no tolerance is incorporated. For line items, a
+      tolerance of 80% is incorporated (i.e. if the rule is “GPS on Paved Surface” and 80% or more of the surface types
+      within the start and end GPS points are paved, then the record is accepted). Paved surfaces include CHRIS surface
+      types 1-4; non-paved surfaces include CHRIS surface types 5-6; unconstructed roads have a CHRIS surface type of E
+      or F.
     </li>
     <li>
-      Road Class checks that the location of the record has the appropriate summer or winter road classifications based on the selected rule. For point items, the classification must match exactly and
-      no tolerance is incorporated. For line items, a tolerance of 80% is incorporated (i.e. if the rule is “Not Class 8 or F” and 80% or more of the maintenance class within the start and end GPS
-      points are not 8 or F, then the record is accepted).
+      Road Class checks that the location of the record has the appropriate summer or winter road classifications based
+      on the selected rule. For point items, the classification must match exactly and no tolerance is incorporated. For
+      line items, a tolerance of 80% is incorporated (i.e. if the rule is “Not Class 8 or F” and 80% or more of the
+      maintenance class within the start and end GPS points are not 8 or F, then the record is accepted).
     </li>
   </ul>,
 ];
@@ -249,7 +262,8 @@ const EditActivityFormFields = ({
 
         setValidLocationCodeValues(() => {
           if (formType === Constants.FORM_TYPE.EDIT) {
-            if (response.data.locationCodeId === locationCodes.find((code) => code.name === 'B').id) return locationCodes.filter((location) => location.name !== 'C');
+            if (response.data.locationCodeId === locationCodes.find((code) => code.name === 'B').id)
+              return locationCodes.filter((location) => location.name !== 'C');
           }
           return locationCodes;
         });
@@ -265,9 +279,13 @@ const EditActivityFormFields = ({
           const pointLineType = 'Point/Line';
 
           if (formType === Constants.FORM_TYPE.EDIT) {
-            if (response.data.featureType === pointLineType) return featureTypes.filter((feature) => feature.id === pointLineType);
+            if (response.data.featureType === pointLineType)
+              return featureTypes.filter((feature) => feature.id === pointLineType);
 
-            if (response.data.featureType) return featureTypes.filter((feature) => feature.id === pointLineType || feature.id === response.data.featureType);
+            if (response.data.featureType)
+              return featureTypes.filter(
+                (feature) => feature.id === pointLineType || feature.id === response.data.featureType,
+              );
           }
           return featureTypes;
         });
@@ -286,7 +304,12 @@ const EditActivityFormFields = ({
       <Row>
         <Col>
           <FormRow name="activityNumber" label="Activity Code*">
-            <FormInput type="text" name="activityNumber" placeholder="Activity Code" disabled={formType === Constants.FORM_TYPE.EDIT} />
+            <FormInput
+              type="text"
+              name="activityNumber"
+              placeholder="Activity Code"
+              disabled={formType === Constants.FORM_TYPE.EDIT}
+            />
           </FormRow>
         </Col>
         <Col>
@@ -298,26 +321,50 @@ const EditActivityFormFields = ({
       <Row>
         <Col>
           <FormRow name="unitOfMeasure" label="Unit*">
-            <SingleDropdownField defaultTitle="Select Unit" items={unitOfMeasures} name="unitOfMeasure" disabled={formType === Constants.FORM_TYPE.EDIT} />
+            <SingleDropdownField
+              defaultTitle="Select Unit"
+              items={unitOfMeasures}
+              name="unitOfMeasure"
+              disabled={formType === Constants.FORM_TYPE.EDIT}
+            />
           </FormRow>
         </Col>
         <Col>
           <FormRow name="maintenanceType" label="Maintenance Type*">
-            <SingleDropdownField defaultTitle="Select Maintenance Type" items={maintenanceTypes} name="maintenanceType" disabled={formType === Constants.FORM_TYPE.EDIT} />
+            <SingleDropdownField
+              defaultTitle="Select Maintenance Type"
+              items={maintenanceTypes}
+              name="maintenanceType"
+              disabled={formType === Constants.FORM_TYPE.EDIT}
+            />
           </FormRow>
         </Col>
       </Row>
       <Row>
         <Col className="col colmargin1">
           <FormRow name="serviceAreaNumbers" label="Service Areas*">
-            <MultiSelect items={serviceAreas} name="serviceAreaNumbers" showSelectAll={true} selectClass="form-control servicearea-large" />
+            <MultiSelect
+              items={serviceAreas}
+              name="serviceAreaNumbers"
+              showSelectAll={true}
+              selectClass="form-control servicearea-large"
+            />
           </FormRow>
           <FormRow name="locationCodeId" label="Location Code*">
-            <SingleDropdownField defaultTitle="Select Location Code" items={validLocationCodeValues} name="locationCodeId" disabled={disableLocationCodeEdit} />
+            <SingleDropdownField
+              defaultTitle="Select Location Code"
+              items={validLocationCodeValues}
+              name="locationCodeId"
+              disabled={disableLocationCodeEdit}
+            />
           </FormRow>
         </Col>
         <Col>
-          <FieldSet legendname="Analytical Validation" tips={tipAnalyticalValidation} targetId="AnalyticalValidationTooltipForFieldsetId">
+          <FieldSet
+            legendname="Analytical Validation"
+            tips={tipAnalyticalValidation}
+            targetId="AnalyticalValidationTooltipForFieldsetId"
+          >
             <FormRow name="minValue" label="Minimum Value">
               <FormInput type="text" name="minValue" placeholder="Minimum Value" />
             </FormRow>
@@ -335,17 +382,29 @@ const EditActivityFormFields = ({
           <Row>
             <Col className="col colmargin1">
               <FormRow name="featureType" label="Feature Type*">
-                <SingleDropdownField defaultTitle="Select Feature Type" items={validFeatureTypeValues} name="featureType" />
+                <SingleDropdownField
+                  defaultTitle="Select Feature Type"
+                  items={validFeatureTypeValues}
+                  name="featureType"
+                />
               </FormRow>
               <FormRow name="spThresholdLevel" label="Location Tolerance Level*">
-                <SingleDropdownField defaultTitle="Select Location Tolerance Level" items={thresholdLevels} name="spThresholdLevel" />
+                <SingleDropdownField
+                  defaultTitle="Select Location Tolerance Level"
+                  items={thresholdLevels}
+                  name="spThresholdLevel"
+                />
               </FormRow>
               <FormRow name="isSiteNumRequired" label="Site Number Required">
                 <FormCheckboxInput name="isSiteNumRequired" />
               </FormRow>
             </Col>
             <Col>
-              <FieldSet legendname="Highway Attribute Validation" tips={tipHighwayAttributeValidation} targetId="HighwayAttributeValidationTooltipForFieldsetId">
+              <FieldSet
+                legendname="Highway Attribute Validation"
+                tips={tipHighwayAttributeValidation}
+                targetId="HighwayAttributeValidationTooltipForFieldsetId"
+              >
                 <FormRow name="roadLengthRule" label="Road Length Validation Rule">
                   <SingleDropdownField defaultTitle="Not Applicable" items={roadLengthRules} name="roadLengthRule" />
                 </FormRow>

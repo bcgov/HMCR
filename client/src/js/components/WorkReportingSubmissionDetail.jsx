@@ -44,7 +44,11 @@ const createRowString = (json, rowNum, recordNumber, serviceAreaNumber) => {
   if (json) {
     const errorDetail = parseErrorDetailJson(json);
 
-    result += errorDetail.map((field) => field.messages.map((msg) => `${rowNum}\t${serviceAreaNumber}\t${recordNumber}\t${field.field}\t"${msg}"`)).join('\n');
+    result += errorDetail
+      .map((field) =>
+        field.messages.map((msg) => `${rowNum}\t${serviceAreaNumber}\t${recordNumber}\t${field.field}\t"${msg}"`),
+      )
+      .join('\n');
     result += '\n';
   }
 
@@ -113,7 +117,9 @@ const WorkReportingSubmissionDetail = ({ toggle, submission }) => {
     return (
       <React.Fragment>
         <span>Submission #: {submissionResultData.id}</span>
-        <span className="ms-3 me-3">Submission Date: {moment(submissionResultData.appCreateTimestamp).format(Constants.DATE_DISPLAY_FORMAT)}</span>
+        <span className="ms-3 me-3">
+          Submission Date: {moment(submissionResultData.appCreateTimestamp).format(Constants.DATE_DISPLAY_FORMAT)}
+        </span>
         <span>Service Area: {submissionResultData.serviceAreaNumber}</span>
       </React.Fragment>
     );
@@ -151,7 +157,11 @@ const WorkReportingSubmissionDetail = ({ toggle, submission }) => {
               size="sm"
               color="primary"
               className="me-2"
-              onClick={() => api.getSubmissionFile(submissionResultData.id).then((response) => FileSaver.saveAs(new Blob([response.data]), submissionResultData.fileName))}
+              onClick={() =>
+                api
+                  .getSubmissionFile(submissionResultData.id)
+                  .then((response) => FileSaver.saveAs(new Blob([response.data]), submissionResultData.fileName))
+              }
               title="Download original submission"
             >
               <FontAwesomeIcon icon="download" /> Original

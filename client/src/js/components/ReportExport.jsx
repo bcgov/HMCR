@@ -52,7 +52,15 @@ const EXPORT_STAGE = {
   DONE: 'DONE',
 };
 
-const ReportExport = ({ reportTypes, maintenanceTypes, serviceAreas, currentUser, activityCodes, fetchActivityCodesDropdown, hideErrorDialog }) => {
+const ReportExport = ({
+  reportTypes,
+  maintenanceTypes,
+  serviceAreas,
+  currentUser,
+  activityCodes,
+  fetchActivityCodesDropdown,
+  hideErrorDialog,
+}) => {
   const [validServiceAreas, setValidServiceAreas] = useState([]);
   const [submitting, setSubmitting] = useState(false);
   const [showModal, setShowModal] = useState(false);
@@ -77,7 +85,8 @@ const ReportExport = ({ reportTypes, maintenanceTypes, serviceAreas, currentUser
 
   const disableFutureDates = (date) => date.isAfter(moment().endOf('day'));
 
-  const isRequiredFieldsSet = (formikProps) => formikProps.values.reportTypeId && formikProps.values.dateFrom && formikProps.values.dateTo;
+  const isRequiredFieldsSet = (formikProps) =>
+    formikProps.values.reportTypeId && formikProps.values.dateFrom && formikProps.values.dateTo;
 
   const buildExportParams = (values, dateFrom, dateTo) => {
     const queryParams = {};
@@ -248,7 +257,13 @@ const ReportExport = ({ reportTypes, maintenanceTypes, serviceAreas, currentUser
 
   return (
     <React.Fragment>
-      <Formik initialValues={defaultSearchFormValues} enableReinitialize={true} onSubmit={submitExport} onReset={() => {}} validationSchema={validationSchema}>
+      <Formik
+        initialValues={defaultSearchFormValues}
+        enableReinitialize={true}
+        onSubmit={submitExport}
+        onReset={() => {}}
+        validationSchema={validationSchema}
+      >
         {(formikProps) => (
           <React.Fragment>
             <MaterialCard>
@@ -259,7 +274,12 @@ const ReportExport = ({ reportTypes, maintenanceTypes, serviceAreas, currentUser
                     <SingleDropdownField defaultTitle="Select Report Type" items={reportTypes} name="reportTypeId" />
                   </div>
                   <div className="d-flex align-items-center">
-                    <DateRangeField name="reportDate" fromName="dateFrom" toName="dateTo" isOutsideRange={disableFutureDates} />
+                    <DateRangeField
+                      name="reportDate"
+                      fromName="dateFrom"
+                      toName="dateTo"
+                      isOutsideRange={disableFutureDates}
+                    />
                     <MouseoverTooltip id="tooltip_datepicker">
                       <ul style={{ paddingInlineStart: 10 }}>
                         <li>
@@ -282,7 +302,12 @@ const ReportExport = ({ reportTypes, maintenanceTypes, serviceAreas, currentUser
                     </div>
                     <div className="d-flex">
                       <div style={filterContainerStyle}>
-                        <MultiDropdownField {...formikProps} title="Service Area" items={validServiceAreas} name="serviceAreaNumbers" />
+                        <MultiDropdownField
+                          {...formikProps}
+                          title="Service Area"
+                          items={validServiceAreas}
+                          name="serviceAreaNumbers"
+                        />
                       </div>
                       {formikProps.values.reportTypeId !== 'HMR_SALT_REPORT' && (
                         <div style={filterContainerStyle}>
@@ -292,10 +317,21 @@ const ReportExport = ({ reportTypes, maintenanceTypes, serviceAreas, currentUser
                       {formikProps.values.reportTypeId === 'HMR_WORK_REPORT' && (
                         <React.Fragment>
                           <div style={filterContainerStyle}>
-                            <MultiDropdownField {...formikProps} title="Maintenance Type" items={maintenanceTypes} name="maintenanceTypeIds" />
+                            <MultiDropdownField
+                              {...formikProps}
+                              title="Maintenance Type"
+                              items={maintenanceTypes}
+                              name="maintenanceTypeIds"
+                            />
                           </div>
                           <div style={filterContainerStyle}>
-                            <MultiDropdownField {...formikProps} title="Activity Number" items={activityCodes} name="activityNumberIds" searchable={true} />
+                            <MultiDropdownField
+                              {...formikProps}
+                              title="Activity Number"
+                              items={activityCodes}
+                              name="activityNumberIds"
+                              searchable={true}
+                            />
                           </div>
                         </React.Fragment>
                       )}
@@ -306,11 +342,18 @@ const ReportExport = ({ reportTypes, maintenanceTypes, serviceAreas, currentUser
                       </div>
                       {formikProps.values.reportTypeId !== 'HMR_SALT_REPORT' && (
                         <div className="d-flex align-items-center">
-                          <DateRangeField name="submissionDate" fromName="submissionDateFrom" toName="submissionDateTo" isOutsideRange={disableFutureDates} />
+                          <DateRangeField
+                            name="submissionDate"
+                            fromName="submissionDateFrom"
+                            toName="submissionDateTo"
+                            isOutsideRange={disableFutureDates}
+                          />
                           <MouseoverTooltip id="tooltip_submission_datepicker">
                             <ul style={{ paddingInlineStart: 10 }}>
-                              This Submission Date filter applies in addition to the applicable mandatory date range above. Tip: To ensure all records submitted in this date range (and / or matching
-                              the entered Submission Number) will be included in the export, set the mandatory date range above to be sufficiently broad
+                              This Submission Date filter applies in addition to the applicable mandatory date range
+                              above. Tip: To ensure all records submitted in this date range (and / or matching the
+                              entered Submission Number) will be included in the export, set the mandatory date range
+                              above to be sufficiently broad
                             </ul>
                           </MouseoverTooltip>
                         </div>

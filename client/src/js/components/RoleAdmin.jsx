@@ -113,7 +113,12 @@ const RoleAdmin = ({ showValidationErrorDialog }) => {
     <React.Fragment>
       <MaterialCard>
         <UIHeader>Role and Permissions Management</UIHeader>
-        <Formik initialValues={searchInitialValues} enableReinitialize={true} onSubmit={(values) => handleSearchFormSubmit(values)} onReset={handleSearchFormReset}>
+        <Formik
+          initialValues={searchInitialValues}
+          enableReinitialize={true}
+          onSubmit={(values) => handleSearchFormSubmit(values)}
+          onReset={handleSearchFormReset}
+        >
           {(formikProps) => (
             <Form>
               <Row form>
@@ -121,7 +126,12 @@ const RoleAdmin = ({ showValidationErrorDialog }) => {
                   <Field type="text" name="searchText" placeholder="Role/Description" className="form-control" />
                 </Col>
                 <Col>
-                  <MultiDropdownField {...formikProps} title="Role Status" items={Constants.ACTIVE_STATUS_ARRAY} name="statusId" />
+                  <MultiDropdownField
+                    {...formikProps}
+                    title="Role Status"
+                    items={Constants.ACTIVE_STATUS_ARRAY}
+                    name="statusId"
+                  />
                 </Col>
                 <Col />
                 <Col />
@@ -141,7 +151,12 @@ const RoleAdmin = ({ showValidationErrorDialog }) => {
       <Authorize requires={Constants.PERMISSIONS.ROLE_W}>
         <Row>
           <Col>
-            <Button size="sm" color="primary" className="float-end mb-3" onClick={() => formModal.openForm(Constants.FORM_TYPE.ADD)}>
+            <Button
+              size="sm"
+              color="primary"
+              className="float-end mb-3"
+              onClick={() => formModal.openForm(Constants.FORM_TYPE.ADD)}
+            >
               Add Role
             </Button>
           </Col>

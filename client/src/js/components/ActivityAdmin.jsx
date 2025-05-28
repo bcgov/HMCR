@@ -9,7 +9,14 @@ import { Row, Col, Button, Alert, Spinner } from 'reactstrap';
 import { showValidationErrorDialog } from '../actions';
 import * as api from '../Api';
 import * as Constants from '../Constants';
-import { buildStatusIdArray, isValueNotEmpty, toNumberOrNull, toStringOrEmpty, toStringWithCommasOrEmpty, isValueEmpty } from '../utils';
+import {
+  buildStatusIdArray,
+  isValueNotEmpty,
+  toNumberOrNull,
+  toStringOrEmpty,
+  toStringWithCommasOrEmpty,
+  isValueEmpty,
+} from '../utils';
 import EditActivityFormFields from './forms/EditActivityFormFields';
 import Authorize from './fragments/Authorize';
 import useFormModal from './hooks/useFormModal';
@@ -48,7 +55,13 @@ const EXPORT_STAGE = {
   DONE: 'DONE',
 };
 
-const ActivityAdmin = ({ maintenanceTypes, locationCodes, unitOfMeasures, showValidationErrorDialog, hideErrorDialog }) => {
+const ActivityAdmin = ({
+  maintenanceTypes,
+  locationCodes,
+  unitOfMeasures,
+  showValidationErrorDialog,
+  hideErrorDialog,
+}) => {
   const location = useLocation();
   const searchData = useSearchData(defaultSearchOptions);
   const [searchInitialValues, setSearchInitialValues] = useState(defaultSearchFormValues);
@@ -111,7 +124,11 @@ const ActivityAdmin = ({ maintenanceTypes, locationCodes, unitOfMeasures, showVa
     if (permanentDelete) {
       api.deleteActivityCode(activityId).then(() => searchData.refresh());
     } else {
-      api.getActivityCode(activityId).then((response) => api.putActivityCode(activityId, { ...response.data, endDate }).then(() => searchData.refresh()));
+      api
+        .getActivityCode(activityId)
+        .then((response) =>
+          api.putActivityCode(activityId, { ...response.data, endDate }).then(() => searchData.refresh()),
+        );
     }
   };
 
@@ -256,7 +273,12 @@ const ActivityAdmin = ({ maintenanceTypes, locationCodes, unitOfMeasures, showVa
     <React.Fragment>
       <MaterialCard>
         <UIHeader>Activity Number Management</UIHeader>
-        <Formik initialValues={searchInitialValues} enableReinitialize={true} onSubmit={(values) => handleSearchFormSubmit(values)} onReset={handleSearchFormReset}>
+        <Formik
+          initialValues={searchInitialValues}
+          enableReinitialize={true}
+          onSubmit={(values) => handleSearchFormSubmit(values)}
+          onReset={handleSearchFormReset}
+        >
           {(formikProps) => (
             <Form>
               <Row form>
@@ -264,10 +286,20 @@ const ActivityAdmin = ({ maintenanceTypes, locationCodes, unitOfMeasures, showVa
                   <Field type="text" name="searchText" placeholder="Activity Number/Name" className="form-control" />
                 </Col>
                 <Col>
-                  <MultiDropdownField {...formikProps} title="Maintenance Type" items={maintenanceTypes} name="maintenanceTypeIds" />
+                  <MultiDropdownField
+                    {...formikProps}
+                    title="Maintenance Type"
+                    items={maintenanceTypes}
+                    name="maintenanceTypeIds"
+                  />
                 </Col>
                 <Col>
-                  <MultiDropdownField {...formikProps} title="Activity Status" items={Constants.ACTIVE_STATUS_ARRAY} name="statusId" />
+                  <MultiDropdownField
+                    {...formikProps}
+                    title="Activity Status"
+                    items={Constants.ACTIVE_STATUS_ARRAY}
+                    name="statusId"
+                  />
                 </Col>
                 <Col />
                 <Col>
@@ -287,7 +319,12 @@ const ActivityAdmin = ({ maintenanceTypes, locationCodes, unitOfMeasures, showVa
         <Row>
           <Col>
             <div className="float-end mb-3">
-              <Button size="sm" color="primary" className="me-2" onClick={() => formModal.openForm(Constants.FORM_TYPE.ADD)}>
+              <Button
+                size="sm"
+                color="primary"
+                className="me-2"
+                onClick={() => formModal.openForm(Constants.FORM_TYPE.ADD)}
+              >
                 Add Activity
               </Button>
               <Button size="sm" color="primary" onClick={(values) => submitExport(searchData)}>

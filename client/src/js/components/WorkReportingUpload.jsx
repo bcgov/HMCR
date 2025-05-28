@@ -40,7 +40,14 @@ const updateUploadStatusMessage = (state, status) => {
   }
 };
 
-const WorkReportingUpload = ({ currentUser, showValidationErrorDialog, serviceArea, handleFileSubmitted, submissionStreams, ...props }) => {
+const WorkReportingUpload = ({
+  currentUser,
+  showValidationErrorDialog,
+  serviceArea,
+  handleFileSubmitted,
+  submissionStreams,
+  ...props
+}) => {
   const [fileInputKey, setFileInputKey] = useState(Math.random());
   const [submitting, setSubmitting] = useState(false);
   const [showStatusModal, setShowStatusModal] = useState(false);
@@ -87,7 +94,9 @@ const WorkReportingUpload = ({ currentUser, showValidationErrorDialog, serviceAr
   };
 
   const handleCheckResubmissions = (apiPath, data, resetCallback) => {
-    setResubCheckStatus(updateUploadStatusMessage(Constants.UPLOAD_STATE.RESUB_CHECK, Constants.UPLOAD_STATE_STATUS.START));
+    setResubCheckStatus(
+      updateUploadStatusMessage(Constants.UPLOAD_STATE.RESUB_CHECK, Constants.UPLOAD_STATE_STATUS.START),
+    );
     api.instance
       .post(`${apiPath}/resubmissions`, data)
       .then((response) => {
@@ -109,7 +118,12 @@ const WorkReportingUpload = ({ currentUser, showValidationErrorDialog, serviceAr
                     size="sm"
                     className="me-2"
                     onClick={() => {
-                      setResubCheckStatus(updateUploadStatusMessage(Constants.UPLOAD_STATE.RESUB_CHECK, Constants.UPLOAD_STATE_STATUS.COMPLETE));
+                      setResubCheckStatus(
+                        updateUploadStatusMessage(
+                          Constants.UPLOAD_STATE.RESUB_CHECK,
+                          Constants.UPLOAD_STATE_STATUS.COMPLETE,
+                        ),
+                      );
                       handleUploadFile(apiPath, data, resetCallback);
                     }}
                   >
@@ -129,12 +143,16 @@ const WorkReportingUpload = ({ currentUser, showValidationErrorDialog, serviceAr
             </React.Fragment>,
           );
         } else {
-          setResubCheckStatus(updateUploadStatusMessage(Constants.UPLOAD_STATE.RESUB_CHECK, Constants.UPLOAD_STATE_STATUS.COMPLETE));
+          setResubCheckStatus(
+            updateUploadStatusMessage(Constants.UPLOAD_STATE.RESUB_CHECK, Constants.UPLOAD_STATE_STATUS.COMPLETE),
+          );
           handleUploadFile(apiPath, data, resetCallback);
         }
       })
       .catch((error) => {
-        setResubCheckStatus(updateUploadStatusMessage(Constants.UPLOAD_STATE.RESUB_CHECK, Constants.UPLOAD_STATE_STATUS.ERROR));
+        setResubCheckStatus(
+          updateUploadStatusMessage(Constants.UPLOAD_STATE.RESUB_CHECK, Constants.UPLOAD_STATE_STATUS.ERROR),
+        );
         setErrorMessages(error.response.data.errors);
         resetCallback();
         handleFileSubmitted();
@@ -146,7 +164,9 @@ const WorkReportingUpload = ({ currentUser, showValidationErrorDialog, serviceAr
     api.instance
       .post(apiPath, data)
       .then((response) => {
-        setSavingStatus(updateUploadStatusMessage(Constants.UPLOAD_STATE.SAVING, Constants.UPLOAD_STATE_STATUS.COMPLETE));
+        setSavingStatus(
+          updateUploadStatusMessage(Constants.UPLOAD_STATE.SAVING, Constants.UPLOAD_STATE_STATUS.COMPLETE),
+        );
         setCompleteMessage(response.data);
         resetCallback();
       })
@@ -201,7 +221,9 @@ const WorkReportingUpload = ({ currentUser, showValidationErrorDialog, serviceAr
                         File restrictions:{' '}
                         <ul>
                           <li>.csv files only</li>
-                          <li>Up to {reportTypes.find((o) => o.id === values.reportTypeId).fileSizeLimitMb}MB per file</li>
+                          <li>
+                            Up to {reportTypes.find((o) => o.id === values.reportTypeId).fileSizeLimitMb}MB per file
+                          </li>
                         </ul>
                       </Alert>
                       <Input
@@ -209,11 +231,21 @@ const WorkReportingUpload = ({ currentUser, showValidationErrorDialog, serviceAr
                         id="reportFileBrowser"
                         name="reportFile"
                         accept=".csv"
-                        onChange={(e) => validateFile(e, setFieldValue, setFieldError, 'reportFile', reportTypes.find((o) => o.id === values.reportTypeId).fileSizeLimitMb)}
+                        onChange={(e) =>
+                          validateFile(
+                            e,
+                            setFieldValue,
+                            setFieldError,
+                            'reportFile',
+                            reportTypes.find((o) => o.id === values.reportTypeId).fileSizeLimitMb,
+                          )
+                        }
                         key={fileInputKey}
                         invalid={errors.reportFile && errors.reportFile.length > 0}
                       />
-                      {errors.reportFile && <FormFeedback style={{ display: 'unset' }}>{errors.reportFile}</FormFeedback>}
+                      {errors.reportFile && (
+                        <FormFeedback style={{ display: 'unset' }}>{errors.reportFile}</FormFeedback>
+                      )}
                     </Col>
                   </FormGroup>
                   <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
