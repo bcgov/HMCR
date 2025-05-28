@@ -40,6 +40,7 @@
     "reactstrap": "^9.2.3",
     "redux": "^4.0.5",
     "redux-thunk": "^2.3.0",
+    "sass-embedded": "^1.89.0",
     "yup": "^0.28.3"
   },
   "devDependencies": {

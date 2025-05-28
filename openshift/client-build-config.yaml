@@ -62,7 +62,7 @@ objects:
       source:
         type: Dockerfile
         dockerfile: |
-          FROM image-registry.openshift-image-registry.svc:5000/d3d940-tools/node:24.1 AS builder
+          FROM image-registry.openshift-image-registry.svc:5000/d3d940-tools/node:24 AS builder
           LABEL maintainer="young-jin.chung@gov.bc.ca"
           RUN apk add --no-cache --virtual .gyp \
             python3 \
