@@ -77,25 +77,40 @@ namespace Hmcr.Chris
 
         public async Task<bool> IsPointOnRfiSegmentAsync(int tolerance, Point point, string rfiSegment)
         {
-            var body = "";
-            var content = "";
+            string body = string.Format(_queries.PointOnRfiSegQuery, tolerance, point.Longitude, point.Latitude, rfiSegment);
+            string content = "";
+            Exception lastException = null;
 
-            try
+            for (int i = 0; i < 3; i++)
             {
-                body = string.Format(_queries.PointOnRfiSegQuery, tolerance, point.Longitude, point.Latitude, rfiSegment);
+                try
+                {
+                    var response = await _api.PostWithRetry(_client, _path, body);
 
-                content = await (await _api.PostWithRetry(_client, _path, body)).Content.ReadAsStringAsync();
+                    if (response.Content.Headers.ContentType?.MediaType != "application/json")
+                    {
+                        content = await response.Content.ReadAsStringAsync();
+                        _logger.LogWarning($"Non-JSON response (attempt {i + 1}): {content}");
+                        throw new Exception("Invalid content type");
+                    }
 
-                var features = JsonSerializer.Deserialize<FeatureCollection<decimal[]>>(content);
+                    content = await response.Content.ReadAsStringAsync();
+                    var features = JsonSerializer.Deserialize<FeatureCollection<decimal[]>>(content);
 
-                return features.numberMatched > 0;
+                    return features?.numberMatched > 0;
+                }
+                catch (Exception ex)
+                {
+                    lastException = ex;
+                    _logger.LogWarning(ex, $"Retry {i + 1} failed for IsPointOnRfiSegmentAsync with body: {body}");
+                    await Task.Delay((int)Math.Pow(2, i) * 100); // 100ms, 200ms, 400ms
+                }
             }
-            catch (Exception ex)
-            {
-                _logger.LogError($"Exception - IsPointOnRfiSegmentAsync: {body} - {content}");
-                throw ex;
-            }
+
+            _logger.LogError($"All retries failed for IsPointOnRfiSegmentAsync: {body} - {content}");
+            throw new Exception("Failed to determine if point is on RFI segment after multiple attempts.", lastException);
         }
+
 
         public async Task<List<Line>> GetLineFromOffsetMeasureOnRfiSegmentAsync(string rfiSegment, decimal start, decimal end)
         {
