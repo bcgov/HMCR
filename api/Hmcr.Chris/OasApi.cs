@@ -115,7 +115,7 @@ namespace Hmcr.Chris
             _logger.LogDebug($"IsPointOnRfiSegmentAsync - body: {body}");
             _logger.LogInformation($"IsPointOnRfiSegmentAsync - rfiSegment: {rfiSegmentClean}, point: ({lon}, {lat}), tolerance: {tolerance}");
 
-            for (int i = 0; i < 3; i++)
+            for (int i = 0; i < 5; i++)
             {
                 try
                 {
@@ -137,7 +137,7 @@ namespace Hmcr.Chris
                 {
                     lastException = ex;
                     _logger.LogWarning(ex, $"Retry {i + 1} failed for IsPointOnRfiSegmentAsync with body: {body}");
-                    await Task.Delay((int)Math.Pow(2, i) * 100); // 100ms, 200ms, 400ms
+                    await Task.Delay((int)Math.Pow(2, i) * 500); // 500ms, 1000ms, 2000ms, 4000ms, 8000ms
                 }
             }
 
