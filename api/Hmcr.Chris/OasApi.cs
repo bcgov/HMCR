@@ -3,9 +3,13 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
+using System.IO;
 using System.Net.Http;
+using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
+using System.Xml.Linq;
 
 namespace Hmcr.Chris
 {
@@ -74,12 +78,42 @@ namespace Hmcr.Chris
             _path = config["CHRIS:OASPath"];
             _logger = logger;
         }
-
         public async Task<bool> IsPointOnRfiSegmentAsync(int tolerance, Point point, string rfiSegment)
         {
-            string body = string.Format(_queries.PointOnRfiSegQuery, tolerance, point.Longitude, point.Latitude, rfiSegment);
+            string Clean(string input) => input?.Replace("\0", "") ?? "";
+
+            string rfiSegmentClean = Clean(rfiSegment);
+            string lon = Clean(point.Longitude.ToString(CultureInfo.InvariantCulture));
+            string lat = Clean(point.Latitude.ToString(CultureInfo.InvariantCulture));
+
+            string body = string.Format(_queries.PointOnRfiSegQuery, tolerance, lon, lat, rfiSegmentClean);
             string content = "";
             Exception lastException = null;
+
+            if (body.Contains('\0', StringComparison.Ordinal))
+            {
+                _logger.LogError("XML body contains NULL character prior to transmission.");
+
+                var bytes = Encoding.UTF8.GetBytes(body);
+                var dumpPath = Path.Combine("/tmp", $"corrupted_body_{DateTime.UtcNow:yyyyMMdd_HHmmss}.bin");
+                await File.WriteAllBytesAsync(dumpPath, bytes);
+
+                _logger.LogError($"Corrupted XML body written to {dumpPath} for inspection.");
+                throw new Exception("Aborting request: XML contains illegal null character.");
+            }
+
+            try
+            {
+                _ = XDocument.Parse(body);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "XML body failed validation before transmission.");
+                throw;
+            }
+
+            _logger.LogDebug($"IsPointOnRfiSegmentAsync - body: {body}");
+            _logger.LogInformation($"IsPointOnRfiSegmentAsync - rfiSegment: {rfiSegmentClean}, point: ({lon}, {lat}), tolerance: {tolerance}");
 
             for (int i = 0; i < 3; i++)
             {
@@ -110,6 +144,7 @@ namespace Hmcr.Chris
             _logger.LogError($"All retries failed for IsPointOnRfiSegmentAsync: {body} - {content}");
             throw new Exception("Failed to determine if point is on RFI segment after multiple attempts.", lastException);
         }
+
 
 
         public async Task<List<Line>> GetLineFromOffsetMeasureOnRfiSegmentAsync(string rfiSegment, decimal start, decimal end)
