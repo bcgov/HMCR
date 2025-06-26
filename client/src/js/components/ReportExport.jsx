@@ -1,7 +1,6 @@
-import { startOfMonth, endOfMonth, subMonths } from 'date-fns';
+import { startOfMonth, endOfMonth, subMonths, format, startOfDay, endOfDay, isAfter } from 'date-fns';
 import FileSaver from 'file-saver';
 import { Formik, Form } from 'formik';
-import moment from 'moment';
 import { useState, useEffect } from 'react';
 import { connect } from 'react-redux';
 import { Alert, Button, Spinner } from 'reactstrap';
@@ -84,7 +83,7 @@ const ReportExport = ({
       .finally(() => setLoading(false));
   }, []);
 
-  const disableFutureDates = (date) => date.isAfter(moment().endOf('day'));
+  const disableFutureDates = (date) => isAfter(date, endOfDay(new Date()));
 
   const isRequiredFieldsSet = (formikProps) =>
     formikProps.values.reportTypeId && formikProps.values.dateFrom && formikProps.values.dateTo;
@@ -151,8 +150,8 @@ const ReportExport = ({
     setShowModal(true);
     setExportStage(EXPORT_STAGE.WAIT);
 
-    const dateFrom = values.dateFrom.startOf('day').format(Constants.DATE_DISPLAY_FORMAT);
-    const dateTo = values.dateTo.endOf('day').format(Constants.DATE_DISPLAY_FORMAT);
+    const dateFrom = format(startOfDay(values.dateFrom), 'yyyy-MM-dd');
+    const dateTo = format(endOfDay(values.dateTo), 'yyyy-MM-dd HH:mm:ss');
 
     if (values.reportTypeId === Constants.REPORT_TYPES.HMR_SALT_REPORT.name) {
       api

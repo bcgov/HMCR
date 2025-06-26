@@ -1,5 +1,4 @@
 import { isInteger } from 'lodash';
-import moment from 'moment';
 import { useEffect, useState } from 'react';
 import { connect } from 'react-redux';
 import { Row, Col } from 'reactstrap';
@@ -294,7 +293,7 @@ const EditActivityFormFields = ({
       api.getActivityCode(activityId).then((response) => {
         setInitialValues({
           ...response.data,
-          endDate: response.data.endDate ? moment(response.data.endDate) : null,
+          endDate: response.data.endDate ? new Date(response.data.endDate) : null,
           minValue: toStringWithCommasOrEmpty(response.data.minValue),
           maxValue: toStringWithCommasOrEmpty(response.data.maxValue),
           reportingFrequency: toStringOrEmpty(response.data.reportingFrequency),

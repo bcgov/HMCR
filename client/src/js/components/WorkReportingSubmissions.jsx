@@ -1,6 +1,6 @@
 import { isBefore } from 'date-fns';
 import _ from 'lodash';
-import moment from 'moment';
+import { parse, format, subMonths } from 'date-fns';
 import queryString from 'query-string';
 import { useState, useEffect, forwardRef, useImperativeHandle } from 'react';
 import { connect } from 'react-redux';
@@ -57,7 +57,7 @@ const tableColumns = [
 ];
 
 const defaultSearchOptions = {
-  dateFrom: new Date(moment().subtract(1, 'months')),
+  dateFrom: subMonths(new Date(), 1),
   dateTo: new Date(),
   searchText: '',
   direction: Constants.SORT_DIRECTION.DESCENDING,
@@ -101,8 +101,8 @@ const WorkReportingSubmissions = ({ serviceArea, submissionStatuses }, ref) => {
     const options = {
       ...defaultSearchOptions,
       ..._.omit(params, ['dateFrom', 'dateTo']),
-      dateFrom: params.dateFrom ? moment(params.dateFrom) : defaultSearchOptions.dateFrom,
-      dateTo: params.dateFrom ? moment(params.dateTo) : defaultSearchOptions.dateTo,
+      dateFrom: params.dateFrom ? new Date(params.dateFrom) : defaultSearchOptions.dateFrom,
+      dateTo: params.dateTo ? new Date(params.dateTo) : defaultSearchOptions.dateTo,
       serviceAreaNumber: serviceArea,
     };
 
@@ -246,10 +246,10 @@ const WorkReportingSubmissions = ({ serviceArea, submissionStatuses }, ref) => {
                   return {
                     ...item,
                     name: `${item.firstName} ${item.lastName}`,
-                    date: moment(item.appCreateTimestamp)
-                      .utc(item.appCreateTimestamp, Constants.MESSAGE_DATE_FORMAT)
-                      .local()
-                      .format(Constants.DATE_DISPLAY_FORMAT),
+                    date: format(
+                      parse(item.appCreateTimestamp, Constants.MESSAGE_DATE_FORMAT, new Date()),
+                      Constants.DATE_DISPLAY_FORMAT,
+                    ),
                     id: (
                       <Button
                         color="link"

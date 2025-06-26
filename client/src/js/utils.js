@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import moment from 'moment';
+import { format } from 'date-fns';
 import queryString from 'query-string';
 
 import * as Constants from './Constants';
@@ -36,8 +36,9 @@ export const updateQueryParamsFromHistory = (history, newParam, overwrite) => {
 
   let processedParams = { ..._.pickBy(newParam, _.identity) };
   Object.keys(processedParams).forEach((key) => {
-    if (moment.isMoment(processedParams[key]))
-      processedParams[key] = processedParams[key].format(Constants.DATE_DISPLAY_FORMAT);
+    if (processedParams[key] instanceof Date && !isNaN(processedParams[key])) {
+      processedParams[key] = format(processedParams[key], Constants.DATE_DISPLAY_FORMAT);
+    }
   });
 
   if (!overwrite) processedParams = { ...params, ...processedParams };

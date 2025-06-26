@@ -27,7 +27,6 @@
     "globals": "^16.2.0",
     "keycloak-js": "^26.2.0",
     "lodash": "^4.17.21",
-    "moment": "^2.24.0",
     "prop-types": "^15.7.2",
     "query-string": "^6.11.1",
     "react": "^18.3.1",
@@ -61,6 +60,7 @@
     "prettier": "^3.5.3",
     "putout": "^40.2.3",
     "redux-immutable-state-invariant": "^2.1.0",
+    "rollup-plugin-visualizer": "^6.0.3",
     "vite": "^6.3.5"
   },
   "overrides": {

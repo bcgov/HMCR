@@ -1,6 +1,6 @@
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { format } from 'date-fns';
 import FileSaver from 'file-saver';
-import moment from 'moment';
 import { useEffect, useState } from 'react';
 import Clipboard from 'react-clipboard.js';
 import { toast } from 'react-toastify';
@@ -83,7 +83,7 @@ const createClipboardText = (data) => {
   let clipboardData = '';
 
   clipboardData += 'submission #\tsubmission date\tservice area\n';
-  clipboardData += `${data.id}\t${moment(data.appCreateTimestamp).format(Constants.DATE_DISPLAY_FORMAT)}\t${data.serviceAreaNumber}\n`;
+  clipboardData += `${data.id}\t${format(new Date(data.appCreateTimestamp), Constants.DATE_DISPLAY_FORMAT)}\t${data.serviceAreaNumber}\n`;
 
   clipboardData += 'file name\treport type\tstatus\n';
   clipboardData += `${data.fileName}\t${data.streamName}\t${data.description}\n`;
@@ -142,7 +142,7 @@ const WorkReportingSubmissionDetail = ({ toggle, submission }) => {
       <>
         <span>Submission #: {submissionResultData.id}</span>
         <span className="ms-3 me-3">
-          Submission Date: {moment(submissionResultData.appCreateTimestamp).format(Constants.DATE_DISPLAY_FORMAT)}
+          Submission Date: {format(new Date(submissionResultData.appCreateTimestamp), Constants.DATE_DISPLAY_FORMAT)}
         </span>
         <span>Service Area: {submissionResultData.serviceAreaNumber}</span>
       </>

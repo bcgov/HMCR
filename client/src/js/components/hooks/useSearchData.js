@@ -1,5 +1,5 @@
+import { isValid, format, startOfDay, endOfDay } from 'date-fns';
 import _ from 'lodash';
-import moment from 'moment';
 import { useState, useEffect } from 'react';
 import { useHistory } from 'react-router-dom';
 
@@ -80,10 +80,8 @@ const useSearchData = (defaultSearchOptions) => {
       ['dateFrom', 'dateTo'].forEach((key) => {
         const date = queryOptions[key];
 
-        if (moment.isMoment(date)) {
-          queryOptions[key] = date.format('YYYY-MM-DD');
-        } else if (date instanceof Date && !isNaN(date.getTime())) {
-          queryOptions[key] = moment(date).format('YYYY-MM-DD');
+        if (date instanceof Date && isValid(date)) {
+          queryOptions[key] = format(date, 'yyyy-MM-dd');
         }
       });
 
@@ -101,16 +99,11 @@ const useSearchData = (defaultSearchOptions) => {
       ['dateFrom', 'dateTo'].forEach((key) => {
         const date = options[key];
 
-        if (moment.isMoment(date)) {
+        if (date instanceof Date && isValid(date)) {
           options[key] =
             key === 'dateFrom'
-              ? date.startOf('day').format(Constants.DATE_UTC_FORMAT)
-              : date.endOf('day').format(Constants.DATE_UTC_FORMAT);
-        } else if (date instanceof Date && !isNaN(date.getTime())) {
-          options[key] =
-            key === 'dateFrom'
-              ? moment(date).startOf('day').format(Constants.DATE_UTC_FORMAT)
-              : moment(date).endOf('day').format(Constants.DATE_UTC_FORMAT);
+              ? format(startOfDay(date), Constants.DATE_UTC_FORMAT)
+              : format(endOfDay(date), Constants.DATE_UTC_FORMAT);
         }
       });
 

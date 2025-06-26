@@ -1,5 +1,5 @@
+import { format, subYears } from 'date-fns';
 import { Formik, Form } from 'formik';
-import moment from 'moment';
 import { useState, useEffect } from 'react';
 import { connect } from 'react-redux';
 import { Col, FormGroup, Label, Alert, Button, Row } from 'reactstrap';
@@ -23,8 +23,8 @@ const SaltReporting = ({ currentUser }) => {
   const [saltReportSuccess, setSaltReportSuccess] = useState(false);
 
   var defaultSearchOptions = {
-    fromDate: moment().subtract(1, 'years').format('YYYY-MM-DD'),
-    toDate: moment().format('YYYY-MM-DD'),
+    fromDate: format(subYears(new Date(), 1), 'yyyy-MM-dd'),
+    toDate: format(new Date(), 'yyyy-MM-dd'),
     serviceAreas: currentUser.serviceAreas.map((sa) => sa.id).join(','),
     pageNumber: 1,
     isActive: true,
@@ -79,7 +79,7 @@ const SaltReporting = ({ currentUser }) => {
     {
       heading: 'Date Created',
       key: 'appCreateTimestamp',
-      format: (date) => moment(date).format('LLL'),
+      format: (date) => format(date, 'PPP p'),
     },
   ];
 

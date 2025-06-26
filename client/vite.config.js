@@ -1,15 +1,30 @@
 import path from 'path';
 
 import react from '@vitejs/plugin-react';
+import { visualizer } from 'rollup-plugin-visualizer';
 import { defineConfig, loadEnv } from 'vite';
 
-export default defineConfig(({ mode }) => {
+
+export default defineConfig(({ mode, command }) => {
   const env = loadEnv(mode, process.cwd(), '');
 
   const API_HOST = env.VITE_API_HOST?.replace(/\/$/, '');
 
+  const plugins = [react()];
+
+  if (command === 'build') {
+    plugins.push(
+      visualizer({
+        filename: './dist/stats.html',
+        open: true, // opens browser after build
+        gzipSize: true,
+        brotliSize: true,
+      })
+    );
+  }
+
   return {
-    plugins: [react()],
+    plugins,
     resolve: {
       alias: {
         '@': path.resolve(__dirname, 'src'),
