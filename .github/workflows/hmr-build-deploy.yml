@@ -52,22 +52,17 @@ jobs:
           node-version: "24"
       - name: Set Version
         run: echo "VERSION=v1.0.${{ github.run_number }}" >> $GITHUB_ENV
-      - name: Deploy the image
+      - name: Deploy using Helm
         run: |
           oc version
           oc login --token=${{ secrets.OPENSHIFT_TOKEN}} --server=${{ secrets.OPENSHIFT_SERVER_URL }}
-          npm ci
-          - name: Deploy using Helm
-            run: |
-              oc version
-              oc login --token=${{ secrets.OPENSHIFT_TOKEN}} --server=${{ secrets.OPENSHIFT_SERVER_URL }}
-              helm upgrade --install hmcr ./helm \
-                -n d3d940-dev \
-                -f ./helm/values.yaml \
-                -f ./helm/values-dev.yaml \
-                --set images.api.tag=${VERSION} \
-                --set images.client.tag=${VERSION} \
-                --set images.hangfire.tag=${VERSION}
+          helm upgrade --install hmcr ./helm \
+            -n d3d940-dev \
+            -f ./helm/values.yaml \
+            -f ./helm/values-dev.yaml \
+            --set images.api.tag=${VERSION} \
+            --set images.client.tag=${VERSION} \
+            --set images.hangfire.tag=${VERSION}
 
 
   deploy-to-test:
@@ -85,22 +80,17 @@ jobs:
           node-version: "24"
       - name: Set Version
         run: echo "VERSION=v1.0.${{ github.run_number }}" >> $GITHUB_ENV
-      - name: Deploy the image
+      - name: Deploy using Helm
         run: |
           oc version
           oc login --token=${{ secrets.OPENSHIFT_TOKEN}} --server=${{ secrets.OPENSHIFT_SERVER_URL }}
-          npm ci
-          - name: Deploy using Helm
-            run: |
-              oc version
-              oc login --token=${{ secrets.OPENSHIFT_TOKEN}} --server=${{ secrets.OPENSHIFT_SERVER_URL }}
-              helm upgrade --install hmcr ./helm \
-                -n d3d940-test \
-                -f ./helm/values.yaml \
-                -f ./helm/values-test.yaml \
-                --set images.api.tag=${VERSION} \
-                --set images.client.tag=${VERSION} \
-                --set images.hangfire.tag=${VERSION}
+          helm upgrade --install hmcr ./helm \
+            -n d3d940-test \
+            -f ./helm/values.yaml \
+            -f ./helm/values-test.yaml \
+            --set images.api.tag=${VERSION} \
+            --set images.client.tag=${VERSION} \
+            --set images.hangfire.tag=${VERSION}
 
 
   deploy-to-uat:
@@ -118,22 +108,17 @@ jobs:
           node-version: "24"
       - name: Set Version
         run: echo "VERSION=v1.0.${{ github.run_number }}" >> $GITHUB_ENV
-      - name: Deploy the image
+      - name: Deploy using Helm
         run: |
           oc version
           oc login --token=${{ secrets.OPENSHIFT_TOKEN}} --server=${{ secrets.OPENSHIFT_SERVER_URL }}
-          npm ci
-          - name: Deploy using Helm
-            run: |
-              oc version
-              oc login --token=${{ secrets.OPENSHIFT_TOKEN}} --server=${{ secrets.OPENSHIFT_SERVER_URL }}
-              helm upgrade --install hmcr ./helm \
-                -n d3d940-uat \
-                -f ./helm/values.yaml \
-                -f ./helm/values-uat.yaml \
-                --set images.api.tag=${VERSION} \
-                --set images.client.tag=${VERSION} \
-                --set images.hangfire.tag=${VERSION}
+          helm upgrade --install hmcr ./helm \
+            -n d3d940-uat \
+            -f ./helm/values.yaml \
+            -f ./helm/values-uat.yaml \
+            --set images.api.tag=${VERSION} \
+            --set images.client.tag=${VERSION} \
+            --set images.hangfire.tag=${VERSION}
 
 
   deploy-to-prod:
@@ -151,20 +136,15 @@ jobs:
           node-version: "24"
       - name: Set Version
         run: echo "VERSION=v1.0.${{ github.run_number }}" >> $GITHUB_ENV
-      - name: Deploy the image
+      - name: Deploy using Helm
         run: |
           oc version
           oc login --token=${{ secrets.OPENSHIFT_TOKEN}} --server=${{ secrets.OPENSHIFT_SERVER_URL }}
-          npm ci
-          - name: Deploy using Helm
-            run: |
-              oc version
-              oc login --token=${{ secrets.OPENSHIFT_TOKEN}} --server=${{ secrets.OPENSHIFT_SERVER_URL }}
-              helm upgrade --install hmcr ./helm \
-                -n d3d940-prod \
-                -f ./helm/values.yaml \
-                -f ./helm/values-prod.yaml \
-                --set images.api.tag=${VERSION} \
-                --set images.client.tag=${VERSION} \
-                --set images.hangfire.tag=${VERSION}
+          helm upgrade --install hmcr ./helm \
+            -n d3d940-prod \
+            -f ./helm/values.yaml \
+            -f ./helm/values-prod.yaml \
+            --set images.api.tag=${VERSION} \
+            --set images.client.tag=${VERSION} \
+            --set images.hangfire.tag=${VERSION}
 
