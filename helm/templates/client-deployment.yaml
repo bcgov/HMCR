@@ -1,0 +1,71 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: client{{ .Values.suffix }}
+  labels:
+    app: client{{ .Values.suffix }}
+spec:
+  replicas: {{ .Values.replicaCounts.client }}
+  selector:
+    matchLabels:
+      app: client{{ .Values.suffix }}
+  template:
+    metadata:
+      labels:
+        app: client{{ .Values.suffix }}
+    spec:
+      containers:
+      - name: client
+        image: "{{ .Values.images.client.repository }}:{{ .Values.images.client.tag }}"
+        imagePullPolicy: {{ .Values.images.client.pullPolicy | quote }}
+        ports:
+        - containerPort: 8080
+          name: web
+        env:
+        - name: CLIENT_SSO_CLIENTID
+          valueFrom:
+            secretKeyRef:
+              name: sso-configs-{{ .Values.env | lower }}
+              key: CLIENT_SSO_CLIENTID
+        - name: CLIENT_SSO_HOST
+          valueFrom:
+            secretKeyRef:
+              name: sso-configs-{{ .Values.env | lower }}
+              key: CLIENT_SSO_HOST
+        - name: CLIENT_SSO_REALM
+          valueFrom:
+            secretKeyRef:
+              name: sso-configs-{{ .Values.env | lower }}
+              key: CLIENT_SSO_REALM
+        resources:
+          limits:
+            {{- toYaml .Values.resources.client.limits | nindent 12 }}
+          requests:
+            {{- toYaml .Values.resources.client.requests | nindent 12 }}
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 8080
+          initialDelaySeconds: 15
+          periodSeconds: 30
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 8080
+          initialDelaySeconds: 5
+          periodSeconds: 30
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: client{{ .Values.suffix }}
+  labels:
+    app: client{{ .Values.suffix }}
+spec:
+  selector:
+    app: client{{ .Values.suffix }}
+  ports:
+  - name: web
+    port: 8080
+    targetPort: web
+    protocol: TCP

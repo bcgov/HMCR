@@ -1,0 +1,20 @@
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: api-{{ .Values.env | lower }}
+  labels:
+    app: api{{ .Values.suffix }}
+  annotations:
+    haproxy.router.openshift.io/timeout: 1h
+spec:
+  host: api-{{ .Values.host }}
+  path: /
+  to:
+    kind: Service
+    name: api{{ .Values.suffix }}
+    weight: 100
+  port:
+    targetPort: web
+  tls:
+    termination: edge
+    insecureEdgeTerminationPolicy: Redirect

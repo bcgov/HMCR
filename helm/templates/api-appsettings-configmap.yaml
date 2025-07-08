@@ -1,0 +1,51 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: api-appsettings-{{ .Values.env | lower }}
+  labels:
+    app: api{{ .Values.suffix }}
+data:
+  appsettings.json: |-
+    {
+      "AllowedHosts": "*",
+      "Constants": {
+        "Version": "2.0.6.0",
+        "SwaggerApiUrl": "/swagger/v1/swagger.json"
+      },
+      "Serilog": {
+        "Using": ["Serilog.Sinks.PostgreSQL.Configuration"],
+        "MinimumLevel": {
+          "Default": "Information",
+          "Override": {
+            "Microsoft": "Warning",
+            "System": "Warning"
+          }
+        },
+        "WriteTo": [
+          {
+            "Name": "Async",
+            "Args": {
+              "configure": [
+                { "Name": "Console" },
+                {
+                  "Name": "PostgreSQL",
+                  "Args": {
+                    "connectionString": "***IGNORE_THIS***",
+                    "tableName": "Logs",
+                    "needAutoCreateTable": true,
+                    "columnOptionsSection": {
+                      "addStandardColumns": ["LogEvent"],
+                      "removeStandardColumns": ["MessageTemplate"]
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "OpenIdConnect": {
+        "ResponseType": "code",
+        "Scope": "openid profile email"
+      }
+    }

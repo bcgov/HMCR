@@ -1,0 +1,154 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: api{{ .Values.suffix }}
+  labels:
+    app: api{{ .Values.suffix }}
+spec:
+  replicas: {{ .Values.replicaCounts.api }}
+  selector:
+    matchLabels:
+      app: api{{ .Values.suffix }}
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 25%
+      maxSurge: 25%
+  template:
+    metadata:
+      labels:
+        app: api{{ .Values.suffix }}
+    spec:
+      volumes:
+      - name: appsettings-volume
+        configMap:
+          name: api-appsettings-{{ .Values.env | lower }}
+          defaultMode: 420
+      containers:
+      - name: api
+        image: "{{ .Values.images.api.repository }}:{{ .Values.images.api.tag }}"
+        imagePullPolicy: {{ .Values.images.api.pullPolicy | quote }}
+        ports:
+        - containerPort: 8080
+          name: web
+        env:
+        # Main DB connection string from secret
+        - name: ConnectionStrings__HMCR   # .NET will map this to ConnectionStrings:HMCR
+          valueFrom:
+            secretKeyRef:
+              name: api-connections-{{ .Values.env | lower }}
+              key: hmr.db
+        # BCeID service credential
+        - name: BCEID_OSID
+          valueFrom:
+            secretKeyRef:
+              name: bceid-service
+              key: BCEID_OSID
+        # Email service thumbprint
+        - name: SMTP_THUMBPRINT
+          valueFrom:
+            secretKeyRef:
+              name: email-service
+              key: SMTP_THUMBPRINT
+        # Keycloak service account credentials
+        - name: KEYCLOAK_CLIENT_ID
+          valueFrom:
+            secretKeyRef:
+              name: keycloak-service-account
+              key: CLIENT_ID
+        - name: KEYCLOAK_CLIENT_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: keycloak-service-account
+              key: CLIENT_SECRET
+        # SSO config (client SSO and JWT config)
+        - name: CLIENT_SSO_CLIENTID
+          valueFrom:
+            secretKeyRef:
+              name: sso-configs-{{ .Values.env | lower }}
+              key: CLIENT_SSO_CLIENTID
+        - name: CLIENT_SSO_HOST
+          valueFrom:
+            secretKeyRef:
+              name: sso-configs-{{ .Values.env | lower }}
+              key: CLIENT_SSO_HOST
+        - name: CLIENT_SSO_REALM
+          valueFrom:
+            secretKeyRef:
+              name: sso-configs-{{ .Values.env | lower }}
+              key: CLIENT_SSO_REALM
+        - name: JWT_SSO_AUDIENCE
+          valueFrom:
+            secretKeyRef:
+              name: sso-configs-{{ .Values.env | lower }}
+              key: JWT_SSO_AUDIENCE
+        - name: JWT_SSO_AUTHORITY
+          valueFrom:
+            secretKeyRef:
+              name: sso-configs-{{ .Values.env | lower }}
+              key: JWT_SSO_AUTHORITY
+        # Internal service account credentials
+        - name: SERVICE_USER
+          valueFrom:
+            secretKeyRef:
+              name: service-account
+              key: SERVICE_USER
+        - name: SERVICE_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: service-account
+              key: SERVICE_PASSWORD
+        # Logging DB connection string (Serilog) from postgres secret
+        - name: ConnectionStrings__Serilog    # assume the app looks for ConnectionStrings:Serilog
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Values.postgresql.name | default "postgresql" }}{{ .Values.suffix }}
+              key: connection-string
+        volumeMounts:
+        - name: appsettings-volume
+          mountPath: /app/appsettings.json   # path inside container where app expects the config
+          subPath: appsettings.json
+        # Attach resource limits/requests
+        resources:
+          limits:
+            {{- toYaml .Values.resources.api.limits | nindent 12 }}
+          requests:
+            {{- toYaml .Values.resources.api.requests | nindent 12 }}
+        livenessProbe:
+          httpGet:
+            path: {{ .Values.probe.api.livenessPath }}
+            port: 8080
+          initialDelaySeconds: {{ .Values.probe.api.initialDelaySeconds }}
+          periodSeconds: {{ .Values.probe.api.periodSeconds }}
+        readinessProbe:
+          httpGet:
+            path: {{ .Values.probe.api.readinessPath }}
+            port: 8080
+          initialDelaySeconds: {{ .Values.probe.api.initialDelaySeconds }}
+          periodSeconds: {{ .Values.probe.api.periodSeconds }}
+      initContainers:
+      - name: wait-for-db
+        image: busybox:1.35
+        command: ['sh', '-c']
+        args:
+          - >
+            echo "Waiting for PostgreSQL to be reachable...";
+            until nc -z {{ printf "%s%s" (default "postgresql" .Values.postgresql.name) .Values.suffix }} 5432;
+            do echo "Still waiting..."; sleep 2; done;
+            echo "PostgreSQL is up.";
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: api{{ .Values.suffix }}
+  labels:
+    app: api{{ .Values.suffix }}
+spec:
+  selector:
+    app: api{{ .Values.suffix }}
+  ports:
+  - name: web
+    port: 8080
+    targetPort: web
+    protocol: TCP
+  sessionAffinity: None

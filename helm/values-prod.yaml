@@ -1,0 +1,36 @@
+env: "prod"
+suffix: "-prod"
+host: "hmcr-d3d940-prod.apps.silver.devops.gov.bc.ca"
+
+images:
+  api:
+    tag: "v2.0.6"   # Use a fixed tag built and tested for prod
+  client:
+    tag: "v2.0.6"
+  hangfire:
+    tag: "v2.0.6"
+
+replicaCounts:
+  api: 3
+  client: 2
+  hangfire: 3
+  postgresql: 1
+
+resources:
+  api:
+    limits: { cpu: "1", memory: "1Gi" }
+    requests: { cpu: "500m", memory: "512Mi" }
+  client:
+    limits: { cpu: "500m", memory: "512Mi" }
+    requests: { cpu: "200m", memory: "256Mi" }
+  hangfire:
+    limits: { cpu: "1", memory: "1Gi" }
+    requests: { cpu: "500m", memory: "512Mi" }
+  postgresql:
+    limits: { cpu: "1", memory: "1Gi" }
+    requests: { cpu: "500m", memory: "512Mi" }
+
+postgresql:
+  storageClass: "netapp-file-standard"
+
+createExternalSecrets: false
