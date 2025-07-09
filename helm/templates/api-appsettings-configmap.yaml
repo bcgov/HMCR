@@ -4,6 +4,9 @@ metadata:
   name: api-appsettings-{{ .Values.env | lower }}
   labels:
     app: api{{ .Values.suffix }}
+    app.kubernetes.io/managed-by: Helm
+    meta.helm.sh/release-name: hmcr
+    meta.helm.sh/release-namespace: {{ .Release.Namespace }}
 data:
   appsettings.json: |-
     {
@@ -13,7 +16,7 @@ data:
         "SwaggerApiUrl": "/swagger/v1/swagger.json"
       },
       "Serilog": {
-        "Using": ["Serilog.Sinks.PostgreSQL.Configuration"],
+        "Using": [ "Serilog.Sinks.PostgreSQL.Configuration" ],
         "MinimumLevel": {
           "Default": "Information",
           "Override": {
@@ -25,27 +28,106 @@ data:
           {
             "Name": "Async",
             "Args": {
-              "configure": [
-                { "Name": "Console" },
-                {
-                  "Name": "PostgreSQL",
+              "configure": [ 
+                { 
+                  "Name": "Console",
                   "Args": {
-                    "connectionString": "***IGNORE_THIS***",
-                    "tableName": "Logs",
-                    "needAutoCreateTable": true,
-                    "columnOptionsSection": {
-                      "addStandardColumns": ["LogEvent"],
-                      "removeStandardColumns": ["MessageTemplate"]
-                    }
+                    "outputTemplate": "[{Timestamp:yyyy-MM-dd HH:mm:ss} {Level:u3}] {Message:lj}{NewLine}{Exception}"
                   }
-                }
+                } 
               ]
             }
+          },
+          {
+            "Name": "PostgreSQL",
+            "Args": {
+              "connectionString": "SERILOG",
+              "tableName": "hmr_log",
+              "needAutoCreateTable": true
+            }
           }
-        ]
+        ],
+        "Enrich": [ "FromLogContext", "WithMachineName" ]
       },
-      "OpenIdConnect": {
-        "ResponseType": "code",
-        "Scope": "openid profile email"
+      "Columns": {
+        "message": "RenderedMessageColumnWriter",
+        "message_template": "MessageTemplateColumnWriter",
+        "level": {
+          "Name": "LevelColumnWriter",
+          "Args": {
+            "renderAsText": false
+          }
+        },
+        "timestamp": {
+          "Name": "TimestampColumnWriter",
+          "Args": {
+            "dbType": "Timestamp"
+          }
+        },
+        "exception": "ExceptionColumnWriter",
+        "log_event": "LogEventSerializedColumnWriter",
+        "props_test": {
+          "Name": "PropertiesColumnWriter",
+          "Args": { "dbType": "Json" }
+        },
+        "machine_name": {
+          "Name": "SinglePropertyColumnWriter",
+          "Args": {
+            "propertyName": "MachineName",
+            "writeMethod": "Raw"
+          }
+        }
+      },
+      "ConnectionStrings": {
+        "HMCR": {{ .Values.connectionStrings.hmcr | quote }},
+        "SERILOG": {{ .Values.connectionStrings.serilog | quote }}
+      },
+      "EnableSensitiveDataLogging": false,
+      "Hangfire": {
+        "EnableServer": true,
+        "ReportJobIntervalInMinutes": 1,
+        "EmailJobIntervalInMinutes": 30,
+        "WorkerCount": 1
+      },
+      "CHRIS": {
+        "MapUrl": "https://prd-maps.th.gov.bc.ca",
+        "MapPath": "geoV05/wfs?",
+        "OASUrl": {{ .Values.config.oasUrl | quote }},
+        "OASPath": "ogs-geoV06/wfs?",
+        "ExportUrl": {{ .Values.config.exportUrl | quote }},
+        "WFSExportPath": "ogs-geoV06/ows?service=WFS&version=2.0.0&request=GetFeature",
+        "KMLExportPath": "ogs-geoV06/wms/kml?mode=download&styles=HMR_GENERIC_FOR_KML"
+      },
+      "Timeouts": {
+        "MapsAPI": {{ .Values.config.geoserverTimeout }},
+        "OasAPI": {{ .Values.config.geoserverTimeout }},
+        "ExportAPI": {{ .Values.config.geoserverTimeout }},
+        "InventoryAPI": {{ .Values.config.geoserverTimeout }}
+      },
+      "JWT": {
+        "Authority": "https://dev.loginproxy.gov.bc.ca/auth/realms/<realmid>",
+        "Audience": "<app-id>"
+      },
+      "BCeID": {
+        "Url": {{ .Values.config.bceidService | quote }},
+        "OSID": "<BCeID:OSID>",
+        "CacheLifespan": 600
+      },
+      "ServiceAccount": {
+        "User": "<ServiceAccount:User>",
+        "Password": "<ServiceAccount:Password>",
+        "GUID": "<ServiceAccount:GUID>"
+      },
+      "Smtp": {
+        "SenderName": "HMR NDR Email TRAN:EX",
+        "SenderAddress": "DoNotReply_HMR@gov.bc.ca",
+        "Thumbprint": "<Smtp:Thumbprint>",
+        "Server": "apps.smtp.gov.bc.ca",
+        "Port": 25,
+        "SubmissionResult": {{ .Values.config.submissionUrl | quote }}
+      },
+      "DefaultThresholdSpLevel": {
+        "Wildlife": "Level 2",
+        "Rockfall": "Level 1"
       }
     }

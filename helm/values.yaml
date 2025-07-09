@@ -57,6 +57,17 @@ postgresql:
   name: postgresql       # the base name for your DB resources
   storageClass: "netapp-file-standard"
 createExternalSecrets: false
+connectionStrings:
+  hmcr: "Server=localhost;Database=HMR_DEV;Trusted_Connection=True;MultipleActiveResultSets=true"
+  serilog: "Host=localhost;Username=postgres;Password=postgres;Database=serilog;Port=9010"
+
+config:
+  submissionUrl: "https://dev-hmcr.th.gov.bc.ca/workreporting?serviceArea={0}&showResult={1}"
+  bceidService: "https://gws1.test.bceid.ca/webservices/client/v10/bceidservice.asmx"
+  exportUrl: "https://tstoas5.apps.th.gov.bc.ca"
+  oasUrl: "https://prdoas5.apps.th.gov.bc.ca"
+  geoserverTimeout: 120
+
 
 # Toggle HPA
 # autoscaling:
