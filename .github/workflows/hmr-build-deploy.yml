@@ -56,10 +56,10 @@ jobs:
         run: |
           oc version
           oc login --token=${{ secrets.OPENSHIFT_TOKEN}} --server=${{ secrets.OPENSHIFT_SERVER_URL }}
-          helm upgrade --install hmcr ./helm \
+          helm upgrade --install hmcr ../helm \
             -n d3d940-dev \
-            -f ./helm/values.yaml \
-            -f ./helm/values-dev.yaml \
+            -f ../helm/values.yaml \
+            -f ../helm/values-dev.yaml \
             --set images.api.tag=${VERSION} \
             --set images.client.tag=${VERSION} \
             --set images.hangfire.tag=${VERSION}
@@ -84,10 +84,10 @@ jobs:
         run: |
           oc version
           oc login --token=${{ secrets.OPENSHIFT_TOKEN}} --server=${{ secrets.OPENSHIFT_SERVER_URL }}
-          helm upgrade --install hmcr ./helm \
+          helm upgrade --install hmcr ../helm \
             -n d3d940-test \
-            -f ./helm/values.yaml \
-            -f ./helm/values-test.yaml \
+            -f ../helm/values.yaml \
+            -f ../helm/values-test.yaml \
             --set images.api.tag=${VERSION} \
             --set images.client.tag=${VERSION} \
             --set images.hangfire.tag=${VERSION}
@@ -112,10 +112,10 @@ jobs:
         run: |
           oc version
           oc login --token=${{ secrets.OPENSHIFT_TOKEN}} --server=${{ secrets.OPENSHIFT_SERVER_URL }}
-          helm upgrade --install hmcr ./helm \
+          helm upgrade --install hmcr ../helm \
             -n d3d940-uat \
-            -f ./helm/values.yaml \
-            -f ./helm/values-uat.yaml \
+            -f ../helm/values.yaml \
+            -f ../helm/values-uat.yaml \
             --set images.api.tag=${VERSION} \
             --set images.client.tag=${VERSION} \
             --set images.hangfire.tag=${VERSION}
@@ -140,10 +140,10 @@ jobs:
         run: |
           oc version
           oc login --token=${{ secrets.OPENSHIFT_TOKEN}} --server=${{ secrets.OPENSHIFT_SERVER_URL }}
-          helm upgrade --install hmcr ./helm \
+          helm upgrade --install hmcr ../helm \
             -n d3d940-prod \
-            -f ./helm/values.yaml \
-            -f ./helm/values-prod.yaml \
+            -f ../helm/values.yaml \
+            -f ../helm/values-prod.yaml \
             --set images.api.tag=${VERSION} \
             --set images.client.tag=${VERSION} \
             --set images.hangfire.tag=${VERSION}
