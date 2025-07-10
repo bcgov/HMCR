@@ -106,8 +106,8 @@ spec:
               key: connection-string
         volumeMounts:
         - name: appsettings-volume
-            mountPath: /opt/app-root/configmap
-            readOnly: true
+          mountPath: /opt/app-root/configmap
+          readOnly: true
         # Attach resource limits/requests
         resources:
           limits:
