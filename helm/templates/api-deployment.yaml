@@ -39,19 +39,19 @@ spec:
               name: api-connections-{{ .Values.env | lower }}
               key: hmr.db
         # BCeID service credential
-        - name: BCEID_OSID
+        - name: BCEID__OSID
           valueFrom:
             secretKeyRef:
               name: bceid-service
               key: BCEID_OSID
         # Email service thumbprint
-        - name: SMTP_THUMBPRINT
+        - name: Smtp__Thumbprint
           valueFrom:
             secretKeyRef:
               name: email-service
               key: SMTP_THUMBPRINT
         # Keycloak service account credentials
-        - name: KEYCLOAK_CLIENT_ID
+        - name: Keycloak__ServiceClientId
           valueFrom:
             secretKeyRef:
               name: keycloak-service-account
@@ -77,12 +77,12 @@ spec:
             secretKeyRef:
               name: sso-configs-{{ .Values.env | lower }}
               key: CLIENT_SSO_REALM
-        - name: JWT_SSO_AUDIENCE
+        - name: JWT__Audience
           valueFrom:
             secretKeyRef:
               name: sso-configs-{{ .Values.env | lower }}
               key: JWT_SSO_AUDIENCE
-        - name: JWT_SSO_AUTHORITY
+        - name: JWT__Authority
           valueFrom:
             secretKeyRef:
               name: sso-configs-{{ .Values.env | lower }}
@@ -99,7 +99,7 @@ spec:
               name: service-account
               key: SERVICE_PASSWORD
         # Logging DB connection string (Serilog) from postgres secret
-        - name: ConnectionStrings__Serilog
+        - name: ConnectionStrings__serilog
           valueFrom:
             secretKeyRef:
               name: {{ .Values.postgresql.name | default "postgresql" }}{{ .Values.suffix }}
