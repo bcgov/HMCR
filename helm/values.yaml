@@ -1,6 +1,8 @@
 env: "dev"                   
 suffix: "-dev"
 host: "hmcr-d3d940-dev.apps.silver.devops.gov.bc.ca"  # Base host for routes (client will use this, API will prepend 'api-')
+client:
+  apiServiceName: api-{{ .Values.global.env }}
 replicaCounts:
   api: 1
   client: 1
@@ -20,8 +22,8 @@ images:
     tag: "latest"
     pullPolicy: "IfNotPresent"
   postgresql:
-    repository: "registry.redhat.io/rhel8/postgresql-10"  # Using the RedHat image for consistency (can change)
-    tag: "1"                           # Tag "1" corresponds to version (from original template)
+    repository: "registry.redhat.io/rhel8/postgresql-10"
+    tag: "1"
     pullPolicy: "IfNotPresent"
 resources:
   api:

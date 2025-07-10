@@ -37,6 +37,8 @@ spec:
             secretKeyRef:
               name: sso-configs-{{ .Values.env | lower }}
               key: CLIENT_SSO_REALM
+        - name: API_SERVICE_NAME
+          value: "api-{{ .Values.env }}"
         resources:
           limits:
             {{- toYaml .Values.resources.client.limits | nindent 12 }}
