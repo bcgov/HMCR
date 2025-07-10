@@ -99,15 +99,15 @@ spec:
               name: service-account
               key: SERVICE_PASSWORD
         # Logging DB connection string (Serilog) from postgres secret
-        - name: ConnectionStrings__Serilog    # assume the app looks for ConnectionStrings:Serilog
+        - name: ConnectionStrings__Serilog
           valueFrom:
             secretKeyRef:
               name: {{ .Values.postgresql.name | default "postgresql" }}{{ .Values.suffix }}
               key: connection-string
         volumeMounts:
         - name: appsettings-volume
-          mountPath: /app/appsettings.json   # path inside container where app expects the config
-          subPath: appsettings.json
+            mountPath: /opt/app-root/configmap
+            readOnly: true
         # Attach resource limits/requests
         resources:
           limits:

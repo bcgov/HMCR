@@ -56,6 +56,10 @@ probe:
 postgresql:
   name: postgresql       # the base name for your DB resources
   storageClass: "netapp-file-standard"
+  user: serilog
+  password: ""
+  adminPassword: ""
+  database: serilog
 createExternalSecrets: false
 connectionStrings:
   hmcr: "Server=localhost;Database=HMR_DEV;Trusted_Connection=True;MultipleActiveResultSets=true"
