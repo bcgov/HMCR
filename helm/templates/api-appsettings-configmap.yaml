@@ -104,10 +104,6 @@ data:
         "ExportAPI": {{ .Values.config.geoserverTimeout }},
         "InventoryAPI": {{ .Values.config.geoserverTimeout }}
       },
-      "JWT": {
-        "Authority": "https://dev.loginproxy.gov.bc.ca/auth/realms/<realmid>",
-        "Audience": "<app-id>"
-      },
       "BCeID": {
         "Url": {{ .Values.config.bceidService | quote }},
         "OSID": "<BCeID:OSID>",
