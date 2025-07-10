@@ -22,23 +22,25 @@ spec:
         - containerPort: 8080
           name: web
         env:
-        - name: CLIENT_SSO_CLIENTID
+        - name: VITE_SSO_CLIENT
           valueFrom:
             secretKeyRef:
               name: sso-configs-{{ .Values.env | lower }}
               key: CLIENT_SSO_CLIENTID
-        - name: CLIENT_SSO_HOST
+        - name: VITE_SSO_HOST
           valueFrom:
             secretKeyRef:
               name: sso-configs-{{ .Values.env | lower }}
               key: CLIENT_SSO_HOST
-        - name: CLIENT_SSO_REALM
+        - name: VITE_SSO_REALM
           valueFrom:
             secretKeyRef:
               name: sso-configs-{{ .Values.env | lower }}
               key: CLIENT_SSO_REALM
         - name: API_SERVICE_NAME
           value: "api-{{ .Values.env }}"
+        - name: VITE_API_HOST
+          value: {{ .Values.host }}
         resources:
           limits:
             {{- toYaml .Values.resources.client.limits | nindent 12 }}
