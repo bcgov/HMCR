@@ -76,8 +76,8 @@ spec:
               key: connection-string
         volumeMounts:
         - name: appsettings-volume
-          mountPath: /app/appsettings.json
-          subPath: appsettings.json
+          mountPath: /opt/app-root/configmap
+          readOnly: true
         resources:
           limits:
             {{- toYaml .Values.resources.hangfire.limits | nindent 12 }}
