@@ -1,6 +1,7 @@
 env: "dev"
 suffix: "-dev"
 host: "hmcr-d3d940-dev.apps.silver.devops.gov.bc.ca"
+aspNetCoreEnv: "Development"  # ASP.NET Core environment setting
 
 images:
   api:

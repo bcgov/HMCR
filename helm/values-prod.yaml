@@ -1,6 +1,7 @@
 env: "prod"
 suffix: "-prod"
 host: "hmcr-d3d940-prod.apps.silver.devops.gov.bc.ca"
+aspNetCoreEnv: "Production"  # ASP.NET Core environment setting
 
 images:
   api:

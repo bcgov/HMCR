@@ -3,6 +3,7 @@ suffix: "-dev"
 host: "hmcr-d3d940-dev.apps.silver.devops.gov.bc.ca"  # Base host for routes (client will use this, API will prepend 'api-')
 client:
   apiServiceName: api-{{ .Values.global.env }}
+aspNetCoreEnv: "Development"  # ASP.NET Core environment setting
 replicaCounts:
   api: 1
   client: 1
@@ -66,7 +67,6 @@ createExternalSecrets: false
 connectionStrings:
   hmcr: "Server=localhost;Database=HMR_DEV;Trusted_Connection=True;MultipleActiveResultSets=true"
   serilog: "Host=localhost;Username=postgres;Password=postgres;Database=serilog;Port=9010"
-
 config:
   submissionUrl: "https://dev-hmcr.th.gov.bc.ca/workreporting?serviceArea={0}&showResult={1}"
   bceidService: "https://gws1.test.bceid.ca/webservices/client/v10/bceidservice.asmx"

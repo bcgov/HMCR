@@ -1,6 +1,7 @@
 env: "uat"
 suffix: "-uat"
 host: "hmcr-d3d940-uat.apps.silver.devops.gov.bc.ca"
+aspNetCoreEnv: "UAT"  # ASP.NET Core environment setting
 
 images:
   api:

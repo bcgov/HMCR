@@ -104,6 +104,9 @@ spec:
             secretKeyRef:
               name: {{ .Values.postgresql.name | default "postgresql" }}{{ .Values.suffix }}
               key: connection-string
+        # Environment variable for ASP.NET Core environment
+        - name: ASPNETCORE_ENVIRONMENT
+          value: {{ .Values.aspNetCoreEnv | quote }}
         volumeMounts:
         - name: appsettings-volume
           mountPath: /opt/app-root/configmap

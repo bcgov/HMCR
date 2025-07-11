@@ -1,6 +1,7 @@
 env: "test"
 suffix: "-test"
 host: "hmcr-d3d940-test.apps.silver.devops.gov.bc.ca"
+aspNetCoreEnv: "Test"  # ASP.NET Core environment setting
 
 images:
   api:
