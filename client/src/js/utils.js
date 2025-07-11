@@ -1,11 +1,14 @@
-import queryString from 'query-string';
-import moment from 'moment';
 import _ from 'lodash';
+import { format } from 'date-fns';
+import queryString from 'query-string';
 
 import * as Constants from './Constants';
 
 export const buildActionWithParam = (action, param) => {
-  return { action, param };
+  return {
+    action,
+    param,
+  };
 };
 
 export const buildApiErrorObject = (response) => {
@@ -33,8 +36,9 @@ export const updateQueryParamsFromHistory = (history, newParam, overwrite) => {
 
   let processedParams = { ..._.pickBy(newParam, _.identity) };
   Object.keys(processedParams).forEach((key) => {
-    if (moment.isMoment(processedParams[key]))
-      processedParams[key] = processedParams[key].format(Constants.DATE_DISPLAY_FORMAT);
+    if (processedParams[key] instanceof Date && !isNaN(processedParams[key])) {
+      processedParams[key] = format(processedParams[key], Constants.DATE_DISPLAY_FORMAT);
+    }
   });
 
   if (!overwrite) processedParams = { ...params, ...processedParams };
@@ -61,39 +65,48 @@ export const buildStatusIdArray = (isActive) => {
   return [Constants.ACTIVE_STATUS.ACTIVE, Constants.ACTIVE_STATUS.INACTIVE];
 };
 
-export const isValueEmpty=(v)=>{
-  if(v === null || v === undefined || v === '') return true;
+export const isValueEmpty = (v) => {
+  if (v === null || v === undefined || v === '') return true;
+
   return false;
 };
 
-export const isValueNotEmpty=(v)=>{
-  if(v !== null && v !== undefined && v !== '') return true;
+export const isValueNotEmpty = (v) => {
+  if (v !== null && v !== undefined && v !== '') return true;
+
   return false;
 };
 
-export const toNumberOrNull=(v)=>{
-  return isValueNotEmpty(removeStringCommas(v)) ? _.toNumber(removeStringCommas(v)): null;
+export const toNumberOrNull = (v) => {
+  return isValueNotEmpty(removeStringCommas(v)) ? _.toNumber(removeStringCommas(v)) : null;
 };
-export const toStringOrEmpty=(v)=>{
-  return isValueNotEmpty(v) ? _.toString(v): '';
+export const toStringOrEmpty = (v) => {
+  return isValueNotEmpty(v) ? _.toString(v) : '';
 };
-export const toStringWithCommasOrEmpty=(v)=>{
-  return isValueNotEmpty(v) ? _.toString(addCommasToNumber(v)): '';
+export const toStringWithCommasOrEmpty = (v) => {
+  return isValueNotEmpty(v) ? _.toString(addCommasToNumber(v)) : '';
 };
-export const removeStringCommas=(v)=>{
+export const removeStringCommas = (v) => {
   return v.toString().replace(/,/g, '');
-}
-export const addCommasToNumber=(n) =>{
-  if(isValueEmpty(n)) return n;
+};
+export const addCommasToNumber = (n) => {
+  if (isValueEmpty(n)) return n;
+
   let s = removeStringCommas(n).split('.');
+
   if (s[0].length >= 4) s[0] = s[0].replace(/(\d)(?=(\d{3})+$)/g, '$1,');
+
   return s.join('.');
-}
-export const isValidDecimal=(v,digits) =>{
-  if(isValueEmpty(v)) return true;
+};
+export const isValidDecimal = (v, digits) => {
+  if (isValueEmpty(v)) return true;
+
   const d = _.toInteger(digits);
   let s = Number(removeStringCommas(v)).toString().split('.');
-  if(s.length <2) return true;
+
+  if (s.length < 2) return true;
+
   if (s[1].length <= d) return true;
+
   return false;
-}
+};

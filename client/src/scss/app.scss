@@ -43,12 +43,12 @@ h6 {
   padding: 0.1rem 0.3rem;
 }
 
-.text-overflow-hiden {
+.text-overflow-hidden {
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
-.text-overflow-hiden:hover {
+.text-overflow-hidden:hover {
   overflow: visible;
   word-wrap: break-word;
 }
@@ -69,19 +69,19 @@ h6 {
 }
 
 .fa-color-primary {
-  color: theme-color(primary);
+  color: map-get($theme-colors, primary);
 }
 
 .fa-color-success {
-  color: theme-color(success);
+  color: var(--bs-success);
 }
 
 .fa-color-danger {
-  color: theme-color(danger);
+  color: var(--bs-danger);
 }
 
 .fa-color-warning {
-  color: theme-color(warning);
+  color: var(--bs-warning);
 }
 
 .modal-dialog.modal-xl {
@@ -94,11 +94,11 @@ ul.no-bullet {
 }
 
 .Toastify__toast--info {
-  background-color: theme-color(primary);
+  background-color: map-get($theme-colors, primary);
 }
 
 .Toastify__toast--success {
-  background-color: theme-color(success);
+  background-color: var(--bs-success);
 }
 
 .Toastify__toast--warning {
@@ -112,7 +112,9 @@ ul.no-bullet {
 .popover {
   background: #fff;
   border-radius: 2px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
+  box-shadow:
+    0 1px 3px rgba(0, 0, 0, 0.12),
+    0 1px 2px rgba(0, 0, 0, 0.24);
   margin-bottom: 16px;
 }
 

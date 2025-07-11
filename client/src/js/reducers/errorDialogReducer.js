@@ -15,9 +15,14 @@ const defaultState = {
 const errorDialogReducer = (state = defaultState, action) => {
   switch (action.type) {
     case SHOW_ERROR_DIALOG_MODAL:
-      return { show: true, ...action.payload };
+      return {
+        show: true,
+        ...action.payload,
+      };
+
     case HIDE_ERROR_DIALOG_MODAL:
       return defaultState;
+
     default:
       return state;
   }

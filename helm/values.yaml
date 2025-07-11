@@ -1,0 +1,86 @@
+env: "dev"                   
+suffix: "-dev"
+host: "hmcr-d3d940-dev.apps.silver.devops.gov.bc.ca"  # Base host for routes (client will use this, API will prepend 'api-')
+client:
+  apiServiceName: api-{{ .Values.global.env }}
+aspNetCoreEnv: "Development"  # ASP.NET Core environment setting
+replicaCounts:
+  api: 1
+  client: 1
+  hangfire: 2 
+  postgresql: 1
+images:
+  api:
+    repository: "image-registry.apps.silver.devops.gov.bc.ca/d3d940-tools/hmcr-api"
+    tag: "latest"
+    pullPolicy: "IfNotPresent"
+  client:
+    repository: "image-registry.apps.silver.devops.gov.bc.ca/d3d940-tools/hmcr-client"
+    tag: "latest"
+    pullPolicy: "IfNotPresent"
+  hangfire:
+    repository: "image-registry.apps.silver.devops.gov.bc.ca/d3d940-tools/hmcr-hangfire"
+    tag: "latest"
+    pullPolicy: "IfNotPresent"
+  postgresql:
+    repository: "registry.redhat.io/rhel8/postgresql-10"
+    tag: "1"
+    pullPolicy: "IfNotPresent"
+resources:
+  api:
+    limits: {"cpu": "500m", "memory": "512Mi"}
+    requests: {"cpu": "200m", "memory": "256Mi"}
+  client:
+    limits: {"cpu": "200m", "memory": "256Mi"}
+    requests: {"cpu": "50m", "memory": "128Mi"}
+  hangfire:
+    limits: {"cpu": "500m", "memory": "512Mi"}
+    requests: {"cpu": "200m", "memory": "256Mi"}
+  postgresql:
+    limits: {"cpu": "500m", "memory": "512Mi"}
+    requests: {"cpu": "250m", "memory": "256Mi"}
+# Liveness and readiness probe settings (could be configurable if needed)
+probe:
+  api:
+    livenessPath: "/healthz"
+    readinessPath: "/healthz"
+    initialDelaySeconds: 15
+    periodSeconds: 10
+  hangfire:
+    livenessPath: "/healthz"
+    readinessPath: "/healthz"
+    initialDelaySeconds: 15
+    periodSeconds: 10
+  postgresql:
+    # Using tcpSocket for liveness, exec for readiness (pg_isready)
+    livenessTcpPort: 5432
+    initialDelaySeconds: 30
+    periodSeconds: 10
+postgresql:
+  name: postgresql       # the base name for your DB resources
+  storageClass: "netapp-file-standard"
+  user: serilog
+  password: ""
+  adminPassword: ""
+  database: serilog
+createExternalSecrets: false
+connectionStrings:
+  hmcr: "Server=localhost;Database=HMR_DEV;Trusted_Connection=True;MultipleActiveResultSets=true"
+  serilog: "Host=localhost;Username=postgres;Password=postgres;Database=serilog;Port=9010"
+config:
+  submissionUrl: "https://dev-hmcr.th.gov.bc.ca/workreporting?serviceArea={0}&showResult={1}"
+  bceidService: "https://gws1.test.bceid.ca/webservices/client/v10/bceidservice.asmx"
+  exportUrl: "https://tstoas5.apps.th.gov.bc.ca"
+  oasUrl: "https://prdoas5.apps.th.gov.bc.ca"
+  geoserverTimeout: 120
+
+
+# Toggle HPA
+# autoscaling:
+#   api:
+#     enabled: true
+#     minReplicas: 1
+#     maxReplicas: 5
+#     targetCPUUtilizationPercentage: 50  # scale up at 50% CPU usage cluster-wide
+#   hangfire:
+#     enabled: false

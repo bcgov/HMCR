@@ -1,9 +1,11 @@
 export const tooltips = {
-  objectives: 'The salt management plan should include a description of planned improvements to be undertaken over time. Achievement of the objectives is an indicator of performance in the implementation of the salt management plan and will be taken into consideration in the second review of progress on the Code of Practice to be conducted by Environment Canada.',
+  objectives:
+    'The salt management plan should include a description of planned improvements to be undertaken over time. Achievement of the objectives is an indicator of performance in the implementation of the salt management plan and will be taken into consideration in the second review of progress on the Code of Practice to be conducted by Environment Canada.',
   acetate: 'calcium-magnesium or potassium acetates',
-  nonchloride: 'record only pure non-chloride (e.g. beet juice, corn bi-product, molasses or other organics), excluding pre-mixed blends with salt brine',
-  liquids: 'Describe multi-chloride liquids that contain more than one type of salt in the same mix'
-}
+  nonchloride:
+    'record only pure non-chloride (e.g. beet juice, corn bi-product, molasses or other organics), excluding pre-mixed blends with salt brine',
+  liquids: 'Describe multi-chloride liquids that contain more than one type of salt in the same mix',
+};
 
 export const defaultValues = {
   reportTypeId: 4,
@@ -38,11 +40,39 @@ export const defaultValues = {
     saltTotalDays: null,
   },
   sect3: {
-    deicer: { nacl: null, mgcl2: null, cacl2: null, acetate: null },
-    treatedAbrasives: { sandStoneDust: null, nacl: null, mgcl2: null, cacl2: null },
-    prewetting: { nacl: null, mgcl2: null, cacl2: null, acetate: null, nonchloride: null },
-    pretreatment: { nacl: null, mgcl2: null, cacl2: null, acetate: null, nonchloride: null },
-    antiicing: { nacl: null, mgcl2: null, cacl2: null, acetate: null, nonchloride: null },
+    deicer: {
+      nacl: null,
+      mgcl2: null,
+      cacl2: null,
+      acetate: null,
+    },
+    treatedAbrasives: {
+      sandStoneDust: null,
+      nacl: null,
+      mgcl2: null,
+      cacl2: null,
+    },
+    prewetting: {
+      nacl: null,
+      mgcl2: null,
+      cacl2: null,
+      acetate: null,
+      nonchloride: null,
+    },
+    pretreatment: {
+      nacl: null,
+      mgcl2: null,
+      cacl2: null,
+      acetate: null,
+      nonchloride: null,
+    },
+    antiicing: {
+      nacl: null,
+      mgcl2: null,
+      cacl2: null,
+      acetate: null,
+      nonchloride: null,
+    },
     multiChlorideA: {
       litres: null,
       naclPercentage: null,
@@ -199,59 +229,200 @@ export const defaultValues = {
   },
   appendix: {
     materialStorage: {
-      newSaltDomeWithPad: { identified: null, achieved: null },
-      newSaltDomeIndoorStorage: { identified: null, achieved: null },
-      upgradeSaltStorageSites: { identified: null, achieved: null },
-      constructPermanentCoverStructure: { identified: null, achieved: null },
-      impermeablePadForAbrasives: { identified: null, achieved: null },
-      expandInsideBuildingForAbrasives: { identified: null, achieved: null },
-      useTarpsForAbrasives: { identified: null, achieved: null },
-      reconfigureStorageCapacity: { identified: null, achieved: null },
-      reconfigureOperationFacilities: { identified: null, achieved: null },
-      designAreaForTruckLoading: { identified: null, achieved: null },
-      controlTruckLoading: { identified: null, achieved: null },
-      installEquipmentWashBay: { identified: null, achieved: null },
-      designSiteForRunoffControl: { identified: null, achieved: null },
-      manageSaltContaminatedWaters: { identified: null, achieved: null },
-      spillPreventionPlan: { identified: null, achieved: null },
-      removeContaminatedSnow: { identified: null, achieved: null },
-      otherSpecify: { identified: null, achieved: null },
+      newSaltDomeWithPad: {
+        identified: null,
+        achieved: null,
+      },
+      newSaltDomeIndoorStorage: {
+        identified: null,
+        achieved: null,
+      },
+      upgradeSaltStorageSites: {
+        identified: null,
+        achieved: null,
+      },
+      constructPermanentCoverStructure: {
+        identified: null,
+        achieved: null,
+      },
+      impermeablePadForAbrasives: {
+        identified: null,
+        achieved: null,
+      },
+      expandInsideBuildingForAbrasives: {
+        identified: null,
+        achieved: null,
+      },
+      useTarpsForAbrasives: {
+        identified: null,
+        achieved: null,
+      },
+      reconfigureStorageCapacity: {
+        identified: null,
+        achieved: null,
+      },
+      reconfigureOperationFacilities: {
+        identified: null,
+        achieved: null,
+      },
+      designAreaForTruckLoading: {
+        identified: null,
+        achieved: null,
+      },
+      controlTruckLoading: {
+        identified: null,
+        achieved: null,
+      },
+      installEquipmentWashBay: {
+        identified: null,
+        achieved: null,
+      },
+      designSiteForRunoffControl: {
+        identified: null,
+        achieved: null,
+      },
+      manageSaltContaminatedWaters: {
+        identified: null,
+        achieved: null,
+      },
+      spillPreventionPlan: {
+        identified: null,
+        achieved: null,
+      },
+      removeContaminatedSnow: {
+        identified: null,
+        achieved: null,
+      },
+      otherSpecify: {
+        identified: null,
+        achieved: null,
+      },
     },
     saltApplication: {
-      installGroundSpeedControls: { identified: null, achieved: null },
-      increasePreWettingEquipment: { identified: null, achieved: null },
-      installLiquidAntiIcing: { identified: null, achieved: null },
-      installInfraredThermometers: { identified: null, achieved: null },
-      installAdditionalRWISStations: { identified: null, achieved: null },
-      accessRWISData: { identified: null, achieved: null },
-      installMobileRWIS: { identified: null, achieved: null },
-      accessMeteorologicalService: { identified: null, achieved: null },
-      adoptPreWettingMajorityNetwork: { identified: null, achieved: null },
-      usePreTreatedSalt: { identified: null, achieved: null },
-      adoptPreWettingOrTreatmentAbrasives: { identified: null, achieved: null },
-      testingNewProducts: { identified: null, achieved: null },
-      adoptAntiIcingStandard: { identified: null, achieved: null },
-      installGPSAndComputerSystems: { identified: null, achieved: null },
-      useChartForApplicationRates: { identified: null, achieved: null },
-      useMDSS: { identified: null, achieved: null },
-      reviewSaltUse: { identified: null, achieved: null },
-      assessPlowingEfficiency: { identified: null, achieved: null },
-      other: { identified: null, achieved: null },
+      installGroundSpeedControls: {
+        identified: null,
+        achieved: null,
+      },
+      increasePreWettingEquipment: {
+        identified: null,
+        achieved: null,
+      },
+      installLiquidAntiIcing: {
+        identified: null,
+        achieved: null,
+      },
+      installInfraredThermometers: {
+        identified: null,
+        achieved: null,
+      },
+      installAdditionalRWISStations: {
+        identified: null,
+        achieved: null,
+      },
+      accessRWISData: {
+        identified: null,
+        achieved: null,
+      },
+      installMobileRWIS: {
+        identified: null,
+        achieved: null,
+      },
+      accessMeteorologicalService: {
+        identified: null,
+        achieved: null,
+      },
+      adoptPreWettingMajorityNetwork: {
+        identified: null,
+        achieved: null,
+      },
+      usePreTreatedSalt: {
+        identified: null,
+        achieved: null,
+      },
+      adoptPreWettingOrTreatmentAbrasives: {
+        identified: null,
+        achieved: null,
+      },
+      testingNewProducts: {
+        identified: null,
+        achieved: null,
+      },
+      adoptAntiIcingStandard: {
+        identified: null,
+        achieved: null,
+      },
+      installGPSAndComputerSystems: {
+        identified: null,
+        achieved: null,
+      },
+      useChartForApplicationRates: {
+        identified: null,
+        achieved: null,
+      },
+      useMDSS: {
+        identified: null,
+        achieved: null,
+      },
+      reviewSaltUse: {
+        identified: null,
+        achieved: null,
+      },
+      assessPlowingEfficiency: {
+        identified: null,
+        achieved: null,
+      },
+      other: {
+        identified: null,
+        achieved: null,
+      },
     },
     snowDisposal: {
-      developProgramPhaseOut: { identified: null, achieved: null },
-      installNewSiteLowPermeability: { identified: null, achieved: null },
-      upgradeExistingSiteLowPermeability: { identified: null, achieved: null },
-      collectMeltWaterSpecificPoint: { identified: null, achieved: null },
-      constructCollectionPond: { identified: null, achieved: null },
-      otherSnowDisposal: { identified: null, achieved: null },
+      developProgramPhaseOut: {
+        identified: null,
+        achieved: null,
+      },
+      installNewSiteLowPermeability: {
+        identified: null,
+        achieved: null,
+      },
+      upgradeExistingSiteLowPermeability: {
+        identified: null,
+        achieved: null,
+      },
+      collectMeltWaterSpecificPoint: {
+        identified: null,
+        achieved: null,
+      },
+      constructCollectionPond: {
+        identified: null,
+        achieved: null,
+      },
+      otherSnowDisposal: {
+        identified: null,
+        achieved: null,
+      },
     },
     vulnerableAreas: {
-      identifySaltVulnerableAreas: { identified: null, achieved: null },
-      prioritizeAreasForAdditionalProtection: { identified: null, achieved: null },
-      implementProtectionMitigationMeasures: { identified: null, achieved: null },
-      conductEnvironmentalMonitoring: { identified: null, achieved: null },
-      otherVulnerableAreas: { identified: null, achieved: null },
+      identifySaltVulnerableAreas: {
+        identified: null,
+        achieved: null,
+      },
+      prioritizeAreasForAdditionalProtection: {
+        identified: null,
+        achieved: null,
+      },
+      implementProtectionMitigationMeasures: {
+        identified: null,
+        achieved: null,
+      },
+      conductEnvironmentalMonitoring: {
+        identified: null,
+        achieved: null,
+      },
+      otherVulnerableAreas: {
+        identified: null,
+        achieved: null,
+      },
     },
   },
 };

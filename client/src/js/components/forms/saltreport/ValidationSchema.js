@@ -1,6 +1,5 @@
 import * as Yup from 'yup';
 
-// Custom validator for decimal with dynamic precision
 const decimalWithPrecision = (precision) => {
   return Yup.number()
     .nullable(true)
@@ -8,7 +7,7 @@ const decimalWithPrecision = (precision) => {
     .test(
       'is-decimal',
       `Invalid format: number must have no more than ${precision} decimal places and be non-negative`,
-      (value) => value === null || (value >= 0 && new RegExp(`^\\d+(\\.\\d{1,${precision}})?$`).test(value))
+      (value) => value === null || (value >= 0 && new RegExp(`^\\d+(\\.\\d{1,${precision}})?$`).test(value)),
     );
 };
 
@@ -20,6 +19,7 @@ const coordinatePrecision = (precision) => {
       if (value === null || value === undefined) {
         return true; // Allow null values
       }
+
       // Check if the value matches the precision requirement
       return new RegExp(`^-?\\d+(\\.\\d{1,${precision}})?$`).test(value);
     });
@@ -120,11 +120,13 @@ const vulnerableAreaSchema = Yup.object().shape({
   latitude: coordinatePrecision(6)
     .min(-90, 'Latitude must be greater than or equal to -90')
     .max(90, 'Latitude must be less than or equal to 90')
-    .nullable(true), // aligns with LAT decimal(9,6)
+    .nullable(true),
+  // aligns with LAT decimal(9,6)
   longitude: coordinatePrecision(6)
     .min(-180, 'Longitude must be greater than or equal to -180')
     .max(180, 'Longitude must be less than or equal to 180')
-    .nullable(true), // aligns with LONG decimal(9,6)
+    .nullable(true),
+  // aligns with LONG decimal(9,6)
   feature: Yup.string().max(255).nullable(true),
   type: Yup.string().max(255).nullable(true),
   protectionMeasures: Yup.string().max(255).nullable(true),

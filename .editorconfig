@@ -1,7 +1,8 @@
-{
-    "[yaml]":  {
-		"editor.insertSpaces": true,
-		"editor.tabSize": 2,
-		"editor.autoIndent": "none"
-	}
-}
+root = true
+
+[*]
+end_of_line = lf
+charset = utf-8
+insert_final_newline = true
+indent_style = space
+indent_size = 2

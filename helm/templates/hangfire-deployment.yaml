@@ -1,0 +1,112 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hangfire{{ .Values.suffix }}
+  labels:
+    app: hangfire{{ .Values.suffix }}
+spec:
+  replicas: {{ .Values.replicaCounts.hangfire }}
+  selector:
+    matchLabels:
+      app: hangfire{{ .Values.suffix }}
+  strategy:
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app: hangfire{{ .Values.suffix }}
+    spec:
+      containers:
+      - name: hangfire
+        image: "{{ .Values.images.hangfire.repository }}:{{ .Values.images.hangfire.tag }}"
+        imagePullPolicy: {{ .Values.images.hangfire.pullPolicy | quote }}
+        ports:
+        - containerPort: 8080
+          name: web
+        env:
+        - name: ConnectionStrings__HMCR
+          valueFrom:
+            secretKeyRef:
+              name: api-connections-{{ .Values.env | lower }}
+              key: hmr.db
+        - name: BCEID_OSID
+          valueFrom:
+            secretKeyRef:
+              name: bceid-service
+              key: BCEID_OSID
+        - name: SMTP_THUMBPRINT
+          valueFrom:
+            secretKeyRef:
+              name: email-service
+              key: SMTP_THUMBPRINT
+        - name: KEYCLOAK_CLIENT_ID
+          valueFrom:
+            secretKeyRef:
+              name: keycloak-service-account
+              key: CLIENT_ID
+        - name: KEYCLOAK_CLIENT_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: keycloak-service-account
+              key: CLIENT_SECRET
+        - name: JWT_SSO_AUDIENCE
+          valueFrom:
+            secretKeyRef:
+              name: sso-configs-{{ .Values.env | lower }}
+              key: JWT_SSO_AUDIENCE
+        - name: JWT_SSO_AUTHORITY
+          valueFrom:
+            secretKeyRef:
+              name: sso-configs-{{ .Values.env | lower }}
+              key: JWT_SSO_AUTHORITY
+        - name: SERVICE_USER
+          valueFrom:
+            secretKeyRef:
+              name: service-account
+              key: SERVICE_USER
+        - name: SERVICE_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: service-account
+              key: SERVICE_PASSWORD
+        - name: ConnectionStrings__Serilog
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Values.postgresql.name | default "postgresql" }}{{ .Values.suffix }}
+              key: connection-string
+        volumeMounts:
+        - name: appsettings-volume
+          mountPath: /opt/app-root/configmap
+          readOnly: true
+        resources:
+          limits:
+            {{- toYaml .Values.resources.hangfire.limits | nindent 12 }}
+          requests:
+            {{- toYaml .Values.resources.hangfire.requests | nindent 12 }}
+        livenessProbe:
+          httpGet:
+            path: {{ .Values.probe.hangfire.livenessPath }}
+            port: 8080
+          initialDelaySeconds: {{ .Values.probe.hangfire.initialDelaySeconds }}
+          periodSeconds: {{ .Values.probe.hangfire.periodSeconds }}
+        readinessProbe:
+          httpGet:
+            path: {{ .Values.probe.hangfire.readinessPath }}
+            port: 8080
+          initialDelaySeconds: {{ .Values.probe.hangfire.initialDelaySeconds }}
+          periodSeconds: {{ .Values.probe.hangfire.periodSeconds }}
+      volumes:
+      - name: appsettings-volume
+        configMap:
+          name: api-appsettings-{{ .Values.env | lower }}
+          defaultMode: 420
+      initContainers:
+      - name: wait-for-db
+        image: busybox:1.35
+        command: ['sh', '-c']
+        args:
+          - >
+            echo "Waiting for PostgreSQL...";
+            until nc -z {{ printf "%s%s" (default "postgresql" .Values.postgresql.name) .Values.suffix }} 5432;
+            do sleep 2; done;
+            echo "PostgreSQL is accessible. Starting Hangfire.";

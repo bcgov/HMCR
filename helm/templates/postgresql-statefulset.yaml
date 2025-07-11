@@ -1,0 +1,77 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ .Values.postgresql.name | default "postgresql" }}{{ .Values.suffix }}
+  labels:
+    app: {{ .Values.postgresql.name | default "postgresql" }}{{ .Values.suffix }}
+spec:
+  serviceName: {{ .Values.postgresql.name | default "postgresql" }}{{ .Values.suffix }}  # headless service for stable network ID
+  replicas: {{ .Values.replicaCounts.postgresql }}
+  selector:
+    matchLabels:
+      app: {{ .Values.postgresql.name | default "postgresql" }}{{ .Values.suffix }}
+  updateStrategy:
+    type: OnDelete   # or RollingUpdate; with single replica it doesn't matter much. OnDelete gives manual control.
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.postgresql.name | default "postgresql" }}{{ .Values.suffix }}
+    spec:
+      containers:
+      - name: postgresql
+        image: "{{ .Values.images.postgresql.repository }}:{{ .Values.images.postgresql.tag }}"
+        imagePullPolicy: {{ .Values.images.postgresql.pullPolicy | quote }}
+        ports:
+        - containerPort: 5432
+          name: db
+        env:
+        - name: POSTGRESQL_USER
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Values.postgresql.name | default "postgresql" }}{{ .Values.suffix }}
+              key: database-user
+        - name: POSTGRESQL_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Values.postgresql.name | default "postgresql" }}{{ .Values.suffix }}
+              key: database-password
+        - name: POSTGRESQL_DATABASE
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Values.postgresql.name | default "postgresql" }}{{ .Values.suffix }}
+              key: database-name
+        - name: POSTGRESQL_ADMIN_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Values.postgresql.name | default "postgresql" }}{{ .Values.suffix }}
+              key: admin-password
+        volumeMounts:
+        - name: data
+          mountPath: /var/lib/pgsql/data  # Mount path for DB data (for RedHat image; official uses /var/lib/postgresql/data)
+        resources:
+          limits:
+            {{- toYaml .Values.resources.postgresql.limits | nindent 12 }}
+          requests:
+            {{- toYaml .Values.resources.postgresql.requests | nindent 12 }}
+        livenessProbe:
+          tcpSocket:
+            port: 5432
+          initialDelaySeconds: {{ .Values.probe.postgresql.initialDelaySeconds }}
+          periodSeconds: {{ .Values.probe.postgresql.periodSeconds }}
+        readinessProbe:
+          exec:
+            command: ["/usr/bin/pg_isready", "-U", "{{ .Values.postgresql.postgresUser | default "postgres" }}"]
+          initialDelaySeconds: 5
+          periodSeconds: 10
+      volumes: []
+  volumeClaimTemplates:
+  - metadata:
+      name: data
+      labels:
+        app: {{ .Values.postgresql.name | default "postgresql" }}{{ .Values.suffix }}
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      resources:
+        requests:
+          storage: 5Gi
+      storageClassName: "{{ .Values.postgresql.storageClass | default "" }}"

@@ -1,7 +1,8 @@
 export const API_URL = window.RUNTIME_REACT_APP_API_HOST //In non-dev environments, start.sh makes sure the runtime variables are popluated using host environment variables.
   ? `${window.location.protocol}//${window.RUNTIME_REACT_APP_API_HOST}/api` //For non-dev environments, CORS is enabled to HMCR urls.
-  : `${window.location.protocol}//${process.env.REACT_APP_CLIENT_ORIGIN}/api`; //For dev environment, proxy (setupProxy.js) is set up to avoid the same origin policy
+  : `${window.location.protocol}//${import.meta.env.VITE_CLIENT_ORIGIN}/api`;
 
+//For dev environment, proxy (vite.config.js) is set up to avoid the same origin policy
 const CODE_LOOKUP = '/codelookup';
 const ACTIVITY_RULE = '/activityrule';
 
@@ -40,10 +41,22 @@ export const API_PATHS = {
 };
 
 export const REPORT_TYPES = {
-  HMR_WORK_REPORT: { api: API_PATHS.WORK_REPORT, name: 'HMR_WORK_REPORT' },
-  HMR_ROCKFALL_REPORT: { api: API_PATHS.ROCKFALL_REPORT, name: 'HMR_ROCKFALL_REPORT' },
-  HMR_WILDLIFE_REPORT: { api: API_PATHS.WILDLIFE_REPORT, name: 'HMR_WILDLIFE_REPORT' },
-  HMR_SALT_REPORT: { api: API_PATHS.SALT_REPORT, name: 'HMR_SALT_REPORT' },
+  HMR_WORK_REPORT: {
+    api: API_PATHS.WORK_REPORT,
+    name: 'HMR_WORK_REPORT',
+  },
+  HMR_ROCKFALL_REPORT: {
+    api: API_PATHS.ROCKFALL_REPORT,
+    name: 'HMR_ROCKFALL_REPORT',
+  },
+  HMR_WILDLIFE_REPORT: {
+    api: API_PATHS.WILDLIFE_REPORT,
+    name: 'HMR_WILDLIFE_REPORT',
+  },
+  HMR_SALT_REPORT: {
+    api: API_PATHS.SALT_REPORT,
+    name: 'HMR_SALT_REPORT',
+  },
 };
 
 export const PATHS = {
@@ -67,13 +80,16 @@ export const PATHS = {
 
 export const MESSAGE_DATE_FORMAT = 'YYYY-MM-DD hh:mmA';
 
-export const DATE_DISPLAY_FORMAT = 'YYYY-MM-DD';
+export const DATE_DISPLAY_FORMAT = 'yyyy-MM-dd';
 
-export const DATE_UTC_FORMAT = 'YYYY-MM-DDTHH:mm';
+export const DATE_UTC_FORMAT = "yyyy-MM-dd'T'HH:mm";
 
 export const DATE_TIME_FORMAT = 'YYYY-MM-DD HH:mm:ss';
 
-export const FORM_TYPE = { ADD: 'ADD_FORM', EDIT: 'EDIT_FORM' };
+export const FORM_TYPE = {
+  ADD: 'ADD_FORM',
+  EDIT: 'EDIT_FORM',
+};
 
 export const PERMISSIONS = {
   CODE_W: 'CODE_W',
@@ -85,10 +101,13 @@ export const PERMISSIONS = {
   FILE_W: 'FILE_W',
   FILE_R: 'FILE_R',
   EXPORT: 'EXPORT',
-  SALT: 'SALT'
+  SALT: 'SALT',
 };
 
-export const USER_TYPE = { INTERNAL: 'INTERNAL', BUSINESS: 'BUSINESS' };
+export const USER_TYPE = {
+  INTERNAL: 'INTERNAL',
+  BUSINESS: 'BUSINESS',
+};
 
 export const UPLOAD_STATE = {
   RESUB_CHECK: 'RESUB_CHECK',
@@ -119,11 +138,11 @@ export const SORT_DIRECTION = {
   DESCENDING: 'desc',
 };
 
-export const DEFAULT_PAGE_SIZE_OPTIONS = process.env.REACT_APP_DEFAULT_PAGE_SIZE_OPTIONS.split(',').map((o) =>
-  parseInt(o)
+export const DEFAULT_PAGE_SIZE_OPTIONS = import.meta.env.VITE_DEFAULT_PAGE_SIZE_OPTIONS.split(',').map((o) =>
+  parseInt(o),
 );
 
-export const DEFAULT_PAGE_SIZE = parseInt(process.env.REACT_APP_DEFAULT_PAGE_SIZE);
+export const DEFAULT_PAGE_SIZE = parseInt(import.meta.env.VITE_DEFAULT_PAGE_SIZE);
 
 export const REPORT_EXPORT_FIELDS = {
   HMR_WORK_REPORT: [
@@ -226,5 +245,5 @@ export const REPORT_EXPORT_FIELDS = {
     'FILE_NAME',
     'RECORD_VERSION_NUMBER',
     'SUBMISSION_DATE',
-  ]
+  ],
 };

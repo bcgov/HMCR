@@ -28,15 +28,21 @@ a:not(.btn):focus {
 }
 
 .list-group .list-group-item-action {
-  @include hover-focus {
+  &:hover,
+  &:focus {
     text-decoration: underline;
   }
 }
 
+thead.thead-dark th {
+  background-color: var(--bs-primary) !important;
+  color: #fff !important;
+}
+
 // Header, adds the gold bottom border and shadow
 header nav {
-  background-color: theme-color(primary-nav);
-  border-bottom: 2px solid theme-color(bcgold);
+  background-color: var(--bs-primary-nav);
+  border-bottom: 2px solid var(--bs-bcgold);
   &.shadow {
     box-shadow: 0 3px 3px 1px $header-box-shadow-color;
   }
@@ -50,7 +56,8 @@ main {
 
 // Underline navbar links when active
 .navbar-nav .nav-link {
-  @include hover-focus {
+  &:hover,
+  &:focus {
     text-decoration: underline;
   }
 }
@@ -73,7 +80,7 @@ footer nav {
 
 // Stronger border colour
 .alert.alert-info {
-  border-color: theme-color-level(info, -4);
+  border-color: #b8d4ee;
 }
 .alert.alert-warning {
   border-color: theme-color-level(warning, -4);

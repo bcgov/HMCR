@@ -1,0 +1,37 @@
+env: "uat"
+suffix: "-uat"
+host: "hmcr-d3d940-uat.apps.silver.devops.gov.bc.ca"
+aspNetCoreEnv: "UAT"  # ASP.NET Core environment setting
+
+images:
+  api:
+    tag: "latest"
+  client:
+    tag: "latest"
+  hangfire:
+    tag: "latest"
+
+replicaCounts:
+  api: 1
+  client: 1
+  hangfire: 2
+  postgresql: 1
+
+resources:
+  api:
+    limits: { cpu: "500m", memory: "512Mi" }
+    requests: { cpu: "200m", memory: "256Mi" }
+  client:
+    limits: { cpu: "200m", memory: "256Mi" }
+    requests: { cpu: "50m", memory: "128Mi" }
+  hangfire:
+    limits: { cpu: "500m", memory: "512Mi" }
+    requests: { cpu: "200m", memory: "256Mi" }
+  postgresql:
+    limits: { cpu: "500m", memory: "512Mi" }
+    requests: { cpu: "250m", memory: "256Mi" }
+
+postgresql:
+  storageClass: "netapp-file-standard"
+
+createExternalSecrets: false

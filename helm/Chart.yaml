@@ -1,0 +1,6 @@
+apiVersion: v2
+name: HMCR
+description: "HMCR Application - API, Client, Hangfire, and PostgreSQL"
+type: application
+version: 1.0.0
+appVersion: "4.0"
