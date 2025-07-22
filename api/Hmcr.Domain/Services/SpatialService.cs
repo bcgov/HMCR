@@ -2,6 +2,7 @@
 using Hmcr.Chris.Models;
 using Hmcr.Model;
 using Hmcr.Model.Utils;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -36,6 +37,7 @@ namespace Hmcr.Domain.Services
 
         private IFieldValidatorService _validator;
         private ILookupCodeService _lookupService;
+        private ILogger<OasApi> _logger;
 
         private IEnumerable<string> _nonSpHighwayUniques = null;
         private IEnumerable<string> NonSpHighwayUniques => _nonSpHighwayUniques ??= _validator.CodeLookup.Where(x => x.CodeSet == CodeSet.NonSpHighwayUnique).Select(x => x.CodeValue).ToArray().ToLowercase();
@@ -59,7 +61,22 @@ namespace Hmcr.Domain.Services
 
             var threshold = _lookupService.GetThresholdLevel(thresholdLevel);
 
-            var isOnRfi = await _oasApi.IsPointOnRfiSegmentAsync(threshold.Error, point, rfiSegment);
+            bool isOnRfi;
+
+            try
+            {
+                isOnRfi = await _oasApi.IsPointOnRfiSegmentAsync(threshold.Error, point, rfiSegment);
+            }
+            catch (Exception ex)
+            {
+                // Log detailed error
+                _logger.LogError(ex, $"Exception during WFS check for RFI segment '{rfiSegment}' at point [{point.Latitude}, {point.Longitude}]");
+
+                // Surface error to validation errors
+                errors.AddItem("WFS Error", $"Failed to validate GPS point against RFI segment [{rfiSegment}]. Details: {ex.Message}");
+
+                return (SpValidationResult.Fail, null, rfiResult.segment);
+            }
 
             if (!isOnRfi)
             {
