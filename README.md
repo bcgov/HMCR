@@ -15,7 +15,7 @@ This presents a problem on how to best collect the data being provided by the MC
 ## Dependencies
 
 - Working KeyCloak Realm with BC Gov IDIR and BCeID
-- Ministry of Transportation and Infrastructure GeoServer access
+- Ministry of Transportation and Transit GeoServer access
 - IDIR service account with access to BC Gov BceID WebService
 
 ## Local Development

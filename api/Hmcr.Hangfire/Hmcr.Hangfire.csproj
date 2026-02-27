@@ -4,8 +4,8 @@
     <TypeScriptCompileBlocked>true</TypeScriptCompileBlocked>
     <TypeScriptToolsVersion>Latest</TypeScriptToolsVersion>
     <IsPackable>false</IsPackable>
-    <Authors>Ministry of Transportation and Infrastructure</Authors>
-    <Company>Ministry of Transportation and Infrastructure</Company>
+    <Authors>Ministry of Transportation and Transit</Authors>
+    <Company>Ministry of Transportation and Transit</Company>
     <Description>The Hangfire server for the Highway Maintenance Contract Reporting System</Description>
     <Copyright>Copyright© 2019, Province of British Columbia.</Copyright>
     <ErrorOnDuplicatePublishOutputFiles>false</ErrorOnDuplicatePublishOutputFiles>
