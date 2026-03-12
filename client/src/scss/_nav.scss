@@ -46,7 +46,7 @@
 }
 
 .main-nav {
-  @include main-nav-colors(theme-color(secondary-nav));
+  @include main-nav-colors(#053662);
 }
 
 .main-nav.dev,
@@ -54,8 +54,13 @@
   @include main-nav-colors(#448a38);
 }
 
+.main-nav.test,
 .main-nav.tst {
   @include main-nav-colors(#f9a825);
+}
+
+.main-nav.prod {
+  @include main-nav-colors(#053662);
 }
 
 .main-nav.uat {

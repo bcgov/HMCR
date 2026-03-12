@@ -687,7 +687,7 @@ const AddSaltReportFormFields = ({ setInitialValues, formValues, setValidationSc
                         <thead>
                           <tr>
                             <th rowSpan={2}>Site Name</th>
-                            <th rowSpan={2}>MoTI Owned?</th>
+                            <th rowSpan={2}>MoTT Owned?</th>
                             <th colSpan={4}>Road Salts</th>
                             <th colSpan={4}>Treated Abrasives</th>
                           </tr>

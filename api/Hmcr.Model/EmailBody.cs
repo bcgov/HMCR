@@ -88,7 +88,7 @@ namespace Hmcr.Model
             htmlBody.Append("<br/>");
             htmlBody.Append("Highway Maintenance Contract Reporting System");
             htmlBody.Append("<br/>");
-            htmlBody.Append("Ministry of Transportation and Infrastructure");
+            htmlBody.Append("Ministry of Transportation and Transit");
 
             return htmlBody.ToString();
         }
