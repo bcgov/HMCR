@@ -60,11 +60,23 @@ module.exports = async (settings) => {
     path.resolve(__dirname, "../../openshift")
   );
   var objects = [];
+  const logDbClaimName = `${phases[phase].name}-logdb${phases[phase].suffix}`;
   const logDbSecret = util.getSecret(
     oc,
     phases[phase].namespace,
-    `${phases[phase].name}-logdb${phases[phase].suffix}`
+    logDbClaimName
   );
+  const logDbPersistentVolumeSize = util.getPersistentVolumeClaimSize(
+    oc,
+    phases[phase].namespace,
+    logDbClaimName
+  );
+
+  if (logDbPersistentVolumeSize) {
+    console.log(
+      `Reusing existing logDb PVC size for ${logDbClaimName}: ${logDbPersistentVolumeSize}`
+    );
+  }
 
   objects.push(
     ...oc.processDeploymentTemplate(
@@ -109,6 +121,9 @@ module.exports = async (settings) => {
           SUFFIX: phases[phase].suffix,
           VERSION: version,
           ENV: phases[phase].phase,
+          ...(logDbPersistentVolumeSize
+            ? { PERSISTENT_VOLUME_SIZE: logDbPersistentVolumeSize }
+            : {}),
         },
       }
     )
