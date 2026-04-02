@@ -2,4 +2,7 @@
 const task = require('./lib/build.js')
 const settings = require('./lib/config.js')
 
-task(Object.assign(settings, { phase: 'build'}))
+Promise.resolve(task(Object.assign(settings, { phase: 'build' }))).catch((error) => {
+  console.error(error);
+  process.exit(1);
+})

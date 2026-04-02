@@ -70,5 +70,5 @@ module.exports = (settings) => {
     phases[phase].changeId,
     phases[phase].instance
   );
-  oc.applyAndBuild(objects);
+  return oc.applyAndBuild(objects);
 };
