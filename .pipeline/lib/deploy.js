@@ -1,10 +1,49 @@
 "use strict";
-const { OpenShiftClientX } = require("@bcgov/pipeline-cli");
 const path = require("path");
 
+const buildTask = require("./build");
+const { HmcrOpenShiftClientX } = require("./openshift-client");
 const util = require("./util");
 
-module.exports = (settings) => {
+const imageNames = ["hmcr-api", "hmcr-client", "hmcr-hangfire"];
+
+function missingBuildImages(oc, buildNamespace, version) {
+  return imageNames.filter((imageName) => {
+    try {
+      oc.raw(
+        "get",
+        ["istag", `${imageName}:${version}`, "-o", "name"],
+        { namespace: buildNamespace }
+      );
+      return false;
+    } catch (error) {
+      return true;
+    }
+  });
+}
+
+async function ensureBuildImages(settings, oc, version) {
+  const buildNamespace = settings.phases.build.namespace;
+  const missingImages = missingBuildImages(oc, buildNamespace, version);
+
+  if (missingImages.length === 0) {
+    return;
+  }
+
+  console.log(
+    `⚠️ Missing build image tags for ${version}: ${missingImages.join(", ")}. Rebuilding before deploy.`
+  );
+  await buildTask(settings);
+
+  const remainingMissingImages = missingBuildImages(oc, buildNamespace, version);
+  if (remainingMissingImages.length > 0) {
+    throw new Error(
+      `Build images are still missing after rebuild for ${version}: ${remainingMissingImages.join(", ")}`
+    );
+  }
+}
+
+module.exports = async (settings) => {
   const phases = settings.phases;
   const options = settings.options;
   const phase = options.env;
@@ -13,7 +52,7 @@ module.exports = (settings) => {
   const version = options.version || `v1.0.${githubRunNumber}`;
   console.log(`🚀 Using version: ${version}`);
 
-  const oc = new OpenShiftClientX(
+  const oc = new HmcrOpenShiftClientX(
     Object.assign({ namespace: phases[phase].namespace }, options)
   );
 
@@ -21,11 +60,23 @@ module.exports = (settings) => {
     path.resolve(__dirname, "../../openshift")
   );
   var objects = [];
+  const logDbClaimName = `${phases[phase].name}-logdb${phases[phase].suffix}`;
   const logDbSecret = util.getSecret(
     oc,
     phases[phase].namespace,
-    `${phases[phase].name}-logdb${phases[phase].suffix}`
+    logDbClaimName
   );
+  const logDbPersistentVolumeSize = util.getPersistentVolumeClaimSize(
+    oc,
+    phases[phase].namespace,
+    logDbClaimName
+  );
+
+  if (logDbPersistentVolumeSize) {
+    console.log(
+      `Reusing existing logDb PVC size for ${logDbClaimName}: ${logDbPersistentVolumeSize}`
+    );
+  }
 
   objects.push(
     ...oc.processDeploymentTemplate(
@@ -70,6 +121,9 @@ module.exports = (settings) => {
           SUFFIX: phases[phase].suffix,
           VERSION: version,
           ENV: phases[phase].phase,
+          ...(logDbPersistentVolumeSize
+            ? { PERSISTENT_VOLUME_SIZE: logDbPersistentVolumeSize }
+            : {}),
         },
       }
     )
@@ -137,6 +191,7 @@ module.exports = (settings) => {
     `${changeId}`,
     phases[phase].instance
   );
+  await ensureBuildImages(settings, oc, version);
   oc.importImageStreams(
     objects,
     phases[phase].tag,
@@ -144,30 +199,10 @@ module.exports = (settings) => {
     version
   );
 
-  // Ensure image streams are imported before proceeding
-  const imageNames = ["hmcr-api", "hmcr-client", "hmcr-hangfire"];
-  imageNames.forEach((imageName) => {
-    try {
-      console.log(`🔄 Importing image stream for ${imageName}`);
-      oc.raw("import-image", [
-        `${imageName}:${phases.build.tag}`,
-        `--from=d3d940-tools/${imageName}:${phases.build.tag}`,
-        "--confirm",
-        "-n",
-        phases.build.namespace,
-      ]);
-      console.log(`✅ Successfully imported image stream for ${imageName}`);
-    } catch (error) {
-      console.error(`❌ Failed to import image stream for ${imageName}: ${error.message}`);
-    }
-  });
-
   let imageExists = false;
   
-  oc.applyAndDeploy(objects, phases[phase].instance)
+  return oc.applyAndDeploy(objects, phases[phase].instance)
     .then(() => {
-      const imageNames = ["hmcr-api", "hmcr-client", "hmcr-hangfire"];
-
       imageExists = imageNames.every((imageName) => {
         try {
           const imageSha = oc.raw("get", [
@@ -209,8 +244,6 @@ module.exports = (settings) => {
         console.log("❌ Skipping final tagging because image does not exist.");
         return;
       }
-      const imageNames = ["hmcr-api", "hmcr-client", "hmcr-hangfire"];
-
       imageNames.forEach((imageName) => {
         const sourceImage = `d3d940-tools/${imageName}:latest`;
         const targetImage = `${phases[phase].namespace}/${imageName}`;

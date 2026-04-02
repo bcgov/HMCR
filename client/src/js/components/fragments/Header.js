@@ -29,6 +29,7 @@ const Header = ({ currentUser }) => {
   const location = useLocation();
   const [collapsed, setCollapsed] = useState(true);
   const [version, setVersion] = useState(null);
+  const environmentClass = version || 'unknown';
 
   useEffect(() => {
     api.getVersion().then((response) => setVersion(response.data.environment.toLowerCase()));
@@ -48,7 +49,7 @@ const Header = ({ currentUser }) => {
 
   return (
     <header className="mb-3">
-      <Navbar expand="lg" className="navbar-dark">
+      <Navbar expand="lg" className={`navbar-dark header-nav ${environmentClass}`}>
         <Container>
           <NavbarBrand tag={Link} onClick={hideNavbar} to="/">
             <img
@@ -72,7 +73,7 @@ const Header = ({ currentUser }) => {
           <Collapse isOpen={!collapsed} navbar />
         </Container>
       </Navbar>
-      <Navbar expand="lg" className={`navbar-dark main-nav ${version}`}>
+      <Navbar expand="lg" className={`navbar-dark main-nav ${environmentClass}`}>
         <Container>
           <Collapse isOpen={!collapsed} navbar>
             <Nav className="navbar-nav">
