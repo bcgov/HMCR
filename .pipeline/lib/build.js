@@ -1,11 +1,11 @@
 "use strict";
-const { OpenShiftClientX } = require("@bcgov/pipeline-cli");
 const path = require("path");
+const { HmcrOpenShiftClientX } = require("./openshift-client");
 
 module.exports = (settings) => {
   const phases = settings.phases;
   const options = settings.options;
-  const oc = new OpenShiftClientX(
+  const oc = new HmcrOpenShiftClientX(
     Object.assign({ namespace: phases.build.namespace }, options)
   );
   const phase = "build";

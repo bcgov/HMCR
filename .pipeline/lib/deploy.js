@@ -1,8 +1,8 @@
 "use strict";
-const { OpenShiftClientX } = require("@bcgov/pipeline-cli");
 const path = require("path");
 
 const buildTask = require("./build");
+const { HmcrOpenShiftClientX } = require("./openshift-client");
 const util = require("./util");
 
 const imageNames = ["hmcr-api", "hmcr-client", "hmcr-hangfire"];
@@ -52,7 +52,7 @@ module.exports = async (settings) => {
   const version = options.version || `v1.0.${githubRunNumber}`;
   console.log(`🚀 Using version: ${version}`);
 
-  const oc = new OpenShiftClientX(
+  const oc = new HmcrOpenShiftClientX(
     Object.assign({ namespace: phases[phase].namespace }, options)
   );
 
@@ -183,23 +183,6 @@ module.exports = async (settings) => {
     phases.build.namespace,
     version
   );
-
-  // Ensure image streams are imported before proceeding
-  imageNames.forEach((imageName) => {
-    try {
-      console.log(`🔄 Importing image stream for ${imageName}`);
-      oc.raw("import-image", [
-        `${imageName}:${phases.build.tag}`,
-        `--from=d3d940-tools/${imageName}:${phases.build.tag}`,
-        "--confirm",
-        "-n",
-        phases.build.namespace,
-      ]);
-      console.log(`✅ Successfully imported image stream for ${imageName}`);
-    } catch (error) {
-      console.error(`❌ Failed to import image stream for ${imageName}: ${error.message}`);
-    }
-  });
 
   let imageExists = false;
   
