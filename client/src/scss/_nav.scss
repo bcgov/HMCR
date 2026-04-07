@@ -1,5 +1,9 @@
 @import './vendor/bootstrap-theme.scss';
 
+@mixin header-nav-colors($background-color) {
+  background-color: $background-color;
+}
+
 @mixin main-nav-colors($background-color) {
   $nav-link-active-bg: lighten($background-color, 10%);
 
@@ -43,6 +47,28 @@
       }
     }
   }
+}
+
+.header-nav {
+  @include header-nav-colors(#053662);
+}
+
+.header-nav.dev,
+.header-nav.unknown {
+  @include header-nav-colors(#448a38);
+}
+
+.header-nav.test,
+.header-nav.tst {
+  @include header-nav-colors(#f9a825);
+}
+
+.header-nav.prod {
+  @include header-nav-colors(#053662);
+}
+
+.header-nav.uat {
+  @include header-nav-colors(#744e91);
 }
 
 .main-nav {

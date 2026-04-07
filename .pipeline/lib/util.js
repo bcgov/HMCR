@@ -23,6 +23,25 @@ function getSecret(oc, namespace, secretId) {
   return secret;
 }
 
+function getPersistentVolumeClaimSize(oc, namespace, claimName) {
+  try {
+    const raw = oc.raw("get", [
+      "-n",
+      namespace,
+      "pvc",
+      claimName,
+      "-o",
+      "json",
+    ]);
+    const claim = JSON.parse(raw.stdout);
+
+    return claim?.spec?.resources?.requests?.storage || null;
+  } catch (error) {
+    return null;
+  }
+}
+
 module.exports = {
   getSecret,
+  getPersistentVolumeClaimSize,
 };
