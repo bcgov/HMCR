@@ -73,38 +73,45 @@ namespace Hmcr.Chris
 
         public async Task<HttpResponseMessage> PostWithRetry(HttpClient client, string path, string body)
         {
-            var response
-                = await client.PostAsync(path, new StringContent(body, Encoding.UTF8));
+            using var content = new StringContent(body, Encoding.UTF8, "application/xml");
 
-            if (!response.IsSuccessStatusCode)
-            {                
-                for (var attempt = 2; attempt <= maxAttempt; attempt++)
+            HttpResponseMessage response = null;
+            Exception lastException = null;
+
+            for (int attempt = 1; attempt <= maxAttempt; attempt++)
+            {
+                try
                 {
-                    await Task.Delay(100 * attempt);
-
-                    response = await client.PostAsync(path, new StringContent(body, Encoding.UTF8));
+                    response = await client.PostAsync(path, content);
 
                     if (response.IsSuccessStatusCode)
                     {
-                        break;
+                        return response;
                     }
-                    else if (attempt == maxAttempt)
-                    {
-                        string message = "";
+                }
+                catch (Exception ex)
+                {
+                    lastException = ex;
+                }
 
-                        if (response.Content != null)
-                        {
-                            var bytes = await response.Content.ReadAsByteArrayAsync();
-                            message = Encoding.UTF8.GetString(bytes);
-                        }
-
-                        throw new Exception($"Status Code: {response.StatusCode}" + Environment.NewLine + message);
-                    }
-                }                
+                if (attempt < maxAttempt)
+                {
+                    await Task.Delay(100 * attempt);
+                }
             }
 
-            return response;
-        }
+            // Final failure
+            string message = "";
 
+            if (response?.Content != null)
+            {
+                var bytes = await response.Content.ReadAsByteArrayAsync();
+                message = Encoding.UTF8.GetString(bytes);
+            }
+
+            throw new Exception($"Failed POST to {path}. " +
+                (response != null ? $"Status Code: {response.StatusCode}" : "") +
+                Environment.NewLine + message, lastException);
+        }
     }
 }
