@@ -1,6 +1,6 @@
 export const API_URL = window.RUNTIME_REACT_APP_API_HOST //In non-dev environments, start.sh makes sure the runtime variables are popluated using host environment variables.
   ? `${window.location.protocol}//${window.RUNTIME_REACT_APP_API_HOST}/api` //For non-dev environments, CORS is enabled to HMCR urls.
-  : `${window.location.protocol}//${process.env.REACT_APP_CLIENT_ORIGIN}/api`; //For dev environment, proxy (setupProxy.js) is set up to avoid the same origin policy
+  : `${window.location.protocol}//${import.meta.env.VITE_CLIENT_ORIGIN}/api`; //For dev environment, the Vite dev server proxy (vite.config.js) avoids the same-origin policy.
 
 const CODE_LOOKUP = '/codelookup';
 const ACTIVITY_RULE = '/activityrule';
@@ -119,11 +119,11 @@ export const SORT_DIRECTION = {
   DESCENDING: 'desc',
 };
 
-export const DEFAULT_PAGE_SIZE_OPTIONS = process.env.REACT_APP_DEFAULT_PAGE_SIZE_OPTIONS.split(',').map((o) =>
+export const DEFAULT_PAGE_SIZE_OPTIONS = import.meta.env.VITE_DEFAULT_PAGE_SIZE_OPTIONS.split(',').map((o) =>
   parseInt(o)
 );
 
-export const DEFAULT_PAGE_SIZE = parseInt(process.env.REACT_APP_DEFAULT_PAGE_SIZE);
+export const DEFAULT_PAGE_SIZE = parseInt(import.meta.env.VITE_DEFAULT_PAGE_SIZE);
 
 export const REPORT_EXPORT_FIELDS = {
   HMR_WORK_REPORT: [
