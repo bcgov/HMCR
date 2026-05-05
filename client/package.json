@@ -37,7 +37,9 @@
     "autoprefixer": "10.4.5"
   },
   "devDependencies": {
-    "redux-immutable-state-invariant": "^2.1.0"
+    "@vitejs/plugin-react": "^4.3.0",
+    "redux-immutable-state-invariant": "^2.1.0",
+    "vite": "^6.0.0"
   },
   "scripts": {
     "start": "react-scripts start",
