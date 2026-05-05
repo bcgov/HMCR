@@ -6,7 +6,12 @@ export default defineConfig(({ mode }) => {
   const apiHost = env.VITE_API_HOST || 'localhost:27238';
 
   return {
-    plugins: [react()],
+    plugins: [react({ include: /\.(js|jsx)$/ })],
+    optimizeDeps: {
+      esbuildOptions: {
+        loader: { '.js': 'jsx' },
+      },
+    },
     server: {
       port: 3000,
       proxy: {
