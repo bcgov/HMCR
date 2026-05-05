@@ -6,7 +6,12 @@ export default defineConfig(({ mode }) => {
   const apiHost = env.VITE_API_HOST || 'localhost:27238';
 
   return {
-    plugins: [react({ include: /\.(js|jsx)$/ })],
+    plugins: [react()],
+    esbuild: {
+      loader: 'jsx',
+      include: /src\/.*\.jsx?$/,
+      exclude: [],
+    },
     optimizeDeps: {
       esbuildOptions: {
         loader: { '.js': 'jsx' },
