@@ -26,7 +26,7 @@
     "react-toastify": "^5.5.0",
     "reactstrap": "^8.4.1",
     "redux": "^4.0.5",
-    "redux-devtools-extension": "^2.13.8",
+    "@redux-devtools/extension": "^3.3.0",
     "redux-thunk": "^2.3.0",
     "sass": "^1.80.0",
     "yup": "^0.28.3"
