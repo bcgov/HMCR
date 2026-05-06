@@ -3,7 +3,7 @@ import { useHistory } from 'react-router-dom';
 import { connect } from 'react-redux';
 import { Button, Row, Col, Input, UncontrolledPopover, PopoverBody, PopoverHeader, Progress } from 'reactstrap';
 import moment from 'moment';
-import { DateRangePicker } from 'react-dates';
+import DatePicker from 'react-datepicker';
 import queryString from 'query-string';
 import _ from 'lodash';
 
@@ -53,7 +53,6 @@ const WorkReportingSubmissions = ({ serviceArea, submissionStatuses }, ref) => {
   const [showResultScreen, setShowResultScreen] = useState({ isOpen: false, submission: null });
 
   // Date picker
-  const [focusedInput, setFocusedInput] = useState(null);
   const [dateFrom, setDateFrom] = useState(defaultSearchOptions.dateFrom);
   const [dateTo, setDateTo] = useState(defaultSearchOptions.dateTo);
 
@@ -119,27 +118,42 @@ const WorkReportingSubmissions = ({ serviceArea, submissionStatuses }, ref) => {
           <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between' }}>
             <div>
               <span className="mr-2">Report Submit Date</span>
-              <DateRangePicker
-                startDate={dateFrom}
-                startDateId="searchStartDate"
-                endDate={dateTo}
-                endDateId="searchEndDate"
-                onDatesChange={({ startDate, endDate }) => {
-                  setDateFrom(startDate);
-                  setDateTo(endDate);
-                  handleDateChanged(startDate, endDate);
+              <DatePicker
+                id="searchStartDate"
+                selected={dateFrom ? dateFrom.toDate() : null}
+                onChange={(date) => {
+                  const next = date ? moment(date) : null;
+                  setDateFrom(next);
+                  handleDateChanged(next, dateTo);
                 }}
-                focusedInput={focusedInput}
-                onFocusChange={(focusedInput) => setFocusedInput(focusedInput)}
-                showDefaultInputIcon
-                hideKeyboardShortcutsPanel
-                inputIconPosition="after"
-                small
-                displayFormat={Constants.DATE_DISPLAY_FORMAT}
-                startDatePlaceholderText="Date From"
-                endDatePlaceholderText="Date To"
-                isOutsideRange={(date) => date.isBefore(startDateLimit) || moment().endOf('day').isBefore(date)}
-                minimumNights={0}
+                selectsStart
+                startDate={dateFrom ? dateFrom.toDate() : null}
+                endDate={dateTo ? dateTo.toDate() : null}
+                dateFormat="yyyy-MM-dd"
+                placeholderText="Date From"
+                filterDate={(date) =>
+                  !(moment(date).isBefore(startDateLimit) || moment().endOf('day').isBefore(moment(date)))
+                }
+                className="form-control form-control-sm"
+              />
+              <DatePicker
+                id="searchEndDate"
+                selected={dateTo ? dateTo.toDate() : null}
+                onChange={(date) => {
+                  const next = date ? moment(date) : null;
+                  setDateTo(next);
+                  handleDateChanged(dateFrom, next);
+                }}
+                selectsEnd
+                startDate={dateFrom ? dateFrom.toDate() : null}
+                endDate={dateTo ? dateTo.toDate() : null}
+                minDate={dateFrom ? dateFrom.toDate() : null}
+                dateFormat="yyyy-MM-dd"
+                placeholderText="Date To"
+                filterDate={(date) =>
+                  !(moment(date).isBefore(startDateLimit) || moment().endOf('day').isBefore(moment(date)))
+                }
+                className="form-control form-control-sm"
               />
               <div
                 style={{
