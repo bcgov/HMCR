@@ -3,7 +3,6 @@ import { Button, Modal, ModalBody, ModalHeader } from 'reactstrap';
 import moment from 'moment';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import FileSaver from 'file-saver';
-import Clipboard from 'react-clipboard.js';
 import { toast } from 'react-toastify';
 
 import PageSpinner from './ui/PageSpinner';
@@ -170,16 +169,17 @@ const WorkReportingSubmissionDetail = ({ toggle, submission }) => {
               <FontAwesomeIcon icon="download" /> Original
             </Button>
           )}
-          <Clipboard
-            className="btn btn-primary btn-sm"
-            option-text={() => createClipboardText(submissionResultData)}
-            onSuccess={() => {
+          <Button
+            color="primary"
+            size="sm"
+            onClick={async () => {
+              await navigator.clipboard.writeText(createClipboardText(submissionResultData));
               toast.info(<div className="text-center">Copied to clipboard.</div>);
             }}
             title="Copy errors to clipboard, with tab delimiter"
           >
             <FontAwesomeIcon icon="copy" /> Copy
-          </Clipboard>
+          </Button>
         </div>
       </div>
     );
