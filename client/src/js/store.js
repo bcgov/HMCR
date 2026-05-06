@@ -1,12 +1,13 @@
 import { createStore, applyMiddleware } from 'redux';
 import { composeWithDevTools } from '@redux-devtools/extension/lib/esm/developmentOnly';
 import reduxThunk from 'redux-thunk';
+import * as reduxImmutableStateInvariant from 'redux-immutable-state-invariant';
 
 import reducers from './reducers';
 
 const middleware =
   process.env.NODE_ENV !== 'production'
-    ? [require('redux-immutable-state-invariant').default(), reduxThunk]
+    ? [reduxImmutableStateInvariant.default(), reduxThunk]
     : [reduxThunk];
 
 const store = createStore(reducers, composeWithDevTools(applyMiddleware(...middleware)));
