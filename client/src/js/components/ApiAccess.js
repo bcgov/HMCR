@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { connect } from 'react-redux';
 import { Alert, Button, FormGroup, Label, Row, Col, Input, InputGroup, InputGroupAddon } from 'reactstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import Clipboard from 'react-clipboard.js';
 import { toast } from 'react-toastify';
 
 import MaterialCard from './ui/MaterialCard';
@@ -171,16 +170,16 @@ const ApiAccess = ({ hideErrorDialog }) => {
                       readOnly
                     />
                     <InputGroupAddon addonType="append">
-                      <Clipboard
-                        className="btn btn-primary"
-                        option-text={() => apiClient.clientId}
-                        onSuccess={() => {
+                      <Button
+                        color="primary"
+                        onClick={async () => {
+                          await navigator.clipboard.writeText(apiClient.clientId);
                           toast.info(<div className="text-center">Copied to clipboard.</div>);
                         }}
                         title="Copy Client Id to Clipboard"
                       >
                         <FontAwesomeIcon icon="copy" />
-                      </Clipboard>
+                      </Button>
                     </InputGroupAddon>
                   </InputGroup>
                 </Col>
@@ -203,17 +202,17 @@ const ApiAccess = ({ hideErrorDialog }) => {
                       <Button color="primary" onClick={() => setShowSecret(!showSecret)}>
                         <FontAwesomeIcon icon={showSecret ? 'eye-slash' : 'eye'} />
                       </Button>
-                      <Clipboard
-                        className="btn btn-primary"
-                        option-text={() => apiClient.clientSecret}
-                        onSuccess={() => {
+                      <Button
+                        color="primary"
+                        onClick={async () => {
+                          await navigator.clipboard.writeText(apiClient.clientSecret);
                           toast.info(<div className="text-center">Copied to clipboard.</div>);
                           setShowSecret(false);
                         }}
                         title="Copy Client Secret to Clipboard"
                       >
                         <FontAwesomeIcon icon="copy" />
-                      </Clipboard>
+                      </Button>
                     </InputGroupAddon>
                   </InputGroup>
                 </Col>
