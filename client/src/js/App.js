@@ -4,9 +4,7 @@ import { BrowserRouter, Route, Switch, Redirect } from 'react-router-dom';
 import { Container } from 'reactstrap';
 import { toast } from 'react-toastify';
 
-import 'react-dates/initialize';
-import 'react-dates/lib/css/_datepicker.css';
-
+import 'react-datepicker/dist/react-datepicker.css';
 import 'react-toastify/dist/ReactToastify.css';
 
 import AuthorizedRoute from './components/fragments/AuthorizedRoute';
