@@ -1,5 +1,5 @@
 import React from 'react';
-import { CustomInput, Col, FormGroup, Label, Input, FormFeedback } from 'reactstrap';
+import { Col, FormGroup, Label, Input, FormFeedback } from 'reactstrap';
 import { useField } from 'formik';
 
 export const FormRow = ({ name, label, children }) => {
@@ -15,12 +15,12 @@ export const FormRow = ({ name, label, children }) => {
 
 export const FormSwitchInput = ({ children, ...props }) => {
   const [field] = useField({ ...props, type: 'checkbox' });
-  return <CustomInput type="switch" id={props.name} {...field} {...props} />;
+  return <Input type="switch" id={props.name} {...field} {...props} />;
 };
 
 export const FormCheckboxInput = ({ children, ...props }) => {
   const [field] = useField({ ...props, type: 'checkbox' });
-  return <CustomInput type="checkbox" id={props.name} {...field} {...props} />;
+  return <Input type="checkbox" id={props.name} {...field} {...props} />;
 };
 
 export const FormInput = ({ children, ...props }) => {
@@ -66,16 +66,12 @@ export const FormNumberInput = ({ children, name, ...props }) => {
 export const FormRadioInput = ({ label, ...props }) => {
   const [field, meta] = useField({ ...props, type: 'radio' });
   return (
-    <div>
-      <CustomInput
-        type="radio"
-        {...field}
-        {...props}
-        label={label}
-        id={props.id || props.name}
-        invalid={meta.touched && meta.error ? true : false}
-      />
+    <FormGroup check>
+      <Input type="radio" {...field} {...props} id={props.id || props.name} invalid={meta.touched && meta.error ? true : false} />
+      <Label check for={props.id || props.name}>
+        {label}
+      </Label>
       {meta.touched && meta.error && <FormFeedback>{meta.error}</FormFeedback>}
-    </div>
+    </FormGroup>
   );
 };

@@ -38,7 +38,8 @@
           color: $navbar-dark-color;
           text-decoration: none;
 
-          @include hover-focus() {
+          &:hover,
+          &:focus {
             text-decoration: underline;
             background-color: $nav-link-active-bg;
             color: $navbar-dark-hover-color;

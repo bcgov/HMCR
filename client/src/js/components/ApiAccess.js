@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { connect } from 'react-redux';
-import { Alert, Button, FormGroup, Label, Row, Col, Input, InputGroup, InputGroupAddon } from 'reactstrap';
+import { Alert, Button, FormGroup, Label, Row, Col, Input, InputGroup } from 'reactstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { toast } from 'react-toastify';
 
@@ -169,18 +169,16 @@ const ApiAccess = ({ hideErrorDialog }) => {
                       value={apiClient.clientId}
                       readOnly
                     />
-                    <InputGroupAddon addonType="append">
-                      <Button
-                        color="primary"
-                        onClick={async () => {
-                          await navigator.clipboard.writeText(apiClient.clientId);
-                          toast.info(<div className="text-center">Copied to clipboard.</div>);
-                        }}
-                        title="Copy Client Id to Clipboard"
-                      >
-                        <FontAwesomeIcon icon="copy" />
-                      </Button>
-                    </InputGroupAddon>
+                    <Button
+                      color="primary"
+                      onClick={async () => {
+                        await navigator.clipboard.writeText(apiClient.clientId);
+                        toast.info(<div className="text-center">Copied to clipboard.</div>);
+                      }}
+                      title="Copy Client Id to Clipboard"
+                    >
+                      <FontAwesomeIcon icon="copy" />
+                    </Button>
                   </InputGroup>
                 </Col>
               </FormGroup>
@@ -198,22 +196,20 @@ const ApiAccess = ({ hideErrorDialog }) => {
                       value={apiClient.clientSecret}
                       readOnly
                     />
-                    <InputGroupAddon addonType="append">
-                      <Button color="primary" onClick={() => setShowSecret(!showSecret)}>
-                        <FontAwesomeIcon icon={showSecret ? 'eye-slash' : 'eye'} />
-                      </Button>
-                      <Button
-                        color="primary"
-                        onClick={async () => {
-                          await navigator.clipboard.writeText(apiClient.clientSecret);
-                          toast.info(<div className="text-center">Copied to clipboard.</div>);
-                          setShowSecret(false);
-                        }}
-                        title="Copy Client Secret to Clipboard"
-                      >
-                        <FontAwesomeIcon icon="copy" />
-                      </Button>
-                    </InputGroupAddon>
+                    <Button color="primary" onClick={() => setShowSecret(!showSecret)}>
+                      <FontAwesomeIcon icon={showSecret ? 'eye-slash' : 'eye'} />
+                    </Button>
+                    <Button
+                      color="primary"
+                      onClick={async () => {
+                        await navigator.clipboard.writeText(apiClient.clientSecret);
+                        toast.info(<div className="text-center">Copied to clipboard.</div>);
+                        setShowSecret(false);
+                      }}
+                      title="Copy Client Secret to Clipboard"
+                    >
+                      <FontAwesomeIcon icon="copy" />
+                    </Button>
                   </InputGroup>
                 </Col>
               </FormGroup>

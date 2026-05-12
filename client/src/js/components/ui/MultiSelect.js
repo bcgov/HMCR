@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { CustomInput, FormFeedback } from 'reactstrap';
+import { FormFeedback, FormGroup, Input, Label } from 'reactstrap';
 import { FieldArray, useField, useFormikContext } from 'formik';
 
 const MultiSelect = (props) => {
@@ -45,18 +45,21 @@ const MultiSelect = (props) => {
         }`}
       >
         {showSelectAll && (
-          <CustomInput
-            type="checkbox"
-            id={`${name}_select_all`}
-            label="Select All"
-            value="select_all"
-            checked={selectAll}
-            onBlur={handleBlur}
-            onChange={(e) => {
-              handleSelectedAllChecked(e.target.checked);
-            }}
-            className="multiselect-all"
-          />
+          <FormGroup check className="multiselect-all">
+            <Input
+              type="checkbox"
+              id={`${name}_select_all`}
+              value="select_all"
+              checked={selectAll}
+              onBlur={handleBlur}
+              onChange={(e) => {
+                handleSelectedAllChecked(e.target.checked);
+              }}
+            />
+            <Label check for={`${name}_select_all`}>
+              Select All
+            </Label>
+          </FormGroup>
         )}
         <FieldArray name={name}>
           {({ push, remove }) =>
@@ -64,18 +67,21 @@ const MultiSelect = (props) => {
               const description = item.description ? item.description : item.name;
               const displayName = description;
               return (
-                <CustomInput
-                  key={item.id}
-                  type="checkbox"
-                  id={`${name}_${item.id}`}
-                  label={displayName}
-                  value={item.id}
-                  checked={values[name].includes(item.id)}
-                  onBlur={handleBlur}
-                  onChange={(e) => {
-                    handleItemSelected(e.target.checked, item.id, push, remove);
-                  }}
-                />
+                <FormGroup check key={item.id}>
+                  <Input
+                    type="checkbox"
+                    id={`${name}_${item.id}`}
+                    value={item.id}
+                    checked={values[name].includes(item.id)}
+                    onBlur={handleBlur}
+                    onChange={(e) => {
+                      handleItemSelected(e.target.checked, item.id, push, remove);
+                    }}
+                  />
+                  <Label check for={`${name}_${item.id}`}>
+                    {displayName}
+                  </Label>
+                </FormGroup>
               );
             })
           }
