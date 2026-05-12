@@ -21,6 +21,7 @@ using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
+using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
 using NetCore.AutoRegisterDi;
 using System;
@@ -89,14 +90,16 @@ namespace Hmcr.Api.Extensions
 
         public static void AddHmcrAutoMapper(this IServiceCollection services)
         {
-            var mappingConfig = new MapperConfiguration(cfg =>
+            services.AddSingleton<IMapper>(serviceProvider =>
             {
-                cfg.AddProfile(new EntityToModelProfile());
-                cfg.AddProfile(new ModelToEntityProfile());
-            });
+                var mappingConfig = new MapperConfiguration(cfg =>
+                {
+                    cfg.AddProfile(new EntityToModelProfile());
+                    cfg.AddProfile(new ModelToEntityProfile());
+                }, serviceProvider.GetRequiredService<ILoggerFactory>());
 
-            var mapper = mappingConfig.CreateMapper();
-            services.AddSingleton(mapper);
+                return mappingConfig.CreateMapper();
+            });
         }
 
         public static void AddHmcrAuthentication(this IServiceCollection services, IConfiguration config)
