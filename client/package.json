@@ -35,8 +35,7 @@
     "@vitejs/plugin-react": "^4.3.0",
     "lighthouse": "^12.1.0",
     "redux-immutable-state-invariant": "^2.1.0",
-    "vite": "^6.0.0",
-    "vite-plugin-visualizer": "^4.2.2"
+    "vite": "^6.0.0"
   },
   "scripts": {
     "start": "vite",
