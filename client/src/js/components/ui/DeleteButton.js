@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Popover, PopoverHeader, PopoverBody, ButtonGroup, Button } from 'reactstrap';
-import { SingleDatePicker } from 'react-dates';
+import DatePicker from 'react-datepicker';
 import moment from 'moment';
 
 import FontAwesomeButton from './FontAwesomeButton';
@@ -17,8 +17,6 @@ const DeleteButton = ({
 }) => {
   const [popoverOpen, setPopoverOpen] = useState(false);
   const [date, setDate] = useState(null);
-  const [focusedInput, setFocusedInput] = useState(false);
-  const [focusClassName, setFocusClassName] = useState('');
   const [buttonText, setButtonText] = useState('Disable');
 
   useEffect(() => {
@@ -32,12 +30,6 @@ const DeleteButton = ({
 
   const togglePopover = () => {
     setPopoverOpen(!popoverOpen);
-  };
-
-  const handleDatePickerFocusChange = (focused) => {
-    setFocusedInput(focused);
-
-    focused ? setFocusClassName('focused') : setFocusClassName('');
   };
 
   const handleConfirmDelete = () => {
@@ -58,27 +50,20 @@ const DeleteButton = ({
               This will <strong>permanently</strong> delete the record.
             </div>
           ) : (
-            <div className={`DatePickerWrapper ${focusClassName}`}>
-              <SingleDatePicker
+            <div className="DatePickerWrapper">
+              <DatePicker
                 id={`${buttonId}_endDate`}
-                date={date}
-                onDateChange={(date) => setDate(date)}
-                focused={focusedInput}
-                onFocusChange={({ focused }) => handleDatePickerFocusChange(focused)}
-                hideKeyboardShortcutsPanel={true}
-                numberOfMonths={1}
-                small
-                block
-                noBorder
-                showDefaultInputIcon={true}
-                showClearDate={true}
-                inputIconPosition="after"
-                placeholder="End Date"
+                selected={date ? date.toDate() : null}
+                onChange={(d) => setDate(d ? moment(d) : null)}
+                dateFormat="yyyy-MM-dd"
+                placeholderText="End Date"
+                isClearable
+                className="form-control form-control-sm"
               />
             </div>
           )}
 
-          <div className="text-right mt-3">
+          <div className="text-end mt-3">
             <ButtonGroup>
               <Button color="danger" size="sm" onClick={handleConfirmDelete}>
                 {permanentDelete ? 'Delete' : buttonText}

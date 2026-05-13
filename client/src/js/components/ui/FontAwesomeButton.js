@@ -7,7 +7,8 @@ const FontAwesomeButton = (props) => {
     <Button
       size={props.size || 'xs'}
       color={props.color || 'primary'}
-      className={`fontawesome-button ${props.className}`}
+      outline={props.noBorder ? false : props.outline !== false}
+      className={`fontawesome-button${props.noBorder ? ' no-border' : ''}${props.className ? ` ${props.className}` : ''}`}
       onClick={props.onClick}
       id={props.id}
       disabled={props.disabled}

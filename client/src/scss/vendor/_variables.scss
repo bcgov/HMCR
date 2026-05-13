@@ -7,15 +7,28 @@
 // Change theme-colors
 $theme-colors: (
   primary: #38598a,
+  secondary: #6c757d,
   success: #43893e,
   info: #96c0e6,
   warning: #f9ca54,
   danger: #d93e45,
+  light: #f8f9fa,
+  dark: #343a40,
   // new entries
   primary-nav: #036,
   secondary-nav: #5475a7,
   bcgold: #fcba19
 );
+
+@function theme-color($key) {
+  @return map-get($theme-colors, $key);
+}
+
+@function theme-color-level($color-name: "primary", $level: 0) {
+  $color: theme-color($color-name);
+  $color-base: if($level > 0, #000, #fff);
+  @return mix($color-base, $color, abs($level) * 8%);
+}
 
 // Add our font as default
 $font-family-sans-serif:    Myriad-Pro, Calibri, Arial, sans serif;
@@ -46,7 +59,9 @@ $table-dark-border-color: theme-color(primary);
 
 // Slightly darker borders
 $gray-400:                  #ced4da;
+$alert-bg-level:            -10;
 $alert-border-level:        -7;
+$alert-color-level:         6;
 $card-border-color:         rgba(0, 0, 0, .2);
 $hr-border-color:           rgba(0, 0, 0, .2);
 $border-color:              $gray-400;

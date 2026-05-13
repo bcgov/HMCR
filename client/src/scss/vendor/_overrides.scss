@@ -28,7 +28,8 @@ a:not(.btn):focus {
 }
 
 .list-group .list-group-item-action {
-  @include hover-focus {
+  &:hover,
+  &:focus {
     text-decoration: underline;
   }
 }
@@ -50,7 +51,8 @@ main {
 
 // Underline navbar links when active
 .navbar-nav .nav-link {
-  @include hover-focus {
+  &:hover,
+  &:focus {
     text-decoration: underline;
   }
 }

@@ -1,135 +1,24 @@
-.DatePickerWrapper {
-  .SingleDatePicker {
-    height: $input-height;
+// Theme overrides for react-datepicker, scoped via the .DatePickerWrapper
+// container that the SingleDateField / DateRangeField / inline pickers use.
 
-    .SingleDatePickerInput {
-      position: relative;
-      display: flex;
-      flex-wrap: wrap;
-      align-items: stretch;
-      width: 100%;
+.react-datepicker__day--selected,
+.react-datepicker__day--selected:hover,
+.react-datepicker__day--keyboard-selected,
+.react-datepicker__day--keyboard-selected:hover,
+.react-datepicker__day--range-start,
+.react-datepicker__day--range-end {
+  background-color: theme-color(primary);
+  color: #fff;
+}
 
-      .DateInput {
-        position: relative;
-        flex: 1 1 auto;
-        width: 1%;
-
-        .DateInput_input {
-          background-color: $input-bg;
-          background-clip: padding-box;
-          border: $input-border-width solid $input-border-color;
-
-          @include border-radius($input-border-radius, 0);
-
-          border-radius: 0;
-          border-top-left-radius: $input-border-radius;
-          border-bottom-left-radius: $input-border-radius;
-
-          @include box-shadow($input-box-shadow);
-          @include transition($input-transition);
-        }
-
-        .DateInput_input__focused {
-          &:focus {
-            color: $input-focus-color;
-            background-color: $input-focus-bg;
-            border-color: $input-focus-border-color;
-            outline: 0;
-            // Avoid using mixin so we can pass custom focus shadow properly
-            @if $enable-shadows {
-              box-shadow: $input-box-shadow, $input-focus-box-shadow;
-            } @else {
-              box-shadow: $input-focus-box-shadow;
-            }
-          }
-        }
-
-        .DateInput__small {
-          width: 100%;
-        }
-
-        .DateInput_input__small {
-          font-size: 1rem;
-          line-height: 1.5;
-          font-weight: 400;
-        }
-      }
-
-      .SingleDatePickerInput_calendarIcon {
-        padding: 0 10px;
-        margin: 0;
-        background-color: theme-color(primary);
-
-        border-radius: 0;
-        border-top-right-radius: $input-border-radius;
-        border-bottom-right-radius: $input-border-radius;
-
-        .SingleDatePickerInput_calendarIcon_svg {
-          fill: white;
-        }
-      }
-
-      .CalendarDay__selected,
-      .CalendarDay__selected:active,
-      .CalendarDay__selected:hover {
-        background: theme-color(primary);
-        border: 1px double theme-color(primary);
-      }
-    }
-
-    .SingleDatePickerInput__showClearDate {
-      padding-right: 0;
-
-      .SingleDatePickerInput_clearDate {
-        right: 30px;
-      }
-    }
-  }
+.react-datepicker__day--in-range,
+.react-datepicker__day--in-selecting-range {
+  background-color: theme-color(info);
+  color: #fff;
 }
 
 .DatePickerWrapper.is-invalid {
-  .DateRangePickerInput__withBorder {
-    border: 1px solid theme-color(danger);
-  }
-}
-
-.DateRangePicker {
-  .DateRangePickerInput__withBorder {
-    border-radius: 0.25rem;
-    height: calc(1.5em + 0.75rem + 2px);
-  }
-
-  .DateRangePickerInput_calendarIcon {
-    margin-right: 0;
-    background-color: theme-color(primary);
-
-    border-radius: 0;
-    border-top-right-radius: $input-border-radius;
-    border-bottom-right-radius: $input-border-radius;
-    height: 100%;
-
-    .DateRangePickerInput_calendarIcon_svg {
-      fill: white;
-      margin-bottom: 10px;
-    }
-  }
-
-  .DateInput_input__focused {
-    border-bottom: 2px solid theme-color(primary);
-  }
-
-  .CalendarDay__selected,
-  .CalendarDay__selected:active,
-  .CalendarDay__selected:hover {
-    background: theme-color(primary);
-    border: 1px double theme-color(primary);
-  }
-
-  .CalendarDay__selected_span,
-  .CalendarDay__hovered_span,
-  .CalendarDay__hovered_span:hover {
-    background: theme-color(info);
-    border: 1px double theme-color(info);
-    color: white;
+  .react-datepicker__input-container input {
+    border-color: theme-color(danger);
   }
 }

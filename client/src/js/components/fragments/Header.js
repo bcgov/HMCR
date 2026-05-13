@@ -50,18 +50,18 @@ const Header = ({ currentUser }) => {
   return (
     <header className="mb-3">
       <Navbar expand="lg" className={`navbar-dark header-nav ${environmentClass}`}>
-        <Container>
+        <Container className='d-flex justify-content-between align-items-center flex-wrap'>
           <NavbarBrand tag={Link} onClick={hideNavbar} to="/">
             <img
               className="img-fluid d-none d-md-block"
-              src={`${process.env.PUBLIC_URL}/images/bcid-logo-rev-en.svg`}
+              src="/images/bcid-logo-rev-en.svg"
               width="181"
               height="44"
               alt="B.C. Government Logo"
             />
             <img
               className="img-fluid d-md-none"
-              src={`${process.env.PUBLIC_URL}/images/bcid-symbol-rev.svg`}
+              src="/images/bcid-symbol-rev.svg"
               width="64"
               height="44"
               alt="B.C. Government Logo"
@@ -125,7 +125,7 @@ const Header = ({ currentUser }) => {
                 </DropdownMenu>
               </UncontrolledDropdown>
             </Nav>
-            <Nav className="navbar-nav ml-auto">
+            <Nav className="navbar-nav ms-auto">
               <NavItem>
                 <Button color="link" onClick={() => Keycloak.logout()}>
                   <FontAwesomeIcon icon="user" /> {`${currentUser.username},  Logout`}
