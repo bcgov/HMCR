@@ -102,7 +102,7 @@ const SaltReporting = ({ currentUser }) => {
                       <Button
                         size="sm"
                         color="primary"
-                        className="mr-2"
+                        className="me-2"
                         type="button"
                         onClick={() => saltReportFormModal.openForm(Constants.FORM_TYPE.ADD)}
                       >

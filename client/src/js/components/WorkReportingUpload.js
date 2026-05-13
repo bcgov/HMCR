@@ -118,7 +118,7 @@ const WorkReportingUpload = ({
                   <Button
                     color="danger"
                     size="sm"
-                    className="mr-2"
+                    className="me-2"
                     onClick={() => {
                       setResubCheckStatus(
                         updateUploadStatusMessage(

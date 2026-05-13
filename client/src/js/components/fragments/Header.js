@@ -125,7 +125,7 @@ const Header = ({ currentUser }) => {
                 </DropdownMenu>
               </UncontrolledDropdown>
             </Nav>
-            <Nav className="navbar-nav ml-auto">
+            <Nav className="navbar-nav ms-auto">
               <NavItem>
                 <Button color="link" onClick={() => Keycloak.logout()}>
                   <FontAwesomeIcon icon="user" /> {`${currentUser.username},  Logout`}

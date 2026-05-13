@@ -13,9 +13,14 @@ export const FormRow = ({ name, label, children }) => {
   );
 };
 
-export const FormSwitchInput = ({ children, ...props }) => {
+export const FormSwitchInput = ({ label, children, ...props }) => {
   const [field] = useField({ ...props, type: 'checkbox' });
-  return <Input type="switch" id={props.name} {...field} {...props} />;
+  return (
+    <FormGroup switch>
+      <Input type="switch" role="switch" id={props.name} {...field} {...props} />
+      {label && <Label check for={props.name}>{label}</Label>}
+    </FormGroup>
+  );
 };
 
 export const FormCheckboxInput = ({ children, ...props }) => {

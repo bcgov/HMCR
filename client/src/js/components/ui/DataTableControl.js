@@ -78,7 +78,7 @@ const DataTableControl = ({
                     <td style={{ width: '1%', whiteSpace: 'nowrap' }}>
                       <FontAwesomeButton
                         icon="edit"
-                        className="mr-1"
+                        className="me-1"
                         onClick={() => handleEditClicked(item.id)}
                         title="Edit Record"
                       />
@@ -97,7 +97,7 @@ const DataTableControl = ({
                   <td>
                     <FontAwesomeButton
                       icon="download"
-                      className="mr-1"
+                      className="me-1"
                       onClick={() => onExportClicked(item.saltReportId)}
                       title="Export Report"
                     />

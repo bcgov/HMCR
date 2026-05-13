@@ -57,7 +57,7 @@ const MultiDropdownField = ({ values, setFieldValue, items, name, title, searcha
           <div className="multi-item select-all p-2">
             <Input
               name={name}
-              type="textbox"
+              type="text"
               placeholder="Search"
               value={textFilter}
               onChange={(e) => {

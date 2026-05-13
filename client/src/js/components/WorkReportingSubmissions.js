@@ -117,7 +117,7 @@ const WorkReportingSubmissions = ({ serviceArea, submissionStatuses }, ref) => {
         <Col>
           <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between' }}>
             <div>
-              <span className="mr-2">Report Submit Date</span>
+              <span className="me-2">Report Submit Date</span>
               <DatePicker
                 id="searchStartDate"
                 selected={dateFrom ? dateFrom.toDate() : null}
@@ -162,7 +162,7 @@ const WorkReportingSubmissions = ({ serviceArea, submissionStatuses }, ref) => {
                   height: 'calc(1.5em + 0.75rem + 2px)',
                   width: '160px',
                 }}
-                className="ml-2"
+                className="ms-2"
               >
                 <Input
                   type="text"
@@ -177,10 +177,10 @@ const WorkReportingSubmissions = ({ serviceArea, submissionStatuses }, ref) => {
                   }}
                 />
               </div>
-              <Button color="primary" type="button" className="ml-2" onClick={handleSearchFormSubmit}>
+              <Button color="primary" type="button" className="ms-2" onClick={handleSearchFormSubmit}>
                 Search
               </Button>
-              <Button color="secondary" type="button" className="ml-2" onClick={handleSearchFormReset}>
+              <Button color="secondary" type="button" className="ms-2" onClick={handleSearchFormReset}>
                 Reset
               </Button>
             </div>

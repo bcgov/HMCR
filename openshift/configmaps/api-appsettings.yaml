@@ -76,7 +76,7 @@ objects:
               }
             },
             "ConnectionStrings": {
-                "HMCR": "Server=localhost;Database=HMR_DEV;Trusted_Connection=True;MultipleActiveResultSets=true",
+                "HMCR": "Server=sqldevtst.th.gov.bc.ca;Database=HMR_DEV;user=HMR_DEV;password=USwuarcGrffgmKMKjeqq;MultipleActiveResultSets=true;TrustServerCertificate=True",
                 "SERILOG": "Host=localhost;Username=postgres;Password=postgres;Database=serilog;Port=9010"
             },
             "EnableSensitiveDataLogging": false,

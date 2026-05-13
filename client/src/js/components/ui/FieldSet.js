@@ -13,7 +13,7 @@ const FieldSet = (props) => {
         <span style={{paddingLeft:"4px"}} href="#" id={tipId}><FontAwesomeIcon
           id={'question-circle'+ props.id}
           icon="question-circle"
-          className="fa-color-primary ml-1 mr-1"/>
+          className="fa-color-primary ms-1 me-1"/>
         </span>
         <Tooltip placement="bottom" className="fieldset-tooltip" autohide={false} isOpen={tooltipOpen} target={tipId} toggle={toggle}>
           <div className="fieldset-tooltip-body">{tips}</div></Tooltip>

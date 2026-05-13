@@ -293,8 +293,8 @@ const ActivityAdmin = ({ maintenanceTypes, locationCodes, unitOfMeasures,showVal
                 </Col>
                 <Col />
                 <Col>
-                  <div className="float-right">
-                    <SubmitButton className="mr-2" disabled={searchData.loading} submitting={searchData.loading}>
+                  <div className="float-end">
+                    <SubmitButton className="me-2" disabled={searchData.loading} submitting={searchData.loading}>
                       Search
                     </SubmitButton>
                     <Button type="reset">Reset</Button>
@@ -308,11 +308,11 @@ const ActivityAdmin = ({ maintenanceTypes, locationCodes, unitOfMeasures,showVal
       <Authorize requires={Constants.PERMISSIONS.CODE_W}>
         <Row>
           <Col>
-            <div className="float-right mb-3">
+            <div className="float-end mb-3">
               <Button
                 size="sm"
                 color="primary"
-                className="mr-2"
+                className="me-2"
                 onClick={() => formModal.openForm(Constants.FORM_TYPE.ADD)}
               >
                 Add Activity
