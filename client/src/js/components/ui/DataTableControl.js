@@ -34,7 +34,7 @@ const DataTableControl = ({
               return (
                 <th key={column.heading} style={style}>
                   {column.heading}
-                  {!column.nosort && <FontAwesomeButton icon="sort" onClick={() => onHeadingSortClicked(column.key)} />}
+                  {!column.nosort && <FontAwesomeButton className="no-border" icon="sort" onClick={() => onHeadingSortClicked(column.key)} />}
                 </th>
               );
             })}

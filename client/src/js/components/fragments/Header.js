@@ -50,7 +50,7 @@ const Header = ({ currentUser }) => {
   return (
     <header className="mb-3">
       <Navbar expand="lg" className={`navbar-dark header-nav ${environmentClass}`}>
-        <Container>
+        <Container className='d-flex justify-content-between align-items-center flex-wrap'>
           <NavbarBrand tag={Link} onClick={hideNavbar} to="/">
             <img
               className="img-fluid d-none d-md-block"

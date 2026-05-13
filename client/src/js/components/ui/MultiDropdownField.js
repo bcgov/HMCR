@@ -67,11 +67,12 @@ const MultiDropdownField = ({ values, setFieldValue, items, name, title, searcha
           </div>
         )}
         <div className="multi-item select-all">
-          <Label check className="multi-item-label">
+          <Label check className="multi-item-label d-flex align-items-center">
             <Input
               name={name}
               type="checkbox"
               checked={selectAll}
+              className="m-0 me-2"
               onChange={(e) => {
                 handleSelectedAllChecked(e.target.checked);
               }}
@@ -86,12 +87,13 @@ const MultiDropdownField = ({ values, setFieldValue, items, name, title, searcha
                 const displayName = item.name;
                 return (
                   <div key={item.id} className="multi-item">
-                    <Label check className="multi-item-label">
+                    <Label check className="multi-item-label d-flex align-items-center">
                       <Input
                         name={name}
                         type="checkbox"
                         value={item.id}
                         checked={values[name].includes(item.id)}
+                        className="m-0 me-2"
                         onChange={(e) => {
                           handleItemSelected(e.target.checked, item.id, push, remove);
                         }}
