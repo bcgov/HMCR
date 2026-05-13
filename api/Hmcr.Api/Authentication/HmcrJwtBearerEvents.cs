@@ -68,10 +68,35 @@ namespace Hmcr.Api.Authentication
 
         private async Task<bool> PopulateCurrentUserFromDb(ClaimsPrincipal principal)
         {
-            if (!TryGetUserIdentity(principal, out var isApiClient, out var preferredUsername, out var username, out var directory, out var userGuid, out var email))
+            var isApiClient = false;
+            bool.TryParse(principal.FindFirstValue(HmcrClaimTypes.KcIsApiClient), out isApiClient);
+            isApiClient = true;
+
+            //preferred_username token has a form of "{guid}@{directory}".
+            //var preferredUsername = isApiClient ? principal.FindFirstValue(HmcrClaimTypes.KcApiUsername) : principal.FindFirstValue(HmcrClaimTypes.KcUsername);
+            var preferredUsername = principal.FindFirstValue(HmcrClaimTypes.KcUsername);
+            var username = principal.FindFirstValue(HmcrClaimTypes.KcApiUsername);
+
+            var directory = "";
+            Guid userGuid = new Guid("00000000-0000-0000-0000-000000000000");
+            var email = "";
+            if (preferredUsername.Contains("@"))
             {
-                return false;
+                directory = preferredUsername.Split("@")[1].ToUpperInvariant();
+                username = principal.FindFirstValue(HmcrClaimTypes.KcUsername).Split("@")[0].ToUpperInvariant();
+                userGuid = new Guid(Guid.Parse(username).ToString());
+                email = principal.FindFirstValue(ClaimTypes.Email)?.ToUpperInvariant();
+
             }
+            else
+            {
+                
+                username = principal.FindFirstValue(HmcrClaimTypes.KcUsername).Split("@")[0].ToUpperInvariant();
+                userGuid = new Guid(principal.FindFirstValue("idir_userid")?.ToUpperInvariant());
+                email = principal.FindFirstValue(ClaimTypes.Email)?.ToUpperInvariant();
+
+            }
+            
 
             var user = await _userService.GetActiveUserEntityAsync(userGuid);
             if (user == null)
@@ -86,11 +111,6 @@ namespace Hmcr.Api.Authentication
             {
                 username = user.Username;
                 email = user.Email;
-            }
-
-            if (string.IsNullOrEmpty(directory))
-            {
-                directory = user.UserType == UserTypeDto.INTERNAL ? UserTypeDto.IDIR : UserTypeDto.BCeId;
             }
 
             if (directory.Equals("IDIR", StringComparison.OrdinalIgnoreCase))
@@ -120,63 +140,13 @@ namespace Hmcr.Api.Authentication
                 return true;
             }
             
-            if (!string.Equals(user.Username, username, StringComparison.OrdinalIgnoreCase) ||
-                !string.Equals(user.Email, email, StringComparison.OrdinalIgnoreCase)) //when the info changed, update db with the latest info from bceid web service
+            if (user.Username.ToUpperInvariant() != username || user.Email.ToUpperInvariant() != email) //when the info changed, update db with the latest info from bceid web service
             {
                 _logger.LogWarning($"Username/Email changed from {user.Username}/{user.Email} to {username}/{email}.");
                 await _userService.UpdateUserFromBceidAsync(userGuid, username, user.UserType, user.ConcurrencyControlNumber);
             }
 
             return true;
-        }
-
-        private bool TryGetUserIdentity(ClaimsPrincipal principal, out bool isApiClient, out string preferredUsername,
-            out string username, out string directory, out Guid userGuid, out string email)
-        {
-            bool.TryParse(principal.FindFirstValue(HmcrClaimTypes.KcIsApiClient), out isApiClient);
-
-            preferredUsername = principal.FindFirstValue(HmcrClaimTypes.KcUsername);
-            username = isApiClient && !string.IsNullOrWhiteSpace(principal.FindFirstValue(HmcrClaimTypes.KcApiUsername))
-                ? principal.FindFirstValue(HmcrClaimTypes.KcApiUsername)
-                : preferredUsername;
-            directory = "";
-            userGuid = Guid.Empty;
-            email = principal.FindFirstValue(ClaimTypes.Email)?.ToUpperInvariant();
-
-            if (string.IsNullOrWhiteSpace(username))
-            {
-                _logger.LogWarning("Access Denied - Token does not contain a username claim.");
-                return false;
-            }
-
-            var usernameParts = username.Split('@', 2);
-            if (usernameParts.Length == 2)
-            {
-                username = usernameParts[0].ToUpperInvariant();
-                directory = usernameParts[1].ToUpperInvariant();
-            }
-            else
-            {
-                username = username.ToUpperInvariant();
-            }
-
-            if (Guid.TryParse(username, out userGuid))
-            {
-                return true;
-            }
-
-            var userGuidClaim =
-                principal.FindFirstValue("idir_userid") ??
-                principal.FindFirstValue(HmcrClaimTypes.KcIdirGuid) ??
-                principal.FindFirstValue(HmcrClaimTypes.KcBceidGuid);
-
-            if (Guid.TryParse(userGuidClaim, out userGuid))
-            {
-                return true;
-            }
-
-            _logger.LogWarning($"Access Denied - User[{username}] token does not contain a valid user GUID claim.");
-            return false;
         }
 
         private void AddClaimsFromUserInfo(ClaimsPrincipal principal, UserCurrentDto user)
