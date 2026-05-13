@@ -123,7 +123,7 @@ namespace Hmcr.Api.Authentication
             if (!string.Equals(user.Username, username, StringComparison.OrdinalIgnoreCase) ||
                 !string.Equals(user.Email, email, StringComparison.OrdinalIgnoreCase)) //when the info changed, update db with the latest info from bceid web service
             {
-                _logger.LogWarning($"Username/Email changed for UserGuid[{userGuid}] (UsernameChanged: {!string.Equals(user.Username, username, StringComparison.OrdinalIgnoreCase)}, EmailChanged: {!string.Equals(user.Email, email, StringComparison.OrdinalIgnoreCase)}).");
+                _logger.LogWarning($"Username/Email changed from {user.Username}/{user.Email} to {username}/{email}.");
                 await _userService.UpdateUserFromBceidAsync(userGuid, username, user.UserType, user.ConcurrencyControlNumber);
             }
 
