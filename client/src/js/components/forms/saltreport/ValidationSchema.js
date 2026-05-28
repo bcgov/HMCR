@@ -12,6 +12,8 @@ const decimalWithPrecision = (precision) => {
     );
 };
 
+const percentageSchema = decimalWithPrecision(2).max(100, 'Value must be less than or equal to 100');
+
 // Custom validator for coordinate with dynamic precision
 const coordinatePrecision = (precision) => {
   return Yup.number()
@@ -114,6 +116,13 @@ const houseKeepingPracticeSchema = Yup.object().shape({
     })
     .nullable(true),
 });
+
+const snowDisposalDesignFeatureSchema = Yup.object()
+  .shape({
+    percentage: percentageSchema,
+    numSites: Yup.number().integer('Must be an integer').min(0, 'Cannot be negative').nullable(true),
+  })
+  .nullable(true);
 
 const vulnerableAreaSchema = Yup.object().shape({
   highwayNumber: Yup.string().max(16).nullable(true),
@@ -345,13 +354,23 @@ export const validationSchema = Yup.object({
       disposal: Yup.object().shape({
         used: Yup.boolean().nullable(true),
         total: Yup.number().integer().min(0).nullable(true),
+        designCapacity: Yup.number().integer().min(0).nullable(true),
       }),
       snowMelter: Yup.object().shape({
         used: Yup.boolean().nullable(true),
+        percentage: percentageSchema,
       }),
       meltwater: Yup.object().shape({
         used: Yup.boolean().nullable(true),
       }),
+      designFeatures: Yup.object()
+        .shape({
+          lowPermeabilitySurface: snowDisposalDesignFeatureSchema,
+          retentionPond: snowDisposalDesignFeatureSchema,
+          municipalSewerSystem: snowDisposalDesignFeatureSchema,
+          watercourse: snowDisposalDesignFeatureSchema,
+        })
+        .nullable(true),
     })
     .nullable(true),
   sect7: Yup.object()

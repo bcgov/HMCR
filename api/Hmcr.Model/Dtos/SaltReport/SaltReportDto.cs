@@ -184,11 +184,28 @@ namespace Hmcr.Model.Dtos.SaltReport
         public SnowDisposalDto Disposal { get; set; }
         public SnowDisposalDto SnowMelter { get; set; }
         public SnowDisposalDto Meltwater { get; set; }
+        public DesignFeaturesDto DesignFeatures { get; set; }
 
         public class SnowDisposalDto
         {
             public bool? Used { get; set; }
             public int? Total { get; set; }
+            public int? DesignCapacity { get; set; }
+            public decimal? Percentage { get; set; }
+        }
+
+        public class DesignFeaturesDto
+        {
+            public DesignFeatureDto LowPermeabilitySurface { get; set; }
+            public DesignFeatureDto RetentionPond { get; set; }
+            public DesignFeatureDto MunicipalSewerSystem { get; set; }
+            public DesignFeatureDto Watercourse { get; set; }
+        }
+
+        public class DesignFeatureDto
+        {
+            public decimal? Percentage { get; set; }
+            public int? NumSites { get; set; }
         }
     }
 

@@ -102,6 +102,13 @@ const housekeepingPracticesLabel = {
   riskManagementPlan: 'Risk management and emergency measures plans are in place',
 };
 
+const snowDisposalDesignFeaturesLabel = {
+  lowPermeabilitySurface: 'Snow is disposed of entirely on a low permeability surface',
+  retentionPond: 'All meltwater is directed to a retention pond before its discharge',
+  municipalSewerSystem: 'All meltwater is collected and discharged into a municipal sewer system',
+  watercourse: 'All meltwater is collected and discharged into a watercourse',
+};
+
 const AddSaltReportFormFields = ({ setInitialValues, formValues, setValidationSchema, currentUser }) => {
   const [loading, setLoading] = useState(true);
   const { errors, submitCount, isSubmitting } = useFormikContext();
@@ -133,7 +140,7 @@ const AddSaltReportFormFields = ({ setInitialValues, formValues, setValidationSc
 
   const loadFromSessionStorage = () => {
     const savedFormData = sessionStorage.getItem('formData');
-    return savedFormData ? JSON.parse(savedFormData) : defaultValues;
+    return savedFormData ? _.merge({}, defaultValues, JSON.parse(savedFormData)) : defaultValues;
   };
 
   const CustomTooltip = ({ tipId, children }) => {
@@ -1131,9 +1138,21 @@ const AddSaltReportFormFields = ({ setInitialValues, formValues, setValidationSc
                   </td>
                 </tr>
                 <tr>
+                  <td>6.1.2 What is the total design capacity of all snow disposal sites (in cubic metres)?</td>
+                  <td colSpan={2}>
+                    <FormNumberInput type="number" name="sect6.disposal.designCapacity" placeholder="m3" />
+                  </td>
+                </tr>
+                <tr>
                   <td>6.2 Does your organization use snow melters?</td>
                   <td>
                     <FormCheckboxInput name="sect6.snowMelter.used" />
+                  </td>
+                </tr>
+                <tr>
+                  <td>6.2.1 Percentage of snow disposed with snow melters?</td>
+                  <td colSpan={2}>
+                    <FormNumberInput type="number" name="sect6.snowMelter.percentage" step="0.01" placeholder="%" />
                   </td>
                 </tr>
                 <tr>
@@ -1144,6 +1163,49 @@ const AddSaltReportFormFields = ({ setInitialValues, formValues, setValidationSc
                 </tr>
               </tbody>
             </Table>
+          </Col>
+        </Row>
+        <Row className="my-4">
+          <Col>
+            <Row>
+              <Col sm={1}>6.3</Col>
+              <Col>
+                Provide the percentage of disposed snow managed under the following design features. If your organization
+                manages more than one site, indicate the number of sites managed using each design feature.
+              </Col>
+            </Row>
+            <Row className="my-2">
+              <Col>
+                <Table bordered>
+                  <thead>
+                    <tr>
+                      <th>Design Feature</th>
+                      <th>% of snow disposed</th>
+                      <th>Number of Sites</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {Object.entries(formValues.sect6.designFeatures || defaultValues.sect6.designFeatures).map(
+                      ([key], index) => (
+                        <tr key={index}>
+                          <td>{snowDisposalDesignFeaturesLabel[key]}</td>
+                          <td>
+                            <FormNumberInput
+                              type="number"
+                              name={`sect6.designFeatures.${key}.percentage`}
+                              step="0.01"
+                            />
+                          </td>
+                          <td>
+                            <FormNumberInput type="number" name={`sect6.designFeatures.${key}.numSites`} />
+                          </td>
+                        </tr>
+                      )
+                    )}
+                  </tbody>
+                </Table>
+              </Col>
+            </Row>
           </Col>
         </Row>
       </section>

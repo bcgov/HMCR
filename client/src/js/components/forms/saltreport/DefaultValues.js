@@ -162,12 +162,32 @@ export const defaultValues = {
     disposal: {
       used: false,
       total: 0,
+      designCapacity: null,
     },
     snowMelter: {
       used: false,
+      percentage: null,
     },
     meltwater: {
       used: false,
+    },
+    designFeatures: {
+      lowPermeabilitySurface: {
+        percentage: null,
+        numSites: null,
+      },
+      retentionPond: {
+        percentage: null,
+        numSites: null,
+      },
+      municipalSewerSystem: {
+        percentage: null,
+        numSites: null,
+      },
+      watercourse: {
+        percentage: null,
+        numSites: null,
+      },
     },
   },
   sect7: {

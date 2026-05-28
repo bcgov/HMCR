@@ -176,6 +176,20 @@ namespace Hmcr.Domain.PdfHelpers
                 AddSnowDisposalData(data, "sect6.disposal", dto.Sect6.Disposal);
                 AddSnowDisposalData(data, "sect6.snowMelter", dto.Sect6.SnowMelter);
                 AddSnowDisposalData(data, "sect6.meltwater", dto.Sect6.Meltwater);
+
+                if (dto.Sect6.DesignFeatures != null)
+                {
+                    AddSnowDisposalDesignFeatureData(
+                        data,
+                        "sect6.designFeatures.lowPermeabilitySurface",
+                        dto.Sect6.DesignFeatures.LowPermeabilitySurface);
+                    AddSnowDisposalDesignFeatureData(data, "sect6.designFeatures.retentionPond", dto.Sect6.DesignFeatures.RetentionPond);
+                    AddSnowDisposalDesignFeatureData(
+                        data,
+                        "sect6.designFeatures.municipalSewerSystem",
+                        dto.Sect6.DesignFeatures.MunicipalSewerSystem);
+                    AddSnowDisposalDesignFeatureData(data, "sect6.designFeatures.watercourse", dto.Sect6.DesignFeatures.Watercourse);
+                }
             }
 
             // Section 7
@@ -299,6 +313,20 @@ namespace Hmcr.Domain.PdfHelpers
             {
                 data[$"{prefix}.used"] = NormalizeRadioButtonValue(disposal.Used);
                 data[$"{prefix}.total"] = disposal.Total?.ToString();
+                data[$"{prefix}.designCapacity"] = disposal.DesignCapacity?.ToString();
+                data[$"{prefix}.percentage"] = disposal.Percentage?.ToString();
+            }
+        }
+
+        private void AddSnowDisposalDesignFeatureData(
+            Dictionary<string, string> data,
+            string prefix,
+            Sect6Dto.DesignFeatureDto feature)
+        {
+            if (feature != null)
+            {
+                data[$"{prefix}.percentage"] = feature.Percentage?.ToString();
+                data[$"{prefix}.numSites"] = feature.NumSites?.ToString();
             }
         }
 
