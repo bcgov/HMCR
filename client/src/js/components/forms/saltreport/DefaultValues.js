@@ -46,11 +46,11 @@ export const defaultValues = {
     saltTotalDays: null,
   },
   sect3: {
-    deicer: { nacl: null, mgcl2: null, cacl2: null, acetate: null },
-    treatedAbrasives: { sandStoneDust: null, nacl: null, mgcl2: null, cacl2: null },
-    prewetting: { nacl: null, mgcl2: null, cacl2: null, acetate: null, nonchloride: null },
-    pretreatment: { nacl: null, mgcl2: null, cacl2: null, acetate: null, nonchloride: null },
-    antiicing: { nacl: null, mgcl2: null, cacl2: null, acetate: null, nonchloride: null },
+    deicer: { nacl: null, mgcl2: null, cacl2: null, acetate: null, sodiumFormate: null },
+    treatedAbrasives: { sandStoneDust: null, nacl: null, mgcl2: null, cacl2: null, sodiumFormate: null },
+    prewetting: { nacl: null, mgcl2: null, cacl2: null, acetate: null, nonchloride: null, sodiumFormate: null },
+    pretreatment: { nacl: null, mgcl2: null, cacl2: null, acetate: null, nonchloride: null, sodiumFormate: null },
+    antiicing: { nacl: null, mgcl2: null, cacl2: null, acetate: null, nonchloride: null, sodiumFormate: null },
     multiChlorideA: {
       litres: null,
       naclPercentage: null,

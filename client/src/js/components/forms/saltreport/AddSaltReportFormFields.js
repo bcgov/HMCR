@@ -431,7 +431,7 @@ const AddSaltReportFormFields = ({ setInitialValues, formValues, setValidationSc
                   </thead>
                   <tbody>
                     <tr>
-                      <th rowSpan={4}>De-icers</th>
+                      <th rowSpan={5}>De-icers</th>
                       <th>Sodium chloride (NaCl)</th>
 
                       <td>
@@ -464,7 +464,13 @@ const AddSaltReportFormFields = ({ setInitialValues, formValues, setValidationSc
                       </td>
                     </tr>
                     <tr>
-                      <th rowSpan={4}>
+                      <th>Sodium Formate (HCOONa)</th>
+                      <td>
+                        <FormNumberInput type="number" name="sect3.deicer.sodiumFormate" step="0.01" />
+                      </td>
+                    </tr>
+                    <tr>
+                      <th rowSpan={5}>
                         Treated Abrasives
                         <br />
                         Specify the types & quantities of solid salts added to stockpile of abrasives (freeze protection
@@ -498,7 +504,17 @@ const AddSaltReportFormFields = ({ setInitialValues, formValues, setValidationSc
                       </td>
                     </tr>
                     <tr>
-                      <th rowSpan={5}>
+                      <th>Sodium Formate (HCOONa)</th>
+                      <td>
+                        <FormNumberInput type="number" name="sect3.treatedAbrasives.sodiumFormate" step="0.01" />
+                      </td>
+                    </tr>
+                    <tr>
+                      <th colSpan={2}>Liquids</th>
+                      <th>Litres</th>
+                    </tr>
+                    <tr>
+                      <th rowSpan={6}>
                         Pre-wetting Liquid Concentrated liquid product sprayed (with on-board equipment) to the solid
                         de-icing agent or the abrasive directly as it is spread or discharged from the truck to the
                         pavement
@@ -542,7 +558,13 @@ const AddSaltReportFormFields = ({ setInitialValues, formValues, setValidationSc
                       </td>
                     </tr>
                     <tr>
-                      <th rowSpan={5}>
+                      <th>Sodium Formate (HCOONa)</th>
+                      <td>
+                        <FormNumberInput type="number" name="sect3.prewetting.sodiumFormate" step="0.01" />
+                      </td>
+                    </tr>
+                    <tr>
+                      <th rowSpan={6}>
                         Pre-treatment Liquid Concentrated liquid product added to the solid de-icer and the abrasive at
                         the time it is stockpiled at the storage site or added by the supplier before delivery
                       </th>
@@ -582,7 +604,13 @@ const AddSaltReportFormFields = ({ setInitialValues, formValues, setValidationSc
                       </td>
                     </tr>
                     <tr>
-                      <th rowSpan={5}>
+                      <th>Sodium Formate (HCOONa)</th>
+                      <td>
+                        <FormNumberInput type="number" name="sect3.pretreatment.sodiumFormate" step="0.01" />
+                      </td>
+                    </tr>
+                    <tr>
+                      <th rowSpan={6}>
                         Direct Liquid Application (aka Anti-icing) Concentrated liquid product that is sprayed directly
                         on the pavement surface with a truck or by a sprayer system (e.g. Fixed Automated Spray
                         Technology FAST) before a storm or the formation of frost.
@@ -620,6 +648,12 @@ const AddSaltReportFormFields = ({ setInitialValues, formValues, setValidationSc
                       <th>Non-chloride organic products3</th>
                       <td>
                         <FormNumberInput type="number" name="sect3.antiicing.nonchloride" step="0.01" />
+                      </td>
+                    </tr>
+                    <tr>
+                      <th>Sodium Formate (HCOONa)</th>
+                      <td>
+                        <FormNumberInput type="number" name="sect3.antiicing.sodiumFormate" step="0.01" />
                       </td>
                     </tr>
                   </tbody>

@@ -97,6 +97,7 @@ namespace Hmcr.Model.Dtos.SaltReport
             public decimal? Cacl2 { get; set; }
             public decimal? Acetate { get; set; }
             public decimal? Nonchloride { get; set; }
+            public decimal? SodiumFormate { get; set; }
         }
 
         public class MultiChlorideDto

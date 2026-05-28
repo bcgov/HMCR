@@ -262,6 +262,7 @@ namespace Hmcr.Domain.PdfHelpers
                 data[$"{prefix}.cacl2"] = material.Cacl2?.ToString();
                 data[$"{prefix}.acetate"] = material.Acetate?.ToString();
                 data[$"{prefix}.nonchloride"] = material.Nonchloride?.ToString();
+                data[$"{prefix}.sodiumFormate"] = material.SodiumFormate?.ToString();
             }
         }
 

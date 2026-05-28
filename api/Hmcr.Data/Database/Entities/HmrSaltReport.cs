@@ -91,6 +91,9 @@ namespace Hmcr.Data.Database.Entities
         [Column("DEICER_ACET")]
         public decimal? DeicerAcetate { get; set; }
 
+        [Column("DEICER_HCOONA")]
+        public decimal? DeicerSodiumFormate { get; set; }
+
 
         [Column("TRTD_ABR_SDST")]
         public decimal? TreatedAbrasivesSandstoneDust { get; set; }
@@ -103,6 +106,9 @@ namespace Hmcr.Data.Database.Entities
 
         [Column("TRTD_ABR_CACL2")]
         public decimal? TreatedAbrasivesCacl2 { get; set; }
+
+        [Column("TRTD_ABR_HCOONA")]
+        public decimal? TreatedAbrasivesSodiumFormate { get; set; }
 
 
         [Column("PRWT_NACL")]
@@ -120,6 +126,9 @@ namespace Hmcr.Data.Database.Entities
         [Column("PRWT_NONCL")]
         public decimal? PrewettingNonchloride { get; set; }
 
+        [Column("PRWT_HCOONA")]
+        public decimal? PrewettingSodiumFormate { get; set; }
+
 
         [Column("PRTT_NACL")]
         public decimal? PretreatmentNacl { get; set; }
@@ -136,6 +145,9 @@ namespace Hmcr.Data.Database.Entities
         [Column("PRTT_NONCL")]
         public decimal? PretreatmentNonchloride { get; set; }
 
+        [Column("PRTT_HCOONA")]
+        public decimal? PretreatmentSodiumFormate { get; set; }
+
 
         [Column("ANTIC_NACL")]
         public decimal? AntiicingNacl { get; set; }
@@ -151,6 +163,9 @@ namespace Hmcr.Data.Database.Entities
 
         [Column("ANTIC_NONCL")]
         public decimal? AntiicingNonchloride { get; set; }
+
+        [Column("ANTIC_HCOONA")]
+        public decimal? AntiicingSodiumFormate { get; set; }
 
 
         [Column("MULTICHL_A_LTRS")]
