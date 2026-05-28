@@ -1210,7 +1210,7 @@ const AddSaltReportFormFields = ({ setInitialValues, formValues, setValidationSc
         </Row>
       </section>
       <section>
-        <h4>Section 7: Management of Salt Vulnerable Areas</h4>
+        <h4>Section 7: Vulnerable Areas</h4>
         <Row className="my-4">
           <Col sm={1}>7.1</Col>
           <Col sm={7}>
@@ -1236,7 +1236,7 @@ const AddSaltReportFormFields = ({ setInitialValues, formValues, setValidationSc
         <Row className="my-4">
           <Col sm={1}>7.3</Col>
           <Col sm={7}>
-            Has your organization prepared an action plan to prioritize areas where measures will be put in place?
+            Have you prepared an action plan to prioritize areas where measures will be put in place?
           </Col>{' '}
           <Col>
             <div>
