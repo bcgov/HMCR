@@ -138,7 +138,7 @@ namespace Hmcr.Domain.Services
             foreach(var user in _userRepo.GetActiveUsersByServiceAreaNumber(serviceAreaNumber))
             {
                 if (user.Email.IsNotEmpty())
-                    recipients.Add(new MailboxAddress(user.Email));
+                    recipients.Add(MailboxAddress.Parse(user.Email));
             }
 
             SendEmail(recipients, subject, htmlBody, textBody);

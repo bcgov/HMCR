@@ -369,10 +369,10 @@ const ReportExport = ({
             </MaterialCard>
             {isRequiredFieldsSet(formikProps) && (
               <div className="d-flex justify-content-end">
-                <div style={{ width: '100px' }} className="mr-2">
+                <div style={{ width: '100px' }} className="me-2">
                   <SingleDropdownField defaultTitle="Export Format" items={supportedFormats} name="outputFormat" />
                 </div>
-                <Button color="primary" size="sm" type="button" onClick={formikProps.submitForm} className="mr-2">
+                <Button color="primary" size="sm" type="button" onClick={formikProps.submitForm} className="me-2">
                   Export
                 </Button>
                 <Button color="secondary" size="sm" type="button" onClick={formikProps.resetForm}>

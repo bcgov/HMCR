@@ -314,8 +314,8 @@ const UserAdmin = ({ serviceAreas, userStatuses, userTypes, showValidationErrorD
                     <MultiDropdownField {...formikProps} items={userStatuses} name="statusId" title="User Status" />
                   </Col>
                   <Col>
-                    <div className="float-right">
-                      <SubmitButton className="mr-2" disabled={searchData.loading} submitting={searchData.loading}>
+                    <div className="float-end">
+                      <SubmitButton className="me-2" disabled={searchData.loading} submitting={searchData.loading}>
                         Search
                       </SubmitButton>
                       <Button type="reset">Reset</Button>
@@ -327,8 +327,8 @@ const UserAdmin = ({ serviceAreas, userStatuses, userTypes, showValidationErrorD
               <Authorize requires={Constants.PERMISSIONS.USER_W}>
                 <Row>
                   <Col>
-                    <div className="float-right mb-3">
-                      <Button size="sm" color="primary" className="mr-2" onClick={() => setAddUserWizardIsOpen(true)}>
+                    <div className="float-end mb-3">
+                      <Button size="sm" color="primary" className="me-2" onClick={() => setAddUserWizardIsOpen(true)}>
                         Add User
                       </Button>
                       <Button size="sm" color="primary" onClick={() => {

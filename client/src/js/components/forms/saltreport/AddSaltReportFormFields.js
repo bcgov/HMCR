@@ -142,7 +142,7 @@ const AddSaltReportFormFields = ({ setInitialValues, formValues, setValidationSc
     return (
       <>
         <span style={{ paddingLeft: '4px' }} href="#" id={tipId}>
-          <FontAwesomeIcon icon="question-circle" className="fa-color-primary ml-1 mr-1" />
+          <FontAwesomeIcon icon="question-circle" className="fa-color-primary ms-1 me-1" />
         </span>
         <Tooltip
           placement="bottom"

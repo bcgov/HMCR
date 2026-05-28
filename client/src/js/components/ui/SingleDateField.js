@@ -1,39 +1,23 @@
-import React, { useState } from 'react';
-import { SingleDatePicker } from 'react-dates';
+import React from 'react';
+import DatePicker from 'react-datepicker';
 import { Field, useFormikContext } from 'formik';
-
-import * as Constants from '../../Constants';
+import moment from 'moment';
 
 const SingleDatePickerWithFormik = ({ field: { name }, placeholder, style, isOutsideRange }) => {
-  const [focusedInput, setFocusedInput] = useState(false);
-  const [focusClassName, setFocusClassName] = useState('');
   const { values, setFieldValue } = useFormikContext();
-
-  const handleFocusChanged = (focused) => {
-    setFocusedInput(focused);
-
-    focused ? setFocusClassName('focused') : setFocusClassName('');
-  };
+  const current = values[name];
 
   return (
-    <div className={`DatePickerWrapper ${focusClassName}`} style={style}>
-      <SingleDatePicker
+    <div className="DatePickerWrapper" style={style}>
+      <DatePicker
         id={name}
-        date={values[name]}
-        onDateChange={(date) => setFieldValue(name, date)}
-        focused={focusedInput}
-        onFocusChange={({ focused }) => handleFocusChanged(focused)}
-        hideKeyboardShortcutsPanel={true}
-        numberOfMonths={1}
-        small
-        block
-        noBorder
-        showDefaultInputIcon={true}
-        showClearDate={true}
-        inputIconPosition="after"
-        placeholder={placeholder}
-        isOutsideRange={isOutsideRange}
-        displayFormat={Constants.DATE_DISPLAY_FORMAT}
+        selected={current ? current.toDate() : null}
+        onChange={(date) => setFieldValue(name, date ? moment(date) : null)}
+        dateFormat="yyyy-MM-dd"
+        placeholderText={placeholder}
+        isClearable
+        filterDate={isOutsideRange ? (date) => !isOutsideRange(moment(date)) : undefined}
+        className="form-control form-control-sm"
       />
     </div>
   );

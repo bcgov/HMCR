@@ -5,6 +5,16 @@
 //---------------------------------------------------------------------------------------
 // sass-lint:disable force-element-nesting, force-pseudo-nesting
 
+// Remove all borders from a button
+.no-border {
+  border: none !important;
+  box-shadow: none !important;
+
+  &:focus, &:active {
+    box-shadow: none !important;
+  }
+}
+
 // The label element is no longer bolded by default, neither is this class defined
 .control-label {
   font-weight: 700;

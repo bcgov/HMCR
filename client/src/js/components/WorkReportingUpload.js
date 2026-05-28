@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { connect } from 'react-redux';
-import { Col, FormGroup, FormFeedback, Label, CustomInput, Spinner, Alert, Button } from 'reactstrap';
+import { Col, FormGroup, FormFeedback, Label, Input, Spinner, Alert, Button } from 'reactstrap';
 import { Formik, Form } from 'formik';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
@@ -118,7 +118,7 @@ const WorkReportingUpload = ({
                   <Button
                     color="danger"
                     size="sm"
-                    className="mr-2"
+                    className="me-2"
                     onClick={() => {
                       setResubCheckStatus(
                         updateUploadStatusMessage(
@@ -228,11 +228,10 @@ const WorkReportingUpload = ({
                           </li>
                         </ul>
                       </Alert>
-                      <CustomInput
+                      <Input
                         type="file"
                         id="reportFileBrowser"
                         name="reportFile"
-                        label="Select Report File"
                         accept=".csv"
                         onChange={(e) =>
                           validateFile(

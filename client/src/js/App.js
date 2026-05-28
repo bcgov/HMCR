@@ -2,11 +2,9 @@ import React from 'react';
 import { connect } from 'react-redux';
 import { BrowserRouter, Route, Switch, Redirect } from 'react-router-dom';
 import { Container } from 'reactstrap';
-import { toast } from 'react-toastify';
+import { toast, ToastContainer } from 'react-toastify';
 
-import 'react-dates/initialize';
-import 'react-dates/lib/css/_datepicker.css';
-
+import 'react-datepicker/dist/react-datepicker.css';
 import 'react-toastify/dist/ReactToastify.css';
 
 import AuthorizedRoute from './components/fragments/AuthorizedRoute';
@@ -29,20 +27,19 @@ import * as Constants from './Constants';
 
 import '../scss/app.scss';
 
-toast.configure({
-  position: 'bottom-center',
-  autoClose: 2000,
-  hideProgressBar: true,
-  closeOnClick: true,
-  pauseOnHover: true,
-  draggable: true,
-});
-
 const App = ({ currentUser }) => {
   addIconsToLibrary();
 
   return (
     <Main>
+      <ToastContainer
+        position="bottom-center"
+        autoClose={2000}
+        hideProgressBar
+        closeOnClick
+        pauseOnHover
+        draggable
+      />
       <BrowserRouter>
         <React.Fragment>
           <Header />

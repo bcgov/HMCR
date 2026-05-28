@@ -3,7 +3,6 @@ import { Button, Modal, ModalBody, ModalHeader } from 'reactstrap';
 import moment from 'moment';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import FileSaver from 'file-saver';
-import Clipboard from 'react-clipboard.js';
 import { toast } from 'react-toastify';
 
 import PageSpinner from './ui/PageSpinner';
@@ -27,7 +26,7 @@ const submissionRowErrors = (rowNum, errorDetail) => {
     <ul style={{ paddingInlineStart: '20px' }}>
       {parseErrorDetailJson(errorDetail).map((error) => (
         <li key={`${rowNum}_${error.field}`}>
-          <strong className="mr-1">{error.field}:</strong>
+          <strong className="me-1">{error.field}:</strong>
           <ul>
             {error.messages.map((msg, k) => (
               <li key={`${rowNum}_${error.field}_${k}`}>{`${msg} `}</li>
@@ -120,7 +119,7 @@ const WorkReportingSubmissionDetail = ({ toggle, submission }) => {
     return (
       <React.Fragment>
         <span>Submission #: {submissionResultData.id}</span>
-        <span className="ml-3 mr-3">
+        <span className="ms-3 me-3">
           Submission Date: {moment(submissionResultData.appCreateTimestamp).format(Constants.DATE_DISPLAY_FORMAT)}
         </span>
         <span>Service Area: {submissionResultData.serviceAreaNumber}</span>
@@ -159,7 +158,7 @@ const WorkReportingSubmissionDetail = ({ toggle, submission }) => {
             <Button
               size="sm"
               color="primary"
-              className="mr-2"
+              className="me-2"
               onClick={() =>
                 api
                   .getSubmissionFile(submissionResultData.id)
@@ -170,16 +169,17 @@ const WorkReportingSubmissionDetail = ({ toggle, submission }) => {
               <FontAwesomeIcon icon="download" /> Original
             </Button>
           )}
-          <Clipboard
-            className="btn btn-primary btn-sm"
-            option-text={() => createClipboardText(submissionResultData)}
-            onSuccess={() => {
+          <Button
+            color="primary"
+            size="sm"
+            onClick={async () => {
+              await navigator.clipboard.writeText(createClipboardText(submissionResultData));
               toast.info(<div className="text-center">Copied to clipboard.</div>);
             }}
             title="Copy errors to clipboard, with tab delimiter"
           >
             <FontAwesomeIcon icon="copy" /> Copy
-          </Clipboard>
+          </Button>
         </div>
       </div>
     );
