@@ -361,10 +361,10 @@ namespace Hmcr.Data.Database.Entities
         [Column("MELTWATER_DISP_METH_USED")]
         public bool? MeltwaterDisposalMethodUsed { get; set; }
 
-        [Column("SNOW_LP_SURF_PCT")]
+        [Column("SNOW_DISP_SITE_LP_PCT")]
         public decimal? SnowLowPermeabilitySurfacePercentage { get; set; }
 
-        [Column("SNOW_LP_SURF_SITES")]
+        [Column("SNOW_DISP_SITE_LP_SITES")]
         public int? SnowLowPermeabilitySurfaceSites { get; set; }
 
         [Column("MELTWATER_POND_PCT")]
@@ -373,16 +373,16 @@ namespace Hmcr.Data.Database.Entities
         [Column("MELTWATER_POND_SITES")]
         public int? MeltwaterRetentionPondSites { get; set; }
 
-        [Column("MELTWATER_SEWER_PCT")]
+        [Column("MELTWATER_MUN_SEWER_SYS_PCT")]
         public decimal? MeltwaterMunicipalSewerPercentage { get; set; }
 
-        [Column("MELTWATER_SEWER_SITES")]
+        [Column("MELTWATER_MUN_SEWER_SYS_SITES")]
         public int? MeltwaterMunicipalSewerSites { get; set; }
 
-        [Column("MELTWATER_WTRCRS_PCT")]
+        [Column("MELTWATER_WATERCRS_PCT")]
         public decimal? MeltwaterWatercoursePercentage { get; set; }
 
-        [Column("MELTWATER_WTRCRS_SITES")]
+        [Column("MELTWATER_WATERCRS_SITES")]
         public int? MeltwaterWatercourseSites { get; set; }
 
 
