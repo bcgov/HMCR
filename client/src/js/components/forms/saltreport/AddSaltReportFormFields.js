@@ -92,12 +92,12 @@ const housekeepingPracticesLabel = {
   allMaterialsHandled: 'All materials are handled in a designated area characterized by an impermeable surface',
   equipmentPreventsOverloading: 'Equipment to prevent overloading of trucks',
   wastewaterSystem: 'System for collection and/or treatment of wastewater from cleaning of trucks',
-  controlDiversionExternalWaters: 'Control and diversion of external waters (non salt impacted',
+  controlDiversionExternalWaters: 'Control and diversion of external waters (non salt impacted)',
   drainageCollectionSystem: 'Drainage inside with collection systems for runoff of salt contaminated waters',
-  municipalSewerSystem: 'Specify discharge point into a municipal sewer system',
-  removalContainment: 'Specify discharge point into a containment for removal',
-  watercourse: 'Specify discharge point into a watercourse',
-  otherDischargePoint: 'Specify discharge point into (other)',
+  municipalSewerSystem: 'A municipal sewer system',
+  removalContainment: 'A containment for removal',
+  watercourse: 'A watercourse',
+  otherDischargePoint: 'Other',
   ongoingCleanup: 'Ongoing cleanup of the site surfaces, and spilled material is swept up quickly',
   riskManagementPlan: 'Risk management and emergency measures plans are in place',
 };
@@ -222,7 +222,8 @@ const AddSaltReportFormFields = ({ setInitialValues, formValues, setValidationSc
           <Col sm={1}>1.1</Col>
           <Col sm={7}>
             Has your organization developed and implemented a salt management plan that covers all elements described in
-            the Code of Practice?
+            the Code of Practice? If your plan does not cover all the elements, answer "No" and explain which elements
+            are not covered in the Additional Information Section.
           </Col>
           <Col>
             <div>
@@ -312,7 +313,7 @@ const AddSaltReportFormFields = ({ setInitialValues, formValues, setValidationSc
                   <thead>
                     <tr>
                       <th rowSpan={2}>Areas for Improvement</th>
-                      <th colSpan={2}>Number of Objectives for Winter 2024/2025</th>
+                      <th colSpan={2}>Number of Objectives for Winter 2025/26</th>
                     </tr>
                     <tr>
                       <th># Identified</th>
@@ -354,7 +355,7 @@ const AddSaltReportFormFields = ({ setInitialValues, formValues, setValidationSc
       <section>
         <h4>Section 2: Winter Operations Information</h4>
         <Row className="my-4">
-          <Col sm={1}>2.1</Col>
+          <Col sm={1}>2.2</Col>
           <Col sm={7}>
             What is the total length of road on which any salt is applied in your Service Area (roads with or without
             abrasive)?
@@ -368,7 +369,7 @@ const AddSaltReportFormFields = ({ setInitialValues, formValues, setValidationSc
           </Col>
         </Row>
         <Row className="my-4">
-          <Col sm={1}>2.2</Col>
+          <Col sm={1}>2.3</Col>
           <Col sm={7}>
             What was the total number of days requiring salt application for winter road maintenance during the winter
             season?
@@ -386,8 +387,11 @@ const AddSaltReportFormFields = ({ setInitialValues, formValues, setValidationSc
               <Col sm={1}>3.1</Col>
               <Col>
                 {/* Needs yearly update */}
-                Provide the total quantity of material used for winter road maintenance (including sidewalks) as of May
-                31st 2025. (If your organization uses multi-chloride<sup>4</sup> products, see question 3.2)
+                Provide the total quantity of de-icing material used for winter road maintenance (including sidewalks)
+                as of May 31st 2026. Ensure not to double count salt quantities between categories. (If your
+                organization uses multi-chloride<sup>4</sup> products, see question 3.2)
+                <br />
+                NOTE: Please provide solid quantities in TONNES and liquid quantities in LITRES
               </Col>
             </Row>
             <Row className="my-2">
@@ -639,7 +643,7 @@ const AddSaltReportFormFields = ({ setInitialValues, formValues, setValidationSc
                     </tr>
                     {/* Multi-chloride B */}
                     <tr>
-                      <td>Multi-chloride A</td>
+                      <td>Multi-chloride B</td>
                       <td>
                         <FormNumberInput type="number" name="sect3.multiChlorideB.litres" step="0.01" />
                       </td>
@@ -709,11 +713,7 @@ const AddSaltReportFormFields = ({ setInitialValues, formValues, setValidationSc
                                 <FormInput name={`sect4.stockpiles.${index}.siteName`} />
                               </td>
                               <td>
-                                <Field
-                                  name={`sect4.stockpiles.${index}.motiOwned`}
-                                  type="checkbox"
-                                  className="form-control"
-                                />
+                                <FormCheckboxInput name={`sect4.stockpiles.${index}.motiOwned`} />
                               </td>
                               <td>
                                 <FormNumberInput
@@ -813,9 +813,9 @@ const AddSaltReportFormFields = ({ setInitialValues, formValues, setValidationSc
                 <Table bordered>
                   <thead>
                     <tr>
-                      <th>Good Housekeeping Practice</th>
-                      <th>Plan in Place (Y/N)</th>
-                      <th>Number of Sites</th>
+                      <th>Good Housekeeping Practices</th>
+                      <th>Yes</th>
+                      <th># of Sites</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -823,7 +823,7 @@ const AddSaltReportFormFields = ({ setInitialValues, formValues, setValidationSc
                       <tr key={index}>
                         <td>{housekeepingPracticesLabel[key]}</td>
                         <td>
-                          <Field name={`sect4.practices.${key}.hasPlan`} type="checkbox" className="form-control" />
+                          <FormCheckboxInput name={`sect4.practices.${key}.hasPlan`} />
                         </td>
                         <td>
                           <FormNumberInput
@@ -868,7 +868,10 @@ const AddSaltReportFormFields = ({ setInitialValues, formValues, setValidationSc
                   </thead>
                   <tbody>
                     <tr>
-                      <td>Total number of vehicles assigned to solid salt application</td>
+                      <td>
+                        Total number of vehicles assigned to solid salt application. Include vehicles with conveyors and
+                        ground speed electronic controller and vehicles equipped with pre-wetting equipment.
+                      </td>
                       <td>
                         <FormNumberInput type="number" name="sect5.vehiclesForSaltApplication" />
                       </td>
@@ -896,7 +899,7 @@ const AddSaltReportFormFields = ({ setInitialValues, formValues, setValidationSc
                 <Row>
                   <Col>
                     Spreading equipment is regularly calibrated?
-                    <Field name="sect5.regularCalibration" type="checkbox" className="form-control" />
+                    <FormCheckboxInput name="sect5.regularCalibration" />
                   </Col>
                   <Col>
                     Frequency
@@ -924,19 +927,15 @@ const AddSaltReportFormFields = ({ setInitialValues, formValues, setValidationSc
                   <thead>
                     <tr>
                       <th>Sources</th>
-                      <th>Used</th>
+                      <th>Yes</th>
                       <th>Number</th>
                     </tr>
                   </thead>
                   <tbody>
                     <tr>
-                      <td>Infrared Thermometer</td>
+                      <td>Infrared thermometer</td>
                       <td>
-                        <Field
-                          type="checkbox"
-                          name="sect5.weatherMonitoringSources.infraredThermometer.relied"
-                          className="form-control"
-                        />
+                        <FormCheckboxInput name="sect5.weatherMonitoringSources.infraredThermometer.relied" />
                       </td>
                       <td>
                         <FormNumberInput
@@ -946,23 +945,15 @@ const AddSaltReportFormFields = ({ setInitialValues, formValues, setValidationSc
                       </td>
                     </tr>
                     <tr>
-                      <td>Meteorological Service</td>
+                      <td>Meteorological service</td>
                       <td>
-                        <Field
-                          type="checkbox"
-                          name="sect5.weatherMonitoringSources.meteorologicalService.relied"
-                          className="form-control"
-                        />
+                        <FormCheckboxInput name="sect5.weatherMonitoringSources.meteorologicalService.relied" />
                       </td>
                     </tr>
                     <tr>
-                      <td>Fixed RWIS Stations</td>
+                      <td>Fixed RWIS stations</td>
                       <td>
-                        <Field
-                          type="checkbox"
-                          name="sect5.weatherMonitoringSources.fixedRWISStations.relied"
-                          className="form-control"
-                        />
+                        <FormCheckboxInput name="sect5.weatherMonitoringSources.fixedRWISStations.relied" />
                       </td>
                       <td>
                         <FormNumberInput type="number" name="sect5.weatherMonitoringSources.fixedRWISStations.number" />
@@ -971,11 +962,7 @@ const AddSaltReportFormFields = ({ setInitialValues, formValues, setValidationSc
                     <tr>
                       <td>Mobile RWIS mounted on vehicles</td>
                       <td>
-                        <Field
-                          type="checkbox"
-                          name="sect5.weatherMonitoringSources.mobileRWISMounted.relied"
-                          className="form-control"
-                        />
+                        <FormCheckboxInput name="sect5.weatherMonitoringSources.mobileRWISMounted.relied" />
                       </td>
                       <td>
                         <FormNumberInput type="number" name="sect5.weatherMonitoringSources.mobileRWISMounted.number" />
@@ -1002,8 +989,8 @@ const AddSaltReportFormFields = ({ setInitialValues, formValues, setValidationSc
                 <Table bordered>
                   <thead>
                     <tr>
-                      <th>Type</th>
-                      <th>Used</th>
+                      <th>Types</th>
+                      <th>Yes</th>
                       <th># of vehicles</th>
                     </tr>
                   </thead>
@@ -1011,11 +998,7 @@ const AddSaltReportFormFields = ({ setInitialValues, formValues, setValidationSc
                     <tr>
                       <td>Automated Vehicle Location (AVL)</td>
                       <td>
-                        <Field
-                          type="checkbox"
-                          name="sect5.maintenanceDecisionSupport.avl.relied"
-                          className="form-control"
-                        />
+                        <FormCheckboxInput name="sect5.maintenanceDecisionSupport.avl.relied" />
                       </td>
                       <td>
                         <FormNumberInput type="number" name="sect5.maintenanceDecisionSupport.avl.number" />
@@ -1024,11 +1007,7 @@ const AddSaltReportFormFields = ({ setInitialValues, formValues, setValidationSc
                     <tr>
                       <td>Record of salt application rates</td>
                       <td>
-                        <Field
-                          type="checkbox"
-                          name="sect5.maintenanceDecisionSupport.saltApplicationRates.relied"
-                          className="form-control"
-                        />
+                        <FormCheckboxInput name="sect5.maintenanceDecisionSupport.saltApplicationRates.relied" />
                       </td>
                       <td>
                         <FormNumberInput
@@ -1040,11 +1019,7 @@ const AddSaltReportFormFields = ({ setInitialValues, formValues, setValidationSc
                     <tr>
                       <td>Use of a chart for application rates adapted to road or temperature conditions</td>
                       <td>
-                        <Field
-                          type="checkbox"
-                          name="sect5.maintenanceDecisionSupport.applicationRateChart.relied"
-                          className="form-control"
-                        />
+                        <FormCheckboxInput name="sect5.maintenanceDecisionSupport.applicationRateChart.relied" />
                       </td>
                       <td>
                         <FormNumberInput
@@ -1054,13 +1029,9 @@ const AddSaltReportFormFields = ({ setInitialValues, formValues, setValidationSc
                       </td>
                     </tr>
                     <tr>
-                      <td>Testing of Maintenance Decision Support System (MDSS)</td>
+                      <td>Testing of Maintenance Decisions Support System (MDSS)</td>
                       <td>
-                        <Field
-                          type="checkbox"
-                          name="sect5.maintenanceDecisionSupport.testingMDSS.relied"
-                          className="form-control"
-                        />
+                        <FormCheckboxInput name="sect5.maintenanceDecisionSupport.testingMDSS.relied" />
                       </td>
                       <td>
                         <FormNumberInput type="number" name="sect5.maintenanceDecisionSupport.testingMDSS.number" />
@@ -1089,7 +1060,7 @@ const AddSaltReportFormFields = ({ setInitialValues, formValues, setValidationSc
                 <tr>
                   <td>6.1 Does your organization perform snow disposal at a designated site?</td>
                   <td>
-                    <Field type="checkbox" name="sect6.disposal.used" className="form-control" />
+                    <FormCheckboxInput name="sect6.disposal.used" />
                   </td>
                   <td>
                     <FormNumberInput type="number" name="sect6.disposal.total" />
@@ -1098,13 +1069,13 @@ const AddSaltReportFormFields = ({ setInitialValues, formValues, setValidationSc
                 <tr>
                   <td>6.2 Does your organization use snow melters?</td>
                   <td>
-                    <Field type="checkbox" name="sect6.snowMelter.used" className="form-control" />
+                    <FormCheckboxInput name="sect6.snowMelter.used" />
                   </td>
                 </tr>
                 <tr>
-                  <td>6.3 Is the meltwater from snow melters discharged though the storm sewer system?</td>
+                  <td>6.2.2 Is the meltwater from snow melters discharged through the storm sewer system?</td>
                   <td>
-                    <Field type="checkbox" name="sect6.meltwater.used" className="form-control" />
+                    <FormCheckboxInput name="sect6.meltwater.used" />
                   </td>
                 </tr>
               </tbody>
@@ -1117,7 +1088,7 @@ const AddSaltReportFormFields = ({ setInitialValues, formValues, setValidationSc
         <Row className="my-4">
           <Col sm={1}>7.1</Col>
           <Col sm={7}>
-            Has your organization completed an inventory of salt vulnerable areas within your Service Area?
+            Have you completed an inventory of salt vulnerable areas in your Service Area?
           </Col>{' '}
           <Col>
             <div>
@@ -1128,7 +1099,7 @@ const AddSaltReportFormFields = ({ setInitialValues, formValues, setValidationSc
         </Row>
         <Row className="my-4">
           <Col sm={1}>7.2</Col>
-          <Col sm={7}>Do you have salt vulnerable areas within your Service Area? (provide list below)</Col>{' '}
+          <Col sm={7}>Do you have salt vulnerable area(s) within your Service Area?</Col>{' '}
           <Col>
             <div>
               <FormRadioInput id="setVulnerableAreas.no" name="sect7.setVulnerableAreas" value="no" label="No" />
@@ -1196,14 +1167,17 @@ const AddSaltReportFormFields = ({ setInitialValues, formValues, setValidationSc
         </Row>
         <Row>
           <Col className="my-2">
-            <h4>Types of Vulnerable Areas</h4>
+            <h4>
+              7.6 Specify the type and number of vulnerable areas identified, where protection measures are in place or
+              chloride levels are monitored:
+            </h4>
             <Table bordered>
               <thead>
                 <tr>
                   <td>Type of Vulnerability</td>
-                  <td># of areas identified</td>
-                  <td># of areas with protection measures</td>
-                  <td># of areas with chloride monitoring</td>
+                  <td># of Areas Identified</td>
+                  <td># of Areas with protection measures in place</td>
+                  <td># of Areas with chloride monitoring</td>
                 </tr>
               </thead>
               <tbody>
@@ -1226,7 +1200,7 @@ const AddSaltReportFormFields = ({ setInitialValues, formValues, setValidationSc
                   </td>
                 </tr>
                 <tr>
-                  <td>Aquatic Life (lake and watercourse)</td>
+                  <td>Aquatic life (lake and watercourse)</td>
                   <td>
                     <FormNumberInput type="number" name="sect7.typesOfVulnerableAreas.aquaticLife.areasIdentified" />
                   </td>
@@ -1253,7 +1227,7 @@ const AddSaltReportFormFields = ({ setInitialValues, formValues, setValidationSc
                   </td>
                 </tr>
                 <tr>
-                  <td>Delimited areas with terrestrial fauna/flora</td>
+                  <td>Delimited areas with terrestrial fauna or flora</td>
                   <td>
                     <FormNumberInput type="number" name="sect7.typesOfVulnerableAreas.delimitedAreas.areasIdentified" />
                   </td>
@@ -1271,7 +1245,7 @@ const AddSaltReportFormFields = ({ setInitialValues, formValues, setValidationSc
                   </td>
                 </tr>
                 <tr>
-                  <td>Valued Lands</td>
+                  <td>Valued lands</td>
                   <td>
                     <FormNumberInput type="number" name="sect7.typesOfVulnerableAreas.valuedLands.areasIdentified" />
                   </td>
@@ -1304,7 +1278,7 @@ const AddSaltReportFormFields = ({ setInitialValues, formValues, setValidationSc
                         <th>Feature (ie: lake, stream)</th>
                         <th>Type</th>
                         <th>Type of Protection Measures (refer to Salt Management Plan)</th>
-                        <th>Is Environmental monitoring in place? (Tick for Yes)</th>
+                        <th>Is environmental monitoring in place? (Tick for Yes)</th>
                         <th>Comments</th>
                       </tr>
                     </thead>
@@ -1337,11 +1311,7 @@ const AddSaltReportFormFields = ({ setInitialValues, formValues, setValidationSc
                             <FormInput name={`sect7.vulnerableAreas.${index}.protectioneasures`} type="text" />
                           </td>
                           <td>
-                            <Field
-                              name={`sect7.vulnerableAreas.${index}.environmentalMonitoring`}
-                              type="checkbox"
-                              className="form-control"
-                            />
+                            <FormCheckboxInput name={`sect7.vulnerableAreas.${index}.environmentalMonitoring`} />
                           </td>
                           <td>
                             <FormInput name={`sect7.vulnerableAreas.${index}.comments`} type="text" />
