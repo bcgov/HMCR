@@ -45,6 +45,18 @@ namespace Hmcr.Domain.PdfHelpers
                         data["sect1.objectives.saltApplication.identified"] = dto.Sect1.Objectives.SaltApplication.Identified?.ToString();
                         data["sect1.objectives.saltApplication.achieved"] = dto.Sect1.Objectives.SaltApplication.Achieved?.ToString();
                     }
+
+                    if (dto.Sect1.Objectives.SnowDisposal != null)
+                    {
+                        data["sect1.objectives.snowDisposal.identified"] = dto.Sect1.Objectives.SnowDisposal.Identified?.ToString();
+                        data["sect1.objectives.snowDisposal.achieved"] = dto.Sect1.Objectives.SnowDisposal.Achieved?.ToString();
+                    }
+
+                    if (dto.Sect1.Objectives.VulnerableAreas != null)
+                    {
+                        data["sect1.objectives.vulnerableAreas.identified"] = dto.Sect1.Objectives.VulnerableAreas.Identified?.ToString();
+                        data["sect1.objectives.vulnerableAreas.achieved"] = dto.Sect1.Objectives.VulnerableAreas.Achieved?.ToString();
+                    }
                 }
             }
 

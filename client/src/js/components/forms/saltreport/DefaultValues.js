@@ -31,6 +31,14 @@ export const defaultValues = {
         identified: null,
         achieved: null,
       },
+      snowDisposal: {
+        identified: null,
+        achieved: null,
+      },
+      vulnerableAreas: {
+        identified: null,
+        achieved: null,
+      },
     },
   },
   sect2: {

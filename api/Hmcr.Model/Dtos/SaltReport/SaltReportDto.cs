@@ -43,6 +43,8 @@ namespace Hmcr.Model.Dtos.SaltReport
         {
             public MaterialStorageDto MaterialStorage { get; set; }
             public SaltApplicationDto SaltApplication { get; set; }
+            public SnowDisposalDto SnowDisposal { get; set; }
+            public VulnerableAreasDto VulnerableAreas { get; set; }
 
             public class MaterialStorageDto
             {
@@ -51,6 +53,18 @@ namespace Hmcr.Model.Dtos.SaltReport
             }
 
             public class SaltApplicationDto
+            {
+                public int? Identified { get; set; }
+                public int? Achieved { get; set; }
+            }
+
+            public class SnowDisposalDto
+            {
+                public int? Identified { get; set; }
+                public int? Achieved { get; set; }
+            }
+
+            public class VulnerableAreasDto
             {
                 public int? Identified { get; set; }
                 public int? Achieved { get; set; }

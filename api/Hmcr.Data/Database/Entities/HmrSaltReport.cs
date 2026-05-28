@@ -57,6 +57,18 @@ namespace Hmcr.Data.Database.Entities
         [Column("SALT_APP_ACH")]
         public int? SaltApplicationAchieved { get; set; }
 
+        [Column("SNOW_DISP_ID")]
+        public int? SnowDisposalIdentified { get; set; }
+
+        [Column("SNOW_DISP_ACH")]
+        public int? SnowDisposalAchieved { get; set; }
+
+        [Column("VULN_AREAS_ID")]
+        public int? VulnerableAreasIdentified { get; set; }
+
+        [Column("VULN_AREAS_ACH")]
+        public int? VulnerableAreasAchieved { get; set; }
+
 
         // Section 2
         [Column("RD_TOT_LEN")]

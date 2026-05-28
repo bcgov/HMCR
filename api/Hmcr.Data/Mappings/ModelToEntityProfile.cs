@@ -124,6 +124,10 @@ namespace Hmcr.Data.Mappings
                 .ForMember(dest => dest.MaterialStorageIdentified, opt => opt.MapFrom(src => src.Sect1.Objectives.MaterialStorage.Identified))
                 .ForMember(dest => dest.SaltApplicationAchieved, opt => opt.MapFrom(src => src.Sect1.Objectives.SaltApplication.Achieved))
                 .ForMember(dest => dest.SaltApplicationIdentified, opt => opt.MapFrom(src => src.Sect1.Objectives.SaltApplication.Identified))
+                .ForMember(dest => dest.SnowDisposalAchieved, opt => opt.MapFrom(src => src.Sect1.Objectives.SnowDisposal.Achieved))
+                .ForMember(dest => dest.SnowDisposalIdentified, opt => opt.MapFrom(src => src.Sect1.Objectives.SnowDisposal.Identified))
+                .ForMember(dest => dest.VulnerableAreasAchieved, opt => opt.MapFrom(src => src.Sect1.Objectives.VulnerableAreas.Achieved))
+                .ForMember(dest => dest.VulnerableAreasIdentified, opt => opt.MapFrom(src => src.Sect1.Objectives.VulnerableAreas.Identified))
                 // Section 2
                 .ForMember(dest => dest.RoadTotalLength, opt => opt.MapFrom(src => src.Sect2.RoadTotalLength))
                 .ForMember(dest => dest.SaltTotalDays, opt => opt.MapFrom(src => src.Sect2.SaltTotalDays))

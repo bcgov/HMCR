@@ -345,6 +345,32 @@ const AddSaltReportFormFields = ({ setInitialValues, formValues, setValidationSc
                         </FormGroup>
                       </td>
                     </tr>
+                    <tr>
+                      <td>Snow Disposal</td>
+                      <td>
+                        <FormGroup>
+                          <FormNumberInput type="number" name="sect1.objectives.snowDisposal.identified" />
+                        </FormGroup>
+                      </td>
+                      <td>
+                        <FormGroup>
+                          <FormNumberInput type="number" name="sect1.objectives.snowDisposal.achieved" />
+                        </FormGroup>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td>Vulnerable Areas</td>
+                      <td>
+                        <FormGroup>
+                          <FormNumberInput type="number" name="sect1.objectives.vulnerableAreas.identified" />
+                        </FormGroup>
+                      </td>
+                      <td>
+                        <FormGroup>
+                          <FormNumberInput type="number" name="sect1.objectives.vulnerableAreas.achieved" />
+                        </FormGroup>
+                      </td>
+                    </tr>
                   </tbody>
                 </Table>
               </Col>
