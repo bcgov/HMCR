@@ -1123,8 +1123,12 @@ const AddSaltReportFormFields = ({ setInitialValues, formValues, setValidationSc
               <thead>
                 <tr>
                   <th>Management of Snow</th>
-                  <th>(Y/N)</th>
-                  <th># of sites</th>
+                  <th>
+                    Yes
+                    <br />
+                    <small>No (leave blank)</small>
+                  </th>
+                  <th># of Sites</th>
                 </tr>
               </thead>
               <tbody>
