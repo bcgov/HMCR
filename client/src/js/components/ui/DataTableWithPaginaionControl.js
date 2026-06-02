@@ -34,6 +34,8 @@ DataTableWithPaginaionControl.propTypes = {
   ).isRequired,
   editable: PropTypes.bool.isRequired,
   editPermissionName: PropTypes.string,
+  editKey: PropTypes.string,
+  deletable: PropTypes.bool,
   searchPagination: PropTypes.shape({
     pageNumber: PropTypes.number.isRequired,
     pageSize: PropTypes.number.isRequired,
