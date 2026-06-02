@@ -11,6 +11,7 @@ import { TooltipProvider, useTooltip } from '../../../contexts/TooltipContext';
 import { FormRow, FormInput, FormCheckboxInput, FormRadioInput, FormNumberInput } from '../FormInputs';
 import { Row, Col, FormGroup, Table, Button, Tooltip } from 'reactstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import * as Constants from '../../../Constants';
 
 const materialStorageAppendixLabel = {
   materialStorage: {
@@ -109,24 +110,25 @@ const snowDisposalDesignFeaturesLabel = {
   watercourse: 'All meltwater is collected and discharged into a watercourse',
 };
 
-const AddSaltReportFormFields = ({ setInitialValues, formValues, setValidationSchema, currentUser }) => {
+const AddSaltReportFormFields = ({ setInitialValues, formValues, setValidationSchema, currentUser, formType, initialReport }) => {
   const [loading, setLoading] = useState(true);
   const { errors, submitCount, isSubmitting } = useFormikContext();
+  const isEditMode = formType === Constants.FORM_TYPE.EDIT;
 
   const debouncedSaveForm = debounce((values) => {
     sessionStorage.setItem('formData', JSON.stringify(values));
   }, 3000);
 
   useEffect(() => {
-    setLoading(false);
     const defaultValidationSchema = validationSchema.shape({});
     setValidationSchema(defaultValidationSchema);
-    setInitialValues(loadFromSessionStorage());
+    setInitialValues(getInitialFormValues());
+    setLoading(false);
 
     return () => {
       debouncedSaveForm.cancel();
     };
-  }, [setInitialValues, setValidationSchema]);
+  }, [setInitialValues, setValidationSchema, formType, initialReport]);
 
   useEffect(() => {
     if (isSubmitting && submitCount > 0 && Object.keys(errors).length > 0) {
@@ -135,12 +137,32 @@ const AddSaltReportFormFields = ({ setInitialValues, formValues, setValidationSc
   }, [isSubmitting, submitCount, errors]);
 
   useEffect(() => {
-    debouncedSaveForm(formValues);
-  }, [formValues]);
+    if (!isEditMode && formValues) {
+      debouncedSaveForm(formValues);
+    }
+  }, [formValues, isEditMode]);
 
   const loadFromSessionStorage = () => {
     const savedFormData = sessionStorage.getItem('formData');
-    return savedFormData ? _.merge({}, defaultValues, JSON.parse(savedFormData)) : defaultValues;
+    return savedFormData ? mergeWithDefaultValues(JSON.parse(savedFormData)) : defaultValues;
+  };
+
+  const getInitialFormValues = () => {
+    if (isEditMode) {
+      return mergeWithDefaultValues(initialReport || {});
+    }
+
+    return loadFromSessionStorage();
+  };
+
+  const mergeWithDefaultValues = (values) => {
+    return _.mergeWith({}, defaultValues, values, (defaultValue, sourceValue) => {
+      if ((_.isPlainObject(defaultValue) || Array.isArray(defaultValue)) && sourceValue === null) {
+        return defaultValue;
+      }
+
+      return undefined;
+    });
   };
 
   const CustomTooltip = ({ tipId, children }) => {
@@ -1147,7 +1169,7 @@ const AddSaltReportFormFields = ({ setInitialValues, formValues, setValidationSc
                     <br />
                     <small>No (leave blank)</small>
                   </th>
-                  <th># of Sites</th>
+                  <th># of sites</th>
                 </tr>
               </thead>
               <tbody>
@@ -1459,7 +1481,7 @@ const AddSaltReportFormFields = ({ setInitialValues, formValues, setValidationSc
                             </Field>
                           </td>
                           <td>
-                            <FormInput name={`sect7.vulnerableAreas.${index}.protectioneasures`} type="text" />
+                            <FormInput name={`sect7.vulnerableAreas.${index}.protectionMeasures`} type="text" />
                           </td>
                           <td>
                             <FormCheckboxInput name={`sect7.vulnerableAreas.${index}.environmentalMonitoring`} />
