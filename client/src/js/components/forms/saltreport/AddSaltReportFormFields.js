@@ -882,7 +882,9 @@ const AddSaltReportFormFields = ({ setInitialValues, formValues, setValidationSc
                     <tr>
                       <th>Good Housekeeping Practices</th>
                       <th>
-                        (Y/N)
+                        Yes
+                        <br />
+                        <small>No (leave blank)</small>
                       </th>
                       <th># of Sites</th>
                     </tr>
