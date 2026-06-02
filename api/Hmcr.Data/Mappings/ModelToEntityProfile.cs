@@ -108,6 +108,7 @@ namespace Hmcr.Data.Mappings
 
             CreateMap<SaltReportDto, HmrSaltReport>()
                 // Section 1
+                .ForMember(dest => dest.SaltReportId, opt => opt.Ignore())
                 .ForMember(dest => dest.ServiceArea, opt => opt.MapFrom(src => src.ServiceArea))
                 .ForMember(dest => dest.ContactName, opt => opt.MapFrom(src => src.ContactName))
                 .ForMember(dest => dest.Telephone, opt => opt.MapFrom(src => src.Telephone))
@@ -254,9 +255,13 @@ namespace Hmcr.Data.Mappings
                 .ForMember(dest => dest.ValuedLandsAreasWithChloride, opt => opt.MapFrom(src => src.Sect7.TypesOfVulnerableAreas.ValuedLands.AreasWithChloride))
                 .ForMember(dest => dest.Appendix, opt => opt.Ignore())
                 .ForMember(dest => dest.VulnerableAreas, opt => opt.Ignore())
-                .ForMember(dest => dest.AppCreateTimestamp, opt => opt.MapFrom(src => src.AppCreateTimestamp))
+                .ForMember(dest => dest.AppCreateTimestamp, opt => opt.Ignore())
                 .ReverseMap()
-                .ForPath(dest => dest.Sect4.Stockpiles, opt => opt.MapFrom(src => src.Stockpiles));
+                .ForMember(dest => dest.SaltReportId, opt => opt.MapFrom(src => src.SaltReportId))
+                .ForMember(dest => dest.AppCreateTimestamp, opt => opt.MapFrom(src => src.AppCreateTimestamp))
+                .ForMember(dest => dest.Appendix, opt => opt.MapFrom(src => src.Appendix))
+                .ForPath(dest => dest.Sect4.Stockpiles, opt => opt.MapFrom(src => src.Stockpiles))
+                .ForPath(dest => dest.Sect7.VulnerableAreas, opt => opt.MapFrom(src => src.VulnerableAreas));
 
             CreateMap<StockpileDto, HmrSaltStockpile>()
                 .ForMember(dest => dest.SiteName, opt => opt.MapFrom(src => src.SiteName))
