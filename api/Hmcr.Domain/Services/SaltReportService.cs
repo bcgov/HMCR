@@ -29,6 +29,7 @@ namespace Hmcr.Domain.Services
     public interface ISaltReportService
     {
         Task<HmrSaltReport> CreateReportAsync(SaltReportDto dto);
+        Task<bool> UpdateReportAsync(decimal saltReportId, SaltReportDto dto);
         Task<IEnumerable<SaltReportDto>> GetAllSaltReportDtosAsync();
         Task<SaltReportDto> GetSaltReportByIdAsync(int saltReportId);
         Task<IEnumerable<HmrSaltReport>> GetSaltReportEntitiesAsync(string serviceAreas, DateTime fromDate, DateTime toDate);
@@ -101,6 +102,99 @@ namespace Hmcr.Domain.Services
                 catch (Exception ex)
                 {
                     _logger.LogError(ex, "Error in creating salt report, rolling back transaction");
+                    await transaction.RollbackAsync();
+                    throw;
+                }
+            }
+        }
+
+        public async Task<bool> UpdateReportAsync(decimal saltReportId, SaltReportDto dto)
+        {
+            using (var transaction = _context.Database.BeginTransaction())
+            {
+                try
+                {
+                    var saltReport = await _context.HmrSaltReports
+                        .Include(x => x.Appendix)
+                        .Include(x => x.Stockpiles)
+                        .Include(x => x.VulnerableAreas)
+                        .FirstOrDefaultAsync(x => x.SaltReportId == saltReportId);
+
+                    if (saltReport == null)
+                    {
+                        return false;
+                    }
+
+                    var saltReportIdValue = saltReport.SaltReportId;
+                    var appCreateTimestamp = saltReport.AppCreateTimestamp;
+
+                    dto.SaltReportId = saltReportId;
+                    _mapper.Map(dto, saltReport);
+                    saltReport.SaltReportId = saltReportIdValue;
+                    saltReport.AppCreateTimestamp = appCreateTimestamp;
+
+                    if (saltReport.Stockpiles != null && saltReport.Stockpiles.Any())
+                    {
+                        _context.HmrSaltStockpiles.RemoveRange(saltReport.Stockpiles);
+                    }
+
+                    if (dto.Sect4?.Stockpiles != null && dto.Sect4.Stockpiles.Any())
+                    {
+                        var stockpiles = MapToStockpiles(dto.Sect4.Stockpiles);
+                        foreach (var stockpile in stockpiles)
+                        {
+                            stockpile.StockPileId = 0;
+                            stockpile.SaltReportId = saltReportId;
+                        }
+                        await _context.HmrSaltStockpiles.AddRangeAsync(stockpiles);
+                    }
+
+                    if (saltReport.VulnerableAreas != null && saltReport.VulnerableAreas.Any())
+                    {
+                        _context.HmrSaltVulnAreas.RemoveRange(saltReport.VulnerableAreas);
+                    }
+
+                    if (dto.Sect7?.VulnerableAreas != null && dto.Sect7.VulnerableAreas.Any())
+                    {
+                        var vulnerableAreas = MapToVulnareas(dto.Sect7.VulnerableAreas);
+                        foreach (var vulnerableArea in vulnerableAreas)
+                        {
+                            vulnerableArea.VulnerableAreaId = 0;
+                            vulnerableArea.SaltReportId = saltReportId;
+                        }
+                        await _context.HmrSaltVulnAreas.AddRangeAsync(vulnerableAreas);
+                    }
+
+                    if (dto.Appendix == null)
+                    {
+                        if (saltReport.Appendix != null)
+                        {
+                            _context.HmrSaltReportAppendixes.Remove(saltReport.Appendix);
+                        }
+                    }
+                    else if (saltReport.Appendix == null)
+                    {
+                        var appendix = MapToAppendix(dto.Appendix, saltReportId);
+                        appendix.AppendixId = 0;
+                        await _context.HmrSaltReportAppendixes.AddAsync(appendix);
+                    }
+                    else
+                    {
+                        var appendixId = saltReport.Appendix.AppendixId;
+                        var appendixCreateTimestamp = saltReport.Appendix.AppCreateTimestamp;
+                        _mapper.Map(dto.Appendix, saltReport.Appendix);
+                        saltReport.Appendix.AppendixId = appendixId;
+                        saltReport.Appendix.SaltReportId = saltReportId;
+                        saltReport.Appendix.AppCreateTimestamp = appendixCreateTimestamp;
+                    }
+
+                    _unitOfWork.Commit();
+                    transaction.Commit();
+                    return true;
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Error in updating salt report, rolling back transaction");
                     await transaction.RollbackAsync();
                     throw;
                 }
