@@ -1412,7 +1412,9 @@ const AddSaltReportFormFields = ({ setInitialValues, formValues, setValidationSc
             </Table>
           </Col>
         </Row>
-        <Row className="my-2">
+        {
+        // DEFERRED ROWS; NO LONGER EXISTING AS OF 2025/2026 ENVIRONMENT CANADA REGULATIONS
+        /* <Row className="my-2">
           <Col>
             <h4>List the Vulnerable Areas in your Service Area: (insert additional rows as needed to the table below)</h4>
             <FieldArray name="sect7.vulnerableAreas">
@@ -1481,7 +1483,7 @@ const AddSaltReportFormFields = ({ setInitialValues, formValues, setValidationSc
               )}
             </FieldArray>
           </Col>
-        </Row>
+        </Row> */}
       </section>
       <section>
         <Col>
