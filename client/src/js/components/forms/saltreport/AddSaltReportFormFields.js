@@ -422,7 +422,7 @@ const AddSaltReportFormFields = ({ setInitialValues, formValues, setValidationSc
                 {/* Needs yearly update */}
                 Provide the total quantity of de-icing material used for winter road maintenance (including sidewalks)
                 as of May 31st 2026. Ensure not to double count salt quantities between categories. (If your
-                organization uses multi-chloride<sup>4</sup> products, see question 3.2)
+                organization uses multi-chloride products, see question 3.2)
                 <br />
                 NOTE: Please provide solid quantities in TONNES and liquid quantities in LITRES
               </Col>
@@ -549,7 +549,8 @@ const AddSaltReportFormFields = ({ setInitialValues, formValues, setValidationSc
                     </tr>
                     <tr>
                       <th>
-                        {'Acetate\u00b2'}
+                        Acetate
+                        <CustomTooltip tipId="prewetting-acetate">{tooltips.acetate}</CustomTooltip>
                       </th>
                       <td>
                         <FormNumberInput type="number" name="sect3.prewetting.acetate" step="0.01" />
@@ -598,14 +599,18 @@ const AddSaltReportFormFields = ({ setInitialValues, formValues, setValidationSc
                     </tr>
                     <tr>
                       <th>
-                        {'Acetate\u00b2'}
+                        Acetate
+                        <CustomTooltip tipId="pretreatment-acetate">{tooltips.acetate}</CustomTooltip>
                       </th>
                       <td>
                         <FormNumberInput type="number" name="sect3.pretreatment.acetate" step="0.01" />
                       </td>
                     </tr>
                     <tr>
-                      <th>{'Non-chloride organic products\u00b3'}</th>
+                      <th>
+                        Non-chloride organic products
+                        <CustomTooltip tipId="pretreatment-nonchloride">{tooltips.nonchloride}</CustomTooltip>
+                      </th>
                       <td>
                         <FormNumberInput type="number" name="sect3.pretreatment.nonchloride" step="0.01" />
                       </td>
@@ -645,14 +650,18 @@ const AddSaltReportFormFields = ({ setInitialValues, formValues, setValidationSc
                     </tr>
                     <tr>
                       <th>
-                        {'Acetate\u00b2'}
+                        Acetate
+                        <CustomTooltip tipId="antiicing-acetate">{tooltips.acetate}</CustomTooltip>
                       </th>
                       <td>
                         <FormNumberInput type="number" name="sect3.antiicing.acetate" step="0.01" />
                       </td>
                     </tr>
                     <tr>
-                      <th>{'Non-chloride organic products\u00b3'}</th>
+                      <th>
+                        Non-chloride organic products
+                        <CustomTooltip tipId="antiicing-nonchloride">{tooltips.nonchloride}</CustomTooltip>
+                      </th>
                       <td>
                         <FormNumberInput type="number" name="sect3.antiicing.nonchloride" step="0.01" />
                       </td>
@@ -687,8 +696,12 @@ const AddSaltReportFormFields = ({ setInitialValues, formValues, setValidationSc
                       <th>Multi-Chloride</th>
                       <th>Litres</th>
                       <th>NaCl %</th>
-                      <th>MgCl2 %</th>
-                      <th>CaCl2 %</th>
+                      <th>
+                        MgCl<sub>2</sub> %
+                      </th>
+                      <th>
+                        CaCl<sub>2</sub> %
+                      </th>
                     </tr>
                   </thead>
                   <tbody>
@@ -1004,7 +1017,10 @@ const AddSaltReportFormFields = ({ setInitialValues, formValues, setValidationSc
                   </thead>
                   <tbody>
                     <tr>
-                      <td>Infrared thermometer</td>
+                      <td>
+                        Infrared thermometer
+                        <CustomTooltip tipId="infrared-thermometer">{tooltips.infraredThermometer}</CustomTooltip>
+                      </td>
                       <td>
                         <FormCheckboxInput name="sect5.weatherMonitoringSources.infraredThermometer.relied" />
                       </td>
@@ -1016,7 +1032,10 @@ const AddSaltReportFormFields = ({ setInitialValues, formValues, setValidationSc
                       </td>
                     </tr>
                     <tr>
-                      <td>Meteorological service</td>
+                      <td>
+                        Meteorological service
+                        <CustomTooltip tipId="meteorological-service">{tooltips.meteorologicalService}</CustomTooltip>
+                      </td>
                       <td>
                         <FormCheckboxInput name="sect5.weatherMonitoringSources.meteorologicalService.relied" />
                       </td>
