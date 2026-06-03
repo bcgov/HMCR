@@ -67,7 +67,7 @@ const SaltReporting = ({ currentUser }) => {
     { heading: 'Report ID', key: 'saltReportId' },
     { heading: 'Service Area', key: 'serviceArea' },
     { heading: 'Contact Name/Title', key: 'contactName' },
-    { heading: 'Date Created', key: 'appCreateTimestamp', format: (date) => moment(date).format('LLL') },
+    { heading: 'Date Created', key: 'appCreateTimestamp', format: (date) => moment.utc(date).local().format('LLL') },
   ];
 
   const saltReportFormModal = useFormModal(

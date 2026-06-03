@@ -1161,7 +1161,7 @@ const AddSaltReportFormFields = ({ setInitialValues, formValues, setValidationSc
                   </td>
                 </tr>
                 <tr>
-                  <td>6.1.1 What is the total design capacity of all snow disposal sites (in cubic metres)?</td>
+                  <td>6.1.2 What is the total design capacity of all snow disposal sites (in cubic metres)?</td>
                   <td colSpan={2}>
                     <FormNumberInput type="number" name="sect6.disposal.designCapacity" placeholder="m3" />
                   </td>
