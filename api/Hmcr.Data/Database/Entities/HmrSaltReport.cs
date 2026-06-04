@@ -57,6 +57,18 @@ namespace Hmcr.Data.Database.Entities
         [Column("SALT_APP_ACH")]
         public int? SaltApplicationAchieved { get; set; }
 
+        [Column("SNOW_DISP_ID")]
+        public int? SnowDisposalIdentified { get; set; }
+
+        [Column("SNOW_DISP_ACH")]
+        public int? SnowDisposalAchieved { get; set; }
+
+        [Column("VULN_AREAS_ID")]
+        public int? VulnerableAreasIdentified { get; set; }
+
+        [Column("VULN_AREAS_ACH")]
+        public int? VulnerableAreasAchieved { get; set; }
+
 
         // Section 2
         [Column("RD_TOT_LEN")]
@@ -79,6 +91,9 @@ namespace Hmcr.Data.Database.Entities
         [Column("DEICER_ACET")]
         public decimal? DeicerAcetate { get; set; }
 
+        [Column("DEICER_HCOONA")]
+        public decimal? DeicerSodiumFormate { get; set; }
+
 
         [Column("TRTD_ABR_SDST")]
         public decimal? TreatedAbrasivesSandstoneDust { get; set; }
@@ -91,6 +106,9 @@ namespace Hmcr.Data.Database.Entities
 
         [Column("TRTD_ABR_CACL2")]
         public decimal? TreatedAbrasivesCacl2 { get; set; }
+
+        [Column("TRTD_ABR_HCOONA")]
+        public decimal? TreatedAbrasivesSodiumFormate { get; set; }
 
 
         [Column("PRWT_NACL")]
@@ -108,6 +126,9 @@ namespace Hmcr.Data.Database.Entities
         [Column("PRWT_NONCL")]
         public decimal? PrewettingNonchloride { get; set; }
 
+        [Column("PRWT_HCOONA")]
+        public decimal? PrewettingSodiumFormate { get; set; }
+
 
         [Column("PRTT_NACL")]
         public decimal? PretreatmentNacl { get; set; }
@@ -124,6 +145,9 @@ namespace Hmcr.Data.Database.Entities
         [Column("PRTT_NONCL")]
         public decimal? PretreatmentNonchloride { get; set; }
 
+        [Column("PRTT_HCOONA")]
+        public decimal? PretreatmentSodiumFormate { get; set; }
+
 
         [Column("ANTIC_NACL")]
         public decimal? AntiicingNacl { get; set; }
@@ -139,6 +163,9 @@ namespace Hmcr.Data.Database.Entities
 
         [Column("ANTIC_NONCL")]
         public decimal? AntiicingNonchloride { get; set; }
+
+        [Column("ANTIC_HCOONA")]
+        public decimal? AntiicingSodiumFormate { get; set; }
 
 
         [Column("MULTICHL_A_LTRS")]
@@ -322,11 +349,41 @@ namespace Hmcr.Data.Database.Entities
         [Column("SNOW_DISP_SITE_TOT")]
         public int? SnowDisposalSiteTotal { get; set; }
 
+        [Column("SNOW_DISP_CAP_M3")]
+        public int? SnowDisposalSiteCapacity { get; set; }
+
         [Column("SNOW_MELT_USED")]
         public bool? SnowMeltersUsed { get; set; }
 
+        [Column("SNOW_MELT_PCT")]
+        public decimal? SnowMeltersSnowPercentage { get; set; }
+
         [Column("MELTWATER_DISP_METH_USED")]
         public bool? MeltwaterDisposalMethodUsed { get; set; }
+
+        [Column("SNOW_DISP_SITE_LP_PCT")]
+        public decimal? SnowLowPermeabilitySurfacePercentage { get; set; }
+
+        [Column("SNOW_DISP_SITE_LP_SITES")]
+        public int? SnowLowPermeabilitySurfaceSites { get; set; }
+
+        [Column("MELTWATER_POND_PCT")]
+        public decimal? MeltwaterRetentionPondPercentage { get; set; }
+
+        [Column("MELTWATER_POND_SITES")]
+        public int? MeltwaterRetentionPondSites { get; set; }
+
+        [Column("MELTWATER_MUN_SEWER_SYS_PCT")]
+        public decimal? MeltwaterMunicipalSewerPercentage { get; set; }
+
+        [Column("MELTWATER_MUN_SEWER_SYS_SITES")]
+        public int? MeltwaterMunicipalSewerSites { get; set; }
+
+        [Column("MELTWATER_WATERCRS_PCT")]
+        public decimal? MeltwaterWatercoursePercentage { get; set; }
+
+        [Column("MELTWATER_WATERCRS_SITES")]
+        public int? MeltwaterWatercourseSites { get; set; }
 
 
         // Section 7

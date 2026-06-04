@@ -2,7 +2,9 @@ export const tooltips = {
   objectives: 'The salt management plan should include a description of planned improvements to be undertaken over time. Achievement of the objectives is an indicator of performance in the implementation of the salt management plan and will be taken into consideration in the second review of progress on the Code of Practice to be conducted by Environment Canada.',
   acetate: 'calcium-magnesium or potassium acetates',
   nonchloride: 'record only pure non-chloride (e.g. beet juice, corn bi-product, molasses or other organics), excluding pre-mixed blends with salt brine',
-  liquids: 'Describe multi-chloride liquids that contain more than one type of salt in the same mix'
+  liquids: 'Describe multi-chloride liquids that contain more than one type of salt in the same mix',
+  infraredThermometer: 'Different versions available: hand-held, truck-mounted, or stationary pole',
+  meteorologicalService: 'Meteorological service such as customized weather forecasts updated during the day or monitoring websites such as Environment Canada weather forecasting and radar'
 }
 
 export const defaultValues = {
@@ -31,6 +33,14 @@ export const defaultValues = {
         identified: null,
         achieved: null,
       },
+      snowDisposal: {
+        identified: null,
+        achieved: null,
+      },
+      vulnerableAreas: {
+        identified: null,
+        achieved: null,
+      },
     },
   },
   sect2: {
@@ -38,11 +48,11 @@ export const defaultValues = {
     saltTotalDays: null,
   },
   sect3: {
-    deicer: { nacl: null, mgcl2: null, cacl2: null, acetate: null },
-    treatedAbrasives: { sandStoneDust: null, nacl: null, mgcl2: null, cacl2: null },
-    prewetting: { nacl: null, mgcl2: null, cacl2: null, acetate: null, nonchloride: null },
-    pretreatment: { nacl: null, mgcl2: null, cacl2: null, acetate: null, nonchloride: null },
-    antiicing: { nacl: null, mgcl2: null, cacl2: null, acetate: null, nonchloride: null },
+    deicer: { nacl: null, mgcl2: null, cacl2: null, acetate: null, sodiumFormate: null },
+    treatedAbrasives: { sandStoneDust: null, nacl: null, mgcl2: null, cacl2: null, sodiumFormate: null },
+    prewetting: { nacl: null, mgcl2: null, cacl2: null, acetate: null, nonchloride: null, sodiumFormate: null },
+    pretreatment: { nacl: null, mgcl2: null, cacl2: null, acetate: null, nonchloride: null, sodiumFormate: null },
+    antiicing: { nacl: null, mgcl2: null, cacl2: null, acetate: null, nonchloride: null, sodiumFormate: null },
     multiChlorideA: {
       litres: null,
       naclPercentage: null,
@@ -154,12 +164,32 @@ export const defaultValues = {
     disposal: {
       used: false,
       total: 0,
+      designCapacity: null,
     },
     snowMelter: {
       used: false,
+      percentage: null,
     },
     meltwater: {
       used: false,
+    },
+    designFeatures: {
+      lowPermeabilitySurface: {
+        percentage: null,
+        numSites: null,
+      },
+      retentionPond: {
+        percentage: null,
+        numSites: null,
+      },
+      municipalSewerSystem: {
+        percentage: null,
+        numSites: null,
+      },
+      watercourse: {
+        percentage: null,
+        numSites: null,
+      },
     },
   },
   sect7: {

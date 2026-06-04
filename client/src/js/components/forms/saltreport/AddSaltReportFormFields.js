@@ -73,7 +73,7 @@ const materialStorageAppendixLabel = {
       'Upgrade an existing snow disposal site(s) and install a low permeability surface',
     collectMeltWaterSpecificPoint: 'Collect all melt water and discharge at a specific point',
     constructCollectionPond:
-      'Construct a collection pond to allow water to settle before its discharged, and control the time and rat of discharge',
+      'Construct a collection pond to allow water to settle before its discharged, and control the time and rate of discharge',
     otherSnowDisposal: 'Other (specify):',
   },
   vulnerableAreas: {
@@ -92,14 +92,21 @@ const housekeepingPracticesLabel = {
   allMaterialsHandled: 'All materials are handled in a designated area characterized by an impermeable surface',
   equipmentPreventsOverloading: 'Equipment to prevent overloading of trucks',
   wastewaterSystem: 'System for collection and/or treatment of wastewater from cleaning of trucks',
-  controlDiversionExternalWaters: 'Control and diversion of external waters (non salt impacted',
+  controlDiversionExternalWaters: 'Control and diversion of external waters (non salt impacted)',
   drainageCollectionSystem: 'Drainage inside with collection systems for runoff of salt contaminated waters',
-  municipalSewerSystem: 'Specify discharge point into a municipal sewer system',
-  removalContainment: 'Specify discharge point into a containment for removal',
-  watercourse: 'Specify discharge point into a watercourse',
-  otherDischargePoint: 'Specify discharge point into (other)',
+  municipalSewerSystem: 'A municipal sewer system',
+  removalContainment: 'A containment for removal',
+  watercourse: 'A watercourse',
+  otherDischargePoint: 'Other',
   ongoingCleanup: 'Ongoing cleanup of the site surfaces, and spilled material is swept up quickly',
   riskManagementPlan: 'Risk management and emergency measures plans are in place',
+};
+
+const snowDisposalDesignFeaturesLabel = {
+  lowPermeabilitySurface: 'Snow is disposed of entirely on a low permeability surface',
+  retentionPond: 'All meltwater is directed to a retention pond before its discharge',
+  municipalSewerSystem: 'All meltwater is collected and discharged into a municipal sewer system',
+  watercourse: 'All meltwater is collected and discharged into a watercourse',
 };
 
 const AddSaltReportFormFields = ({ setInitialValues, formValues, setValidationSchema, currentUser }) => {
@@ -133,7 +140,7 @@ const AddSaltReportFormFields = ({ setInitialValues, formValues, setValidationSc
 
   const loadFromSessionStorage = () => {
     const savedFormData = sessionStorage.getItem('formData');
-    return savedFormData ? JSON.parse(savedFormData) : defaultValues;
+    return savedFormData ? _.merge({}, defaultValues, JSON.parse(savedFormData)) : defaultValues;
   };
 
   const CustomTooltip = ({ tipId, children }) => {
@@ -222,7 +229,8 @@ const AddSaltReportFormFields = ({ setInitialValues, formValues, setValidationSc
           <Col sm={1}>1.1</Col>
           <Col sm={7}>
             Has your organization developed and implemented a salt management plan that covers all elements described in
-            the Code of Practice?
+            the Code of Practice? If your plan does not cover all the elements, answer "No" and explain which elements
+            are not covered in the Additional Information Section.
           </Col>
           <Col>
             <div>
@@ -312,7 +320,7 @@ const AddSaltReportFormFields = ({ setInitialValues, formValues, setValidationSc
                   <thead>
                     <tr>
                       <th rowSpan={2}>Areas for Improvement</th>
-                      <th colSpan={2}>Number of Objectives for Winter 2024/2025</th>
+                      <th colSpan={2}>Number of Objectives for Winter 2025/26</th>
                     </tr>
                     <tr>
                       <th># Identified</th>
@@ -344,6 +352,32 @@ const AddSaltReportFormFields = ({ setInitialValues, formValues, setValidationSc
                         </FormGroup>
                       </td>
                     </tr>
+                    <tr>
+                      <td>Snow Disposal</td>
+                      <td>
+                        <FormGroup>
+                          <FormNumberInput type="number" name="sect1.objectives.snowDisposal.identified" />
+                        </FormGroup>
+                      </td>
+                      <td>
+                        <FormGroup>
+                          <FormNumberInput type="number" name="sect1.objectives.snowDisposal.achieved" />
+                        </FormGroup>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td>Vulnerable Areas</td>
+                      <td>
+                        <FormGroup>
+                          <FormNumberInput type="number" name="sect1.objectives.vulnerableAreas.identified" />
+                        </FormGroup>
+                      </td>
+                      <td>
+                        <FormGroup>
+                          <FormNumberInput type="number" name="sect1.objectives.vulnerableAreas.achieved" />
+                        </FormGroup>
+                      </td>
+                    </tr>
                   </tbody>
                 </Table>
               </Col>
@@ -354,7 +388,7 @@ const AddSaltReportFormFields = ({ setInitialValues, formValues, setValidationSc
       <section>
         <h4>Section 2: Winter Operations Information</h4>
         <Row className="my-4">
-          <Col sm={1}>2.1</Col>
+          <Col sm={1}>2.2</Col>
           <Col sm={7}>
             What is the total length of road on which any salt is applied in your Service Area (roads with or without
             abrasive)?
@@ -368,7 +402,7 @@ const AddSaltReportFormFields = ({ setInitialValues, formValues, setValidationSc
           </Col>
         </Row>
         <Row className="my-4">
-          <Col sm={1}>2.2</Col>
+          <Col sm={1}>2.3</Col>
           <Col sm={7}>
             What was the total number of days requiring salt application for winter road maintenance during the winter
             season?
@@ -386,8 +420,11 @@ const AddSaltReportFormFields = ({ setInitialValues, formValues, setValidationSc
               <Col sm={1}>3.1</Col>
               <Col>
                 {/* Needs yearly update */}
-                Provide the total quantity of material used for winter road maintenance (including sidewalks) as of May
-                31st 2025. (If your organization uses multi-chloride<sup>4</sup> products, see question 3.2)
+                Provide the total quantity of de-icing material used for winter road maintenance (including sidewalks)
+                as of May 31st 2026. Ensure not to double count salt quantities between categories. (If your
+                organization uses multi-chloride products, see question 3.2)
+                <br />
+                NOTE: Please provide solid quantities in TONNES and liquid quantities in LITRES
               </Col>
             </Row>
             <Row className="my-2">
@@ -401,8 +438,8 @@ const AddSaltReportFormFields = ({ setInitialValues, formValues, setValidationSc
                   </thead>
                   <tbody>
                     <tr>
-                      <th rowSpan={4}>De-icers</th>
-                      <th>Sodium chloride (NaCl)</th>
+                      <th rowSpan={5}>De-icers</th>
+                      <th>Sodium Chloride (NaCl)</th>
 
                       <td>
                         <FormNumberInput type="number" name="sect3.deicer.nacl" step="0.01" />
@@ -410,7 +447,7 @@ const AddSaltReportFormFields = ({ setInitialValues, formValues, setValidationSc
                     </tr>
                     <tr>
                       <th>
-                        Magnesium chloride (MgCl<sub>2</sub>)
+                        Magnesium Chloride (MgCl<sub>2</sub>)
                       </th>
                       <td>
                         <FormNumberInput type="number" name="sect3.deicer.mgcl2" step="0.01" />
@@ -418,7 +455,7 @@ const AddSaltReportFormFields = ({ setInitialValues, formValues, setValidationSc
                     </tr>
                     <tr>
                       <th>
-                        Calcium chloride (CaCl<sub>2</sub>)
+                        Calcium Chloride (CaCl<sub>2</sub>)
                       </th>
                       <td>
                         <FormNumberInput type="number" name="sect3.deicer.cacl2" step="0.01" />
@@ -434,7 +471,13 @@ const AddSaltReportFormFields = ({ setInitialValues, formValues, setValidationSc
                       </td>
                     </tr>
                     <tr>
-                      <th rowSpan={4}>
+                      <th>Sodium Formate (HCOONa)</th>
+                      <td>
+                        <FormNumberInput type="number" name="sect3.deicer.sodiumFormate" step="0.01" />
+                      </td>
+                    </tr>
+                    <tr>
+                      <th rowSpan={5}>
                         Treated Abrasives
                         <br />
                         Specify the types & quantities of solid salts added to stockpile of abrasives (freeze protection
@@ -446,14 +489,14 @@ const AddSaltReportFormFields = ({ setInitialValues, formValues, setValidationSc
                       </td>
                     </tr>
                     <tr>
-                      <th>Sodium chloride (NaCl)</th>
+                      <th>Sodium Chloride (NaCl)</th>
                       <td>
                         <FormNumberInput type="number" name="sect3.treatedAbrasives.nacl" step="0.01" />
                       </td>
                     </tr>
                     <tr>
                       <th>
-                        Magnesium chloride (MgCl<sub>2</sub>)
+                        Magnesium Chloride (MgCl<sub>2</sub>)
                       </th>
                       <td>
                         <FormNumberInput type="number" name="sect3.treatedAbrasives.mgcl2" step="0.01" />
@@ -461,26 +504,36 @@ const AddSaltReportFormFields = ({ setInitialValues, formValues, setValidationSc
                     </tr>
                     <tr>
                       <th>
-                        Calcium chloride (CaCl<sub>2</sub>)
+                        Calcium Chloride (CaCl<sub>2</sub>)
                       </th>
                       <td>
                         <FormNumberInput type="number" name="sect3.treatedAbrasives.cacl2" step="0.01" />
                       </td>
                     </tr>
                     <tr>
-                      <th rowSpan={5}>
+                      <th>Sodium Formate (HCOONa)</th>
+                      <td>
+                        <FormNumberInput type="number" name="sect3.treatedAbrasives.sodiumFormate" step="0.01" />
+                      </td>
+                    </tr>
+                    <tr>
+                      <th colSpan={2}>Liquids</th>
+                      <th>Litres</th>
+                    </tr>
+                    <tr>
+                      <th rowSpan={6}>
                         Pre-wetting Liquid Concentrated liquid product sprayed (with on-board equipment) to the solid
                         de-icing agent or the abrasive directly as it is spread or discharged from the truck to the
                         pavement
                       </th>
-                      <th>Sodium chloride (NaCl)</th>
+                      <th>Sodium Chloride (NaCl)</th>
                       <td>
                         <FormNumberInput type="number" name="sect3.prewetting.nacl" step="0.01" />
                       </td>
                     </tr>
                     <tr>
                       <th>
-                        Magnesium chloride (MgCl<sub>2</sub>)
+                        Magnesium Chloride (MgCl<sub>2</sub>)
                       </th>
                       <td>
                         <FormNumberInput type="number" name="sect3.prewetting.mgcl2" step="0.01" />
@@ -488,7 +541,7 @@ const AddSaltReportFormFields = ({ setInitialValues, formValues, setValidationSc
                     </tr>
                     <tr>
                       <th>
-                        Calcium chloride (CaCl<sub>2</sub>)
+                        Calcium Chloride (CaCl<sub>2</sub>)
                       </th>
                       <td>
                         <FormNumberInput type="number" name="sect3.prewetting.cacl2" step="0.01" />
@@ -496,7 +549,8 @@ const AddSaltReportFormFields = ({ setInitialValues, formValues, setValidationSc
                     </tr>
                     <tr>
                       <th>
-                        Acetate<sup>2</sup>
+                        Acetate
+                        <CustomTooltip tipId="prewetting-acetate">{tooltips.acetate}</CustomTooltip>
                       </th>
                       <td>
                         <FormNumberInput type="number" name="sect3.prewetting.acetate" step="0.01" />
@@ -512,18 +566,24 @@ const AddSaltReportFormFields = ({ setInitialValues, formValues, setValidationSc
                       </td>
                     </tr>
                     <tr>
-                      <th rowSpan={5}>
+                      <th>Sodium Formate (HCOONa)</th>
+                      <td>
+                        <FormNumberInput type="number" name="sect3.prewetting.sodiumFormate" step="0.01" />
+                      </td>
+                    </tr>
+                    <tr>
+                      <th rowSpan={6}>
                         Pre-treatment Liquid Concentrated liquid product added to the solid de-icer and the abrasive at
                         the time it is stockpiled at the storage site or added by the supplier before delivery
                       </th>
-                      <th>Sodium chloride (NaCl)</th>
+                      <th>Sodium Chloride (NaCl)</th>
                       <td>
                         <FormNumberInput type="number" name="sect3.pretreatment.nacl" step="0.01" />
                       </td>
                     </tr>
                     <tr>
                       <th>
-                        Magnesium chloride (MgCl<sub>2</sub>)
+                        Magnesium Chloride (MgCl<sub>2</sub>)
                       </th>
                       <td>
                         <FormNumberInput type="number" name="sect3.pretreatment.mgcl2" step="0.01" />
@@ -531,7 +591,7 @@ const AddSaltReportFormFields = ({ setInitialValues, formValues, setValidationSc
                     </tr>
                     <tr>
                       <th>
-                        Calcium chloride (CaCl<sub>2</sub>)
+                        Calcium Chloride (CaCl<sub>2</sub>)
                       </th>
                       <td>
                         <FormNumberInput type="number" name="sect3.pretreatment.cacl2" step="0.01" />
@@ -539,32 +599,42 @@ const AddSaltReportFormFields = ({ setInitialValues, formValues, setValidationSc
                     </tr>
                     <tr>
                       <th>
-                        Acetate<sup>2</sup>
+                        Acetate
+                        <CustomTooltip tipId="pretreatment-acetate">{tooltips.acetate}</CustomTooltip>
                       </th>
                       <td>
                         <FormNumberInput type="number" name="sect3.pretreatment.acetate" step="0.01" />
                       </td>
                     </tr>
                     <tr>
-                      <th>Non-chloride organic products3</th>
+                      <th>
+                        Non-chloride organic products
+                        <CustomTooltip tipId="pretreatment-nonchloride">{tooltips.nonchloride}</CustomTooltip>
+                      </th>
                       <td>
                         <FormNumberInput type="number" name="sect3.pretreatment.nonchloride" step="0.01" />
                       </td>
                     </tr>
                     <tr>
-                      <th rowSpan={5}>
+                      <th>Sodium Formate (HCOONa)</th>
+                      <td>
+                        <FormNumberInput type="number" name="sect3.pretreatment.sodiumFormate" step="0.01" />
+                      </td>
+                    </tr>
+                    <tr>
+                      <th rowSpan={6}>
                         Direct Liquid Application (aka Anti-icing) Concentrated liquid product that is sprayed directly
                         on the pavement surface with a truck or by a sprayer system (e.g. Fixed Automated Spray
                         Technology FAST) before a storm or the formation of frost.
                       </th>
-                      <th>Sodium chloride (NaCl)</th>
+                      <th>Sodium Chloride (NaCl)</th>
                       <td>
                         <FormNumberInput type="number" name="sect3.antiicing.nacl" step="0.01" />
                       </td>
                     </tr>
                     <tr>
                       <th>
-                        Magnesium chloride (MgCl<sub>2</sub>)
+                        Magnesium Chloride (MgCl<sub>2</sub>)
                       </th>
                       <td>
                         <FormNumberInput type="number" name="sect3.antiicing.mgcl2" step="0.01" />
@@ -572,7 +642,7 @@ const AddSaltReportFormFields = ({ setInitialValues, formValues, setValidationSc
                     </tr>
                     <tr>
                       <th>
-                        Calcium chloride (CaCl<sub>2</sub>)
+                        Calcium Chloride (CaCl<sub>2</sub>)
                       </th>
                       <td>
                         <FormNumberInput type="number" name="sect3.antiicing.cacl2" step="0.01" />
@@ -580,16 +650,26 @@ const AddSaltReportFormFields = ({ setInitialValues, formValues, setValidationSc
                     </tr>
                     <tr>
                       <th>
-                        Acetate<sup>2</sup>
+                        Acetate
+                        <CustomTooltip tipId="antiicing-acetate">{tooltips.acetate}</CustomTooltip>
                       </th>
                       <td>
                         <FormNumberInput type="number" name="sect3.antiicing.acetate" step="0.01" />
                       </td>
                     </tr>
                     <tr>
-                      <th>Non-chloride organic products3</th>
+                      <th>
+                        Non-chloride organic products
+                        <CustomTooltip tipId="antiicing-nonchloride">{tooltips.nonchloride}</CustomTooltip>
+                      </th>
                       <td>
                         <FormNumberInput type="number" name="sect3.antiicing.nonchloride" step="0.01" />
+                      </td>
+                    </tr>
+                    <tr>
+                      <th>Sodium Formate (HCOONa)</th>
+                      <td>
+                        <FormNumberInput type="number" name="sect3.antiicing.sodiumFormate" step="0.01" />
                       </td>
                     </tr>
                   </tbody>
@@ -616,14 +696,18 @@ const AddSaltReportFormFields = ({ setInitialValues, formValues, setValidationSc
                       <th>Multi-Chloride</th>
                       <th>Litres</th>
                       <th>NaCl %</th>
-                      <th>MgCl2 %</th>
-                      <th>CaCl2 %</th>
+                      <th>
+                        MgCl<sub>2</sub> %
+                      </th>
+                      <th>
+                        CaCl<sub>2</sub> %
+                      </th>
                     </tr>
                   </thead>
                   <tbody>
-                    {/* Multi-chloride A */}
+                    {/* Multi-Chloride A */}
                     <tr>
-                      <td>Multi-chloride A</td>
+                      <td>Multi-Chloride A</td>
                       <td>
                         <FormNumberInput type="number" name="sect3.multiChlorideA.litres" step="0.01" />
                       </td>
@@ -637,9 +721,9 @@ const AddSaltReportFormFields = ({ setInitialValues, formValues, setValidationSc
                         <FormNumberInput type="number" name="sect3.multiChlorideA.cacl2Percentage" step="0.01" />
                       </td>
                     </tr>
-                    {/* Multi-chloride B */}
+                    {/* Multi-Chloride B */}
                     <tr>
-                      <td>Multi-chloride A</td>
+                      <td>Multi-Chloride B</td>
                       <td>
                         <FormNumberInput type="number" name="sect3.multiChlorideB.litres" step="0.01" />
                       </td>
@@ -675,7 +759,7 @@ const AddSaltReportFormFields = ({ setInitialValues, formValues, setValidationSc
               <Col sm={1}>4.2</Col>
               <Col>
                 Provide the number of stockpiles that are stored under the following conditions. If your organization
-                manages more than one site, provide the information for each site (insert additional rows as needed to table below)
+                manages more than one site, provide the information for each site (insert additional rows as needed to the table below)
               </Col>
             </Row>
             <Row className="my-2">
@@ -709,11 +793,7 @@ const AddSaltReportFormFields = ({ setInitialValues, formValues, setValidationSc
                                 <FormInput name={`sect4.stockpiles.${index}.siteName`} />
                               </td>
                               <td>
-                                <Field
-                                  name={`sect4.stockpiles.${index}.motiOwned`}
-                                  type="checkbox"
-                                  className="form-control"
-                                />
+                                <FormCheckboxInput name={`sect4.stockpiles.${index}.motiOwned`} />
                               </td>
                               <td>
                                 <FormNumberInput
@@ -813,9 +893,13 @@ const AddSaltReportFormFields = ({ setInitialValues, formValues, setValidationSc
                 <Table bordered>
                   <thead>
                     <tr>
-                      <th>Good Housekeeping Practice</th>
-                      <th>Plan in Place (Y/N)</th>
-                      <th>Number of Sites</th>
+                      <th>Good Housekeeping Practices</th>
+                      <th>
+                        Yes
+                        <br />
+                        <small>No (leave blank)</small>
+                      </th>
+                      <th># of Sites</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -823,7 +907,7 @@ const AddSaltReportFormFields = ({ setInitialValues, formValues, setValidationSc
                       <tr key={index}>
                         <td>{housekeepingPracticesLabel[key]}</td>
                         <td>
-                          <Field name={`sect4.practices.${key}.hasPlan`} type="checkbox" className="form-control" />
+                          <FormCheckboxInput name={`sect4.practices.${key}.hasPlan`} />
                         </td>
                         <td>
                           <FormNumberInput
@@ -868,7 +952,10 @@ const AddSaltReportFormFields = ({ setInitialValues, formValues, setValidationSc
                   </thead>
                   <tbody>
                     <tr>
-                      <td>Total number of vehicles assigned to solid salt application</td>
+                      <td>
+                        Total number of vehicles assigned to solid salt application. Include vehicles with conveyors and
+                        ground speed electronic controller and vehicles equipped with pre-wetting equipment.
+                      </td>
                       <td>
                         <FormNumberInput type="number" name="sect5.vehiclesForSaltApplication" />
                       </td>
@@ -896,7 +983,7 @@ const AddSaltReportFormFields = ({ setInitialValues, formValues, setValidationSc
                 <Row>
                   <Col>
                     Spreading equipment is regularly calibrated?
-                    <Field name="sect5.regularCalibration" type="checkbox" className="form-control" />
+                    <FormCheckboxInput name="sect5.regularCalibration" />
                   </Col>
                   <Col>
                     Frequency
@@ -924,19 +1011,18 @@ const AddSaltReportFormFields = ({ setInitialValues, formValues, setValidationSc
                   <thead>
                     <tr>
                       <th>Sources</th>
-                      <th>Used</th>
+                      <th>Yes</th>
                       <th>Number</th>
                     </tr>
                   </thead>
                   <tbody>
                     <tr>
-                      <td>Infrared Thermometer</td>
                       <td>
-                        <Field
-                          type="checkbox"
-                          name="sect5.weatherMonitoringSources.infraredThermometer.relied"
-                          className="form-control"
-                        />
+                        Infrared thermometer
+                        <CustomTooltip tipId="infrared-thermometer">{tooltips.infraredThermometer}</CustomTooltip>
+                      </td>
+                      <td>
+                        <FormCheckboxInput name="sect5.weatherMonitoringSources.infraredThermometer.relied" />
                       </td>
                       <td>
                         <FormNumberInput
@@ -946,23 +1032,18 @@ const AddSaltReportFormFields = ({ setInitialValues, formValues, setValidationSc
                       </td>
                     </tr>
                     <tr>
-                      <td>Meteorological Service</td>
                       <td>
-                        <Field
-                          type="checkbox"
-                          name="sect5.weatherMonitoringSources.meteorologicalService.relied"
-                          className="form-control"
-                        />
+                        Meteorological service
+                        <CustomTooltip tipId="meteorological-service">{tooltips.meteorologicalService}</CustomTooltip>
+                      </td>
+                      <td>
+                        <FormCheckboxInput name="sect5.weatherMonitoringSources.meteorologicalService.relied" />
                       </td>
                     </tr>
                     <tr>
-                      <td>Fixed RWIS Stations</td>
+                      <td>Fixed RWIS stations</td>
                       <td>
-                        <Field
-                          type="checkbox"
-                          name="sect5.weatherMonitoringSources.fixedRWISStations.relied"
-                          className="form-control"
-                        />
+                        <FormCheckboxInput name="sect5.weatherMonitoringSources.fixedRWISStations.relied" />
                       </td>
                       <td>
                         <FormNumberInput type="number" name="sect5.weatherMonitoringSources.fixedRWISStations.number" />
@@ -971,11 +1052,7 @@ const AddSaltReportFormFields = ({ setInitialValues, formValues, setValidationSc
                     <tr>
                       <td>Mobile RWIS mounted on vehicles</td>
                       <td>
-                        <Field
-                          type="checkbox"
-                          name="sect5.weatherMonitoringSources.mobileRWISMounted.relied"
-                          className="form-control"
-                        />
+                        <FormCheckboxInput name="sect5.weatherMonitoringSources.mobileRWISMounted.relied" />
                       </td>
                       <td>
                         <FormNumberInput type="number" name="sect5.weatherMonitoringSources.mobileRWISMounted.number" />
@@ -1002,20 +1079,16 @@ const AddSaltReportFormFields = ({ setInitialValues, formValues, setValidationSc
                 <Table bordered>
                   <thead>
                     <tr>
-                      <th>Type</th>
-                      <th>Used</th>
-                      <th># of vehicles</th>
+                      <th>Types</th>
+                      <th>Yes</th>
+                      <th>Number</th>
                     </tr>
                   </thead>
                   <tbody>
                     <tr>
                       <td>Automated Vehicle Location (AVL)</td>
                       <td>
-                        <Field
-                          type="checkbox"
-                          name="sect5.maintenanceDecisionSupport.avl.relied"
-                          className="form-control"
-                        />
+                        <FormCheckboxInput name="sect5.maintenanceDecisionSupport.avl.relied" />
                       </td>
                       <td>
                         <FormNumberInput type="number" name="sect5.maintenanceDecisionSupport.avl.number" />
@@ -1024,11 +1097,7 @@ const AddSaltReportFormFields = ({ setInitialValues, formValues, setValidationSc
                     <tr>
                       <td>Record of salt application rates</td>
                       <td>
-                        <Field
-                          type="checkbox"
-                          name="sect5.maintenanceDecisionSupport.saltApplicationRates.relied"
-                          className="form-control"
-                        />
+                        <FormCheckboxInput name="sect5.maintenanceDecisionSupport.saltApplicationRates.relied" />
                       </td>
                       <td>
                         <FormNumberInput
@@ -1040,11 +1109,7 @@ const AddSaltReportFormFields = ({ setInitialValues, formValues, setValidationSc
                     <tr>
                       <td>Use of a chart for application rates adapted to road or temperature conditions</td>
                       <td>
-                        <Field
-                          type="checkbox"
-                          name="sect5.maintenanceDecisionSupport.applicationRateChart.relied"
-                          className="form-control"
-                        />
+                        <FormCheckboxInput name="sect5.maintenanceDecisionSupport.applicationRateChart.relied" />
                       </td>
                       <td>
                         <FormNumberInput
@@ -1056,11 +1121,7 @@ const AddSaltReportFormFields = ({ setInitialValues, formValues, setValidationSc
                     <tr>
                       <td>Testing of Maintenance Decision Support System (MDSS)</td>
                       <td>
-                        <Field
-                          type="checkbox"
-                          name="sect5.maintenanceDecisionSupport.testingMDSS.relied"
-                          className="form-control"
-                        />
+                        <FormCheckboxInput name="sect5.maintenanceDecisionSupport.testingMDSS.relied" />
                       </td>
                       <td>
                         <FormNumberInput type="number" name="sect5.maintenanceDecisionSupport.testingMDSS.number" />
@@ -1081,43 +1142,102 @@ const AddSaltReportFormFields = ({ setInitialValues, formValues, setValidationSc
               <thead>
                 <tr>
                   <th>Management of Snow</th>
-                  <th>(Y/N)</th>
-                  <th># of sites</th>
+                  <th>
+                    Yes
+                    <br />
+                    <small>No (leave blank)</small>
+                  </th>
+                  <th># of Sites</th>
                 </tr>
               </thead>
               <tbody>
                 <tr>
                   <td>6.1 Does your organization perform snow disposal at a designated site?</td>
                   <td>
-                    <Field type="checkbox" name="sect6.disposal.used" className="form-control" />
+                    <FormCheckboxInput name="sect6.disposal.used" />
                   </td>
                   <td>
                     <FormNumberInput type="number" name="sect6.disposal.total" />
                   </td>
                 </tr>
                 <tr>
-                  <td>6.2 Does your organization use snow melters?</td>
-                  <td>
-                    <Field type="checkbox" name="sect6.snowMelter.used" className="form-control" />
+                  <td>6.1.2 What is the total design capacity of all snow disposal sites (in cubic metres)?</td>
+                  <td colSpan={2}>
+                    <FormNumberInput type="number" name="sect6.disposal.designCapacity" placeholder="m3" />
                   </td>
                 </tr>
                 <tr>
-                  <td>6.3 Is the meltwater from snow melters discharged though the storm sewer system?</td>
+                  <td>6.2 Does your organization use snow melters?</td>
                   <td>
-                    <Field type="checkbox" name="sect6.meltwater.used" className="form-control" />
+                    <FormCheckboxInput name="sect6.snowMelter.used" />
+                  </td>
+                </tr>
+                <tr>
+                  <td>6.2.1 Percentage of snow disposed with snow melters?</td>
+                  <td colSpan={2}>
+                    <FormNumberInput type="number" name="sect6.snowMelter.percentage" step="0.01" placeholder="%" />
+                  </td>
+                </tr>
+                <tr>
+                  <td>6.2.2 Is the meltwater from snow melters discharged through the storm sewer system?</td>
+                  <td>
+                    <FormCheckboxInput name="sect6.meltwater.used" />
                   </td>
                 </tr>
               </tbody>
             </Table>
           </Col>
         </Row>
+        <Row className="my-4">
+          <Col>
+            <Row>
+              <Col sm={1}>6.3</Col>
+              <Col>
+                Provide the percentage of disposed snow managed under the following design features. If your organization
+                manages more than one site, indicate the number of sites managed using each design feature.
+              </Col>
+            </Row>
+            <Row className="my-2">
+              <Col>
+                <Table bordered>
+                  <thead>
+                    <tr>
+                      <th>Design Feature</th>
+                      <th>% of snow disposed</th>
+                      <th># of Sites</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {Object.entries(formValues.sect6.designFeatures || defaultValues.sect6.designFeatures).map(
+                      ([key], index) => (
+                        <tr key={index}>
+                          <td>{snowDisposalDesignFeaturesLabel[key]}</td>
+                          <td>
+                            <FormNumberInput
+                              type="number"
+                              name={`sect6.designFeatures.${key}.percentage`}
+                              step="0.01"
+                            />
+                          </td>
+                          <td>
+                            <FormNumberInput type="number" name={`sect6.designFeatures.${key}.numSites`} />
+                          </td>
+                        </tr>
+                      )
+                    )}
+                  </tbody>
+                </Table>
+              </Col>
+            </Row>
+          </Col>
+        </Row>
       </section>
       <section>
-        <h4>Section 7: Management of Salt Vulnerable Areas</h4>
+        <h4>Section 7: Vulnerable Areas</h4>
         <Row className="my-4">
           <Col sm={1}>7.1</Col>
           <Col sm={7}>
-            Has your organization completed an inventory of salt vulnerable areas within your Service Area?
+            Have you completed an inventory of salt vulnerable areas in your Service Area?
           </Col>{' '}
           <Col>
             <div>
@@ -1128,7 +1248,7 @@ const AddSaltReportFormFields = ({ setInitialValues, formValues, setValidationSc
         </Row>
         <Row className="my-4">
           <Col sm={1}>7.2</Col>
-          <Col sm={7}>Do you have salt vulnerable areas within your Service Area? (provide list below)</Col>{' '}
+          <Col sm={7}>Do you have salt vulnerable area(s) within your Service Area?</Col>{' '}
           <Col>
             <div>
               <FormRadioInput id="setVulnerableAreas.no" name="sect7.setVulnerableAreas" value="no" label="No" />
@@ -1139,7 +1259,7 @@ const AddSaltReportFormFields = ({ setInitialValues, formValues, setValidationSc
         <Row className="my-4">
           <Col sm={1}>7.3</Col>
           <Col sm={7}>
-            Has your organization prepared an action plan to prioritize areas where measures will be put in place?
+            Have you prepared an action plan to prioritize areas where measures will be put in place?
           </Col>{' '}
           <Col>
             <div>
@@ -1196,14 +1316,17 @@ const AddSaltReportFormFields = ({ setInitialValues, formValues, setValidationSc
         </Row>
         <Row>
           <Col className="my-2">
-            <h4>Types of Vulnerable Areas</h4>
+            <h4>
+              7.6 Specify the type and number of vulnerable areas identified, where protection measures are in place or
+              chloride levels are monitored:
+            </h4>
             <Table bordered>
               <thead>
                 <tr>
                   <td>Type of Vulnerability</td>
-                  <td># of areas identified</td>
-                  <td># of areas with protection measures</td>
-                  <td># of areas with chloride monitoring</td>
+                  <td># of Areas Identified</td>
+                  <td># of Areas with protection measures in place</td>
+                  <td># of Areas with chloride monitoring</td>
                 </tr>
               </thead>
               <tbody>
@@ -1226,7 +1349,7 @@ const AddSaltReportFormFields = ({ setInitialValues, formValues, setValidationSc
                   </td>
                 </tr>
                 <tr>
-                  <td>Aquatic Life (lake and watercourse)</td>
+                  <td>Aquatic life (lake and watercourse)</td>
                   <td>
                     <FormNumberInput type="number" name="sect7.typesOfVulnerableAreas.aquaticLife.areasIdentified" />
                   </td>
@@ -1253,7 +1376,7 @@ const AddSaltReportFormFields = ({ setInitialValues, formValues, setValidationSc
                   </td>
                 </tr>
                 <tr>
-                  <td>Delimited areas with terrestrial fauna/flora</td>
+                  <td>Delimited areas with terrestrial fauna or flora</td>
                   <td>
                     <FormNumberInput type="number" name="sect7.typesOfVulnerableAreas.delimitedAreas.areasIdentified" />
                   </td>
@@ -1271,7 +1394,7 @@ const AddSaltReportFormFields = ({ setInitialValues, formValues, setValidationSc
                   </td>
                 </tr>
                 <tr>
-                  <td>Valued Lands</td>
+                  <td>Valued lands</td>
                   <td>
                     <FormNumberInput type="number" name="sect7.typesOfVulnerableAreas.valuedLands.areasIdentified" />
                   </td>
@@ -1289,9 +1412,11 @@ const AddSaltReportFormFields = ({ setInitialValues, formValues, setValidationSc
             </Table>
           </Col>
         </Row>
-        <Row className="my-2">
+        {
+        // DEFERRED ROWS; NO LONGER EXISTING AS OF 2025/2026 ENVIRONMENT CANADA REGULATIONS
+        /* <Row className="my-2">
           <Col>
-            <h4>List the Vulnerable Areas in your Service Area: (insert additional rows as needed to table below)</h4>
+            <h4>List the Vulnerable Areas in your Service Area: (insert additional rows as needed to the table below)</h4>
             <FieldArray name="sect7.vulnerableAreas">
               {({ insert, remove }) => (
                 <>
@@ -1304,7 +1429,7 @@ const AddSaltReportFormFields = ({ setInitialValues, formValues, setValidationSc
                         <th>Feature (ie: lake, stream)</th>
                         <th>Type</th>
                         <th>Type of Protection Measures (refer to Salt Management Plan)</th>
-                        <th>Is Environmental monitoring in place? (Tick for Yes)</th>
+                        <th>Is environmental monitoring in place? (Check for Yes)</th>
                         <th>Comments</th>
                       </tr>
                     </thead>
@@ -1337,11 +1462,7 @@ const AddSaltReportFormFields = ({ setInitialValues, formValues, setValidationSc
                             <FormInput name={`sect7.vulnerableAreas.${index}.protectioneasures`} type="text" />
                           </td>
                           <td>
-                            <Field
-                              name={`sect7.vulnerableAreas.${index}.environmentalMonitoring`}
-                              type="checkbox"
-                              className="form-control"
-                            />
+                            <FormCheckboxInput name={`sect7.vulnerableAreas.${index}.environmentalMonitoring`} />
                           </td>
                           <td>
                             <FormInput name={`sect7.vulnerableAreas.${index}.comments`} type="text" />
@@ -1362,7 +1483,7 @@ const AddSaltReportFormFields = ({ setInitialValues, formValues, setValidationSc
               )}
             </FieldArray>
           </Col>
-        </Row>
+        </Row> */}
       </section>
       <section>
         <Col>
@@ -1371,8 +1492,8 @@ const AddSaltReportFormFields = ({ setInitialValues, formValues, setValidationSc
             <thead>
               <tr>
                 <th>Material Storage Facilities</th>
-                <th>Identified</th>
-                <th>Achieved</th>
+                <th># Identified</th>
+                <th># Achieved</th>
               </tr>
             </thead>
             <tbody>
@@ -1412,8 +1533,8 @@ const AddSaltReportFormFields = ({ setInitialValues, formValues, setValidationSc
             <thead>
               <tr>
                 <th>Salt Application</th>
-                <th>Identified</th>
-                <th>Achieved</th>
+                <th># Identified</th>
+                <th># Achieved</th>
               </tr>
             </thead>
             <tbody>
@@ -1446,8 +1567,8 @@ const AddSaltReportFormFields = ({ setInitialValues, formValues, setValidationSc
             <thead>
               <tr>
                 <th>Snow Disposal</th>
-                <th>Identified</th>
-                <th>Achieved</th>
+                <th># Identified</th>
+                <th># Achieved</th>
               </tr>
             </thead>
             <tbody>
@@ -1476,8 +1597,8 @@ const AddSaltReportFormFields = ({ setInitialValues, formValues, setValidationSc
             <thead>
               <tr>
                 <th>Vulnerable Areas</th>
-                <th>Identified</th>
-                <th>Achieved</th>
+                <th># Identified</th>
+                <th># Achieved</th>
               </tr>
             </thead>
             <tbody>

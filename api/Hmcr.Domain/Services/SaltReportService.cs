@@ -250,14 +250,134 @@ namespace Hmcr.Domain.Services
             return memoryStream;
         }
 
+        private const int SaltReportCsvColumnCount = 145;
+
+        private static string[] CreateCsvRow()
+        {
+            return Enumerable.Repeat(string.Empty, SaltReportCsvColumnCount).ToArray();
+        }
+
+        private static string[] CreateCsvRow(params (int Index, string Value)[] cells)
+        {
+            var row = CreateCsvRow();
+            foreach (var cell in cells)
+            {
+                row[cell.Index] = cell.Value;
+            }
+            return row;
+        }
+
+        private static void WriteCsvRow(StreamWriter writer, string[] columns)
+        {
+            writer.WriteLine(string.Join(",", columns));
+        }
+
+        private static string CsvValue(object value)
+        {
+            return value?.ToString() ?? string.Empty;
+        }
+
         private void WriteCsvHeaders(StreamWriter writer)
         {
-            // Headers
-            writer.WriteLine(",,,,1. Salt Management Plan,,,,,,,,,,,,2. Winter Ops,,3. Materials Applied,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,4. Design & Operation at Road Salt Storage sites,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,5. Salt Application,,,,,,,,,,,,,,,,,,,,,,6. Snow Disposal,,,,7. Management of Salt Vulnerable Areas,,,,,,,,,,,,,,,,,,,");
-            writer.WriteLine(",,,,Salt Management Plan,,,1.4 Training offered to:,,,,,1.5 Objectives:,,,,(2.1 not used),,3.1 Quantity of materials used:,,,,,,,,,,,,,,,,,,,,,,,3.2 Multi-Chloride Liquids,,,,,,,,4.1,4.2 Stockpile Conditions,,,,,,,,4.3 Good Housekeeping Practices,,,,,,,,,,,,,,,,,,,,,,5.1 Management of Equipment,,,,,,,5.2 Weather Monitoring,,,,,,,5.3 Maintenance Decision Support,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,");
-            writer.WriteLine(",,,,1.1,1.2,1.3,Managers,Superv's,Operators,Mechanics,Patrollers,Storage Facilities,,Salt Application,,2.2 Total length,2.3 # of days that,SOLIDS:,,,,,,,,LIQUIDS:,wet sand/salt as it goes out,,,,stop the sand from freezing (goes on the stockpile),,,,,to anti-ice (prevent bond); de-ice (too late),,,,,,,,,,,,,Total #  of,Road Salts,,,,Treated Abrasive,,,,Materials handled on imperm surface,,Truck overload prevention,,Truck wash-water collection system,,Control & diversion of external (non-salt) water,,Drainage inside with collection systems for runoff of salt contaminated waters:,,Discharged into:,,,,,,,,Ongoing cleanup and sweeping,,Risk mgmt & emerg meas plans in place,,# Vehicles used for salt application,,,,,,,Sources of information,,,,,,,Types of systems used to aid decision making,,,,,,,,6.1,,6.2,6.3,Salt Vulnerable Areas,,,,,,,,,,,,,,,,,,,");
-            writer.WriteLine(",,,,developed,reviewed,updated,,,,,,#,#,#,#,of roads that,salt was,De-icers,,,,Treated Abrasives,,,,Pre-wetting liquid,,,,,Pre-treatment liquid,,,,,Direct Liquid Application,,,,,Mix A,,,,Mix B,,,,Salt Storage,# salt,Impermeable Surface,Permanent Roof,Tarp Only,total #,Impermeable Surface,Permanent Roof,Tarp Only,,,,,,,,,,,Municipal sewer system,,Containment for removal,,Watercourse,,Other,,,,,,Total #,,conveyor & grnd,,direct,Regular Calibration?,,Infrared Thermometer,,Weather Srv,Fixed RWIS,,Mobile RWIS,,Auto Vehicle Locate,,Record Salt App rates,,Chart for app rates,,Testing of MDSS,,Perform snow disposal at desginated site?,,Use snow melters?,Meltwater discharged in storm sewer?,Inventory?,Vulnerable areas?,Action Plan?,Mitigation Measures,Monitoring?,Drinking Water # Identified,Drinking Water # with protection,Drinking Water # Chloride ,Aquatic Life # Identified,Aquatic Life # with protection,Aquatic Life # Chloride ,Wetlands & Associated aquatic life # Identified,Wetlands & Associated aquatic life # with protection,Wetlands & Associated aquatic life # Chloride ,Delimited Areas w/ terrestrial Fauna/flora # Identified,Delimited Areas w/ terrestrial Fauna/flora # with protection,Delimited Areas w/ terrestrial Fauna/flora # Chloride ,Valued Lands # Identified,Valued Lands # with protection,Valued Lands # Chloride ");
-            writer.WriteLine("SA,Contact Name,Number,Email,Y/N?,Y/N?,Y/N?,Y/N?,Y/N?,Y/N?,Y/N?,Y/N?,Identifed,Achieved,Identifed,Achieved,are salted?,applied?,NaCl,MgCl2,CaCl2,Acetate,sand/etc,NaCl,MgCl2,CaCl2,NaCl,MgCl2,CaCl2,Acetate,non-chloride,NaCl,MgCl2,CaCl2,Acetate,non-chloride,NaCl,MgCl2,CaCl2,Acetate,non-chloride,Litres,NaCl %,MgCl2 %,CaCl2 %,Litres,NaCl %,MgCl2 %,CaCl2 %,sites,stockpiles,# sites,# sites,# sites,stockpiles,# sites,# sites,# sites,Y/N,# sites,Y/N,# sites,Y/N,# sites,Y/N,#sites,Y/N,# sites,Y/N,# sites,Y/N,# sites,Y/N,# sites,Y/N,# sites,Y/N,# sites,Y/N,# sites,of vehicles,solid salt,speed sensor,pre-wetting,liquid app,Y/N,#/Yr,Y/N,#,Y/N,Y/N,#,Y/N,#,Y/N,#,Y/N,#,Y/N,#,Y/N,#,Y/N,#,Y/N,Y/N,Y/N,Y/N,Y/N,Y/N,Y/N,#,#,#,#,#,#,#,#,#,#,#,#,#,#,#");
+            WriteCsvRow(writer, CreateCsvRow(
+                (4, "1. Salt Management Plan"),
+                (20, "2. Winter Ops"),
+                (22, "3. Materials Applied"),
+                (58, "4. Design & Operation at Road Salt Storage sites"),
+                (89, "5. Salt Application"),
+                (111, "6. Snow Disposal"),
+                (125, "7. Management of Salt Vulnerable Areas")));
+
+            WriteCsvRow(writer, CreateCsvRow(
+                (4, "Salt Management Plan"),
+                (7, "1.4 Training offered to:"),
+                (12, "1.5 Objectives:"),
+                (20, "(2.1 not used)"),
+                (22, "3.1 Quantity of materials used:"),
+                (50, "3.2 Multi-Chloride Liquids"),
+                (58, "4.1"),
+                (59, "4.2 Stockpile Conditions"),
+                (67, "4.3 Good Housekeeping Practices"),
+                (89, "5.1 Management of Equipment"),
+                (96, "5.2 Weather Monitoring"),
+                (103, "5.3 Maintenance Decision Support")));
+
+            WriteCsvRow(writer, CreateCsvRow(
+                (4, "1.1"),
+                (5, "1.2"),
+                (6, "1.3"),
+                (7, "Managers"),
+                (8, "Superv's"),
+                (9, "Operators"),
+                (10, "Mechanics"),
+                (11, "Patrollers"),
+                (12, "Storage Facilities"),
+                (14, "Salt Application"),
+                (16, "Snow Disposal"),
+                (18, "Vulnerable Areas"),
+                (20, "2.2 Total length"),
+                (21, "2.3 # of days that salt was applied"),
+                (22, "De-icers"),
+                (27, "Treated Abrasives"),
+                (32, "Pre-wetting liquid"),
+                (38, "Pre-treatment liquid"),
+                (44, "Direct Liquid Application"),
+                (50, "Mix A"),
+                (54, "Mix B"),
+                (58, "Salt Storage"),
+                (59, "Road Salts"),
+                (63, "Treated Abrasive"),
+                (67, "Good Housekeeping Practices"),
+                (89, "# Vehicles used for salt application"),
+                (96, "Sources of information"),
+                (103, "Types of systems used to aid decision making"),
+                (111, "6.1 Snow disposal sites"),
+                (114, "6.2 Snow melters"),
+                (116, "6.3 Meltwater management"),
+                (125, "Salt Vulnerable Areas")));
+
+            WriteCsvRow(writer, CreateCsvRow(
+                (4, "developed"),
+                (5, "reviewed"),
+                (6, "updated"),
+                (20, "of roads that are salted"),
+                (21, "salt was applied"),
+                (77, "Municipal sewer system"),
+                (79, "Containment for removal"),
+                (81, "Watercourse"),
+                (83, "Other"),
+                (94, "Regular Calibration?"),
+                (111, "Perform snow disposal at designated site?"),
+                (112, "Total sites"),
+                (113, "Design capacity"),
+                (114, "Use snow melters?"),
+                (115, "% snow managed"),
+                (116, "Meltwater disposal method used?"),
+                (117, "Low permeability surface"),
+                (119, "Retention pond"),
+                (121, "Municipal sewer system"),
+                (123, "Watercourse"),
+                (125, "Inventory?"),
+                (126, "Vulnerable areas?"),
+                (127, "Action Plan?"),
+                (128, "Mitigation Measures"),
+                (129, "Monitoring?")));
+
+            WriteCsvRow(writer, new[]
+            {
+                "SA", "Contact Name", "Number", "Email", "Y/N?", "Y/N?", "Y/N?", "Y/N?", "Y/N?", "Y/N?", "Y/N?", "Y/N?",
+                "Identified", "Achieved", "Identified", "Achieved", "Identified", "Achieved", "Identified", "Achieved",
+                "are salted?", "applied?", "NaCl", "MgCl2", "CaCl2", "Acetate", "HCOONa", "sand/etc", "NaCl", "MgCl2", "CaCl2", "HCOONa",
+                "NaCl", "MgCl2", "CaCl2", "Acetate", "non-chloride", "HCOONa", "NaCl", "MgCl2", "CaCl2", "Acetate", "non-chloride", "HCOONa",
+                "NaCl", "MgCl2", "CaCl2", "Acetate", "non-chloride", "HCOONa", "Litres", "NaCl %", "MgCl2 %", "CaCl2 %",
+                "Litres", "NaCl %", "MgCl2 %", "CaCl2 %", "sites", "stockpiles", "# sites", "# sites", "# sites", "stockpiles", "# sites", "# sites", "# sites",
+                "Y/N", "# sites", "Y/N", "# sites", "Y/N", "# sites", "Y/N", "# sites", "Y/N", "# sites", "Y/N", "# sites",
+                "Y/N", "# sites", "Y/N", "# sites", "Y/N", "# sites", "Y/N", "# sites", "Y/N", "# sites",
+                "of vehicles", "solid salt", "speed sensor", "pre-wetting", "liquid app", "Y/N", "#/Yr", "Y/N", "#", "Y/N", "Y/N", "#",
+                "Y/N", "#", "Y/N", "#", "Y/N", "#", "Y/N", "#", "Y/N", "#", "Y/N", "#", "m3", "Y/N", "%", "Y/N",
+                "%", "# sites", "%", "# sites", "%", "# sites", "%", "# sites", "Y/N", "Y/N", "Y/N", "Y/N", "Y/N",
+                "#", "#", "#", "#", "#", "#", "#", "#", "#", "#", "#", "#", "#", "#", "#"
+            });
         }
 
         private void WriteTotals(StreamWriter writer, IEnumerable<HmrSaltReport> saltReportEntities)
@@ -277,31 +397,40 @@ namespace Hmcr.Domain.Services
             var TotalMaterialStorageAchieved = reports.GetTotalIntValue(report => report.MaterialStorageAchieved);
             var TotalSaltApplicationIdentified = reports.GetTotalIntValue(report => report.SaltApplicationIdentified);
             var TotalSaltApplicationAchieved = reports.GetTotalIntValue(report => report.SaltApplicationAchieved);
+            var TotalSnowDisposalIdentified = reports.GetTotalIntValue(report => report.SnowDisposalIdentified);
+            var TotalSnowDisposalAchieved = reports.GetTotalIntValue(report => report.SnowDisposalAchieved);
+            var TotalVulnerableAreasIdentified = reports.GetTotalIntValue(report => report.VulnerableAreasIdentified);
+            var TotalVulnerableAreasAchieved = reports.GetTotalIntValue(report => report.VulnerableAreasAchieved);
             var TotalRoadTotalLength = reports.GetTotalIntValue(report => report.RoadTotalLength);
             var TotalSaltTotalDays = reports.GetTotalIntValue(report => report.SaltTotalDays);
             var TotalDeicerNacl = reports.GetTotalDecimalValue(report => report.DeicerNacl);
             var TotalDeicerMgcl2 = reports.GetTotalDecimalValue(report => report.DeicerMgcl2);
             var TotalDeicerCacl2 = reports.GetTotalDecimalValue(report => report.DeicerCacl2);
             var TotalDeicerAcetate = reports.GetTotalDecimalValue(report => report.DeicerAcetate);
+            var TotalDeicerSodiumFormate = reports.GetTotalDecimalValue(report => report.DeicerSodiumFormate);
             var TotalTreatedAbrasivesSandstoneDust = reports.GetTotalDecimalValue(report => report.TreatedAbrasivesSandstoneDust);
             var TotalTreatedAbrasivesNacl = reports.GetTotalDecimalValue(report => report.TreatedAbrasivesNacl);
             var TotalTreatedAbrasivesMgcl2 = reports.GetTotalDecimalValue(report => report.TreatedAbrasivesMgcl2);
             var TotalTreatedAbrasivesCacl2 = reports.GetTotalDecimalValue(report => report.TreatedAbrasivesCacl2);
+            var TotalTreatedAbrasivesSodiumFormate = reports.GetTotalDecimalValue(report => report.TreatedAbrasivesSodiumFormate);
             var TotalPrewettingNacl = reports.GetTotalDecimalValue(report => report.PrewettingNacl);
             var TotalPrewettingMgcl2 = reports.GetTotalDecimalValue(report => report.PrewettingMgcl2);
             var TotalPrewettingCacl2 = reports.GetTotalDecimalValue(report => report.PrewettingCacl2);
             var TotalPrewettingAcetate = reports.GetTotalDecimalValue(report => report.PrewettingAcetate);
             var TotalPrewettingNonchloride = reports.GetTotalDecimalValue(report => report.PrewettingNonchloride);
+            var TotalPrewettingSodiumFormate = reports.GetTotalDecimalValue(report => report.PrewettingSodiumFormate);
             var TotalPretreatmentNacl = reports.GetTotalDecimalValue(report => report.PretreatmentNacl);
             var TotalPretreatmentMgcl2 = reports.GetTotalDecimalValue(report => report.PretreatmentMgcl2);
             var TotalPretreatmentCacl2 = reports.GetTotalDecimalValue(report => report.PretreatmentCacl2);
             var TotalPretreatmentAcetate = reports.GetTotalDecimalValue(report => report.PretreatmentAcetate);
             var TotalPretreatmentNonchloride = reports.GetTotalDecimalValue(report => report.PretreatmentNonchloride);
+            var TotalPretreatmentSodiumFormate = reports.GetTotalDecimalValue(report => report.PretreatmentSodiumFormate);
             var TotalAntiicingNacl = reports.GetTotalDecimalValue(report => report.AntiicingNacl);
             var TotalAntiicingMgcl2 = reports.GetTotalDecimalValue(report => report.AntiicingMgcl2);
             var TotalAntiicingCacl2 = reports.GetTotalDecimalValue(report => report.AntiicingCacl2);
             var TotalAntiicingAcetate = reports.GetTotalDecimalValue(report => report.AntiicingAcetate);
             var TotalAntiicingNonchloride = reports.GetTotalDecimalValue(report => report.AntiicingNonchloride);
+            var TotalAntiicingSodiumFormate = reports.GetTotalDecimalValue(report => report.AntiicingSodiumFormate);
             var TotalMultichlorideALitres = reports.GetTotalDecimalValue(report => report.MultichlorideALitres);
             var TotalMultichlorideANaclPercentage = reports.GetTotalDecimalValue(report => report.MultichlorideANaclPercentage);
             var TotalMultichlorideAMgcl2Percentage = reports.GetTotalDecimalValue(report => report.MultichlorideAMgcl2Percentage);
@@ -367,8 +496,18 @@ namespace Hmcr.Domain.Services
             var TotalTestingSMDSTotal = reports.GetTotalIntValue(report => report.TestingSMDSTotal);
             var TotalSnowDisposalSiteUsed = reports.GetTotalBoolValue(report => report.SnowDisposalSiteUsed);
             var TotalSnowDisposalSiteTotal = reports.GetTotalIntValue(report => report.SnowDisposalSiteTotal);
+            var TotalSnowDisposalSiteCapacity = reports.GetTotalIntValue(report => report.SnowDisposalSiteCapacity);
             var TotalSnowMeltersUsed = reports.GetTotalBoolValue(report => report.SnowMeltersUsed);
+            var TotalSnowMeltersSnowPercentage = reports.GetTotalDecimalValue(report => report.SnowMeltersSnowPercentage);
             var TotalMeltwaterDisposalMethodUsed = reports.GetTotalBoolValue(report => report.MeltwaterDisposalMethodUsed);
+            var TotalSnowLowPermeabilitySurfacePercentage = reports.GetTotalDecimalValue(report => report.SnowLowPermeabilitySurfacePercentage);
+            var TotalSnowLowPermeabilitySurfaceSites = reports.GetTotalIntValue(report => report.SnowLowPermeabilitySurfaceSites);
+            var TotalMeltwaterRetentionPondPercentage = reports.GetTotalDecimalValue(report => report.MeltwaterRetentionPondPercentage);
+            var TotalMeltwaterRetentionPondSites = reports.GetTotalIntValue(report => report.MeltwaterRetentionPondSites);
+            var TotalMeltwaterMunicipalSewerPercentage = reports.GetTotalDecimalValue(report => report.MeltwaterMunicipalSewerPercentage);
+            var TotalMeltwaterMunicipalSewerSites = reports.GetTotalIntValue(report => report.MeltwaterMunicipalSewerSites);
+            var TotalMeltwaterWatercoursePercentage = reports.GetTotalDecimalValue(report => report.MeltwaterWatercoursePercentage);
+            var TotalMeltwaterWatercourseSites = reports.GetTotalIntValue(report => report.MeltwaterWatercourseSites);
             var TotalCompletedInventory = reports.GetTotalYesResponses(report => report.CompletedInventory);
             var TotalSetVulnerableAreas = reports.GetTotalYesResponses(report => report.SetVulnerableAreas);
             var TotalActionPlanPrepared = reports.GetTotalYesResponses(report => report.ActionPlanPrepared);
@@ -390,8 +529,190 @@ namespace Hmcr.Domain.Services
             var TotalValuedLandsAreasWithProtection = reports.GetTotalIntValue(report => report.ValuedLandsAreasWithProtection);
             var TotalValuedLandsAreasWithChloride = reports.GetTotalIntValue(report => report.ValuedLandsAreasWithChloride);
 
-            writer.WriteLine($"Total / Total Yes,,,,{TotalPlanDeveloped}, {TotalPlanReviewed}, {TotalPlanUpdated}, {TotalManagerTraining}, {TotalSupervisorTraining}, {TotalOperatorTraining}, {TotalMechanicalTraining}, {TotalPatrollerTraining}, {TotalMaterialStorageIdentified}, {TotalMaterialStorageAchieved}, {TotalSaltApplicationIdentified}, {TotalSaltApplicationAchieved}, {TotalRoadTotalLength}, {TotalSaltTotalDays}, {TotalDeicerNacl}, {TotalDeicerMgcl2}, {TotalDeicerCacl2}, {TotalDeicerAcetate}, {TotalTreatedAbrasivesSandstoneDust}, {TotalTreatedAbrasivesNacl}, {TotalTreatedAbrasivesMgcl2}, {TotalTreatedAbrasivesCacl2}, {TotalPrewettingNacl}, {TotalPrewettingMgcl2}, {TotalPrewettingCacl2}, {TotalPrewettingAcetate}, {TotalPrewettingNonchloride}, {TotalPretreatmentNacl}, {TotalPretreatmentMgcl2}, {TotalPretreatmentCacl2}, {TotalPretreatmentAcetate}, {TotalPretreatmentNonchloride}, {TotalAntiicingNacl}, {TotalAntiicingMgcl2}, {TotalAntiicingCacl2}, {TotalAntiicingAcetate}, {TotalAntiicingNonchloride}, {TotalMultichlorideALitres}, {TotalMultichlorideANaclPercentage}, {TotalMultichlorideAMgcl2Percentage}, {TotalMultichlorideACacl2Percentage}, {TotalMultichlorideBLitres}, {TotalMultichlorideBNaclPercentage}, {TotalMultichlorideBMgcl2Percentage}, {TotalMultichlorideBCacl2Percentage},{TotalSaltStorageSitesTotal},{TotalRoadSaltStockpilesTotal},{TotalRoadSaltOnImpermeableSurface},{TotalRoadSaltUnderPermanentRoof},{TotalRoadSaltUnderTarp},{TotalTreatedAbrasivesStockpilesTotal},{TotalTreatedAbrasivesOnImpermeableSurface},{TotalTreatedAbrasivesUnderPermanentRoof},{TotalTreatedAbrasivesUnderTarp}, {TotalAllMaterialsHandledPlan}, {TotalAllMaterialsHandledSites}, {TotalEquipmentPreventsOverloadingPlan}, {TotalEquipmentPreventsOverloadingSites}, {TotalWastewaterSystemPlan}, {TotalWastewaterSystemSites}, {TotalControlDiversionExternalWatersPlan}, {TotalControlDiversionExternalWatersSites}, {TotalDrainageCollectionSystemPlan}, {TotalDrainageCollectionSystemSites}, {TotalMunicipalSewerSystemPlan}, {TotalMunicipalSewerSystemSites}, {TotalRemovalContainmentPlan}, {TotalRemovalContainmentSites}, {TotalWatercoursePlan}, {TotalWatercourseSites}, {TotalOtherDischargePointPlan}, {TotalOtherDischargePointSites}, {TotalOngoingCleanupPlan}, {TotalOngoingCleanupSites}, {TotalRiskManagementPlanPlan}, {TotalRiskManagementPlanSites}, {TotalNumberOfVehicles}, {TotalVehiclesForSaltApplication}, {TotalVehiclesWithConveyors}, {TotalVehiclesWithPreWettingEquipment}, {TotalVehiclesForDLA}, {TotalRegularCalibration}, {TotalRegularCalibrationTotal}, {TotalInfraredThermometerRelied}, {TotalInfraredThermometerTotal}, {TotalMeteorologicalServiceRelied}, {TotalFixedRWISStationsRelied}, {TotalFixedRWISStationsTotal}, {TotalMobileRWISMountedRelied}, {TotalMobileRWISMountedTotal}, {TotalAVLRelied}, {TotalAVLTotal}, {TotalSaltApplicationRatesRelied}, {TotalSaltApplicationRatesTotal}, {TotalApplicationRateChartRelied}, {TotalApplicationRateChartTotal}, {TotalTestingMDSSRelied}, {TotalTestingSMDSTotal}, {TotalSnowDisposalSiteUsed}, {TotalSnowDisposalSiteTotal}, {TotalSnowMeltersUsed}, {TotalMeltwaterDisposalMethodUsed}, {TotalCompletedInventory}, {TotalSetVulnerableAreas}, {TotalActionPlanPrepared}, {TotalProtectionMeasuresImplemented}, {TotalEnvironmentalMonitoringConducted}, {TotalDrinkingWaterAreasIdentified}, {TotalDrinkingWaterAreasWithProtection}, {TotalDrinkingWaterAreasWithChloride}, {TotalAquaticLifeAreasIdentified}, {TotalAquaticLifeAreasWithProtection}, {TotalAquaticLifeAreasWithChloride}, {TotalWetlandsAreasIdentified}, {TotalWetlandsAreasWithProtection}, {TotalWetlandsAreasWithChloride}, {TotalDelimitedAreasAreasIdentified}, {TotalDelimitedAreasAreasWithProtection}, {TotalDelimitedAreasAreasWithChloride}, {TotalValuedLandsAreasIdentified}, {TotalValuedLandsAreasWithProtection}, {TotalValuedLandsAreasWithChloride}");
-            writer.WriteLine($"Total No (treats empties as No),,,,{totalReports - TotalPlanDeveloped}, {totalReports - TotalPlanReviewed}, {totalReports - TotalPlanUpdated}, {totalReports - TotalManagerTraining}, {totalReports - TotalSupervisorTraining}, {totalReports - TotalOperatorTraining}, {totalReports - TotalMechanicalTraining}, {totalReports - TotalPatrollerTraining}, , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , {totalReports - TotalAllMaterialsHandledPlan}, , {totalReports - TotalEquipmentPreventsOverloadingPlan}, , {totalReports - TotalWastewaterSystemPlan}, , {totalReports - TotalControlDiversionExternalWatersPlan}, , {totalReports - TotalDrainageCollectionSystemPlan}, , {totalReports - TotalMunicipalSewerSystemPlan}, , {totalReports - TotalRemovalContainmentPlan}, , {totalReports - TotalWatercoursePlan}, , {totalReports - TotalOtherDischargePointPlan}, , {totalReports - TotalOngoingCleanupPlan}, , {totalReports - TotalRiskManagementPlanPlan},,,,,,,{totalReports - TotalRegularCalibration}, , {totalReports - TotalInfraredThermometerRelied}, , {totalReports - TotalMeteorologicalServiceRelied}, {totalReports - TotalFixedRWISStationsRelied}, ,{totalReports - TotalMobileRWISMountedRelied}, , {totalReports - TotalAVLRelied}, , {totalReports - TotalSaltApplicationRatesRelied}, , {totalReports - TotalApplicationRateChartRelied}, , {totalReports - TotalTestingMDSSRelied}, , {totalReports - TotalSnowDisposalSiteUsed}, , {totalReports - TotalSnowMeltersUsed}, , {totalReports - TotalCompletedInventory}, {totalReports - TotalSetVulnerableAreas}, {totalReports - TotalActionPlanPrepared}, {totalReports - TotalProtectionMeasuresImplemented}, {totalReports - TotalEnvironmentalMonitoringConducted}");
+            var totalRow = CreateCsvRow();
+            totalRow[0] = "Total / Total Yes";
+            totalRow[4] = CsvValue(TotalPlanDeveloped);
+            totalRow[5] = CsvValue(TotalPlanReviewed);
+            totalRow[6] = CsvValue(TotalPlanUpdated);
+            totalRow[7] = CsvValue(TotalManagerTraining);
+            totalRow[8] = CsvValue(TotalSupervisorTraining);
+            totalRow[9] = CsvValue(TotalOperatorTraining);
+            totalRow[10] = CsvValue(TotalMechanicalTraining);
+            totalRow[11] = CsvValue(TotalPatrollerTraining);
+            totalRow[12] = CsvValue(TotalMaterialStorageIdentified);
+            totalRow[13] = CsvValue(TotalMaterialStorageAchieved);
+            totalRow[14] = CsvValue(TotalSaltApplicationIdentified);
+            totalRow[15] = CsvValue(TotalSaltApplicationAchieved);
+            totalRow[16] = CsvValue(TotalSnowDisposalIdentified);
+            totalRow[17] = CsvValue(TotalSnowDisposalAchieved);
+            totalRow[18] = CsvValue(TotalVulnerableAreasIdentified);
+            totalRow[19] = CsvValue(TotalVulnerableAreasAchieved);
+            totalRow[20] = CsvValue(TotalRoadTotalLength);
+            totalRow[21] = CsvValue(TotalSaltTotalDays);
+            totalRow[22] = CsvValue(TotalDeicerNacl);
+            totalRow[23] = CsvValue(TotalDeicerMgcl2);
+            totalRow[24] = CsvValue(TotalDeicerCacl2);
+            totalRow[25] = CsvValue(TotalDeicerAcetate);
+            totalRow[26] = CsvValue(TotalDeicerSodiumFormate);
+            totalRow[27] = CsvValue(TotalTreatedAbrasivesSandstoneDust);
+            totalRow[28] = CsvValue(TotalTreatedAbrasivesNacl);
+            totalRow[29] = CsvValue(TotalTreatedAbrasivesMgcl2);
+            totalRow[30] = CsvValue(TotalTreatedAbrasivesCacl2);
+            totalRow[31] = CsvValue(TotalTreatedAbrasivesSodiumFormate);
+            totalRow[32] = CsvValue(TotalPrewettingNacl);
+            totalRow[33] = CsvValue(TotalPrewettingMgcl2);
+            totalRow[34] = CsvValue(TotalPrewettingCacl2);
+            totalRow[35] = CsvValue(TotalPrewettingAcetate);
+            totalRow[36] = CsvValue(TotalPrewettingNonchloride);
+            totalRow[37] = CsvValue(TotalPrewettingSodiumFormate);
+            totalRow[38] = CsvValue(TotalPretreatmentNacl);
+            totalRow[39] = CsvValue(TotalPretreatmentMgcl2);
+            totalRow[40] = CsvValue(TotalPretreatmentCacl2);
+            totalRow[41] = CsvValue(TotalPretreatmentAcetate);
+            totalRow[42] = CsvValue(TotalPretreatmentNonchloride);
+            totalRow[43] = CsvValue(TotalPretreatmentSodiumFormate);
+            totalRow[44] = CsvValue(TotalAntiicingNacl);
+            totalRow[45] = CsvValue(TotalAntiicingMgcl2);
+            totalRow[46] = CsvValue(TotalAntiicingCacl2);
+            totalRow[47] = CsvValue(TotalAntiicingAcetate);
+            totalRow[48] = CsvValue(TotalAntiicingNonchloride);
+            totalRow[49] = CsvValue(TotalAntiicingSodiumFormate);
+            totalRow[50] = CsvValue(TotalMultichlorideALitres);
+            totalRow[51] = CsvValue(TotalMultichlorideANaclPercentage);
+            totalRow[52] = CsvValue(TotalMultichlorideAMgcl2Percentage);
+            totalRow[53] = CsvValue(TotalMultichlorideACacl2Percentage);
+            totalRow[54] = CsvValue(TotalMultichlorideBLitres);
+            totalRow[55] = CsvValue(TotalMultichlorideBNaclPercentage);
+            totalRow[56] = CsvValue(TotalMultichlorideBMgcl2Percentage);
+            totalRow[57] = CsvValue(TotalMultichlorideBCacl2Percentage);
+            totalRow[58] = CsvValue(TotalSaltStorageSitesTotal);
+            totalRow[59] = CsvValue(TotalRoadSaltStockpilesTotal);
+            totalRow[60] = CsvValue(TotalRoadSaltOnImpermeableSurface);
+            totalRow[61] = CsvValue(TotalRoadSaltUnderPermanentRoof);
+            totalRow[62] = CsvValue(TotalRoadSaltUnderTarp);
+            totalRow[63] = CsvValue(TotalTreatedAbrasivesStockpilesTotal);
+            totalRow[64] = CsvValue(TotalTreatedAbrasivesOnImpermeableSurface);
+            totalRow[65] = CsvValue(TotalTreatedAbrasivesUnderPermanentRoof);
+            totalRow[66] = CsvValue(TotalTreatedAbrasivesUnderTarp);
+            totalRow[67] = CsvValue(TotalAllMaterialsHandledPlan);
+            totalRow[68] = CsvValue(TotalAllMaterialsHandledSites);
+            totalRow[69] = CsvValue(TotalEquipmentPreventsOverloadingPlan);
+            totalRow[70] = CsvValue(TotalEquipmentPreventsOverloadingSites);
+            totalRow[71] = CsvValue(TotalWastewaterSystemPlan);
+            totalRow[72] = CsvValue(TotalWastewaterSystemSites);
+            totalRow[73] = CsvValue(TotalControlDiversionExternalWatersPlan);
+            totalRow[74] = CsvValue(TotalControlDiversionExternalWatersSites);
+            totalRow[75] = CsvValue(TotalDrainageCollectionSystemPlan);
+            totalRow[76] = CsvValue(TotalDrainageCollectionSystemSites);
+            totalRow[77] = CsvValue(TotalMunicipalSewerSystemPlan);
+            totalRow[78] = CsvValue(TotalMunicipalSewerSystemSites);
+            totalRow[79] = CsvValue(TotalRemovalContainmentPlan);
+            totalRow[80] = CsvValue(TotalRemovalContainmentSites);
+            totalRow[81] = CsvValue(TotalWatercoursePlan);
+            totalRow[82] = CsvValue(TotalWatercourseSites);
+            totalRow[83] = CsvValue(TotalOtherDischargePointPlan);
+            totalRow[84] = CsvValue(TotalOtherDischargePointSites);
+            totalRow[85] = CsvValue(TotalOngoingCleanupPlan);
+            totalRow[86] = CsvValue(TotalOngoingCleanupSites);
+            totalRow[87] = CsvValue(TotalRiskManagementPlanPlan);
+            totalRow[88] = CsvValue(TotalRiskManagementPlanSites);
+            totalRow[89] = CsvValue(TotalNumberOfVehicles);
+            totalRow[90] = CsvValue(TotalVehiclesForSaltApplication);
+            totalRow[91] = CsvValue(TotalVehiclesWithConveyors);
+            totalRow[92] = CsvValue(TotalVehiclesWithPreWettingEquipment);
+            totalRow[93] = CsvValue(TotalVehiclesForDLA);
+            totalRow[94] = CsvValue(TotalRegularCalibration);
+            totalRow[95] = CsvValue(TotalRegularCalibrationTotal);
+            totalRow[96] = CsvValue(TotalInfraredThermometerRelied);
+            totalRow[97] = CsvValue(TotalInfraredThermometerTotal);
+            totalRow[98] = CsvValue(TotalMeteorologicalServiceRelied);
+            totalRow[99] = CsvValue(TotalFixedRWISStationsRelied);
+            totalRow[100] = CsvValue(TotalFixedRWISStationsTotal);
+            totalRow[101] = CsvValue(TotalMobileRWISMountedRelied);
+            totalRow[102] = CsvValue(TotalMobileRWISMountedTotal);
+            totalRow[103] = CsvValue(TotalAVLRelied);
+            totalRow[104] = CsvValue(TotalAVLTotal);
+            totalRow[105] = CsvValue(TotalSaltApplicationRatesRelied);
+            totalRow[106] = CsvValue(TotalSaltApplicationRatesTotal);
+            totalRow[107] = CsvValue(TotalApplicationRateChartRelied);
+            totalRow[108] = CsvValue(TotalApplicationRateChartTotal);
+            totalRow[109] = CsvValue(TotalTestingMDSSRelied);
+            totalRow[110] = CsvValue(TotalTestingSMDSTotal);
+            totalRow[111] = CsvValue(TotalSnowDisposalSiteUsed);
+            totalRow[112] = CsvValue(TotalSnowDisposalSiteTotal);
+            totalRow[113] = CsvValue(TotalSnowDisposalSiteCapacity);
+            totalRow[114] = CsvValue(TotalSnowMeltersUsed);
+            totalRow[115] = CsvValue(TotalSnowMeltersSnowPercentage);
+            totalRow[116] = CsvValue(TotalMeltwaterDisposalMethodUsed);
+            totalRow[117] = CsvValue(TotalSnowLowPermeabilitySurfacePercentage);
+            totalRow[118] = CsvValue(TotalSnowLowPermeabilitySurfaceSites);
+            totalRow[119] = CsvValue(TotalMeltwaterRetentionPondPercentage);
+            totalRow[120] = CsvValue(TotalMeltwaterRetentionPondSites);
+            totalRow[121] = CsvValue(TotalMeltwaterMunicipalSewerPercentage);
+            totalRow[122] = CsvValue(TotalMeltwaterMunicipalSewerSites);
+            totalRow[123] = CsvValue(TotalMeltwaterWatercoursePercentage);
+            totalRow[124] = CsvValue(TotalMeltwaterWatercourseSites);
+            totalRow[125] = CsvValue(TotalCompletedInventory);
+            totalRow[126] = CsvValue(TotalSetVulnerableAreas);
+            totalRow[127] = CsvValue(TotalActionPlanPrepared);
+            totalRow[128] = CsvValue(TotalProtectionMeasuresImplemented);
+            totalRow[129] = CsvValue(TotalEnvironmentalMonitoringConducted);
+            totalRow[130] = CsvValue(TotalDrinkingWaterAreasIdentified);
+            totalRow[131] = CsvValue(TotalDrinkingWaterAreasWithProtection);
+            totalRow[132] = CsvValue(TotalDrinkingWaterAreasWithChloride);
+            totalRow[133] = CsvValue(TotalAquaticLifeAreasIdentified);
+            totalRow[134] = CsvValue(TotalAquaticLifeAreasWithProtection);
+            totalRow[135] = CsvValue(TotalAquaticLifeAreasWithChloride);
+            totalRow[136] = CsvValue(TotalWetlandsAreasIdentified);
+            totalRow[137] = CsvValue(TotalWetlandsAreasWithProtection);
+            totalRow[138] = CsvValue(TotalWetlandsAreasWithChloride);
+            totalRow[139] = CsvValue(TotalDelimitedAreasAreasIdentified);
+            totalRow[140] = CsvValue(TotalDelimitedAreasAreasWithProtection);
+            totalRow[141] = CsvValue(TotalDelimitedAreasAreasWithChloride);
+            totalRow[142] = CsvValue(TotalValuedLandsAreasIdentified);
+            totalRow[143] = CsvValue(TotalValuedLandsAreasWithProtection);
+            totalRow[144] = CsvValue(TotalValuedLandsAreasWithChloride);
+            WriteCsvRow(writer, totalRow);
+
+            var totalNoRow = CreateCsvRow();
+            totalNoRow[0] = "Total No (treats empties as No)";
+            totalNoRow[4] = CsvValue(totalReports - TotalPlanDeveloped);
+            totalNoRow[5] = CsvValue(totalReports - TotalPlanReviewed);
+            totalNoRow[6] = CsvValue(totalReports - TotalPlanUpdated);
+            totalNoRow[7] = CsvValue(totalReports - TotalManagerTraining);
+            totalNoRow[8] = CsvValue(totalReports - TotalSupervisorTraining);
+            totalNoRow[9] = CsvValue(totalReports - TotalOperatorTraining);
+            totalNoRow[10] = CsvValue(totalReports - TotalMechanicalTraining);
+            totalNoRow[11] = CsvValue(totalReports - TotalPatrollerTraining);
+            totalNoRow[67] = CsvValue(totalReports - TotalAllMaterialsHandledPlan);
+            totalNoRow[69] = CsvValue(totalReports - TotalEquipmentPreventsOverloadingPlan);
+            totalNoRow[71] = CsvValue(totalReports - TotalWastewaterSystemPlan);
+            totalNoRow[73] = CsvValue(totalReports - TotalControlDiversionExternalWatersPlan);
+            totalNoRow[75] = CsvValue(totalReports - TotalDrainageCollectionSystemPlan);
+            totalNoRow[77] = CsvValue(totalReports - TotalMunicipalSewerSystemPlan);
+            totalNoRow[79] = CsvValue(totalReports - TotalRemovalContainmentPlan);
+            totalNoRow[81] = CsvValue(totalReports - TotalWatercoursePlan);
+            totalNoRow[83] = CsvValue(totalReports - TotalOtherDischargePointPlan);
+            totalNoRow[85] = CsvValue(totalReports - TotalOngoingCleanupPlan);
+            totalNoRow[87] = CsvValue(totalReports - TotalRiskManagementPlanPlan);
+            totalNoRow[94] = CsvValue(totalReports - TotalRegularCalibration);
+            totalNoRow[96] = CsvValue(totalReports - TotalInfraredThermometerRelied);
+            totalNoRow[98] = CsvValue(totalReports - TotalMeteorologicalServiceRelied);
+            totalNoRow[99] = CsvValue(totalReports - TotalFixedRWISStationsRelied);
+            totalNoRow[101] = CsvValue(totalReports - TotalMobileRWISMountedRelied);
+            totalNoRow[103] = CsvValue(totalReports - TotalAVLRelied);
+            totalNoRow[105] = CsvValue(totalReports - TotalSaltApplicationRatesRelied);
+            totalNoRow[107] = CsvValue(totalReports - TotalApplicationRateChartRelied);
+            totalNoRow[109] = CsvValue(totalReports - TotalTestingMDSSRelied);
+            totalNoRow[111] = CsvValue(totalReports - TotalSnowDisposalSiteUsed);
+            totalNoRow[114] = CsvValue(totalReports - TotalSnowMeltersUsed);
+            totalNoRow[116] = CsvValue(totalReports - TotalMeltwaterDisposalMethodUsed);
+            totalNoRow[125] = CsvValue(totalReports - TotalCompletedInventory);
+            totalNoRow[126] = CsvValue(totalReports - TotalSetVulnerableAreas);
+            totalNoRow[127] = CsvValue(totalReports - TotalActionPlanPrepared);
+            totalNoRow[128] = CsvValue(totalReports - TotalProtectionMeasuresImplemented);
+            totalNoRow[129] = CsvValue(totalReports - TotalEnvironmentalMonitoringConducted);
+            WriteCsvRow(writer, totalNoRow);
         }
 
         private void RegisterCsvConverters(CsvWriter csv)

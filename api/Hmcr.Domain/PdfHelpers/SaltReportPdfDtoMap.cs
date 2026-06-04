@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using System.Globalization;
 using Hmcr.Model.Dtos.SaltReport;
 
 namespace Hmcr.Domain.PdfHelpers
@@ -19,17 +18,17 @@ namespace Hmcr.Domain.PdfHelpers
             // Section 1
             if (dto.Sect1 != null)
             {
-                data["sect1.planDeveloped"] = NormalizeRadioButtonValue(dto.Sect1.PlanDeveloped);
-                data["sect1.planReviewed"] = NormalizeRadioButtonValue(dto.Sect1.PlanReviewed);
-                data["sect1.planUpdated"] = NormalizeRadioButtonValue(dto.Sect1.PlanUpdated);
+                AddYesNoData(data, "sect1.planDeveloped", dto.Sect1.PlanDeveloped);
+                AddYesNoData(data, "sect1.planReviewed", dto.Sect1.PlanReviewed);
+                AddYesNoData(data, "sect1.planUpdated", dto.Sect1.PlanUpdated);
 
                 if (dto.Sect1.Training != null)
                 {
-                    data["sect1.training.manager"] = NormalizeRadioButtonValue(dto.Sect1.Training.Manager);
-                    data["sect1.training.supervisor"] = NormalizeRadioButtonValue(dto.Sect1.Training.Supervisor);
-                    data["sect1.training.operator"] = NormalizeRadioButtonValue(dto.Sect1.Training.Operator);
-                    data["sect1.training.mechanical"] = NormalizeRadioButtonValue(dto.Sect1.Training.Mechanical);
-                    data["sect1.training.patroller"] = NormalizeRadioButtonValue(dto.Sect1.Training.Patroller);
+                    AddYesNoData(data, "sect1.training.manager", dto.Sect1.Training.Manager);
+                    AddYesNoData(data, "sect1.training.supervisor", dto.Sect1.Training.Supervisor);
+                    AddYesNoData(data, "sect1.training.operator", dto.Sect1.Training.Operator);
+                    AddYesNoData(data, "sect1.training.mechanical", dto.Sect1.Training.Mechanical);
+                    AddYesNoData(data, "sect1.training.patroller", dto.Sect1.Training.Patroller);
                 }
 
                 if (dto.Sect1.Objectives != null)
@@ -45,6 +44,18 @@ namespace Hmcr.Domain.PdfHelpers
                         data["sect1.objectives.saltApplication.identified"] = dto.Sect1.Objectives.SaltApplication.Identified?.ToString();
                         data["sect1.objectives.saltApplication.achieved"] = dto.Sect1.Objectives.SaltApplication.Achieved?.ToString();
                     }
+
+                    if (dto.Sect1.Objectives.SnowDisposal != null)
+                    {
+                        data["sect1.objectives.snowDisposal.identified"] = dto.Sect1.Objectives.SnowDisposal.Identified?.ToString();
+                        data["sect1.objectives.snowDisposal.achieved"] = dto.Sect1.Objectives.SnowDisposal.Achieved?.ToString();
+                    }
+
+                    if (dto.Sect1.Objectives.VulnerableAreas != null)
+                    {
+                        data["sect1.objectives.vulnerableAreas.identified"] = dto.Sect1.Objectives.VulnerableAreas.Identified?.ToString();
+                        data["sect1.objectives.vulnerableAreas.achieved"] = dto.Sect1.Objectives.VulnerableAreas.Achieved?.ToString();
+                    }
                 }
             }
 
@@ -58,11 +69,11 @@ namespace Hmcr.Domain.PdfHelpers
             // Section 3
             if (dto.Sect3 != null)
             {
-                AddMaterialData(data, "sect3.deicer", dto.Sect3.Deicer);
-                AddMaterialData(data, "sect3.treatedAbrasives", dto.Sect3.TreatedAbrasives);
-                AddMaterialData(data, "sect3.prewetting", dto.Sect3.Prewetting);
-                AddMaterialData(data, "sect3.pretreatment", dto.Sect3.Pretreatment);
-                AddMaterialData(data, "sect3.antiicing", dto.Sect3.Antiicing);
+                AddMaterialData(data, "sect3.deicer", dto.Sect3.Deicer, includeAcetate: true, includeSodiumFormate: true);
+                AddMaterialData(data, "sect3.treatedAbrasives", dto.Sect3.TreatedAbrasives, includeSandstoneDust: true, includeSodiumFormate: true);
+                AddMaterialData(data, "sect3.prewetting", dto.Sect3.Prewetting, includeAcetate: true, includeNonchloride: true, includeSodiumFormate: true);
+                AddMaterialData(data, "sect3.pretreatment", dto.Sect3.Pretreatment, includeAcetate: true, includeNonchloride: true, includeSodiumFormate: true);
+                AddMaterialData(data, "sect3.antiicing", dto.Sect3.Antiicing, includeAcetate: true, includeNonchloride: true, includeSodiumFormate: true);
 
                 if (dto.Sect3.MultiChlorideA != null)
                 {
@@ -95,10 +106,10 @@ namespace Hmcr.Domain.PdfHelpers
                     AddPracticeData(data, "sect4.practices.ongoingCleanup", dto.Sect4.Practices.OngoingCleanup);
                     AddPracticeData(data, "sect4.practices.riskManagementPlan", dto.Sect4.Practices.RiskManagementPlan);
                     AddPracticeData(data, "sect4.practices.drainageCollectionSystem", dto.Sect4.Practices.DrainageCollectionSystem);
-                    AddPracticeData(data, "sect4.practices.municipalSewerSystem", dto.Sect4.Practices.MunicipalSewerSystem);
-                    AddPracticeData(data, "sect4.practices.removalContainment", dto.Sect4.Practices.RemovalContainment);
-                    AddPracticeData(data, "sect4.practices.watercourse", dto.Sect4.Practices.Watercourse);
-                    AddPracticeData(data, "sect4.practices.otherDischargePoint", dto.Sect4.Practices.OtherDischargePoint);
+                    AddPracticeData(data, "sect4.practices.municipalSewerSystem", dto.Sect4.Practices.MunicipalSewerSystem, includeNo: false);
+                    AddPracticeData(data, "sect4.practices.removalContainment", dto.Sect4.Practices.RemovalContainment, includeNo: false);
+                    AddPracticeData(data, "sect4.practices.watercourse", dto.Sect4.Practices.Watercourse, includeNo: false);
+                    AddPracticeData(data, "sect4.practices.otherDischargePoint", dto.Sect4.Practices.OtherDischargePoint, includeNo: false);
                 }
 
                 if (dto.Sect4?.Stockpiles != null)
@@ -107,7 +118,7 @@ namespace Hmcr.Domain.PdfHelpers
                     foreach (var stockpile in dto.Sect4.Stockpiles)
                     {
                         data[$"sect4.stockpiles.sitename_{index}"] = stockpile.SiteName;
-                        data[$"sect4.stockpiles.motiOwned_{index}"] = stockpile.MotiOwned?.ToString() ?? "false";
+                        data[$"sect4.stockpiles.motiOwned_{index}"] = FormatYesNo(stockpile.MotiOwned);
 
                         if (stockpile.RoadSalts != null)
                         {
@@ -138,13 +149,13 @@ namespace Hmcr.Domain.PdfHelpers
                 data["sect5.vehiclesWithConveyors"] = dto.Sect5.VehiclesWithConveyors.ToString();
                 data["sect5.vehiclesWithPreWettingEquipment"] = dto.Sect5.VehiclesWithPreWettingEquipment.ToString();
                 data["sect5.vehiclesForDLA"] = dto.Sect5.VehiclesForDLA.ToString();
-                data["sect5.regularCalibration"] = NormalizeRadioButtonValue(dto.Sect5.RegularCalibration);
+                data["sect5.regularCalibration"] = FormatYesNo(dto.Sect5.RegularCalibration);
                 data["sect5.regularCalibrationTotal"] = dto.Sect5.RegularCalibrationTotal?.ToString();
 
                 if (dto.Sect5.WeatherMonitoringSources != null)
                 {
                     AddWeatherMonitoringSource(data, "sect5.weatherMonitoringSources.infraredThermometer", dto.Sect5.WeatherMonitoringSources.InfraredThermometer);
-                    AddWeatherMonitoringSource(data, "sect5.weatherMonitoringSources.meteorologicalService", dto.Sect5.WeatherMonitoringSources.MeteorologicalService);
+                    AddWeatherMonitoringSource(data, "sect5.weatherMonitoringSources.meteorologicalService", dto.Sect5.WeatherMonitoringSources.MeteorologicalService, includeNumber: false);
                     AddWeatherMonitoringSource(data, "sect5.weatherMonitoringSources.fixedRWISStations", dto.Sect5.WeatherMonitoringSources.FixedRWISStations);
                     AddWeatherMonitoringSource(data, "sect5.weatherMonitoringSources.mobileRWISMounted", dto.Sect5.WeatherMonitoringSources.MobileRWISMounted);
                 }
@@ -161,19 +172,33 @@ namespace Hmcr.Domain.PdfHelpers
             // Section 6
             if (dto.Sect6 != null)
             {
-                AddSnowDisposalData(data, "sect6.disposal", dto.Sect6.Disposal);
-                AddSnowDisposalData(data, "sect6.snowMelter", dto.Sect6.SnowMelter);
+                AddSnowDisposalData(data, "sect6.disposal", dto.Sect6.Disposal, includeTotal: true, includeDesignCapacity: true);
+                AddSnowDisposalData(data, "sect6.snowMelter", dto.Sect6.SnowMelter, includePercentage: true);
                 AddSnowDisposalData(data, "sect6.meltwater", dto.Sect6.Meltwater);
+
+                if (dto.Sect6.DesignFeatures != null)
+                {
+                    AddSnowDisposalDesignFeatureData(
+                        data,
+                        "sect6.designFeatures.lowPermeabilitySurface",
+                        dto.Sect6.DesignFeatures.LowPermeabilitySurface);
+                    AddSnowDisposalDesignFeatureData(data, "sect6.designFeatures.retentionPond", dto.Sect6.DesignFeatures.RetentionPond);
+                    AddSnowDisposalDesignFeatureData(
+                        data,
+                        "sect6.designFeatures.municipalSewerSystem",
+                        dto.Sect6.DesignFeatures.MunicipalSewerSystem);
+                    AddSnowDisposalDesignFeatureData(data, "sect6.designFeatures.watercourse", dto.Sect6.DesignFeatures.Watercourse);
+                }
             }
 
             // Section 7
             if (dto.Sect7 != null)
             {
-                data["sect7.completedInventory"] = NormalizeRadioButtonValue(dto.Sect7.CompletedInventory);
-                data["sect7.setVulnerableAreas"] = NormalizeRadioButtonValue(dto.Sect7.SetVulnerableAreas);
-                data["sect7.actionPlanPrepared"] = NormalizeRadioButtonValue(dto.Sect7.ActionPlanPrepared);
-                data["sect7.protectionMeasuresImplemented"] = NormalizeRadioButtonValue(dto.Sect7.ProtectionMeasuresImplemented);
-                data["sect7.environmentalMonitoringConducted"] = NormalizeRadioButtonValue(dto.Sect7.EnvironmentalMonitoringConducted);
+                AddYesNoData(data, "sect7.completedInventory", dto.Sect7.CompletedInventory);
+                AddYesNoData(data, "sect7.setVulnerableAreas", dto.Sect7.SetVulnerableAreas);
+                AddYesNoData(data, "sect7.actionPlanPrepared", dto.Sect7.ActionPlanPrepared);
+                AddYesNoData(data, "sect7.protectionMeasuresImplemented", dto.Sect7.ProtectionMeasuresImplemented);
+                AddYesNoData(data, "sect7.environmentalMonitoringConducted", dto.Sect7.EnvironmentalMonitoringConducted);
 
                 if (dto.Sect7.TypesOfVulnerableAreas != null)
                 {
@@ -240,34 +265,65 @@ namespace Hmcr.Domain.PdfHelpers
             return data;
         }
 
-        private void AddMaterialData(Dictionary<string, string> data, string prefix, Sect3Dto.MaterialDto material)
+        private void AddMaterialData(
+            Dictionary<string, string> data,
+            string prefix,
+            Sect3Dto.MaterialDto material,
+            bool includeSandstoneDust = false,
+            bool includeAcetate = false,
+            bool includeNonchloride = false,
+            bool includeSodiumFormate = false)
         {
             if (material != null)
             {
-                data[$"{prefix}.sandStoneDust"] = material.SandstoneDust?.ToString();
+                if (includeSandstoneDust)
+                {
+                    data[$"{prefix}.sandStoneDust"] = material.SandstoneDust?.ToString();
+                }
                 data[$"{prefix}.nacl"] = material.Nacl?.ToString();
                 data[$"{prefix}.mgcl2"] = material.Mgcl2?.ToString();
                 data[$"{prefix}.cacl2"] = material.Cacl2?.ToString();
-                data[$"{prefix}.acetate"] = material.Acetate?.ToString();
-                data[$"{prefix}.nonchloride"] = material.Nonchloride?.ToString();
+                if (includeAcetate)
+                {
+                    data[$"{prefix}.acetate"] = material.Acetate?.ToString();
+                }
+                if (includeNonchloride)
+                {
+                    data[$"{prefix}.nonchloride"] = material.Nonchloride?.ToString();
+                }
+                if (includeSodiumFormate)
+                {
+                    data[$"{prefix}.sodiumFormate"] = material.SodiumFormate?.ToString();
+                }
             }
         }
 
-        private void AddPracticeData(Dictionary<string, string> data, string prefix, Sect4Dto.PracticesDto.PracticeItemDto practice)
+        private void AddPracticeData(
+            Dictionary<string, string> data,
+            string prefix,
+            Sect4Dto.PracticesDto.PracticeItemDto practice,
+            bool includeNo = true)
         {
             if (practice != null)
             {
-                data[$"{prefix}.hasPlan"] = NormalizeRadioButtonValue(practice.HasPlan).ToString();
+                AddYesNoData(data, $"{prefix}.hasPlan", practice.HasPlan, includeNo);
                 data[$"{prefix}.numSites"] = practice.NumSites?.ToString();
             }
         }
 
-        private void AddWeatherMonitoringSource(Dictionary<string, string> data, string prefix, Sect5Dto.WeatherMonitoringSourcesDto.WMSDto source)
+        private void AddWeatherMonitoringSource(
+            Dictionary<string, string> data,
+            string prefix,
+            Sect5Dto.WeatherMonitoringSourcesDto.WMSDto source,
+            bool includeNumber = true)
         {
             if (source != null)
             {
-                data[$"{prefix}.relied"] = NormalizeRadioButtonValue(source.Relied);
-                data[$"{prefix}.number"] = source.Number?.ToString();
+                AddYesNoData(data, $"{prefix}.relied", source.Relied);
+                if (includeNumber)
+                {
+                    data[$"{prefix}.number"] = source.Number?.ToString();
+                }
             }
         }
 
@@ -275,17 +331,46 @@ namespace Hmcr.Domain.PdfHelpers
         {
             if (source != null)
             {
-                data[$"{prefix}.relied"] = NormalizeRadioButtonValue(source.Relied);
+                AddYesNoData(data, $"{prefix}.relied", source.Relied);
                 data[$"{prefix}.number"] = source.Number?.ToString();
             }
         }
 
-        private void AddSnowDisposalData(Dictionary<string, string> data, string prefix, Sect6Dto.SnowDisposalDto disposal)
+        private void AddSnowDisposalData(
+            Dictionary<string, string> data,
+            string prefix,
+            Sect6Dto.SnowDisposalDto disposal,
+            bool includeTotal = false,
+            bool includeDesignCapacity = false,
+            bool includePercentage = false)
         {
             if (disposal != null)
             {
-                data[$"{prefix}.used"] = NormalizeRadioButtonValue(disposal.Used);
-                data[$"{prefix}.total"] = disposal.Total?.ToString();
+                AddYesNoData(data, $"{prefix}.used", disposal.Used);
+                if (includeTotal)
+                {
+                    data[$"{prefix}.total"] = disposal.Total?.ToString();
+                }
+                if (includeDesignCapacity)
+                {
+                    data[$"{prefix}.designCapacity"] = disposal.DesignCapacity?.ToString();
+                }
+                if (includePercentage)
+                {
+                    data[$"{prefix}.percentage"] = disposal.Percentage?.ToString();
+                }
+            }
+        }
+
+        private void AddSnowDisposalDesignFeatureData(
+            Dictionary<string, string> data,
+            string prefix,
+            Sect6Dto.DesignFeatureDto feature)
+        {
+            if (feature != null)
+            {
+                data[$"{prefix}.percentage"] = feature.Percentage?.ToString();
+                data[$"{prefix}.numSites"] = feature.NumSites?.ToString();
             }
         }
 
@@ -308,27 +393,55 @@ namespace Hmcr.Domain.PdfHelpers
             }
         }
 
-        private string NormalizeRadioButtonValue(object value)
+        private void AddYesNoData(Dictionary<string, string> data, string prefix, object value, bool includeNo = true)
         {
-            if (value == null) return string.Empty;
+            var boolValue = GetBooleanValue(value);
+
+            data[$"{prefix}.yes"] = boolValue == true ? "X" : string.Empty;
+            if (includeNo)
+            {
+                data[$"{prefix}.no"] = boolValue == false ? "X" : string.Empty;
+            }
+        }
+
+        private string FormatYesNo(object value)
+        {
+            var boolValue = GetBooleanValue(value);
+
+            if (boolValue == null) return string.Empty;
+
+            return boolValue.Value ? "Yes" : "No";
+        }
+
+        private bool? GetBooleanValue(object value)
+        {
+            if (value == null) return null;
 
             if (value is bool boolValue)
             {
-                return boolValue ? "true" : "false";
+                return boolValue;
             }
 
             if (value is string stringValue)
             {
-                // Assume string is already in "Yes"/"No"
                 if (stringValue.Equals("Yes", System.StringComparison.OrdinalIgnoreCase) ||
-                    stringValue.Equals("No", System.StringComparison.OrdinalIgnoreCase))
+                    stringValue.Equals("Y", System.StringComparison.OrdinalIgnoreCase) ||
+                    stringValue.Equals("True", System.StringComparison.OrdinalIgnoreCase) ||
+                    stringValue.Equals("1", System.StringComparison.OrdinalIgnoreCase))
                 {
-                    TextInfo ti = CultureInfo.CurrentCulture.TextInfo;
-                    return ti.ToTitleCase(stringValue);
+                    return true;
+                }
+
+                if (stringValue.Equals("No", System.StringComparison.OrdinalIgnoreCase) ||
+                    stringValue.Equals("N", System.StringComparison.OrdinalIgnoreCase) ||
+                    stringValue.Equals("False", System.StringComparison.OrdinalIgnoreCase) ||
+                    stringValue.Equals("0", System.StringComparison.OrdinalIgnoreCase))
+                {
+                    return false;
                 }
             }
 
-            return string.Empty; // Default to empty if value is invalid
+            return null;
         }
     }
 }
