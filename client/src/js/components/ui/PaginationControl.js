@@ -50,17 +50,17 @@ const PaginationControl = ({
             ))}
           </Input>
           <PaginationItem disabled={currentPage <= 1}>
-            <PaginationLink first onClick={() => onPageChange(1)} />
+            <PaginationLink onClick={() => onPageChange(1)}>{'\u00abFirst'}</PaginationLink>
           </PaginationItem>
           <PaginationItem disabled={currentPage <= 1}>
-            <PaginationLink previous onClick={() => onPageChange(currentPage - 1)} />
+            <PaginationLink onClick={() => onPageChange(currentPage - 1)}>{'\u2039Previous'}</PaginationLink>
           </PaginationItem>
           {pageItems}
           <PaginationItem disabled={currentPage >= pageCount}>
-            <PaginationLink next onClick={() => onPageChange(currentPage + 1)} />
+            <PaginationLink onClick={() => onPageChange(currentPage + 1)}>{'Next\u203a'}</PaginationLink>
           </PaginationItem>
           <PaginationItem disabled={currentPage >= pageCount}>
-            <PaginationLink last onClick={() => onPageChange(pageCount)} />
+            <PaginationLink onClick={() => onPageChange(pageCount)}>{'Last\u00bb'}</PaginationLink>
           </PaginationItem>
         </Pagination>
       )}

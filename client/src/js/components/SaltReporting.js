@@ -40,7 +40,9 @@ const SaltReporting = ({ currentUser }) => {
     });
   }, []);
 
-  const handleSaltReportSubmit = async (values) => {
+  const handleSaltReportSubmit = async (values, formType) => {
+    const isEditMode = formType === Constants.FORM_TYPE.EDIT;
+
     try {
       saltReportFormModal.closeForm();
       setShowSaltReportStatusModal(true);
@@ -48,16 +50,36 @@ const SaltReporting = ({ currentUser }) => {
 
       const stagingTableName = 'HMR_SALT_REPORT';
       const apiPath = Constants.REPORT_TYPES[stagingTableName].api;
-      const response = await api.instance.post(apiPath, values);
+      const response = isEditMode
+        ? await api.putSaltReport(values.saltReportId, values)
+        : await api.instance.post(apiPath, values);
       setLoading(false);
 
-      setSaltReportCompleteMessage(`Report successfully created. Details: ${response.status} ${response.statusText}.`);
+      setSaltReportCompleteMessage(
+        `Report successfully ${isEditMode ? 'updated' : 'created'}. Details: ${response.status} ${response.statusText}.`
+      );
       setSaltReportSuccess(true);
+      searchData.refresh();
     } catch (error) {
       setLoading(false);
       console.error(error);
-      setSaltReportCompleteMessage(`Report submission failed.  ${error.response?.data.error}`);
+      setSaltReportCompleteMessage(`Report submission failed.  ${error.response?.data.error || error.response?.data || ''}`);
       setSaltReportSuccess(false);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSaltReportEditClicked = async (saltReportId) => {
+    try {
+      setLoading(true);
+      const response = await api.getSaltReport(saltReportId);
+      saltReportFormModal.openForm(Constants.FORM_TYPE.EDIT, { initialReport: response.data });
+    } catch (error) {
+      console.error(error);
+      setSaltReportCompleteMessage(`Unable to load salt report. ${error.response?.data.error || error.response?.data || ''}`);
+      setSaltReportSuccess(false);
+      setShowSaltReportStatusModal(true);
     } finally {
       setLoading(false);
     }
@@ -66,8 +88,8 @@ const SaltReporting = ({ currentUser }) => {
   const tableColumns = [
     { heading: 'Report ID', key: 'saltReportId' },
     { heading: 'Service Area', key: 'serviceArea' },
-    { heading: 'Contact Name', key: 'contactName' },
-    { heading: 'Date Created', key: 'appCreateTimestamp', format: (date) => moment(date).format('LLL') },
+    { heading: 'Contact Name/Title', key: 'contactName' },
+    { heading: 'Date Created', key: 'appCreateTimestamp', format: (date) => moment.utc(date).local().format('LLL') },
   ];
 
   const saltReportFormModal = useFormModal(
@@ -127,12 +149,16 @@ const SaltReporting = ({ currentUser }) => {
                 searchPagination={searchData.pagination}
                 onPageNumberChange={searchData.handleChangePage}
                 onPageSizeChange={searchData.handleChangePageSize}
-                editable={false}
+                editable={true}
+                editPermissionName={Constants.PERMISSIONS.FILE_W}
+                editKey="saltReportId"
+                deletable={false}
+                onEditClicked={handleSaltReportEditClicked}
                 onHeadingSortClicked={searchData.handleHeadingSortClicked}
                 showExportButton={true}
                 onExportClicked={(saltReportId) => {
                   console.log(`Exporting report with ID: ${saltReportId}`);
-                  api.getSaltReportById(saltReportId, { isPdf: true });
+                  api.downloadSaltReportPdf(saltReportId);
                 }}
               />
             ) : (

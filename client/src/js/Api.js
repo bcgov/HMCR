@@ -76,6 +76,8 @@ export const getRoadClassRules = () => instance.get(Constants.API_PATHS.RULE_ROA
 export const getReportExport = (params) => instance.get(Constants.API_PATHS.REPORT_EXPORT, { params: {...params } });
 export const getSaltReports = (params) => instance.get(Constants.API_PATHS.SALT_REPORT, { params: {...params }, responseType: 'blob' });
 export const getSaltReportsJson = (params) => instance.get(Constants.API_PATHS.SALT_REPORT, { params: {...params }});
+export const getSaltReport = (id) => instance.get(`${Constants.API_PATHS.SALT_REPORT}/${id}`);
+export const putSaltReport = (id, data) => instance.put(`${Constants.API_PATHS.SALT_REPORT}/${id}`, data);
 export const getExportSupportedFormats = () => instance.get(Constants.API_PATHS.SUPPORTED_FORMATS);
 
 export const getApiClient = () => instance.get(`${Constants.API_PATHS.USER}/api-client`);
@@ -84,29 +86,32 @@ export const resetApiClientSecret = () => instance.post(`${Constants.API_PATHS.U
 
 export const getVersion = () => instance.get(Constants.API_PATHS.VERSION);
 
-export const getSaltReportById = async (id, params) => {
+export const downloadSaltReportPdf = async (id) => {
     try {
       const response = await instance.get(`${Constants.API_PATHS.SALT_REPORT}/${id}`, {
-        params: { ...params },
+        params: { isPdf: true },
         responseType: 'blob',
       });
   
-      // Trigger download
-      if (params.isPdf) {
-        const blob = new Blob([response.data], { type: 'application/pdf' });
-        const url = window.URL.createObjectURL(blob);
-        const link = document.createElement('a');
-        link.href = url;
-        link.download = `salt_report_${id}.pdf`;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-      } else {
-        // Return JSON for other cases
-        return response.data;
-      }
+      const blob = new Blob([response.data], { type: 'application/pdf' });
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `salt_report_${id}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
     } catch (error) {
       console.error('Error fetching salt report:', error);
       throw error;
     }
-  };
+};
+
+export const getSaltReportById = async (id, params = {}) => {
+    if (params.isPdf) {
+      return downloadSaltReportPdf(id);
+    }
+
+    const response = await getSaltReport(id);
+    return response.data;
+};

@@ -187,6 +187,7 @@ namespace Hmcr.Data.Repositories
             return await _context.HmrSaltReports
                 .Include(x => x.Appendix)
                 .Include(x => x.Stockpiles)
+                .Include(x => x.VulnerableAreas)
                 .FirstOrDefaultAsync(x => x.SaltReportId == saltReportId);
         }
 

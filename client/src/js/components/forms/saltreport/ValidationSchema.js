@@ -12,6 +12,9 @@ const decimalWithPrecision = (precision) => {
     );
 };
 
+const percentageSchema = decimalWithPrecision(2).max(100, 'Value must be less than or equal to 100');
+const nonNegativeIntegerSchema = Yup.number().integer('Must be an integer').min(0, 'Cannot be negative').nullable(true);
+
 // Custom validator for coordinate with dynamic precision
 const coordinatePrecision = (precision) => {
   return Yup.number()
@@ -115,6 +118,13 @@ const houseKeepingPracticeSchema = Yup.object().shape({
     .nullable(true),
 });
 
+const snowDisposalDesignFeatureSchema = Yup.object()
+  .shape({
+    percentage: percentageSchema,
+    numSites: Yup.number().integer('Must be an integer').min(0, 'Cannot be negative').nullable(true),
+  })
+  .nullable(true);
+
 const vulnerableAreaSchema = Yup.object().shape({
   highwayNumber: Yup.string().max(16).nullable(true),
   latitude: coordinatePrecision(6)
@@ -135,37 +145,37 @@ const vulnerableAreaSchema = Yup.object().shape({
 const typesOfVulnerableAreasSchema = Yup.object().shape({
   drinkingWater: Yup.object()
     .shape({
-      areasIdentified: Yup.number().integer().nullable(true),
-      areasWithProtection: Yup.number().integer().nullable(true),
-      areasWithChloride: Yup.number().integer().nullable(true),
+      areasIdentified: nonNegativeIntegerSchema,
+      areasWithProtection: nonNegativeIntegerSchema,
+      areasWithChloride: nonNegativeIntegerSchema,
     })
     .nullable(true),
   aquaticLife: Yup.object()
     .shape({
-      areasIdentified: Yup.number().integer().nullable(true),
-      areasWithProtection: Yup.number().integer().nullable(true),
-      areasWithChloride: Yup.number().integer().nullable(true),
+      areasIdentified: nonNegativeIntegerSchema,
+      areasWithProtection: nonNegativeIntegerSchema,
+      areasWithChloride: nonNegativeIntegerSchema,
     })
     .nullable(true),
   wetlands: Yup.object()
     .shape({
-      areasIdentified: Yup.number().integer().nullable(true),
-      areasWithProtection: Yup.number().integer().nullable(true),
-      areasWithChloride: Yup.number().integer().nullable(true),
+      areasIdentified: nonNegativeIntegerSchema,
+      areasWithProtection: nonNegativeIntegerSchema,
+      areasWithChloride: nonNegativeIntegerSchema,
     })
     .nullable(true),
   delimitedAreas: Yup.object()
     .shape({
-      areasIdentified: Yup.number().integer().nullable(true),
-      areasWithProtection: Yup.number().integer().nullable(true),
-      areasWithChloride: Yup.number().integer().nullable(true),
+      areasIdentified: nonNegativeIntegerSchema,
+      areasWithProtection: nonNegativeIntegerSchema,
+      areasWithChloride: nonNegativeIntegerSchema,
     })
     .nullable(true),
   valuedLands: Yup.object()
     .shape({
-      areasIdentified: Yup.number().integer().nullable(true),
-      areasWithProtection: Yup.number().integer().nullable(true),
-      areasWithChloride: Yup.number().integer().nullable(true),
+      areasIdentified: nonNegativeIntegerSchema,
+      areasWithProtection: nonNegativeIntegerSchema,
+      areasWithChloride: nonNegativeIntegerSchema,
     })
     .nullable(true),
 });
@@ -200,14 +210,26 @@ export const validationSchema = Yup.object({
         .shape({
           materialStorage: Yup.object()
             .shape({
-              identified: Yup.number().integer().min(0, 'Cannot be negative').nullable(true),
-              achieved: Yup.number().integer().min(0, 'Cannot be negative').nullable(true),
+              identified: nonNegativeIntegerSchema,
+              achieved: nonNegativeIntegerSchema,
             })
             .nullable(true),
           saltApplication: Yup.object()
             .shape({
-              identified: Yup.number().integer().min(0, 'Cannot be negative').nullable(true),
-              achieved: Yup.number().integer().min(0, 'Cannot be negative').nullable(true),
+              identified: nonNegativeIntegerSchema,
+              achieved: nonNegativeIntegerSchema,
+            })
+            .nullable(true),
+          snowDisposal: Yup.object()
+            .shape({
+              identified: nonNegativeIntegerSchema,
+              achieved: nonNegativeIntegerSchema,
+            })
+            .nullable(true),
+          vulnerableAreas: Yup.object()
+            .shape({
+              identified: nonNegativeIntegerSchema,
+              achieved: nonNegativeIntegerSchema,
             })
             .nullable(true),
         })
@@ -228,6 +250,7 @@ export const validationSchema = Yup.object({
           mgcl2: decimalWithPrecision(2).nullable(true),
           cacl2: decimalWithPrecision(2).nullable(true),
           acetate: decimalWithPrecision(2).nullable(true),
+          sodiumFormate: decimalWithPrecision(2).nullable(true),
         })
         .nullable(true),
       treatedAbrasives: Yup.object()
@@ -236,6 +259,7 @@ export const validationSchema = Yup.object({
           nacl: decimalWithPrecision(2).nullable(true),
           mgcl2: decimalWithPrecision(2).nullable(true),
           cacl2: decimalWithPrecision(2).nullable(true),
+          sodiumFormate: decimalWithPrecision(2).nullable(true),
         })
         .nullable(true),
       prewetting: Yup.object()
@@ -245,6 +269,7 @@ export const validationSchema = Yup.object({
           cacl2: decimalWithPrecision(2).nullable(true),
           acetate: decimalWithPrecision(2).nullable(true),
           nonchloride: decimalWithPrecision(2).nullable(true),
+          sodiumFormate: decimalWithPrecision(2).nullable(true),
         })
         .nullable(true),
       pretreatment: Yup.object()
@@ -254,6 +279,7 @@ export const validationSchema = Yup.object({
           cacl2: decimalWithPrecision(2).nullable(true),
           acetate: decimalWithPrecision(2).nullable(true),
           nonchloride: decimalWithPrecision(2).nullable(true),
+          sodiumFormate: decimalWithPrecision(2).nullable(true),
         })
         .nullable(true),
       antiicing: Yup.object()
@@ -263,22 +289,23 @@ export const validationSchema = Yup.object({
           cacl2: decimalWithPrecision(2).nullable(true),
           acetate: decimalWithPrecision(2).nullable(true),
           nonchloride: decimalWithPrecision(2).nullable(true),
+          sodiumFormate: decimalWithPrecision(2).nullable(true),
         })
         .nullable(true),
       multiChlorideA: Yup.object()
         .shape({
           litres: decimalWithPrecision(2).nullable(true),
-          naclPercentage: decimalWithPrecision(2).nullable(true),
-          mgcl2Percentage: decimalWithPrecision(2).nullable(true),
-          cacl2Percentage: decimalWithPrecision(2).nullable(true),
+          naclPercentage: percentageSchema,
+          mgcl2Percentage: percentageSchema,
+          cacl2Percentage: percentageSchema,
         })
         .nullable(true),
       multiChlorideB: Yup.object()
         .shape({
           litres: decimalWithPrecision(2).nullable(true),
-          naclPercentage: decimalWithPrecision(2).nullable(true),
-          mgcl2Percentage: decimalWithPrecision(2).nullable(true),
-          cacl2Percentage: decimalWithPrecision(2).nullable(true),
+          naclPercentage: percentageSchema,
+          mgcl2Percentage: percentageSchema,
+          cacl2Percentage: percentageSchema,
         })
         .nullable(true),
     })
@@ -345,13 +372,23 @@ export const validationSchema = Yup.object({
       disposal: Yup.object().shape({
         used: Yup.boolean().nullable(true),
         total: Yup.number().integer().min(0).nullable(true),
+        designCapacity: Yup.number().integer().min(0).nullable(true),
       }),
       snowMelter: Yup.object().shape({
         used: Yup.boolean().nullable(true),
+        percentage: percentageSchema,
       }),
       meltwater: Yup.object().shape({
         used: Yup.boolean().nullable(true),
       }),
+      designFeatures: Yup.object()
+        .shape({
+          lowPermeabilitySurface: snowDisposalDesignFeatureSchema,
+          retentionPond: snowDisposalDesignFeatureSchema,
+          municipalSewerSystem: snowDisposalDesignFeatureSchema,
+          watercourse: snowDisposalDesignFeatureSchema,
+        })
+        .nullable(true),
     })
     .nullable(true),
   sect7: Yup.object()

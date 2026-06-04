@@ -43,6 +43,8 @@ namespace Hmcr.Model.Dtos.SaltReport
         {
             public MaterialStorageDto MaterialStorage { get; set; }
             public SaltApplicationDto SaltApplication { get; set; }
+            public SnowDisposalDto SnowDisposal { get; set; }
+            public VulnerableAreasDto VulnerableAreas { get; set; }
 
             public class MaterialStorageDto
             {
@@ -51,6 +53,18 @@ namespace Hmcr.Model.Dtos.SaltReport
             }
 
             public class SaltApplicationDto
+            {
+                public int? Identified { get; set; }
+                public int? Achieved { get; set; }
+            }
+
+            public class SnowDisposalDto
+            {
+                public int? Identified { get; set; }
+                public int? Achieved { get; set; }
+            }
+
+            public class VulnerableAreasDto
             {
                 public int? Identified { get; set; }
                 public int? Achieved { get; set; }
@@ -83,6 +97,7 @@ namespace Hmcr.Model.Dtos.SaltReport
             public decimal? Cacl2 { get; set; }
             public decimal? Acetate { get; set; }
             public decimal? Nonchloride { get; set; }
+            public decimal? SodiumFormate { get; set; }
         }
 
         public class MultiChlorideDto
@@ -169,11 +184,28 @@ namespace Hmcr.Model.Dtos.SaltReport
         public SnowDisposalDto Disposal { get; set; }
         public SnowDisposalDto SnowMelter { get; set; }
         public SnowDisposalDto Meltwater { get; set; }
+        public DesignFeaturesDto DesignFeatures { get; set; }
 
         public class SnowDisposalDto
         {
             public bool? Used { get; set; }
             public int? Total { get; set; }
+            public int? DesignCapacity { get; set; }
+            public decimal? Percentage { get; set; }
+        }
+
+        public class DesignFeaturesDto
+        {
+            public DesignFeatureDto LowPermeabilitySurface { get; set; }
+            public DesignFeatureDto RetentionPond { get; set; }
+            public DesignFeatureDto MunicipalSewerSystem { get; set; }
+            public DesignFeatureDto Watercourse { get; set; }
+        }
+
+        public class DesignFeatureDto
+        {
+            public decimal? Percentage { get; set; }
+            public int? NumSites { get; set; }
         }
     }
 

@@ -71,6 +71,69 @@ namespace Hmcr.Api.Controllers
         }
 
 
+        [HttpPut("{id}")]
+        [RequiresPermission(Permissions.FileUploadWrite)]
+        public async Task<IActionResult> UpdateSaltReportAsync(int id, [FromBody] SaltReportDto saltReport)
+        {
+            if (saltReport == null)
+            {
+                return BadRequest("Received salt report data is null");
+            }
+
+            if (saltReport.SaltReportId != 0 && saltReport.SaltReportId != id)
+            {
+                return BadRequest("The salt report ID from the route does not match the body.");
+            }
+
+            var existingReport = await _saltReportService.GetSaltReportByIdAsync(id);
+            if (existingReport == null)
+            {
+                return NotFound();
+            }
+
+            var existingServiceAreaProblem = IsServiceAreaAuthorized(_currentUser, existingReport.ServiceArea);
+            if (existingServiceAreaProblem != null)
+            {
+                return Unauthorized(existingServiceAreaProblem);
+            }
+
+            var submittedServiceAreaProblem = IsServiceAreaAuthorized(_currentUser, saltReport.ServiceArea);
+            if (submittedServiceAreaProblem != null)
+            {
+                return Unauthorized(submittedServiceAreaProblem);
+            }
+
+            saltReport.SaltReportId = id;
+
+            try
+            {
+                var updated = await _saltReportService.UpdateReportAsync(id, saltReport);
+                if (!updated)
+                {
+                    return NotFound();
+                }
+
+                return NoContent();
+            }
+            catch (Exception ex)
+            {
+                var innerExceptionMessage = ex.InnerException?.Message ?? "Please contact an administrator to resolve this issue.";
+
+                Console.Error.WriteLine($"Exception: {ex.Message}");
+                if (ex.InnerException != null)
+                {
+                    Console.Error.WriteLine($"Inner Exception: {innerExceptionMessage}");
+                }
+
+                return StatusCode(500, new
+                {
+                    message = "An internal error occurred. Please try again later.",
+                    error = $"500 Internal Server Error: {innerExceptionMessage}"
+                });
+            }
+        }
+
+
         [HttpGet("{id}", Name = "GetSaltReportAsync")]
         public async Task<ActionResult<SaltReportDto>> GetSaltReportAsync(int id, [FromQuery] bool isPdf)
         {

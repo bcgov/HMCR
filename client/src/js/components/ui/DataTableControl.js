@@ -11,6 +11,8 @@ const DataTableControl = ({
   tableColumns,
   editable,
   editPermissionName,
+  editKey,
+  deletable,
   onEditClicked,
   onDeleteClicked,
   onHeadingSortClicked,
@@ -20,6 +22,27 @@ const DataTableControl = ({
   const handleEditClicked = (id) => {
     if (onEditClicked) onEditClicked(id);
   };
+
+  const editControls = (item) => (
+    <React.Fragment>
+      <FontAwesomeButton
+        icon="edit"
+        className="me-1"
+        onClick={() => handleEditClicked(item[editKey])}
+        title="Edit Record"
+      />
+      {deletable && (
+        <DeleteButton
+          itemId={item.id}
+          buttonId={`item_${item.id}_delete`}
+          defaultEndDate={item.endDate}
+          onDeleteClicked={onDeleteClicked}
+          permanentDelete={item.canDelete}
+          title={item.canDelete ? 'Delete Record' : 'Disable Record'}
+        ></DeleteButton>
+      )}
+    </React.Fragment>
+  );
 
   return (
     <React.Fragment>
@@ -38,7 +61,7 @@ const DataTableControl = ({
                 </th>
               );
             })}
-            {editable && (
+            {editable && !showExportButton && (
               <Authorize requires={editPermissionName}>
                 <th></th>
               </Authorize>
@@ -73,28 +96,16 @@ const DataTableControl = ({
                     </td>
                   );
                 })}
-                {editable && (
+                {editable && !showExportButton && (
                   <Authorize requires={editPermissionName}>
                     <td style={{ width: '1%', whiteSpace: 'nowrap' }}>
-                      <FontAwesomeButton
-                        icon="edit"
-                        className="me-1"
-                        onClick={() => handleEditClicked(item.id)}
-                        title="Edit Record"
-                      />
-                      <DeleteButton
-                        itemId={item.id}
-                        buttonId={`item_${item.id}_delete`}
-                        defaultEndDate={item.endDate}
-                        onDeleteClicked={onDeleteClicked}
-                        permanentDelete={item.canDelete}
-                        title={item.canDelete ? 'Delete Record' : 'Disable Record'}
-                      ></DeleteButton>
+                      {editControls(item)}
                     </td>
                   </Authorize>
                 )}
                 {showExportButton && (
-                  <td>
+                  <td style={{ width: '1%', whiteSpace: 'nowrap' }}>
+                    {editable && <Authorize requires={editPermissionName}>{editControls(item)}</Authorize>}
                     <FontAwesomeButton
                       icon="download"
                       className="me-1"
@@ -124,6 +135,8 @@ DataTableControl.propTypes = {
   ).isRequired,
   editable: PropTypes.bool.isRequired,
   editPermissionName: PropTypes.string,
+  editKey: PropTypes.string,
+  deletable: PropTypes.bool,
   onEditClicked: PropTypes.func,
   onDeleteClicked: PropTypes.func,
   onHeadingSortClicked: PropTypes.func,
@@ -131,6 +144,8 @@ DataTableControl.propTypes = {
 
 DataTableControl.defaultProps = {
   editable: false,
+  editKey: 'id',
+  deletable: true,
 };
 
 export default DataTableControl;
