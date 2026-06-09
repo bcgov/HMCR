@@ -74,7 +74,8 @@ const SaltReporting = ({ currentUser }) => {
     'Annual Salt Report',
     <AddSaltReportFormFields />,
     handleSaltReportSubmit,
-    'xl'
+    'xl',
+    { disableSubmitWhenEmpty: false }
   );
 
   return (
