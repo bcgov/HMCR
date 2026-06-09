@@ -109,19 +109,21 @@ const snowDisposalDesignFeaturesLabel = {
   watercourse: 'All meltwater is collected and discharged into a watercourse',
 };
 
+const saltReportDraftStorageKey = 'saltReportFormData';
+
 const AddSaltReportFormFields = ({ setInitialValues, formValues, setValidationSchema, currentUser }) => {
   const [loading, setLoading] = useState(true);
   const { errors, submitCount, isSubmitting } = useFormikContext();
 
   const debouncedSaveForm = debounce((values) => {
-    sessionStorage.setItem('formData', JSON.stringify(values));
+    localStorage.setItem(saltReportDraftStorageKey, JSON.stringify(values));
   }, 3000);
 
   useEffect(() => {
     setLoading(false);
     const defaultValidationSchema = validationSchema.shape({});
     setValidationSchema(defaultValidationSchema);
-    setInitialValues(loadFromSessionStorage());
+    setInitialValues(loadDraft());
 
     return () => {
       debouncedSaveForm.cancel();
@@ -138,8 +140,8 @@ const AddSaltReportFormFields = ({ setInitialValues, formValues, setValidationSc
     debouncedSaveForm(formValues);
   }, [formValues]);
 
-  const loadFromSessionStorage = () => {
-    const savedFormData = sessionStorage.getItem('formData');
+  const loadDraft = () => {
+    const savedFormData = localStorage.getItem(saltReportDraftStorageKey);
     return savedFormData ? _.merge({}, defaultValues, JSON.parse(savedFormData)) : defaultValues;
   };
 

@@ -6,7 +6,13 @@ import SubmitButton from '../ui/SubmitButton';
 
 import * as Constants from '../../Constants';
 
-const useFormModal = (formTitle, formFieldsChildElement, handleFormSubmit,modSize) => {
+const useFormModal = (
+  formTitle,
+  formFieldsChildElement,
+  handleFormSubmit,
+  modSize,
+  { disableSubmitWhenEmpty = true } = {}
+) => {
   // This is needed until Formik fixes its own setSubmitting function
   const [submitting, setSubmitting] = useState(false);
   const [initialValues, setInitialValues] = useState(null);
@@ -55,7 +61,11 @@ const useFormModal = (formTitle, formFieldsChildElement, handleFormSubmit,modSiz
                   })}
               </ModalBody>
               <ModalFooter>
-                <SubmitButton size="sm" submitting={submitting} disabled={submitting || !dirty}>
+                <SubmitButton
+                  size="sm"
+                  submitting={submitting}
+                  disabled={submitting || (disableSubmitWhenEmpty && !dirty)}
+                >
                   Submit
                 </SubmitButton>
                 <Button color="secondary" size="sm" onClick={toggle}>
