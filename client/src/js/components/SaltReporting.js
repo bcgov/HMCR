@@ -56,7 +56,16 @@ const SaltReporting = ({ currentUser }) => {
     } catch (error) {
       setLoading(false);
       console.error(error);
-      setSaltReportCompleteMessage(`Report submission failed.  ${error.response?.data.error}`);
+      const data = error.response?.data;
+      const serverMessage =
+        data?.error ||
+        data?.detail ||
+        data?.title ||
+        (typeof data === 'string' ? data : null) ||
+        error.message ||
+        'Unknown error';
+      const status = error.response?.status;
+      setSaltReportCompleteMessage(`Report submission failed. ${status ? `(${status}) ` : ''}${serverMessage}`);
       setSaltReportSuccess(false);
     } finally {
       setLoading(false);
