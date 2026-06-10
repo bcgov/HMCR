@@ -27,17 +27,21 @@ const SingleDropdownField = (props) => {
   }
 
   return (
-    <SingleDropdown
-      items={items}
-      value={field.value}
-      defaultTitle={title}
-      handleOnChange={handleOnSelect}
-      handleOnBlur={() => setFieldTouched(name, true)}
-      disabled={disabled}
-      isInvalidClassName={isInvalidClassName}
-      errorStyle={style}
-      fieldMeta={meta}
-    />
+    <>
+      {/* Scroll/focus anchor so validation error handlers that query [name] can locate this dropdown */}
+      <span name={name} tabIndex={-1} style={{ position: 'absolute', width: 0, height: 0 }} />
+      <SingleDropdown
+        items={items}
+        value={field.value}
+        defaultTitle={title}
+        handleOnChange={handleOnSelect}
+        handleOnBlur={() => setFieldTouched(name, true)}
+        disabled={disabled}
+        isInvalidClassName={isInvalidClassName}
+        errorStyle={style}
+        fieldMeta={meta}
+      />
+    </>
   );
 };
 
