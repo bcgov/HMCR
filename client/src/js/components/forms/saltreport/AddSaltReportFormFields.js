@@ -109,7 +109,7 @@ const snowDisposalDesignFeaturesLabel = {
   watercourse: 'All meltwater is collected and discharged into a watercourse',
 };
 
-const saltReportDraftStorageKey = 'saltReportFormData';
+export const saltReportDraftStorageKey = 'saltReportFormData';
 
 const AddSaltReportFormFields = ({ setInitialValues, formValues, setValidationSchema, currentUser }) => {
   const [loading, setLoading] = useState(true);

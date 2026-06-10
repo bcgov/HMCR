@@ -13,7 +13,7 @@ import MaterialCard from './ui/MaterialCard';
 import UIHeader from './ui/UIHeader';
 import DataTableWithPaginaionControl from './ui/DataTableWithPaginaionControl';
 import Authorize from './fragments/Authorize';
-import AddSaltReportFormFields from './forms/saltreport/AddSaltReportFormFields';
+import AddSaltReportFormFields, { saltReportDraftStorageKey } from './forms/saltreport/AddSaltReportFormFields';
 import { Col, FormGroup, Label, Alert, Button, Row } from 'reactstrap';
 
 const SaltReporting = ({ currentUser }) => {
@@ -51,6 +51,7 @@ const SaltReporting = ({ currentUser }) => {
       const response = await api.instance.post(apiPath, values);
       setLoading(false);
 
+      localStorage.removeItem(saltReportDraftStorageKey);
       setSaltReportCompleteMessage(`Report successfully created. Details: ${response.status} ${response.statusText}.`);
       setSaltReportSuccess(true);
     } catch (error) {
