@@ -13,7 +13,7 @@ import MaterialCard from './ui/MaterialCard';
 import UIHeader from './ui/UIHeader';
 import DataTableWithPaginaionControl from './ui/DataTableWithPaginaionControl';
 import Authorize from './fragments/Authorize';
-import AddSaltReportFormFields from './forms/saltreport/AddSaltReportFormFields';
+import AddSaltReportFormFields, { saltReportDraftStorageKey } from './forms/saltreport/AddSaltReportFormFields';
 import { Col, FormGroup, Label, Alert, Button, Row } from 'reactstrap';
 
 const SaltReporting = ({ currentUser }) => {
@@ -51,12 +51,22 @@ const SaltReporting = ({ currentUser }) => {
       const response = await api.instance.post(apiPath, values);
       setLoading(false);
 
+      localStorage.removeItem(saltReportDraftStorageKey);
       setSaltReportCompleteMessage(`Report successfully created. Details: ${response.status} ${response.statusText}.`);
       setSaltReportSuccess(true);
     } catch (error) {
       setLoading(false);
       console.error(error);
-      setSaltReportCompleteMessage(`Report submission failed.  ${error.response?.data.error}`);
+      const data = error.response?.data;
+      const serverMessage =
+        data?.error ||
+        data?.detail ||
+        data?.title ||
+        (typeof data === 'string' ? data : null) ||
+        error.message ||
+        'Unknown error';
+      const status = error.response?.status;
+      setSaltReportCompleteMessage(`Report submission failed. ${status ? `(${status}) ` : ''}${serverMessage}`);
       setSaltReportSuccess(false);
     } finally {
       setLoading(false);
@@ -74,7 +84,8 @@ const SaltReporting = ({ currentUser }) => {
     'Annual Salt Report',
     <AddSaltReportFormFields />,
     handleSaltReportSubmit,
-    'xl'
+    'xl',
+    { disableSubmitWhenEmpty: false }
   );
 
   return (
