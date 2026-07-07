@@ -99,7 +99,11 @@ namespace Hmcr.Domain.Hangfire
                 }
 
                 //set activity code rules and location code
-                SetActivityCodeRulesIntoUntypedRow(untypedRow, activityCode);
+                if (!TrySetActivityCodeRulesIntoUntypedRow(untypedRow, activityCode, errors))
+                {
+                    SetErrorDetail(submissionRow, errors, _statusService.FileBasicError); //Stage 2 - Basic Error
+                    continue;
+                }
 
                 //this also sets RowType (D2, D3, D4)
                 var entityName = GetValidationEntityName(untypedRow, activityCode);
@@ -190,27 +194,33 @@ namespace Hmcr.Domain.Hangfire
 
         #region Validation Batch Processes
 
+        private decimal GetNotApplicableRuleId(string ruleSet, string ruleExecName)
+        {
+            var rule = _validator.ActivityCodeRuleLookup
+                .Where(x => x.ActivityRuleSet == ruleSet)
+                .Where(x => x.ActivityRuleExecName == ruleExecName)
+                .FirstOrDefault();
+
+            if (rule == null)
+            {
+                throw new Exception($"The '{ruleExecName}' rule for rule set '{ruleSet}' is missing from the activity rule " +
+                    "configuration (HMR_ACTIVITY_CODE_RULE). Submissions cannot be validated until the configuration is corrected " +
+                    "by the administrator.");
+            }
+
+            return rule.ActivityCodeRuleId;
+        }
+
         private List<WorkReportGeometry> PerformAnalyticalValidationBatchAsync(List<WorkReportGeometry> workReports)
         {
             MethodLogger.LogEntry(_logger, _enableMethodLog, _methodLogHeader, $"Total Record: {workReports.Count}");
             //DateTime StartAt = DateTime.Now;
 
-            //get surface type not applicable id
-            var notApplicableRoadLengthId = _validator.ActivityCodeRuleLookup
-                .Where(x => x.ActivityRuleSet == ActivityRuleType.RoadLength)
-                .Where(x => x.ActivityRuleExecName == RoadLengthRules.NA)
-                .FirstOrDefault().ActivityCodeRuleId;
-
-            //get surface type not applicable id
-            var notApplicableMaintenanceClassId = _validator.ActivityCodeRuleLookup
-                .Where(x => x.ActivityRuleSet == ActivityRuleType.RoadClass)
-                .Where(x => x.ActivityRuleExecName == MaintenanceClassRules.NA)
-                .FirstOrDefault().ActivityCodeRuleId;
-
-            var notApplicableSurfaceTypeId = _validator.ActivityCodeRuleLookup
-                .Where(x => x.ActivityRuleSet == ActivityRuleType.SurfaceType)
-                .Where(x => x.ActivityRuleExecName == SurfaceTypeRules.NA)
-                .FirstOrDefault().ActivityCodeRuleId;
+            //get the 'Not Applicable' rule ids; fail with a descriptive message when the
+            //HMR_ACTIVITY_CODE_RULE seed data is incomplete instead of a NullReferenceException
+            var notApplicableRoadLengthId = GetNotApplicableRuleId(ActivityRuleType.RoadLength, RoadLengthRules.NA);
+            var notApplicableMaintenanceClassId = GetNotApplicableRuleId(ActivityRuleType.RoadClass, MaintenanceClassRules.NA);
+            var notApplicableSurfaceTypeId = GetNotApplicableRuleId(ActivityRuleType.SurfaceType, SurfaceTypeRules.NA);
 
             var updatedWorkReports = new ConcurrentBag<WorkReportGeometry>();
             var updatedWorkReportTypeds = new ConcurrentBag<WorkReportTyped>();
@@ -342,7 +352,7 @@ namespace Hmcr.Domain.Hangfire
                     if (itemExists)
                     {
                         warnings.AddItem("Reporting Frequency Validation: End Date"
-                            , $"END DATE [{((typedRow.EndDate.Value == null) ? "" : typedRow.EndDate.Value.ToString("yyyy-MM-dd"))}] should NOT be reported more frequently" +
+                            , $"END DATE [{typedRow.EndDate?.ToString("yyyy-MM-dd") ?? ""}] should NOT be reported more frequently" +
                             $" than the Reporting Frequency (days) of [{typedRow.ActivityCodeValidation.ReportingFrequency}]" +
                             $" for Activity [{typedRow.ActivityNumber}]. Record conflicts with Record Number(s)" +
                             $"[{String.Join("; ", conflicts.ToArray())}]");
@@ -355,7 +365,7 @@ namespace Hmcr.Domain.Hangfire
                     if (itemExists)
                     {
                         warnings.AddItem("Reporting Frequency Validation: End Date"
-                            , $"END DATE [{((typedRow.EndDate.Value == null) ? "" : typedRow.EndDate.Value.ToString("yyyy-MM-dd"))}] should NOT be reported more frequently" +
+                            , $"END DATE [{typedRow.EndDate?.ToString("yyyy-MM-dd") ?? ""}] should NOT be reported more frequently" +
                             $" than the Reporting Frequency (days) of [{typedRow.ActivityCodeValidation.ReportingFrequency}]" +
                             $" for Activity [{typedRow.ActivityNumber}] for Highway Unique [{typedRow.HighwayUnique}]." +
                             $" Record conflicts with Record Number(s) [{String.Join("; ", conflicts.ToArray())}]");
@@ -374,7 +384,7 @@ namespace Hmcr.Domain.Hangfire
 
                         //need to display the message differently for lines/points
                         warnings.AddItem("Reporting Frequency Validation: End Date, GPS position"
-                            , $"END DATE [{((typedRow.EndDate.Value == null) ? "" : typedRow.EndDate.Value.ToString("yyyy-MM-dd"))}] should NOT be reported more frequently" +
+                            , $"END DATE [{typedRow.EndDate?.ToString("yyyy-MM-dd") ?? ""}] should NOT be reported more frequently" +
                             $" than the Reporting Frequency (days) of [{typedRow.ActivityCodeValidation.ReportingFrequency}]" +
                             $" for Activity [{typedRow.ActivityNumber}]," +
                             $" Highway Unique [{typedRow.HighwayUnique}]," +
@@ -403,7 +413,12 @@ namespace Hmcr.Domain.Hangfire
 
             var hasRestAreaWithinVariance = await WithinRestAreaVariance(typedRow, structureVarianceM);
 
-            if (!hasRestAreaWithinVariance)
+            if (hasRestAreaWithinVariance == null)
+            {
+                warnings.AddItem("Site Validation", $"Site Number [{typedRow.SiteNumber}] could not be verified because " +
+                    "the mapping service was temporarily unavailable. Please verify the site number manually or submit the file again later.");
+            }
+            else if (hasRestAreaWithinVariance == false)
             {
                 if (typedRow.FeatureType == FeatureType.Line)
                 {
@@ -439,7 +454,12 @@ namespace Hmcr.Domain.Hangfire
 
             //structure checking
             var hasStructureWithinVariance = await WithinStructureVariance(typedRow, structureVarianceM);
-            if (!hasStructureWithinVariance)
+            if (hasStructureWithinVariance == null)
+            {
+                warnings.AddItem("Structure Validation", $"Structure Number [{typedRow.StructureNumber}] could not be verified because " +
+                    "the mapping service was temporarily unavailable. Please verify the structure number manually or submit the file again later.");
+            }
+            else if (hasStructureWithinVariance == false)
             {
                 if (typedRow.FeatureType == FeatureType.Line)
                 {
@@ -1035,7 +1055,12 @@ namespace Hmcr.Domain.Hangfire
                             {
                                 //structure checking
                                 var hasBridgeWithinVariance = await WithinBridgeStructureVariance(typedRow, (decimal)structureVarianceM);
-                                if (!hasBridgeWithinVariance)
+                                if (hasBridgeWithinVariance == null)
+                                {
+                                    warnings.AddItem("Surface Type Validation", "The nearby structure check could not be completed because " +
+                                        "the mapping service was temporarily unavailable. Please verify manually or submit the file again later.");
+                                }
+                                else if (hasBridgeWithinVariance == false)
                                 {
                                     warnings.AddItem("Surface Type Validation", $"GPS position from [{typedRow.StartLatitude},{typedRow.StartLongitude}] " +
                                         $"to [{typedRow.EndLatitude},{typedRow.EndLongitude}] should be >= 80% paved surface or be within " +
@@ -1099,7 +1124,12 @@ namespace Hmcr.Domain.Hangfire
                             {
                                 //structure checking
                                 var hasBridgeWithinVariance = await WithinBridgeStructureVariance(typedRow, (decimal)structureVarianceM);
-                                if (!hasBridgeWithinVariance)
+                                if (hasBridgeWithinVariance == null)
+                                {
+                                    warnings.AddItem("Surface Type Validation", "The nearby structure check could not be completed because " +
+                                        "the mapping service was temporarily unavailable. Please verify manually or submit the file again later.");
+                                }
+                                else if (hasBridgeWithinVariance == false)
                                 {
                                     warnings.AddItem("Surface Type Validation", $"GPS position [{typedRow.StartLatitude},{typedRow.StartLongitude}] " +
                                         $"should be paved or be within {structureVariance}M of a Structure");
@@ -1138,7 +1168,8 @@ namespace Hmcr.Domain.Hangfire
             }
         }
 
-        private async Task<bool> WithinBridgeStructureVariance(WorkReportTyped typedRow, decimal structureVariance)
+        //returns null when the check could not be performed because the mapping service was unavailable
+        private async Task<bool?> WithinBridgeStructureVariance(WorkReportTyped typedRow, decimal structureVariance)
         {
             //this function will return false by default if no structure features are returned
             var isBridgeWithinVariance = false;
@@ -1157,6 +1188,9 @@ namespace Hmcr.Domain.Hangfire
             }
 
             var result = await _spatialService.GetStructuresOnRFISegmentAsync(typedRow.HighwayUnique, typedRow.RecordNumber);
+
+            if (result.result == SpValidationResult.Fail)
+                return null;
 
             if (result.structures.Count() > 0)
             {
@@ -1177,7 +1211,8 @@ namespace Hmcr.Domain.Hangfire
             return isBridgeWithinVariance;
         }
 
-        private async Task<bool> WithinRestAreaVariance(WorkReportTyped typedRow, decimal structureVariance)
+        //returns null when the check could not be performed because the mapping service was unavailable
+        private async Task<bool?> WithinRestAreaVariance(WorkReportTyped typedRow, decimal structureVariance)
         {
             //this function will return false by default if no rest areas are returned
             var isWithinVariance = false;
@@ -1198,6 +1233,9 @@ namespace Hmcr.Domain.Hangfire
 
             var result = await _spatialService.GetRestAreasOnRFISegmentAsync(typedRow.HighwayUnique, typedRow.RecordNumber);
 
+            if (result.result == SpValidationResult.Fail)
+                return null;
+
             if (result.restAreas.Count() > 0)
             {
                 var restAreas = result.restAreas.Where(x => x.SiteNumber == siteNumber).ToList();
@@ -1216,15 +1254,19 @@ namespace Hmcr.Domain.Hangfire
             return isWithinVariance;
         }
 
-        private async Task<bool> WithinStructureVariance(WorkReportTyped typedRow, decimal structureVariance)
+        //returns null when the check could not be performed because the mapping service was unavailable
+        private async Task<bool?> WithinStructureVariance(WorkReportTyped typedRow, decimal structureVariance)
         {
             //this function will return false by default if no structures are returned
             var isWithinVariance = false;
             var startOffset = typedRow.StartOffset - structureVariance;
             var endOffset = ((typedRow.EndOffset == null) ? typedRow.StartOffset : typedRow.EndOffset) + structureVariance;
-            string structureNumber = typedRow.StructureNumber.TrimStart('0');
+            string structureNumber = typedRow.StructureNumber?.TrimStart('0') ?? "";
 
             var result = await _spatialService.GetStructuresOnRFISegmentAsync(typedRow.HighwayUnique, typedRow.RecordNumber);
+
+            if (result.result == SpValidationResult.Fail)
+                return null;
 
             if (result.structures.Count() > 0)
             {
@@ -1689,27 +1731,42 @@ namespace Hmcr.Domain.Hangfire
             }
         }
 
-        private void SetActivityCodeRulesIntoUntypedRow(WorkReportCsvDto untypedRow, ActivityCodeDto activityCode)
+        /// <summary>
+        /// Returns false and records a row error when the activity's validation rules are not
+        /// configured in HMR_ACTIVITY_CODE_RULE. A missing rule used to throw a
+        /// NullReferenceException, which failed the whole submission with 'Unexpected Error'.
+        /// </summary>
+        private bool TrySetActivityCodeRulesIntoUntypedRow(WorkReportCsvDto untypedRow, ActivityCodeDto activityCode, Dictionary<string, List<string>> errors)
         {
+            var roadLengthRule = _validator.ActivityCodeRuleLookup
+                .FirstOrDefault(x => x.ActivityCodeRuleId == activityCode.RoadLengthRule);
+            var surfaceTypeRule = _validator.ActivityCodeRuleLookup
+                .FirstOrDefault(x => x.ActivityCodeRuleId == activityCode.SurfaceTypeRule);
+            var roadClassRule = _validator.ActivityCodeRuleLookup
+                .FirstOrDefault(x => x.ActivityCodeRuleId == activityCode.RoadClassRule);
+
+            if (roadLengthRule == null || surfaceTypeRule == null || roadClassRule == null)
+            {
+                errors.AddItem(Fields.ActivityNumber,
+                    $"The validation rules for activity [{activityCode.ActivityNumber}] are not configured correctly in the system. " +
+                    "This is a system configuration issue, not a problem with the report data. " +
+                    "Please contact the administrator and provide the activity number.");
+                return false;
+            }
+
             untypedRow.FeatureType = activityCode.FeatureType ?? FeatureType.None;
             untypedRow.SpThresholdLevel = activityCode.SpThresholdLevel;
             //set activity code rules and location code
             untypedRow.ActivityCodeValidation.LocationCode = activityCode.LocationCode.LocationCode;
 
             untypedRow.ActivityCodeValidation.RoadLengthRuleId = activityCode.RoadLengthRule;
-            untypedRow.ActivityCodeValidation.RoadLenghRuleExec = _validator.ActivityCodeRuleLookup
-                .Where(x => x.ActivityCodeRuleId == activityCode.RoadLengthRule)
-                .FirstOrDefault().ActivityRuleExecName;
+            untypedRow.ActivityCodeValidation.RoadLenghRuleExec = roadLengthRule.ActivityRuleExecName;
 
             untypedRow.ActivityCodeValidation.SurfaceTypeRuleId = activityCode.SurfaceTypeRule;
-            untypedRow.ActivityCodeValidation.SurfaceTypeRuleExec = _validator.ActivityCodeRuleLookup
-                .Where(x => x.ActivityCodeRuleId == activityCode.SurfaceTypeRule)
-                .FirstOrDefault().ActivityRuleExecName;
+            untypedRow.ActivityCodeValidation.SurfaceTypeRuleExec = surfaceTypeRule.ActivityRuleExecName;
 
             untypedRow.ActivityCodeValidation.RoadClassRuleId = activityCode.RoadClassRule;
-            untypedRow.ActivityCodeValidation.RoadClassRuleExec = _validator.ActivityCodeRuleLookup
-                .Where(x => x.ActivityCodeRuleId == activityCode.RoadClassRule)
-                .FirstOrDefault().ActivityRuleExecName;
+            untypedRow.ActivityCodeValidation.RoadClassRuleExec = roadClassRule.ActivityRuleExecName;
 
             untypedRow.ActivityCodeValidation.MinValue = activityCode.MinValue;
             untypedRow.ActivityCodeValidation.MaxValue = activityCode.MaxValue;
@@ -1718,6 +1775,8 @@ namespace Hmcr.Domain.Hangfire
             untypedRow.ActivityCodeValidation.ServiceAreaNumbers = activityCode.ServiceAreaNumbers;
 
             untypedRow.ActivityCodeValidation.IsSiteNumRequired = activityCode.IsSiteNumRequired;
+
+            return true;
         }
 
         private string GetValidationEntityName(WorkReportCsvDto untypedRow, ActivityCodeDto activityCode)

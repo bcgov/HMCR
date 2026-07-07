@@ -31,6 +31,16 @@ namespace Hmcr.Domain.Services
 
     public class SpatialService : ISpatialService
     {
+        /// <summary>
+        /// User-facing message recorded when the external mapping services (CHRIS/OAS/GeoServer)
+        /// cannot be reached. Spatial failures used to throw and fail the entire submission with
+        /// an opaque 'Unexpected Error'; they are now contained as a per-row location error.
+        /// </summary>
+        public const string SpatialServiceUnavailable =
+            "Spatial validation could not be completed because the mapping service (CHRIS/GeoServer) did not respond. " +
+            "This is a temporary system issue, not a problem with the report data. " +
+            "Please submit the file again later; if the problem persists, contact the administrator.";
+
         private IOasApi _oasApi;
         private IInventoryApi _inventoryApi;
 
@@ -48,7 +58,30 @@ namespace Hmcr.Domain.Services
             _inventoryApi = inventoryApi;
         }
 
+        /// <summary>
+        /// Records a spatial system failure as a row-level validation error so a single
+        /// unreachable mapping service call no longer fails the entire submission.
+        /// </summary>
+        private static void AddSpatialServiceError(Dictionary<string, List<string>> errors, Exception ex)
+        {
+            errors.AddItem("Spatial Validation", $"{SpatialServiceUnavailable} (Detail: {ex.Message})");
+        }
+
         public async Task<(SpValidationResult result, LrsPointResult lrsResult, RfiSegment rfiSegment)> ValidateGpsPointAsync
+            (Point point, string rfiSegment, string rfiSegmentName, string thresholdLevel, Dictionary<string, List<string>> errors)
+        {
+            try
+            {
+                return await ValidateGpsPointInternalAsync(point, rfiSegment, rfiSegmentName, thresholdLevel, errors);
+            }
+            catch (Exception ex)
+            {
+                AddSpatialServiceError(errors, ex);
+                return (SpValidationResult.Fail, null, null);
+            }
+        }
+
+        private async Task<(SpValidationResult result, LrsPointResult lrsResult, RfiSegment rfiSegment)> ValidateGpsPointInternalAsync
             (Point point, string rfiSegment, string rfiSegmentName, string thresholdLevel, Dictionary<string, List<string>> errors)
         {
             var rfiResult = await ValidateRfiSegmentAsync(rfiSegment, rfiSegmentName, errors);
@@ -82,6 +115,20 @@ namespace Hmcr.Domain.Services
         }
 
         public async Task<(SpValidationResult result, LrsPointResult startPointResult, LrsPointResult endPointResult, List<Line> lines, RfiSegment rfiSegment)> ValidateGpsLineAsync
+            (Point startPoint, Point endPoint, string rfiSegment, string rfiSegmentName, string thresholdLevel, Dictionary<string, List<string>> errors)
+        {
+            try
+            {
+                return await ValidateGpsLineInternalAsync(startPoint, endPoint, rfiSegment, rfiSegmentName, thresholdLevel, errors);
+            }
+            catch (Exception ex)
+            {
+                AddSpatialServiceError(errors, ex);
+                return (SpValidationResult.Fail, null, null, null, null);
+            }
+        }
+
+        private async Task<(SpValidationResult result, LrsPointResult startPointResult, LrsPointResult endPointResult, List<Line> lines, RfiSegment rfiSegment)> ValidateGpsLineInternalAsync
             (Point startPoint, Point endPoint, string rfiSegment, string rfiSegmentName, string thresholdLevel, Dictionary<string, List<string>> errors)
         {
             var rfiResult = await ValidateRfiSegmentAsync(rfiSegment, rfiSegmentName, errors);
@@ -144,6 +191,20 @@ namespace Hmcr.Domain.Services
         public async Task<(SpValidationResult result, decimal snappedOffset, Point point, RfiSegment rfiSegment)> ValidateLrsPointAsync
             (decimal offset, string rfiSegment, string rfiSegmentName, string thresholdLevel, Dictionary<string, List<string>> errors)
         {
+            try
+            {
+                return await ValidateLrsPointInternalAsync(offset, rfiSegment, rfiSegmentName, thresholdLevel, errors);
+            }
+            catch (Exception ex)
+            {
+                AddSpatialServiceError(errors, ex);
+                return (SpValidationResult.Fail, offset, null, null);
+            }
+        }
+
+        private async Task<(SpValidationResult result, decimal snappedOffset, Point point, RfiSegment rfiSegment)> ValidateLrsPointInternalAsync
+            (decimal offset, string rfiSegment, string rfiSegmentName, string thresholdLevel, Dictionary<string, List<string>> errors)
+        {
             var rfiResult = await ValidateRfiSegmentAsync(rfiSegment, rfiSegmentName, errors);
             if (rfiResult.result != SpValidationResult.Success)
             {
@@ -170,6 +231,20 @@ namespace Hmcr.Domain.Services
 
         public async Task<(SpValidationResult result, decimal snappedStartOffset, decimal snappedEndOffset, Point startPoint, Point endPoint, List<Line> lines, RfiSegment rfiSegment)>
             ValidateLrsLineAsync(decimal startOffset, decimal endOffset, string rfiSegment, string rfiSegmentName, string thresholdLevel, Dictionary<string, List<string>> errors)
+        {
+            try
+            {
+                return await ValidateLrsLineInternalAsync(startOffset, endOffset, rfiSegment, rfiSegmentName, thresholdLevel, errors);
+            }
+            catch (Exception ex)
+            {
+                AddSpatialServiceError(errors, ex);
+                return (SpValidationResult.Fail, startOffset, endOffset, null, null, null, null);
+            }
+        }
+
+        private async Task<(SpValidationResult result, decimal snappedStartOffset, decimal snappedEndOffset, Point startPoint, Point endPoint, List<Line> lines, RfiSegment rfiSegment)>
+            ValidateLrsLineInternalAsync(decimal startOffset, decimal endOffset, string rfiSegment, string rfiSegmentName, string thresholdLevel, Dictionary<string, List<string>> errors)
         {
             var snappedStartOffset = startOffset;
             var snappedEndOffset = endOffset;
@@ -251,14 +326,24 @@ namespace Hmcr.Domain.Services
             return (SpValidationResult.Success, rfiDetail);
         }
 
-        public async Task<(SpValidationResult result, string message, List<SurfaceType> surfaceTypes)> GetSurfaceTypesAssocWithRFISegment(string rfiSegmentName, string recordNumber, 
+        public async Task<(SpValidationResult result, string message, List<SurfaceType> surfaceTypes)> GetSurfaceTypesAssocWithRFISegment(string rfiSegmentName, string recordNumber,
             decimal startOffset, decimal endOffset)
         {
             var surfaceTypes = new List<SurfaceType>();
             var validationResult = SpValidationResult.Success;
 
-            //retrieve the feature collection for the highway unique from the ogs endpoint
-            var (featureCollection, errorMsg) = await _inventoryApi.GetSurfaceType(rfiSegmentName, recordNumber);
+            GJFeature.FeatureCollection featureCollection;
+            string errorMsg;
+
+            try
+            {
+                //retrieve the feature collection for the highway unique from the ogs endpoint
+                (featureCollection, errorMsg) = await _inventoryApi.GetSurfaceType(rfiSegmentName, recordNumber);
+            }
+            catch (Exception ex)
+            {
+                return (SpValidationResult.Fail, $"{SpatialServiceUnavailable} (Detail: {ex.Message})", surfaceTypes);
+            }
             
             var foundFeatures = FindFeaturesWithinSegment(featureCollection, startOffset, endOffset);
 
@@ -286,12 +371,24 @@ namespace Hmcr.Domain.Services
         {
             var maintenanceClasses = new List<MaintenanceClass>();
             var validationResult = SpValidationResult.Success;
-            
-            var (featureCollection, errorMsg) = await _inventoryApi.GetMaintenanceClass(rfiSegmentName, recordNumber);
+
+            GJFeature.FeatureCollection featureCollection;
+            string errorMsg;
+
+            try
+            {
+                (featureCollection, errorMsg) = await _inventoryApi.GetMaintenanceClass(rfiSegmentName, recordNumber);
+            }
+            catch (Exception ex)
+            {
+                return (SpValidationResult.Fail, $"{SpatialServiceUnavailable} (Detail: {ex.Message})", maintenanceClasses);
+            }
 
             var foundFeatures = FindFeaturesWithinSegment(featureCollection, startOffset, endOffset);
-            
-            if (foundFeatures != null)
+
+            //note: FindFeaturesWithinSegment never returns null; check the feature count like the
+            //other inventory queries so a GeoServer error response is reported as a failure.
+            if (foundFeatures.Features.Count > 0)
             {
                 foreach (var feature in foundFeatures.Features)
                 {
@@ -318,7 +415,17 @@ namespace Hmcr.Domain.Services
             var highwayProfiles = new List<HighwayProfile>();
             var validationResult = SpValidationResult.Success;
 
-            var (featureCollection, errorMsg) = await _inventoryApi.GetHighwayProfile(rfiSegmentName, recordNumber);
+            GJFeature.FeatureCollection featureCollection;
+            string errorMsg;
+
+            try
+            {
+                (featureCollection, errorMsg) = await _inventoryApi.GetHighwayProfile(rfiSegmentName, recordNumber);
+            }
+            catch (Exception ex)
+            {
+                return (SpValidationResult.Fail, $"{SpatialServiceUnavailable} (Detail: {ex.Message})", highwayProfiles);
+            }
 
             var foundFeatures = FindFeaturesWithinSegment(featureCollection, startOffset, endOffset);
 
@@ -349,7 +456,17 @@ namespace Hmcr.Domain.Services
             var guardrails = new List<Guardrail>();
             var validationResult = SpValidationResult.Success;
 
-            var (featureCollection, errorMsg) = await _inventoryApi.GetGuardrail(rfiSegmentName, recordNumber);
+            GJFeature.FeatureCollection featureCollection;
+            string errorMsg;
+
+            try
+            {
+                (featureCollection, errorMsg) = await _inventoryApi.GetGuardrail(rfiSegmentName, recordNumber);
+            }
+            catch (Exception ex)
+            {
+                return (SpValidationResult.Fail, $"{SpatialServiceUnavailable} (Detail: {ex.Message})", guardrails);
+            }
 
             var foundFeatures = FindFeaturesWithinSegment(featureCollection, startOffset, endOffset);
 
@@ -434,17 +551,30 @@ namespace Hmcr.Domain.Services
 
         public async Task<(SpValidationResult result, List<Structure> structures)> GetStructuresOnRFISegmentAsync(string rfiSegmentName, string recordNumber)
         {
-            var structures = await _inventoryApi.GetStructuresOnRFISegment(rfiSegmentName, recordNumber);
+            try
+            {
+                var structures = await _inventoryApi.GetStructuresOnRFISegment(rfiSegmentName, recordNumber);
 
-
-            return (SpValidationResult.Success, structures);
+                return (SpValidationResult.Success, structures);
+            }
+            catch (Exception)
+            {
+                return (SpValidationResult.Fail, new List<Structure>());
+            }
         }
 
         public async Task<(SpValidationResult result, List<RestArea> restAreas)> GetRestAreasOnRFISegmentAsync(string rfiSegmentName, string recordNumber)
         {
-            var restAreas = await _inventoryApi.GetRestAreasOnRFISegment(rfiSegmentName, recordNumber);
+            try
+            {
+                var restAreas = await _inventoryApi.GetRestAreasOnRFISegment(rfiSegmentName, recordNumber);
 
-            return (SpValidationResult.Success, restAreas);
+                return (SpValidationResult.Success, restAreas);
+            }
+            catch (Exception)
+            {
+                return (SpValidationResult.Fail, new List<RestArea>());
+            }
         }
 
         private (bool withinTolerance, decimal snappedOffset) GetSnappedOffset(RfiSegment segment, decimal offset, string rfiSegment,
