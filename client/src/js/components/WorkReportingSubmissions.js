@@ -203,9 +203,14 @@ const WorkReportingSubmissions = ({ serviceArea, submissionStatuses }, ref) => {
             {searchData.data.length > 0 && (
               <DataTableWithPaginaionControl
                 dataList={searchData.data.map((item) => {
-                  const itemStatus = submissionStatuses[item.submissionStatusCode];
-                  const progressBarLength =
-                    (itemStatus.stage < 0 ? maxValidationStages : itemStatus.stage / maxValidationStages) * 100;
+                  // Fall back to the submission's own description so an unknown status code
+                  // degrades to a warning-styled row instead of crashing the entire table.
+                  const itemStatus = submissionStatuses[item.submissionStatusCode] || {
+                    stage: -1,
+                    description: item.description,
+                    longDescription: 'No further detail is available for this submission status.',
+                  };
+                  const progressBarLength = (itemStatus.stage < 0 ? 1 : itemStatus.stage / maxValidationStages) * 100;
 
                   return {
                     ...item,
