@@ -205,6 +205,8 @@ namespace Hmcr.Chris
 
                 content = await (await _api.GetWithRetry(_client, query)).Content.ReadAsStringAsync();
 
+                ApiResponseGuard.EnsureJsonResponse(content, "retrieving the structures on the road segment");
+
                 var results = JsonSerializer.Deserialize<FeatureCollection<object>>(content);
 
                 var structures = new List<Structure>();
@@ -215,10 +217,10 @@ namespace Hmcr.Chris
                     structure.StructureType = feature.properties.BMIS_STRUCTURE_TYPE;
                     // need to apply trim start '0' to strip leading zeros, if the structure number in the typed row
                     //  had no alpha chars the CSV parse casts it as a number (ie. 00525 = 525)
-                    structure.StructureNumber = feature.properties.BMIS_STRUCTURE_NO.TrimStart('0');
-                    structure.BeginKM = feature.properties.BEGIN_KM;
-                    structure.EndKM = feature.properties.END_KM;
-                    structure.Length = feature.properties.LENGTH_KM;
+                    structure.StructureNumber = feature.properties.BMIS_STRUCTURE_NO?.TrimStart('0') ?? "";
+                    structure.BeginKM = feature.properties.BEGIN_KM ?? 0M;
+                    structure.EndKM = feature.properties.END_KM ?? 0M;
+                    structure.Length = feature.properties.LENGTH_KM ?? 0d;
 
                     structures.Add(structure);
                 }
@@ -243,6 +245,8 @@ namespace Hmcr.Chris
 
                 content = await (await _api.GetWithRetry(_client, query)).Content.ReadAsStringAsync();
 
+                ApiResponseGuard.EnsureJsonResponse(content, "retrieving the rest areas on the road segment");
+
                 var results = JsonSerializer.Deserialize<FeatureCollection<object>>(content);
 
                 var restAreas = new List<RestArea>();
@@ -251,7 +255,7 @@ namespace Hmcr.Chris
                 {
                     RestArea restArea = new RestArea();
                     restArea.SiteNumber = feature.properties.REST_AREA_NUMBER;
-                    restArea.LocationKM = feature.properties.LOC_KM;
+                    restArea.LocationKM = feature.properties.LOC_KM ?? 0M;
                     restArea.Class = feature.properties.REST_AREA_CLASS;
 
                     restAreas.Add(restArea);
