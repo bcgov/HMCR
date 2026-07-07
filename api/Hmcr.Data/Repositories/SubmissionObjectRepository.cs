@@ -62,9 +62,16 @@ namespace Hmcr.Data.Repositories
 
         public SubmissionDto[] GetSubmissionObjecsForBackgroundJob(decimal serviceAreaNumber)
         {
+            //includes the stage 3/4 in-progress statuses so a submission stranded mid-validation
+            //by a pod restart or crash is picked up and reprocessed on the next run instead of
+            //staying 'Validation in Progress' forever. Reprocessing is safe: SkipSameJob prevents
+            //concurrent runs per service area and report saves are upserts by record number.
             var submissions = DbSet.AsNoTracking()
                 .Where(x => x.ServiceAreaNumber == serviceAreaNumber && x.DigitalRepresentation != null && x.SubmissionStatus.StatusType == StatusType.File &&
-                    (x.SubmissionStatus.StatusCode == FileStatus.FileReceived || x.SubmissionStatus.StatusCode == FileStatus.FileInProgress))
+                    (x.SubmissionStatus.StatusCode == FileStatus.FileReceived
+                        || x.SubmissionStatus.StatusCode == FileStatus.FileInProgress
+                        || x.SubmissionStatus.StatusCode == FileStatus.FileStage3InProgress
+                        || x.SubmissionStatus.StatusCode == FileStatus.FileStage4InProgress))
                 .Include(x => x.MimeType)
                 .Include(x => x.SubmissionStream)
                 .OrderBy(x => x.SubmissionObjectId) //must be ascending order
