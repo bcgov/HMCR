@@ -80,9 +80,17 @@ namespace Hmcr.Chris
                     //credential failures are not transient - retrying only delays the inevitable
                     if (response.StatusCode == HttpStatusCode.Unauthorized || response.StatusCode == HttpStatusCode.Forbidden)
                     {
-                        throw new Exception($"The mapping service rejected the system's credentials (HTTP {(int)response.StatusCode} {response.StatusCode}). " +
+                        var statusCode = response.StatusCode;
+                        response.Dispose();
+                        throw new Exception($"The mapping service rejected the system's credentials (HTTP {(int)statusCode} {statusCode}). " +
                             "The CHRIS service account may be locked, expired, or misconfigured. " +
                             "Submitters cannot fix this - please contact the HMCR administrator.");
+                    }
+
+                    if (attempt < maxAttempt)
+                    {
+                        response.Dispose();
+                        response = null;
                     }
                 }
                 catch (HttpRequestException ex)
@@ -101,15 +109,23 @@ namespace Hmcr.Chris
             }
 
             var message = "";
+            var finalStatusCode = response.StatusCode;
 
-            if (response.Content != null)
+            try
             {
-                var bytes = await response.Content.ReadAsByteArrayAsync();
-                //error bodies are often HTML pages; reduce them to a readable snippet
-                message = ApiResponseGuard.ExtractText(Encoding.UTF8.GetString(bytes));
+                if (response.Content != null)
+                {
+                    var bytes = await response.Content.ReadAsByteArrayAsync();
+                    //error bodies are often HTML pages; reduce them to a readable snippet
+                    message = ApiResponseGuard.ExtractText(Encoding.UTF8.GetString(bytes));
+                }
+            }
+            finally
+            {
+                response.Dispose();
             }
 
-            throw new Exception($"The mapping service returned an error (HTTP {(int)response.StatusCode} {response.StatusCode}) after {maxAttempt} attempts. " +
+            throw new Exception($"The mapping service returned an error (HTTP {(int)finalStatusCode} {finalStatusCode}) after {maxAttempt} attempts. " +
                 "Please submit the file again later; if the problem persists, contact the HMCR administrator. " +
                 $"Service response: {message}");
         }
