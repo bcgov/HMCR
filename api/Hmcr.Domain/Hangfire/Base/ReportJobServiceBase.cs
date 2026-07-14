@@ -83,7 +83,7 @@ namespace Hmcr.Domain.Hangfire.Base
                 {
                     ((HmcrRepositoryBase<HmrSubmissionObject>)_submissionRepo).RollBackEntities();
 
-                    _submission.ErrorDetail = $"{FileError.UnknownException}: {ex.Message}";
+                    _submission.ErrorDetail = GetUnexpectedErrorDetail(ex);
                     _submission.SubmissionStatusId = _statusService.FileUnexpectedError;
                     await CommitAndSendEmailAsync();
                 }
@@ -96,7 +96,39 @@ namespace Hmcr.Domain.Hangfire.Base
         {
             _submission.SubmissionStatusId = submissionStatusId;
             _unitOfWork.Commit();
-        } 
+        }
+
+        /// <summary>
+        /// Builds a valid ERROR_DETAIL JSON payload for an unhandled processing exception.
+        /// The previous implementation appended the raw exception message after the JSON,
+        /// producing an unparseable value that crashed the client submission detail page.
+        /// </summary>
+        private static string GetUnexpectedErrorDetail(Exception ex)
+        {
+            // ERROR_DETAIL is VARCHAR(4000); leave room for the JSON wrapper and user message.
+            const int maxExceptionLength = 3000;
+
+            // Parallel validation batches surface failures as an AggregateException whose own
+            // message ("One or more errors occurred") hides the real cause - report the inner ones.
+            var exceptionMessage = ex is AggregateException aggregate
+                ? string.Join(" | ", aggregate.Flatten().InnerExceptions.Select(x => x.Message).Distinct())
+                : ex.Message ?? "";
+
+            if (exceptionMessage.Length > maxExceptionLength)
+            {
+                exceptionMessage = exceptionMessage.Substring(0, maxExceptionLength) + "...";
+            }
+
+            var errors = new Dictionary<string, List<string>>();
+            errors.AddItem("File", FileError.UnexpectedErrorMessage);
+
+            if (exceptionMessage.IsNotEmpty())
+            {
+                errors.AddItem("System Error Detail", exceptionMessage);
+            }
+
+            return errors.GetErrorDetail();
+        }
 
         public virtual Task<bool> ProcessSubmission(SubmissionDto submissionDto)
         {

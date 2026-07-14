@@ -86,6 +86,8 @@ namespace Hmcr.Chris
 
                 content = await (await _api.PostWithRetry(_client, _path, body)).Content.ReadAsStringAsync();
 
+                ApiResponseGuard.EnsureJsonResponse(content, "checking a GPS position against the road segment");
+
                 var features = JsonSerializer.Deserialize<FeatureCollection<decimal[]>>(content);
 
                 return features.numberMatched > 0;
@@ -107,6 +109,8 @@ namespace Hmcr.Chris
                 query = _path + string.Format(_queries.LineFromOffsetMeasureOnRfiSeg, rfiSegment, start, end);
 
                 content = await (await _api.GetWithRetry(_client, query)).Content.ReadAsStringAsync();
+
+                ApiResponseGuard.EnsureJsonResponse(content, "retrieving the road geometry between offsets");
 
                 var simpleFeatures = JsonSerializer.Deserialize<FeatureCollection>(content);
 
@@ -149,13 +153,15 @@ namespace Hmcr.Chris
 
                 content = await (await _api.GetWithRetry(_client, query)).Content.ReadAsStringAsync();
 
+                ApiResponseGuard.EnsureJsonResponse(content, "calculating the offset of a GPS position on the road segment");
+
                 var features = JsonSerializer.Deserialize<FeatureCollection<decimal[]>>(content);
 
                 if (features.totalFeatures == 0) return (false, null);
 
                 return (true, new LrsPointResult(
-                    Convert.ToDecimal(features.features[0].properties.MEASURE),
-                    Convert.ToDecimal(features.features[0].properties.POINT_VARIANCE),
+                    Convert.ToDecimal(features.features[0].properties.MEASURE ?? 0f),
+                    Convert.ToDecimal(features.features[0].properties.POINT_VARIANCE ?? 0d),
                     new Point(features.features[0].geometry.coordinates)));
             }
             catch (Exception ex)
@@ -175,6 +181,8 @@ namespace Hmcr.Chris
                 query = _path + string.Format(_queries.PointFromOffsetMeasureOnRfiSeg, rfiSegment, offset);
 
                 content = await (await _api.GetWithRetry(_client, query)).Content.ReadAsStringAsync();
+
+                ApiResponseGuard.EnsureJsonResponse(content, "retrieving the GPS position for an offset on the road segment");
 
                 var features = JsonSerializer.Deserialize<FeatureCollection<decimal[]>>(content);
 
@@ -200,6 +208,8 @@ namespace Hmcr.Chris
 
                 content = await (await _api.GetWithRetry(_client, query)).Content.ReadAsStringAsync();
 
+                ApiResponseGuard.EnsureJsonResponse(content, "retrieving the road segment details");
+
                 var features = JsonSerializer.Deserialize<FeatureCollection<object>>(content);
 
                 if (features.totalFeatures == 0)
@@ -209,7 +219,8 @@ namespace Hmcr.Chris
 
                 var dimension = feature.geometry.type.ToLower() == "point" ? RecordDimension.Point : RecordDimension.Line;
 
-                return new RfiSegment { Dimension = dimension, Length = Convert.ToDecimal(feature.properties.NE_LENGTH), Descr = feature.properties.NE_DESCR };
+                //NE_LENGTH can be null in CHRIS data for some segments; treat it as 0 rather than failing the file
+                return new RfiSegment { Dimension = dimension, Length = Convert.ToDecimal(feature.properties.NE_LENGTH ?? 0f), Descr = feature.properties.NE_DESCR };
             }
             catch (Exception ex)
             {

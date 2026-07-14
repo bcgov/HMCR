@@ -295,7 +295,15 @@ namespace Hmcr.Model
     public static class FileError
     {
         public const string ReferToRowErrors = "{ \"fieldMessages\": [ { \"field\": \"File\", \"messages\": [ \"Some headers or values are missing/incorrect. Please refer to row error(s).\" ] } ] }";
-        public const string UnknownException = "{ \"fieldMessages\": [ { \"field\": \"File\", \"messages\": [ \"Encountered unexpected error. Please try again later. If it keeps happening, please contact the administrator.\" ] } ] }";
+
+        /// <summary>
+        /// User-facing message stored when file processing fails with an unhandled exception.
+        /// Serialized into ERROR_DETAIL as JSON via MessageDetail - do not embed raw JSON here.
+        /// </summary>
+        public const string UnexpectedErrorMessage =
+            "The file could not be processed because the system encountered an unexpected internal error. " +
+            "This is not a problem with your report data. " +
+            "Please submit the file again; if the problem continues, contact the administrator and provide the submission number.";
     }
 
     public static class RowWarning

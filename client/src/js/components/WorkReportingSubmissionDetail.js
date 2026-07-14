@@ -19,7 +19,75 @@ const errorTableColumns = [
   { heading: 'Message', key: 'message', nosort: true },
 ];
 
-const parseErrorDetailJson = (json) => JSON.parse(json).fieldMessages;
+// Finds where the leading JSON object ends, accounting for braces inside quoted strings.
+// Returns the index just past the closing brace, or -1 if the object never closes.
+const findEndOfLeadingJsonObject = (text) => {
+  let depth = 0;
+  let inString = false;
+  let escaped = false;
+
+  for (let i = 0; i < text.length; i++) {
+    const c = text[i];
+
+    if (escaped) {
+      escaped = false;
+    } else if (c === '\\') {
+      escaped = true;
+    } else if (c === '"') {
+      inString = !inString;
+    } else if (!inString && c === '{') {
+      depth++;
+    } else if (!inString && c === '}') {
+      depth--;
+      if (depth === 0) return i + 1;
+    }
+  }
+
+  return -1;
+};
+
+// ERROR_DETAIL is expected to be JSON of the shape { fieldMessages: [{ field, messages: [] }] }.
+// Submissions that failed with an unexpected system error historically stored
+// '<json>: <raw exception text>' which is NOT valid JSON, and the resulting parse
+// exception crashed the whole page into the ErrorBoundary. This parser salvages
+// those rows and never throws.
+const parseErrorDetailJson = (json) => {
+  if (!json) return [];
+
+  try {
+    return JSON.parse(json).fieldMessages || [];
+  } catch (parseError) {
+    const endOfJson = findEndOfLeadingJsonObject(json);
+
+    if (endOfJson > 0) {
+      try {
+        const fieldMessages = JSON.parse(json.substring(0, endOfJson)).fieldMessages || [];
+        const trailingText = json
+          .substring(endOfJson)
+          .replace(/^[\s:]+/, '')
+          .trim();
+
+        if (trailingText) fieldMessages.push({ field: 'System Error Detail', messages: [trailingText] });
+
+        return fieldMessages;
+      } catch (innerParseError) {
+        // fall through to the generic message below
+      }
+    }
+
+    return [
+      {
+        field: 'File',
+        messages: [
+          'This file could not be processed because the system encountered an unexpected internal error.' +
+            ' This is not a problem with your report data.' +
+            ' Please submit the file again; if the problem continues, contact the administrator and provide the Submission # above.',
+          `Error detail recorded by the system: ${json}`,
+        ],
+      },
+    ];
+  }
+};
 
 const submissionRowErrors = (rowNum, errorDetail) => {
   return (
