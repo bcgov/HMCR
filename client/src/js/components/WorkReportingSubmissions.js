@@ -269,6 +269,9 @@ const WorkReportingSubmissions = ({ serviceArea, submissionStatuses }, ref) => {
           submission={showResultScreen.submission}
           toggle={() => {
             setShowResultScreen({ isOpen: false });
+            // The submission may have finished processing while the detail was open;
+            // refresh so the list status matches what the detail just showed.
+            searchData.refresh();
             const params = queryString.parse(history.location.search);
             if (params.showResult) history.push(`?${stringifyQueryParams(_.omit(params, ['showResult']))}`);
           }}
