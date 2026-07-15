@@ -303,7 +303,7 @@ namespace Hmcr.Model
         public const string UnexpectedErrorMessage =
             "The file could not be processed because the system encountered an unexpected internal error. " +
             "This is not a problem with your report data. " +
-            "Please submit the file again; if the problem continues, contact the administrator and provide the submission number.";
+            "Please submit the file again; if the problem continues, contact the administrator and provide the support ID and submission number.";
     }
 
     public static class RowWarning

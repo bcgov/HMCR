@@ -89,8 +89,7 @@ namespace Hmcr.Domain.Services
                 isSent = false;
                 errorText = ex.Message;
 
-                _logger.LogError($"Email for the submission {submissionObjectId} failed.");
-                _logger.LogError(ex.ToString());
+                _logger.LogError(ex, "Email for submission {SubmissionObjectId} failed.", submissionObjectId);
             }
 
             if (feedbackMessage == null)
