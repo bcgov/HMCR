@@ -13,13 +13,118 @@ export const instance = axios.create({
     },
 });
 
+const CLIENT_SESSION_KEY = 'hmcrClientSessionId';
+
+const randomId = () => {
+    if (window.crypto && window.crypto.randomUUID) return window.crypto.randomUUID();
+    return `${Date.now().toString(36)}-${Math.random().toString(36).substring(2, 12)}`;
+};
+
+const setHeader = (headers, name, value) => {
+    if (headers.set) headers.set(name, value);
+    else headers[name] = value;
+};
+
+const getClientSessionId = () => {
+    let sessionId = sessionStorage.getItem(CLIENT_SESSION_KEY);
+    if (!sessionId) {
+        sessionId = `hmcr-session-${randomId()}`;
+        sessionStorage.setItem(CLIENT_SESSION_KEY, sessionId);
+    }
+
+    return sessionId;
+};
+
+export const createSupportId = () => {
+    const now = new Date();
+    const date = now.toISOString().replace(/[-:]/g, '').replace(/\..+/, '');
+    return `HMCR-${date.substring(0, 8)}-${date.substring(9, 15)}-${randomId().replace(/-/g, '').substring(0, 8).toUpperCase()}`;
+};
+
+const createCorrelationId = () => `hmcr-client-${randomId()}`;
+
+export const reportClientError = (error, details = {}) => {
+    const supportId = details.supportId || createSupportId();
+    const payload = {
+        supportId,
+        errorCode: details.errorCode || 'HMCR-CLIENT-UNEXPECTED',
+        message: details.message || error?.message || 'Client error',
+        stack: details.stack || error?.stack,
+        componentStack: details.componentStack,
+        route: window.location.pathname,
+        clientSessionId: getClientSessionId(),
+        clientTraceId: details.clientTraceId || createCorrelationId(),
+        correlationId: details.correlationId,
+        httpMethod: details.httpMethod,
+        url: details.url || window.location.href,
+        statusCode: details.statusCode,
+        userAgent: navigator.userAgent,
+        appVersion: Constants.APP_VERSION,
+        timestampUtc: new Date().toISOString(),
+    };
+
+    instance
+        .post(Constants.API_PATHS.CLIENT_LOGS, payload, {
+            skipClientErrorDialog: true,
+            skipClientErrorLog: true,
+        })
+        .catch(() => {});
+
+    return supportId;
+};
+
+export const registerGlobalClientErrorHandlers = () => {
+    const onError = (event) => {
+        reportClientError(event.error, {
+            message: event.message,
+            url: event.filename,
+        });
+    };
+
+    const onUnhandledRejection = (event) => {
+        const reason = event.reason;
+        reportClientError(reason, {
+            message: reason?.message || 'Unhandled promise rejection',
+            stack: reason?.stack,
+        });
+    };
+
+    window.addEventListener('error', onError);
+    window.addEventListener('unhandledrejection', onUnhandledRejection);
+
+    return () => {
+        window.removeEventListener('error', onError);
+        window.removeEventListener('unhandledrejection', onUnhandledRejection);
+    };
+};
+
+instance.interceptors.request.use((config) => {
+    const correlationId = config.correlationId || createCorrelationId();
+    config.headers = config.headers || {};
+    config.metadata = { ...(config.metadata || {}), correlationId };
+    setHeader(config.headers, Constants.CORRELATION_HEADER, correlationId);
+
+    return config;
+});
+
 instance.interceptors.response.use(
     (response) => {
         return response;
     },
     (error) => {
-        if (!error.response || error.response.status !== 422)
-            store.dispatch({ type: SHOW_ERROR_DIALOG_MODAL, payload: buildApiErrorObject(error.response) });
+        const apiError = buildApiErrorObject(error);
+
+        if (!error.response && !error.config?.skipClientErrorLog) {
+            apiError.supportId = reportClientError(error, {
+                message: apiError.message,
+                correlationId: error.config?.metadata?.correlationId,
+                httpMethod: error.config?.method?.toUpperCase(),
+                url: error.config?.url,
+            });
+        }
+
+        if (!error.config?.skipClientErrorDialog && (!error.response || error.response.status !== 422))
+            store.dispatch({ type: SHOW_ERROR_DIALOG_MODAL, payload: apiError });
 
         return Promise.reject(error);
     }
@@ -106,7 +211,14 @@ export const getSaltReportById = async (id, params) => {
         return response.data;
       }
     } catch (error) {
-      console.error('Error fetching salt report:', error);
+      if (!error.response) {
+        reportClientError(error, {
+          message: 'Error fetching salt report',
+          httpMethod: 'GET',
+          url: `${Constants.API_PATHS.SALT_REPORT}/${id}`,
+          correlationId: error.config?.metadata?.correlationId,
+        });
+      }
       throw error;
     }
   };

@@ -1,20 +1,25 @@
 import React from 'react';
 
+import { createSupportId, reportClientError } from '../Api';
+
 class ErrorBoundary extends React.Component {
   constructor(props) {
     super(props);
-    this.state = { hasError: false };
+    this.state = { hasError: false, supportId: null };
   }
 
   static getDerivedStateFromError(error) {
-    // Update state so the next render will show the fallback UI.
-    console.log(error);
     return { hasError: true };
   }
 
   componentDidCatch(error, errorInfo) {
-    // You can also log the error to an error reporting service
-    //logErrorToMyService(error, errorInfo);
+    const supportId = createSupportId();
+    this.setState({ supportId });
+
+    reportClientError(error, {
+      supportId,
+      componentStack: errorInfo?.componentStack,
+    });
   }
 
   render() {
@@ -31,6 +36,11 @@ class ErrorBoundary extends React.Component {
             Please reload the page and try again. If the problem continues, contact the administrator and describe what
             you were doing when the error occurred.
           </p>
+          {this.state.supportId && (
+            <p>
+              <strong>Support ID:</strong> <code style={{ wordBreak: 'break-all' }}>{this.state.supportId}</code>
+            </p>
+          )}
           <button type="button" className="btn btn-primary" onClick={() => window.location.reload()}>
             Reload Page
           </button>

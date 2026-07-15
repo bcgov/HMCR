@@ -95,8 +95,6 @@ const ActivityAdmin = ({ maintenanceTypes, locationCodes, unitOfMeasures,showVal
   };
 
   const buildExportParams = () => {
-    console.log(searchData);
-
     const searchText = searchData.searchOptions.searchText;
     const maintenanceTypes = searchData.searchOptions.maintenanceTypes;
     const isActive = searchData.searchOptions.isActive;

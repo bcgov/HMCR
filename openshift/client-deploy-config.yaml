@@ -61,6 +61,8 @@ objects:
                       key: CLIENT_SSO_CLIENTID
                 - name: REACT_APP_API_HOST
                   value: ${HOST}
+                - name: REACT_APP_VERSION
+                  value: ${VERSION}
                 - name: HMCR_DEPLOY_SUFFIX
                   value: ${SUFFIX}
       test: false

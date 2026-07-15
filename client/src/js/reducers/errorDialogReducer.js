@@ -9,6 +9,9 @@ const defaultState = {
   errors: undefined,
   path: undefined,
   method: undefined,
+  supportId: undefined,
+  errorCode: undefined,
+  correlationId: undefined,
   hidePrimaryButton: false,
 };
 

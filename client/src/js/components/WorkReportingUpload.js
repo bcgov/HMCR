@@ -155,7 +155,7 @@ const WorkReportingUpload = ({
         setResubCheckStatus(
           updateUploadStatusMessage(Constants.UPLOAD_STATE.RESUB_CHECK, Constants.UPLOAD_STATE_STATUS.ERROR)
         );
-        setErrorMessages(error.response.data.errors);
+        setErrorMessages(buildUploadErrorMessages(error));
         resetCallback();
         handleFileSubmitted();
       });
@@ -174,7 +174,7 @@ const WorkReportingUpload = ({
       })
       .catch((error) => {
         setSavingStatus(updateUploadStatusMessage(Constants.UPLOAD_STATE.SAVING, Constants.UPLOAD_STATE_STATUS.ERROR));
-        setErrorMessages(error.response.data.errors);
+        setErrorMessages(buildUploadErrorMessages(error));
       })
       .finally(() => {
         resetCallback();
@@ -312,6 +312,21 @@ const WorkReportingUpload = ({
       </SimpleModalWrapper>
     </React.Fragment>
   );
+};
+
+const buildUploadErrorMessages = (error) => {
+  const data = error.response?.data;
+
+  if (data?.errors) return data.errors;
+
+  const messages = [
+    data?.detail,
+    data?.title,
+    data?.supportId ? `Support ID: ${data.supportId}` : null,
+    error.message,
+  ].filter(Boolean);
+
+  return { File: messages.length > 0 ? messages : ['Upload failed.'] };
 };
 
 const mapStateToProps = (state) => {
