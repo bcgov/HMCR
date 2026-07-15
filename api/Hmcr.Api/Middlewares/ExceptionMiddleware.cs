@@ -1,9 +1,10 @@
 ﻿using Hmcr.Api.Extensions;
+using Hmcr.Api.Observability;
+using Hmcr.Model;
+using Hmcr.Model.Logging;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using System;
-using System.Net;
 using System.Threading.Tasks;
 
 namespace Hmcr.Api.Middlewares
@@ -19,7 +20,7 @@ namespace Hmcr.Api.Middlewares
             _next = next;
         }
 
-        public async Task InvokeAsync(HttpContext httpContext)
+        public async Task InvokeAsync(HttpContext httpContext, HmcrCurrentUser currentUser)
         {
             try
             {
@@ -30,26 +31,30 @@ namespace Hmcr.Api.Middlewares
                 if (httpContext.Response.HasStarted || httpContext.RequestAborted.IsCancellationRequested)
                     return;
 
-                var guid = Guid.NewGuid();
-                _logger.LogError($"HMCR Exception {guid}: {ex}");
-                await HandleExceptionAsync(httpContext, guid);
+                var supportId = HmcrLogContext.CreateSupportId();
+                using (_logger.BeginScope(HmcrLogContext.CreateHttpScope(
+                    httpContext,
+                    currentUser,
+                    HmcrLogConstants.Sources.Api,
+                    HmcrLogContext.GetOperation(httpContext),
+                    supportId,
+                    HmcrLogConstants.ErrorCodes.ApiUnexpected,
+                    StatusCodes.Status500InternalServerError)))
+                {
+                    _logger.LogError(ex, "Unhandled API exception {SupportId}", supportId);
+                }
+
+                await HandleExceptionAsync(httpContext, supportId);
             }
         }
 
-        private async Task HandleExceptionAsync(HttpContext context, Guid guid)
+        private async Task HandleExceptionAsync(HttpContext context, string supportId)
         {
-            context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
-
-            var problem = new ValidationProblemDetails()
-            {
-                Type = "https://hmcr.bc.gov.ca/exception",
-                Title = "An unexpected error occurred!",
-                Status = StatusCodes.Status500InternalServerError,
-                Detail = "The instance value should be used to identify the problem when calling customer support",
-                Instance = $"urn:hmcr:error:{Guid.NewGuid()}"
-            };
-
-            problem.Extensions.Add("traceId", context.TraceIdentifier);
+            context.Response.StatusCode = StatusCodes.Status500InternalServerError;
+            var problem = HmcrLogContext.CreateUnexpectedProblem(
+                context,
+                supportId,
+                HmcrLogConstants.ErrorCodes.ApiUnexpected);
 
             await context.Response.WriteJsonAsync(problem, "application/problem+json");
         }

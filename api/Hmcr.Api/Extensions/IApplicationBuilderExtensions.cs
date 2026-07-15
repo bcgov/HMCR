@@ -19,6 +19,16 @@ namespace Hmcr.Api.Extensions
             app.UseMiddleware<ExceptionMiddleware>();
         }
 
+        public static void UseHmcrCorrelation(this IApplicationBuilder app)
+        {
+            app.UseMiddleware<CorrelationIdMiddleware>();
+        }
+
+        public static void UseHmcrRequestLogging(this IApplicationBuilder app)
+        {
+            app.UseMiddleware<RequestLoggingMiddleware>();
+        }
+
         public static void UseHmcrEndpoints(this IApplicationBuilder app)
         {
             app.UseEndpoints(endpoints =>
