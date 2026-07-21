@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Hmcr.Api.Observability;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using System.Collections.Generic;
@@ -25,7 +26,7 @@ namespace Hmcr.Api
                 Instance = context.HttpContext.Request.Path
             };
 
-            problem.Extensions.Add("traceId", context.HttpContext.TraceIdentifier);
+            HmcrLogContext.EnrichProblemDetails(problem, context.HttpContext);
 
             return new UnprocessableEntityObjectResult(problem)
             {
@@ -44,7 +45,7 @@ namespace Hmcr.Api
                 Instance = context.HttpContext.Request.Path
             };
 
-            problem.Extensions.Add("traceId", context.HttpContext.TraceIdentifier);
+            HmcrLogContext.EnrichProblemDetails(problem, context.HttpContext);
 
             return new UnprocessableEntityObjectResult(problem)
             {
@@ -63,7 +64,7 @@ namespace Hmcr.Api
                 Instance = context.HttpContext.Request.Path
             };
 
-            problem.Extensions.Add("traceId", context.HttpContext.TraceIdentifier);
+            HmcrLogContext.EnrichProblemDetails(problem, context.HttpContext);
 
             return new UnprocessableEntityObjectResult(problem)
             {
@@ -82,7 +83,7 @@ namespace Hmcr.Api
                 Instance = context.HttpContext.Request.Path
             };
 
-            problem.Extensions.Add("traceId", context.HttpContext.TraceIdentifier);
+            HmcrLogContext.EnrichProblemDetails(problem, context.HttpContext);
 
             return new UnprocessableEntityObjectResult(problem)
             {
@@ -101,7 +102,7 @@ namespace Hmcr.Api
                 Instance = context.HttpContext.Request.Path
             };
 
-            problem.Extensions.Add("traceId", context.HttpContext.TraceIdentifier);
+            HmcrLogContext.EnrichProblemDetails(problem, context.HttpContext);
 
             return new UnprocessableEntityObjectResult(problem)
             {

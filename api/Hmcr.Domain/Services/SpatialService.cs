@@ -582,6 +582,14 @@ namespace Hmcr.Domain.Services
         {
             var snappedOffset = offset;
 
+            //CHRIS has no recorded length for some segments (NE_LENGTH null, e.g. 13-D-D-00001W).
+            //A zero-length line segment means the length is unknown, not that the road is 0 km long,
+            //so skip the length check and let the point-from-offset lookup validate the offset instead.
+            if (segment.Length == 0 && segment.Dimension == RecordDimension.Line)
+            {
+                return (true, offset);
+            }
+
             if (segment.Length < offset)
             {
                 var threshold = _lookupService.GetThresholdLevel(thresholdLevel);

@@ -100,12 +100,12 @@ namespace Hmcr.Domain.Services
                 }
                 catch (CsvHelperException ex)
                 {
-                    _logger.LogInformation(ex.ToString());
+                    _logger.LogInformation(ex, "CsvHelper exception while parsing wildlife report upload.");
                     throw;
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogError(ex.ToString());
+                    _logger.LogError(ex, "Unexpected exception while parsing wildlife report upload.");
                     throw;
                 }
 

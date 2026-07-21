@@ -71,7 +71,6 @@ const useSearchData = (defaultSearchOptions) => {
   useEffect(() => {
     const updateHistoryLocationSearch = () => {
       if (!history) {
-        console.warn('userSearchData: history object is null, skipping updating query params');
         return;
       }
 

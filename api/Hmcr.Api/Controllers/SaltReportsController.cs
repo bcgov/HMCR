@@ -13,6 +13,8 @@ using System.Data.Common;
 using System.Collections.Generic;
 using Hmcr.Domain.PdfHelpers;
 using System.Reflection;
+using Hmcr.Api.Observability;
+using Hmcr.Model.Logging;
 
 
 namespace Hmcr.Api.Controllers
@@ -22,12 +24,14 @@ namespace Hmcr.Api.Controllers
     public class SaltReportController : HmcrControllerBase
     {
         private readonly ISaltReportService _saltReportService;
+        private readonly ILogger<SaltReportController> _logger;
         private HmcrCurrentUser _currentUser;
 
-        public SaltReportController(ISaltReportService saltReportService, ISubmissionObjectService submissionService, HmcrCurrentUser currentUser, IEmailService emailService)
+        public SaltReportController(ISaltReportService saltReportService, ISubmissionObjectService submissionService, HmcrCurrentUser currentUser, IEmailService emailService, ILogger<SaltReportController> logger)
         {
             _saltReportService = saltReportService ?? throw new ArgumentNullException(nameof(saltReportService));
             _currentUser = currentUser ?? throw new ArgumentNullException(nameof(currentUser));
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
         [HttpPost]
@@ -52,20 +56,7 @@ namespace Hmcr.Api.Controllers
             }
             catch (Exception ex)
             {
-                // Get the inner exception message if it exists
-                var innerExceptionMessage = ex.InnerException?.Message ?? "Please contact an administrator to resolve this issue.";
-
-                Console.Error.WriteLine($"Exception: {ex.Message}");
-                if (ex.InnerException != null)
-                {
-                    Console.Error.WriteLine($"Inner Exception: {innerExceptionMessage}");
-                }
-
-                return StatusCode(500, new
-                {
-                    message = "An internal error occurred. Please try again later.",
-                    error = $"500 Internal Server Error: {innerExceptionMessage}"
-                });
+                return UnexpectedError(ex, nameof(CreateSaltReportAsync));
             }
 
         }
@@ -97,7 +88,7 @@ namespace Hmcr.Api.Controllers
                     }
                     catch (Exception ex)
                     {
-                        return BadRequest(ex.Message);
+                        return UnexpectedError(ex, nameof(GetSaltReportAsync));
                     }
                 }
 
@@ -105,7 +96,7 @@ namespace Hmcr.Api.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest($"An error occurred: {ex.Message}");
+                return UnexpectedError(ex, nameof(GetSaltReportAsync));
             }
         }
 
@@ -151,8 +142,7 @@ namespace Hmcr.Api.Controllers
                         }
                         catch (Exception ex)
                         {
-                            // Log the exception details here to diagnose issues.
-                            return StatusCode(500, "An internal server error occurred.");
+                            return UnexpectedError(ex, nameof(GetSaltReportsAsync));
                         }
                 }
             }
@@ -162,13 +152,36 @@ namespace Hmcr.Api.Controllers
             }
             catch (DbException ex)
             {
-                return StatusCode(500, "An error occurred while processing your request.");
+                return UnexpectedError(ex, nameof(GetSaltReportsAsync));
             }
             catch (Exception ex)
             {
-                return StatusCode(500, "An error occurred while processing your request.");
+                return UnexpectedError(ex, nameof(GetSaltReportsAsync));
             }
         }
 
+        private ObjectResult UnexpectedError(Exception ex, string operation)
+        {
+            var supportId = HmcrLogContext.CreateSupportId();
+
+            using (_logger.BeginScope(HmcrLogContext.CreateHttpScope(
+                HttpContext,
+                _currentUser,
+                HmcrLogConstants.Sources.Api,
+                operation,
+                supportId,
+                HmcrLogConstants.ErrorCodes.ApiUnexpected,
+                500)))
+            {
+                _logger.LogError(ex, "Unhandled API exception {SupportId}", supportId);
+            }
+
+            var problem = HmcrLogContext.CreateUnexpectedProblem(
+                HttpContext,
+                supportId,
+                HmcrLogConstants.ErrorCodes.ApiUnexpected);
+
+            return StatusCode(500, problem);
+        }
     }
 }

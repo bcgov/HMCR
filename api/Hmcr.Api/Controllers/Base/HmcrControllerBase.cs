@@ -1,4 +1,5 @@
-﻿using Hmcr.Model;
+﻿using Hmcr.Api.Observability;
+using Hmcr.Model;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
@@ -23,7 +24,7 @@ namespace Hmcr.Api.Controllers.Base
                     Instance = HttpContext.Request.Path
                 };
 
-                problem.Extensions.Add("traceId", HttpContext.TraceIdentifier);
+                HmcrLogContext.EnrichProblemDetails(problem, HttpContext);
 
                 return problem;
             }
@@ -65,7 +66,7 @@ namespace Hmcr.Api.Controllers.Base
                 Instance = HttpContext.Request.Path
             };
 
-            problem.Extensions.Add("traceId", HttpContext.TraceIdentifier);
+            HmcrLogContext.EnrichProblemDetails(problem, HttpContext);
 
             return problem;
         }

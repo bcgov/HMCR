@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { connect } from 'react-redux';
 import { BrowserRouter, Route, Switch, Redirect } from 'react-router-dom';
 import { Container } from 'reactstrap';
@@ -21,6 +21,7 @@ import Version from './components/Version';
 import ApiAccess from './components/ApiAccess';
 import WorkReportingSubmissionDetail from './components/WorkReportingSubmissionDetail';
 import ErrorBoundary from './components/ErrorBoundary';
+import { registerGlobalClientErrorHandlers } from './Api';
 
 import addIconsToLibrary from './fontAwesome';
 import * as Constants from './Constants';
@@ -29,6 +30,8 @@ import '../scss/app.scss';
 
 const App = ({ currentUser }) => {
   addIconsToLibrary();
+
+  useEffect(() => registerGlobalClientErrorHandlers(), []);
 
   return (
     <Main>

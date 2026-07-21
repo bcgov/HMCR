@@ -56,7 +56,6 @@ const SaltReporting = ({ currentUser }) => {
       setSaltReportSuccess(true);
     } catch (error) {
       setLoading(false);
-      console.error(error);
       const data = error.response?.data;
       const serverMessage =
         data?.error ||
@@ -142,7 +141,6 @@ const SaltReporting = ({ currentUser }) => {
                 onHeadingSortClicked={searchData.handleHeadingSortClicked}
                 showExportButton={true}
                 onExportClicked={(saltReportId) => {
-                  console.log(`Exporting report with ID: ${saltReportId}`);
                   api.getSaltReportById(saltReportId, { isPdf: true });
                 }}
               />

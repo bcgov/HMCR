@@ -47,11 +47,7 @@ namespace Hmcr.Hangfire
             IServiceScopeFactory serviceScopeFactory, IServiceAreaService svcAreaService, ICodeLookupRepository codeLookupRepo, 
             IActivityRuleRepository activityRuleRepo, IFieldValidatorService validator)
         {
-            if (env.IsDevelopment())
-            {
-                app.UseDeveloperExceptionPage();
-            }
-
+            app.UseHmcrCorrelation();
             app.UseExceptionMiddleware();
             app.UseHmcrHealthCheck();
             app.UseHangfireDashboard();

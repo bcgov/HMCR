@@ -2,6 +2,13 @@ export const API_URL = window.RUNTIME_REACT_APP_API_HOST //In non-dev environmen
   ? `${window.location.protocol}//${window.RUNTIME_REACT_APP_API_HOST}/api` //For non-dev environments, CORS is enabled to HMCR urls.
   : `${window.location.protocol}//${import.meta.env.VITE_CLIENT_ORIGIN}/api`; //For dev environment, the Vite dev server proxy (vite.config.js) avoids the same-origin policy.
 
+export const APP_VERSION =
+  window.RUNTIME_REACT_APP_VERSION || import.meta.env.VITE_APP_VERSION || 'unknown';
+
+export const CORRELATION_HEADER = 'X-HMCR-Correlation-ID';
+
+export const SUPPORT_ID_HEADER = 'X-HMCR-Support-ID';
+
 const CODE_LOOKUP = '/codelookup';
 const ACTIVITY_RULE = '/activityrule';
 
@@ -37,6 +44,7 @@ export const API_PATHS = {
   REPORT_EXPORT: '/exports/report',
   SUPPORTED_FORMATS: '/exports/supportedformats',
   VERSION: '/version',
+  CLIENT_LOGS: '/clientlogs',
 };
 
 export const REPORT_TYPES = {

@@ -1,4 +1,5 @@
 ﻿using Hmcr.Api.Extensions;
+using Hmcr.Api.Observability;
 using Hmcr.Bceid;
 using Hmcr.Data.Database.Entities;
 using Hmcr.Domain.Services;
@@ -48,7 +49,7 @@ namespace Hmcr.Api.Authentication
                 Instance = context.Request.Path
             };
 
-            problem.Extensions.Add("traceId", context.HttpContext.TraceIdentifier);
+            HmcrLogContext.EnrichProblemDetails(problem, context.HttpContext);
 
             await context.Response.WriteJsonAsync(problem, "application/problem+json");
         }

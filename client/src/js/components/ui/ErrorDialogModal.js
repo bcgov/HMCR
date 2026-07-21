@@ -13,6 +13,9 @@ const ErrorDialogModal = ({
   errors,
   path,
   method,
+  supportId,
+  errorCode,
+  correlationId,
   hideErrorDialog,
   hidePrimaryButton,
 }) => {
@@ -44,6 +47,25 @@ const ErrorDialogModal = ({
               <small>
                 A <strong>{method}</strong> request to <strong className="text-primary">{path}</strong> has returned a{' '}
                 <strong className="text-danger">{statusCode}</strong> status code.
+              </small>
+            </p>
+          )}
+          {supportId && (
+            <p>
+              <strong>Support ID:</strong> <code style={{ wordBreak: 'break-all' }}>{supportId}</code>
+            </p>
+          )}
+          {errorCode && (
+            <p>
+              <small>
+                <strong>Error code:</strong> <code>{errorCode}</code>
+              </small>
+            </p>
+          )}
+          {correlationId && (
+            <p>
+              <small>
+                <strong>Correlation ID:</strong> <code style={{ wordBreak: 'break-all' }}>{correlationId}</code>
               </small>
             </p>
           )}
@@ -89,6 +111,9 @@ ErrorDialogModal.propTypes = {
   title: PropTypes.string,
   message: PropTypes.string,
   errors: PropTypes.object,
+  supportId: PropTypes.string,
+  errorCode: PropTypes.string,
+  correlationId: PropTypes.string,
   hidePrimaryButton: PropTypes.bool,
 };
 

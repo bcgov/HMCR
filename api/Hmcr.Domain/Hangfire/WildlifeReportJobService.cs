@@ -366,7 +366,7 @@ namespace Hmcr.Domain.Hangfire
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogError(ex.ToString());
+                    _logger.LogError(ex, "Unexpected exception while reading wildlife report CSV records.");
                     throw;
                 }
 
@@ -403,7 +403,7 @@ namespace Hmcr.Domain.Hangfire
                 }
                 catch (CsvHelper.TypeConversion.TypeConverterException ex)
                 {
-                    _logger.LogError(ex.ToString());
+                    _logger.LogError(ex, "Type conversion exception while parsing wildlife report CSV row.");
                     rowNum = GetRowNum(csv.Context.RawRecord);
                     LogRowParseException(rowNum, ex.ToString(), csv.Context);
                     errors.AddItem("Parse Error", $"Exception while parsing the text [{ex.Text}]");
@@ -411,7 +411,7 @@ namespace Hmcr.Domain.Hangfire
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogError(ex.ToString());
+                    _logger.LogError(ex, "Unexpected exception while parsing wildlife report CSV row.");
                     rowNum = GetRowNum(csv.Context.RawRecord);
                     LogRowParseException(rowNum, ex.ToString(), csv.Context);
                     errors.AddItem("Parse Error", $"Exception while parsing");

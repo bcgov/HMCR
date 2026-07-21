@@ -1,4 +1,5 @@
-﻿using Hmcr.Model;
+﻿using Hmcr.Api.Observability;
+using Hmcr.Model;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -38,7 +39,7 @@ namespace Hmcr.Api.Authorization
                     Instance = context.HttpContext.Request.Path
                 };
 
-                problem.Extensions.Add("traceId", context.HttpContext.TraceIdentifier);
+                HmcrLogContext.EnrichProblemDetails(problem, context.HttpContext);
 
                 context.Result = new UnauthorizedObjectResult(problem);
             }

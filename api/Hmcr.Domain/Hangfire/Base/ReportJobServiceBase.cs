@@ -9,7 +9,9 @@ using Hmcr.Model.Dtos;
 using Hmcr.Model.Dtos.FeedbackMessage;
 using Hmcr.Model.Dtos.ServiceArea;
 using Hmcr.Model.Dtos.SubmissionObject;
+using Hmcr.Model.Dtos.User;
 using Hmcr.Model.Utils;
+using Hmcr.Model.Logging;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using NetTopologySuite;
@@ -41,6 +43,7 @@ namespace Hmcr.Domain.Hangfire.Base
 
         protected HmrSubmissionObject _submission;
         protected Dictionary<decimal, HmrSubmissionRow> _submissionRows;
+        protected string _correlationId;
 
         protected ServiceAreaNumberDto _serviceArea;
 
@@ -71,19 +74,29 @@ namespace Hmcr.Domain.Hangfire.Base
 
         public async Task<bool> ProcessSubmissionMain(SubmissionDto submissionDto) 
         {
+            _correlationId = $"hmcr-{Guid.NewGuid():N}";
+
             try
             {
                 return await ProcessSubmission(submissionDto);
             }
             catch(Exception ex)
             {
-                _logger.LogError(ex.ToString());
+                var supportId = HmcrSupportId.Create();
+
+                using (_logger.BeginScope(CreateSubmissionLogScope(
+                    "ProcessSubmission",
+                    supportId,
+                    HmcrLogConstants.ErrorCodes.HangfireUnexpected)))
+                {
+                    _logger.LogError(ex, "Unhandled Hangfire submission exception {SupportId}", supportId);
+                }
 
                 if (_submission != null)
                 {
                     ((HmcrRepositoryBase<HmrSubmissionObject>)_submissionRepo).RollBackEntities();
 
-                    _submission.ErrorDetail = GetUnexpectedErrorDetail(ex);
+                    _submission.ErrorDetail = GetUnexpectedErrorDetail(supportId);
                     _submission.SubmissionStatusId = _statusService.FileUnexpectedError;
                     await CommitAndSendEmailAsync();
                 }
@@ -103,29 +116,11 @@ namespace Hmcr.Domain.Hangfire.Base
         /// The previous implementation appended the raw exception message after the JSON,
         /// producing an unparseable value that crashed the client submission detail page.
         /// </summary>
-        private static string GetUnexpectedErrorDetail(Exception ex)
+        private static string GetUnexpectedErrorDetail(string supportId)
         {
-            // ERROR_DETAIL is VARCHAR(4000); leave room for the JSON wrapper and user message.
-            const int maxExceptionLength = 3000;
-
-            // Parallel validation batches surface failures as an AggregateException whose own
-            // message ("One or more errors occurred") hides the real cause - report the inner ones.
-            var exceptionMessage = ex is AggregateException aggregate
-                ? string.Join(" | ", aggregate.Flatten().InnerExceptions.Select(x => x.Message).Distinct())
-                : ex.Message ?? "";
-
-            if (exceptionMessage.Length > maxExceptionLength)
-            {
-                exceptionMessage = exceptionMessage.Substring(0, maxExceptionLength) + "...";
-            }
-
             var errors = new Dictionary<string, List<string>>();
             errors.AddItem("File", FileError.UnexpectedErrorMessage);
-
-            if (exceptionMessage.IsNotEmpty())
-            {
-                errors.AddItem("System Error Detail", exceptionMessage);
-            }
+            errors.AddItem("Support ID", supportId);
 
             return errors.GetErrorDetail();
         }
@@ -256,9 +251,42 @@ namespace Hmcr.Domain.Hangfire.Base
         {
             MethodLogger.LogEntry(_logger, _enableMethodLog, _methodLogHeader);
 
-            _logger.LogError($"Exception while parsing the line [{rowNum}]");
-            _logger.LogError(string.Join(',', context.HeaderRecord));
-            _logger.LogError(context.RawRecord);
+            using (_logger.BeginScope(CreateSubmissionLogScope("LogRowParseException")))
+            {
+                _logger.LogError(
+                    "Exception while parsing CSV row {RowNum}. Header names were {HeaderNames}. Raw uploaded row contents were not logged.",
+                    rowNum,
+                    string.Join(',', context.HeaderRecord));
+            }
+        }
+
+        private Dictionary<string, object> CreateSubmissionLogScope(string operation, string supportId = null, string errorCode = null)
+        {
+            var scope = new Dictionary<string, object>
+            {
+                ["timestampUtc"] = DateTime.UtcNow,
+                ["source"] = HmcrLogConstants.Sources.Hangfire,
+                ["operation"] = operation,
+                ["actorType"] = HmcrLogConstants.ActorTypes.System,
+                ["actorUsername"] = "hangfire",
+                ["actorDirectory"] = UserTypeDto.IDIR,
+                ["correlationId"] = _correlationId ?? $"hmcr-{Guid.NewGuid():N}"
+            };
+
+            if (_submission != null)
+            {
+                scope["submissionObjectId"] = (long)_submission.SubmissionObjectId;
+                scope["serviceAreaNumber"] = _submission.ServiceAreaNumber;
+                scope["submissionStreamId"] = _submission.SubmissionStreamId;
+            }
+
+            if (!string.IsNullOrWhiteSpace(supportId))
+                scope["supportId"] = supportId;
+
+            if (!string.IsNullOrWhiteSpace(errorCode))
+                scope["errorCode"] = errorCode;
+
+            return scope;
         }
 
         protected void ValidateHighwayUniqueAgainstServiceArea(string highwayUnique, Dictionary<string, List<string>> errors)

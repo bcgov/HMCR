@@ -30,7 +30,7 @@ namespace Hmcr.Api
 
         public void ConfigureServices(IServiceCollection services)
         {
-            IdentityModelEventSource.ShowPII = true;
+            IdentityModelEventSource.ShowPII = _env.IsDevelopment();
             var connectionString = Configuration.GetValue<string>("ConnectionStrings:HMCR");
             var enableSensitiveDataLogging = Configuration.GetValue<bool>("EnableSensitiveDataLogging");
 
@@ -53,14 +53,13 @@ namespace Hmcr.Api
             IServiceScopeFactory serviceScopeFactory, IServiceAreaService svcAreaService, ICodeLookupRepository codeLookupRepo, 
             IActivityRuleRepository activityRuleRepo, IFieldValidatorService validator)
         {
-            if (env.IsDevelopment())
-                app.UseDeveloperExceptionPage();            
-
+            app.UseHmcrCorrelation();
             app.UseExceptionMiddleware();
             app.UseHmcrHealthCheck();
             app.UseRouting();
             app.UseCors(Constants.HmcrOrigins);
             app.UseAuthentication();
+            app.UseHmcrRequestLogging();
             app.UseAuthorization();
             app.UseSerilogUi();
             app.UseHmcrEndpoints();

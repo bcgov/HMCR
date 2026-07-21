@@ -8,18 +8,24 @@ export const buildActionWithParam = (action, param) => {
   return { action, param };
 };
 
-export const buildApiErrorObject = (response) => {
+export const buildApiErrorObject = (error) => {
   try {
+    const response = error.response ? error.response : error;
     const method = response.config.method.toUpperCase();
     const path = response.config.url.replace(response.config.baseURL, '');
+    const data = response.data || {};
 
     return {
-      message: response.data.title,
+      message: data.title,
       statusCode: response.status,
-      detail: response.data.detail,
-      errors: response.data.errors,
+      detail: data.detail,
+      errors: data.errors,
       path,
       method,
+      supportId: data.supportId || response.headers?.[Constants.SUPPORT_ID_HEADER.toLowerCase()],
+      errorCode: data.errorCode,
+      correlationId: data.correlationId || response.headers?.[Constants.CORRELATION_HEADER.toLowerCase()],
+      timestampUtc: data.timestampUtc,
     };
   } catch {
     return {

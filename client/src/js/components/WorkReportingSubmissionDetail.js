@@ -89,10 +89,21 @@ const parseErrorDetailJson = (json) => {
   }
 };
 
+const isSupportIdField = (field) => field?.trim().toLowerCase() === 'support id';
+
+const getSupportIdFromErrorDetail = (errorDetail) => {
+  const supportIdField = parseErrorDetailJson(errorDetail).find((field) => isSupportIdField(field.field));
+  return supportIdField?.messages?.[0];
+};
+
 const submissionRowErrors = (rowNum, errorDetail) => {
+  const visibleErrors = parseErrorDetailJson(errorDetail).filter((error) => !isSupportIdField(error.field));
+
+  if (visibleErrors.length <= 0) return null;
+
   return (
     <ul style={{ paddingInlineStart: '20px' }}>
-      {parseErrorDetailJson(errorDetail).map((error) => (
+      {visibleErrors.map((error) => (
         <li key={`${rowNum}_${error.field}`}>
           <strong className="me-1">{error.field}:</strong>
           <ul>
@@ -196,6 +207,8 @@ const WorkReportingSubmissionDetail = ({ toggle, submission }) => {
   };
 
   const submissionObject = () => {
+    const supportId = getSupportIdFromErrorDetail(submissionResultData.errorDetail);
+
     return (
       <div style={{ display: 'flex', justifyContent: 'space-between' }}>
         <div>
@@ -214,6 +227,11 @@ const WorkReportingSubmissionDetail = ({ toggle, submission }) => {
             <li>
               <strong>Status:</strong> {submissionResultData.description}
             </li>
+            {supportId && (
+              <li>
+                <strong>Support ID:</strong> <code style={{ wordBreak: 'break-all' }}>{supportId}</code>
+              </li>
+            )}
             {submissionResultData.errorDetail && (
               <li>
                 <strong>Status Detail:</strong> <ul>{submissionRowErrors(0, submissionResultData.errorDetail)}</ul>
