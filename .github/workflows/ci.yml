@@ -1,0 +1,196 @@
+name: Build and Push to GHCR
+run-name: "CI - Build, Tag, Push"
+
+on:
+  push:
+    branches: [master]
+  workflow_dispatch:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+concurrency:
+  group: ci-${{ github.event.pull_request.number || github.ref_name || github.run_id }}
+  cancel-in-progress: true
+
+env:
+  IMAGE_NAMESPACE: bcgov/hmcr
+
+jobs:
+  pr-description-add:
+    name: PR Description Add
+    if: github.event_name == 'pull_request'
+    env:
+      DOMAIN: apps.silver.devops.gov.bc.ca
+      PREFIX: hmcr-d3d940-dev
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+    timeout-minutes: 1
+    steps:
+      - uses: bcgov/action-pr-description-add@d79a5c3b49d3b3b3215495afac3ae599cef191bb # v2.0.1
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          add_markdown: |
+            ---
+
+            Thanks for the PR.
+
+            After the images are built, deploy a PR tag to DEV with the **CD - Update GitOps repository** workflow:
+            - tag: `pr-${{ github.event.pull_request.number }}`
+            - environment: `dev`
+            - [DEV Homepage](https://${{ env.PREFIX }}.${{ env.DOMAIN }})
+
+  vars:
+    name: Set Variables
+    outputs:
+      pr: ${{ steps.vars.outputs.pr }}
+      branch: ${{ steps.vars.outputs.branch }}
+      primary_tag: ${{ steps.vars.outputs.primary_tag }}
+    runs-on: ubuntu-latest
+    permissions: {}
+    steps:
+      - name: Resolve variables
+        id: vars
+        run: |
+          set -euo pipefail
+
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            PR="${{ github.event.pull_request.number }}"
+            BRANCH="${{ github.head_ref }}"
+            PRIMARY_TAG="pr-${PR}"
+          else
+            PR=""
+            BRANCH="${{ github.ref_name }}"
+            PRIMARY_TAG="${BRANCH//\//-}"
+          fi
+
+          BRANCH="${BRANCH//\//-}"
+
+          echo "pr=${PR}" >> "$GITHUB_OUTPUT"
+          echo "branch=${BRANCH}" >> "$GITHUB_OUTPUT"
+          echo "primary_tag=${PRIMARY_TAG}" >> "$GITHUB_OUTPUT"
+
+  builds:
+    name: Builds
+    if: github.event_name == 'pull_request' || github.event_name == 'workflow_dispatch'
+    needs: [vars]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    strategy:
+      matrix:
+        include:
+          - package: api
+            build_context: api
+            build_file: api/Dockerfile
+            triggers: api/
+          - package: hangfire
+            build_context: api
+            build_file: api/Dockerfile.hangfire
+            triggers: api/
+          - package: client
+            build_context: client
+            build_file: client/Dockerfile
+            triggers: client/
+    timeout-minutes: 15
+    steps:
+      - uses: bcgov/action-builder-ghcr@cb2629351c87dd1c2130073e4ebb7233a9653a63 # v4.4.1
+        env:
+          DOCKER_METADATA_PR_HEAD_SHA: true
+        with:
+          package: ${{ matrix.package }}
+          build_context: ${{ matrix.build_context }}
+          build_file: ${{ matrix.build_file }}
+          tags: ${{ needs.vars.outputs.primary_tag }}
+          tag_fallback: latest
+          triggers: ${{ matrix.triggers }}
+          metadata_tags: 'true'
+          metadata_tag_rules: |
+            type=raw,value=pr-${{ needs.vars.outputs.pr }}-${{ needs.vars.outputs.branch }},enable=${{ github.event_name == 'pull_request' && needs.vars.outputs.pr != '' }}
+            type=ref,event=tag
+            type=sha,prefix=sha-
+            type=raw,value=latest,enable={{is_default_branch}}
+
+  builds-required:
+    name: Builds Required
+    if: ${{ always() && github.event_name == 'pull_request' }}
+    needs: [builds]
+    runs-on: ubuntu-latest
+    permissions: {}
+    steps:
+      - name: Require successful builds
+        run: |
+          set -euo pipefail
+
+          if [ "${{ needs.builds.result }}" != "success" ]; then
+            echo "Builds job result was '${{ needs.builds.result }}'. Pull requests must pass Builds before merging."
+            exit 1
+          fi
+
+          echo "Builds completed successfully."
+
+  retag-merged-commit:
+    name: Retag Merged Commit
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+      pull-requests: read
+    strategy:
+      matrix:
+        package: [api, hangfire, client]
+    timeout-minutes: 5
+    steps:
+      - name: Resolve source and target tags
+        id: tags
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+
+          TARGET_SHA="${{ github.sha }}"
+          TARGET_TAG="sha-${TARGET_SHA:0:7}"
+
+          PR_NUMBER=""
+          for attempt in 1 2; do
+            PR_NUMBER="$(gh api \
+              -H "Accept: application/vnd.github+json" \
+              "/repos/${{ github.repository }}/commits/${TARGET_SHA}/pulls" \
+              --jq '.[0].number // empty')"
+
+            if [ -n "$PR_NUMBER" ] || [ "$attempt" -eq 2 ]; then
+              break
+            fi
+
+            echo "No associated PR found yet for ${TARGET_SHA}. Retrying in 10 seconds..."
+            sleep 10
+          done
+
+          if [ -z "$PR_NUMBER" ]; then
+            echo "Error: no associated PR found for ${TARGET_SHA}; cannot retag merged commit."
+            exit 1
+          fi
+
+          PR_HEAD_SHA="$(gh api \
+            "/repos/${{ github.repository }}/pulls/${PR_NUMBER}" \
+            --jq '.head.sha')"
+
+          if [ -z "$PR_HEAD_SHA" ]; then
+            echo "Error: PR ${PR_NUMBER} does not have a head SHA; cannot retag merged commit."
+            exit 1
+          fi
+
+          SOURCE_TAG="sha-${PR_HEAD_SHA:0:7}"
+
+          echo "source_tag=${SOURCE_TAG}" >> "$GITHUB_OUTPUT"
+          echo "target_tag=${TARGET_TAG}" >> "$GITHUB_OUTPUT"
+
+      - name: Retag PR image as merged commit image
+        uses: shrink/actions-docker-registry-tag@e6aaef25c595b6e0edd18bf4c7dbfea3abd43299 # v5
+        with:
+          registry: ghcr.io
+          repository: ${{ env.IMAGE_NAMESPACE }}/${{ matrix.package }}
+          target: ${{ steps.tags.outputs.source_tag }}
+          tags: ${{ steps.tags.outputs.target_tag }}
