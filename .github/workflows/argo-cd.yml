@@ -1,0 +1,177 @@
+name: CD - Update GitOps repository
+run-name: "GitOps Update to ${{ inputs.environment || github.event.inputs.environment || 'dev' }}"
+
+on:
+  workflow_call:
+    inputs:
+      tag:
+        description: "Image tag to deploy."
+        required: true
+        type: string
+      environment:
+        description: "Target environment."
+        required: true
+        default: "dev"
+        type: string
+    secrets:
+      GITOPS_REPO_PAT:
+        required: true
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: "Target environment to deploy."
+        required: true
+        default: "dev"
+        type: choice
+        options:
+          - dev
+          - test
+          - uat
+          - prod
+      tag:
+        description: "Existing image tag, commit SHA, sha-xxxxxxx, pr-123, rc_x.y.z, or vX.Y.Z."
+        required: true
+        type: string
+
+concurrency:
+  group: deploy-${{ inputs.environment || github.event.inputs.environment || 'dev' }}
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+  packages: write
+
+env:
+  IMAGE_NAMESPACE: bcgov/hmcr
+
+jobs:
+  update-gitops:
+    environment: ${{ inputs.environment || github.event.inputs.environment || 'dev' }}
+    runs-on: ubuntu-latest
+    outputs:
+      tag: ${{ steps.vars.outputs.tag }}
+      environment: ${{ steps.vars.outputs.environment }}
+    steps:
+      - id: vars
+        env:
+          RAW_ENVIRONMENT: ${{ inputs.environment || github.event.inputs.environment || 'dev' }}
+          RAW_TAG: ${{ inputs.tag || github.event.inputs.tag }}
+        run: |
+          set -euo pipefail
+
+          ENVIRONMENT="$RAW_ENVIRONMENT"
+          case "$ENVIRONMENT" in
+            dev|test|uat|prod) ;;
+            *)
+              echo "Error: unsupported environment '$RAW_ENVIRONMENT'. Expected one of: dev, test, uat, prod."
+              exit 1
+              ;;
+          esac
+
+          TAG="$RAW_TAG"
+          if [[ "$TAG" =~ ^sha-([0-9a-fA-F]{7,40})$ ]]; then
+            SHA="${BASH_REMATCH[1]}"
+            TAG="sha-${SHA:0:7}"
+          elif [[ "$TAG" =~ ^[0-9a-fA-F]{7,40}$ ]]; then
+            TAG="sha-${TAG:0:7}"
+          fi
+
+          echo "environment=${ENVIRONMENT}" >> "$GITHUB_OUTPUT"
+          echo "tag=${TAG}" >> "$GITHUB_OUTPUT"
+
+      - name: Log in to GHCR
+        run: |
+          echo "${{ github.token }}" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
+
+      - name: Verify image tags exist
+        env:
+          TAG: ${{ steps.vars.outputs.tag }}
+        run: |
+          set -euo pipefail
+
+          for package in api hangfire client; do
+            image="ghcr.io/${IMAGE_NAMESPACE}/${package}:${TAG}"
+            echo "Checking ${image}"
+            docker manifest inspect "${image}" >/dev/null
+          done
+
+      - name: Checkout GitOps repository
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
+        with:
+          repository: bcgov-c/tenant-gitops-d3d940
+          token: ${{ secrets.GITOPS_REPO_PAT }}
+          path: gitops-repo
+
+      - name: Update Helm values
+        env:
+          ENVIRONMENT: ${{ steps.vars.outputs.environment }}
+          TAG: ${{ steps.vars.outputs.tag }}
+        run: |
+          set -euo pipefail
+
+          cd gitops-repo
+          VALUES_FILE="argocd/env-apps/values-${ENVIRONMENT}.yaml"
+          export VALUES_FILE
+
+          if [ ! -f "$VALUES_FILE" ]; then
+            echo "Error: GitOps values file '$VALUES_FILE' does not exist."
+            exit 1
+          fi
+
+          python3 - <<'PY'
+          import os
+          from pathlib import Path
+
+          values_file = Path(os.environ["VALUES_FILE"])
+          tag = os.environ["TAG"]
+          lines = values_file.read_text().splitlines()
+
+          in_global = False
+          in_image = False
+          updated = False
+          for index, line in enumerate(lines):
+              stripped = line.strip()
+              if line.startswith("global:"):
+                  in_global = True
+                  in_image = False
+                  continue
+              if in_global and line and not line.startswith(" "):
+                  in_global = False
+                  in_image = False
+              if in_global and line.startswith("  image:"):
+                  in_image = True
+                  continue
+              if in_global and in_image and line.startswith("    tag:"):
+                  lines[index] = f'    tag: "{tag}"'
+                  updated = True
+                  break
+
+          if not updated:
+              raise SystemExit(f"Could not find global.image.tag in {values_file}")
+
+          values_file.write_text("\n".join(lines) + "\n")
+          PY
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add "$VALUES_FILE"
+          git commit -m "Deploy HMCR to ${ENVIRONMENT} with tag ${TAG}" || echo "No changes to commit"
+          git push origin main
+
+  promote-images:
+    name: Promote Images
+    needs: [update-gitops]
+    runs-on: ubuntu-latest
+    permissions:
+      packages: write
+    strategy:
+      matrix:
+        package: [api, hangfire, client]
+    timeout-minutes: 2
+    steps:
+      - uses: shrink/actions-docker-registry-tag@e6aaef25c595b6e0edd18bf4c7dbfea3abd43299 # v5
+        with:
+          registry: ghcr.io
+          repository: ${{ env.IMAGE_NAMESPACE }}/${{ matrix.package }}
+          target: ${{ needs.update-gitops.outputs.tag }}
+          tags: ${{ needs.update-gitops.outputs.environment }}

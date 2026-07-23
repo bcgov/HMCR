@@ -1,0 +1,98 @@
+name: Create Production v Tag
+
+on:
+  workflow_dispatch:
+    inputs:
+      rc_tag:
+        description: "Source RC tag to promote, for example rc_1.2.3."
+        required: true
+        type: string
+      deploy_to_prd:
+        description: "Trigger CD deployment to PROD after tagging."
+        required: false
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+  packages: write
+  actions: write
+
+env:
+  IMAGE_NAMESPACE: bcgov/hmcr
+
+jobs:
+  create-prod-tag:
+    runs-on: ubuntu-latest
+    outputs:
+      target_sha: ${{ steps.resolve.outputs.target_sha }}
+      prod_tag: ${{ steps.resolve.outputs.prod_tag }}
+    env:
+      RC_TAG: ${{ inputs.rc_tag }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
+        with:
+          fetch-depth: 0
+          fetch-tags: true
+
+      - name: Validate inputs and resolve SHA
+        id: resolve
+        run: |
+          set -euo pipefail
+
+          if [[ ! $RC_TAG =~ ^rc_[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "Error: RC tag '$RC_TAG' must match format rc_x.y.z."
+            exit 1
+          fi
+
+          PROD_TAG="v${RC_TAG#rc_}"
+
+          if ! git rev-parse "$RC_TAG" >/dev/null 2>&1; then
+            echo "Error: RC tag '$RC_TAG' does not exist."
+            exit 1
+          fi
+
+          TARGET_SHA=$(git rev-parse "$RC_TAG^{commit}")
+
+          echo "target_sha=$TARGET_SHA" >> "$GITHUB_OUTPUT"
+          echo "prod_tag=$PROD_TAG" >> "$GITHUB_OUTPUT"
+
+      - name: Create and push production tag
+        run: |
+          set -euo pipefail
+
+          PROD_TAG="${{ steps.resolve.outputs.prod_tag }}"
+          TARGET_SHA="${{ steps.resolve.outputs.target_sha }}"
+
+          git config user.name "GitHub Actions"
+          git config user.email "actions@github.com"
+          git tag "$PROD_TAG" "$TARGET_SHA"
+          git push origin "$PROD_TAG"
+
+  retag-images:
+    name: Retag Images
+    needs: [create-prod-tag]
+    runs-on: ubuntu-latest
+    permissions:
+      packages: write
+    strategy:
+      matrix:
+        package: [api, hangfire, client]
+    steps:
+      - uses: shrink/actions-docker-registry-tag@e6aaef25c595b6e0edd18bf4c7dbfea3abd43299 # v5
+        with:
+          registry: ghcr.io
+          repository: ${{ env.IMAGE_NAMESPACE }}/${{ matrix.package }}
+          target: ${{ inputs.rc_tag }}
+          tags: ${{ needs.create-prod-tag.outputs.prod_tag }}
+
+  deploy-prod:
+    name: Deploy to Prod
+    needs: [create-prod-tag, retag-images]
+    if: ${{ inputs.deploy_to_prd }}
+    uses: ./.github/workflows/argo-cd.yml
+    with:
+      environment: prod
+      tag: ${{ needs.create-prod-tag.outputs.prod_tag }}
+    secrets: inherit
