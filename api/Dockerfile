@@ -1,0 +1,27 @@
+FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
+WORKDIR /src
+
+COPY Hmcr.sln ./
+COPY Hmcr.Api/Hmcr.Api.csproj Hmcr.Api/
+COPY Hmcr.Bceid/Hmcr.Bceid.csproj Hmcr.Bceid/
+COPY Hmcr.Chris/Hmcr.Chris.csproj Hmcr.Chris/
+COPY Hmcr.Data/Hmcr.Data.csproj Hmcr.Data/
+COPY Hmcr.Domain/Hmcr.Domain.csproj Hmcr.Domain/
+COPY Hmcr.Model/Hmcr.Model.csproj Hmcr.Model/
+COPY Serilog.Sinks.HmcrPostgreSql/Serilog.Sinks.HmcrPostgreSql.csproj Serilog.Sinks.HmcrPostgreSql/
+
+RUN dotnet restore Hmcr.Api/Hmcr.Api.csproj
+
+COPY . .
+RUN dotnet publish Hmcr.Api/Hmcr.Api.csproj -c Release -o /app/publish --no-restore /p:UseAppHost=false
+
+FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS runtime
+WORKDIR /app
+
+ENV ASPNETCORE_URLS=http://+:8080 \
+    DOTNET_RUNNING_IN_CONTAINER=true
+
+COPY --from=build /app/publish .
+
+EXPOSE 8080
+ENTRYPOINT ["dotnet", "Hmcr.Api.dll"]
