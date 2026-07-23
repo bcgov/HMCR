@@ -78,6 +78,8 @@ jobs:
     permissions:
       contents: read
       packages: write
+      id-token: write
+      attestations: write
     strategy:
       matrix:
         include:
@@ -95,22 +97,52 @@ jobs:
             triggers: client/
     timeout-minutes: 15
     steps:
-      - uses: bcgov/action-builder-ghcr@cb2629351c87dd1c2130073e4ebb7233a9653a63 # v4.4.1
+      - name: Checkout PR head
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.ref }}
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ github.token }}
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Prepare container metadata
+        id: meta
+        uses: docker/metadata-action@v5
         env:
           DOCKER_METADATA_PR_HEAD_SHA: true
         with:
-          package: ${{ matrix.package }}
-          build_context: ${{ matrix.build_context }}
-          build_file: ${{ matrix.build_file }}
-          tags: ${{ needs.vars.outputs.primary_tag }}
-          tag_fallback: latest
-          triggers: ${{ matrix.triggers }}
-          metadata_tags: 'true'
-          metadata_tag_rules: |
+          images: ghcr.io/${{ env.IMAGE_NAMESPACE }}/${{ matrix.package }}
+          tags: |
+            type=raw,value=${{ needs.vars.outputs.primary_tag }}
             type=raw,value=pr-${{ needs.vars.outputs.pr }}-${{ needs.vars.outputs.branch }},enable=${{ github.event_name == 'pull_request' && needs.vars.outputs.pr != '' }}
             type=ref,event=tag
             type=sha,prefix=sha-
             type=raw,value=latest,enable={{is_default_branch}}
+
+      - name: Build and push image
+        id: build
+        uses: docker/build-push-action@v6
+        with:
+          context: ${{ matrix.build_context }}
+          file: ${{ matrix.build_file }}
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          annotations: ${{ steps.meta.outputs.annotations }}
+
+      - name: Attest image
+        uses: actions/attest-build-provenance@v2
+        with:
+          subject-name: ghcr.io/${{ env.IMAGE_NAMESPACE }}/${{ matrix.package }}
+          subject-digest: ${{ steps.build.outputs.digest }}
+          push-to-registry: true
 
   builds-required:
     name: Builds Required
