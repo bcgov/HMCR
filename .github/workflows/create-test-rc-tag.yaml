@@ -1,0 +1,147 @@
+name: Create Test rc Tag
+
+on:
+  workflow_dispatch:
+    inputs:
+      build_sha:
+        description: "Git commit SHA/ref to tag: full SHA, short SHA, sha-xxxxxxx, branch, tag, or latest."
+        required: true
+        type: string
+        default: latest
+      rc_tag:
+        description: "RC tag name, for example rc_1.2.3."
+        required: true
+        type: string
+      deploy_to_tst:
+        description: "Trigger CD deployment to TEST after tagging."
+        required: false
+        type: boolean
+        default: true
+      dry_run:
+        description: "Validate only; skip tag creation, image retag, release, and deployment."
+        required: false
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+  packages: write
+  actions: write
+
+env:
+  IMAGE_NAMESPACE: bcgov/hmcr
+
+jobs:
+  create-rc-tag:
+    runs-on: ubuntu-latest
+    outputs:
+      target_sha: ${{ steps.resolve_sha.outputs.target_sha }}
+      sha_short: ${{ steps.resolve_sha.outputs.sha_short }}
+    env:
+      RC_TAG: ${{ inputs.rc_tag }}
+      BUILD_SHA: ${{ inputs.build_sha }}
+      DRY_RUN: ${{ inputs.dry_run }}
+      BRANCH: master
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
+        with:
+          ref: ${{ env.BRANCH }}
+          fetch-depth: 0
+          fetch-tags: true
+
+      - name: Validate inputs
+        id: resolve_sha
+        run: |
+          set -euo pipefail
+
+          git fetch --force --prune origin \
+            '+refs/heads/*:refs/remotes/origin/*' \
+            '+refs/tags/*:refs/tags/*' \
+            --quiet
+
+          if [[ ! $RC_TAG =~ ^rc_[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "Error: RC tag '$RC_TAG' must match format rc_x.y.z."
+            exit 1
+          fi
+
+          if [[ "$BUILD_SHA" == "latest" ]]; then
+            BUILD_SHA="origin/${BRANCH}"
+          elif [[ "$BUILD_SHA" =~ ^sha-([0-9a-fA-F]{7,40})$ ]]; then
+            BUILD_SHA="${BASH_REMATCH[1]}"
+          fi
+
+          if [[ "$BUILD_SHA" =~ ^[0-9a-fA-F]{7,40}$ ]]; then
+            git fetch origin "$BUILD_SHA" --quiet || true
+          fi
+
+          if ! TARGET_SHA="$(git rev-parse --verify "${BUILD_SHA}^{commit}" 2>/dev/null)"; then
+            echo "Error: build_sha '$BUILD_SHA' was not found or is not a commit."
+            exit 1
+          fi
+
+          SHA_SHORT="sha-${TARGET_SHA:0:7}"
+
+          echo "target_sha=$TARGET_SHA" >> "$GITHUB_OUTPUT"
+          echo "sha_short=$SHA_SHORT" >> "$GITHUB_OUTPUT"
+
+          if [[ "$DRY_RUN" == "true" ]]; then
+            echo "Dry run: would create tag $RC_TAG -> $TARGET_SHA"
+          fi
+
+      - name: Create and push RC tag
+        if: ${{ !inputs.dry_run }}
+        run: |
+          set -euo pipefail
+
+          git config user.name "GitHub Actions"
+          git config user.email "actions@github.com"
+          git tag "$RC_TAG" "${{ steps.resolve_sha.outputs.target_sha }}"
+          git push origin "$RC_TAG"
+
+  retag-images:
+    name: Retag Images
+    needs: [create-rc-tag]
+    runs-on: ubuntu-latest
+    if: ${{ !inputs.dry_run }}
+    permissions:
+      packages: write
+    strategy:
+      matrix:
+        package: [api, hangfire, client]
+    steps:
+      - uses: shrink/actions-docker-registry-tag@e6aaef25c595b6e0edd18bf4c7dbfea3abd43299 # v5
+        with:
+          registry: ghcr.io
+          repository: ${{ env.IMAGE_NAMESPACE }}/${{ matrix.package }}
+          target: ${{ needs.create-rc-tag.outputs.sha_short }}
+          tags: ${{ inputs.rc_tag }}
+
+  create-release:
+    name: Release
+    needs: [create-rc-tag, retag-images]
+    runs-on: ubuntu-latest
+    if: ${{ !inputs.dry_run }}
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
+
+      - name: Create GitHub Pre-release with Release Notes
+        uses: softprops/action-gh-release@b4309332981a82ec1c5618f44dd2e27cc8bfbfda # v3
+        with:
+          tag_name: ${{ inputs.rc_tag }}
+          prerelease: true
+          generate_release_notes: true
+          target_commitish: ${{ needs.create-rc-tag.outputs.target_sha }}
+
+  deploy-test:
+    name: Deploy to Test
+    needs: [create-release]
+    uses: ./.github/workflows/argo-cd.yml
+    if: ${{ !inputs.dry_run && inputs.deploy_to_tst }}
+    with:
+      environment: test
+      tag: ${{ inputs.rc_tag }}
+    secrets: inherit

@@ -1,19 +1,37 @@
-FROM image-registry.openshift-image-registry.svc:5000/d3d940-tools/node-python:1 AS builder
-LABEL maintainer="bruce.wang@gov.bc.ca"
+FROM node:26-alpine AS builder
+WORKDIR /app
 
-RUN cat /etc/os-release
-RUN node -v
+RUN apk add --no-cache python3 make g++
 
-COPY . ./src
+COPY package*.json ./
+RUN npm ci
 
-RUN cd ./src && npm ci && npm run build
- 
-FROM image-registry.openshift-image-registry.svc:5000/d3d940-tools/nginx-116-rhel8:1
+COPY . .
+RUN npm run build
 
-COPY --from=builder /src/build/. /tmp/src
-COPY --from=builder /src/nginx-start/. /tmp/src/nginx-start
-COPY --from=builder /src/nginx.conf.tmpl /tmp/src/nginx.conf.tmpl
+FROM nginx:1.27-alpine
 
-RUN $STI_SCRIPTS_PATH/assemble
+ENV HOME=/opt/app-root/src
 
-CMD $STI_SCRIPTS_PATH/run
+RUN apk add --no-cache gettext \
+    && mkdir -p /opt/app-root/src/js \
+      /opt/app-root/etc/nginx.d \
+      /opt/app-root/etc/nginx.default.d \
+      /var/cache/nginx \
+      /var/run \
+      /run \
+      /var/log/nginx \
+    && chgrp -R 0 /opt/app-root /var/cache/nginx /var/run /run /var/log/nginx /etc/nginx \
+    && chmod -R g+rwX /opt/app-root /var/cache/nginx /var/run /run /var/log/nginx /etc/nginx
+
+COPY --from=builder /app/build/ /opt/app-root/src/
+COPY nginx.conf.tmpl /tmp/src/nginx.conf.tmpl
+COPY nginx-start/start.sh /docker-entrypoint.d/10-start.sh
+
+RUN chmod +x /docker-entrypoint.d/10-start.sh \
+    && touch /opt/app-root/src/js/env.config.js \
+    && chgrp 0 /opt/app-root/src/js/env.config.js \
+    && chmod g+rw /opt/app-root/src/js/env.config.js
+
+EXPOSE 8080
+CMD ["nginx", "-g", "daemon off;"]
