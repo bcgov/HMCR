@@ -1,4 +1,5 @@
 ﻿using CsvHelper;
+using Hmcr.Chris;
 using Hmcr.Data.Database;
 using Hmcr.Data.Database.Entities;
 using Hmcr.Data.Repositories;
@@ -144,6 +145,20 @@ namespace Hmcr.Domain.Hangfire.Base
             _enableMethodLog = _config.GetValue<string>("DISABLE_METHOD_LOGGER") != "Y"; //enabled by default
 
             _serviceArea = await _serviceAreaService.GetServiceAreaByServiceAreaNumberAsyc(_submission.ServiceAreaNumber);
+
+            if (FaultInjection.Is(_config, FaultInjection.Scenario.UnhandledException))
+            {
+                throw new NullReferenceException(
+                    $"Object reference not set to an instance of an object. {FaultInjection.Tag(FaultInjection.Scenario.UnhandledException)}");
+            }
+
+            if (FaultInjection.Is(_config, FaultInjection.Scenario.AggregateAsyncFailure))
+            {
+                var tag = FaultInjection.Tag(FaultInjection.Scenario.AggregateAsyncFailure);
+                throw new AggregateException(
+                    new Exception($"Row validation task 1 failed. {tag}"),
+                    new Exception($"Row validation task 2 failed. {tag}"));
+            }
 
             return true;
         }

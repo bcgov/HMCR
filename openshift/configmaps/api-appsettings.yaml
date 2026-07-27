@@ -186,6 +186,10 @@ objects:
             "DefaultThresholdSpLevel": {
               "Wildlife": "Level 2",
               "Rockfall": "Level 1"
+            },
+            "FaultInjection": {
+              "Enabled": ${FAULT_INJECTION_ENABLED},
+              "Scenario": "${FAULT_INJECTION_SCENARIO}"
             }
         }
     kind: ConfigMap
@@ -224,3 +228,21 @@ parameters:
     name: GEOSERVER_TIMEOUT
     required: true
     value: "120"
+  - description: >-
+      Fault injection master switch. When true, the next submission processed simulates the
+      failure named in FAULT_INJECTION_SCENARIO instead of calling the real CHRIS/GeoServer
+      service, so testers can reproduce each 'Unexpected Error' / system-error class on demand.
+      The application also hard-blocks fault injection whenever ASPNETCORE_ENVIRONMENT is
+      Production, regardless of this value, so it cannot affect prod even if left on by mistake.
+    displayName: FAULT_INJECTION_ENABLED
+    name: FAULT_INJECTION_ENABLED
+    required: true
+    value: "false"
+  - description: >-
+      Which failure to simulate when FAULT_INJECTION_ENABLED is true. One of: None,
+      ChrisHtmlResponse, ChrisUnauthorized, ChrisTimeout, ChrisNullLength, UnhandledException,
+      AggregateAsyncFailure. See api/Hmcr.Chris/FaultInjection.cs for what each one does.
+    displayName: FAULT_INJECTION_SCENARIO
+    name: FAULT_INJECTION_SCENARIO
+    required: true
+    value: "None"

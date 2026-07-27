@@ -65,6 +65,7 @@ namespace Hmcr.Chris
         private IApi _api;
         private string _path;
         private ILogger<OasApi> _logger;
+        private IConfiguration _config;
 
         public OasApi(HttpClient client, IApi api, IConfiguration config, ILogger<OasApi> logger)
         {
@@ -73,6 +74,7 @@ namespace Hmcr.Chris
             _queries = new OasQueries();
             _path = config["CHRIS:OASPath"];
             _logger = logger;
+            _config = config;
         }
 
         public async Task<bool> IsPointOnRfiSegmentAsync(int tolerance, Point point, string rfiSegment)
@@ -204,9 +206,35 @@ namespace Hmcr.Chris
 
             try
             {
-                query = _path + string.Format(_queries.RfiSegmentDetail, rfiSegment);
+                if (FaultInjection.Is(_config, FaultInjection.Scenario.ChrisUnauthorized))
+                {
+                    throw new Exception("The mapping service rejected the system's credentials (HTTP 401 Unauthorized). " +
+                        "The CHRIS service account may be locked, expired, or misconfigured. " +
+                        $"Submitters cannot fix this - please contact the HMCR administrator. {FaultInjection.Tag(FaultInjection.Scenario.ChrisUnauthorized)}");
+                }
 
-                content = await (await _api.GetWithRetry(_client, query)).Content.ReadAsStringAsync();
+                if (FaultInjection.Is(_config, FaultInjection.Scenario.ChrisTimeout))
+                {
+                    throw new Exception("The mapping service could not be reached after 5 attempts: " +
+                        $"a connection attempt failed. {FaultInjection.Tag(FaultInjection.Scenario.ChrisTimeout)}");
+                }
+
+                if (FaultInjection.Is(_config, FaultInjection.Scenario.ChrisHtmlResponse))
+                {
+                    content = "<html><body><h2>HTTP Status 503 - Service Unavailable</h2>" +
+                        $"<p>{FaultInjection.Tag(FaultInjection.Scenario.ChrisHtmlResponse)}</p></body></html>";
+                }
+                else if (FaultInjection.Is(_config, FaultInjection.Scenario.ChrisNullLength))
+                {
+                    var descr = FaultInjection.Tag(FaultInjection.Scenario.ChrisNullLength);
+                    content = "{\"type\":\"FeatureCollection\",\"totalFeatures\":1,\"features\":[{\"type\":\"Feature\"," +
+                        "\"geometry\":{\"type\":\"LineString\"},\"properties\":{\"NE_LENGTH\":null,\"NE_DESCR\":\"" + descr + "\"}}]}";
+                }
+                else
+                {
+                    query = _path + string.Format(_queries.RfiSegmentDetail, rfiSegment);
+                    content = await (await _api.GetWithRetry(_client, query)).Content.ReadAsStringAsync();
+                }
 
                 ApiResponseGuard.EnsureJsonResponse(content, "retrieving the road segment details");
 
