@@ -80,9 +80,21 @@ const DEFAULT_HTTP_ERROR_CONTENT = {
 };
 
 const NETWORK_ERROR_CONTENT = {
-  label: 'Connection problem',
-  message: 'The system could not connect to the server.',
-  action: 'Check your connection and try again.',
+  offline: {
+    label: 'Internet connection problem',
+    message: 'Your device appears to be offline.',
+    action: 'Check your internet connection, then try again.',
+  },
+  service_unreachable: {
+    label: 'HMCR service unavailable',
+    message: 'The app is running, but it cannot connect to the HMCR service.',
+    action: 'Try again in a few minutes. If the problem continues, contact support with the support ID below.',
+  },
+  timeout: {
+    label: 'Service timed out',
+    message: 'The HMCR service did not respond in time.',
+    action: 'Try again in a few minutes. If the problem continues, contact support with the support ID below.',
+  },
 };
 
 const AUTHORIZATION_401_CONTENT = {
@@ -97,8 +109,8 @@ const SESSION_TIMEOUT_401_CONTENT = {
   action: 'Reload the page, sign in again if asked, then try again.',
 };
 
-const getHttpErrorContent = (statusCode, message, detail) => {
-  if (!statusCode) return NETWORK_ERROR_CONTENT;
+const getHttpErrorContent = (statusCode, message, detail, networkErrorType) => {
+  if (!statusCode) return NETWORK_ERROR_CONTENT[networkErrorType] || NETWORK_ERROR_CONTENT.service_unreachable;
 
   if (statusCode === 401) {
     const errorText = `${message || ''} ${detail || ''}`.toLowerCase();
@@ -116,6 +128,12 @@ const getHttpErrorContent = (statusCode, message, detail) => {
 };
 
 const getStatusText = (statusCode, label) => (statusCode ? `${statusCode} - ${label}` : label);
+
+const isPresent = (value) => {
+  if (typeof value === 'string') return value.trim().length > 0;
+
+  return Boolean(value);
+};
 
 const hasErrorDetails = (errors) => errors && Object.keys(errors).length > 0;
 
@@ -142,6 +160,7 @@ const ErrorDialogModal = ({
   errorCode,
   correlationId,
   timestampUtc,
+  networkErrorType,
   hideErrorDialog,
   hidePrimaryButton,
 }) => {
@@ -160,16 +179,19 @@ const ErrorDialogModal = ({
     else hideErrorDialog();
   };
 
-  const errorContent = getHttpErrorContent(statusCode, message, detail);
+  const errorContent = getHttpErrorContent(statusCode, message, detail, networkErrorType);
   const hasStatusCode = Boolean(statusCode);
+  const isNetworkError = !hasStatusCode && Boolean(networkErrorType);
+  const showFriendlyError = hasStatusCode || isNetworkError;
   const hasDetails =
-    message ||
-    detail ||
+    isPresent(message) ||
+    isPresent(detail) ||
     hasStatusCode ||
-    (path && method) ||
-    errorCode ||
-    correlationId ||
-    timestampUtc ||
+    isPresent(path) ||
+    isPresent(method) ||
+    isPresent(errorCode) ||
+    isPresent(correlationId) ||
+    isPresent(timestampUtc) ||
     hasErrorDetails(errors);
   const modalTitle = title || errorContent.label;
 
@@ -178,7 +200,7 @@ const ErrorDialogModal = ({
       <Modal isOpen={isOpen}>
         <ModalHeader toggle={hideErrorDialog}>{modalTitle}</ModalHeader>
         <ModalBody>
-          {hasStatusCode ? (
+          {showFriendlyError ? (
             <Alert color="danger">
               <p className="mb-1">
                 <strong>{getStatusText(statusCode, errorContent.label)}</strong>
@@ -189,7 +211,7 @@ const ErrorDialogModal = ({
               </p>
             </Alert>
           ) : (
-            message && (
+            isPresent(message) && (
               <p>
                 <strong>Error:</strong> {message}
               </p>
@@ -218,21 +240,21 @@ const ErrorDialogModal = ({
               </Button>
               <Collapse isOpen={showDetails}>
                 <Alert color="secondary" className="mt-3 mb-0">
-                  {message && (
+                  {isPresent(message) && (
                     <p>
                       <small>
                         <strong>Error:</strong> {message}
                       </small>
                     </p>
                   )}
-                  {detail && (
+                  {isPresent(detail) && (
                     <p>
                       <small>
                         <strong>Detail:</strong> {detail}
                       </small>
                     </p>
                   )}
-                  {statusCode && path && method && (
+                  {statusCode && isPresent(path) && isPresent(method) && (
                     <p>
                       <small>
                         A <strong>{method}</strong> request to <strong className="text-primary">{path}</strong> has
@@ -240,21 +262,29 @@ const ErrorDialogModal = ({
                       </small>
                     </p>
                   )}
-                  {statusCode && (!path || !method) && (
+                  {statusCode && (!isPresent(path) || !isPresent(method)) && (
                     <p>
                       <small>
                         <strong>Status code:</strong> <code>{statusCode}</code>
                       </small>
                     </p>
                   )}
-                  {errorCode && (
+                  {!statusCode && isPresent(path) && isPresent(method) && (
+                    <p>
+                      <small>
+                        A <strong>{method}</strong> request to <strong className="text-primary">{path}</strong> did not
+                        receive a response from the server.
+                      </small>
+                    </p>
+                  )}
+                  {isPresent(errorCode) && (
                     <p>
                       <small>
                         <strong>Error code:</strong> <code>{errorCode}</code>
                       </small>
                     </p>
                   )}
-                  {correlationId && (
+                  {isPresent(correlationId) && (
                     <p>
                       <small>
                         <strong>Correlation ID:</strong>{' '}
@@ -262,7 +292,7 @@ const ErrorDialogModal = ({
                       </small>
                     </p>
                   )}
-                  {timestampUtc && (
+                  {isPresent(timestampUtc) && (
                     <p>
                       <small>
                         <strong>Timestamp UTC:</strong> <code>{timestampUtc}</code>
@@ -310,6 +340,7 @@ ErrorDialogModal.propTypes = {
   errorCode: PropTypes.string,
   correlationId: PropTypes.string,
   timestampUtc: PropTypes.string,
+  networkErrorType: PropTypes.string,
   hidePrimaryButton: PropTypes.bool,
 };
 
