@@ -1,9 +1,11 @@
 ﻿using Hmcr.Api.Observability;
 using Hmcr.Model;
+using Hmcr.Model.Logging;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,11 +17,16 @@ namespace Hmcr.Api.Authorization
     {
         private readonly IAuthorizationService _authService;
         private readonly PermissionRequirement _requiredPermissions;
+        private readonly ILogger<RequiresPermissionFilter> _logger;
 
-        public RequiresPermissionFilter(IAuthorizationService authService, PermissionRequirement requiredPermissions)
+        public RequiresPermissionFilter(
+            IAuthorizationService authService,
+            PermissionRequirement requiredPermissions,
+            ILogger<RequiresPermissionFilter> logger)
         {
             _authService = authService;
             _requiredPermissions = requiredPermissions;
+            _logger = logger;
         }
 
         public async Task OnAuthorizationAsync(AuthorizationFilterContext context)
@@ -30,6 +37,7 @@ namespace Hmcr.Api.Authorization
 
             if (!result.Succeeded)
             {
+                var supportId = HmcrLogContext.CreateSupportId();
                 var problem = new ValidationProblemDetails()
                 {
                     Type = "https://hmcr.bc.gov.ca/exception",
@@ -39,7 +47,19 @@ namespace Hmcr.Api.Authorization
                     Instance = context.HttpContext.Request.Path
                 };
 
-                HmcrLogContext.EnrichProblemDetails(problem, context.HttpContext);
+                using (_logger.BeginScope(HmcrLogContext.CreateHttpScope(
+                    context.HttpContext,
+                    null,
+                    HmcrLogConstants.Sources.Api,
+                    HmcrLogContext.GetOperation(context.HttpContext),
+                    supportId,
+                    null,
+                    StatusCodes.Status401Unauthorized)))
+                {
+                    _logger.LogWarning("Authorization failed {SupportId}", supportId);
+                }
+
+                HmcrLogContext.EnrichProblemDetails(problem, context.HttpContext, supportId);
 
                 context.Result = new UnauthorizedObjectResult(problem);
             }

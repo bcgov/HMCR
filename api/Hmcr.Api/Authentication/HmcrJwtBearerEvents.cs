@@ -5,6 +5,7 @@ using Hmcr.Data.Database.Entities;
 using Hmcr.Domain.Services;
 using Hmcr.Model;
 using Hmcr.Model.Dtos.User;
+using Hmcr.Model.Logging;
 using Hmcr.Model.Utils;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Hosting;
@@ -37,6 +38,8 @@ namespace Hmcr.Api.Authentication
 
         public override async Task AuthenticationFailed(AuthenticationFailedContext context)
         {
+            var supportId = HmcrLogContext.CreateSupportId();
+
             context.Response.ContentType = "application/json";
             context.Response.StatusCode = StatusCodes.Status401Unauthorized;
 
@@ -49,7 +52,22 @@ namespace Hmcr.Api.Authentication
                 Instance = context.Request.Path
             };
 
-            HmcrLogContext.EnrichProblemDetails(problem, context.HttpContext);
+            using (_logger.BeginScope(HmcrLogContext.CreateHttpScope(
+                context.HttpContext,
+                _curentUser,
+                HmcrLogConstants.Sources.Api,
+                HmcrLogContext.GetOperation(context.HttpContext),
+                supportId,
+                null,
+                StatusCodes.Status401Unauthorized)))
+            {
+                if (context.Exception != null)
+                    _logger.LogWarning(context.Exception, "Authentication failed {SupportId}", supportId);
+                else
+                    _logger.LogWarning("Authentication failed {SupportId}", supportId);
+            }
+
+            HmcrLogContext.EnrichProblemDetails(problem, context.HttpContext, supportId);
 
             await context.Response.WriteJsonAsync(problem, "application/problem+json");
         }

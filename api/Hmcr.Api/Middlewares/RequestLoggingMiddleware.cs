@@ -42,6 +42,9 @@ namespace Hmcr.Api.Middlewares
                     await _next(context);
                     stopwatch.Stop();
 
+                    if (context.Response.Headers.TryGetValue(HmcrLogConstants.SupportIdHeader, out var supportIds))
+                        scope["supportId"] = supportIds.ToString();
+
                     scope["statusCode"] = context.Response.StatusCode;
                     scope["elapsedMs"] = stopwatch.ElapsedMilliseconds;
 
