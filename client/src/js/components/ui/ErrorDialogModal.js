@@ -12,9 +12,9 @@ const HTTP_ERROR_CONTENT = {
     action: 'Check the information on the page and try again.',
   },
   401: {
-    label: 'Session timed out',
-    message: 'Your sign-in session appears to have expired.',
-    action: 'Reload the page, sign in again if asked, then try again.',
+    label: 'Authentication required',
+    message: 'Your session may have expired, or your account may not have access to complete this action.',
+    action: 'Reload the page and sign in again if asked. If this keeps happening, contact your administrator.',
   },
   403: {
     label: 'Access denied',
@@ -85,8 +85,32 @@ const NETWORK_ERROR_CONTENT = {
   action: 'Check your connection and try again.',
 };
 
-const getHttpErrorContent = (statusCode) => {
+const AUTHORIZATION_401_CONTENT = {
+  label: 'Access denied',
+  message: 'Your account does not have access to complete this action.',
+  action: 'Contact your administrator if you need access.',
+};
+
+const SESSION_TIMEOUT_401_CONTENT = {
+  label: 'Session timed out',
+  message: 'Your sign-in session appears to have expired.',
+  action: 'Reload the page, sign in again if asked, then try again.',
+};
+
+const getHttpErrorContent = (statusCode, message, detail) => {
   if (!statusCode) return NETWORK_ERROR_CONTENT;
+
+  if (statusCode === 401) {
+    const errorText = `${message || ''} ${detail || ''}`.toLowerCase();
+
+    if (errorText.includes('insufficient permission') || errorText.includes('access denied')) {
+      return AUTHORIZATION_401_CONTENT;
+    }
+
+    if (errorText.includes('authentication failed') || errorText.includes('expired')) {
+      return SESSION_TIMEOUT_401_CONTENT;
+    }
+  }
 
   return HTTP_ERROR_CONTENT[statusCode] || DEFAULT_HTTP_ERROR_CONTENT;
 };
@@ -136,7 +160,7 @@ const ErrorDialogModal = ({
     else hideErrorDialog();
   };
 
-  const errorContent = getHttpErrorContent(statusCode);
+  const errorContent = getHttpErrorContent(statusCode, message, detail);
   const hasStatusCode = Boolean(statusCode);
   const hasDetails =
     message ||
