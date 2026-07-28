@@ -98,6 +98,24 @@ export const registerGlobalClientErrorHandlers = () => {
     };
 };
 
+const shouldShowErrorDialog = (error) =>
+    !error.config?.skipClientErrorDialog && (!error.response || error.response.status !== 422);
+
+const ensureSupportIdForErrorDialog = (error, apiError) => {
+    if (!error.response || apiError.supportId) return;
+
+    const supportId = createSupportId();
+    apiError.supportId = reportClientError(error, {
+        supportId,
+        message: apiError.message,
+        correlationId: apiError.correlationId || error.config?.metadata?.correlationId,
+        errorCode: apiError.errorCode,
+        httpMethod: apiError.method || error.config?.method?.toUpperCase(),
+        statusCode: apiError.statusCode || error.response.status,
+        url: apiError.path || error.config?.url,
+    });
+};
+
 instance.interceptors.request.use((config) => {
     const correlationId = config.correlationId || createCorrelationId();
     config.headers = config.headers || {};
@@ -113,17 +131,11 @@ instance.interceptors.response.use(
     },
     (error) => {
         const apiError = buildApiErrorObject(error);
+        const showErrorDialog = shouldShowErrorDialog(error);
 
-        if (!error.response && !error.config?.skipClientErrorLog) {
-            apiError.supportId = reportClientError(error, {
-                message: apiError.message,
-                correlationId: error.config?.metadata?.correlationId,
-                httpMethod: error.config?.method?.toUpperCase(),
-                url: error.config?.url,
-            });
-        }
+        if (showErrorDialog) ensureSupportIdForErrorDialog(error, apiError);
 
-        if (!error.config?.skipClientErrorDialog && (!error.response || error.response.status !== 422))
+        if (showErrorDialog)
             store.dispatch({ type: SHOW_ERROR_DIALOG_MODAL, payload: apiError });
 
         return Promise.reject(error);

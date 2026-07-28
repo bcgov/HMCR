@@ -88,12 +88,12 @@ const NETWORK_ERROR_CONTENT = {
   service_unreachable: {
     label: 'HMCR service unavailable',
     message: 'The app is running, but it cannot connect to the HMCR service.',
-    action: 'Try again in a few minutes. If the problem continues, contact support with the support ID below.',
+    action: 'Try again in a few minutes. If the problem continues, contact support and describe what you were doing.',
   },
   timeout: {
     label: 'Service timed out',
     message: 'The HMCR service did not respond in time.',
-    action: 'Try again in a few minutes. If the problem continues, contact support with the support ID below.',
+    action: 'Try again in a few minutes. If the problem continues, contact support and describe what you were doing.',
   },
 };
 
