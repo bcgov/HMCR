@@ -8,15 +8,27 @@ export const buildActionWithParam = (action, param) => {
   return { action, param };
 };
 
+const getNetworkErrorType = (error) => {
+  const message = error?.message?.toLowerCase() || '';
+
+  if (error?.code === 'ECONNABORTED' || message.includes('timeout')) return 'timeout';
+
+  if (typeof navigator !== 'undefined' && navigator.onLine === false) return 'offline';
+
+  return 'service_unreachable';
+};
+
 export const buildApiErrorObject = (error) => {
   try {
     const response = error.response ? error.response : error;
-    const method = response.config.method.toUpperCase();
-    const path = response.config.url.replace(response.config.baseURL, '');
+    const config = response.config || {};
+    const method = config.method?.toUpperCase();
+    const path = config.baseURL ? config.url?.replace(config.baseURL, '') : config.url;
     const data = response.data || {};
+    const isNetworkError = !error.response;
 
     return {
-      message: data.title,
+      message: data.title || error.message || 'Connection to server cannot be established',
       statusCode: response.status,
       detail: data.detail,
       errors: data.errors,
@@ -24,12 +36,14 @@ export const buildApiErrorObject = (error) => {
       method,
       supportId: data.supportId || response.headers?.[Constants.SUPPORT_ID_HEADER.toLowerCase()],
       errorCode: data.errorCode,
-      correlationId: data.correlationId || response.headers?.[Constants.CORRELATION_HEADER.toLowerCase()],
+      correlationId: data.correlationId || response.headers?.[Constants.CORRELATION_HEADER.toLowerCase()] || config.metadata?.correlationId,
       timestampUtc: data.timestampUtc,
+      networkErrorType: isNetworkError ? getNetworkErrorType(error) : undefined,
     };
   } catch {
     return {
       message: 'Connection to server cannot be established',
+      networkErrorType: getNetworkErrorType(error),
     };
   }
 };

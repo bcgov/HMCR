@@ -15,6 +15,7 @@ namespace Hmcr.Api.Controllers.Base
             var serviceArea = currentUser.UserInfo.ServiceAreas.FirstOrDefault(x => x.ServiceAreaNumber == serviceAreaNumber);
             if (serviceArea == null)
             {
+                var supportId = HmcrLogContext.CreateSupportId();
                 var problem = new ValidationProblemDetails()
                 {
                     Type = "https://hmcr.bc.gov.ca/exception",
@@ -24,7 +25,7 @@ namespace Hmcr.Api.Controllers.Base
                     Instance = HttpContext.Request.Path
                 };
 
-                HmcrLogContext.EnrichProblemDetails(problem, HttpContext);
+                HmcrLogContext.EnrichProblemDetails(problem, HttpContext, supportId);
 
                 return problem;
             }
