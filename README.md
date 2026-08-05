@@ -8,8 +8,8 @@ This presents a problem on how to best collect the data being provided by the MC
 
 ## Prerequisites
 
-- .Net Core 3.1 SDK
-- Node.JS v10.0 or newer
+- .NET 8 SDK
+- Node.js 26 or newer
 - Microsoft SQL Server 2017 or newer
 
 ## Dependencies
@@ -106,6 +106,6 @@ Use the following steps to run the local development environment
    npm start
    ```
 
-## OpenShift Deployment
+## Deployment
 
-Refer to [this document](openshift/README.md) for OpenShift Deployment and Pipeline related topics
+HMCR deploys through GitHub Actions, Helm, and ArgoCD. Refer to [docs/deployment.md](docs/deployment.md) for GitOps deployment, promotion, rollback, and measurement steps.
