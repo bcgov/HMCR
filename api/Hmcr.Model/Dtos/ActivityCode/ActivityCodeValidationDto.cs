@@ -7,6 +7,7 @@ namespace Hmcr.Model.Dtos.ActivityCode
 {
     public class ActivityCodeValidationDto
     {
+        public string ActivityName { get; set; }
         public string LocationCode { get; set; }
 
         public decimal RoadLengthRuleId { get; set; }

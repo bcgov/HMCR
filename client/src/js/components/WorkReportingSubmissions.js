@@ -1,7 +1,7 @@
 import React, { useState, useEffect, forwardRef, useImperativeHandle } from 'react';
 import { useHistory } from 'react-router-dom';
 import { connect } from 'react-redux';
-import { Button, Row, Col, Input, UncontrolledPopover, PopoverBody, PopoverHeader, Progress } from 'reactstrap';
+import { Button, Row, Col, Input, Progress } from 'reactstrap';
 import moment from 'moment';
 import DatePicker from 'react-datepicker';
 import queryString from 'query-string';
@@ -25,7 +25,6 @@ const tableColumns = [
   { heading: 'Submitted By', key: 'name', nosort: true },
   { heading: 'Report Type', key: 'streamName', nosort: true },
   { heading: 'Submission Status', key: 'description', nosort: true },
-  { heading: '', key: 'longDescription', nosort: true },
 ];
 
 const defaultSearchOptions = {
@@ -203,14 +202,9 @@ const WorkReportingSubmissions = ({ serviceArea, submissionStatuses }, ref) => {
             {searchData.data.length > 0 && (
               <DataTableWithPaginaionControl
                 dataList={searchData.data.map((item) => {
-                  // Fall back to the submission's own description so an unknown status code
-                  // degrades to a warning-styled row instead of crashing the entire table.
-                  const itemStatus = submissionStatuses[item.submissionStatusCode] || {
-                    stage: -1,
-                    description: item.description,
-                    longDescription: 'No further detail is available for this submission status.',
-                  };
-                  const progressBarLength = (itemStatus.stage < 0 ? 1 : itemStatus.stage / maxValidationStages) * 100;
+                  // Unknown status codes use the warning-style progress indicator.
+                  const itemStage = submissionStatuses[item.submissionStatusCode]?.stage ?? -1;
+                  const progressBarLength = (itemStage < 0 ? 1 : itemStage / maxValidationStages) * 100;
 
                   return {
                     ...item,
@@ -233,23 +227,9 @@ const WorkReportingSubmissions = ({ serviceArea, submissionStatuses }, ref) => {
                         {item.description}
                         <Progress
                           className="thin-underline"
-                          color={stageColors(itemStatus.stage)}
+                          color={stageColors(itemStage)}
                           value={progressBarLength}
                         ></Progress>
-                      </React.Fragment>
-                    ),
-                    longDescription: (
-                      <React.Fragment>
-                        <FontAwesomeButton
-                          id={`tooltip_${item.id}`}
-                          className="fa-color-primary"
-                          color="link"
-                          icon="question-circle"
-                        />
-                        <UncontrolledPopover trigger="focus" placement="auto" target={`tooltip_${item.id}`}>
-                          <PopoverHeader>{itemStatus.description}</PopoverHeader>
-                          <PopoverBody>{itemStatus.longDescription}</PopoverBody>
-                        </UncontrolledPopover>
                       </React.Fragment>
                     ),
                   };

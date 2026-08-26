@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { connect } from 'react-redux';
 import { Button, Modal, ModalBody, ModalHeader } from 'reactstrap';
 import moment from 'moment';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -178,7 +179,7 @@ const createClipboardText = (data) => {
   return clipboardData;
 };
 
-const WorkReportingSubmissionDetail = ({ toggle, submission }) => {
+const WorkReportingSubmissionDetail = ({ toggle, submission, submissionStatuses }) => {
   const [submissionResultData, setSubmissionResultData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [modalSize, setModalSize] = useState('modal-lg');
@@ -208,6 +209,10 @@ const WorkReportingSubmissionDetail = ({ toggle, submission }) => {
 
   const submissionObject = () => {
     const supportId = getSupportIdFromErrorDetail(submissionResultData.errorDetail);
+    const submissionStatus = submissionStatuses[submissionResultData.submissionStatusCode] || {
+      description: submissionResultData.description,
+      longDescription: 'No further detail is available for this submission status.',
+    };
 
     return (
       <div style={{ display: 'flex', justifyContent: 'space-between' }}>
@@ -225,7 +230,10 @@ const WorkReportingSubmissionDetail = ({ toggle, submission }) => {
               </li>
             )}
             <li>
-              <strong>Status:</strong> {submissionResultData.description}
+              <strong>Description:</strong> {submissionStatus.longDescription}
+            </li>
+            <li>
+              <strong>Status:</strong> {submissionStatus.description}
             </li>
             {supportId && (
               <li>
@@ -334,4 +342,10 @@ const WorkReportingSubmissionDetail = ({ toggle, submission }) => {
   );
 };
 
-export default WorkReportingSubmissionDetail;
+const mapStateToProps = (state) => {
+  return {
+    submissionStatuses: state.submissions.statuses,
+  };
+};
+
+export default connect(mapStateToProps)(WorkReportingSubmissionDetail);

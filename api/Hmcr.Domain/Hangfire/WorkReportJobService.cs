@@ -328,6 +328,11 @@ namespace Hmcr.Domain.Hangfire
 
         #region Async Validation Functions
 
+        private static string FormatActivity(string activityNumber, string activityName)
+        {
+            return $"[{activityNumber} - {activityName}]";
+        }
+
         private async Task<List<WorkReportGeometry>> PerformReportedWorkReportsValidationAsync(List<WorkReportGeometry> workReports)
         {
             foreach (var workReport in workReports)
@@ -354,7 +359,7 @@ namespace Hmcr.Domain.Hangfire
                         warnings.AddItem("Reporting Frequency Validation: End Date"
                             , $"END DATE [{typedRow.EndDate?.ToString("yyyy-MM-dd") ?? ""}] should NOT be reported more frequently" +
                             $" than the Reporting Frequency (days) of [{typedRow.ActivityCodeValidation.ReportingFrequency}]" +
-                            $" for Activity [{typedRow.ActivityNumber}]. Record conflicts with Record Number(s)" +
+                            $" for Activity {FormatActivity(typedRow.ActivityNumber, typedRow.ActivityCodeValidation.ActivityName)}. Record conflicts with Record Number(s)" +
                             $"[{String.Join("; ", conflicts.ToArray())}]");
                     }
                 }
@@ -367,7 +372,7 @@ namespace Hmcr.Domain.Hangfire
                         warnings.AddItem("Reporting Frequency Validation: End Date"
                             , $"END DATE [{typedRow.EndDate?.ToString("yyyy-MM-dd") ?? ""}] should NOT be reported more frequently" +
                             $" than the Reporting Frequency (days) of [{typedRow.ActivityCodeValidation.ReportingFrequency}]" +
-                            $" for Activity [{typedRow.ActivityNumber}] for Highway Unique [{typedRow.HighwayUnique}]." +
+                            $" for Activity {FormatActivity(typedRow.ActivityNumber, typedRow.ActivityCodeValidation.ActivityName)} for Highway Unique [{typedRow.HighwayUnique}]." +
                             $" Record conflicts with Record Number(s) [{String.Join("; ", conflicts.ToArray())}]");
                     }
                 }
@@ -386,7 +391,7 @@ namespace Hmcr.Domain.Hangfire
                         warnings.AddItem("Reporting Frequency Validation: End Date, GPS position"
                             , $"END DATE [{typedRow.EndDate?.ToString("yyyy-MM-dd") ?? ""}] should NOT be reported more frequently" +
                             $" than the Reporting Frequency (days) of [{typedRow.ActivityCodeValidation.ReportingFrequency}]" +
-                            $" for Activity [{typedRow.ActivityNumber}]," +
+                            $" for Activity {FormatActivity(typedRow.ActivityNumber, typedRow.ActivityCodeValidation.ActivityName)}," +
                             $" Highway Unique [{typedRow.HighwayUnique}]," +
                             gpsMessage +
                             $" Record conflicts with Record Number(s) [{String.Join("; ", conflicts.ToArray())}]");
@@ -711,7 +716,7 @@ namespace Hmcr.Domain.Hangfire
             {
                 warnings.AddItem("Data Precision Validation: Accomplishment",
                     $"Accomplishment value of [{accomplishment}] should be a whole number for Unit of Measure [{typedRow.UnitOfMeasure}]" +
-                    $" for Activity Code [{typedRow.ActivityNumber}]");
+                    $" for Activity Code {FormatActivity(typedRow.ActivityNumber, typedRow.ActivityCodeValidation.ActivityName)}");
             }
 
             //validate min/max value
@@ -724,13 +729,13 @@ namespace Hmcr.Domain.Hangfire
                 {
                     warnings.AddItem("Minimum / Maximum Value Validation: Accomplishment",
                         $"Accomplishment value of [{accomplishment}]" +
-                        $" should be >= the Minimum Value [{minValue}] allowed for the Activity [{typedRow.ActivityNumber}]");
+                        $" should be >= the Minimum Value [{minValue}] allowed for the Activity {FormatActivity(typedRow.ActivityNumber, typedRow.ActivityCodeValidation.ActivityName)}");
                 }
                 if (accomplishment.ConvertStrToDecimal() > typedRow.ActivityCodeValidation.MaxValue.ConvertNullableDecimal())
                 {
                     warnings.AddItem("Minimum / Maximum Value Validation: Accomplishment",
                         $"Accomplishment value of [{accomplishment}]" +
-                        $" should be <= the Maximum Value [{maxValue}] allowed for the Activity [{typedRow.ActivityNumber}]");
+                        $" should be <= the Maximum Value [{maxValue}] allowed for the Activity {FormatActivity(typedRow.ActivityNumber, typedRow.ActivityCodeValidation.ActivityName)}");
                 }
             }
 
@@ -1311,12 +1316,12 @@ namespace Hmcr.Domain.Hangfire
 
             if (untypedRow.UnitOfMeasure.ToLowerInvariant() != activityCode.UnitOfMeasure.ToLowerInvariant())
             {
-                errors.AddItem(Fields.UnitOfMeasure, $"Unit of measure for the activity Code [{activityCode.ActivityNumber}] must be [{activityCode.UnitOfMeasure}]");
+                errors.AddItem(Fields.UnitOfMeasure, $"Unit of measure for the activity Code {FormatActivity(activityCode.ActivityNumber, activityCode.ActivityName)} must be [{activityCode.UnitOfMeasure}]");
             }
 
             if (untypedRow.RecordType.ToLowerInvariant() != activityCode.MaintenanceType.ToLowerInvariant())
             {
-                errors.AddItem(Fields.RecordType, $"Record type of the activity code [{activityCode.ActivityNumber}] must be [{activityCode.MaintenanceType}]");
+                errors.AddItem(Fields.RecordType, $"Record type of the activity code {FormatActivity(activityCode.ActivityNumber, activityCode.ActivityName)} must be [{activityCode.MaintenanceType}]");
             }
         }
 
@@ -1328,13 +1333,13 @@ namespace Hmcr.Domain.Hangfire
                 var submissionRow = _submissionRows[(decimal)typedRow.RowNum];
                 if (string.IsNullOrWhiteSpace(typedRow.ServiceArea.ToString()) || typedRow.ActivityCodeValidation.ServiceAreaNumbers == null)
                 {
-                    errors.AddItem(Fields.ServiceArea, $"Service area [{typedRow.ServiceArea}] is NOT associated with Activity [{typedRow.ActivityNumber}]");
+                    errors.AddItem(Fields.ServiceArea, $"Service area [{typedRow.ServiceArea}] is NOT associated with Activity {FormatActivity(typedRow.ActivityNumber, typedRow.ActivityCodeValidation.ActivityName)}");
                 }
                 else
                 {
                     if (!typedRow.ActivityCodeValidation.ServiceAreaNumbers.Contains(typedRow.ServiceArea))
                     {
-                        errors.AddItem(Fields.ServiceArea, $"Service area [{typedRow.ServiceArea}] is NOT associated with Activity [{typedRow.ActivityNumber}]");
+                        errors.AddItem(Fields.ServiceArea, $"Service area [{typedRow.ServiceArea}] is NOT associated with Activity {FormatActivity(typedRow.ActivityNumber, typedRow.ActivityCodeValidation.ActivityName)}");
                     }
                 }
 
@@ -1748,7 +1753,7 @@ namespace Hmcr.Domain.Hangfire
             if (roadLengthRule == null || surfaceTypeRule == null || roadClassRule == null)
             {
                 errors.AddItem(Fields.ActivityNumber,
-                    $"The validation rules for activity [{activityCode.ActivityNumber}] are not configured correctly in the system. " +
+                    $"The validation rules for activity {FormatActivity(activityCode.ActivityNumber, activityCode.ActivityName)} are not configured correctly in the system. " +
                     "This is a system configuration issue, not a problem with the report data. " +
                     "Please contact the administrator and provide the activity number.");
                 return false;
@@ -1757,6 +1762,7 @@ namespace Hmcr.Domain.Hangfire
             untypedRow.FeatureType = activityCode.FeatureType ?? FeatureType.None;
             untypedRow.SpThresholdLevel = activityCode.SpThresholdLevel;
             //set activity code rules and location code
+            untypedRow.ActivityCodeValidation.ActivityName = activityCode.ActivityName;
             untypedRow.ActivityCodeValidation.LocationCode = activityCode.LocationCode.LocationCode;
 
             untypedRow.ActivityCodeValidation.RoadLengthRuleId = activityCode.RoadLengthRule;
