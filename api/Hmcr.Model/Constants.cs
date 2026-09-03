@@ -132,6 +132,13 @@ namespace Hmcr.Model
         public const string FileSuccessWithWarnings = "SW";
     }
 
+    public static class EmailDeliveryStatus
+    {
+        public const string Sent = "SENT";
+        public const string Failed = "FAILED";
+        public const string SkippedNoRecipients = "SKIPPED_NO_RECIPIENTS";
+    }
+
     public static class Fields
     {
         public const string Username = "Username";
