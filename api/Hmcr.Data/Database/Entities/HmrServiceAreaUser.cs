@@ -5,6 +5,11 @@ namespace Hmcr.Data.Database.Entities
 {
     public partial class HmrServiceAreaUser
     {
+        public HmrServiceAreaUser()
+        {
+            HmrNotificationPreferences = new HashSet<HmrNotificationPreference>();
+        }
+
         public decimal ServiceAreaUserId { get; set; }
         public decimal ServiceAreaNumber { get; set; }
         public decimal SystemUserId { get; set; }
@@ -25,5 +30,6 @@ namespace Hmcr.Data.Database.Entities
 
         public virtual HmrServiceArea ServiceAreaNumberNavigation { get; set; }
         public virtual HmrSystemUser SystemUser { get; set; }
+        public virtual ICollection<HmrNotificationPreference> HmrNotificationPreferences { get; set; }
     }
 }
