@@ -143,6 +143,20 @@ instance.interceptors.response.use(
 );
 
 export const getCurrentUser = () => instance.get(Constants.API_PATHS.USER_CURRENT);
+export const getCurrentUserNotificationPreferences = () =>
+    instance.get(Constants.API_PATHS.USER_CURRENT_NOTIFICATION_PREFERENCES, { skipClientErrorDialog: true });
+export const putCurrentUserNotificationPreference = (serviceAreaNumber, submissionStreamId, preference) =>
+    instance.put(
+        `${Constants.API_PATHS.USER_CURRENT_NOTIFICATION_PREFERENCES}/${serviceAreaNumber}/${submissionStreamId}`,
+        preference,
+        { skipClientErrorDialog: true }
+    );
+export const putAllCurrentUserNotificationPreferences = (enabled) =>
+    instance.put(
+        `${Constants.API_PATHS.USER_CURRENT_NOTIFICATION_PREFERENCES}/all`,
+        { enabled },
+        { skipClientErrorDialog: true }
+    );
 export const getUser = (id) => instance.get(`${Constants.API_PATHS.USER}/${id}`);
 export const getUserStatuses = () => instance.get(Constants.API_PATHS.USER_STATUSES);
 export const getUserTypes = () => instance.get(Constants.API_PATHS.USER_TYPES);

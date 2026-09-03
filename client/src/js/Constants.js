@@ -30,6 +30,7 @@ export const API_PATHS = {
   SERVICE_AREAS: '/serviceareas',
   USER: '/users',
   USER_CURRENT: '/users/current',
+  USER_CURRENT_NOTIFICATION_PREFERENCES: '/users/current/notification-preferences',
   USER_TYPES: '/users/usertypes',
   USER_STATUSES: '/users/userstatus',
   USER_BCEID_ACCOUNT: '/users/bceidaccount',
@@ -57,6 +58,7 @@ export const REPORT_TYPES = {
 export const PATHS = {
   UNAUTHORIZED: '/unauthorized',
   HOME: '/',
+  NOTIFICATION_PREFERENCES: '/notification-preferences',
   ABOUT: '/admin/about',
   API_ACCESS: '/admin/api-access',
   WORK_REPORTING: '/workreporting',
