@@ -15,6 +15,7 @@ namespace Hmcr.Model.Dtos.User
         public UserCurrentDto()
         {
             ServiceAreas = new List<ServiceAreaDto>();
+            Roles = new List<UserCurrentRoleDto>();
             Permissions = new List<string>();
         }
 
@@ -29,9 +30,12 @@ namespace Hmcr.Model.Dtos.User
         public string Email { get; set; }
         public string BusinessLegalName { get; set; }
         public DateTime? EndDate { get; set; }
+        public bool IsActive => EndDate == null || EndDate > DateTime.Today;
+        public string AccountStatus => IsActive ? UserStatusDto.ACTIVE : UserStatusDto.INACTIVE;
         public bool IsSystemAdmin { get; set; }
 
         public virtual IList<ServiceAreaDto> ServiceAreas { get; set; }
+        public virtual IList<UserCurrentRoleDto> Roles { get; set; }
         public virtual IList<string> Permissions { get; set; }       
     }
 }
