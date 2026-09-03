@@ -126,11 +126,26 @@ const Header = ({ currentUser }) => {
               </UncontrolledDropdown>
             </Nav>
             <Nav className="navbar-nav ms-auto">
-              <NavItem>
-                <Button color="link" onClick={() => Keycloak.logout()}>
-                  <FontAwesomeIcon icon="user" /> {`${currentUser.username},  Logout`}
-                </Button>
-              </NavItem>
+              {currentUser.userType === Constants.USER_TYPE.INTERNAL ? (
+                <UncontrolledDropdown nav inNavbar>
+                  <DropdownToggle nav caret aria-label={`User menu for ${currentUser.username}`}>
+                    <FontAwesomeIcon icon="user" /> {currentUser.username}
+                  </DropdownToggle>
+                  <DropdownMenu end>
+                    <DropdownItem tag={Link} to={Constants.PATHS.NOTIFICATION_PREFERENCES} onClick={hideNavbar}>
+                      Notification Preferences
+                    </DropdownItem>
+                    <DropdownItem divider />
+                    <DropdownItem onClick={() => Keycloak.logout()}>Logout</DropdownItem>
+                  </DropdownMenu>
+                </UncontrolledDropdown>
+              ) : (
+                <NavItem>
+                  <Button color="link" onClick={() => Keycloak.logout()}>
+                    <FontAwesomeIcon icon="user" /> {`${currentUser.username},  Logout`}
+                  </Button>
+                </NavItem>
+              )}
             </Nav>
           </Collapse>
         </Container>
