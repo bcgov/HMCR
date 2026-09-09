@@ -120,11 +120,15 @@ BEGIN
     END CATCH;
 END;');
 
-    UPDATE [dbo].[HMR_FEEDBACK_MESSAGE]
-    SET
-        [DELIVERY_STATUS] = CASE WHEN [IS_SENT] = 1 THEN 'SENT' ELSE 'FAILED' END,
-        [CONCURRENCY_CONTROL_NUMBER] = [CONCURRENCY_CONTROL_NUMBER] + 1
-    WHERE [DELIVERY_STATUS] IS NULL;
+    -- HMR_FEEDBACK_MESSAGE already exists when this batch is compiled. Keep
+    -- every statement that binds the newly added column in a child batch so
+    -- SQL Server compiles it only after ALTER TABLE above has completed.
+    EXEC(N'
+UPDATE [dbo].[HMR_FEEDBACK_MESSAGE]
+SET
+    [DELIVERY_STATUS] = CASE WHEN [IS_SENT] = 1 THEN ''SENT'' ELSE ''FAILED'' END,
+    [CONCURRENCY_CONTROL_NUMBER] = [CONCURRENCY_CONTROL_NUMBER] + 1
+WHERE [DELIVERY_STATUS] IS NULL;');
 
     IF EXISTS
     (
@@ -135,8 +139,9 @@ END;');
           AND [is_nullable] = 1
     )
     BEGIN
-        ALTER TABLE [dbo].[HMR_FEEDBACK_MESSAGE]
-            ALTER COLUMN [DELIVERY_STATUS] VARCHAR(30) NOT NULL;
+        EXEC(N'
+ALTER TABLE [dbo].[HMR_FEEDBACK_MESSAGE]
+    ALTER COLUMN [DELIVERY_STATUS] VARCHAR(30) NOT NULL;');
     END;
 
     IF NOT EXISTS
@@ -150,9 +155,10 @@ END;');
           AND c.[name] = N'DELIVERY_STATUS'
     )
     BEGIN
-        ALTER TABLE [dbo].[HMR_FEEDBACK_MESSAGE]
-            ADD CONSTRAINT [HMR_FDBK_MSG_DLVRY_ST_DF]
-            DEFAULT ('FAILED') FOR [DELIVERY_STATUS];
+        EXEC(N'
+ALTER TABLE [dbo].[HMR_FEEDBACK_MESSAGE]
+    ADD CONSTRAINT [HMR_FDBK_MSG_DLVRY_ST_DF]
+    DEFAULT (''FAILED'') FOR [DELIVERY_STATUS];');
     END;
 
     IF NOT EXISTS
@@ -163,9 +169,10 @@ END;');
           AND [name] = N'HMR_FDBK_MSG_DLVRY_ST_CK'
     )
     BEGIN
-        ALTER TABLE [dbo].[HMR_FEEDBACK_MESSAGE] WITH CHECK
-            ADD CONSTRAINT [HMR_FDBK_MSG_DLVRY_ST_CK]
-            CHECK ([DELIVERY_STATUS] IN ('SENT', 'FAILED', 'SKIPPED_NO_RECIPIENTS'));
+        EXEC(N'
+ALTER TABLE [dbo].[HMR_FEEDBACK_MESSAGE] WITH CHECK
+    ADD CONSTRAINT [HMR_FDBK_MSG_DLVRY_ST_CK]
+    CHECK ([DELIVERY_STATUS] IN (''SENT'', ''FAILED'', ''SKIPPED_NO_RECIPIENTS''));');
     END;
 
     /* ------------------------------------------------------------------ */
