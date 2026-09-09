@@ -1,19 +1,14 @@
 ﻿using System;
-using System.Collections.Generic;
 
 namespace Hmcr.Data.Database.Entities
 {
-    public partial class HmrServiceAreaUser
+    public partial class HmrNotificationPreference
     {
-        public HmrServiceAreaUser()
-        {
-            HmrNotificationPreferences = new HashSet<HmrNotificationPreference>();
-        }
-
+        public decimal NotificationPreferenceId { get; set; }
         public decimal ServiceAreaUserId { get; set; }
-        public decimal ServiceAreaNumber { get; set; }
-        public decimal SystemUserId { get; set; }
-        public DateTime? EndDate { get; set; }
+        public decimal SubmissionStreamId { get; set; }
+        public bool SuccessEmailEnabled { get; set; }
+        public bool ErrorEmailEnabled { get; set; }
         public long ConcurrencyControlNumber { get; set; }
         public string AppCreateUserid { get; set; }
         public DateTime AppCreateTimestamp { get; set; }
@@ -28,8 +23,7 @@ namespace Hmcr.Data.Database.Entities
         public string DbAuditLastUpdateUserid { get; set; }
         public DateTime DbAuditLastUpdateTimestamp { get; set; }
 
-        public virtual HmrServiceArea ServiceAreaNumberNavigation { get; set; }
-        public virtual HmrSystemUser SystemUser { get; set; }
-        public virtual ICollection<HmrNotificationPreference> HmrNotificationPreferences { get; set; }
+        public virtual HmrServiceAreaUser ServiceAreaUser { get; set; }
+        public virtual HmrSubmissionStream SubmissionStream { get; set; }
     }
 }

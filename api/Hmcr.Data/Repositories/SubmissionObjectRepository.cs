@@ -183,6 +183,7 @@ namespace Hmcr.Data.Repositories
                      SubmissionObjectId = (long)x.SubmissionObjectId,
                      FileName = x.FileName,
                      FileType = x.SubmissionStream.StreamName,
+                     SubmissionStreamId = x.SubmissionStreamId,
                      SubmissionDate = x.AppCreateTimestamp,
                      ServiceAreaNumber = (int)x.ServiceAreaNumber,
                      NumOfRecords = x.HmrSubmissionRows.Count(),

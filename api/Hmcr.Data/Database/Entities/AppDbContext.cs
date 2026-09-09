@@ -28,6 +28,7 @@ namespace Hmcr.Data.Database.Entities
         public virtual DbSet<HmrContractTermHist> HmrContractTermHists { get; set; }
         public virtual DbSet<HmrDistrict> HmrDistricts { get; set; }
         public virtual DbSet<HmrFeedbackMessage> HmrFeedbackMessages { get; set; }
+        public virtual DbSet<HmrNotificationPreference> HmrNotificationPreferences { get; set; }
         public virtual DbSet<HmrLocationCode> HmrLocationCodes { get; set; }
         public virtual DbSet<HmrLocationCodeHist> HmrLocationCodeHists { get; set; }
         public virtual DbSet<HmrMimeType> HmrMimeTypes { get; set; }
@@ -1099,6 +1100,14 @@ namespace Hmcr.Data.Database.Entities
                     .IsUnicode(false)
                     .HasComment("Error message received from application email invocation, if encountered.  Used to troubleshoot emailing issues.  Does not factor in any subsequent email bounces or rejections from a receiving mail server.");
 
+                entity.Property(e => e.DeliveryStatus)
+                    .IsRequired()
+                    .HasColumnName("DELIVERY_STATUS")
+                    .HasMaxLength(30)
+                    .IsUnicode(false)
+                    .HasDefaultValueSql("('FAILED')")
+                    .HasComment("Final application delivery outcome: SENT, FAILED, or SKIPPED_NO_RECIPIENTS.");
+
                 entity.Property(e => e.SubmissionObjectId)
                     .HasColumnName("SUBMISSION_OBJECT_ID")
                     .HasColumnType("numeric(9, 0)")
@@ -1109,6 +1118,140 @@ namespace Hmcr.Data.Database.Entities
                     .HasForeignKey(d => d.SubmissionObjectId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("HMR_FDBK_MSG_SUBM_OBJ_FK");
+            });
+
+            modelBuilder.Entity<HmrNotificationPreference>(entity =>
+            {
+                entity.HasKey(e => e.NotificationPreferenceId)
+                    .HasName("HMR_NOTIF_PREF_PK");
+
+                entity.ToTable("HMR_NOTIFICATION_PREFERENCE");
+
+                entity.HasComment("Email notification preferences for an internal user's service area assignment and submission stream.");
+
+                entity.HasIndex(e => new { e.ServiceAreaUserId, e.SubmissionStreamId })
+                    .HasName("HMR_NOTIF_PREF_UK")
+                    .IsUnique();
+
+                entity.HasIndex(e => e.SubmissionStreamId)
+                    .HasName("HMR_NOTIF_PREF_STRM_FK_I");
+
+                entity.Property(e => e.NotificationPreferenceId)
+                    .HasColumnName("NOTIFICATION_PREFERENCE_ID")
+                    .HasColumnType("numeric(9, 0)")
+                    .HasDefaultValueSql("(NEXT VALUE FOR [HMR_NOTIF_PREF_ID_SEQ])")
+                    .HasComment("Unique identifier for a notification preference.");
+
+                entity.Property(e => e.ServiceAreaUserId)
+                    .HasColumnName("SERVICE_AREA_USER_ID")
+                    .HasColumnType("numeric(9, 0)")
+                    .HasComment("Service area assignment governed by this preference.");
+
+                entity.Property(e => e.SubmissionStreamId)
+                    .HasColumnName("SUBMISSION_STREAM_ID")
+                    .HasColumnType("numeric(9, 0)")
+                    .HasComment("Submission stream governed by this preference.");
+
+                entity.Property(e => e.SuccessEmailEnabled)
+                    .HasColumnName("SUCCESS_EMAIL_ENABLED")
+                    .HasDefaultValueSql("((1))")
+                    .HasComment("Indicates whether successful upload emails are enabled.");
+
+                entity.Property(e => e.ErrorEmailEnabled)
+                    .HasColumnName("ERROR_EMAIL_ENABLED")
+                    .HasDefaultValueSql("((1))")
+                    .HasComment("Indicates whether upload error emails are enabled.");
+
+                entity.Property(e => e.ConcurrencyControlNumber)
+                    .HasColumnName("CONCURRENCY_CONTROL_NUMBER")
+                    .HasDefaultValueSql("((1))")
+                    .HasComment("Record under edit indicator used for optimistic record contention management.");
+
+                entity.Property(e => e.AppCreateTimestamp)
+                    .HasColumnName("APP_CREATE_TIMESTAMP")
+                    .HasColumnType("datetime")
+                    .HasComment("Date and time of record creation");
+
+                entity.Property(e => e.AppCreateUserDirectory)
+                    .IsRequired()
+                    .HasColumnName("APP_CREATE_USER_DIRECTORY")
+                    .HasMaxLength(12)
+                    .IsUnicode(false)
+                    .HasComment("Active Directory which retains source of truth for user identifiers.");
+
+                entity.Property(e => e.AppCreateUserGuid)
+                    .HasColumnName("APP_CREATE_USER_GUID")
+                    .HasComment("Unique identifier of user who created record");
+
+                entity.Property(e => e.AppCreateUserid)
+                    .IsRequired()
+                    .HasColumnName("APP_CREATE_USERID")
+                    .HasMaxLength(30)
+                    .IsUnicode(false)
+                    .HasComment("Unique identifier of user who created record");
+
+                entity.Property(e => e.AppLastUpdateTimestamp)
+                    .HasColumnName("APP_LAST_UPDATE_TIMESTAMP")
+                    .HasColumnType("datetime")
+                    .HasComment("Date and time of last record update");
+
+                entity.Property(e => e.AppLastUpdateUserDirectory)
+                    .IsRequired()
+                    .HasColumnName("APP_LAST_UPDATE_USER_DIRECTORY")
+                    .HasMaxLength(12)
+                    .IsUnicode(false)
+                    .HasComment("Active Directory which retains source of truth for user identifiers.");
+
+                entity.Property(e => e.AppLastUpdateUserGuid)
+                    .HasColumnName("APP_LAST_UPDATE_USER_GUID")
+                    .HasComment("Unique identifier of user who last updated record");
+
+                entity.Property(e => e.AppLastUpdateUserid)
+                    .IsRequired()
+                    .HasColumnName("APP_LAST_UPDATE_USERID")
+                    .HasMaxLength(30)
+                    .IsUnicode(false)
+                    .HasComment("Unique identifier of user who last updated record");
+
+                entity.Property(e => e.DbAuditCreateTimestamp)
+                    .HasColumnName("DB_AUDIT_CREATE_TIMESTAMP")
+                    .HasColumnType("datetime")
+                    .HasDefaultValueSql("(getutcdate())")
+                    .HasComment("Date and time record created in the database");
+
+                entity.Property(e => e.DbAuditCreateUserid)
+                    .IsRequired()
+                    .HasColumnName("DB_AUDIT_CREATE_USERID")
+                    .HasMaxLength(30)
+                    .IsUnicode(false)
+                    .HasDefaultValueSql("(user_name())")
+                    .HasComment("Named database user who created record");
+
+                entity.Property(e => e.DbAuditLastUpdateTimestamp)
+                    .HasColumnName("DB_AUDIT_LAST_UPDATE_TIMESTAMP")
+                    .HasColumnType("datetime")
+                    .HasDefaultValueSql("(getutcdate())")
+                    .HasComment("Date and time record was last updated in the database.");
+
+                entity.Property(e => e.DbAuditLastUpdateUserid)
+                    .IsRequired()
+                    .HasColumnName("DB_AUDIT_LAST_UPDATE_USERID")
+                    .HasMaxLength(30)
+                    .IsUnicode(false)
+                    .HasDefaultValueSql("(user_name())")
+                    .HasComment("Named database user who last updated record");
+
+                entity.HasOne(d => d.ServiceAreaUser)
+                    .WithMany(p => p.HmrNotificationPreferences)
+                    .HasForeignKey(d => d.ServiceAreaUserId)
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .HasConstraintName("HMR_NOTIF_PREF_SAU_FK");
+
+                entity.HasOne(d => d.SubmissionStream)
+                    .WithMany(p => p.HmrNotificationPreferences)
+                    .HasForeignKey(d => d.SubmissionStreamId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("HMR_NOTIF_PREF_STRM_FK");
             });
 
             modelBuilder.Entity<HmrLocationCode>(entity =>
@@ -7212,6 +7355,10 @@ namespace Hmcr.Data.Database.Entities
             });
 
             modelBuilder.HasSequence("FDBK_MSG_ID_SEQ")
+                .HasMin(1)
+                .HasMax(999999999);
+
+            modelBuilder.HasSequence("HMR_NOTIF_PREF_ID_SEQ")
                 .HasMin(1)
                 .HasMax(999999999);
 

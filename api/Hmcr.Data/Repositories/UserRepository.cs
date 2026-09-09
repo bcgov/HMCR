@@ -27,7 +27,7 @@ namespace Hmcr.Data.Repositories
         Task DeleteUserAsync(UserDeleteDto user);
         Task<HmrSystemUser> GetActiveUserEntityAsync(Guid userGuid);
         Task UpdateUserFromBceidAsync(BceidAccount user, long concurrencyControlNumber);
-        IEnumerable<UserDto> GetActiveUsersByServiceAreaNumber(decimal serviceAreaNumber);
+        IEnumerable<UserDto> GetActiveUsersByServiceAreaNumber(decimal serviceAreaNumber, decimal submissionStreamId, bool isError);
         Task UpdateUserApiClientId(string clientId);
         Task<IEnumerable<UserSearchExportDto>> GetUsersByFilterAsync(decimal[]? serviceAreas, string[]? userTypes, string searchText, bool? isActive);
     }
@@ -57,11 +57,16 @@ namespace Hmcr.Data.Repositories
 
             var currentUser = Mapper.Map<UserCurrentDto>(userEntity);
 
-            var permissions =
-                userEntity
+            var activeUserRoles = userEntity
                 .HmrUserRoles
+                .Where(x =>
+                    (x.EndDate == null || x.EndDate > DateTime.Today) &&
+                    (x.Role.EndDate == null || x.Role.EndDate > DateTime.Today))
+                .ToList();
+
+            var permissions =
+                activeUserRoles
                 .Select(r => r.Role)
-                .Where(r => r.EndDate == null || r.EndDate > DateTime.Today) //active roles
                 .SelectMany(r => r.HmrRolePermissions.Select(rp => rp.Permission))
                 .Where(p => p.EndDate == null || p.EndDate > DateTime.Today) //active permissions
                 .ToLookup(p => p.Name)
@@ -71,14 +76,26 @@ namespace Hmcr.Data.Repositories
 
             currentUser.Permissions = permissions;
 
+            currentUser.Roles = activeUserRoles
+                .Select(x => new UserCurrentRoleDto
+                {
+                    RoleId = x.RoleId,
+                    Name = x.Role.Name,
+                    Description = x.Role.Description
+                })
+                .OrderBy(x => x.Name)
+                .ToList();
+
             var serviceAreas =
                 userEntity
                 .HmrServiceAreaUsers
-                .Select(s => s.ServiceAreaNumberNavigation);
+                .Where(x => x.EndDate == null || x.EndDate > DateTime.Today)
+                .Select(s => s.ServiceAreaNumberNavigation)
+                .OrderBy(x => x.ServiceAreaNumber);
 
             currentUser.ServiceAreas = new List<ServiceAreaDto>(Mapper.Map<IEnumerable<ServiceAreaDto>>(serviceAreas));
 
-            currentUser.IsSystemAdmin = userEntity.HmrUserRoles.Any(x => x.Role.Name == Constants.SystemAdmin);
+            currentUser.IsSystemAdmin = activeUserRoles.Any(x => x.Role.Name == Constants.SystemAdmin);
 
             return currentUser;
         }
@@ -423,9 +440,27 @@ namespace Hmcr.Data.Repositories
         }
 
 
-        public IEnumerable<UserDto> GetActiveUsersByServiceAreaNumber(decimal serviceAreaNumber)
+        public IEnumerable<UserDto> GetActiveUsersByServiceAreaNumber(decimal serviceAreaNumber, decimal submissionStreamId, bool isError)
         {
-            return GetAll<UserDto>(x => (x.EndDate == null || x.EndDate > DateTime.Today) && x.HmrServiceAreaUsers.Any(y => y.ServiceAreaNumber == serviceAreaNumber));
+            var today = DateTime.Today;
+
+            var recipients = DbSet.AsNoTracking()
+                .Where(user =>
+                    (user.EndDate == null || user.EndDate > today) &&
+                    user.HmrServiceAreaUsers.Any(serviceAreaUser =>
+                        serviceAreaUser.ServiceAreaNumber == serviceAreaNumber &&
+                        (serviceAreaUser.EndDate == null || serviceAreaUser.EndDate > today) &&
+                        (
+                            user.UserType != UserTypeDto.INTERNAL ||
+                            !serviceAreaUser.HmrNotificationPreferences.Any(preference =>
+                                preference.SubmissionStreamId == submissionStreamId) ||
+                            serviceAreaUser.HmrNotificationPreferences.Any(preference =>
+                                preference.SubmissionStreamId == submissionStreamId &&
+                                (isError ? preference.ErrorEmailEnabled : preference.SuccessEmailEnabled))
+                        )))
+                .ToList();
+
+            return Mapper.Map<IEnumerable<UserDto>>(recipients);
         }
 
         public async Task UpdateUserApiClientId(string apiClientId)
