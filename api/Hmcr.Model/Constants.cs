@@ -51,7 +51,32 @@ namespace Hmcr.Model
         public const string RoleRead = "ROLE_R";
         public const string FileUploadWrite = "FILE_W";
         public const string FileUploadRead = "FILE_R";
+        public const string WorkReportWrite = "WORK_REPORT_W";
+        public const string SubmissionConfigurationWrite = "SUB_CONFIG_W";
         public const string Export = "EXPORT";
+    }
+
+    public static class SubmissionConfigurationValues
+    {
+        public const string GlobalScope = "GLOBAL";
+        public const string ServiceAreaScope = "SERVICE_AREA";
+
+        public const string ReminderWindow = "REMINDER";
+        public const string BlackoutWindow = "BLACKOUT";
+
+        public const string InactiveState = "INACTIVE";
+        public const string OutsideWindowState = "OUTSIDE_WINDOW";
+        public const string ReminderState = "REMINDER";
+        public const string BlackoutState = "BLACKOUT";
+
+        public const string ActivityAccomplishmentRule = "ACTIVITY_ACCOMPLISHMENT";
+        public const string GreaterThanOperator = "GT";
+        public const string GreaterThanOrEqualOperator = "GTE";
+
+        public const string UserTypeAudience = "USER_TYPE";
+
+        public const string WarningSeverity = "WARNING";
+        public const string DangerSeverity = "DANGER";
     }
 
     public static class Entities
