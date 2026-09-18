@@ -42,6 +42,7 @@ export const API_PATHS = {
   SUBMISSIONS: '/submissionobjects',
   SUBMISSION_STATUS: '/submissionstatus',
   SUBMISSION_STREAMS: '/submissionstreams',
+  SUBMISSION_CONFIGURATIONS: '/submissionconfigurations',
   REPORT_EXPORT: '/exports/report',
   SUPPORTED_FORMATS: '/exports/supportedformats',
   VERSION: '/version',
@@ -59,6 +60,7 @@ export const PATHS = {
   UNAUTHORIZED: '/unauthorized',
   HOME: '/',
   NOTIFICATION_PREFERENCES: '/notification-preferences',
+  SUBMISSION_CONFIGURATION: '/submission-configuration',
   ABOUT: '/admin/about',
   API_ACCESS: '/admin/api-access',
   WORK_REPORTING: '/workreporting',
@@ -94,6 +96,8 @@ export const PERMISSIONS = {
   ROLE_R: 'ROLE_R',
   FILE_W: 'FILE_W',
   FILE_R: 'FILE_R',
+  SUB_CONFIG_W: 'SUB_CONFIG_W',
+  WORK_REPORT_W: 'WORK_REPORT_W',
   EXPORT: 'EXPORT',
   SALT: 'SALT'
 };

@@ -135,6 +135,15 @@ const Header = ({ currentUser }) => {
                     <DropdownItem tag={Link} to={Constants.PATHS.NOTIFICATION_PREFERENCES} onClick={hideNavbar}>
                       Notification Preferences
                     </DropdownItem>
+                    <Authorize requires={Constants.PERMISSIONS.SUB_CONFIG_W}>
+                      <DropdownItem
+                        tag={Link}
+                        to={Constants.PATHS.SUBMISSION_CONFIGURATION}
+                        onClick={hideNavbar}
+                      >
+                        Submission Configuration
+                      </DropdownItem>
+                    </Authorize>
                     <DropdownItem divider />
                     <DropdownItem onClick={() => Keycloak.logout()}>Logout</DropdownItem>
                   </DropdownMenu>

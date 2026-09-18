@@ -13,6 +13,7 @@ import { showValidationErrorDialog } from '../actions';
 
 import * as Constants from '../Constants';
 import * as api from '../Api';
+import { getUploadableSubmissionStreams } from '../utils';
 
 const defaultFormValues = { reportTypeId: null, reportFile: null };
 
@@ -60,8 +61,8 @@ const WorkReportingUpload = ({
   const [reportTypes, setReportTypes] = useState([]);
 
   useEffect(() => {
-    setReportTypes(Object.values(submissionStreams).filter((o) => o.isActive));
-  }, [submissionStreams]);
+    setReportTypes(getUploadableSubmissionStreams(submissionStreams, currentUser.permissions));
+  }, [currentUser.permissions, submissionStreams]);
 
   const resetUploadStatus = () => {
     setFileInputKey(Math.random());

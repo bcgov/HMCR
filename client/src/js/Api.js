@@ -180,6 +180,21 @@ export const deleteRole = (id, endDate) =>
 export const getPermissions = () => instance.get(Constants.API_PATHS.PERMISSIONS);
 
 export const getSubmissionStreams = () => instance.get(Constants.API_PATHS.SUBMISSION_STREAMS);
+export const getSubmissionConfigurations = () =>
+    instance.get(Constants.API_PATHS.SUBMISSION_CONFIGURATIONS, { skipClientErrorDialog: true });
+export const putSubmissionConfigurationActivation = (id, isActive, concurrencyControlNumber) =>
+    instance.put(`${Constants.API_PATHS.SUBMISSION_CONFIGURATIONS}/${id}/activation`, {
+        isActive,
+        concurrencyControlNumber,
+    }, { skipClientErrorDialog: true });
+export const getSubmissionConfigurationNotices = (submissionStreamId, serviceAreaNumber) =>
+    instance.get(`${Constants.API_PATHS.SUBMISSION_CONFIGURATIONS}/notices`, {
+        params: {
+            submissionStreamId,
+            ...(serviceAreaNumber !== null && serviceAreaNumber !== undefined ? { serviceAreaNumber } : {}),
+        },
+        skipClientErrorDialog: true,
+    });
 export const searchSubmissions = (params) => instance.get(Constants.API_PATHS.SUBMISSIONS, { params: {...params } });
 export const getSubmissionResult = (id) => instance.get(`${Constants.API_PATHS.SUBMISSIONS}/${id}/result`);
 export const getSubmissionFile = (id) =>
