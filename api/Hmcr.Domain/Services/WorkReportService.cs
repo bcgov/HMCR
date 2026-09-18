@@ -7,6 +7,7 @@ using Hmcr.Domain.Services.Base;
 using Hmcr.Model;
 using Hmcr.Model.Dtos.SubmissionObject;
 using Hmcr.Model.Dtos.SubmissionRow;
+using Hmcr.Model.Dtos.SubmissionConfiguration;
 using Hmcr.Model.Dtos.WorkReport;
 using Hmcr.Model.Utils;
 using Microsoft.Extensions.Logging;
@@ -28,11 +29,15 @@ namespace Hmcr.Domain.Services
     {
         private IWorkReportRepository _workRptRepo;
         private ILogger<WorkReportService> _logger;
+        private readonly ISubmissionRestrictionEvaluator _submissionRestrictionEvaluator;
+        private readonly HmcrCurrentUser _currentUser;
+        private readonly TimeProvider _timeProvider;
 
         public WorkReportService(IUnitOfWork unitOfWork, 
             ISubmissionStreamService streamService, ISubmissionObjectRepository submissionRepo, ISumbissionRowRepository rowRepo, 
             IContractTermRepository contractRepo, ISubmissionStatusService statusService, IWorkReportRepository workRptRepo, IFieldValidatorService validator,
-            ILogger<WorkReportService> logger, IServiceAreaService saService)
+            ILogger<WorkReportService> logger, IServiceAreaService saService,
+            ISubmissionRestrictionEvaluator submissionRestrictionEvaluator, HmcrCurrentUser currentUser, TimeProvider timeProvider)
             : base(unitOfWork, streamService, submissionRepo, rowRepo, contractRepo, statusService, validator, saService, logger)
         {
             TableName = TableNames.WorkReport;
@@ -41,10 +46,16 @@ namespace Hmcr.Domain.Services
             DateFieldName = Fields.EndDate;
             _workRptRepo = workRptRepo;
             _logger = logger;
+            _submissionRestrictionEvaluator = submissionRestrictionEvaluator;
+            _currentUser = currentUser;
+            _timeProvider = timeProvider;
         }
 
         protected override async Task<bool> ParseRowsAsync(SubmissionObjectCreateDto submission, TextReader textReader, Dictionary<string, List<string>> errors)
         {
+            // Use one request-local timestamp so a file cannot change blackout state
+            // while it is being parsed (for example, at Pacific midnight).
+            var submittedAtUtc = _timeProvider.GetUtcNow();
             using var csv = new CsvReader(textReader, CultureInfo.InvariantCulture);
 
             CsvHelperUtils.Config(errors, csv, false);
@@ -83,6 +94,7 @@ namespace Hmcr.Domain.Services
                     }
 
                     row.ServiceArea = serviceArea.ConvertToServiceAreaString(row.ServiceArea);
+                    row.RowNum = csv.Context.Row;
                     rows.Add(row);
                 }
                 catch (TypeConverterException ex)
@@ -139,6 +151,31 @@ namespace Hmcr.Domain.Services
             if (errors.Count == 0)
             {
                 Validate(rows, Entities.WorkReportInit, errors);
+            }
+
+            if (errors.Count == 0)
+            {
+                var restrictionRows = rows.Select(row => new SubmissionRestrictionRowDto
+                {
+                    RowNum = row.RowNum,
+                    RecordNumber = row.RecordNumber,
+                    ActivityNumber = row.ActivityNumber,
+                    Accomplishment = row.Accomplishment
+                });
+
+                var violations = await _submissionRestrictionEvaluator.EvaluateAsync(
+                    submission.SubmissionStreamId,
+                    submission.ServiceAreaNumber,
+                    _currentUser.UserType,
+                    submittedAtUtc,
+                    restrictionRows);
+
+                foreach (var violation in violations
+                    .GroupBy(x => new { x.SubmissionConfigurationId, x.RowNum, x.Message })
+                    .Select(x => x.First()))
+                {
+                    errors.AddItem("Submission Blackout", violation.Message);
+                }
             }
 
             return errors.Count == 0;
