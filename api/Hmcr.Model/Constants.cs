@@ -326,7 +326,7 @@ namespace Hmcr.Model
 
     public static class FileError
     {
-        public const string ReferToRowErrors = "{ \"fieldMessages\": [ { \"field\": \"File\", \"messages\": [ \"Some headers or values are missing/incorrect. Please refer to row error(s).\" ] } ] }";
+        public const string ReferToRowErrors = "{ \"fieldMessages\": [ { \"field\": \"File\", \"messages\": [ \"The following errors were found:\" ] } ] }";
 
         /// <summary>
         /// User-facing message stored when file processing fails with an unhandled exception.
