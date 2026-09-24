@@ -7,6 +7,7 @@ namespace Hmcr.Data.Database.Entities
     {
         public HmrSubmissionStream()
         {
+            HmrNotificationPreferences = new HashSet<HmrNotificationPreference>();
             HmrStreamElements = new HashSet<HmrStreamElement>();
             HmrSubmissionObjects = new HashSet<HmrSubmissionObject>();
         }
@@ -30,6 +31,7 @@ namespace Hmcr.Data.Database.Entities
         public string DbAuditLastUpdateUserid { get; set; }
         public DateTime DbAuditLastUpdateTimestamp { get; set; }
 
+        public virtual ICollection<HmrNotificationPreference> HmrNotificationPreferences { get; set; }
         public virtual ICollection<HmrStreamElement> HmrStreamElements { get; set; }
         public virtual ICollection<HmrSubmissionObject> HmrSubmissionObjects { get; set; }
     }

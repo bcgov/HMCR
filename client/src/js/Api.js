@@ -143,6 +143,20 @@ instance.interceptors.response.use(
 );
 
 export const getCurrentUser = () => instance.get(Constants.API_PATHS.USER_CURRENT);
+export const getCurrentUserNotificationPreferences = () =>
+    instance.get(Constants.API_PATHS.USER_CURRENT_NOTIFICATION_PREFERENCES, { skipClientErrorDialog: true });
+export const putCurrentUserNotificationPreference = (serviceAreaNumber, submissionStreamId, preference) =>
+    instance.put(
+        `${Constants.API_PATHS.USER_CURRENT_NOTIFICATION_PREFERENCES}/${serviceAreaNumber}/${submissionStreamId}`,
+        preference,
+        { skipClientErrorDialog: true }
+    );
+export const putAllCurrentUserNotificationPreferences = (enabled) =>
+    instance.put(
+        `${Constants.API_PATHS.USER_CURRENT_NOTIFICATION_PREFERENCES}/all`,
+        { enabled },
+        { skipClientErrorDialog: true }
+    );
 export const getUser = (id) => instance.get(`${Constants.API_PATHS.USER}/${id}`);
 export const getUserStatuses = () => instance.get(Constants.API_PATHS.USER_STATUSES);
 export const getUserTypes = () => instance.get(Constants.API_PATHS.USER_TYPES);
@@ -166,6 +180,21 @@ export const deleteRole = (id, endDate) =>
 export const getPermissions = () => instance.get(Constants.API_PATHS.PERMISSIONS);
 
 export const getSubmissionStreams = () => instance.get(Constants.API_PATHS.SUBMISSION_STREAMS);
+export const getSubmissionConfigurations = () =>
+    instance.get(Constants.API_PATHS.SUBMISSION_CONFIGURATIONS, { skipClientErrorDialog: true });
+export const putSubmissionConfigurationActivation = (id, isActive, concurrencyControlNumber) =>
+    instance.put(`${Constants.API_PATHS.SUBMISSION_CONFIGURATIONS}/${id}/activation`, {
+        isActive,
+        concurrencyControlNumber,
+    }, { skipClientErrorDialog: true });
+export const getSubmissionConfigurationNotices = (submissionStreamId, serviceAreaNumber) =>
+    instance.get(`${Constants.API_PATHS.SUBMISSION_CONFIGURATIONS}/notices`, {
+        params: {
+            submissionStreamId,
+            ...(serviceAreaNumber !== null && serviceAreaNumber !== undefined ? { serviceAreaNumber } : {}),
+        },
+        skipClientErrorDialog: true,
+    });
 export const searchSubmissions = (params) => instance.get(Constants.API_PATHS.SUBMISSIONS, { params: {...params } });
 export const getSubmissionResult = (id) => instance.get(`${Constants.API_PATHS.SUBMISSIONS}/${id}/result`);
 export const getSubmissionFile = (id) =>

@@ -30,6 +30,7 @@ export const API_PATHS = {
   SERVICE_AREAS: '/serviceareas',
   USER: '/users',
   USER_CURRENT: '/users/current',
+  USER_CURRENT_NOTIFICATION_PREFERENCES: '/users/current/notification-preferences',
   USER_TYPES: '/users/usertypes',
   USER_STATUSES: '/users/userstatus',
   USER_BCEID_ACCOUNT: '/users/bceidaccount',
@@ -41,6 +42,7 @@ export const API_PATHS = {
   SUBMISSIONS: '/submissionobjects',
   SUBMISSION_STATUS: '/submissionstatus',
   SUBMISSION_STREAMS: '/submissionstreams',
+  SUBMISSION_CONFIGURATIONS: '/submissionconfigurations',
   REPORT_EXPORT: '/exports/report',
   SUPPORTED_FORMATS: '/exports/supportedformats',
   VERSION: '/version',
@@ -57,6 +59,8 @@ export const REPORT_TYPES = {
 export const PATHS = {
   UNAUTHORIZED: '/unauthorized',
   HOME: '/',
+  NOTIFICATION_PREFERENCES: '/notification-preferences',
+  SUBMISSION_CONFIGURATION: '/submission-configuration',
   ABOUT: '/admin/about',
   API_ACCESS: '/admin/api-access',
   WORK_REPORTING: '/workreporting',
@@ -92,6 +96,8 @@ export const PERMISSIONS = {
   ROLE_R: 'ROLE_R',
   FILE_W: 'FILE_W',
   FILE_R: 'FILE_R',
+  SUB_CONFIG_W: 'SUB_CONFIG_W',
+  WORK_REPORT_W: 'WORK_REPORT_W',
   EXPORT: 'EXPORT',
   SALT: 'SALT'
 };
