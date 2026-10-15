@@ -56,6 +56,11 @@ export const REPORT_TYPES = {
   HMR_SALT_REPORT: { api: API_PATHS.SALT_REPORT, name: 'HMR_SALT_REPORT' },
 };
 
+export const SUBMISSION_STATUS_CODES = {
+  FILE_ERROR: 'FE',
+  SUBMISSION_BLOCKED: 'SB',
+};
+
 export const PATHS = {
   UNAUTHORIZED: '/unauthorized',
   HOME: '/',

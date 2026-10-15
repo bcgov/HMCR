@@ -170,6 +170,11 @@ namespace Hmcr.Domain.Services
                     submittedAtUtc,
                     restrictionRows);
 
+                if (violations.Count > 0)
+                {
+                    submission.SubmissionStatusId = _statusService.SubmissionBlocked;
+                }
+
                 foreach (var violation in violations
                     .GroupBy(x => new { x.SubmissionConfigurationId, x.RowNum, x.Message })
                     .Select(x => x.First()))

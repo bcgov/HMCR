@@ -144,6 +144,7 @@ namespace Hmcr.Model
     {
         public const string FileReceived = "FR";
         public const string FileError = "FE";
+        public const string SubmissionBlocked = "SB";
         public const string FileDuplicate = "DS";
         public const string FileInProgress = "DP";
         public const string FileBasicError = "DE";
