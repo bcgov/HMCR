@@ -1,0 +1,83 @@
+@import './vendor/bootstrap-theme.scss';
+
+.submission-configuration {
+  &__heading {
+    align-items: flex-start;
+    border-bottom: 1px solid #eee;
+    display: flex;
+    gap: 1rem;
+    justify-content: space-between;
+    margin-bottom: 1rem;
+    padding-bottom: 0.75rem;
+
+    h2 {
+      margin-bottom: 0.4rem;
+    }
+  }
+
+  &__toggle {
+    align-items: center;
+    display: flex;
+    gap: 0.5rem;
+    margin: 0;
+    min-width: 7rem;
+
+    .form-check-input,
+    .form-check-label {
+      cursor: pointer;
+    }
+
+    .form-check-input:disabled,
+    .form-check-input:disabled + .form-check-label {
+      cursor: wait;
+    }
+  }
+
+  &__details {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0 2rem;
+  }
+
+  &__detail {
+    border-bottom: 1px solid #eee;
+    display: grid;
+    gap: 1rem;
+    grid-template-columns: minmax(9rem, 35%) 1fr;
+    padding: 0.65rem 0;
+
+    dt,
+    dd {
+      margin: 0;
+      overflow-wrap: anywhere;
+    }
+  }
+
+  &__rules,
+  &__windows {
+    th,
+    td {
+      padding: 0.65rem;
+      vertical-align: middle;
+    }
+  }
+}
+
+@media (max-width: 767.98px) {
+  .submission-configuration__details {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 575.98px) {
+  .submission-configuration {
+    &__heading {
+      flex-direction: column;
+    }
+
+    &__detail {
+      gap: 0.25rem;
+      grid-template-columns: 1fr;
+    }
+  }
+}

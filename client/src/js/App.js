@@ -19,6 +19,8 @@ import WorkReporting from './components/WorkReporting';
 import SaltReporting from './components/SaltReporting';
 import Version from './components/Version';
 import ApiAccess from './components/ApiAccess';
+import NotificationPreferences from './components/NotificationPreferences';
+import SubmissionConfiguration from './components/SubmissionConfiguration';
 import WorkReportingSubmissionDetail from './components/WorkReportingSubmissionDetail';
 import ErrorBoundary from './components/ErrorBoundary';
 import { registerGlobalClientErrorHandlers } from './Api';
@@ -84,6 +86,9 @@ const defaultPath = (currentUser) => {
 
   if (currentUser.permissions.includes(Constants.PERMISSIONS.ROLE_R)) return Constants.PATHS.ADMIN_ROLES;
 
+  if (currentUser.permissions.includes(Constants.PERMISSIONS.SUB_CONFIG_W))
+    return Constants.PATHS.SUBMISSION_CONFIGURATION;
+
   if (currentUser.permissions.includes(Constants.PERMISSIONS.FILE_R)) return Constants.PATHS.WORK_REPORTING;
 
   return Constants.PATHS.UNAUTHORIZED;
@@ -111,6 +116,12 @@ const CommonRoutes = () => {
 const ContractorRoutes = (currentUser) => {
   return (
     <Switch>
+      <Route path={Constants.PATHS.NOTIFICATION_PREFERENCES}>
+        <Redirect to={Constants.PATHS.UNAUTHORIZED} />
+      </Route>
+      <Route path={Constants.PATHS.SUBMISSION_CONFIGURATION}>
+        <Redirect to={Constants.PATHS.UNAUTHORIZED} />
+      </Route>
       <Route path={Constants.PATHS.ADMIN}>
         <Redirect to={Constants.PATHS.UNAUTHORIZED} />
       </Route>
@@ -135,6 +146,22 @@ const ContractorRoutes = (currentUser) => {
 const AdminRoutes = (currentUser) => {
   return (
     <Switch>
+      <Route
+        path={Constants.PATHS.NOTIFICATION_PREFERENCES}
+        exact
+        component={NotificationPreferences}
+      />
+      <AuthorizedRoute
+        path={Constants.PATHS.SUBMISSION_CONFIGURATION}
+        requires={Constants.PERMISSIONS.SUB_CONFIG_W}
+        userType={Constants.USER_TYPE.INTERNAL}
+      >
+        <Route
+          path={Constants.PATHS.SUBMISSION_CONFIGURATION}
+          exact
+          component={SubmissionConfiguration}
+        />
+      </AuthorizedRoute>
       <Route path={Constants.PATHS.HOME} exact>
         <Redirect to={getLastVistedPath(currentUser)} />
       </Route>

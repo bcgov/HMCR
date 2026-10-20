@@ -11,6 +11,7 @@ namespace Hmcr.Domain.Services
     {
         decimal FileReceived { get; }
         decimal FileError { get; }
+        decimal SubmissionBlocked { get; }
         decimal FileDuplicate { get; }
         decimal FileInProgress { get; }
         decimal FileBasicError { get; }
@@ -45,6 +46,11 @@ namespace Hmcr.Domain.Services
 
         private decimal? _fileError;
         public decimal FileError => _fileError ??= GetStatusIdByTypeAndCode(StatusType.File, FileStatus.FileError);
+
+        private decimal? _submissionBlocked;
+        public decimal SubmissionBlocked => _submissionBlocked ??= GetStatusIdByTypeAndCode(
+            StatusType.File,
+            FileStatus.SubmissionBlocked);
 
         private decimal? _fileDuplicate;
         public decimal FileDuplicate => _fileDuplicate ??= GetStatusIdByTypeAndCode(StatusType.File, FileStatus.FileDuplicate);

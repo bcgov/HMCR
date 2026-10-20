@@ -25,7 +25,7 @@ namespace Hmcr.Api.Controllers
         }
 
         [HttpPost]
-        [RequiresPermission(Permissions.FileUploadWrite)]
+        [RequiresPermission(Permissions.WorkReportWrite)]
         public async Task<IActionResult> CreateWorkReportAsync([FromForm] FileUploadDto upload)
         {
             var problem = IsServiceAreaAuthorized(_currentUser, upload.ServiceAreaNumber);
@@ -45,7 +45,7 @@ namespace Hmcr.Api.Controllers
         }
 
         [HttpPost("resubmissions")]
-        [RequiresPermission(Permissions.FileUploadWrite)]
+        [RequiresPermission(Permissions.WorkReportWrite)]
         public async Task<ActionResult<List<string>>> CheckResubmitAsync([FromForm] FileUploadDto upload)
         {
             var problem = IsServiceAreaAuthorized(_currentUser, upload.ServiceAreaNumber);

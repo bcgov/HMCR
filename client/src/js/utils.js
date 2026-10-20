@@ -81,6 +81,20 @@ export const buildStatusIdArray = (isActive) => {
   return [Constants.ACTIVE_STATUS.ACTIVE, Constants.ACTIVE_STATUS.INACTIVE];
 };
 
+export const canUploadSubmissionStream = (stream, permissions = []) => {
+  if (!stream?.isActive) return false;
+
+  const isWorkReport = stream.stagingTableName === Constants.REPORT_TYPES.HMR_WORK_REPORT.name;
+  return isWorkReport
+    ? permissions.includes(Constants.PERMISSIONS.WORK_REPORT_W)
+    : permissions.includes(Constants.PERMISSIONS.FILE_W);
+};
+
+export const getUploadableSubmissionStreams = (submissionStreams, permissions = []) =>
+  Object.values(submissionStreams || {}).filter((stream) =>
+    canUploadSubmissionStream(stream, permissions)
+  );
+
 export const isValueEmpty=(v)=>{
   if(v === null || v === undefined || v === '') return true;
   return false;

@@ -248,7 +248,9 @@ const WorkReportingSubmissionDetail = ({ toggle, submission, submissionStatuses 
           </ul>
         </div>
         <div style={{ whiteSpace: 'nowrap' }}>
-          {submissionResultData.submissionStatusCode !== 'FE' && (
+          {![Constants.SUBMISSION_STATUS_CODES.FILE_ERROR, Constants.SUBMISSION_STATUS_CODES.SUBMISSION_BLOCKED].includes(
+            submissionResultData.submissionStatusCode,
+          ) && (
             <Button
               size="sm"
               color="primary"

@@ -174,6 +174,11 @@ namespace Hmcr.Api.Extensions
             //Unit of Work
             services.AddScoped<IUnitOfWork, UnitOfWork>();
 
+            //Submission blackout evaluation
+            services.AddSingleton(TimeProvider.System);
+            services.AddScoped<ISubmissionRestrictionRuleEvaluator, ActivityAccomplishmentRestrictionRuleEvaluator>();
+            services.AddScoped<ISubmissionRestrictionEvaluator, SubmissionRestrictionEvaluator>();
+
             //SmHeaders
             services.AddScoped<HmcrCurrentUser, HmcrCurrentUser>();
 

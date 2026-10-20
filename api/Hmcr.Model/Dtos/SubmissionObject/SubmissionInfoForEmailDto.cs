@@ -7,6 +7,7 @@ namespace Hmcr.Model.Dtos.SubmissionObject
         public long SubmissionObjectId { get; set; }
         public string FileName { get; set; }
         public string FileType { get; set; }
+        public decimal SubmissionStreamId { get; set; }
         public DateTime SubmissionDate { get; set; }
         public int ServiceAreaNumber { get; set; }
         public int NumOfRecords { get; set; }

@@ -11,5 +11,6 @@ namespace Hmcr.Model.Dtos.FeedbackMessage
         public bool? IsSent { get; set; }
         public bool? IsError { get; set; }
         public string SendErrorText { get; set; }
+        public string DeliveryStatus { get; set; }
     }
 }
