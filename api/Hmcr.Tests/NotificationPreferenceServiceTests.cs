@@ -50,6 +50,7 @@ public class NotificationPreferenceServiceTests
         var result = await service.UpdateCurrentUserPreferenceAsync(7, 3, Update(false, true));
 
         Assert.Equal(NotificationPreferenceUpdateResult.ServiceAreaNotAssigned, result);
+        repository.Verify(x => x.GetActiveServiceAreaUserIdAsync(42, 7), Times.Once);
         repository.VerifyNoOtherCalls();
         unitOfWork.VerifyNoOtherCalls();
     }
@@ -70,6 +71,8 @@ public class NotificationPreferenceServiceTests
         var result = await service.UpdateCurrentUserPreferenceAsync(7, 99, Update(false, true));
 
         Assert.Equal(NotificationPreferenceUpdateResult.UnsupportedSubmissionStream, result);
+        repository.Verify(x => x.GetActiveServiceAreaUserIdAsync(42, 7), Times.Once);
+        repository.Verify(x => x.IsSupportedSubmissionStreamAsync(99), Times.Once);
         repository.VerifyNoOtherCalls();
         unitOfWork.VerifyNoOtherCalls();
     }

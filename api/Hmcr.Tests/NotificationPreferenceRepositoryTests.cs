@@ -5,6 +5,8 @@ using Hmcr.Data.Repositories;
 using Hmcr.Model;
 using Hmcr.Model.Dtos.User;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
+using Microsoft.EntityFrameworkCore.ValueGeneration;
 using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
 
@@ -12,6 +14,20 @@ namespace Hmcr.Tests;
 
 public class NotificationPreferenceRepositoryTests
 {
+    [Fact]
+    public void PreferenceEmailFlags_UseTrueAsTheInsertSentinel()
+    {
+        using var context = CreateContext();
+        var entity = context.Model.FindEntityType(typeof(HmrNotificationPreference));
+
+        foreach (var name in new[] { nameof(HmrNotificationPreference.SuccessEmailEnabled), nameof(HmrNotificationPreference.ErrorEmailEnabled) })
+        {
+            var property = entity.FindProperty(name);
+            Assert.Equal(true, property.Sentinel);
+            Assert.Equal(true, property.GetDefaultValue());
+        }
+    }
+
     [Fact]
     public async Task GetForUser_ReturnsActiveAssignmentsAndSupportedStreams_WithMissingRowsEnabled()
     {
@@ -127,7 +143,7 @@ public class NotificationPreferenceRepositoryTests
     public async Task EnsureDefaults_IsIdempotentAndInternalOnly()
     {
         using var context = CreateContext();
-        SeedUsersAreasAndStreams(context);
+        SeedUsersAreasAndStreams(context, UserTypeDto.BUSINESS);
         context.HmrServiceAreaUsers.AddRange(
             Assignment(101, 1, 1),
             Assignment(201, 2, 1));
@@ -205,7 +221,50 @@ public class NotificationPreferenceRepositoryTests
             .UseInMemoryDatabase(Guid.NewGuid().ToString())
             .Options;
 
-        return new AppDbContext(options, NullLogger<AppDbContext>.Instance, currentUser);
+        return new TestAppDbContext(options, currentUser);
+    }
+
+    private sealed class TestAppDbContext : AppDbContext
+    {
+        public TestAppDbContext(DbContextOptions<AppDbContext> options, HmcrCurrentUser currentUser)
+            : base(options, NullLogger<AppDbContext>.Instance, currentUser)
+        {
+        }
+
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            base.OnModelCreating(modelBuilder);
+            // SQL Server supplies sequence IDs; InMemory needs an equivalent generator.
+            modelBuilder.Entity<HmrNotificationPreference>()
+                .Property(x => x.NotificationPreferenceId)
+                .HasValueGenerator<TestPreferenceIdGenerator>();
+        }
+
+        public override int SaveChanges()
+        {
+            // SQL Server supplies these required database audit values; InMemory does not.
+            foreach (var entry in ChangeTracker.Entries().Where(x => x.State == EntityState.Added))
+            {
+                foreach (var name in new[] { "DbAuditCreateUserid", "DbAuditLastUpdateUserid" })
+                {
+                    if (entry.Metadata.FindProperty(name) != null && entry.Property(name).CurrentValue == null)
+                    {
+                        entry.Property(name).CurrentValue = "TESTUSER";
+                    }
+                }
+            }
+
+            return base.SaveChanges();
+        }
+    }
+
+    private sealed class TestPreferenceIdGenerator : ValueGenerator<decimal>
+    {
+        private decimal _nextId = 10000;
+
+        public override decimal Next(EntityEntry entry) => ++_nextId;
+
+        public override bool GeneratesTemporaryValues => false;
     }
 
     private static void SeedUsersAreasAndStreams(

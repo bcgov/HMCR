@@ -1154,12 +1154,14 @@ namespace Hmcr.Data.Database.Entities
 
                 entity.Property(e => e.SuccessEmailEnabled)
                     .HasColumnName("SUCCESS_EMAIL_ENABLED")
-                    .HasDefaultValueSql("((1))")
+                    .HasDefaultValue(true)
+                    .HasSentinel(true)
                     .HasComment("Indicates whether successful upload emails are enabled.");
 
                 entity.Property(e => e.ErrorEmailEnabled)
                     .HasColumnName("ERROR_EMAIL_ENABLED")
-                    .HasDefaultValueSql("((1))")
+                    .HasDefaultValue(true)
+                    .HasSentinel(true)
                     .HasComment("Indicates whether upload error emails are enabled.");
 
                 entity.Property(e => e.ConcurrencyControlNumber)
