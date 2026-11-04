@@ -28,8 +28,8 @@ const filterContainerStyle = {
 
 const defaultSearchFormValues = {
   reportTypeId: '',
-  dateFrom: moment().subtract(1, 'months').startOf('month'),
-  dateTo: moment().subtract(1, 'months').endOf('month'),
+  dateFrom: null,
+  dateTo: null,
   submissionDateFrom: null,
   submissionDateTo: null,
   serviceAreaNumbers: [],
@@ -42,9 +42,9 @@ const defaultSearchFormValues = {
 
 const validationSchema = Yup.object({
   reportTypeId: Yup.string().required('Required').trim(),
-  dateFrom: Yup.object().required('Required'),
-  dateTo: Yup.object().required('Required'),
-  outputFormat: Yup.string().required('Reuired'),
+  dateFrom: Yup.object().nullable().required('Required'),
+  dateTo: Yup.object().nullable().required('Required'),
+  outputFormat: Yup.string().required('Required'),
 });
 
 const EXPORT_STAGE = {
