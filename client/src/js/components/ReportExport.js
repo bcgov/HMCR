@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { connect } from 'react-redux';
-import { Alert, Button, Spinner } from 'reactstrap';
+import { Alert, Button, Label, Spinner } from 'reactstrap';
 import { Formik, Form } from 'formik';
 import * as Yup from 'yup';
 import moment from 'moment';
@@ -39,6 +39,10 @@ const defaultSearchFormValues = {
   submissionNumber: '',
   outputFormat: 'csv',
 };
+
+// Salt reports are filtered on the date they were submitted, not a work date
+const getPrimaryDateRangeLabel = (reportTypeId) =>
+  reportTypeId === Constants.REPORT_TYPES.HMR_SALT_REPORT.name ? 'Submission Date Range' : 'Work Date Range';
 
 const validationSchema = Yup.object({
   reportTypeId: Yup.string().required('Required').trim(),
@@ -275,28 +279,36 @@ const ReportExport = ({
               <Form>
                 <div className="d-flex align-items-start">
                   <div style={filterContainerStyle}>
+                    <Label className="mb-1">
+                      <strong>Report Type</strong>
+                    </Label>
                     <SingleDropdownField defaultTitle="Select Report Type" items={reportTypes} name="reportTypeId" />
                   </div>
-                  <div className="d-flex align-items-center">
-                    <DateRangeField
-                      name="reportDate"
-                      fromName="dateFrom"
-                      toName="dateTo"
-                      isOutsideRange={disableFutureDates}
-                    />
-                    <MouseoverTooltip id="tooltip_datepicker">
-                      <ul style={{ paddingInlineStart: 10 }}>
-                        <li>
-                          For Maintenance Work Reporting this refers to the <em>End Date</em>
-                        </li>
-                        <li>
-                          For Rockfall this refers to the <em>Rockfall Date</em>
-                        </li>
-                        <li>
-                          For Wildlife this corresponds to the <em>Accident Date</em>
-                        </li>
-                      </ul>
-                    </MouseoverTooltip>
+                  <div>
+                    <Label for="reportDate_dateFrom" className="mb-1">
+                      <strong>{getPrimaryDateRangeLabel(formikProps.values.reportTypeId)}</strong> (required)
+                    </Label>
+                    <div className="d-flex align-items-center">
+                      <DateRangeField
+                        name="reportDate"
+                        fromName="dateFrom"
+                        toName="dateTo"
+                        isOutsideRange={disableFutureDates}
+                      />
+                      <MouseoverTooltip id="tooltip_datepicker">
+                        <ul style={{ paddingInlineStart: 10 }}>
+                          <li>
+                            For Maintenance Work Reporting this refers to the <em>End Date</em>
+                          </li>
+                          <li>
+                            For Rockfall this refers to the <em>Rockfall Date</em>
+                          </li>
+                          <li>
+                            For Wildlife this corresponds to the <em>Accident Date</em>
+                          </li>
+                        </ul>
+                      </MouseoverTooltip>
+                    </div>
                   </div>
                 </div>
                 {isRequiredFieldsSet(formikProps) && (
@@ -340,26 +352,31 @@ const ReportExport = ({
                         </React.Fragment>
                       )}
                     </div>
-                    <div className="d-flex mt-3">
+                    <div className="d-flex align-items-end mt-3">
                       <div style={filterContainerStyle}>
                         <FormInput type="text" name="submissionNumber" placeholder="Submission Number" />
                       </div>
                       {formikProps.values.reportTypeId !== 'HMR_SALT_REPORT' && (
-                        <div className="d-flex align-items-center">
-                          <DateRangeField
-                            name="submissionDate"
-                            fromName="submissionDateFrom"
-                            toName="submissionDateTo"
-                            isOutsideRange={disableFutureDates}
-                          />
-                          <MouseoverTooltip id="tooltip_submission_datepicker">
-                            <ul style={{ paddingInlineStart: 10 }}>
-                              This Submission Date filter applies in addition to the applicable mandatory date range
-                              above. Tip: To ensure all records submitted in this date range (and / or matching the
-                              entered Submission Number) will be included in the export, set the mandatory date range
-                              above to be sufficiently broad
-                            </ul>
-                          </MouseoverTooltip>
+                        <div>
+                          <Label for="submissionDate_submissionDateFrom" className="mb-1">
+                            <strong>Submission Date Range</strong> (optional)
+                          </Label>
+                          <div className="d-flex align-items-center">
+                            <DateRangeField
+                              name="submissionDate"
+                              fromName="submissionDateFrom"
+                              toName="submissionDateTo"
+                              isOutsideRange={disableFutureDates}
+                            />
+                            <MouseoverTooltip id="tooltip_submission_datepicker">
+                              <ul style={{ paddingInlineStart: 10 }}>
+                                This Submission Date filter applies in addition to the applicable mandatory date range
+                                above. Tip: To ensure all records submitted in this date range (and / or matching the
+                                entered Submission Number) will be included in the export, set the mandatory date range
+                                above to be sufficiently broad
+                              </ul>
+                            </MouseoverTooltip>
+                          </div>
                         </div>
                       )}
                     </div>
