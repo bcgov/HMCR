@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { connect } from 'react-redux';
-import { Alert, Button, Spinner } from 'reactstrap';
+import { Alert, Button, FormText, Label, Spinner } from 'reactstrap';
 import { Formik, Form } from 'formik';
 import * as Yup from 'yup';
 import moment from 'moment';
@@ -16,7 +16,6 @@ import MultiDropdownField from './ui/MultiDropdownField';
 import { FormInput } from './forms/FormInputs';
 import SimpleModalWrapper from './ui/SimpleModalWrapper';
 import PageSpinner from './ui/PageSpinner';
-import MouseoverTooltip from './ui/MouseoverTooltip';
 
 import * as Constants from '../Constants';
 import * as api from '../Api';
@@ -28,8 +27,8 @@ const filterContainerStyle = {
 
 const defaultSearchFormValues = {
   reportTypeId: '',
-  dateFrom: moment().subtract(1, 'months').startOf('month'),
-  dateTo: moment().subtract(1, 'months').endOf('month'),
+  dateFrom: null,
+  dateTo: null,
   submissionDateFrom: null,
   submissionDateTo: null,
   serviceAreaNumbers: [],
@@ -40,11 +39,40 @@ const defaultSearchFormValues = {
   outputFormat: 'csv',
 };
 
+// Salt reports are filtered on the date they were submitted, not a work date
+const getPrimaryDateRangeLabel = (reportTypeId) =>
+  reportTypeId === Constants.REPORT_TYPES.HMR_SALT_REPORT.name ? 'Submission Date Range' : 'Work Date Range';
+
+const helpTextStyle = {
+  maxWidth: '420px',
+};
+
+// Help for the required date range, shown inline for the selected report type
+const primaryDateRangeHelp = {
+  default: 'Select a report type to see which date this range filters on.',
+  [Constants.REPORT_TYPES.HMR_WORK_REPORT.name]: (
+    <>
+      Filters on the <em>End Date</em> of each work record.
+    </>
+  ),
+  [Constants.REPORT_TYPES.HMR_ROCKFALL_REPORT.name]: (
+    <>
+      Filters on the <em>Rockfall Date</em> of each rockfall record.
+    </>
+  ),
+  [Constants.REPORT_TYPES.HMR_WILDLIFE_REPORT.name]: (
+    <>
+      Filters on the <em>Accident Date</em> of each wildlife record.
+    </>
+  ),
+  [Constants.REPORT_TYPES.HMR_SALT_REPORT.name]: 'Filters on the date each salt report was submitted.',
+};
+
 const validationSchema = Yup.object({
   reportTypeId: Yup.string().required('Required').trim(),
-  dateFrom: Yup.object().required('Required'),
-  dateTo: Yup.object().required('Required'),
-  outputFormat: Yup.string().required('Reuired'),
+  dateFrom: Yup.object().nullable().required('Required'),
+  dateTo: Yup.object().nullable().required('Required'),
+  outputFormat: Yup.string().required('Required'),
 });
 
 const EXPORT_STAGE = {
@@ -275,28 +303,24 @@ const ReportExport = ({
               <Form>
                 <div className="d-flex align-items-start">
                   <div style={filterContainerStyle}>
+                    <Label className="mb-1">
+                      <strong>Report Type</strong>
+                    </Label>
                     <SingleDropdownField defaultTitle="Select Report Type" items={reportTypes} name="reportTypeId" />
                   </div>
-                  <div className="d-flex align-items-center">
+                  <div>
+                    <Label for="reportDate_dateFrom" className="mb-1">
+                      <strong>{getPrimaryDateRangeLabel(formikProps.values.reportTypeId)}</strong> (required)
+                    </Label>
                     <DateRangeField
                       name="reportDate"
                       fromName="dateFrom"
                       toName="dateTo"
                       isOutsideRange={disableFutureDates}
                     />
-                    <MouseoverTooltip id="tooltip_datepicker">
-                      <ul style={{ paddingInlineStart: 10 }}>
-                        <li>
-                          For Maintenance Work Reporting this refers to the <em>End Date</em>
-                        </li>
-                        <li>
-                          For Rockfall this refers to the <em>Rockfall Date</em>
-                        </li>
-                        <li>
-                          For Wildlife this corresponds to the <em>Accident Date</em>
-                        </li>
-                      </ul>
-                    </MouseoverTooltip>
+                    <FormText id="reportDate_help" color="muted" className="d-block" style={helpTextStyle}>
+                      {primaryDateRangeHelp[formikProps.values.reportTypeId] ?? primaryDateRangeHelp.default}
+                    </FormText>
                   </div>
                 </div>
                 {isRequiredFieldsSet(formikProps) && (
@@ -340,26 +364,34 @@ const ReportExport = ({
                         </React.Fragment>
                       )}
                     </div>
-                    <div className="d-flex mt-3">
+                    <div className="d-flex align-items-start mt-3">
                       <div style={filterContainerStyle}>
-                        <FormInput type="text" name="submissionNumber" placeholder="Submission Number" />
+                        <Label for="submissionNumber" className="mb-1">
+                          <strong>Submission Number</strong>
+                        </Label>
+                        <FormInput
+                          type="text"
+                          id="submissionNumber"
+                          name="submissionNumber"
+                          placeholder="Submission Number"
+                        />
                       </div>
                       {formikProps.values.reportTypeId !== 'HMR_SALT_REPORT' && (
-                        <div className="d-flex align-items-center">
+                        <div>
+                          <Label for="submissionDate_submissionDateFrom" className="mb-1">
+                            <strong>Submission Date Range</strong> (optional)
+                          </Label>
                           <DateRangeField
                             name="submissionDate"
                             fromName="submissionDateFrom"
                             toName="submissionDateTo"
                             isOutsideRange={disableFutureDates}
                           />
-                          <MouseoverTooltip id="tooltip_submission_datepicker">
-                            <ul style={{ paddingInlineStart: 10 }}>
-                              This Submission Date filter applies in addition to the applicable mandatory date range
-                              above. Tip: To ensure all records submitted in this date range (and / or matching the
-                              entered Submission Number) will be included in the export, set the mandatory date range
-                              above to be sufficiently broad
-                            </ul>
-                          </MouseoverTooltip>
+                          <FormText id="submissionDate_help" color="muted" className="d-block" style={helpTextStyle}>
+                            Applied in addition to the Work Date Range above, so only records matching both are
+                            exported. To include every record submitted in this range (or matching the Submission
+                            Number), set the Work Date Range wide enough to cover it.
+                          </FormText>
                         </div>
                       )}
                     </div>
