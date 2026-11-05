@@ -13,6 +13,7 @@ namespace Hmcr.Data.Database.Entities
         public bool? IsSent { get; set; }
         public bool? IsError { get; set; }
         public string SendErrorText { get; set; }
+        public string DeliveryStatus { get; set; }
         public long ConcurrencyControlNumber { get; set; }
         public string DbAuditCreateUserid { get; set; }
         public DateTime DbAuditCreateTimestamp { get; set; }

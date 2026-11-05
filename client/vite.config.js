@@ -34,5 +34,9 @@ export default defineConfig(({ mode }) => {
       outDir: 'build',
       sourcemap: env.GENERATE_SOURCEMAP !== 'false',
     },
+    test: {
+      environment: 'jsdom',
+      setupFiles: './src/test/setup.js',
+    },
   };
 });

@@ -4,6 +4,7 @@ using Hmcr.Domain.Services;
 using Hmcr.Model;
 using Hmcr.Model.Dtos;
 using Hmcr.Model.Dtos.Keycloak;
+using Hmcr.Model.Dtos.NotificationPreference;
 using Hmcr.Model.Dtos.User;
 using Hmcr.Model.Utils;
 using Microsoft.AspNetCore.Http;
@@ -25,12 +26,18 @@ namespace Hmcr.Api.Controllers
     {
         private IUserService _userService;
         private IKeycloakService _keyCloakService;
+        private INotificationPreferenceService _notificationPreferenceService;
         private HmcrCurrentUser _currentUser;
 
-        public UsersController(IUserService userService, IKeycloakService keyCloakService, HmcrCurrentUser currentUser)
+        public UsersController(
+            IUserService userService,
+            IKeycloakService keyCloakService,
+            INotificationPreferenceService notificationPreferenceService,
+            HmcrCurrentUser currentUser)
         {
             _userService = userService;
             _keyCloakService = keyCloakService;
+            _notificationPreferenceService = notificationPreferenceService;
             _currentUser = currentUser;
         }
 
@@ -38,6 +45,69 @@ namespace Hmcr.Api.Controllers
         public ActionResult<UserCurrentDto> GetCurrentUser()
         {
             return Ok(_currentUser.UserInfo);
+        }
+
+        [HttpGet("current/notification-preferences")]
+        public async Task<ActionResult<NotificationPreferencesDto>> GetCurrentUserNotificationPreferencesAsync()
+        {
+            if (!_notificationPreferenceService.IsCurrentUserEligible)
+            {
+                return Forbid();
+            }
+
+            return Ok(await _notificationPreferenceService.GetCurrentUserPreferencesAsync());
+        }
+
+        [HttpPut("current/notification-preferences/all")]
+        public async Task<ActionResult> UpdateAllCurrentUserNotificationPreferencesAsync(
+            [FromBody] NotificationPreferenceBulkUpdateDto update)
+        {
+            if (!_notificationPreferenceService.IsCurrentUserEligible)
+            {
+                return Forbid();
+            }
+
+            if (update == null)
+            {
+                return BadRequest();
+            }
+
+            await _notificationPreferenceService.UpdateAllCurrentUserPreferencesAsync(update.Enabled.Value);
+            return NoContent();
+        }
+
+        [HttpPut("current/notification-preferences/{serviceAreaNumber}/{submissionStreamId}")]
+        public async Task<ActionResult> UpdateCurrentUserNotificationPreferenceAsync(
+            decimal serviceAreaNumber,
+            decimal submissionStreamId,
+            [FromBody] NotificationPreferenceUpdateDto update)
+        {
+            if (!_notificationPreferenceService.IsCurrentUserEligible)
+            {
+                return Forbid();
+            }
+
+            if (update == null)
+            {
+                return BadRequest();
+            }
+
+            var result = await _notificationPreferenceService.UpdateCurrentUserPreferenceAsync(
+                serviceAreaNumber,
+                submissionStreamId,
+                update);
+
+            if (result == NotificationPreferenceUpdateResult.ServiceAreaNotAssigned)
+            {
+                return NotFound();
+            }
+
+            if (result == NotificationPreferenceUpdateResult.UnsupportedSubmissionStream)
+            {
+                return BadRequest("The submission stream does not support notification preferences.");
+            }
+
+            return NoContent();
         }
 
         [HttpGet("usertypes")]

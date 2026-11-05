@@ -19,6 +19,7 @@ import WorkReporting from './components/WorkReporting';
 import SaltReporting from './components/SaltReporting';
 import Version from './components/Version';
 import ApiAccess from './components/ApiAccess';
+import NotificationPreferences from './components/NotificationPreferences';
 import WorkReportingSubmissionDetail from './components/WorkReportingSubmissionDetail';
 import ErrorBoundary from './components/ErrorBoundary';
 import { registerGlobalClientErrorHandlers } from './Api';
@@ -111,6 +112,9 @@ const CommonRoutes = () => {
 const ContractorRoutes = (currentUser) => {
   return (
     <Switch>
+      <Route path={Constants.PATHS.NOTIFICATION_PREFERENCES}>
+        <Redirect to={Constants.PATHS.UNAUTHORIZED} />
+      </Route>
       <Route path={Constants.PATHS.ADMIN}>
         <Redirect to={Constants.PATHS.UNAUTHORIZED} />
       </Route>
@@ -135,6 +139,11 @@ const ContractorRoutes = (currentUser) => {
 const AdminRoutes = (currentUser) => {
   return (
     <Switch>
+      <Route
+        path={Constants.PATHS.NOTIFICATION_PREFERENCES}
+        exact
+        component={NotificationPreferences}
+      />
       <Route path={Constants.PATHS.HOME} exact>
         <Redirect to={getLastVistedPath(currentUser)} />
       </Route>

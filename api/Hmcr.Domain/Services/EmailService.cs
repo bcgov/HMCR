@@ -79,14 +79,26 @@ namespace Hmcr.Domain.Services
             var isSent = true;
             var isError = !submissionInfo.Success;
             var errorText = "";
+            var recipientCount = 0;
+            var deliveryStatus = EmailDeliveryStatus.Sent;
 
             try
             {
-                SendEmailToUsersInServiceArea(submissionInfo.ServiceAreaNumber, subject, htmlBody, textBody);
+                recipientCount = SendEmailToUsersInServiceArea(
+                    submissionInfo.ServiceAreaNumber,
+                    submissionInfo.SubmissionStreamId,
+                    isError,
+                    subject,
+                    htmlBody,
+                    textBody);
+
+                if (recipientCount == 0)
+                    deliveryStatus = EmailDeliveryStatus.SkippedNoRecipients;
             }
             catch (Exception ex)
             {
                 isSent = false;
+                deliveryStatus = EmailDeliveryStatus.Failed;
                 errorText = ex.Message;
 
                 _logger.LogError(ex, "Email for submission {SubmissionObjectId} failed.", submissionObjectId);
@@ -102,7 +114,8 @@ namespace Hmcr.Domain.Services
                     CommunicationDate = DateTime.UtcNow,
                     IsSent = isSent,
                     IsError = isError,
-                    SendErrorText = errorText
+                    SendErrorText = errorText,
+                    DeliveryStatus = deliveryStatus
                 };
 
                 await _feedbackRepo.CreateFeedbackMessageAsync(feedback);
@@ -116,40 +129,45 @@ namespace Hmcr.Domain.Services
                 feedbackMessage.IsSent = isSent;
                 feedbackMessage.IsError = isError;
                 feedbackMessage.SendErrorText = errorText;
+                feedbackMessage.DeliveryStatus = deliveryStatus;
 
                 await _feedbackRepo.UpdateFeedbackMessageAsync(feedbackMessage);
             }
 
             _unitOfWork.Commit();
 
-            var finished = isSent ? "Finished" : "Failed";
+            var finished = deliveryStatus == EmailDeliveryStatus.SkippedNoRecipients ? "Skipped" : isSent ? "Finished" : "Failed";
             var sending = feedbackMessage == null ? "sending" : "resending";
 
-            _logger.LogInformation($"[Hangfire] {finished} {sending} email for submission {submissionObjectId}", submissionObjectId);
+            _logger.LogInformation(
+                "[Hangfire] {EmailOperationStatus} {EmailOperation} email for submission {SubmissionObjectId}; delivery status {DeliveryStatus}; recipient count {RecipientCount}",
+                finished,
+                sending,
+                submissionObjectId,
+                deliveryStatus,
+                recipientCount);
 
             return isSent;
         }
 
-        private void SendEmailToUsersInServiceArea(decimal serviceAreaNumber, string subject, string htmlBody, string textBody)
+        private int SendEmailToUsersInServiceArea(decimal serviceAreaNumber, decimal submissionStreamId, bool isError, string subject, string htmlBody, string textBody)
         {
             var recipients = new List<MailboxAddress>();
 
-            foreach(var user in _userRepo.GetActiveUsersByServiceAreaNumber(serviceAreaNumber))
+            foreach(var user in _userRepo.GetActiveUsersByServiceAreaNumber(serviceAreaNumber, submissionStreamId, isError))
             {
                 if (user.Email.IsNotEmpty())
                     recipients.Add(MailboxAddress.Parse(user.Email));
             }
 
-            SendEmail(recipients, subject, htmlBody, textBody);
+            if (recipients.Count > 0)
+                SendEmail(recipients, subject, htmlBody, textBody);
+
+            return recipients.Count;
         }
 
         private void SendEmail(List<MailboxAddress> recipients, string subject, string htmlBody, string textBody)
         {
-            if (recipients.Count == 0)
-            {
-                throw new Exception("Email error - no recepients");
-            }
-
             var message = new MimeMessage();
 
             var from = new MailboxAddress(SenderName, SenderAddress);

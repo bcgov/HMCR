@@ -35,6 +35,7 @@ namespace Hmcr.Domain.Services
         private IPartyRepository _partyRepo;
         private IServiceAreaRepository _serviceAreaRepo;
         private IRoleRepository _roleRepo;
+        private INotificationPreferenceService _notificationPreferenceService;
         private IUnitOfWork _unitOfWork;
         private HmcrCurrentUser _currentUser;
         private IFieldValidatorService _validator;
@@ -43,12 +44,14 @@ namespace Hmcr.Domain.Services
         private ILogger _logger;
 
         public UserService(IUserRepository userRepo, IPartyRepository partyRepo, IServiceAreaRepository serviceAreaRepo, IRoleRepository roleRepo,
-            IUnitOfWork unitOfWork, HmcrCurrentUser currentUser, IFieldValidatorService validator, IBceidApi bceid, IMapper mapper, ILogger<UserService> logger)
+            INotificationPreferenceService notificationPreferenceService, IUnitOfWork unitOfWork, HmcrCurrentUser currentUser,
+            IFieldValidatorService validator, IBceidApi bceid, IMapper mapper, ILogger<UserService> logger)
         {
             _userRepo = userRepo;
             _partyRepo = partyRepo;
             _serviceAreaRepo = serviceAreaRepo;
             _roleRepo = roleRepo;
+            _notificationPreferenceService = notificationPreferenceService;
             _unitOfWork = unitOfWork;
             _currentUser = currentUser;
             _validator = validator;
@@ -117,6 +120,7 @@ namespace Hmcr.Domain.Services
 
             var userEntity = await _userRepo.CreateUserAsync(user, account);
             _unitOfWork.Commit();
+            await _notificationPreferenceService.InitializeDefaultsForInternalUserAsync(userEntity.SystemUserId);
 
             return (userEntity.SystemUserId, errors);
         }
@@ -139,6 +143,7 @@ namespace Hmcr.Domain.Services
 
             await _userRepo.UpdateUserAsync(user);
             _unitOfWork.Commit();
+            await _notificationPreferenceService.InitializeDefaultsForInternalUserAsync(user.SystemUserId);
 
             return (false, errors);
         }
